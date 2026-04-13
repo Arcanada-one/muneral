@@ -1,0 +1,29 @@
+# Gitleaks configuration for Muneral
+# Prevents secrets from being committed to the public repo
+
+title = "Muneral Secret Detection"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id          = "muneral-api-key"
+description = "Muneral API key"
+regex       = '''mun_sk_[A-Za-z0-9]{32,}'''
+tags        = ["muneral", "api-key"]
+
+[[rules]]
+id          = "jwt-secret"
+description = "JWT secret in env assignment"
+regex       = '''(?i)(jwt_secret|jwt_key)\s*=\s*[^\s]{16,}'''
+tags        = ["jwt", "secret"]
+
+[[rules]]
+id          = "postgres-dsn"
+description = "PostgreSQL connection string with password"
+regex       = '''postgres://[^:]+:[^@]{8,}@'''
+tags        = ["database", "credentials"]
+
+[allowlist]
+description = "Allow .env.example and test fixtures"
+paths       = ['''\.env\.example$''', '''test/fixtures/''']
