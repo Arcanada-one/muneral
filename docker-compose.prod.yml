@@ -1,0 +1,22 @@
+version: '3.9'
+services:
+  muneral-api:
+    image: muneral-api:latest
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    ports:
+      - "127.0.0.1:3500:3500"
+    env_file: .env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3500/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  muneral-worker:
+    image: muneral-api:latest
+    command: ["node", "dist/worker.js"]
+    env_file: .env
+    restart: unless-stopped
