@@ -37,9 +37,9 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm install
-      - name: Install API dependencies
-        working-directory: apps/api
-        run: npm install
+      - name: Build shared types
+        working-directory: packages/types
+        run: npm run build
       - name: Test API
         working-directory: apps/api
         run: npm test
