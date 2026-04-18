@@ -1,27 +1,20 @@
-name: CI
+# ============================================================
+# Muneral Arcana — GitHub Actions CI/CD
+# Fixed by DEVOPS-0001 (removed paid gitleaks-action, added deploy)
+# Template: CI-Runners.md §10.1 adapted (npm + Turborepo)
+# ============================================================
+
+name: CI & Deploy
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
   pull_request:
     branches: [main]
 
 jobs:
-  secrets-scan:
-    name: Secrets Scan (gitleaks)
+  lint-and-test:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  lint-test:
-    name: Lint & Test
-    runs-on: ubuntu-latest
-    needs: secrets-scan
     services:
       postgres:
         image: postgres:16
@@ -40,10 +33,43 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          cache: 'npm'
+          node-version: 22
+          cache: npm
       - run: npm ci
-      - run: npm run lint
-      - run: npm run test:ci
+      - name: Lint
+        run: npm run lint
+      - name: Test
+        run: npm test
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/muneral_test
+
+  deploy:
+    needs: lint-and-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-muneral
+      cancel-in-progress: false
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd /srv/apps/muneral
+            git pull --ff-only origin main
+            docker compose -f docker-compose.prod.yml up -d --build
+            sleep 10
+            curl -fsS http://localhost:3500/health || \
+              (docker compose -f docker-compose.prod.yml logs --tail=50 && exit 1)
+            echo "Deploy OK: $(docker compose -f docker-compose.prod.yml ps --format '{{.Name}} {{.Status}}')"
+
+      - name: Notify Ops Bot on failure
+        if: failure()
+        run: |
+          curl -fsS -X POST https://ops.arcanada.one/events \
+            -H "Authorization: Bearer ${{ secrets.OPSBOT_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"category":"fatal","title":"CI Deploy Failed: ${{ github.repository }}","body":"Branch: ${{ github.ref }}, Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}","dedup_key":"ci-fail-${{ github.repository }}-${{ github.run_id }}"}'
