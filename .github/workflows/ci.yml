@@ -35,10 +35,16 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm install
-      - name: Lint
+      - name: Install dependencies
+        run: npm install
+      - name: Install API dependencies
+        working-directory: apps/api
+        run: npm install
+      - name: Lint API
+        working-directory: apps/api
         run: npm run lint
-      - name: Test
+      - name: Test API
+        working-directory: apps/api
         run: npm test
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/muneral_test
