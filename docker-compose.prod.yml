@@ -15,8 +15,9 @@ services:
       timeout: 10s
       retries: 3
 
-  muneral-worker:
-    image: muneral-api:latest
-    command: ["node", "dist/worker.js"]
-    env_file: .env
-    restart: unless-stopped
+  # muneral-worker: disabled — worker.js not yet implemented (MUN-0007+)
+  # muneral-worker:
+  #   image: muneral-api:latest
+  #   command: ["node", "dist/worker.js"]
+  #   env_file: .env
+  #   restart: unless-stopped
