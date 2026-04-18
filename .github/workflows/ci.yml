@@ -61,12 +61,12 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
+            set -e
             cd /srv/apps/muneral
             git pull --ff-only origin main
             docker compose -f docker-compose.prod.yml up -d --build
             sleep 10
-            curl -fsS http://localhost:3500/health || \
-              (docker compose -f docker-compose.prod.yml logs --tail=50 && exit 1)
+            curl -fsS http://localhost:3500/health
             echo "Deploy OK: $(docker compose -f docker-compose.prod.yml ps --format '{{.Name}} {{.Status}}')"
 
       - name: Notify Ops Bot on failure
