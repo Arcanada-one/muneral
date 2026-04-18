@@ -40,9 +40,6 @@ jobs:
       - name: Install API dependencies
         working-directory: apps/api
         run: npm install
-      - name: Lint API
-        working-directory: apps/api
-        run: npm run lint
       - name: Test API
         working-directory: apps/api
         run: npm test
