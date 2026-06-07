@@ -33,7 +33,7 @@ export class AuthService {
   signAccess(userId: string): string {
     return this.jwtService.sign(
       { sub: userId, type: 'access' },
-      { expiresIn: process.env.JWT_ACCESS_EXPIRES ?? '15m' },
+      { expiresIn: (process.env.JWT_ACCESS_EXPIRES ?? '15m') as unknown as number },
     );
   }
 
@@ -41,7 +41,7 @@ export class AuthService {
   signRefresh(userId: string): string {
     return this.jwtService.sign(
       { sub: userId, type: 'refresh' },
-      { expiresIn: process.env.JWT_REFRESH_EXPIRES ?? '30d' },
+      { expiresIn: (process.env.JWT_REFRESH_EXPIRES ?? '30d') as unknown as number },
     );
   }
 
