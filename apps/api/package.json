@@ -22,8 +22,9 @@
     "@nestjs/platform-express": "^11.1.24",
     "@nestjs/platform-socket.io": "^11.1.24",
     "@nestjs/throttler": "^6.5.0",
-    "@nestjs/typeorm": "^11.0.1",
     "@nestjs/websockets": "^11.1.24",
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
     "bcrypt": "^5.1.1",
     "bullmq": "^5.34.8",
     "class-transformer": "^0.5.1",
@@ -34,10 +35,10 @@
     "passport-github2": "^0.1.12",
     "passport-jwt": "^4.0.1",
     "pg": "^8.13.3",
+    "prisma": "^7.8.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "socket.io": "^4.8.1",
-    "typeorm": "^0.3.20",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

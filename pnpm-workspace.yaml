@@ -3,8 +3,10 @@ packages:
   - 'packages/*'
 allowBuilds:
   '@nestjs/core': true
+  '@prisma/engines': true
   bcrypt: true
   esbuild: true
   msgpackr-extract: true
+  prisma: true
   sharp: true
   unrs-resolver: true

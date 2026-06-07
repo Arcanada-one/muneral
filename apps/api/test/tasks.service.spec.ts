@@ -1,12 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { TasksService } from '../src/tasks/tasks.service';
-import { Task } from '../src/tasks/entities/task.entity';
-import { TaskTag } from '../src/tasks/entities/task-tag.entity';
-import { TaskChecklist } from '../src/tasks/entities/task-checklist.entity';
-import { TaskDependency } from '../src/tasks/entities/task-dependency.entity';
-import { Project } from '../src/projects/entities/project.entity';
+import { PrismaService } from '../src/prisma/prisma.service';
 import { ActivityService } from '../src/activity/activity.service';
 import { KanbanService } from '../src/ws/kanban.service';
 import { Actor } from '@muneral/types';
@@ -22,32 +17,33 @@ const MOCK_TASK = {
   priority: 'medium' as const,
 };
 
-const makeTaskRepo = () => ({
-  findOne: jest.fn(),
-  create: jest.fn((data) => ({ id: 'task-new', ...data })),
-  save: jest.fn((entity) => Promise.resolve(entity)),
-  remove: jest.fn().mockResolvedValue(undefined),
-  createQueryBuilder: jest.fn().mockReturnValue({
-    where: jest.fn().mockReturnThis(),
-    orderBy: jest.fn().mockReturnThis(),
-    getMany: jest.fn().mockResolvedValue([]),
-  }),
-});
-
-const makeGenericRepo = () => ({
-  findOne: jest.fn(),
-  create: jest.fn((data) => ({ id: 'item-new', ...data })),
-  save: jest.fn((entity) => Promise.resolve(entity)),
-  remove: jest.fn().mockResolvedValue(undefined),
-  createQueryBuilder: jest.fn().mockReturnValue({
-    where: jest.fn().mockReturnThis(),
-    orderBy: jest.fn().mockReturnThis(),
-    getMany: jest.fn().mockResolvedValue([]),
-  }),
-});
-
-const makeProjectRepo = () => ({
-  findOne: jest.fn().mockResolvedValue(MOCK_PROJECT),
+const makePrisma = () => ({
+  project: {
+    findUnique: jest.fn(),
+  },
+  task: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn().mockResolvedValue([]),
+    update: jest.fn(),
+    delete: jest.fn().mockResolvedValue(undefined),
+  },
+  taskTag: {
+    createMany: jest.fn().mockResolvedValue({ count: 0 }),
+  },
+  taskChecklist: {
+    create: jest.fn(),
+    findFirst: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn().mockResolvedValue(undefined),
+    findMany: jest.fn().mockResolvedValue([]),
+  },
+  taskDependency: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn().mockResolvedValue([]),
+    delete: jest.fn().mockResolvedValue(undefined),
+  },
 });
 
 const makeActivityService = () => ({
@@ -61,23 +57,19 @@ const makeKanbanService = () => ({
 
 describe('TasksService', () => {
   let service: TasksService;
-  let taskRepo: ReturnType<typeof makeTaskRepo>;
+  let prisma: ReturnType<typeof makePrisma>;
   let activityService: ReturnType<typeof makeActivityService>;
   let kanbanService: ReturnType<typeof makeKanbanService>;
 
   beforeEach(async () => {
-    taskRepo = makeTaskRepo();
+    prisma = makePrisma();
     activityService = makeActivityService();
     kanbanService = makeKanbanService();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TasksService,
-        { provide: getRepositoryToken(Task), useValue: taskRepo },
-        { provide: getRepositoryToken(TaskTag), useValue: makeGenericRepo() },
-        { provide: getRepositoryToken(TaskChecklist), useValue: makeGenericRepo() },
-        { provide: getRepositoryToken(TaskDependency), useValue: makeGenericRepo() },
-        { provide: getRepositoryToken(Project), useValue: makeProjectRepo() },
+        { provide: PrismaService, useValue: prisma },
         { provide: ActivityService, useValue: activityService },
         { provide: KanbanService, useValue: kanbanService },
       ],
@@ -88,14 +80,15 @@ describe('TasksService', () => {
 
   describe('create', () => {
     it('creates a task and logs activity', async () => {
-      taskRepo.save.mockResolvedValue({ ...MOCK_TASK, id: 'task-new' });
+      prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
+      prisma.task.create.mockResolvedValue({ ...MOCK_TASK, id: 'task-new' });
 
       const result = await service.create(humanActor, {
         projectId: 'proj-1',
         title: 'Test task',
       });
 
-      expect(taskRepo.create).toHaveBeenCalled();
+      expect(prisma.task.create).toHaveBeenCalled();
       expect(activityService.log).toHaveBeenCalledWith(
         expect.objectContaining({ action: 'task:created' }),
       );
@@ -107,32 +100,19 @@ describe('TasksService', () => {
     });
 
     it('throws NotFoundException for missing project', async () => {
-      const projectRepo = { findOne: jest.fn().mockResolvedValue(null) };
+      prisma.project.findUnique.mockResolvedValue(null);
 
-      const module = await Test.createTestingModule({
-        providers: [
-          TasksService,
-          { provide: getRepositoryToken(Task), useValue: taskRepo },
-          { provide: getRepositoryToken(TaskTag), useValue: makeGenericRepo() },
-          { provide: getRepositoryToken(TaskChecklist), useValue: makeGenericRepo() },
-          { provide: getRepositoryToken(TaskDependency), useValue: makeGenericRepo() },
-          { provide: getRepositoryToken(Project), useValue: projectRepo },
-          { provide: ActivityService, useValue: activityService },
-          { provide: KanbanService, useValue: kanbanService },
-        ],
-      }).compile();
-
-      const svc = module.get<TasksService>(TasksService);
       await expect(
-        svc.create(humanActor, { projectId: 'missing', title: 'Fail' }),
+        service.create(humanActor, { projectId: 'missing', title: 'Fail' }),
       ).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('updateStatus (state machine)', () => {
     it('allows valid transition and logs it', async () => {
-      taskRepo.findOne.mockResolvedValue({ ...MOCK_TASK });
-      taskRepo.save.mockImplementation((t) => Promise.resolve(t));
+      prisma.task.findUnique.mockResolvedValue({ ...MOCK_TASK });
+      prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
+      prisma.task.update.mockResolvedValue({ ...MOCK_TASK, status: 'in_progress' });
 
       const result = await service.updateStatus('task-1', humanActor, {
         status: 'in_progress',
@@ -153,7 +133,8 @@ describe('TasksService', () => {
     });
 
     it('throws BadRequestException for invalid transition', async () => {
-      taskRepo.findOne.mockResolvedValue({ ...MOCK_TASK, status: 'todo' });
+      prisma.task.findUnique.mockResolvedValue({ ...MOCK_TASK, status: 'todo' });
+      prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
 
       await expect(
         service.updateStatus('task-1', humanActor, { status: 'done' }),
@@ -161,7 +142,7 @@ describe('TasksService', () => {
     });
 
     it('throws NotFoundException for missing task', async () => {
-      taskRepo.findOne.mockResolvedValue(null);
+      prisma.task.findUnique.mockResolvedValue(null);
 
       await expect(
         service.updateStatus('missing', humanActor, { status: 'in_progress' }),
@@ -171,11 +152,12 @@ describe('TasksService', () => {
 
   describe('delete', () => {
     it('removes task and emits WS event', async () => {
-      taskRepo.findOne.mockResolvedValue({ ...MOCK_TASK });
+      prisma.task.findUnique.mockResolvedValue({ ...MOCK_TASK });
+      prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
 
       await service.delete('task-1', humanActor);
 
-      expect(taskRepo.remove).toHaveBeenCalled();
+      expect(prisma.task.delete).toHaveBeenCalled();
       expect(kanbanService.notify).toHaveBeenCalledWith(
         'proj-1',
         'task:deleted',

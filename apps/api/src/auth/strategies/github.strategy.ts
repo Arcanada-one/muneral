@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-github2';
 import { AuthService } from '../auth.service';
 import { GithubProfile } from '../dto/github-profile.dto';
-import { User } from '../../common/entities/user.entity';
+import type { User } from '@prisma/client';
 
 @Injectable()
 export class GithubStrategy extends PassportStrategy(Strategy, 'github') {

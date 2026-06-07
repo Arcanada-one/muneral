@@ -4,13 +4,10 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { JwtService as NestJwtService } from '@nestjs/jwt';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
-import { User } from '../common/entities/user.entity';
-import { ApiKey } from '../agents/entities/api-key.entity';
+import { PrismaService } from '../prisma/prisma.service';
 import { GithubProfile } from './dto/github-profile.dto';
 import { TelegramLoginDto } from './dto/telegram-login.dto';
 
@@ -23,10 +20,7 @@ const ROTATION_GRACE_MS = 24 * 60 * 60 * 1000;
 export class AuthService {
   constructor(
     private readonly jwtService: NestJwtService,
-    @InjectRepository(User)
-    private readonly userRepo: Repository<User>,
-    @InjectRepository(ApiKey)
-    private readonly apiKeyRepo: Repository<ApiKey>,
+    private readonly prisma: PrismaService,
   ) {}
 
   /** Issue a short-lived access JWT (15 min) */
@@ -45,16 +39,17 @@ export class AuthService {
     );
   }
 
-  async findOrCreateGithubUser(profile: GithubProfile): Promise<User> {
-    const githubId = parseInt(profile.id, 10);
-    let user = await this.userRepo.findOne({ where: { githubId } });
+  async findOrCreateGithubUser(profile: GithubProfile) {
+    const githubId = BigInt(profile.id);
+    let user = await this.prisma.user.findUnique({ where: { githubId } });
     if (!user) {
-      user = this.userRepo.create({
-        githubId,
-        name: profile.displayName ?? profile.username,
-        avatarUrl: profile.photos?.[0]?.value ?? null,
+      user = await this.prisma.user.create({
+        data: {
+          githubId,
+          name: profile.displayName ?? profile.username,
+          avatarUrl: profile.photos?.[0]?.value ?? null,
+        },
       });
-      await this.userRepo.save(user);
     }
     return user;
   }
@@ -95,18 +90,18 @@ export class AuthService {
     return crypto.timingSafeEqual(hashBuffer, expectedBuffer);
   }
 
-  async findOrCreateTelegramUser(dto: TelegramLoginDto): Promise<User> {
-    let user = await this.userRepo.findOne({
-      where: { telegramId: dto.id },
-    });
+  async findOrCreateTelegramUser(dto: TelegramLoginDto) {
+    const telegramId = BigInt(dto.id);
+    let user = await this.prisma.user.findUnique({ where: { telegramId } });
     if (!user) {
       const name = [dto.first_name, dto.last_name].filter(Boolean).join(' ');
-      user = this.userRepo.create({
-        telegramId: dto.id,
-        name,
-        avatarUrl: dto.photo_url ?? null,
+      user = await this.prisma.user.create({
+        data: {
+          telegramId,
+          name,
+          avatarUrl: dto.photo_url ?? null,
+        },
       });
-      await this.userRepo.save(user);
     }
     return user;
   }
@@ -116,12 +111,13 @@ export class AuthService {
     const rawKey = `${API_KEY_PREFIX}${uuidv4().replace(/-/g, '')}`;
     const keyHash = await bcrypt.hash(rawKey, BCRYPT_ROUNDS);
 
-    const apiKey = this.apiKeyRepo.create({
-      agentId,
-      keyHash,
-      label: label ?? null,
+    const apiKey = await this.prisma.apiKey.create({
+      data: {
+        agentId,
+        keyHash,
+        label: label ?? null,
+      },
     });
-    await this.apiKeyRepo.save(apiKey);
 
     return { key: rawKey, keyId: apiKey.id };
   }
@@ -132,7 +128,7 @@ export class AuthService {
    * - Sets old key to expire in 24h (grace period for in-flight requests)
    */
   async rotateApiKey(keyId: string): Promise<{ key: string; keyId: string }> {
-    const existing = await this.apiKeyRepo.findOne({ where: { id: keyId } });
+    const existing = await this.prisma.apiKey.findUnique({ where: { id: keyId } });
     if (!existing) {
       throw new UnauthorizedException('API key not found');
     }
@@ -144,46 +140,55 @@ export class AuthService {
     const result = await this.createApiKey(existing.agentId, existing.label ?? undefined);
 
     // Set old key to expire after grace period
-    existing.expiresAt = new Date(Date.now() + ROTATION_GRACE_MS);
-    await this.apiKeyRepo.save(existing);
+    await this.prisma.apiKey.update({
+      where: { id: keyId },
+      data: { expiresAt: new Date(Date.now() + ROTATION_GRACE_MS) },
+    });
 
     return result;
   }
 
   /** Hard-revoke an API key immediately */
   async revokeApiKey(keyId: string): Promise<void> {
-    const existing = await this.apiKeyRepo.findOne({ where: { id: keyId } });
+    const existing = await this.prisma.apiKey.findUnique({ where: { id: keyId } });
     if (!existing) {
       throw new UnauthorizedException('API key not found');
     }
-    existing.revokedAt = new Date();
-    await this.apiKeyRepo.save(existing);
+    await this.prisma.apiKey.update({
+      where: { id: keyId },
+      data: { revokedAt: new Date() },
+    });
   }
 
   /**
    * Validate an incoming raw API key against stored hashes.
    * Returns the matching ApiKey entity or null.
    */
-  async validateApiKey(rawKey: string): Promise<ApiKey | null> {
+  async validateApiKey(rawKey: string) {
     if (!rawKey.startsWith(API_KEY_PREFIX)) {
       return null;
     }
 
-    // Fetch candidate keys for the prefix — in production, prefix lookup is O(small)
-    // We use a short prefix match via LIKE to reduce bcrypt comparisons
-    const candidates = await this.apiKeyRepo
-      .createQueryBuilder('ak')
-      .leftJoinAndSelect('ak.agent', 'agent')
-      .where('ak.revoked_at IS NULL')
-      .andWhere('(ak.expires_at IS NULL OR ak.expires_at > NOW())')
-      .getMany();
+    const candidates = await this.prisma.apiKey.findMany({
+      where: {
+        revokedAt: null,
+        OR: [
+          { expiresAt: null },
+          { expiresAt: { gt: new Date() } },
+        ],
+      },
+      include: { agent: true },
+    });
 
     for (const candidate of candidates) {
       const match = await bcrypt.compare(rawKey, candidate.keyHash);
       if (match) {
         // Update last_used_at without blocking the request
-        void this.apiKeyRepo.update(candidate.id, { lastUsedAt: new Date() }).catch(() => {
-          // Non-critical — log silently
+        void this.prisma.apiKey.update({
+          where: { id: candidate.id },
+          data: { lastUsedAt: new Date() },
+        }).catch(() => {
+          // Non-critical
         });
         return candidate;
       }
@@ -192,7 +197,7 @@ export class AuthService {
   }
 
   /** Validate JWT payload and return user */
-  async validateJwtPayload(payload: { sub: string }): Promise<User | null> {
-    return this.userRepo.findOne({ where: { id: payload.sub } });
+  async validateJwtPayload(payload: { sub: string }) {
+    return this.prisma.user.findUnique({ where: { id: payload.sub } });
   }
 }

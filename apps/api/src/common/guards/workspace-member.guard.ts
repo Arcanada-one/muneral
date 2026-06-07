@@ -5,10 +5,8 @@ import {
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { Request } from 'express';
-import { WorkspaceMember } from '../../workspaces/entities/workspace-member.entity';
+import { PrismaService } from '../../prisma/prisma.service';
 import { Actor } from '@muneral/types';
 
 /**
@@ -18,16 +16,13 @@ import { Actor } from '@muneral/types';
  */
 @Injectable()
 export class WorkspaceMemberGuard implements CanActivate {
-  constructor(
-    @InjectRepository(WorkspaceMember)
-    private readonly memberRepo: Repository<WorkspaceMember>,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<
       Request & {
         actor?: Actor;
-        workspaceMember?: WorkspaceMember;
+        workspaceMember?: object;
         params: { workspaceId?: string };
       }
     >();
@@ -42,8 +37,8 @@ export class WorkspaceMemberGuard implements CanActivate {
       throw new NotFoundException('Workspace ID required in route params');
     }
 
-    const member = await this.memberRepo.findOne({
-      where: { workspaceId, userId: actor.id },
+    const member = await this.prisma.workspaceMember.findUnique({
+      where: { workspaceId_userId: { workspaceId, userId: actor.id } },
     });
 
     if (!member) {
