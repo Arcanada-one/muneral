@@ -2,10 +2,7 @@
   "name": "muneral",
   "version": "0.1.0",
   "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
+  "packageManager": "pnpm@11.5.2",
   "scripts": {
     "build": "turbo run build",
     "test": "turbo run test",
