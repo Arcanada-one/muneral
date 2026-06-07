@@ -1,0 +1,18 @@
+# Keep the Docker build context clean — the deploy host (/srv/apps/muneral)
+# accumulates a host node_modules + lockfile residue from `prisma migrate deploy`
+# run before the image build; copying those into the image breaks pnpm's
+# deps-status check inside `pnpm --filter ... build` (runDepsStatusCheck → install exit 1).
+**/node_modules
+**/dist
+**/.turbo
+.git
+.github
+**/.env
+**/.env.*
+package-lock.json
+npm-debug.log*
+*.log
+.DS_Store
+**/coverage
+**/.next
+.worktrees
