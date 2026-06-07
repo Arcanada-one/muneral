@@ -21,7 +21,7 @@ import { WorkspaceRoleGuard } from '../common/guards/workspace-role.guard';
 import { ActorInterceptor } from '../common/interceptors/actor.interceptor';
 import { UseInterceptors } from '@nestjs/common';
 import { Actor } from '@muneral/types';
-import { User } from '../common/entities/user.entity';
+import { User } from '@prisma/client';
 
 type AuthRequest = Request & { user: User; actor?: Actor };
 

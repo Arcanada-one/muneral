@@ -12,7 +12,7 @@ import {
 import { Request } from 'express';
 import { ApiKeyGuard } from '../../auth/guards/api-key.guard';
 import { FieldChangesService, AckBody } from './field-changes.service';
-import { Agent } from '../../agents/entities/agent.entity';
+import { Agent } from '@prisma/client';
 
 type ApiKeyRequest = Request & { apiKeyAgent: Agent };
 

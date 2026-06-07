@@ -13,7 +13,7 @@ import { Request } from 'express';
 import { AuthService } from './auth.service';
 import { GithubOAuthGuard } from './guards/github-oauth.guard';
 import { TelegramLoginDto } from './dto/telegram-login.dto';
-import { User } from '../common/entities/user.entity';
+import { User } from '@prisma/client';
 import { Throttle } from '@nestjs/throttler';
 
 /**
