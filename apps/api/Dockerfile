@@ -31,30 +31,22 @@ FROM node:22-alpine AS production
 WORKDIR /app
 ENV NODE_ENV=production
 
-RUN corepack enable
-
-# Copy workspace layout needed to resolve pnpm virtual store
-COPY --from=builder /app/.npmrc ./
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/pnpm-lock.yaml ./
-COPY --from=builder /app/pnpm-workspace.yaml ./
+# Carry over the FULL builder workspace. With pnpm's non-hoisting layout the
+# generated Prisma client + query-engine binaries live inside the per-workspace
+# .pnpm virtual store (node_modules/.pnpm/@prisma+client@.../...), NOT in a root
+# node_modules/@prisma directory — so the old per-package COPY of
+# node_modules/@prisma resolved to a non-existent path and broke the build.
+# Copying the whole node_modules tree (root + per-workspace, incl. symlinks into
+# .pnpm) preserves the generated client and avoids a fragile prod re-install
+# that pnpm cannot reproduce deterministically for a partially-built monorepo.
+COPY --from=builder /app/.npmrc /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml ./
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/apps/api/package.json ./apps/api/
-COPY --from=builder /app/packages/types/package.json ./packages/types/
-
-# Install production-only dependencies
-RUN pnpm install --frozen-lockfile --prod
-
-# Copy compiled output
-COPY --from=builder /app/packages/types/dist ./packages/types/dist
+COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
-
-# Copy generated Prisma client and query engine binaries.
-# @prisma/* are hoisted to root node_modules via public-hoist-pattern in .npmrc.
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-
-# Copy Prisma schema (needed at runtime by the query engine for introspection/error messages)
 COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
+COPY --from=builder /app/packages/types/package.json ./packages/types/
+COPY --from=builder /app/packages/types/dist ./packages/types/dist
 
 WORKDIR /app/apps/api
 EXPOSE 3500
