@@ -82,6 +82,9 @@
     "testEnvironment": "node",
     "moduleNameMapper": {
       "^@muneral/types$": "<rootDir>/../../packages/types/dist/index.js"
-    }
+    },
+    "setupFiles": [
+      "<rootDir>/test/setup-env.ts"
+    ]
   }
 }

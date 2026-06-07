@@ -366,3 +366,36 @@ model UsageLimits {
 
   @@map("usage_limits")
 }
+
+// ---------------------------------------------------------------------------
+// task_field_state — per-field versioned hash storage
+// ---------------------------------------------------------------------------
+// No Prisma relation to Task — FK ON DELETE CASCADE enforced via migration SQL.
+// version is a monotonic counter bumped on every value change (not on no-op writes).
+model TaskFieldState {
+  taskId    String   @map("task_id") @db.Uuid
+  fieldName String   @map("field_name") @db.VarChar(64)
+  hash      String   @db.VarChar(64)
+  version   BigInt
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@id([taskId, fieldName])
+  @@index([taskId, version])
+  @@map("task_field_state")
+}
+
+// ---------------------------------------------------------------------------
+// agent_field_reads — per-agent per-field read watermark
+// ---------------------------------------------------------------------------
+// No Prisma relations — taskId/agentId referenced logically; FK enforced via migration SQL.
+model AgentFieldRead {
+  agentId         String   @map("agent_id") @db.Uuid
+  taskId          String   @map("task_id") @db.Uuid
+  fieldName       String   @map("field_name") @db.VarChar(64)
+  lastSeenVersion BigInt   @map("last_seen_version")
+  lastSeenHash    String   @map("last_seen_hash") @db.VarChar(64)
+  acknowledgedAt  DateTime @map("acknowledged_at") @db.Timestamptz()
+
+  @@id([agentId, taskId, fieldName])
+  @@map("agent_field_reads")
+}

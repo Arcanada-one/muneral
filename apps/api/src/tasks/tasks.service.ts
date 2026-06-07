@@ -12,6 +12,7 @@ import { CreateChecklistItemDto } from './dto/create-checklist-item.dto';
 import { ActivityService } from '../activity/activity.service';
 import { KanbanService } from '../ws/kanban.service';
 import { Actor, isValidTransition, TaskStatus } from '@muneral/types';
+import { TaskFieldStateService } from './field-state/task-field-state.service';
 
 @Injectable()
 export class TasksService {
@@ -19,6 +20,7 @@ export class TasksService {
     private readonly prisma: PrismaService,
     private readonly activityService: ActivityService,
     private readonly kanbanService: KanbanService,
+    private readonly fieldStateService: TaskFieldStateService,
   ) {}
 
   async create(actor: Actor, dto: CreateTaskDto) {
@@ -29,36 +31,54 @@ export class TasksService {
       throw new NotFoundException('Project not found');
     }
 
-    const task = await this.prisma.task.create({
-      data: {
-        projectId: dto.projectId,
-        sprintId: dto.sprintId ?? null,
-        parentId: dto.parentId ?? null,
-        title: dto.title,
-        description: dto.description ?? null,
-        status: dto.status ?? 'todo',
-        priority: dto.priority ?? 'medium',
-        dueDate: dto.dueDate ?? null,
-        estimateHours: dto.estimateHours != null ? new Prisma.Decimal(dto.estimateHours) : null,
-        createdById: actor.id,
-        actorType: actor.type,
+    // All mutations (task create + field-state + activity) in one transaction.
+    // kanbanService.notify is post-commit (side-effect outside tx).
+    const task = await this.prisma.$transaction(
+      async (tx) => {
+        const created = await tx.task.create({
+          data: {
+            projectId: dto.projectId,
+            sprintId: dto.sprintId ?? null,
+            parentId: dto.parentId ?? null,
+            title: dto.title,
+            description: dto.description ?? null,
+            status: dto.status ?? 'todo',
+            priority: dto.priority ?? 'medium',
+            dueDate: dto.dueDate ?? null,
+            estimateHours:
+              dto.estimateHours != null
+                ? new Prisma.Decimal(dto.estimateHours)
+                : null,
+            createdById: actor.id,
+            actorType: actor.type,
+          },
+        });
+
+        // Save tags
+        if (dto.tags?.length) {
+          await tx.taskTag.createMany({
+            data: dto.tags.map((tag) => ({ taskId: created.id, tag })),
+          });
+        }
+
+        // Recompute field state using resolved entity (not DTO — defaults applied above)
+        await this.fieldStateService.recompute(tx, created);
+
+        await tx.activityLog.create({
+          data: {
+            workspaceId: project.workspaceId,
+            taskId: created.id,
+            actorType: actor.type,
+            actorId: actor.id,
+            action: 'task:created',
+            payload: { title: created.title, status: created.status } as Prisma.InputJsonValue,
+          },
+        });
+
+        return created;
       },
-    });
-
-    // Save tags
-    if (dto.tags?.length) {
-      await this.prisma.taskTag.createMany({
-        data: dto.tags.map((tag) => ({ taskId: task.id, tag })),
-      });
-    }
-
-    await this.activityService.log({
-      workspaceId: project.workspaceId,
-      taskId: task.id,
-      actor,
-      action: 'task:created',
-      payload: { title: task.title, status: task.status },
-    });
+      { timeout: 10_000, isolationLevel: 'ReadCommitted' },
+    );
 
     this.kanbanService.notify(project.id, 'task:created', task);
 
@@ -100,18 +120,31 @@ export class TasksService {
     }
 
     const previousStatus = task.status;
-    const updated = await this.prisma.task.update({
-      where: { id: taskId },
-      data: { status: dto.status },
-    });
 
-    await this.activityService.log({
-      workspaceId: project.workspaceId,
-      taskId: task.id,
-      actor,
-      action: 'task:status_changed',
-      payload: { from: previousStatus, to: dto.status },
-    });
+    const updated = await this.prisma.$transaction(
+      async (tx) => {
+        const u = await tx.task.update({
+          where: { id: taskId },
+          data: { status: dto.status },
+        });
+
+        await this.fieldStateService.recompute(tx, u);
+
+        await tx.activityLog.create({
+          data: {
+            workspaceId: project.workspaceId,
+            taskId: task.id,
+            actorType: actor.type,
+            actorId: actor.id,
+            action: 'task:status_changed',
+            payload: { from: previousStatus, to: dto.status } as Prisma.InputJsonValue,
+          },
+        });
+
+        return u;
+      },
+      { timeout: 10_000, isolationLevel: 'ReadCommitted' },
+    );
 
     this.kanbanService.notify(project.id, 'task:moved', {
       taskId: task.id,
@@ -145,25 +178,38 @@ export class TasksService {
     if (updates.priority !== undefined) data.priority = updates.priority;
     if (updates.dueDate !== undefined) data.dueDate = updates.dueDate;
     if (updates.estimateHours !== undefined) {
-      data.estimateHours = updates.estimateHours != null
-        ? new Prisma.Decimal(updates.estimateHours)
-        : null;
+      data.estimateHours =
+        updates.estimateHours != null
+          ? new Prisma.Decimal(updates.estimateHours)
+          : null;
     }
     if (updates.sprintId !== undefined) data.sprintId = updates.sprintId;
 
-    const updated = await this.prisma.task.update({
-      where: { id: taskId },
-      data,
-    });
+    const updated = await this.prisma.$transaction(
+      async (tx) => {
+        const u = await tx.task.update({ where: { id: taskId }, data });
+
+        await this.fieldStateService.recompute(tx, u);
+
+        if (project) {
+          await tx.activityLog.create({
+            data: {
+              workspaceId: project.workspaceId,
+              taskId: task.id,
+              actorType: actor.type,
+              actorId: actor.id,
+              action: 'task:updated',
+              payload: updates as Prisma.InputJsonValue,
+            },
+          });
+        }
+
+        return u;
+      },
+      { timeout: 10_000, isolationLevel: 'ReadCommitted' },
+    );
 
     if (project) {
-      await this.activityService.log({
-        workspaceId: project.workspaceId,
-        taskId: task.id,
-        actor,
-        action: 'task:updated',
-        payload: updates as Record<string, unknown>,
-      });
       this.kanbanService.notify(project.id, 'task:updated', updated);
     }
 
@@ -227,7 +273,6 @@ export class TasksService {
   }
 
   async getChecklist(taskId: string) {
-    // NULLS LAST: Prisma orderBy supports nulls: 'last' for nullables
     return this.prisma.taskChecklist.findMany({
       where: { taskId },
       orderBy: { position: { sort: 'asc', nulls: 'last' } },
