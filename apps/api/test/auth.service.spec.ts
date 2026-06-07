@@ -1,10 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { AuthService } from '../src/auth/auth.service';
-import { User } from '../src/common/entities/user.entity';
-import { ApiKey } from '../src/agents/entities/api-key.entity';
+import { PrismaService } from '../src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 
 // Mock bcrypt to speed up tests (no real hashing)
@@ -15,23 +13,17 @@ jest.mock('bcrypt', () => ({
   ),
 }));
 
-const makeUserRepo = () => ({
-  findOne: jest.fn(),
-  create: jest.fn((data) => data),
-  save: jest.fn((entity) => Promise.resolve({ id: 'user-1', ...entity })),
-});
-
-const makeApiKeyRepo = () => ({
-  findOne: jest.fn(),
-  create: jest.fn((data) => ({ id: 'key-1', ...data })),
-  save: jest.fn((entity) => Promise.resolve(entity)),
-  update: jest.fn().mockResolvedValue(undefined),
-  createQueryBuilder: jest.fn().mockReturnValue({
-    leftJoinAndSelect: jest.fn().mockReturnThis(),
-    where: jest.fn().mockReturnThis(),
-    andWhere: jest.fn().mockReturnThis(),
-    getMany: jest.fn().mockResolvedValue([]),
-  }),
+const makePrisma = () => ({
+  user: {
+    findUnique: jest.fn(),
+    create: jest.fn((args) => Promise.resolve({ id: 'user-1', ...args.data })),
+  },
+  apiKey: {
+    findUnique: jest.fn(),
+    create: jest.fn((args) => Promise.resolve({ id: 'key-1', ...args.data })),
+    update: jest.fn((args) => Promise.resolve({ id: args.where.id, ...args.data })),
+    findMany: jest.fn().mockResolvedValue([]),
+  },
 });
 
 const makeJwtService = () => ({
@@ -41,21 +33,18 @@ const makeJwtService = () => ({
 
 describe('AuthService', () => {
   let service: AuthService;
-  let userRepo: ReturnType<typeof makeUserRepo>;
-  let apiKeyRepo: ReturnType<typeof makeApiKeyRepo>;
+  let prisma: ReturnType<typeof makePrisma>;
   let jwtService: ReturnType<typeof makeJwtService>;
 
   beforeEach(async () => {
-    userRepo = makeUserRepo();
-    apiKeyRepo = makeApiKeyRepo();
+    prisma = makePrisma();
     jwtService = makeJwtService();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
         { provide: JwtService, useValue: jwtService },
-        { provide: getRepositoryToken(User), useValue: userRepo },
-        { provide: getRepositoryToken(ApiKey), useValue: apiKeyRepo },
+        { provide: PrismaService, useValue: prisma },
       ],
     }).compile();
 
@@ -122,29 +111,31 @@ describe('AuthService', () => {
       const { key, keyId } = await service.createApiKey('agent-1', 'test');
       expect(key).toMatch(/^mun_sk_/);
       expect(keyId).toBe('key-1');
-      expect(apiKeyRepo.create).toHaveBeenCalledWith(
-        expect.objectContaining({ agentId: 'agent-1', label: 'test' }),
+      expect(prisma.apiKey.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ agentId: 'agent-1', label: 'test' }),
+        }),
       );
     });
 
     it('stores a bcrypt hash of the key', async () => {
       await service.createApiKey('agent-1');
       expect(bcrypt.hash).toHaveBeenCalled();
-      const createCall = (apiKeyRepo.create as jest.Mock).mock.calls[0][0];
-      expect(createCall.keyHash).toMatch(/^hashed:/);
+      const createCall = (prisma.apiKey.create as jest.Mock).mock.calls[0][0];
+      expect(createCall.data.keyHash).toMatch(/^hashed:/);
     });
   });
 
   describe('rotateApiKey', () => {
     it('throws UnauthorizedException when key not found', async () => {
-      apiKeyRepo.findOne.mockResolvedValue(null);
+      prisma.apiKey.findUnique.mockResolvedValue(null);
       await expect(service.rotateApiKey('missing-key')).rejects.toThrow(
         UnauthorizedException,
       );
     });
 
     it('throws BadRequestException when key is already revoked', async () => {
-      apiKeyRepo.findOne.mockResolvedValue({
+      prisma.apiKey.findUnique.mockResolvedValue({
         id: 'key-1',
         agentId: 'agent-1',
         revokedAt: new Date(),
@@ -163,19 +154,20 @@ describe('AuthService', () => {
         expiresAt: null,
         label: 'my-key',
       };
-      apiKeyRepo.findOne.mockResolvedValue(existingKey);
-      apiKeyRepo.save.mockResolvedValue(existingKey);
-      apiKeyRepo.create.mockReturnValue({ id: 'key-2', agentId: 'agent-1' });
+      prisma.apiKey.findUnique.mockResolvedValue(existingKey);
+      prisma.apiKey.create.mockResolvedValue({ id: 'key-2', agentId: 'agent-1' });
 
       const before = Date.now();
       await service.rotateApiKey('key-1');
       const after = Date.now();
 
-      const savedKey = (apiKeyRepo.save as jest.Mock).mock.calls.find(
-        (call) => call[0].id === 'key-1',
+      // Find the update call for the old key
+      const updateCalls = (prisma.apiKey.update as jest.Mock).mock.calls;
+      const oldKeyUpdate = updateCalls.find(
+        (call) => call[0].where?.id === 'key-1',
       );
-      expect(savedKey).toBeDefined();
-      const expiresAt = savedKey![0].expiresAt as Date;
+      expect(oldKeyUpdate).toBeDefined();
+      const expiresAt = oldKeyUpdate![0].data.expiresAt as Date;
       const gracePeriodMs = expiresAt.getTime() - before;
       // Grace period should be ~24h (86400000ms) with some tolerance
       expect(gracePeriodMs).toBeGreaterThan(86_390_000);
@@ -185,16 +177,16 @@ describe('AuthService', () => {
 
   describe('revokeApiKey', () => {
     it('sets revoked_at on the key', async () => {
-      const key = { id: 'key-1', revokedAt: null };
-      apiKeyRepo.findOne.mockResolvedValue(key);
-      apiKeyRepo.save.mockResolvedValue(key);
+      prisma.apiKey.findUnique.mockResolvedValue({ id: 'key-1', revokedAt: null });
 
       await service.revokeApiKey('key-1');
-      expect(key.revokedAt).toBeInstanceOf(Date);
+
+      const updateCall = (prisma.apiKey.update as jest.Mock).mock.calls[0][0];
+      expect(updateCall.data.revokedAt).toBeInstanceOf(Date);
     });
 
     it('throws UnauthorizedException when key not found', async () => {
-      apiKeyRepo.findOne.mockResolvedValue(null);
+      prisma.apiKey.findUnique.mockResolvedValue(null);
       await expect(service.revokeApiKey('missing')).rejects.toThrow(
         UnauthorizedException,
       );
@@ -205,7 +197,7 @@ describe('AuthService', () => {
     it('returns null for keys without mun_sk_ prefix', async () => {
       const result = await service.validateApiKey('sk-wrong-prefix');
       expect(result).toBeNull();
-      expect(apiKeyRepo.createQueryBuilder).not.toHaveBeenCalled();
+      expect(prisma.apiKey.findMany).not.toHaveBeenCalled();
     });
 
     it('returns null when no candidates match', async () => {
@@ -219,12 +211,7 @@ describe('AuthService', () => {
         keyHash: 'hashed:mun_sk_validkey',
         agent: { id: 'agent-1', name: 'TestAgent' },
       };
-      apiKeyRepo.createQueryBuilder.mockReturnValue({
-        leftJoinAndSelect: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue([candidate]),
-      });
+      prisma.apiKey.findMany.mockResolvedValue([candidate]);
 
       const result = await service.validateApiKey('mun_sk_validkey');
       expect(result).toBe(candidate);

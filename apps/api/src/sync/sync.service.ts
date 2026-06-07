@@ -1,8 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Task } from '../tasks/entities/task.entity';
-import { Project } from '../projects/entities/project.entity';
+import { Prisma } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
 import { TaskStatus, TaskPriority } from '@muneral/types';
 
 /**
@@ -10,29 +8,23 @@ import { TaskStatus, TaskPriority } from '@muneral/types';
  */
 @Injectable()
 export class SyncService {
-  constructor(
-    @InjectRepository(Task)
-    private readonly taskRepo: Repository<Task>,
-    @InjectRepository(Project)
-    private readonly projectRepo: Repository<Project>,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   /**
    * Export project tasks in Datarim tasks.md format.
    */
   async exportDatarim(projectId: string): Promise<string> {
-    const project = await this.projectRepo.findOne({
+    const project = await this.prisma.project.findUnique({
       where: { id: projectId },
     });
     if (!project) {
       throw new NotFoundException('Project not found');
     }
 
-    const tasks = await this.taskRepo
-      .createQueryBuilder('t')
-      .where('t.project_id = :projectId', { projectId })
-      .orderBy('t.created_at', 'ASC')
-      .getMany();
+    const tasks = await this.prisma.task.findMany({
+      where: { projectId },
+      orderBy: { createdAt: 'asc' },
+    });
 
     const activeTasks = tasks.filter(
       (t) => !['done', 'cancelled'].includes(t.status),
@@ -74,7 +66,7 @@ export class SyncService {
    * Creates new tasks; updates existing ones matched by title.
    */
   async importDatarim(projectId: string, markdown: string): Promise<{ created: number; updated: number }> {
-    const project = await this.projectRepo.findOne({
+    const project = await this.prisma.project.findUnique({
       where: { id: projectId },
     });
     if (!project) {
@@ -89,27 +81,32 @@ export class SyncService {
     let updated = 0;
 
     for (const block of taskBlocks) {
-      const existing = await this.taskRepo.findOne({
+      const existing = await this.prisma.task.findFirst({
         where: { projectId, title: block.title },
       });
 
       if (existing) {
-        existing.status = block.status ?? existing.status;
-        existing.priority = block.priority ?? existing.priority;
-        existing.dueDate = block.dueDate ?? existing.dueDate;
-        await this.taskRepo.save(existing);
+        await this.prisma.task.update({
+          where: { id: existing.id },
+          data: {
+            status: block.status ?? existing.status,
+            priority: block.priority ?? existing.priority,
+            dueDate: block.dueDate ?? existing.dueDate,
+          },
+        });
         updated++;
       } else {
-        const task = this.taskRepo.create({
-          projectId,
-          title: block.title,
-          description: block.description ?? null,
-          status: block.status ?? 'todo',
-          priority: block.priority ?? 'medium',
-          dueDate: block.dueDate ?? null,
-          actorType: 'human',
+        await this.prisma.task.create({
+          data: {
+            projectId,
+            title: block.title,
+            description: block.description ?? null,
+            status: block.status ?? 'todo',
+            priority: block.priority ?? 'medium',
+            dueDate: block.dueDate ?? null,
+            actorType: 'human',
+          },
         });
-        await this.taskRepo.save(task);
         created++;
       }
     }

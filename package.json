@@ -2,10 +2,7 @@
   "name": "muneral",
   "version": "0.1.0",
   "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
+  "packageManager": "pnpm@11.5.2",
   "scripts": {
     "build": "turbo run build",
     "test": "turbo run test",
@@ -14,6 +11,7 @@
     "clean": "turbo run clean"
   },
   "devDependencies": {
+    "prisma": "^7.8.0",
     "turbo": "^2.3.3"
   },
   "engines": {

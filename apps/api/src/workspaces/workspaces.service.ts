@@ -4,61 +4,44 @@ import {
   ConflictException,
   ForbiddenException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Workspace } from './entities/workspace.entity';
-import { WorkspaceMember } from './entities/workspace-member.entity';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 import { WorkspaceMemberRole } from '@muneral/types';
 
 @Injectable()
 export class WorkspacesService {
-  constructor(
-    @InjectRepository(Workspace)
-    private readonly workspaceRepo: Repository<Workspace>,
-    @InjectRepository(WorkspaceMember)
-    private readonly memberRepo: Repository<WorkspaceMember>,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  async create(ownerId: string, dto: CreateWorkspaceDto): Promise<Workspace> {
-    const existing = await this.workspaceRepo.findOne({
+  async create(ownerId: string, dto: CreateWorkspaceDto) {
+    const existing = await this.prisma.workspace.findUnique({
       where: { slug: dto.slug },
     });
     if (existing) {
       throw new ConflictException(`Workspace slug '${dto.slug}' is taken`);
     }
 
-    const workspace = this.workspaceRepo.create({
-      ...dto,
-      ownerId,
+    const workspace = await this.prisma.workspace.create({
+      data: { ...dto, ownerId },
     });
-    await this.workspaceRepo.save(workspace);
 
     // Auto-add owner as member
-    const member = this.memberRepo.create({
-      workspaceId: workspace.id,
-      userId: ownerId,
-      role: 'owner',
+    await this.prisma.workspaceMember.create({
+      data: { workspaceId: workspace.id, userId: ownerId, role: 'owner' },
     });
-    await this.memberRepo.save(member);
 
     return workspace;
   }
 
-  async findAllForUser(userId: string): Promise<Workspace[]> {
-    return this.workspaceRepo
-      .createQueryBuilder('ws')
-      .innerJoin(
-        WorkspaceMember,
-        'wm',
-        'wm.workspace_id = ws.id AND wm.user_id = :userId',
-        { userId },
-      )
-      .getMany();
+  async findAllForUser(userId: string) {
+    const memberships = await this.prisma.workspaceMember.findMany({
+      where: { userId },
+      include: { workspace: true },
+    });
+    return memberships.map((m) => m.workspace);
   }
 
-  async findOne(workspaceId: string): Promise<Workspace> {
-    const workspace = await this.workspaceRepo.findOne({
+  async findOne(workspaceId: string) {
+    const workspace = await this.prisma.workspace.findUnique({
       where: { id: workspaceId },
     });
     if (!workspace) {
@@ -67,19 +50,16 @@ export class WorkspacesService {
     return workspace;
   }
 
-  async addMember(
-    workspaceId: string,
-    userId: string,
-    role: WorkspaceMemberRole = 'developer',
-  ): Promise<WorkspaceMember> {
-    const existing = await this.memberRepo.findOne({
-      where: { workspaceId, userId },
+  async addMember(workspaceId: string, userId: string, role: WorkspaceMemberRole = 'developer') {
+    const existing = await this.prisma.workspaceMember.findUnique({
+      where: { workspaceId_userId: { workspaceId, userId } },
     });
     if (existing) {
       throw new ConflictException('User is already a member');
     }
-    const member = this.memberRepo.create({ workspaceId, userId, role });
-    return this.memberRepo.save(member);
+    return this.prisma.workspaceMember.create({
+      data: { workspaceId, userId, role },
+    });
   }
 
   async updateMemberRole(
@@ -87,49 +67,52 @@ export class WorkspacesService {
     userId: string,
     role: WorkspaceMemberRole,
     requesterId: string,
-  ): Promise<WorkspaceMember> {
-    const member = await this.memberRepo.findOne({
-      where: { workspaceId, userId },
+  ) {
+    const member = await this.prisma.workspaceMember.findUnique({
+      where: { workspaceId_userId: { workspaceId, userId } },
     });
     if (!member) {
       throw new NotFoundException('Member not found');
     }
     // Prevent demoting the last owner
     if (member.role === 'owner' && role !== 'owner') {
-      const ownerCount = await this.memberRepo.count({
+      const ownerCount = await this.prisma.workspaceMember.count({
         where: { workspaceId, role: 'owner' },
       });
       if (ownerCount <= 1 && userId !== requesterId) {
         throw new ForbiddenException('Cannot remove the last owner');
       }
     }
-    member.role = role;
-    return this.memberRepo.save(member);
+    return this.prisma.workspaceMember.update({
+      where: { workspaceId_userId: { workspaceId, userId } },
+      data: { role },
+    });
   }
 
   async removeMember(workspaceId: string, userId: string): Promise<void> {
-    const member = await this.memberRepo.findOne({
-      where: { workspaceId, userId },
+    const member = await this.prisma.workspaceMember.findUnique({
+      where: { workspaceId_userId: { workspaceId, userId } },
     });
     if (!member) {
       throw new NotFoundException('Member not found');
     }
     if (member.role === 'owner') {
-      const ownerCount = await this.memberRepo.count({
+      const ownerCount = await this.prisma.workspaceMember.count({
         where: { workspaceId, role: 'owner' },
       });
       if (ownerCount <= 1) {
         throw new ForbiddenException('Cannot remove the last owner');
       }
     }
-    await this.memberRepo.remove(member);
+    await this.prisma.workspaceMember.delete({
+      where: { workspaceId_userId: { workspaceId, userId } },
+    });
   }
 
-  async listMembers(workspaceId: string): Promise<WorkspaceMember[]> {
-    return this.memberRepo
-      .createQueryBuilder('wm')
-      .leftJoinAndSelect('wm.user', 'u')
-      .where('wm.workspace_id = :workspaceId', { workspaceId })
-      .getMany();
+  async listMembers(workspaceId: string) {
+    return this.prisma.workspaceMember.findMany({
+      where: { workspaceId },
+      include: { user: true },
+    });
   }
 }

@@ -1,7 +1,6 @@
+import { Prisma } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { ActivityLog } from './entities/activity-log.entity';
+import { PrismaService } from '../prisma/prisma.service';
 import { Actor } from '@muneral/types';
 
 export interface LogOptions {
@@ -18,36 +17,36 @@ export interface LogOptions {
  */
 @Injectable()
 export class ActivityService {
-  constructor(
-    @InjectRepository(ActivityLog)
-    private readonly logRepo: Repository<ActivityLog>,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  async log(opts: LogOptions): Promise<ActivityLog> {
-    const entry = this.logRepo.create({
-      workspaceId: opts.workspaceId,
-      taskId: opts.taskId ?? null,
-      actorType: opts.actor.type,
-      actorId: opts.actor.id,
-      action: opts.action,
-      payload: opts.payload ?? null,
+  async log(opts: LogOptions) {
+    return this.prisma.activityLog.create({
+      data: {
+        workspaceId: opts.workspaceId,
+        taskId: opts.taskId ?? null,
+        actorType: opts.actor.type,
+        actorId: opts.actor.id,
+        action: opts.action,
+        payload: opts.payload !== undefined ? (opts.payload as Prisma.InputJsonValue) : Prisma.DbNull,
+      },
     });
-    return this.logRepo.save(entry);
   }
 
   async findForTask(
     taskId: string,
     page = 1,
     limit = 20,
-  ): Promise<{ data: ActivityLog[]; total: number; page: number; limit: number }> {
-    const [data, total] = await this.logRepo
-      .createQueryBuilder('al')
-      .where('al.task_id = :taskId', { taskId })
-      .orderBy('al.created_at', 'DESC')
-      .skip((page - 1) * limit)
-      .take(limit)
-      .getManyAndCount();
-
+  ): Promise<{ data: object[]; total: number; page: number; limit: number }> {
+    const skip = (page - 1) * limit;
+    const [data, total] = await Promise.all([
+      this.prisma.activityLog.findMany({
+        where: { taskId },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.activityLog.count({ where: { taskId } }),
+    ]);
     return { data, total, page, limit };
   }
 
@@ -55,15 +54,17 @@ export class ActivityService {
     workspaceId: string,
     page = 1,
     limit = 20,
-  ): Promise<{ data: ActivityLog[]; total: number; page: number; limit: number }> {
-    const [data, total] = await this.logRepo
-      .createQueryBuilder('al')
-      .where('al.workspace_id = :workspaceId', { workspaceId })
-      .orderBy('al.created_at', 'DESC')
-      .skip((page - 1) * limit)
-      .take(limit)
-      .getManyAndCount();
-
+  ): Promise<{ data: object[]; total: number; page: number; limit: number }> {
+    const skip = (page - 1) * limit;
+    const [data, total] = await Promise.all([
+      this.prisma.activityLog.findMany({
+        where: { workspaceId },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.activityLog.count({ where: { workspaceId } }),
+    ]);
     return { data, total, page, limit };
   }
 }

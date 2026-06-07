@@ -3,128 +3,148 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Task } from './entities/task.entity';
-import { TaskTag } from './entities/task-tag.entity';
-import { TaskChecklist } from './entities/task-checklist.entity';
-import { TaskDependency } from './entities/task-dependency.entity';
+import { Prisma } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
 import { AddDependencyDto } from './dto/add-dependency.dto';
 import { CreateChecklistItemDto } from './dto/create-checklist-item.dto';
 import { ActivityService } from '../activity/activity.service';
 import { KanbanService } from '../ws/kanban.service';
-import { Actor, isValidTransition } from '@muneral/types';
-import { Project } from '../projects/entities/project.entity';
+import { Actor, isValidTransition, TaskStatus } from '@muneral/types';
+import { TaskFieldStateService } from './field-state/task-field-state.service';
 
 @Injectable()
 export class TasksService {
   constructor(
-    @InjectRepository(Task)
-    private readonly taskRepo: Repository<Task>,
-    @InjectRepository(TaskTag)
-    private readonly tagRepo: Repository<TaskTag>,
-    @InjectRepository(TaskChecklist)
-    private readonly checklistRepo: Repository<TaskChecklist>,
-    @InjectRepository(TaskDependency)
-    private readonly depRepo: Repository<TaskDependency>,
-    @InjectRepository(Project)
-    private readonly projectRepo: Repository<Project>,
+    private readonly prisma: PrismaService,
     private readonly activityService: ActivityService,
     private readonly kanbanService: KanbanService,
+    private readonly fieldStateService: TaskFieldStateService,
   ) {}
 
-  async create(actor: Actor, dto: CreateTaskDto): Promise<Task> {
-    const project = await this.projectRepo.findOne({
+  async create(actor: Actor, dto: CreateTaskDto) {
+    const project = await this.prisma.project.findUnique({
       where: { id: dto.projectId },
     });
     if (!project) {
       throw new NotFoundException('Project not found');
     }
 
-    const task = this.taskRepo.create({
-      projectId: dto.projectId,
-      sprintId: dto.sprintId ?? null,
-      parentId: dto.parentId ?? null,
-      title: dto.title,
-      description: dto.description ?? null,
-      status: dto.status ?? 'todo',
-      priority: dto.priority ?? 'medium',
-      dueDate: dto.dueDate ?? null,
-      estimateHours: dto.estimateHours ?? null,
-      createdById: actor.id,
-      actorType: actor.type,
-    });
-    await this.taskRepo.save(task);
+    // All mutations (task create + field-state + activity) in one transaction.
+    // kanbanService.notify is post-commit (side-effect outside tx).
+    const task = await this.prisma.$transaction(
+      async (tx) => {
+        const created = await tx.task.create({
+          data: {
+            projectId: dto.projectId,
+            sprintId: dto.sprintId ?? null,
+            parentId: dto.parentId ?? null,
+            title: dto.title,
+            description: dto.description ?? null,
+            status: dto.status ?? 'todo',
+            priority: dto.priority ?? 'medium',
+            dueDate: dto.dueDate ?? null,
+            estimateHours:
+              dto.estimateHours != null
+                ? new Prisma.Decimal(dto.estimateHours)
+                : null,
+            createdById: actor.id,
+            actorType: actor.type,
+          },
+        });
 
-    // Save tags
-    if (dto.tags?.length) {
-      const tags = dto.tags.map((tag) =>
-        this.tagRepo.create({ taskId: task.id, tag }),
-      );
-      await this.tagRepo.save(tags);
-    }
+        // Save tags
+        if (dto.tags?.length) {
+          await tx.taskTag.createMany({
+            data: dto.tags.map((tag) => ({ taskId: created.id, tag })),
+          });
+        }
 
-    await this.activityService.log({
-      workspaceId: project.workspaceId,
-      taskId: task.id,
-      actor,
-      action: 'task:created',
-      payload: { title: task.title, status: task.status },
-    });
+        // Recompute field state using resolved entity (not DTO — defaults applied above)
+        await this.fieldStateService.recompute(tx, created);
+
+        await tx.activityLog.create({
+          data: {
+            workspaceId: project.workspaceId,
+            taskId: created.id,
+            actorType: actor.type,
+            actorId: actor.id,
+            action: 'task:created',
+            payload: { title: created.title, status: created.status } as Prisma.InputJsonValue,
+          },
+        });
+
+        return created;
+      },
+      { timeout: 10_000, isolationLevel: 'ReadCommitted' },
+    );
 
     this.kanbanService.notify(project.id, 'task:created', task);
 
     return task;
   }
 
-  async findOne(taskId: string): Promise<Task> {
-    const task = await this.taskRepo.findOne({ where: { id: taskId } });
+  async findOne(taskId: string) {
+    const task = await this.prisma.task.findUnique({ where: { id: taskId } });
     if (!task) {
       throw new NotFoundException('Task not found');
     }
     return task;
   }
 
-  async findByProject(projectId: string): Promise<Task[]> {
-    return this.taskRepo
-      .createQueryBuilder('t')
-      .where('t.project_id = :projectId', { projectId })
-      .orderBy('t.created_at', 'DESC')
-      .getMany();
+  async findByProject(projectId: string) {
+    return this.prisma.task.findMany({
+      where: { projectId },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
   async updateStatus(
     taskId: string,
     actor: Actor,
     dto: UpdateTaskStatusDto,
-  ): Promise<Task> {
+  ) {
     const task = await this.findOne(taskId);
-    const project = await this.projectRepo.findOne({
+    const project = await this.prisma.project.findUnique({
       where: { id: task.projectId },
     });
     if (!project) {
       throw new NotFoundException('Project not found');
     }
 
-    if (!isValidTransition(task.status, dto.status)) {
+    if (!isValidTransition(task.status as TaskStatus, dto.status)) {
       throw new BadRequestException(
         `Invalid status transition: ${task.status} → ${dto.status}`,
       );
     }
 
     const previousStatus = task.status;
-    task.status = dto.status;
-    await this.taskRepo.save(task);
 
-    await this.activityService.log({
-      workspaceId: project.workspaceId,
-      taskId: task.id,
-      actor,
-      action: 'task:status_changed',
-      payload: { from: previousStatus, to: dto.status },
-    });
+    const updated = await this.prisma.$transaction(
+      async (tx) => {
+        const u = await tx.task.update({
+          where: { id: taskId },
+          data: { status: dto.status },
+        });
+
+        await this.fieldStateService.recompute(tx, u);
+
+        await tx.activityLog.create({
+          data: {
+            workspaceId: project.workspaceId,
+            taskId: task.id,
+            actorType: actor.type,
+            actorId: actor.id,
+            action: 'task:status_changed',
+            payload: { from: previousStatus, to: dto.status } as Prisma.InputJsonValue,
+          },
+        });
+
+        return u;
+      },
+      { timeout: 10_000, isolationLevel: 'ReadCommitted' },
+    );
 
     this.kanbanService.notify(project.id, 'task:moved', {
       taskId: task.id,
@@ -132,43 +152,77 @@ export class TasksService {
       to: dto.status,
     });
 
-    return task;
+    return updated;
   }
 
   async update(
     taskId: string,
     actor: Actor,
-    updates: Partial<Pick<Task, 'title' | 'description' | 'priority' | 'dueDate' | 'estimateHours' | 'sprintId'>>,
-  ): Promise<Task> {
+    updates: Partial<{
+      title: string;
+      description: string | null;
+      priority: string;
+      dueDate: string | null;
+      estimateHours: number | null;
+      sprintId: string | null;
+    }>,
+  ) {
     const task = await this.findOne(taskId);
-    const project = await this.projectRepo.findOne({
+    const project = await this.prisma.project.findUnique({
       where: { id: task.projectId },
     });
 
-    Object.assign(task, updates);
-    await this.taskRepo.save(task);
+    const data: Prisma.TaskUncheckedUpdateInput = {};
+    if (updates.title !== undefined) data.title = updates.title;
+    if (updates.description !== undefined) data.description = updates.description;
+    if (updates.priority !== undefined) data.priority = updates.priority;
+    if (updates.dueDate !== undefined) data.dueDate = updates.dueDate;
+    if (updates.estimateHours !== undefined) {
+      data.estimateHours =
+        updates.estimateHours != null
+          ? new Prisma.Decimal(updates.estimateHours)
+          : null;
+    }
+    if (updates.sprintId !== undefined) data.sprintId = updates.sprintId;
+
+    const updated = await this.prisma.$transaction(
+      async (tx) => {
+        const u = await tx.task.update({ where: { id: taskId }, data });
+
+        await this.fieldStateService.recompute(tx, u);
+
+        if (project) {
+          await tx.activityLog.create({
+            data: {
+              workspaceId: project.workspaceId,
+              taskId: task.id,
+              actorType: actor.type,
+              actorId: actor.id,
+              action: 'task:updated',
+              payload: updates as Prisma.InputJsonValue,
+            },
+          });
+        }
+
+        return u;
+      },
+      { timeout: 10_000, isolationLevel: 'ReadCommitted' },
+    );
 
     if (project) {
-      await this.activityService.log({
-        workspaceId: project.workspaceId,
-        taskId: task.id,
-        actor,
-        action: 'task:updated',
-        payload: updates as Record<string, unknown>,
-      });
-      this.kanbanService.notify(project.id, 'task:updated', task);
+      this.kanbanService.notify(project.id, 'task:updated', updated);
     }
 
-    return task;
+    return updated;
   }
 
   async delete(taskId: string, actor: Actor): Promise<void> {
     const task = await this.findOne(taskId);
-    const project = await this.projectRepo.findOne({
+    const project = await this.prisma.project.findUnique({
       where: { id: task.projectId },
     });
 
-    await this.taskRepo.remove(task);
+    await this.prisma.task.delete({ where: { id: taskId } });
 
     if (project) {
       await this.activityService.log({
@@ -184,93 +238,81 @@ export class TasksService {
 
   // --- Checklist ---
 
-  async addChecklistItem(
-    taskId: string,
-    dto: CreateChecklistItemDto,
-  ): Promise<TaskChecklist> {
+  async addChecklistItem(taskId: string, dto: CreateChecklistItemDto) {
     await this.findOne(taskId); // verify task exists
-    const item = this.checklistRepo.create({
-      taskId,
-      text: dto.text,
-      position: dto.position ?? null,
+    return this.prisma.taskChecklist.create({
+      data: {
+        taskId,
+        text: dto.text,
+        position: dto.position ?? null,
+      },
     });
-    return this.checklistRepo.save(item);
   }
 
-  async toggleChecklistItem(
-    taskId: string,
-    itemId: string,
-    checked: boolean,
-  ): Promise<TaskChecklist> {
-    const item = await this.checklistRepo.findOne({
+  async toggleChecklistItem(taskId: string, itemId: string, checked: boolean) {
+    const item = await this.prisma.taskChecklist.findFirst({
       where: { id: itemId, taskId },
     });
     if (!item) {
       throw new NotFoundException('Checklist item not found');
     }
-    item.checked = checked;
-    return this.checklistRepo.save(item);
+    return this.prisma.taskChecklist.update({
+      where: { id: itemId },
+      data: { checked },
+    });
   }
 
   async deleteChecklistItem(taskId: string, itemId: string): Promise<void> {
-    const item = await this.checklistRepo.findOne({
+    const item = await this.prisma.taskChecklist.findFirst({
       where: { id: itemId, taskId },
     });
     if (!item) {
       throw new NotFoundException('Checklist item not found');
     }
-    await this.checklistRepo.remove(item);
+    await this.prisma.taskChecklist.delete({ where: { id: itemId } });
   }
 
-  async getChecklist(taskId: string): Promise<TaskChecklist[]> {
-    return this.checklistRepo
-      .createQueryBuilder('ci')
-      .where('ci.task_id = :taskId', { taskId })
-      .orderBy('ci.position', 'ASC', 'NULLS LAST')
-      .getMany();
+  async getChecklist(taskId: string) {
+    return this.prisma.taskChecklist.findMany({
+      where: { taskId },
+      orderBy: { position: { sort: 'asc', nulls: 'last' } },
+    });
   }
 
   // --- Dependencies ---
 
-  async addDependency(
-    fromTaskId: string,
-    dto: AddDependencyDto,
-  ): Promise<TaskDependency> {
+  async addDependency(fromTaskId: string, dto: AddDependencyDto) {
     await this.findOne(fromTaskId);
     await this.findOne(dto.toTaskId);
 
-    const dep = this.depRepo.create({
-      fromTaskId,
-      toTaskId: dto.toTaskId,
-      type: dto.type,
+    return this.prisma.taskDependency.create({
+      data: {
+        fromTaskId,
+        toTaskId: dto.toTaskId,
+        type: dto.type,
+      },
     });
-    return this.depRepo.save(dep);
   }
 
   async removeDependency(depId: string): Promise<void> {
-    const dep = await this.depRepo.findOne({ where: { id: depId } });
+    const dep = await this.prisma.taskDependency.findUnique({ where: { id: depId } });
     if (!dep) {
       throw new NotFoundException('Dependency not found');
     }
-    await this.depRepo.remove(dep);
+    await this.prisma.taskDependency.delete({ where: { id: depId } });
   }
 
-  async getDependencies(taskId: string): Promise<TaskDependency[]> {
-    return this.depRepo
-      .createQueryBuilder('td')
-      .where('td.from_task_id = :taskId', { taskId })
-      .getMany();
+  async getDependencies(taskId: string) {
+    return this.prisma.taskDependency.findMany({
+      where: { fromTaskId: taskId },
+    });
   }
 
   // --- Comments (via ActivityLog) ---
 
-  async addComment(
-    taskId: string,
-    actor: Actor,
-    body: string,
-  ): Promise<void> {
+  async addComment(taskId: string, actor: Actor, body: string): Promise<void> {
     const task = await this.findOne(taskId);
-    const project = await this.projectRepo.findOne({
+    const project = await this.prisma.project.findUnique({
       where: { id: task.projectId },
     });
     if (!project) {

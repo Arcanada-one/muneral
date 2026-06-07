@@ -1,23 +1,17 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Task } from './entities/task.entity';
-import { TaskTag } from './entities/task-tag.entity';
-import { TaskChecklist } from './entities/task-checklist.entity';
-import { TaskDependency } from './entities/task-dependency.entity';
 import { TasksService } from './tasks.service';
 import { TasksController } from './tasks.controller';
+import { FieldChangesController } from './field-state/field-changes.controller';
 import { ActivityModule } from '../activity/activity.module';
 import { WsModule } from '../ws/ws.module';
-import { Project } from '../projects/entities/project.entity';
+import { TaskFieldStateService } from './field-state/task-field-state.service';
+import { FieldChangesService } from './field-state/field-changes.service';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Task, TaskTag, TaskChecklist, TaskDependency, Project]),
-    ActivityModule,
-    WsModule,
-  ],
-  controllers: [TasksController],
-  providers: [TasksService],
-  exports: [TasksService, TypeOrmModule],
+  imports: [ActivityModule, WsModule, AuthModule],
+  controllers: [TasksController, FieldChangesController],
+  providers: [TasksService, TaskFieldStateService, FieldChangesService],
+  exports: [TasksService, TaskFieldStateService, FieldChangesService],
 })
 export class TasksModule {}

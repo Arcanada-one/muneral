@@ -7,6 +7,10 @@ import helmet from 'helmet';
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
 
+  // Express 5 (shipped with NestJS 11) changed the default query parser to
+  // 'simple'; set it back to 'extended' (qs) to preserve NestJS 10 behaviour.
+  app.getHttpAdapter().getInstance().set('query parser', 'extended');
+
   // Security headers
   app.use(helmet());
 

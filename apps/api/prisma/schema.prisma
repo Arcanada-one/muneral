@@ -1,0 +1,401 @@
+// Muneral Arcana — Prisma schema
+// Hand-authored from apps/api/migrations/1713100000000-InitialSchema.ts
+// Enums stored as String + @db.VarChar with CHECK constraints in migration SQL.
+// Do NOT use `db pull` — hand-authoring is the source of truth.
+//
+// Mapping decisions:
+// - WorkspaceMember.user FK → User via WorkspaceMember.userId (not User.apiKeys dual-FK)
+// - ApiKey.agent FK only → Agent (original schema: api_keys.agent_id FK agents)
+// - ActivityLog.actorId is polymorphic (human OR agent) — Prisma cannot model polymorphic FK;
+//   stored as plain String (no @@relation), consistent with actor_type discriminator.
+// - TaskGitRef FK → tasks only (task_id); project relation removed (original has no project_id col).
+// - Milestone.dueDate and Sprint.startDate/endDate stored as String
+//   (ISO-8601 date strings, matching TypeORM entity usage).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// users
+// ---------------------------------------------------------------------------
+model User {
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  githubId   BigInt?   @unique @map("github_id")
+  telegramId BigInt?   @unique @map("telegram_id")
+  name       String    @db.VarChar
+  avatarUrl  String?   @map("avatar_url") @db.VarChar
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  ownedWorkspaces  Workspace[]
+  workspaceMemberships WorkspaceMember[]
+
+  @@map("users")
+}
+
+// ---------------------------------------------------------------------------
+// workspaces
+// ---------------------------------------------------------------------------
+model Workspace {
+  id               String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  slug             String    @unique @db.VarChar
+  name             String    @db.VarChar
+  ownerId          String    @map("owner_id") @db.Uuid
+  subscriptionTier String    @default("free") @map("subscription_tier") @db.VarChar
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+
+  // Relations
+  owner          User              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  members        WorkspaceMember[]
+  projects       Project[]
+  agents         Agent[]
+  activityLogs   ActivityLog[]
+  webhookConfigs WebhookConfig[]
+  usageLimits    UsageLimits?
+
+  @@map("workspaces")
+}
+
+// ---------------------------------------------------------------------------
+// workspace_members
+// ---------------------------------------------------------------------------
+model WorkspaceMember {
+  workspaceId String @map("workspace_id") @db.Uuid
+  userId      String @map("user_id") @db.Uuid
+  // role CHECK (role IN ('owner','manager','developer','viewer')) added in migration
+  role        String @db.VarChar
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([workspaceId, userId])
+  @@map("workspace_members")
+}
+
+// ---------------------------------------------------------------------------
+// projects
+// ---------------------------------------------------------------------------
+model Project {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  slug        String   @db.VarChar
+  name        String   @db.VarChar
+  description String?  @db.Text
+  repoUrl     String?  @map("repo_url") @db.VarChar
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  // Relations
+  workspace  Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  milestones Milestone[]
+  sprints    Sprint[]
+  tasks      Task[]
+
+  @@map("projects")
+}
+
+// ---------------------------------------------------------------------------
+// milestones
+// ---------------------------------------------------------------------------
+model Milestone {
+  id        String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  projectId String  @map("project_id") @db.Uuid
+  title     String  @db.VarChar
+  dueDate   String? @map("due_date")
+  // status: 'open' | 'closed' — no enum constraint in InitialSchema
+  status    String  @default("open") @db.VarChar
+
+  // Relations
+  project Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sprints Sprint[]
+
+  @@map("milestones")
+}
+
+// ---------------------------------------------------------------------------
+// sprints
+// ---------------------------------------------------------------------------
+model Sprint {
+  id          String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  projectId   String  @map("project_id") @db.Uuid
+  milestoneId String? @map("milestone_id") @db.Uuid
+  name        String  @db.VarChar
+  startDate   String  @map("start_date")
+  endDate     String  @map("end_date")
+  // status CHECK (status IN ('planned','active','completed')) in migration
+  status      String  @default("planned") @db.VarChar
+
+  // Relations
+  project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  milestone Milestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+  tasks     Task[]
+
+  @@map("sprints")
+}
+
+// ---------------------------------------------------------------------------
+// tasks
+// ---------------------------------------------------------------------------
+model Task {
+  id            String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  projectId     String   @map("project_id") @db.Uuid
+  sprintId      String?  @map("sprint_id") @db.Uuid
+  parentId      String?  @map("parent_id") @db.Uuid
+  title         String   @db.VarChar
+  description   String?  @db.Text
+  // status CHECK (status IN ('todo','in_progress','review','blocked','done','cancelled')) in migration
+  status        String   @default("todo") @db.VarChar
+  // priority CHECK (priority IN ('critical','high','medium','low')) in migration
+  priority      String   @default("medium") @db.VarChar
+  dueDate       String?  @map("due_date")
+  estimateHours Decimal? @map("estimate_hours") @db.Decimal(6, 2)
+  createdById   String?  @map("created_by_id") @db.Uuid
+  // actor_type CHECK (actor_type IN ('human','agent')) in migration
+  actorType     String?  @map("actor_type") @db.VarChar
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  project      Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sprint       Sprint?         @relation(fields: [sprintId], references: [id], onDelete: SetNull)
+  parent       Task?           @relation("TaskChildren", fields: [parentId], references: [id], onDelete: SetNull)
+  children     Task[]          @relation("TaskChildren")
+  tags         TaskTag[]
+  checklists   TaskChecklist[]
+  depsFrom     TaskDependency[] @relation("DepsFrom")
+  depsTo       TaskDependency[] @relation("DepsTo")
+  agents       TaskAgent[]
+  activityLogs ActivityLog[]
+  gitRefs      TaskGitRef[]
+
+  @@index([projectId], name: "idx_tasks_project_id")
+  @@index([sprintId], name: "idx_tasks_sprint_id")
+  @@index([status], name: "idx_tasks_status")
+  @@map("tasks")
+}
+
+// ---------------------------------------------------------------------------
+// task_tags
+// ---------------------------------------------------------------------------
+model TaskTag {
+  taskId String @map("task_id") @db.Uuid
+  tag    String @db.VarChar
+
+  // Relations
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, tag])
+  @@map("task_tags")
+}
+
+// ---------------------------------------------------------------------------
+// task_checklists
+// ---------------------------------------------------------------------------
+model TaskChecklist {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  taskId    String   @map("task_id") @db.Uuid
+  text      String   @db.VarChar
+  checked   Boolean  @default(false)
+  position  Int?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  // Relations
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@map("task_checklists")
+}
+
+// ---------------------------------------------------------------------------
+// task_dependencies
+// ---------------------------------------------------------------------------
+model TaskDependency {
+  id         String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  fromTaskId String @map("from_task_id") @db.Uuid
+  toTaskId   String @map("to_task_id") @db.Uuid
+  // type CHECK (type IN ('depends_on','blocks','related_to','duplicates')) in migration
+  type       String @db.VarChar
+
+  // Relations
+  fromTask Task @relation("DepsFrom", fields: [fromTaskId], references: [id], onDelete: Cascade)
+  toTask   Task @relation("DepsTo", fields: [toTaskId], references: [id], onDelete: Cascade)
+
+  @@map("task_dependencies")
+}
+
+// ---------------------------------------------------------------------------
+// agents
+// ---------------------------------------------------------------------------
+model Agent {
+  id           String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  workspaceId  String   @map("workspace_id") @db.Uuid
+  name         String   @db.VarChar
+  model        String?  @db.VarChar
+  provider     String?  @db.VarChar
+  capabilities Json     @default("{}")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  // Relations
+  workspace  Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  apiKeys    ApiKey[]
+  taskAgents TaskAgent[]
+
+  @@map("agents")
+}
+
+// ---------------------------------------------------------------------------
+// api_keys
+// ---------------------------------------------------------------------------
+model ApiKey {
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  agentId    String    @map("agent_id") @db.Uuid
+  keyHash    String    @map("key_hash") @db.VarChar
+  label      String?   @db.VarChar
+  lastUsedAt DateTime? @map("last_used_at") @db.Timestamptz()
+  expiresAt  DateTime? @map("expires_at") @db.Timestamptz()
+  revokedAt  DateTime? @map("revoked_at") @db.Timestamptz()
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+
+  // Relations
+  agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@index([agentId], name: "idx_api_keys_agent_id")
+  @@map("api_keys")
+}
+
+// ---------------------------------------------------------------------------
+// task_agents
+// ---------------------------------------------------------------------------
+model TaskAgent {
+  taskId     String   @map("task_id") @db.Uuid
+  agentId    String   @map("agent_id") @db.Uuid
+  // role CHECK (role IN ('lead','reviewer','executor')) in migration
+  role       String   @db.VarChar
+  assignedAt DateTime @default(now()) @map("assigned_at") @db.Timestamptz()
+
+  // Relations
+  task  Task  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  agent Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, agentId])
+  @@index([agentId], name: "idx_task_agents_agent_id")
+  @@map("task_agents")
+}
+
+// ---------------------------------------------------------------------------
+// activity_log
+// ---------------------------------------------------------------------------
+// actorId is polymorphic (references either users.id or agents.id, discriminated
+// by actorType). Prisma does not support polymorphic FKs — stored as plain String.
+// The DB-level FK in the original schema does not exist either (actor_id has no FK).
+model ActivityLog {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  taskId      String?  @map("task_id") @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  // actor_type CHECK (actor_type IN ('human','agent')) in migration
+  actorType   String   @map("actor_type") @db.VarChar
+  // actorId is polymorphic — no FK relation, plain UUID stored as string
+  actorId     String   @map("actor_id") @db.Uuid
+  action      String   @db.VarChar
+  payload     Json?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  // Relations
+  task      Task?     @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([taskId], name: "idx_activity_log_task_id")
+  @@index([workspaceId], name: "idx_activity_log_workspace_id")
+  @@map("activity_log")
+}
+
+// ---------------------------------------------------------------------------
+// webhook_configs
+// ---------------------------------------------------------------------------
+model WebhookConfig {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  url         String   @db.VarChar
+  events      String[] @default([])
+  secret      String?  @db.VarChar
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("webhook_configs")
+}
+
+// ---------------------------------------------------------------------------
+// task_git_refs
+// ---------------------------------------------------------------------------
+// Note: task_git_refs.task_id FK → tasks only (InitialSchema has no project_id col here).
+// ProjectsService manages git refs but queries by task_id, not project_id.
+model TaskGitRef {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  taskId    String   @map("task_id") @db.Uuid
+  // type CHECK (type IN ('repo','branch','commit')) in migration
+  type      String   @db.VarChar
+  url       String   @db.VarChar
+  ref       String?  @db.VarChar
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  // Relations
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@map("task_git_refs")
+}
+
+// ---------------------------------------------------------------------------
+// usage_limits (scaffold)
+// ---------------------------------------------------------------------------
+model UsageLimits {
+  workspaceId      String @id @map("workspace_id") @db.Uuid
+  maxAgents        Int    @default(-1) @map("max_agents")
+  maxProjects      Int    @default(-1) @map("max_projects")
+  maxTasksPerMonth Int    @default(-1) @map("max_tasks_per_month")
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("usage_limits")
+}
+
+// ---------------------------------------------------------------------------
+// task_field_state — per-field versioned hash storage
+// ---------------------------------------------------------------------------
+// No Prisma relation to Task — FK ON DELETE CASCADE enforced via migration SQL.
+// version is a monotonic counter bumped on every value change (not on no-op writes).
+model TaskFieldState {
+  taskId    String   @map("task_id") @db.Uuid
+  fieldName String   @map("field_name") @db.VarChar(64)
+  hash      String   @db.VarChar(64)
+  version   BigInt
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@id([taskId, fieldName])
+  @@index([taskId, version])
+  @@map("task_field_state")
+}
+
+// ---------------------------------------------------------------------------
+// agent_field_reads — per-agent per-field read watermark
+// ---------------------------------------------------------------------------
+// No Prisma relations — taskId/agentId referenced logically; FK enforced via migration SQL.
+model AgentFieldRead {
+  agentId         String   @map("agent_id") @db.Uuid
+  taskId          String   @map("task_id") @db.Uuid
+  fieldName       String   @map("field_name") @db.VarChar(64)
+  lastSeenVersion BigInt   @map("last_seen_version")
+  lastSeenHash    String   @map("last_seen_hash") @db.VarChar(64)
+  acknowledgedAt  DateTime @map("acknowledged_at") @db.Timestamptz()
+
+  @@id([agentId, taskId, fieldName])
+  @@map("agent_field_reads")
+}

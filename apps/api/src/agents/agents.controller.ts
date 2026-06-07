@@ -18,7 +18,7 @@ import { AssignAgentDto } from './dto/assign-agent.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ApiKeyGuard } from '../auth/guards/api-key.guard';
 import { ActorInterceptor } from '../common/interceptors/actor.interceptor';
-import { Agent } from './entities/agent.entity';
+import { Agent } from '@prisma/client';
 
 /**
  * Agents management, task assignment, and API key lifecycle.

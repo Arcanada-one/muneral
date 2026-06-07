@@ -7,7 +7,7 @@ import {
   mixin,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { WorkspaceMember } from '../../workspaces/entities/workspace-member.entity';
+import { WorkspaceMember } from '@prisma/client';
 import { WorkspaceMemberRole, hasRole } from '@muneral/types';
 
 /**
@@ -29,7 +29,7 @@ export function WorkspaceRoleGuard(requiredRole: WorkspaceMemberRole) {
         throw new ForbiddenException('Workspace membership not resolved');
       }
 
-      if (!hasRole(member.role, requiredRole)) {
+      if (!hasRole(member.role as WorkspaceMemberRole, requiredRole)) {
         throw new ForbiddenException(
           `Requires at least '${requiredRole}' role`,
         );

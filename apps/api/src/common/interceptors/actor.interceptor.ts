@@ -7,8 +7,7 @@ import {
 import { Observable } from 'rxjs';
 import { Request } from 'express';
 import { Actor } from '@muneral/types';
-import { User } from '../entities/user.entity';
-import { Agent } from '../../agents/entities/agent.entity';
+import { User, Agent } from '@prisma/client';
 
 /**
  * ActorInterceptor — detects whether the request is authenticated via JWT (human)

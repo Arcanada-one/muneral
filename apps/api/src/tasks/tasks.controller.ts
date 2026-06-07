@@ -12,8 +12,10 @@ import {
   Req,
   HttpCode,
   HttpStatus,
+  Headers,
+  Res,
 } from '@nestjs/common';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
@@ -23,17 +25,22 @@ import { AddCommentDto } from './dto/add-comment.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ActorInterceptor } from '../common/interceptors/actor.interceptor';
 import { Actor } from '@muneral/types';
+import { FieldChangesService } from './field-state/field-changes.service';
 
 type AuthRequest = Request & { actor: Actor };
 
 /**
- * Tasks CRUD with status state machine, checklists, dependencies, and comments.
+ * Tasks CRUD with status state machine, checklists, dependencies, comments.
+ * Field-change tracking endpoints are in FieldChangesController (API-key auth).
  */
 @Controller('tasks')
 @UseGuards(JwtAuthGuard)
 @UseInterceptors(ActorInterceptor)
 export class TasksController {
-  constructor(private readonly tasksService: TasksService) {}
+  constructor(
+    private readonly tasksService: TasksService,
+    private readonly fieldChangesService: FieldChangesService,
+  ) {}
 
   @Post()
   create(@Req() req: AuthRequest, @Body() dto: CreateTaskDto) {
@@ -41,8 +48,26 @@ export class TasksController {
   }
 
   @Get(':taskId')
-  findOne(@Param('taskId') taskId: string) {
-    return this.tasksService.findOne(taskId);
+  async findOne(
+    @Param('taskId') taskId: string,
+    @Headers('if-none-match') ifNoneMatch: string | undefined,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const task = await this.tasksService.findOne(taskId);
+
+    // Strong ETag: SHA-256 of sorted field:version pairs
+    const etag = await this.fieldChangesService.computeTaskEtag(taskId);
+    if (etag) {
+      const etagValue = `"${etag}"`;
+      res.setHeader('ETag', etagValue);
+
+      if (ifNoneMatch && ifNoneMatch === etagValue) {
+        res.status(304).end();
+        return;
+      }
+    }
+
+    return task;
   }
 
   @Get('project/:projectId')

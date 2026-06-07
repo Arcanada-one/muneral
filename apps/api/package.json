@@ -13,17 +13,18 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@muneral/types": "*",
-    "@nestjs/bullmq": "^10.2.3",
-    "@nestjs/common": "^10.4.15",
-    "@nestjs/core": "^10.4.15",
-    "@nestjs/jwt": "^10.2.0",
-    "@nestjs/passport": "^10.0.3",
-    "@nestjs/platform-express": "^10.4.15",
-    "@nestjs/platform-socket.io": "^10.4.15",
-    "@nestjs/throttler": "^5.2.0",
-    "@nestjs/typeorm": "^10.0.2",
-    "@nestjs/websockets": "^10.4.15",
+    "@muneral/types": "workspace:*",
+    "@nestjs/bullmq": "^11.0.4",
+    "@nestjs/common": "^11.1.24",
+    "@nestjs/core": "^11.1.24",
+    "@nestjs/jwt": "^11.0.2",
+    "@nestjs/passport": "^11.0.5",
+    "@nestjs/platform-express": "^11.1.24",
+    "@nestjs/platform-socket.io": "^11.1.24",
+    "@nestjs/throttler": "^6.5.0",
+    "@nestjs/websockets": "^11.1.24",
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
     "bcrypt": "^5.1.1",
     "bullmq": "^5.34.8",
     "class-transformer": "^0.5.1",
@@ -34,16 +35,18 @@
     "passport-github2": "^0.1.12",
     "passport-jwt": "^4.0.1",
     "pg": "^8.13.3",
+    "prisma": "^7.8.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "socket.io": "^4.8.1",
-    "typeorm": "^0.3.20",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@nestjs/cli": "^10.4.9",
-    "@nestjs/testing": "^10.4.15",
+    "@nestjs/cli": "^11.0.21",
+    "@nestjs/testing": "^11.1.24",
     "@types/bcrypt": "^5.0.2",
+    "@types/express": "^5.0.0",
+    "dotenv": "^17.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^22.14.0",
     "@types/passport-github2": "^1.2.9",
@@ -81,6 +84,9 @@
     "testEnvironment": "node",
     "moduleNameMapper": {
       "^@muneral/types$": "<rootDir>/../../packages/types/dist/index.js"
-    }
+    },
+    "setupFiles": [
+      "<rootDir>/test/setup-env.ts"
+    ]
   }
 }

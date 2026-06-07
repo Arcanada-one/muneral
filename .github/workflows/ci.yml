@@ -1,7 +1,7 @@
 # ============================================================
 # Muneral Arcana — GitHub Actions CI/CD
 # Fixed by DEVOPS-0001 (removed paid gitleaks-action, added deploy)
-# Template: CI-Runners.md §10.1 adapted (npm + Turborepo)
+# Template: CI-Runners.md §10.1 adapted (pnpm + Turborepo)
 # ============================================================
 
 name: CI & Deploy
@@ -31,18 +31,28 @@ jobs:
           - 5432:5432
     steps:
       - uses: actions/checkout@v4
+      - name: Enable corepack (pnpm@11.5.2 from packageManager field)
+        run: corepack enable
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
+          cache: pnpm
       - name: Install dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile
       - name: Build shared types
-        working-directory: packages/types
-        run: npm run build
+        run: pnpm --filter @muneral/types build
+      - name: Generate Prisma client
+        # Run from repo root so prisma.config.ts (root) resolves apps/api/prisma/schema.prisma
+        run: pnpm exec prisma generate
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/muneral_test
+      - name: Apply DB migrations
+        # Run from repo root — prisma.config.ts at root, schema at apps/api/prisma/schema.prisma
+        run: pnpm exec prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/muneral_test
       - name: Test API
-        working-directory: apps/api
-        run: npm test
+        run: pnpm --filter @muneral/api test
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/muneral_test
 
@@ -59,6 +69,12 @@ jobs:
           set -e
           cd /srv/apps/muneral
           git pull --ff-only origin main
+          # Apply schema migrations before starting the new image.
+          # prisma.config.ts lives at repo root; migrate deploy resolves the
+          # schema path and DATABASE_URL from the .env file in this directory.
+          set -o allexport && source .env && set +o allexport
+          # Run from repo root so prisma.config.ts resolves schema + DATABASE_URL
+          pnpm exec prisma migrate deploy
           docker compose -f docker-compose.prod.yml up -d --build
           sleep 10
           curl -fsS http://localhost:3500/health

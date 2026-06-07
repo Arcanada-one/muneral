@@ -1,33 +1,29 @@
+import { Prisma } from '@prisma/client';
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
 import { ActivityService } from '../src/activity/activity.service';
-import { ActivityLog } from '../src/activity/entities/activity-log.entity';
+import { PrismaService } from '../src/prisma/prisma.service';
 import { Actor } from '@muneral/types';
 
 const mockActor: Actor = { type: 'human', id: 'user-1', name: 'Pavel' };
 
-const makeRepo = () => ({
-  create: jest.fn((data) => ({ id: 'log-1', ...data })),
-  save: jest.fn((entity) => Promise.resolve(entity)),
-  createQueryBuilder: jest.fn().mockReturnValue({
-    where: jest.fn().mockReturnThis(),
-    orderBy: jest.fn().mockReturnThis(),
-    skip: jest.fn().mockReturnThis(),
-    take: jest.fn().mockReturnThis(),
-    getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
-  }),
+const makePrisma = () => ({
+  activityLog: {
+    create: jest.fn((args) => Promise.resolve({ id: 'log-1', ...args.data })),
+    findMany: jest.fn().mockResolvedValue([]),
+    count: jest.fn().mockResolvedValue(0),
+  },
 });
 
 describe('ActivityService', () => {
   let service: ActivityService;
-  let repo: ReturnType<typeof makeRepo>;
+  let prisma: ReturnType<typeof makePrisma>;
 
   beforeEach(async () => {
-    repo = makeRepo();
+    prisma = makePrisma();
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ActivityService,
-        { provide: getRepositoryToken(ActivityLog), useValue: repo },
+        { provide: PrismaService, useValue: prisma },
       ],
     }).compile();
 
@@ -44,15 +40,16 @@ describe('ActivityService', () => {
         payload: { title: 'Fix bug' },
       });
 
-      expect(repo.create).toHaveBeenCalledWith({
-        workspaceId: 'ws-1',
-        taskId: 'task-1',
-        actorType: 'human',
-        actorId: 'user-1',
-        action: 'task:created',
-        payload: { title: 'Fix bug' },
+      expect(prisma.activityLog.create).toHaveBeenCalledWith({
+        data: {
+          workspaceId: 'ws-1',
+          taskId: 'task-1',
+          actorType: 'human',
+          actorId: 'user-1',
+          action: 'task:created',
+          payload: { title: 'Fix bug' },
+        },
       });
-      expect(repo.save).toHaveBeenCalled();
       expect(result).toMatchObject({ action: 'task:created' });
     });
 
@@ -63,8 +60,10 @@ describe('ActivityService', () => {
         action: 'workspace:created',
       });
 
-      expect(repo.create).toHaveBeenCalledWith(
-        expect.objectContaining({ taskId: null }),
+      expect(prisma.activityLog.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ taskId: null }),
+        }),
       );
     });
 
@@ -75,8 +74,10 @@ describe('ActivityService', () => {
         action: 'some:action',
       });
 
-      expect(repo.create).toHaveBeenCalledWith(
-        expect.objectContaining({ payload: null }),
+      expect(prisma.activityLog.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ payload: Prisma.DbNull }),
+        }),
       );
     });
 
@@ -88,8 +89,10 @@ describe('ActivityService', () => {
         action: 'task:updated',
       });
 
-      expect(repo.create).toHaveBeenCalledWith(
-        expect.objectContaining({ actorType: 'agent', actorId: 'agent-1' }),
+      expect(prisma.activityLog.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ actorType: 'agent', actorId: 'agent-1' }),
+        }),
       );
     });
   });
@@ -97,8 +100,8 @@ describe('ActivityService', () => {
   describe('findForTask', () => {
     it('queries with task ID and returns paginated result', async () => {
       const mockLogs = [{ id: 'log-1', action: 'task:created' }];
-      const qb = repo.createQueryBuilder();
-      (qb.getManyAndCount as jest.Mock).mockResolvedValue([mockLogs, 1]);
+      prisma.activityLog.findMany.mockResolvedValue(mockLogs);
+      prisma.activityLog.count.mockResolvedValue(1);
 
       const result = await service.findForTask('task-1', 1, 20);
       expect(result).toEqual({ data: mockLogs, total: 1, page: 1, limit: 20 });
@@ -106,9 +109,9 @@ describe('ActivityService', () => {
 
     it('applies correct pagination skip/take', async () => {
       await service.findForTask('task-1', 3, 10);
-      const qb = repo.createQueryBuilder();
-      expect(qb.skip).toHaveBeenCalledWith(20); // (3-1)*10
-      expect(qb.take).toHaveBeenCalledWith(10);
+      expect(prisma.activityLog.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: 20, take: 10 }),
+      );
     });
   });
 
