@@ -1,3 +1,7 @@
+-- Required for uuid_generate_v4() on clean PostgreSQL instances (PG < 13 or
+-- without the extension pre-installed). Idempotent on DBs that already have it.
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 -- CreateTable
 CREATE TABLE "users" (
     "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
