@@ -13,6 +13,24 @@ on:
     branches: [main]
 
 jobs:
+  secrets-gate:
+    # TRANS-0029: fail-fast if OPSBOT_API_KEY is missing/empty. Without this
+    # gate a deploy failure would silently no-op the Ops Bot notify curl
+    # (empty Bearer token -> 401) and the incident would only surface when
+    # someone noticed the missing alert. Pattern per TRANS-0027 (transcribator-api).
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assert OPSBOT_API_KEY is set
+        env:
+          OPSBOT_API_KEY: ${{ secrets.OPSBOT_API_KEY }}
+        run: |
+          if [ -z "${OPSBOT_API_KEY:-}" ]; then
+            echo "::error::OPSBOT_API_KEY secret is missing or empty — alerting path to ops.arcanada.one would silently fail. Restore via OpsBot CLI (\`agent register --name muneral\`) and \`gh secret set OPSBOT_API_KEY --repo Arcanada-one/muneral\`."
+            exit 1
+          fi
+          echo "OPSBOT_API_KEY present (length=${#OPSBOT_API_KEY})."
+
   lint-and-test:
     runs-on: ubuntu-latest
     services:
@@ -57,7 +75,7 @@ jobs:
           DATABASE_URL: postgresql://test:test@localhost:5432/muneral_test
 
   deploy:
-    needs: lint-and-test
+    needs: [lint-and-test, secrets-gate]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: [self-hosted, linux, arcana-prod]
     concurrency:
@@ -86,4 +104,4 @@ jobs:
           curl -fsS -X POST https://ops.arcanada.one/events \
             -H "Authorization: Bearer ${{ secrets.OPSBOT_API_KEY }}" \
             -H "Content-Type: application/json" \
-            -d '{"category":"fatal","title":"CI Deploy Failed: ${{ github.repository }}","body":"Branch: ${{ github.ref }}, Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}","dedup_key":"ci-fail-${{ github.repository }}-${{ github.run_id }}"}'
+            -d '{"category":"fatal","agent":"muneral","title":"CI Deploy Failed: ${{ github.repository }}","body":"Branch: ${{ github.ref }}, Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}","dedup_key":"ci-fail-${{ github.repository }}-${{ github.run_id }}"}'
