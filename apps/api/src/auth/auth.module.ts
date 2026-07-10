@@ -7,6 +7,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { GithubStrategy } from './strategies/github.strategy';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { ApiKeyGuard } from './guards/api-key.guard';
+import { JwtOrApiKeyGuard } from './guards/jwt-or-api-key.guard';
 
 const optionalProviders: Provider[] = [];
 
@@ -31,7 +32,8 @@ if (process.env.GITHUB_CLIENT_ID) {
     ...optionalProviders,
     JwtAuthGuard,
     ApiKeyGuard,
+    JwtOrApiKeyGuard,
   ],
-  exports: [AuthService, JwtAuthGuard, ApiKeyGuard],
+  exports: [AuthService, JwtAuthGuard, ApiKeyGuard, JwtOrApiKeyGuard],
 })
 export class AuthModule {}

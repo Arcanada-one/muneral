@@ -17,6 +17,7 @@ import { CreateAgentDto } from './dto/create-agent.dto';
 import { AssignAgentDto } from './dto/assign-agent.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ApiKeyGuard } from '../auth/guards/api-key.guard';
+import { JwtOrApiKeyGuard } from '../auth/guards/jwt-or-api-key.guard';
 import { ActorInterceptor } from '../common/interceptors/actor.interceptor';
 import { Agent } from '@prisma/client';
 
@@ -47,8 +48,9 @@ export class AgentsController {
     return this.agentsService.getAgentTasks(req.apiKeyAgent.id);
   }
 
+  /** Called by human dashboard (JWT) or the agent itself (long-lived API key) */
   @Post('tasks/:taskId/assign')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtOrApiKeyGuard)
   assignToTask(@Param('taskId') taskId: string, @Body() dto: AssignAgentDto) {
     return this.agentsService.assignToTask(taskId, dto);
   }
