@@ -22,7 +22,7 @@ import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
 import { AddDependencyDto } from './dto/add-dependency.dto';
 import { CreateChecklistItemDto } from './dto/create-checklist-item.dto';
 import { AddCommentDto } from './dto/add-comment.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtOrApiKeyGuard } from '../auth/guards/jwt-or-api-key.guard';
 import { ActorInterceptor } from '../common/interceptors/actor.interceptor';
 import { Actor } from '@muneral/types';
 import { FieldChangesService } from './field-state/field-changes.service';
@@ -31,10 +31,13 @@ type AuthRequest = Request & { actor: Actor };
 
 /**
  * Tasks CRUD with status state machine, checklists, dependencies, comments.
- * Field-change tracking endpoints are in FieldChangesController (API-key auth).
+ * Accepts either a human JWT or an agent `mun_sk_` API key (MUN-0032 — lets
+ * long-lived automation, e.g. the Arcanada Assistant, survive past the 15m
+ * JWT TTL). Field-change tracking endpoints are in FieldChangesController
+ * (API-key only).
  */
 @Controller('tasks')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtOrApiKeyGuard)
 @UseInterceptors(ActorInterceptor)
 export class TasksController {
   constructor(
