@@ -88,6 +88,7 @@ BEGIN
             SELECT NEW.task_id
         ) AS endpoints(task_id)
         WHERE endpoints.task_id IS NOT NULL
+        ORDER BY endpoints.task_id
     LOOP
         PERFORM public.muneral_kb_touch_task(v_task_id, NULL);
     END LOOP;
@@ -112,6 +113,8 @@ BEGIN
                 UNION ALL
                 SELECT NEW.to_task_id
             ) AS endpoints(task_id)
+            WHERE endpoints.task_id IS NOT NULL
+            ORDER BY endpoints.task_id
         LOOP
             PERFORM public.muneral_kb_touch_task(v_task_id, NULL);
         END LOOP;
@@ -124,6 +127,8 @@ BEGIN
                 UNION ALL
                 SELECT OLD.to_task_id
             ) AS endpoints(task_id)
+            WHERE endpoints.task_id IS NOT NULL
+            ORDER BY endpoints.task_id
         LOOP
             PERFORM public.muneral_kb_touch_task(v_task_id, NULL);
         END LOOP;
@@ -141,6 +146,8 @@ BEGIN
             UNION ALL
             SELECT NEW.to_task_id
         ) AS endpoints(task_id)
+        WHERE endpoints.task_id IS NOT NULL
+        ORDER BY endpoints.task_id
     LOOP
         PERFORM public.muneral_kb_touch_task(v_task_id, NULL);
     END LOOP;
@@ -166,6 +173,7 @@ BEGIN
         SELECT source_task.id
         FROM public.tasks AS source_task
         WHERE source_task.project_id = NEW.id
+        ORDER BY source_task.id
     LOOP
         PERFORM public.muneral_kb_touch_task(v_task_id, NULL);
     END LOOP;

@@ -83,6 +83,15 @@ describe('Muneral KB task change registry migration', () => {
     );
   });
 
+  it('locks every multi-task trigger path in deterministic UUID order', () => {
+    expect(
+      migration.match(/ORDER BY endpoints\.task_id/g),
+    ).toHaveLength(4);
+    expect(migration).toMatch(
+      /FROM public\.tasks AS source_task[\s\S]*ORDER BY source_task\.id/,
+    );
+  });
+
   it('uses only schema-qualified static SQL in security-definer bodies', () => {
     const bodies = [...migration.matchAll(/AS \$function\$([\s\S]*?)\$function\$;/g)]
       .map((match) => match[1])
@@ -118,6 +127,8 @@ describe('Muneral KB task change registry migration', () => {
     expect(realPgHarness).toContain('trap on_exit EXIT');
     expect(realPgHarness).toContain('MUNERAL_SMOKE_TEST_FAIL_AFTER_READER');
     expect(realPgHarness).toContain('reader/database residue remains');
+    expect(realPgHarness).toContain('concurrent project/dependency sessions');
+    expect(realPgHarness).toContain('MUNERAL_KB_CONCURRENCY_PASS');
     expect(realPgHarness).not.toMatch(/password|DATABASE_URL|PGPASSWORD/i);
   });
 });

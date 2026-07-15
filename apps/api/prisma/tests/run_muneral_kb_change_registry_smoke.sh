@@ -101,6 +101,52 @@ if [[ "$(tail -n 1 <<< "$smoke_output")" != 'MUNERAL_KB_CHANGE_REGISTRY_SMOKE_PA
   exit 1
 fi
 
+remote_psql_file "$db" \
+  "$SCRIPT_DIR/muneral_kb_change_registry_concurrency_setup.sql" >/dev/null
+
+# Force concurrent project/dependency sessions across the same task rows. Both
+# trigger paths sort UUIDs, so one session may wait but neither may deadlock.
+set +e
+remote_psql_query "$db" \
+  "BEGIN;
+   SET LOCAL application_name = 'ltm-project';
+   SET LOCAL deadlock_timeout = '100ms';
+   SET LOCAL lock_timeout = '8s';
+   SET LOCAL statement_timeout = '12s';
+   UPDATE public.projects
+   SET name = 'concurrent project update'
+   WHERE id = '30000000-0000-0000-0000-000000000001'::uuid;
+   COMMIT;" >/dev/null &
+project_pid="$!"
+remote_psql_query "$db" \
+  "BEGIN;
+   SET LOCAL application_name = 'ltm-dependency';
+   SET LOCAL deadlock_timeout = '100ms';
+   SET LOCAL lock_timeout = '8s';
+   SET LOCAL statement_timeout = '12s';
+   UPDATE public.task_dependencies
+   SET from_task_id = 'a0000000-0000-0000-0000-000000000001'::uuid,
+       to_task_id = 'a0000000-0000-0000-0000-000000000002'::uuid
+   WHERE id = 'd0000000-0000-0000-0000-000000000007'::uuid;
+   COMMIT;" >/dev/null &
+dependency_pid="$!"
+wait "$project_pid"
+project_status="$?"
+wait "$dependency_pid"
+dependency_status="$?"
+set -e
+if [[ "$project_status" -ne 0 || "$dependency_status" -ne 0 ]]; then
+  echo 'concurrent project/dependency sessions did not both commit' >&2
+  exit 1
+fi
+
+concurrency_output="$(remote_psql_file "$db" \
+  "$SCRIPT_DIR/muneral_kb_change_registry_concurrency_assert.sql")"
+if [[ "$(tail -n 1 <<< "$concurrency_output")" != 'MUNERAL_KB_CONCURRENCY_PASS' ]]; then
+  echo 'concurrency smoke did not emit its success marker' >&2
+  exit 1
+fi
+
 remote_psql_query postgres "CREATE ROLE \"$reader\" NOLOGIN;" >/dev/null
 created_reader=1
 
