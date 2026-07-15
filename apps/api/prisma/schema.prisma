@@ -24,16 +24,16 @@ datasource db {
 // users
 // ---------------------------------------------------------------------------
 model User {
-  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  githubId   BigInt?   @unique @map("github_id")
-  telegramId BigInt?   @unique @map("telegram_id")
-  name       String    @db.VarChar
-  avatarUrl  String?   @map("avatar_url") @db.VarChar
-  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz()
-  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  githubId   BigInt?  @unique @map("github_id")
+  telegramId BigInt?  @unique @map("telegram_id")
+  name       String   @db.VarChar
+  avatarUrl  String?  @map("avatar_url") @db.VarChar
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz()
 
   // Relations
-  ownedWorkspaces  Workspace[]
+  ownedWorkspaces      Workspace[]
   workspaceMemberships WorkspaceMember[]
 
   @@map("users")
@@ -43,12 +43,12 @@ model User {
 // workspaces
 // ---------------------------------------------------------------------------
 model Workspace {
-  id               String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  slug             String    @unique @db.VarChar
-  name             String    @db.VarChar
-  ownerId          String    @map("owner_id") @db.Uuid
-  subscriptionTier String    @default("free") @map("subscription_tier") @db.VarChar
-  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  id               String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  slug             String   @unique @db.VarChar
+  name             String   @db.VarChar
+  ownerId          String   @map("owner_id") @db.Uuid
+  subscriptionTier String   @default("free") @map("subscription_tier") @db.VarChar
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
   // Relations
   owner          User              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
@@ -162,10 +162,10 @@ model Task {
   updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz()
 
   // Relations
-  project      Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  sprint       Sprint?         @relation(fields: [sprintId], references: [id], onDelete: SetNull)
-  parent       Task?           @relation("TaskChildren", fields: [parentId], references: [id], onDelete: SetNull)
-  children     Task[]          @relation("TaskChildren")
+  project      Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sprint       Sprint?          @relation(fields: [sprintId], references: [id], onDelete: SetNull)
+  parent       Task?            @relation("TaskChildren", fields: [parentId], references: [id], onDelete: SetNull)
+  children     Task[]           @relation("TaskChildren")
   tags         TaskTag[]
   checklists   TaskChecklist[]
   depsFrom     TaskDependency[] @relation("DepsFrom")
@@ -398,4 +398,18 @@ model AgentFieldRead {
 
   @@id([agentId, taskId, fieldName])
   @@map("agent_field_reads")
+}
+
+// ---------------------------------------------------------------------------
+// muneral_kb_task_changes — durable task graph change registry
+// ---------------------------------------------------------------------------
+// Intentionally has no FK to Task: task deletions must leave a tombstone that
+// the Muneral-to-KB synchronizer can consume after the domain row is gone.
+model MuneralKbTaskChange {
+  taskId    String   @id @map("task_id") @db.Uuid
+  revision  BigInt
+  changedAt DateTime @map("changed_at") @db.Timestamptz()
+  deleted   Boolean  @default(false)
+
+  @@map("muneral_kb_task_changes")
 }
