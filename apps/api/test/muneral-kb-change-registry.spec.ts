@@ -17,6 +17,13 @@ const rollback = readFileSync(
   'utf8',
 );
 const schema = readFileSync(join(apiRoot, 'prisma/schema.prisma'), 'utf8');
+const realPgHarness = readFileSync(
+  join(
+    apiRoot,
+    'prisma/tests/run_muneral_kb_change_registry_smoke.sh',
+  ),
+  'utf8',
+);
 
 describe('Muneral KB task change registry migration', () => {
   it('models the registry without a relation or foreign key to tasks', () => {
@@ -93,5 +100,24 @@ describe('Muneral KB task change registry migration', () => {
       'DROP TABLE IF EXISTS public.muneral_kb_task_changes;',
     );
     expect(rollback).not.toMatch(/\b(DROP|TRUNCATE|DELETE FROM) public\.(tasks|projects|task_)/);
+  });
+
+  it('commits a fail-closed least-privilege reader smoke harness', () => {
+    expect(realPgHarness).toContain('set -euo pipefail');
+    expect(realPgHarness).toContain('REVOKE TEMPORARY');
+    expect(realPgHarness).toContain('has_database_privilege');
+    expect(realPgHarness).toContain('has_schema_privilege');
+    expect(realPgHarness).toContain('has_table_privilege');
+    expect(realPgHarness).toContain('SET ROLE');
+    expect(realPgHarness).toContain('reader source DML');
+    expect(realPgHarness).toContain('reader registry DML');
+    expect(realPgHarness).toContain('reader durable schema DDL');
+    expect(realPgHarness).toContain('reader durable table DDL');
+    expect(realPgHarness).toContain('reader TEMP DDL');
+    expect(realPgHarness).toContain('permission denied');
+    expect(realPgHarness).toContain('trap on_exit EXIT');
+    expect(realPgHarness).toContain('MUNERAL_SMOKE_TEST_FAIL_AFTER_READER');
+    expect(realPgHarness).toContain('reader/database residue remains');
+    expect(realPgHarness).not.toMatch(/password|DATABASE_URL|PGPASSWORD/i);
   });
 });
