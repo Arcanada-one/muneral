@@ -1,0 +1,40 @@
+{
+  "description": "Non-empty traceFields — verify they do not affect digest",
+  "input": {
+    "schemaVersion": "v0",
+    "taskId": "task-trace",
+    "causationId": "caus-trace",
+    "correlationId": "corr-trace",
+    "tenant": "acme",
+    "principal": "user-4",
+    "purpose": "test",
+    "audience": "internal",
+    "scope": "read",
+    "rolePolicy": {
+      "policyId": "policy-trace",
+      "policyVersion": "2026-07-30T00:00:00Z",
+      "roleName": "assistant"
+    },
+    "candidateSet": {
+      "candidates": [
+        "assistant",
+        "reviewer"
+      ],
+      "sourceDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "capturedAt": "2026-07-30T00:00:00Z"
+    },
+    "deadline": "2027-06-01T00:00:00Z",
+    "traceFields": {
+      "customRequestId": "xyz-789",
+      "originatingHost": "build-agent-3",
+      "pipelineRunId": "run-42"
+    },
+    "provenance": {
+      "policyUri": "content://policy-trace",
+      "policyDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "issuedAt": "2026-07-30T00:00:00Z"
+    }
+  },
+  "expectedDigest": "9e631421c8a570561695ae3ead64d1fc9569365536403e7df6655b2eeb6a9bf7",
+  "expectedArtifactId": "9e631421c8a570561695ae3ead64d1fc9569365536403e7df6655b2eeb6a9bf7"
+}

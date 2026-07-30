@@ -1,0 +1,32 @@
+{
+  "description": "candidateSet sourceDigest is not 64 lowercase hex → INVALID_DIGEST",
+  "input": {
+    "schemaVersion": "v0",
+    "taskId": "task-dig",
+    "causationId": "c",
+    "correlationId": "c",
+    "tenant": "acme",
+    "principal": "user",
+    "purpose": "test",
+    "audience": "internal",
+    "scope": "read",
+    "rolePolicy": {
+      "policyId": "p",
+      "policyVersion": "v1",
+      "roleName": "r"
+    },
+    "candidateSet": {
+      "candidates": [
+        "a"
+      ],
+      "sourceDigest": "not-a-sha256",
+      "capturedAt": "2026-07-30T00:00:00Z"
+    },
+    "provenance": {
+      "policyUri": "u",
+      "policyDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "issuedAt": "2026-07-30T00:00:00Z"
+    }
+  },
+  "expectedErrorCode": "INVALID_DIGEST"
+}

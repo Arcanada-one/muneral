@@ -1,0 +1,34 @@
+{
+  "description": "Optional deadline omitted, attemptBudget present",
+  "input": {
+    "schemaVersion": "v0",
+    "taskId": "task-nodeadline",
+    "causationId": "caus-nd",
+    "correlationId": "corr-nd",
+    "tenant": "acme",
+    "principal": "user-5",
+    "purpose": "batch",
+    "audience": "internal",
+    "scope": "admin",
+    "rolePolicy": {
+      "policyId": "policy-admin",
+      "policyVersion": "2026-07-30T00:00:00Z",
+      "roleName": "admin"
+    },
+    "candidateSet": {
+      "candidates": [
+        "admin"
+      ],
+      "sourceDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "capturedAt": "2026-07-30T00:00:00Z"
+    },
+    "attemptBudget": 50,
+    "provenance": {
+      "policyUri": "content://policy-admin",
+      "policyDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "issuedAt": "2026-07-30T00:00:00Z"
+    }
+  },
+  "expectedDigest": "76bf4d07524d608ea614cb5b3b35e3f64068c836ac94f5881085d3ea21a9d68b",
+  "expectedArtifactId": "76bf4d07524d608ea614cb5b3b35e3f64068c836ac94f5881085d3ea21a9d68b"
+}

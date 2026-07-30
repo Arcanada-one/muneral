@@ -1,0 +1,35 @@
+{
+  "description": "Extra key \"providerConfig\" → UNKNOWN_EXECUTION_FIELD",
+  "input": {
+    "schemaVersion": "v0",
+    "taskId": "task-bad",
+    "causationId": "c",
+    "correlationId": "c",
+    "tenant": "acme",
+    "principal": "user",
+    "purpose": "test",
+    "audience": "internal",
+    "scope": "read",
+    "rolePolicy": {
+      "policyId": "p",
+      "policyVersion": "v1",
+      "roleName": "r"
+    },
+    "candidateSet": {
+      "candidates": [
+        "a"
+      ],
+      "sourceDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "capturedAt": "2026-07-30T00:00:00Z"
+    },
+    "provenance": {
+      "policyUri": "u",
+      "policyDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "issuedAt": "2026-07-30T00:00:00Z"
+    },
+    "providerConfig": {
+      "endpoint": "https://evil.com"
+    }
+  },
+  "expectedErrorCode": "UNKNOWN_EXECUTION_FIELD"
+}

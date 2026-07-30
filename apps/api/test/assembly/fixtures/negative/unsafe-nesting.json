@@ -1,0 +1,57 @@
+{
+  "description": "Deeply nested object → UNSAFE_NESTING",
+  "input": {
+    "schemaVersion": "v0",
+    "taskId": "task-nest",
+    "causationId": "c",
+    "correlationId": "c",
+    "tenant": "acme",
+    "principal": "user",
+    "purpose": "test",
+    "audience": "internal",
+    "scope": "read",
+    "rolePolicy": {
+      "policyId": "p",
+      "policyVersion": "v1",
+      "roleName": "r"
+    },
+    "candidateSet": {
+      "candidates": [
+        "a"
+      ],
+      "sourceDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "capturedAt": "2026-07-30T00:00:00Z"
+    },
+    "provenance": {
+      "policyUri": "u",
+      "policyDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "issuedAt": "2026-07-30T00:00:00Z"
+    },
+    "traceFields": {
+      "nested": {
+        "nested": {
+          "nested": {
+            "nested": {
+              "nested": {
+                "nested": {
+                  "nested": {
+                    "nested": {
+                      "nested": {
+                        "nested": {
+                          "nested": {
+                            "nested": {}
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "expectedErrorCode": "UNSAFE_NESTING"
+}

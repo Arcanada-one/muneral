@@ -1,0 +1,33 @@
+{
+  "description": "Scope is subset — narrow authority",
+  "input": {
+    "schemaVersion": "v0",
+    "taskId": "task-narrow",
+    "causationId": "caus-narrow",
+    "correlationId": "corr-narrow",
+    "tenant": "acme",
+    "principal": "user-3",
+    "purpose": "review",
+    "audience": "internal",
+    "scope": "read",
+    "rolePolicy": {
+      "policyId": "policy-narrow",
+      "policyVersion": "2026-07-30T00:00:00Z",
+      "roleName": "assistant"
+    },
+    "candidateSet": {
+      "candidates": [
+        "assistant"
+      ],
+      "sourceDigest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "capturedAt": "2026-07-30T00:00:00Z"
+    },
+    "provenance": {
+      "policyUri": "content://policy-narrow",
+      "policyDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "issuedAt": "2026-07-30T00:00:00Z"
+    }
+  },
+  "expectedDigest": "0a94ee7f6f8044012bdd2e9919c83d0424b781d453fdf9da128c76e34fdd9663",
+  "expectedArtifactId": "0a94ee7f6f8044012bdd2e9919c83d0424b781d453fdf9da128c76e34fdd9663"
+}

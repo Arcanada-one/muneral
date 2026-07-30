@@ -1,0 +1,34 @@
+{
+  "description": "Smallest valid request — all required fields, no optionals",
+  "input": {
+    "schemaVersion": "v0",
+    "taskId": "task-minimal",
+    "causationId": "caus-minimal",
+    "correlationId": "corr-minimal",
+    "tenant": "acme",
+    "principal": "user-1",
+    "purpose": "test",
+    "audience": "internal",
+    "scope": "read",
+    "rolePolicy": {
+      "policyId": "policy-sha256",
+      "policyVersion": "2026-07-30T00:00:00Z",
+      "roleName": "assistant"
+    },
+    "candidateSet": {
+      "candidates": [
+        "assistant",
+        "reviewer"
+      ],
+      "sourceDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "capturedAt": "2026-07-30T00:00:00Z"
+    },
+    "provenance": {
+      "policyUri": "content://policy-sha256",
+      "policyDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "issuedAt": "2026-07-30T00:00:00Z"
+    }
+  },
+  "expectedDigest": "cb58441840d3211ea879ff7c46df8c0a55fb28bcbc80897adeed36edb568f5ca",
+  "expectedArtifactId": "cb58441840d3211ea879ff7c46df8c0a55fb28bcbc80897adeed36edb568f5ca"
+}
