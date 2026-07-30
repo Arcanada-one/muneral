@@ -162,17 +162,20 @@ model Task {
   updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz()
 
   // Relations
-  project      Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  sprint       Sprint?          @relation(fields: [sprintId], references: [id], onDelete: SetNull)
-  parent       Task?            @relation("TaskChildren", fields: [parentId], references: [id], onDelete: SetNull)
-  children     Task[]           @relation("TaskChildren")
-  tags         TaskTag[]
-  checklists   TaskChecklist[]
-  depsFrom     TaskDependency[] @relation("DepsFrom")
-  depsTo       TaskDependency[] @relation("DepsTo")
-  agents       TaskAgent[]
-  activityLogs ActivityLog[]
-  gitRefs      TaskGitRef[]
+  project         Project                @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sprint          Sprint?                @relation(fields: [sprintId], references: [id], onDelete: SetNull)
+  parent          Task?                  @relation("TaskChildren", fields: [parentId], references: [id], onDelete: SetNull)
+  children        Task[]                 @relation("TaskChildren")
+  tags            TaskTag[]
+  checklists      TaskChecklist[]
+  depsFrom        TaskDependency[]       @relation("DepsFrom")
+  depsTo          TaskDependency[]       @relation("DepsTo")
+  agents          TaskAgent[]
+  activityLogs    ActivityLog[]
+  gitRefs         TaskGitRef[]
+  executionState  TaskExecutionState?
+  attempts        TaskExecutionAttempt[]
+  transitions     TaskExecutionTransition[]
 
   @@index([projectId], name: "idx_tasks_project_id")
   @@index([sprintId], name: "idx_tasks_sprint_id")
@@ -412,4 +415,73 @@ model MuneralKbTaskChange {
   deleted   Boolean  @default(false)
 
   @@map("muneral_kb_task_changes")
+}
+
+// ---------------------------------------------------------------------------
+// MUN-0020 execution-authority — additive models extending Task
+// ---------------------------------------------------------------------------
+// These models add execution authority without replacing Task or its current
+// status machine. They are disabled-by-default (not wired into AppModule).
+
+// One row per task — the task-scoped execution aggregate root.
+model TaskExecutionState {
+  taskId           String    @id @map("task_id") @db.Uuid
+  aggregateVersion BigInt    @map("aggregate_version")
+  currentAttemptId String?   @map("current_attempt_id") @db.Uuid
+  retryBudget      Int       @map("retry_budget")
+  retryCount       Int       @map("retry_count")
+  retryBackoffMs   BigInt    @map("retry_backoff_ms")
+  retryEligibleAt  DateTime? @map("retry_eligible_at") @db.Timestamptz()
+
+  // Relations
+  task Task @relation(fields: [taskId], references: [id], onDelete: Restrict)
+
+  @@map("task_execution_state")
+}
+
+// One row per Muneral-issued execution attempt.
+model TaskExecutionAttempt {
+  attemptId   String    @id @map("attempt_id") @db.Uuid
+  taskId      String    @map("task_id") @db.Uuid
+  ordinal     Int
+  status      String    @db.VarChar(32)
+  issuedAt    DateTime  @map("issued_at") @db.Timestamptz()
+  startedAt   DateTime? @map("started_at") @db.Timestamptz()
+  completedAt DateTime? @map("completed_at") @db.Timestamptz()
+
+  // Relations
+  task        Task                     @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  transitions TaskExecutionTransition[]
+
+  @@unique([taskId, ordinal])
+  @@unique([attemptId, taskId])
+  @@index([taskId])
+  @@map("task_execution_attempts")
+}
+
+// One immutable row per transition fact — append-only journal.
+model TaskExecutionTransition {
+  id                String   @id @db.Uuid
+  taskId            String   @map("task_id") @db.Uuid
+  attemptId         String   @map("attempt_id") @db.Uuid
+  aggregateVersion  BigInt   @map("aggregate_version")
+  eventType         String   @map("event_type") @db.VarChar(64)
+  idempotencyKey    String   @map("idempotency_key") @db.VarChar(256)
+  commandDigest     String   @map("command_digest") @db.VarChar(64)
+  transitionPayload Json     @map("transition_payload") @default("{}")
+  committedResult   Json     @map("committed_result") @default("{}")
+  evidenceRefs      Json     @map("evidence_refs") @default("[]")
+  causationId       String   @map("causation_id") @db.VarChar(256)
+  correlationId     String   @map("correlation_id") @db.VarChar(256)
+  recordedAt        DateTime @map("recorded_at") @db.Timestamptz()
+
+  // Relations
+  task    Task                @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  attempt TaskExecutionAttempt @relation(fields: [attemptId, taskId], references: [attemptId, taskId], onDelete: Restrict)
+
+  @@unique([taskId, aggregateVersion])
+  @@unique([taskId, idempotencyKey])
+  @@index([taskId])
+  @@index([attemptId])
+  @@map("task_execution_transitions")
 }
