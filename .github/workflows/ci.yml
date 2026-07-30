@@ -29,7 +29,11 @@ jobs:
             echo "::error::OPSBOT_API_KEY secret is missing or empty — alerting path to ops.arcanada.one would silently fail. Restore via OpsBot CLI (\`agent register --name muneral\`) and \`gh secret set OPSBOT_API_KEY --repo Arcanada-one/muneral\`."
             exit 1
           fi
-          echo "OPSBOT_API_KEY present (length=${#OPSBOT_API_KEY})."
+          if [[ ! "${OPSBOT_API_KEY}" =~ ^opsbot_[A-Za-z0-9_-]{43}$ ]]; then
+            echo "::error::OPSBOT_API_KEY is present but does not match the canonical agent-key contract. Rotate it through the OpsBot CLI and restore the GitHub secret."
+            exit 1
+          fi
+          echo "OPSBOT_API_KEY presence and format checks passed."
 
   lint-and-test:
     runs-on: [self-hosted, linux, ci-general]
@@ -48,19 +52,23 @@ jobs:
         ports:
           - 5432:5432
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+      - name: Test runner Docker/Compose preflight contract
+        run: bash scripts/ci/runner-docker-preflight.test.sh
       - name: Enable corepack (pnpm@11.5.2 from packageManager field)
         run: |
           COREPACK_HOME="${RUNNER_TEMP}/corepack-bin"
           mkdir -p "${COREPACK_HOME}"
           corepack enable --install-directory "${COREPACK_HOME}"
           echo "${COREPACK_HOME}" >> "${GITHUB_PATH}"
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
         with:
           node-version: 22
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
       - name: Build shared types
         run: pnpm --filter @muneral/types build
       - name: Generate Prisma client
@@ -68,13 +76,15 @@ jobs:
         run: pnpm exec prisma generate
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/muneral_test
+      - name: Build
+        run: pnpm build
       - name: Apply DB migrations
         # Run from repo root — prisma.config.ts at root, schema at apps/api/prisma/schema.prisma
         run: pnpm exec prisma migrate deploy
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/muneral_test
-      - name: Test API
-        run: pnpm --filter @muneral/api test
+      - name: Test
+        run: pnpm test
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/muneral_test
 
@@ -91,12 +101,21 @@ jobs:
     concurrency:
       group: deploy-muneral
       cancel-in-progress: false
+    env:
+      VAULT_ADDR: ${{ vars.VAULT_ADDR }}
     steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+
+      - name: Verify runner Docker/Compose capability
+        env:
+          RUNNER_PREFLIGHT_COMPOSE_FILE: /srv/apps/muneral/docker-compose.prod.yml
+          RUNNER_PREFLIGHT_EXPECTED_PLUGIN: /usr/libexec/docker/cli-plugins/docker-compose
+          RUNNER_PREFLIGHT_VAULT_ADDR: ${{ env.VAULT_ADDR }}
+        run: bash scripts/ci/runner-docker-preflight.sh
+
       - name: Pre-deploy host readiness
         id: preflight
-        uses: Arcanada-one/datarim/.github/actions/preflight-check@f01ab2034ee99321fe627b76e98641b672e12c0b # v1, immutable pin
-        env:
-          VAULT_ADDR: ${{ vars.VAULT_ADDR }}
+        uses: Arcanada-one/datarim/.github/actions/preflight-check@f01ab2034ee99321fe627b76e98641b672e12c0b  # v1, immutable pin
         with:
           target-host: arcana-prod
           service-name: muneral
