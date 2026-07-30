@@ -95,6 +95,8 @@ jobs:
       - name: Pre-deploy host readiness
         id: preflight
         uses: Arcanada-one/datarim/.github/actions/preflight-check@f01ab2034ee99321fe627b76e98641b672e12c0b # v1, immutable pin
+        env:
+          VAULT_ADDR: ${{ vars.VAULT_ADDR }}
         with:
           target-host: arcana-prod
           service-name: muneral
