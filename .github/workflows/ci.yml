@@ -50,7 +50,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Enable corepack (pnpm@11.5.2 from packageManager field)
-        run: corepack enable
+        run: sudo corepack enable
       - uses: actions/setup-node@v4
         with:
           node-version: 22
