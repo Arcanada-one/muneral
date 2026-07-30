@@ -278,7 +278,7 @@ export interface ReconciliationSnapshot {
 // ---------------------------------------------------------------------------
 
 /**
- * Forbidden top-level keys in an outbox event payload. The presence of any
+ * Forbidden keys at any depth in an outbox event payload. The presence of any
  * of these keys signals a wrong-plane payload (fleet registry, lifecycle,
  * placement, update, watchdog, telemetry, or direct command routing).
  * This is a structural check only — no Supervisor domain model is imported.
@@ -325,20 +325,54 @@ export const FORBIDDEN_PAYLOAD_KEYS: readonly string[] = [
 
 /**
  * Validate that an event payload does not contain forbidden fleet/supervisor
- * keys. Returns a string error message on violation, null on pass.
+ * keys at any depth. Returns a string error message on violation, null on
+ * pass. The traversal is bounded and fails closed on cyclic or over-deep
+ * structures, which are invalid JSON payloads in any case.
  *
- * This is a structural guard that does NOT import or depend on a Supervisor
- * domain model. It checks only top-level JSON keys.
+ * This structural guard does NOT import or depend on a Supervisor domain
+ * model.
  */
 export function validatePayloadPlane(
   payload: Record<string, unknown>,
 ): string | null {
-  for (const key of Object.keys(payload)) {
-    if ((FORBIDDEN_PAYLOAD_KEYS as readonly string[]).includes(key)) {
-      return `wrong-plane payload rejected: forbidden key "${key}" — Muneral outbox transports task facts only; fleet/supervisor content belongs in the separate Supervisor project`;
+  const forbidden = new Set(FORBIDDEN_PAYLOAD_KEYS);
+  const seen = new WeakSet<object>();
+  let visitedNodes = 0;
+
+  const visit = (
+    value: unknown,
+    path: string,
+    depth: number,
+  ): string | null => {
+    if (value === null || typeof value !== 'object') return null;
+    if (depth > 16) {
+      return `wrong-plane payload rejected: structure exceeds the bounded validation depth at "${path}"`;
     }
-  }
-  return null;
+    if (seen.has(value)) {
+      return `wrong-plane payload rejected: cyclic structure at "${path}"`;
+    }
+    seen.add(value);
+    visitedNodes += 1;
+    if (visitedNodes > 256) {
+      return 'wrong-plane payload rejected: structure exceeds the bounded validation size';
+    }
+
+    for (const key of Object.keys(value)) {
+      const childPath = `${path}.${key}`;
+      if (forbidden.has(key)) {
+        return `wrong-plane payload rejected: forbidden key "${key}" at "${childPath}" — Muneral outbox transports task facts only; fleet/supervisor content belongs in the separate Supervisor project`;
+      }
+      const nested = visit(
+        (value as Record<string, unknown>)[key],
+        childPath,
+        depth + 1,
+      );
+      if (nested) return nested;
+    }
+    return null;
+  };
+
+  return visit(payload, '$', 0);
 }
 
 // ---------------------------------------------------------------------------

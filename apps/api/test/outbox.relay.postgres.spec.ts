@@ -657,6 +657,7 @@ describe('Outbox relay — PostgreSQL integration', () => {
 
     const after1 = await prisma.outboxLease.findUnique({ where: { outboxEventId } });
     expect(after1.failureCount).toBe(1);
+    expect(after1.lastErrorCode).toBe('Error');
 
     // Expire the lease for re-acquisition: set both acquired_at and expires_at
     // to past times so the CHECK constraint (expires_at > acquired_at) holds
@@ -678,6 +679,7 @@ describe('Outbox relay — PostgreSQL integration', () => {
 
     const after2 = await prisma.outboxLease.findUnique({ where: { outboxEventId } });
     expect(after2.failureCount).toBe(2);
+    expect(after2.lastErrorCode).toBe('Error');
 
     // Expire again
     const pastAcquired2 = new Date(Date.now() - 120_000);
@@ -698,6 +700,7 @@ describe('Outbox relay — PostgreSQL integration', () => {
     const after3 = await prisma.outboxLease.findUnique({ where: { outboxEventId } });
     expect(after3.failureCount).toBe(3);
     expect(after3.deliveryStatus).toBe('quarantined');
+    expect(after3.lastErrorCode).toBe('Error');
 
     // Quarantine evidence row exists
     const qRow = await prisma.quarantineEvidence.findUnique({

@@ -5,7 +5,10 @@
 
 import { OutboxRelay } from '../src/outbox/outbox.relay';
 import type { TransactionalClient } from '../src/outbox/outbox.relay';
-import { normaliseConfig } from '../src/outbox/outbox.types';
+import {
+  normaliseConfig,
+  validatePayloadPlane,
+} from '../src/outbox/outbox.types';
 import { WrongPlanePayloadError } from '../src/outbox/outbox.errors';
 import type {
   OutboxEvent,
@@ -402,6 +405,23 @@ describe('OutboxRelay', () => {
   // -- dispatch: wrong-plane rejection ---------------------------------------
 
   describe('dispatch — wrong-plane payload rejection', () => {
+    it('rejects nested Supervisor keys in objects and arrays', () => {
+      expect(
+        validatePayloadPlane({
+          committedResult: {
+            metadata: [{ host_id: 'wrong-plane-host' }],
+          },
+        }),
+      ).toContain('forbidden key "host_id"');
+    });
+
+    it('fails closed on cyclic non-JSON structures', () => {
+      const cyclic: Record<string, unknown> = {};
+      cyclic.self = cyclic;
+
+      expect(validatePayloadPlane(cyclic)).toContain('cyclic structure');
+    });
+
     it('rejects payload with forbidden fleet key (host_id) before consumer invocation', async () => {
       const event = makeOutboxEvent({
         eventPayload: {
@@ -588,6 +608,62 @@ describe('OutboxRelay', () => {
       );
 
       expect(disposition).toBe('expired');
+      expect(consumer.consume).not.toHaveBeenCalled();
+    });
+
+    it('returns expired when only the lease holder mismatches', async () => {
+      const event = makeOutboxEvent();
+      const leaseRow = makeLeaseRow({
+        deliveryStatus: 'leased',
+        leaseHolder: 'other-holder',
+        deliveryOrdinal: 1,
+        leaseExpiresAt: FIXED_NOW_PLUS_30S,
+      });
+      const tx = makeTx({
+        outboxLease: {
+          findUnique: jest.fn().mockResolvedValue(leaseRow),
+        },
+      });
+      const dispatchRelay = new OutboxRelay(
+        makePrisma(tx), clock, idSource, config,
+      );
+      const consumer = makeConsumer();
+      const fencedEvent = {
+        ...event,
+        _fence: { leaseHolder: 'holder-1', deliveryOrdinal: 1 } as LeaseFence,
+      } as OutboxEvent & { _fence: LeaseFence };
+
+      await expect(
+        dispatchRelay.dispatch(fencedEvent as unknown as OutboxEvent, consumer),
+      ).resolves.toBe('expired');
+      expect(consumer.consume).not.toHaveBeenCalled();
+    });
+
+    it('returns expired when only the delivery ordinal mismatches', async () => {
+      const event = makeOutboxEvent();
+      const leaseRow = makeLeaseRow({
+        deliveryStatus: 'leased',
+        leaseHolder: 'holder-1',
+        deliveryOrdinal: 2,
+        leaseExpiresAt: FIXED_NOW_PLUS_30S,
+      });
+      const tx = makeTx({
+        outboxLease: {
+          findUnique: jest.fn().mockResolvedValue(leaseRow),
+        },
+      });
+      const dispatchRelay = new OutboxRelay(
+        makePrisma(tx), clock, idSource, config,
+      );
+      const consumer = makeConsumer();
+      const fencedEvent = {
+        ...event,
+        _fence: { leaseHolder: 'holder-1', deliveryOrdinal: 1 } as LeaseFence,
+      } as OutboxEvent & { _fence: LeaseFence };
+
+      await expect(
+        dispatchRelay.dispatch(fencedEvent as unknown as OutboxEvent, consumer),
+      ).resolves.toBe('expired');
       expect(consumer.consume).not.toHaveBeenCalled();
     });
 
@@ -841,12 +917,48 @@ describe('OutboxRelay', () => {
           }),
           data: expect.objectContaining({
             failureCount: { increment: 1 },
+            lastErrorCode: 'Error',
           }),
         }),
       );
       // Delivery attempt was recorded
       expect(tx.deliveryAttemptEvidence.create).toHaveBeenCalled();
       // NOT quarantined (failure count < maxRetries)
+      expect(tx.quarantineEvidence.create).not.toHaveBeenCalled();
+    });
+
+    it('records no evidence when the holder loses its fence during consumer failure', async () => {
+      const event = makeOutboxEvent();
+      const leaseRow = makeLeaseRow({
+        deliveryStatus: 'leased',
+        leaseHolder: 'holder-1',
+        deliveryOrdinal: 1,
+        leaseExpiresAt: FIXED_NOW_PLUS_30S,
+      });
+      const tx = makeTx({
+        outboxLease: {
+          findUnique: jest.fn().mockResolvedValue(leaseRow),
+          updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+        },
+      });
+      const dispatchRelay = new OutboxRelay(
+        makePrisma(tx), clock, idSource, config,
+      );
+      const failingConsumer = makeConsumer({
+        consume: jest.fn().mockRejectedValue(new Error('late failure')),
+      });
+      const fencedEvent = {
+        ...event,
+        _fence: { leaseHolder: 'holder-1', deliveryOrdinal: 1 } as LeaseFence,
+      } as OutboxEvent & { _fence: LeaseFence };
+
+      await expect(
+        dispatchRelay.dispatch(
+          fencedEvent as unknown as OutboxEvent,
+          failingConsumer,
+        ),
+      ).resolves.toBe('expired');
+      expect(tx.deliveryAttemptEvidence.create).not.toHaveBeenCalled();
       expect(tx.quarantineEvidence.create).not.toHaveBeenCalled();
     });
 

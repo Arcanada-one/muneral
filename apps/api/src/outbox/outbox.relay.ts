@@ -280,8 +280,13 @@ export class OutboxRelay {
           err instanceof Error ? err.message : String(err);
 
         const updatedLease = await this.bumpFailureCountFenced(
-          tx, event.id, fence,
+          tx, event.id, errorCode, fence,
         );
+        if (!updatedLease) {
+          // The holder/ordinal fence was lost while the consumer ran. A stale
+          // worker must not append evidence or mutate the reclaimed lease.
+          return 'expired' as DeliveryDisposition;
+        }
         const failureCount = updatedLease?.failureCount ?? 0;
         const currentOrdinal = updatedLease?.deliveryOrdinal ?? (fence?.deliveryOrdinal ?? 0);
 
@@ -505,6 +510,7 @@ export class OutboxRelay {
   private async bumpFailureCountFenced(
     tx: PrismaTx,
     outboxEventId: string,
+    errorCode: string,
     fence?: LeaseFence,
   ): Promise<{ failureCount: number; deliveryOrdinal: number; leaseHolder: string | null } | null> {
     const where: Record<string, unknown> = { outboxEventId };
@@ -513,12 +519,17 @@ export class OutboxRelay {
       where.deliveryOrdinal = fence.deliveryOrdinal;
     }
     // Increment failure_count atomically
-    await (tx as any).outboxLease.updateMany({
+    const updated = await (tx as any).outboxLease.updateMany({
       where,
-      data: { failureCount: { increment: 1 } },
+      data: {
+        failureCount: { increment: 1 },
+        lastErrorCode: errorCode,
+      },
     });
+    if ((updated?.count ?? 0) !== 1) return null;
+
     // Re-read for the new values
-    const row = await (tx as any).outboxLease.findUnique({ where: { outboxEventId } });
+    const row = await (tx as any).outboxLease.findUnique({ where });
     if (!row) return null;
     return {
       failureCount: row.failureCount ?? row.failure_count ?? 0,
