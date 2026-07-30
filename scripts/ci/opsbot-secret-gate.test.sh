@@ -40,6 +40,18 @@ expect_failure invalid_character \
 expect_failure embedded_whitespace \
   env OPSBOT_API_KEY="${valid_key%?} " "${subject}"
 
+if ! grep -F -q -- '::error::opsbot-secret-gate:' \
+  "${fixture_dir}/missing_key.out"; then
+  printf 'FAIL: missing key did not emit a GitHub Actions error annotation\n' >&2
+  exit 1
+fi
+
+if ! grep -F -q -- 'approved Ops Bot agent-registration and GitHub secret workflow' \
+  "${fixture_dir}/missing_key.out"; then
+  printf 'FAIL: missing key did not emit recovery guidance\n' >&2
+  exit 1
+fi
+
 if grep -R -F -q -- "${valid_key}" "${fixture_dir}"; then
   printf 'FAIL: secret value was disclosed in captured output\n' >&2
   exit 1

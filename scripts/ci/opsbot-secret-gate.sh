@@ -2,7 +2,7 @@
 set -euo pipefail
 
 fail() {
-  printf 'opsbot-secret-gate: ERROR: %s\n' "$1" >&2
+  printf '::error::opsbot-secret-gate: %s Restore or rotate it through the approved Ops Bot agent-registration and GitHub secret workflow.\n' "$1" >&2
   exit 1
 }
 
