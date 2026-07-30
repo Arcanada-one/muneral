@@ -19,7 +19,7 @@ jobs:
     # (empty Bearer token -> 401) and the incident would only surface when
     # someone noticed the missing alert. Pattern per TRANS-0027 (transcribator-api).
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, ci-general]
     steps:
       - name: Assert OPSBOT_API_KEY is set
         env:
@@ -32,7 +32,7 @@ jobs:
           echo "OPSBOT_API_KEY present (length=${#OPSBOT_API_KEY})."
 
   lint-and-test:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, ci-general]
     services:
       postgres:
         image: postgres:16
@@ -50,7 +50,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Enable corepack (pnpm@11.5.2 from packageManager field)
-        run: corepack enable
+        run: |
+          COREPACK_HOME="${RUNNER_TEMP}/corepack-bin"
+          mkdir -p "${COREPACK_HOME}"
+          corepack enable --install-directory "${COREPACK_HOME}"
+          echo "${COREPACK_HOME}" >> "${GITHUB_PATH}"
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -75,9 +79,10 @@ jobs:
           DATABASE_URL: postgresql://test:test@localhost:5432/muneral_test
 
   network-exposure:
-    uses: Arcanada-one/datarim/.github/workflows/network-exposure-lint.yml@main
+    uses: Arcanada-one/datarim/.github/workflows/network-exposure-lint.yml@57afdfcd6a2d71aa8e0b577de6e43846e93b60dd
     with:
       compose_paths: docker-compose.prod.yml
+      datarim_ref: '57afdfcd6a2d71aa8e0b577de6e43846e93b60dd'
 
   deploy:
     needs: [lint-and-test, secrets-gate, network-exposure]
