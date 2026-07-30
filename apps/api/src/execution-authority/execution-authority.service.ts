@@ -32,6 +32,8 @@ import type {
   TransitionAttemptCommand,
 } from './execution-authority.types';
 import { EVENT_TO_ATTEMPT_STATUS } from './execution-authority.types';
+import { deriveOutboxEventType } from '../outbox/outbox.types';
+import type { OutboxEvent } from '../outbox/outbox.types';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -41,6 +43,9 @@ export interface ExecutionResult {
   committedResult: Record<string, unknown>;
   transition: TaskExecutionTransition;
   state: TaskExecutionState;
+  /** Populated when the transition produced a terminal outcome (succeeded,
+   *  failed, or cancelled) and an outbox event was atomically committed. */
+  outboxEvent?: OutboxEvent;
 }
 
 /**
@@ -358,10 +363,77 @@ export class ExecutionAuthorityService {
         ),
       });
 
+    // ---- MUN-0021: Derive and atomically insert outbox event ----
+    let outboxEvent: OutboxEvent | undefined;
+
+    if (command.kind === 'transition_attempt') {
+      const derivedType = deriveOutboxEventType(
+        command.eventType,
+        result.nextState.retryCount,
+        result.nextState.retryBudget,
+      );
+
+      if (derivedType !== null) {
+        const outboxId = this.idSource.generate();
+        const outboxPayload = {
+          schema: 'muneral-outbox-v1' as const,
+          transitionEventType: command.eventType,
+          committedResult: result.transition.committedResult,
+          idempotencyKey: command.idempotencyKey,
+          aggregateVersion: result.nextState.aggregateVersion,
+          attemptId: command.attemptId,
+          attemptOrdinal: (
+            currentAttempt?.ordinal ??
+            (result.attempt?.ordinal ?? 1)
+          ),
+          retryCount: result.nextState.retryCount,
+          retryBudget: result.nextState.retryBudget,
+        };
+
+        await tx.taskOutboxEvent.create({
+          data: {
+            id: outboxId,
+            taskId: command.taskId,
+            aggregateVersion: BigInt(result.nextState.aggregateVersion),
+            attemptId: command.attemptId,
+            transitionId,
+            eventType: derivedType,
+            eventPayload: outboxPayload,
+            recordedAt: now,
+          },
+        });
+
+        await tx.outboxLease.create({
+          data: {
+            outboxEventId: outboxId,
+            leaseHolder: null,
+            leaseAcquiredAt: null,
+            leaseExpiresAt: null,
+            deliveryStatus: 'pending',
+            deliveryOrdinal: 0,
+            failureCount: 0,
+            lastErrorCode: null,
+          },
+        });
+
+        outboxEvent = {
+          id: outboxId,
+          taskId: command.taskId,
+          aggregateVersion: result.nextState.aggregateVersion,
+          attemptId: command.attemptId,
+          transitionId,
+          eventType: derivedType,
+          eventPayload: outboxPayload,
+          recordedAt: now,
+        };
+      }
+    }
+
     return {
       committedResult: result.transition.committedResult,
       transition: this.unmarshalTransition(createdTransition),
       state: result.nextState,
+      outboxEvent,
     };
   }
 

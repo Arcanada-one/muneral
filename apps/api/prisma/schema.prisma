@@ -176,6 +176,7 @@ model Task {
   executionState  TaskExecutionState?
   attempts        TaskExecutionAttempt[]
   transitions     TaskExecutionTransition[]
+  outboxEvents    TaskOutboxEvent[]
 
   @@index([projectId], name: "idx_tasks_project_id")
   @@index([sprintId], name: "idx_tasks_sprint_id")
@@ -452,6 +453,7 @@ model TaskExecutionAttempt {
   // Relations
   task        Task                     @relation(fields: [taskId], references: [id], onDelete: Restrict)
   transitions TaskExecutionTransition[]
+  outboxEvents TaskOutboxEvent[]
 
   @@unique([taskId, ordinal])
   @@unique([attemptId, taskId])
@@ -478,10 +480,122 @@ model TaskExecutionTransition {
   // Relations
   task    Task                @relation(fields: [taskId], references: [id], onDelete: Restrict)
   attempt TaskExecutionAttempt @relation(fields: [attemptId, taskId], references: [attemptId, taskId], onDelete: Restrict)
+  outboxEvent TaskOutboxEvent?
 
   @@unique([taskId, aggregateVersion])
   @@unique([taskId, idempotencyKey])
   @@index([taskId])
   @@index([attemptId])
   @@map("task_execution_transitions")
+}
+
+// ---------------------------------------------------------------------------
+// MUN-0021 outbox-relay — additive models extending MUN-0020 execution authority
+// ---------------------------------------------------------------------------
+// Typed outbox events atomically committed with authority transitions.
+// Mutable lease bookkeeping, append-only delivery-attempt and quarantine
+// evidence, and durable consumer inbox/deduplication.
+// Disabled-by-default (not wired into AppModule).
+
+// One row per committed authority transition — server-derived from the
+// transition and aggregate state. Callers cannot choose routing or payload.
+// Immutable after insert — append-only trigger enforced via migration SQL.
+model TaskOutboxEvent {
+  id               String   @id @db.Uuid
+  taskId           String   @map("task_id") @db.Uuid
+  aggregateVersion BigInt   @map("aggregate_version")
+  attemptId        String   @map("attempt_id") @db.Uuid
+  transitionId     String   @unique @map("transition_id") @db.Uuid
+  eventType        String   @map("event_type") @db.VarChar(64)
+  eventPayload     Json     @map("event_payload") @default("{}")
+  recordedAt       DateTime @map("recorded_at") @db.Timestamptz()
+
+  // Relations
+  task       Task                    @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  attempt    TaskExecutionAttempt    @relation(fields: [attemptId, taskId], references: [attemptId, taskId], onDelete: Restrict)
+  transition TaskExecutionTransition @relation(fields: [transitionId], references: [id], onDelete: Restrict)
+  lease      OutboxLease?
+  deliveryAttempts DeliveryAttemptEvidence[]
+  quarantines      QuarantineEvidence[]
+  inboxEntries     ConsumerInbox[]
+
+  @@unique([taskId, transitionId])
+  @@index([taskId])
+  @@index([attemptId])
+  @@index([recordedAt])
+  @@map("task_outbox_events")
+}
+
+// Mutable delivery bookkeeping — one row per outbox event.
+// This is the ONLY table whose rows are updated during normal operation.
+// Lease acquisition is a single-writer atomic UPDATE with RETURNING.
+// Fenced: every mutation must match lease_holder + delivery_ordinal so a
+// stale worker cannot commit a status change after the lease was reclaimed.
+model OutboxLease {
+  outboxEventId  String    @id @map("outbox_event_id") @db.Uuid
+  leaseHolder    String?   @map("lease_holder") @db.VarChar(128)
+  leaseAcquiredAt DateTime? @map("lease_acquired_at") @db.Timestamptz()
+  leaseExpiresAt DateTime? @map("lease_expires_at") @db.Timestamptz()
+  deliveryStatus String    @map("delivery_status") @default("pending") @db.VarChar(32)
+  deliveryOrdinal Int      @map("delivery_ordinal") @default(0)
+  failureCount   Int       @map("failure_count") @default(0)
+  lastErrorCode  String?   @map("last_error_code") @db.VarChar(64)
+
+  // Relations
+  outboxEvent TaskOutboxEvent @relation(fields: [outboxEventId], references: [id], onDelete: Restrict)
+
+  @@map("outbox_leases")
+}
+
+// Append-only record of each dispatch attempt.
+// UPDATE and DELETE rejected by database trigger.
+model DeliveryAttemptEvidence {
+  id             String    @id @db.Uuid
+  outboxEventId  String    @map("outbox_event_id") @db.Uuid
+  deliveryOrdinal Int      @map("delivery_ordinal")
+  disposition    String    @db.VarChar(32)
+  consumerDigest String?   @map("consumer_digest") @db.VarChar(64)
+  errorDetail    Json?     @map("error_detail")
+  attemptedAt    DateTime  @map("attempted_at") @db.Timestamptz()
+
+  // Relations
+  outboxEvent TaskOutboxEvent @relation(fields: [outboxEventId], references: [id], onDelete: Restrict)
+
+  @@index([outboxEventId])
+  @@map("delivery_attempt_evidence")
+}
+
+// Append-only poison record — one row per quarantined event.
+// UPDATE and DELETE rejected by database trigger.
+model QuarantineEvidence {
+  id             String   @id @db.Uuid
+  outboxEventId  String   @map("outbox_event_id") @db.Uuid
+  deliveryOrdinal Int     @map("delivery_ordinal")
+  failureCount   Int      @map("failure_count")
+  lastErrorCode  String?  @map("last_error_code") @db.VarChar(64)
+  lastErrorDetail Json?   @map("last_error_detail")
+  quarantinedAt  DateTime @map("quarantined_at") @db.Timestamptz()
+
+  // Relations
+  outboxEvent TaskOutboxEvent @relation(fields: [outboxEventId], references: [id], onDelete: Restrict)
+
+  @@unique([outboxEventId])
+  @@map("quarantine_evidence")
+}
+
+// Durable deduplication boundary per consumer.
+// Append-only — UPDATE/DELETE rejected by database trigger. Application
+// code has no mutation path after insert.
+model ConsumerInbox {
+  consumerId       String   @map("consumer_id") @db.VarChar(128)
+  outboxEventId    String   @map("outbox_event_id") @db.Uuid
+  consumedAt       DateTime @map("consumed_at") @db.Timestamptz()
+  sideEffectDigest String   @map("side_effect_digest") @db.VarChar(64)
+
+  // Relations
+  outboxEvent TaskOutboxEvent @relation(fields: [outboxEventId], references: [id], onDelete: Restrict)
+
+  @@unique([consumerId, outboxEventId])
+  @@id([consumerId, outboxEventId])
+  @@map("consumer_inbox")
 }

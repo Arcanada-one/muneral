@@ -54,6 +54,14 @@ function makeTx(overrides: Record<string, any> = {}): any {
     },
     taskExecutionTransition: {
       findFirst: jest.fn().mockResolvedValue(null),
+      findMany: jest.fn().mockResolvedValue([]),
+      create: jest.fn().mockResolvedValue({}),
+    },
+    // MUN-0021: Outbox tables added to execution-authority transaction
+    taskOutboxEvent: {
+      create: jest.fn().mockResolvedValue({}),
+    },
+    outboxLease: {
       create: jest.fn().mockResolvedValue({}),
     },
     ...overrides,
