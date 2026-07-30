@@ -23,6 +23,25 @@ describe('validateEvidenceRef', () => {
     ).toBeNull();
   });
 
+  it('rejects unknown fields with a typed validation error', () => {
+    const err = validateEvidenceRef({
+      ...validRef,
+      extra: 'not part of EvidenceRef',
+    });
+    expect(err?.code).toBe('INVALID_EVIDENCE_REF');
+    expect(err?.reason).toContain('unknown field');
+    expect(err?.reason).toContain('extra');
+  });
+
+  it('rejects a pathological payload hidden in an unknown field', () => {
+    const err = validateEvidenceRef({
+      ...validRef,
+      extra: 'x'.repeat(1_000_000),
+    });
+    expect(err?.code).toBe('INVALID_EVIDENCE_REF');
+    expect(err?.reason).toContain('extra');
+  });
+
   // -- null/non-object safety --
 
   it('rejects null input', () => {

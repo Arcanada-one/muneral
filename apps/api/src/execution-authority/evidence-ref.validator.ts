@@ -7,6 +7,7 @@ const HEX64_RE = /^[0-9a-f]{64}$/i;
 const URI_MAX = 512;
 const LABEL_MAX = 128;
 const MAX_REFS = 64;
+const ALLOWED_FIELDS = new Set(['uri', 'digest', 'contentType', 'label']);
 
 // Tight bounded set — not arbitrary MIME types
 const ALLOWED_CONTENT_TYPES = new Set([
@@ -46,6 +47,15 @@ export function validateEvidenceRef(
   }
 
   const r = ref as EvidenceRef;
+  const unknownFields = Object.keys(ref).filter(
+    (field) => !ALLOWED_FIELDS.has(field),
+  );
+  if (unknownFields.length > 0) {
+    return new EvidenceRefValidationError(
+      r,
+      `unknown field${unknownFields.length === 1 ? '' : 's'}: ${unknownFields.join(', ')}`,
+    );
+  }
 
   if (typeof r.uri !== 'string' || r.uri.length === 0) {
     return new EvidenceRefValidationError(r, 'uri must be a non-empty string');
