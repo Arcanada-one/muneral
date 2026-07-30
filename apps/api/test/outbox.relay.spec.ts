@@ -1044,6 +1044,28 @@ describe('OutboxRelay', () => {
         polled: 0, leased: 0, delivered: 0, quarantined: 0, skipped: 0,
       });
     });
+
+    it('counts a durably rejected wrong-plane event as quarantined', async () => {
+      const event = makeOutboxEvent();
+      const tx = makeTx();
+      const prisma = makePrisma(tx);
+      const cycleRelay = new OutboxRelay(prisma, clock, idSource, config);
+      await cycleRelay.resume();
+
+      jest.spyOn(cycleRelay, 'poll').mockResolvedValue([event]);
+      jest.spyOn(cycleRelay, 'lease').mockResolvedValue([event]);
+      jest.spyOn(cycleRelay, 'dispatch').mockRejectedValue(
+        new WrongPlanePayloadError(event.id, 'host_id'),
+      );
+
+      await expect(cycleRelay.cycle(makeConsumer())).resolves.toEqual({
+        polled: 1,
+        leased: 1,
+        delivered: 0,
+        quarantined: 1,
+        skipped: 0,
+      });
+    });
   });
 
   // -- stop & resume ---------------------------------------------------------
@@ -1430,7 +1452,7 @@ describe('OutboxRelay', () => {
     });
 
     it('failure_count is NOT reset on lease acquisition (preserved across cycles)', async () => {
-      // The pre-fix lease() sets failure_count = 0 on every acquisition.
+      // A resetting lease implementation would erase the accumulated count.
       // This test verifies the fix: failure_count is left untouched.
       const events = [makeOutboxEvent()];
       const tx = makeTx({

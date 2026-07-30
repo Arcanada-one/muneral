@@ -344,9 +344,14 @@ export class OutboxRelay {
         if (disposition === 'delivered') delivered++;
         else if (disposition === 'quarantined') quarantined++;
         else skipped++;
-      } catch {
-        // dispatch threw (consumer failure, not quarantined yet)
-        skipped++;
+      } catch (err) {
+        if (err instanceof WrongPlanePayloadError) {
+          // Wrong-plane dispatch records durable quarantine evidence before
+          // throwing, so the cycle result must expose it as quarantined.
+          quarantined++;
+        } else {
+          skipped++;
+        }
       }
     }
 
