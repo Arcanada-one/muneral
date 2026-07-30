@@ -3,11 +3,19 @@
 
 import type { EvidenceRef } from './execution-authority.types';
 
-const HEX64_RE = /^[0-9a-f]{64}$/i;
 const URI_MAX = 512;
 const LABEL_MAX = 128;
 const MAX_REFS = 64;
-const ALLOWED_FIELDS = new Set(['uri', 'digest', 'contentType', 'label']);
+const REQUIRED_FIELDS = ['uri', 'digest', 'contentType'] as const;
+const OPTIONAL_FIELDS = ['label'] as const;
+const ALLOWED_FIELDS = new Set<string>([
+  ...REQUIRED_FIELDS,
+  ...OPTIONAL_FIELDS,
+]);
+const PLAIN_OBJECT_REASON = 'evidence reference must be a plain object';
+const UNKNOWN_FIELDS_REASON = 'evidence reference contains unknown fields';
+const DATA_PROPERTIES_REASON =
+  'evidence reference fields must be own enumerable data properties';
 
 // Tight bounded set — not arbitrary MIME types
 const ALLOWED_CONTENT_TYPES = new Set([
@@ -41,21 +49,77 @@ export function validateEvidenceRef(
 ): EvidenceRefValidationError | null {
   if (ref === null || ref === undefined || typeof ref !== 'object') {
     return new EvidenceRefValidationError(
-      { uri: '', digest: '', contentType: '' },
+      createSentinelRef(),
       'evidence reference must be a non-null object',
     );
   }
 
-  const r = ref as EvidenceRef;
-  const unknownFields = Object.keys(ref).filter(
-    (field) => !ALLOWED_FIELDS.has(field),
-  );
-  if (unknownFields.length > 0) {
+  let ownPropertyNames: string[];
+  try {
+    const prototype = Object.getPrototypeOf(ref);
+    if (prototype !== Object.prototype && prototype !== null) {
+      return new EvidenceRefValidationError(
+        createSentinelRef(),
+        PLAIN_OBJECT_REASON,
+      );
+    }
+
+    ownPropertyNames = Object.getOwnPropertyNames(ref);
+    if (
+      Object.getOwnPropertySymbols(ref).length > 0 ||
+      ownPropertyNames.some((field) => !ALLOWED_FIELDS.has(field))
+    ) {
+      return new EvidenceRefValidationError(
+        createSentinelRef(),
+        UNKNOWN_FIELDS_REASON,
+      );
+    }
+  } catch {
     return new EvidenceRefValidationError(
-      r,
-      `unknown field${unknownFields.length === 1 ? '' : 's'}: ${unknownFields.join(', ')}`,
+      createSentinelRef(),
+      PLAIN_OBJECT_REASON,
     );
   }
+
+  const descriptors = new Map<string, PropertyDescriptor>();
+  try {
+    for (const field of REQUIRED_FIELDS) {
+      const descriptor = Object.getOwnPropertyDescriptor(ref, field);
+      if (!isOwnEnumerableDataProperty(descriptor)) {
+        return new EvidenceRefValidationError(
+          createSentinelRef(),
+          DATA_PROPERTIES_REASON,
+        );
+      }
+      descriptors.set(field, descriptor);
+    }
+
+    for (const field of OPTIONAL_FIELDS) {
+      if (!ownPropertyNames.includes(field)) continue;
+      const descriptor = Object.getOwnPropertyDescriptor(ref, field);
+      if (!isOwnEnumerableDataProperty(descriptor)) {
+        return new EvidenceRefValidationError(
+          createSentinelRef(),
+          DATA_PROPERTIES_REASON,
+        );
+      }
+      descriptors.set(field, descriptor);
+    }
+  } catch {
+    return new EvidenceRefValidationError(
+      createSentinelRef(),
+      DATA_PROPERTIES_REASON,
+    );
+  }
+
+  const r = {
+    uri: descriptors.get('uri')!.value,
+    digest: descriptors.get('digest')!.value,
+    contentType: descriptors.get('contentType')!.value,
+    ...(descriptors.has('label')
+      ? { label: descriptors.get('label')!.value }
+      : {}),
+  } as EvidenceRef;
 
   if (typeof r.uri !== 'string' || r.uri.length === 0) {
     return new EvidenceRefValidationError(r, 'uri must be a non-empty string');
@@ -182,4 +246,14 @@ export function validateEvidenceRefs(
 
 function createSentinelRef(): EvidenceRef {
   return { uri: '', digest: '', contentType: '' };
+}
+
+function isOwnEnumerableDataProperty(
+  descriptor: PropertyDescriptor | undefined,
+): descriptor is PropertyDescriptor & { value: unknown } {
+  return (
+    descriptor !== undefined &&
+    descriptor.enumerable === true &&
+    Object.prototype.hasOwnProperty.call(descriptor, 'value')
+  );
 }

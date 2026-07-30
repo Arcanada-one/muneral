@@ -23,14 +23,19 @@ describe('validateEvidenceRef', () => {
     ).toBeNull();
   });
 
+  it('accepts an ordinary null-prototype record', () => {
+    const ref = Object.assign(Object.create(null), validRef);
+    expect(validateEvidenceRef(ref)).toBeNull();
+  });
+
   it('rejects unknown fields with a typed validation error', () => {
     const err = validateEvidenceRef({
       ...validRef,
       extra: 'not part of EvidenceRef',
     });
     expect(err?.code).toBe('INVALID_EVIDENCE_REF');
-    expect(err?.reason).toContain('unknown field');
-    expect(err?.reason).toContain('extra');
+    expect(err?.reason).toBe('evidence reference contains unknown fields');
+    expect(err?.reason).not.toContain('extra');
   });
 
   it('rejects a pathological payload hidden in an unknown field', () => {
@@ -39,7 +44,140 @@ describe('validateEvidenceRef', () => {
       extra: 'x'.repeat(1_000_000),
     });
     expect(err?.code).toBe('INVALID_EVIDENCE_REF');
-    expect(err?.reason).toContain('extra');
+    expect(err?.reason).toBe('evidence reference contains unknown fields');
+    expect(err?.reason).not.toContain('x'.repeat(100));
+  });
+
+  it('keeps diagnostics bounded for a pathological unknown field name', () => {
+    const attackerKey = 'x'.repeat(100_000);
+    const err = validateEvidenceRef({
+      ...validRef,
+      [attackerKey]: true,
+    });
+
+    expect(err?.code).toBe('INVALID_EVIDENCE_REF');
+    expect(err?.reason).toBe('evidence reference contains unknown fields');
+    expect(err!.reason.length).toBeLessThanOrEqual(128);
+    expect(err!.message.length).toBeLessThanOrEqual(192);
+    expect(err!.message).not.toContain(attackerKey.slice(0, 100));
+  });
+
+  it('rejects a non-enumerable required field', () => {
+    const ref = {
+      digest: validRef.digest,
+      contentType: validRef.contentType,
+    };
+    Object.defineProperty(ref, 'uri', {
+      value: validRef.uri,
+      enumerable: false,
+      configurable: true,
+    });
+
+    const err = validateEvidenceRef(ref);
+    expect(err?.code).toBe('INVALID_EVIDENCE_REF');
+    expect(err?.reason).toBe(
+      'evidence reference fields must be own enumerable data properties',
+    );
+  });
+
+  it('rejects a non-enumerable optional field', () => {
+    const ref = { ...validRef };
+    Object.defineProperty(ref, 'label', {
+      value: 'hidden label',
+      enumerable: false,
+      configurable: true,
+    });
+
+    const err = validateEvidenceRef(ref);
+    expect(err?.code).toBe('INVALID_EVIDENCE_REF');
+    expect(err?.reason).toBe(
+      'evidence reference fields must be own enumerable data properties',
+    );
+  });
+
+  it('rejects an accessor without invoking it', () => {
+    let getterHits = 0;
+    const ref = {
+      digest: validRef.digest,
+      contentType: validRef.contentType,
+      get uri() {
+        getterHits += 1;
+        return validRef.uri;
+      },
+    };
+
+    const err = validateEvidenceRef(ref);
+    expect(err?.code).toBe('INVALID_EVIDENCE_REF');
+    expect(err?.reason).toBe(
+      'evidence reference fields must be own enumerable data properties',
+    );
+    expect(getterHits).toBe(0);
+  });
+
+  it('rejects class instances', () => {
+    class EvidenceFixture {
+      uri = validRef.uri;
+      digest = validRef.digest;
+      contentType = validRef.contentType;
+    }
+
+    const err = validateEvidenceRef(new EvidenceFixture());
+    expect(err?.code).toBe('INVALID_EVIDENCE_REF');
+    expect(err?.reason).toBe('evidence reference must be a plain object');
+  });
+
+  it('rejects inherited required fields under Object.prototype pollution', () => {
+    const fieldNames = ['uri', 'digest', 'contentType'] as const;
+    const previous = new Map(
+      fieldNames.map((field) => [
+        field,
+        Object.getOwnPropertyDescriptor(Object.prototype, field),
+      ]),
+    );
+
+    try {
+      Object.defineProperties(Object.prototype, {
+        uri: {
+          value: validRef.uri,
+          enumerable: true,
+          configurable: true,
+        },
+        digest: {
+          value: validRef.digest,
+          enumerable: true,
+          configurable: true,
+        },
+        contentType: {
+          value: validRef.contentType,
+          enumerable: true,
+          configurable: true,
+        },
+      });
+
+      const err = validateEvidenceRef({});
+      expect(err?.code).toBe('INVALID_EVIDENCE_REF');
+      expect(err?.reason).toBe(
+        'evidence reference fields must be own enumerable data properties',
+      );
+    } finally {
+      for (const field of fieldNames) {
+        const descriptor = previous.get(field);
+        if (descriptor) {
+          Object.defineProperty(Object.prototype, field, descriptor);
+        } else {
+          delete (Object.prototype as Record<string, unknown>)[field];
+        }
+      }
+    }
+  });
+
+  it('rejects symbol-keyed fields', () => {
+    const err = validateEvidenceRef({
+      ...validRef,
+      [Symbol('extra')]: true,
+    });
+    expect(err?.code).toBe('INVALID_EVIDENCE_REF');
+    expect(err?.reason).toBe('evidence reference contains unknown fields');
   });
 
   // -- null/non-object safety --

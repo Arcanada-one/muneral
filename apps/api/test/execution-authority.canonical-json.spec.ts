@@ -133,6 +133,36 @@ describe('commandDigest', () => {
     const cmd2 = { ...cmd1, kind: 'issue_retry_attempt' as const };
     expect(commandDigest(cmd1)).not.toBe(commandDigest(cmd2));
   });
+
+  it('preserves evidence bytes and digest across a JSON wire round-trip', () => {
+    const command: IssueInitialAttemptCommand = {
+      kind: 'issue_initial_attempt',
+      taskId: '00000000-0000-0000-0000-000000000001',
+      expectedVersion: 0,
+      idempotencyKey: 'key-with-evidence',
+      causationId: 'cause-with-evidence',
+      correlationId: 'corr-with-evidence',
+      retryBudget: 3,
+      retryBackoffMs: 1_000,
+      evidenceRefs: [
+        {
+          uri: 'tasks/task-1/evidence/log.txt',
+          digest:
+            'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+          contentType: 'text/plain',
+          label: 'Execution log',
+        },
+      ],
+    };
+
+    const wireCommand = JSON.parse(JSON.stringify(command));
+
+    expect(wireCommand.evidenceRefs).toEqual(command.evidenceRefs);
+    expect(wireCommand.evidenceRefs[0].uri).toBe(
+      'tasks/task-1/evidence/log.txt',
+    );
+    expect(commandDigest(wireCommand)).toBe(commandDigest(command));
+  });
 });
 
 describe('jsonDigest', () => {

@@ -17,6 +17,7 @@ import {
   IdempotencyCollisionError,
 } from '../src/execution-authority/execution-authority.errors';
 import { commandDigest } from '../src/execution-authority/canonical-json';
+import { EvidenceRefValidationError } from '../src/execution-authority/evidence-ref.validator';
 
 // ---------------------------------------------------------------------------
 // Test fixtures
@@ -72,6 +73,17 @@ function makePrisma(tx: ReturnType<typeof makeTx>): TransactionalClient {
         async (fn: (t: unknown) => Promise<unknown>) => fn(tx),
       ),
   };
+}
+
+function expectNoAuthorityStoreAccess(tx: ReturnType<typeof makeTx>): void {
+  expect(tx.taskExecutionState.findUnique).not.toHaveBeenCalled();
+  expect(tx.taskExecutionState.create).not.toHaveBeenCalled();
+  expect(tx.taskExecutionState.updateMany).not.toHaveBeenCalled();
+  expect(tx.taskExecutionAttempt.findUnique).not.toHaveBeenCalled();
+  expect(tx.taskExecutionAttempt.create).not.toHaveBeenCalled();
+  expect(tx.taskExecutionAttempt.update).not.toHaveBeenCalled();
+  expect(tx.taskExecutionTransition.findFirst).not.toHaveBeenCalled();
+  expect(tx.taskExecutionTransition.create).not.toHaveBeenCalled();
 }
 
 // ---------------------------------------------------------------------------
@@ -369,6 +381,168 @@ describe('ExecutionAuthorityService', () => {
   // -- pre-mutation validations ----------------------------------------------
 
   describe('pre-mutation validations (safe returns)', () => {
+    async function executeWithEvidenceRef(
+      ref: unknown,
+      idempotencyKey: string,
+    ): Promise<{
+      result: Awaited<ReturnType<ExecutionAuthorityService['executeCommand']>>;
+      tx: ReturnType<typeof makeTx>;
+    }> {
+      const tx = makeTx();
+      const prisma = makePrisma(tx);
+      const result = await service.executeCommand(prisma, {
+        kind: 'issue_initial_attempt',
+        taskId: 'task-structural-validation',
+        expectedVersion: 0,
+        idempotencyKey,
+        causationId: 'cause-structural-validation',
+        correlationId: 'corr-structural-validation',
+        retryBudget: 3,
+        retryBackoffMs: 1_000,
+        evidenceRefs: [ref] as never[],
+      });
+      return { result, tx };
+    }
+
+    function expectStructuralRejection(
+      result: Awaited<ReturnType<ExecutionAuthorityService['executeCommand']>>,
+      tx: ReturnType<typeof makeTx>,
+    ): EvidenceRefValidationError {
+      expect(result).toBeInstanceOf(EvidenceRefValidationError);
+      const err = result as EvidenceRefValidationError;
+      expect(err.reason.length).toBeLessThanOrEqual(128);
+      expect(err.message.length).toBeLessThanOrEqual(192);
+      expectNoAuthorityStoreAccess(tx);
+      return err;
+    }
+
+    it('rejects a non-enumerable uri before digesting or store access', async () => {
+      const ref = {
+        digest: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        contentType: 'text/plain',
+      };
+      Object.defineProperty(ref, 'uri', {
+        value: 'tasks/task-1/evidence/log.txt',
+        enumerable: false,
+        configurable: true,
+      });
+
+      const { result, tx } = await executeWithEvidenceRef(
+        ref,
+        'idem-hidden-uri',
+      );
+      const err = expectStructuralRejection(result, tx);
+      expect(err.reason).toBe(
+        'evidence reference fields must be own enumerable data properties',
+      );
+    });
+
+    it('rejects an accessor before invoking it or accessing the store', async () => {
+      let getterHits = 0;
+      const ref = {
+        digest: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        contentType: 'text/plain',
+        get uri() {
+          getterHits += 1;
+          return 'tasks/task-1/evidence/log.txt';
+        },
+      };
+
+      const { result, tx } = await executeWithEvidenceRef(
+        ref,
+        'idem-accessor-uri',
+      );
+      const err = expectStructuralRejection(result, tx);
+      expect(err.reason).toBe(
+        'evidence reference fields must be own enumerable data properties',
+      );
+      expect(getterHits).toBe(0);
+    });
+
+    it('rejects a class instance before canonical digesting or store access', async () => {
+      class EvidenceFixture {
+        uri = 'tasks/task-1/evidence/log.txt';
+        digest =
+          'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+        contentType = 'text/plain';
+      }
+
+      const { result, tx } = await executeWithEvidenceRef(
+        new EvidenceFixture(),
+        'idem-class-instance',
+      );
+      const err = expectStructuralRejection(result, tx);
+      expect(err.reason).toBe('evidence reference must be a plain object');
+    });
+
+    it('rejects inherited fields under Object.prototype pollution', async () => {
+      const fieldNames = ['uri', 'digest', 'contentType'] as const;
+      const previous = new Map(
+        fieldNames.map((field) => [
+          field,
+          Object.getOwnPropertyDescriptor(Object.prototype, field),
+        ]),
+      );
+
+      try {
+        Object.defineProperties(Object.prototype, {
+          uri: {
+            value: 'tasks/task-1/evidence/log.txt',
+            enumerable: true,
+            configurable: true,
+          },
+          digest: {
+            value:
+              'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            enumerable: true,
+            configurable: true,
+          },
+          contentType: {
+            value: 'text/plain',
+            enumerable: true,
+            configurable: true,
+          },
+        });
+
+        const { result, tx } = await executeWithEvidenceRef(
+          {},
+          'idem-prototype-pollution',
+        );
+        const err = expectStructuralRejection(result, tx);
+        expect(err.reason).toBe(
+          'evidence reference fields must be own enumerable data properties',
+        );
+      } finally {
+        for (const field of fieldNames) {
+          const descriptor = previous.get(field);
+          if (descriptor) {
+            Object.defineProperty(Object.prototype, field, descriptor);
+          } else {
+            delete (Object.prototype as Record<string, unknown>)[field];
+          }
+        }
+      }
+    });
+
+    it('bounds diagnostics for an attacker-sized unknown key', async () => {
+      const attackerKey = 'x'.repeat(100_000);
+      const ref = {
+        uri: 'tasks/task-1/evidence/log.txt',
+        digest:
+          'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        contentType: 'text/plain',
+        [attackerKey]: true,
+      };
+
+      const { result, tx } = await executeWithEvidenceRef(
+        ref,
+        'idem-long-unknown-key',
+      );
+      const err = expectStructuralRejection(result, tx);
+      expect(err.reason).toBe('evidence reference contains unknown fields');
+      expect(err.message).not.toContain(attackerKey.slice(0, 100));
+    });
+
     it('NEGATIVE-CONTROL: updateMany WHERE clause includes aggregateVersion', async () => {
       const tx = makeTx({
         taskExecutionState: {

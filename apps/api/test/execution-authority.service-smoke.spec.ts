@@ -9,6 +9,8 @@ import {
   RetryBudgetExhaustedError, RetryBackoffError,
 } from '../src/execution-authority/execution-authority.errors';
 import { replayJournal, decisionHash } from '../src/execution-authority/execution-authority.replay';
+import { commandDigest } from '../src/execution-authority/canonical-json';
+import { EvidenceRefValidationError } from '../src/execution-authority/evidence-ref.validator';
 
 // Separate task IDs for test isolation
 const TID = 'a0000000-0000-0000-0000-000000000002';
@@ -48,6 +50,42 @@ async function snapCounts(p: any, tid: string) {
   };
 }
 
+async function seedTask(p: any, tid: string, title: string): Promise<void> {
+  await p.$executeRawUnsafe(
+    `INSERT INTO public.tasks (id, project_id, title, status, priority, updated_at)
+     VALUES ($1::uuid, '20000000-0000-0000-0000-000000000001', $2, 'todo', 'medium', now())
+     ON CONFLICT DO NOTHING`,
+    tid,
+    title,
+  );
+}
+
+function initialCommandWithEvidence(
+  taskId: string,
+  idempotencyKey: string,
+  ref: unknown,
+) {
+  return {
+    kind: 'issue_initial_attempt' as const,
+    taskId,
+    expectedVersion: 0,
+    idempotencyKey,
+    causationId: 'cause-structural-validation',
+    correlationId: 'corr-structural-validation',
+    retryBudget: 3,
+    retryBackoffMs: 100,
+    evidenceRefs: [ref] as never[],
+  };
+}
+
+function expectEvidenceValidationError(result: unknown): EvidenceRefValidationError {
+  expect(result).toBeInstanceOf(EvidenceRefValidationError);
+  const err = result as EvidenceRefValidationError;
+  expect(err.reason.length).toBeLessThanOrEqual(128);
+  expect(err.message.length).toBeLessThanOrEqual(192);
+  return err;
+}
+
 describeIf('ExecutionAuthorityService — disposable PostgreSQL', () => {
   let prisma: any;
   let svc: ExecutionAuthorityService;
@@ -57,6 +95,202 @@ describeIf('ExecutionAuthorityService — disposable PostgreSQL', () => {
     svc = new ExecutionAuthorityService(clk, idSrc);
   });
   afterAll(async () => { await prisma.$disconnect(); });
+
+  // =====================================================================
+  // EvidenceRef structural boundary — every rejection must leave no rows
+  // =====================================================================
+
+  it('0a: non-enumerable uri is rejected with no database residue', async () => {
+    const taskId = 'a0000000-0000-0000-0000-000000000020';
+    await seedTask(prisma, taskId, 'Hidden URI validation');
+    const before = await snapCounts(prisma, taskId);
+    const ref = {
+      digest: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      contentType: 'text/plain',
+    };
+    Object.defineProperty(ref, 'uri', {
+      value: 'tasks/task-20/evidence/log.txt',
+      enumerable: false,
+      configurable: true,
+    });
+
+    const result = await svc.executeCommand(
+      prisma,
+      initialCommandWithEvidence(taskId, 'struct-hidden-uri', ref),
+    );
+
+    const err = expectEvidenceValidationError(result);
+    expect(err.reason).toBe(
+      'evidence reference fields must be own enumerable data properties',
+    );
+    expect(await snapCounts(prisma, taskId)).toEqual(before);
+  });
+
+  it('0b: uri accessor is rejected without invocation or database residue', async () => {
+    const taskId = 'a0000000-0000-0000-0000-000000000021';
+    await seedTask(prisma, taskId, 'Accessor URI validation');
+    const before = await snapCounts(prisma, taskId);
+    let getterHits = 0;
+    const ref = {
+      digest: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      contentType: 'text/plain',
+      get uri() {
+        getterHits += 1;
+        return 'tasks/task-21/evidence/log.txt';
+      },
+    };
+
+    const result = await svc.executeCommand(
+      prisma,
+      initialCommandWithEvidence(taskId, 'struct-accessor-uri', ref),
+    );
+
+    const err = expectEvidenceValidationError(result);
+    expect(err.reason).toBe(
+      'evidence reference fields must be own enumerable data properties',
+    );
+    expect(getterHits).toBe(0);
+    expect(await snapCounts(prisma, taskId)).toEqual(before);
+  });
+
+  it('0c: class instance is rejected before canonicalization with no residue', async () => {
+    const taskId = 'a0000000-0000-0000-0000-000000000022';
+    await seedTask(prisma, taskId, 'Class instance validation');
+    const before = await snapCounts(prisma, taskId);
+
+    class EvidenceFixture {
+      uri = 'tasks/task-22/evidence/log.txt';
+      digest =
+        'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+      contentType = 'text/plain';
+    }
+
+    const result = await svc.executeCommand(
+      prisma,
+      initialCommandWithEvidence(
+        taskId,
+        'struct-class-instance',
+        new EvidenceFixture(),
+      ),
+    );
+
+    const err = expectEvidenceValidationError(result);
+    expect(err.reason).toBe('evidence reference must be a plain object');
+    expect(await snapCounts(prisma, taskId)).toEqual(before);
+  });
+
+  it('0d: Object.prototype evidence pollution is rejected with no residue', async () => {
+    const taskId = 'a0000000-0000-0000-0000-000000000023';
+    await seedTask(prisma, taskId, 'Prototype pollution validation');
+    const before = await snapCounts(prisma, taskId);
+    const fieldNames = ['uri', 'digest', 'contentType'] as const;
+    const previous = new Map(
+      fieldNames.map((field) => [
+        field,
+        Object.getOwnPropertyDescriptor(Object.prototype, field),
+      ]),
+    );
+    let result: unknown;
+
+    try {
+      Object.defineProperties(Object.prototype, {
+        uri: {
+          value: 'tasks/task-23/evidence/log.txt',
+          enumerable: true,
+          configurable: true,
+        },
+        digest: {
+          value:
+            'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+          enumerable: true,
+          configurable: true,
+        },
+        contentType: {
+          value: 'text/plain',
+          enumerable: true,
+          configurable: true,
+        },
+      });
+      result = await svc.executeCommand(
+        prisma,
+        initialCommandWithEvidence(taskId, 'struct-prototype-pollution', {}),
+      );
+    } finally {
+      for (const field of fieldNames) {
+        const descriptor = previous.get(field);
+        if (descriptor) {
+          Object.defineProperty(Object.prototype, field, descriptor);
+        } else {
+          delete (Object.prototype as Record<string, unknown>)[field];
+        }
+      }
+    }
+
+    const err = expectEvidenceValidationError(result);
+    expect(err.reason).toBe(
+      'evidence reference fields must be own enumerable data properties',
+    );
+    expect(await snapCounts(prisma, taskId)).toEqual(before);
+  });
+
+  it('0e: attacker-sized unknown key has bounded diagnostics and no residue', async () => {
+    const taskId = 'a0000000-0000-0000-0000-000000000024';
+    await seedTask(prisma, taskId, 'Bounded diagnostic validation');
+    const before = await snapCounts(prisma, taskId);
+    const attackerKey = 'x'.repeat(100_000);
+    const ref = {
+      uri: 'tasks/task-24/evidence/log.txt',
+      digest: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      contentType: 'text/plain',
+      [attackerKey]: true,
+    };
+
+    const result = await svc.executeCommand(
+      prisma,
+      initialCommandWithEvidence(taskId, 'struct-long-key', ref),
+    );
+
+    const err = expectEvidenceValidationError(result);
+    expect(err.reason).toBe('evidence reference contains unknown fields');
+    expect(err.message).not.toContain(attackerKey.slice(0, 100));
+    expect(await snapCounts(prisma, taskId)).toEqual(before);
+  });
+
+  it('0f: JSON-wire evidence persists completely with the canonical digest', async () => {
+    const taskId = 'a0000000-0000-0000-0000-000000000025';
+    await seedTask(prisma, taskId, 'JSON wire evidence');
+    const command = initialCommandWithEvidence(
+      taskId,
+      'struct-json-wire',
+      {
+        uri: 'tasks/task-25/evidence/log.txt',
+        digest:
+          'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        contentType: 'text/plain',
+        label: 'Execution log',
+      },
+    );
+    const wireCommand = JSON.parse(JSON.stringify(command));
+    const expectedDigest = commandDigest(command);
+
+    expect(commandDigest(wireCommand)).toBe(expectedDigest);
+    must(await svc.executeCommand(prisma, wireCommand));
+
+    const stored = await prisma.taskExecutionTransition.findFirst({
+      where: {
+        taskId,
+        idempotencyKey: 'struct-json-wire',
+      },
+    });
+    expect(stored).not.toBeNull();
+    expect(stored.commandDigest).toBe(expectedDigest);
+    expect(stored.evidenceRefs).toEqual(command.evidenceRefs);
+    expect(await snapCounts(prisma, taskId)).toEqual({
+      state: 1,
+      attempts: 1,
+      transitions: 1,
+    });
+  });
 
   // =====================================================================
   // Positive path

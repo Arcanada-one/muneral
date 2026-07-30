@@ -185,8 +185,8 @@ for i in $(seq 1 10); do
   sleep 1
 done
 service_output="$(cd "$PRISMA_DIR/.." && MUN0020_DB_URL="$pg_url" npx jest --testPathPattern='execution-authority.service-smoke' --no-coverage --forceExit 2>&1)"
-if ! grep -qE 'Tests:\s+15 passed,\s+15 total' <<< "$service_output"; then
-  echo 'service-path integration smoke: expected exactly 15 passed, 15 total' >&2
+if ! grep -qE 'Tests:\s+21 passed,\s+21 total' <<< "$service_output"; then
+  echo 'service-path integration smoke: expected exactly 21 passed, 21 total' >&2
   echo "--- service output ---" >&2
   echo "$service_output" >&2
   exit 1
