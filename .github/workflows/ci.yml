@@ -21,19 +21,11 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: [self-hosted, linux, ci-general]
     steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
       - name: Assert OPSBOT_API_KEY is set
         env:
           OPSBOT_API_KEY: ${{ secrets.OPSBOT_API_KEY }}
-        run: |
-          if [ -z "${OPSBOT_API_KEY:-}" ]; then
-            echo "::error::OPSBOT_API_KEY secret is missing or empty — alerting path to ops.arcanada.one would silently fail. Restore via OpsBot CLI (\`agent register --name muneral\`) and \`gh secret set OPSBOT_API_KEY --repo Arcanada-one/muneral\`."
-            exit 1
-          fi
-          if [[ ! "${OPSBOT_API_KEY}" =~ ^opsbot_[A-Za-z0-9_-]{43}$ ]]; then
-            echo "::error::OPSBOT_API_KEY is present but does not match the canonical agent-key contract. Rotate it through the OpsBot CLI and restore the GitHub secret."
-            exit 1
-          fi
-          echo "OPSBOT_API_KEY presence and format checks passed."
+        run: bash scripts/ci/opsbot-secret-gate.sh
 
   lint-and-test:
     runs-on: [self-hosted, linux, ci-general]
@@ -53,6 +45,8 @@ jobs:
           - 5432:5432
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+      - name: Test Ops Bot secret gate contract
+        run: bash scripts/ci/opsbot-secret-gate.test.sh
       - name: Test runner Docker/Compose preflight contract
         run: bash scripts/ci/runner-docker-preflight.test.sh
       - name: Enable corepack (pnpm@11.5.2 from packageManager field)

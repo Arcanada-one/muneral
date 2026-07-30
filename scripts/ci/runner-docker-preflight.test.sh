@@ -88,6 +88,8 @@ expect_failure malformed_vault_address \
   run_subject RUNNER_PREFLIGHT_VAULT_ADDR=vault.internal:8200
 expect_failure credentialed_vault_address \
   run_subject RUNNER_PREFLIGHT_VAULT_ADDR=http://user:password@vault.internal:8200
+expect_failure whitespace_vault_address \
+  run_subject "RUNNER_PREFLIGHT_VAULT_ADDR=http://vault internal:8200"
 expect_success configured_vault_address \
   run_subject RUNNER_PREFLIGHT_VAULT_ADDR=http://vault.internal:8200
 
