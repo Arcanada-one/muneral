@@ -600,4 +600,206 @@ describe('Outbox relay — PostgreSQL integration', () => {
     expect(DATABASE_URL).not.toContain('rds.amazonaws.com');
     expect(DATABASE_URL).not.toContain('supabase');
   });
+
+  // -- F1: failure_count accumulation across lease cycles (real DB) -----------
+
+  it('F1: failure_count accumulates across lease cycles and reaches quarantine (real DB)', async () => {
+    const { OutboxRelay } = require('../src/outbox/outbox.relay');
+    const { normaliseConfig, validatePayloadPlane } = require('../src/outbox/outbox.types');
+
+    await seedTask();
+    const { outboxEventId } = await seedOutboxEvent('task:completed', {
+      deliveryStatus: 'pending',
+      failureCount: 0,
+      deliveryOrdinal: 0,
+    });
+
+    const config = normaliseConfig({
+      relayId: `f1-relay-${randomUUID().slice(0, 8)}`,
+      leaseTtlMs: 60_000,
+      maxRetries: 3,
+      batchSize: 10,
+    });
+
+    const clock = { now: () => new Date() };
+    const idSource = { generate: () => randomUUID() };
+
+    const relay = new OutboxRelay(prisma, clock, idSource, config);
+    await relay.resume();
+
+    // Helper: get a fenced event by polling and leasing
+    async function pollAndLeaseOne(): Promise<any> {
+      const events = await relay.poll();
+      if (events.length === 0) return null;
+      const leased = await relay.lease(events);
+      return leased.length > 0 ? leased[0] : null;
+    }
+
+    // Create a failing consumer that always throws
+    const failingConsumer = {
+      consumerId: 'f1-failing-consumer',
+      consume: jest.fn().mockRejectedValue(new Error('simulated side-effect failure')),
+    };
+
+    // Helper: acquire a lease on our specific event by polling then filtering
+    async function leaseOurEvent(): Promise<any> {
+      const events = await relay.poll();
+      const ours = events.find((e: any) => e.id === outboxEventId);
+      if (!ours) return null;
+      const leased = await relay.lease([ours]);
+      return leased.length > 0 ? leased[0] : null;
+    }
+
+    // ---- F1 test body ----
+    // Cycle 1: failure_count 0 → 1
+    const evt1 = await leaseOurEvent();
+    expect(evt1).not.toBeNull();
+    const disp1 = await relay.dispatch(evt1 as any, failingConsumer);
+    expect(disp1).toBe('expired');
+
+    const after1 = await prisma.outboxLease.findUnique({ where: { outboxEventId } });
+    expect(after1.failureCount).toBe(1);
+
+    // Expire the lease for re-acquisition: set both acquired_at and expires_at
+    // to past times so the CHECK constraint (expires_at > acquired_at) holds
+    // but the lease appears expired to poll().
+    const pastAcquired = new Date(Date.now() - 120_000);
+    const pastExpires = new Date(Date.now() - 60_000);
+    await prisma.$executeRawUnsafe(
+      `UPDATE outbox_leases
+       SET lease_acquired_at = $1, lease_expires_at = $2
+       WHERE outbox_event_id = $3`,
+      pastAcquired, pastExpires, outboxEventId,
+    );
+
+    // Cycle 2: re-acquire lease (failure_count preserved at 1) → 2
+    const evt2 = await leaseOurEvent();
+    expect(evt2).not.toBeNull();
+    const disp2 = await relay.dispatch(evt2 as any, failingConsumer);
+    expect(disp2).toBe('expired');
+
+    const after2 = await prisma.outboxLease.findUnique({ where: { outboxEventId } });
+    expect(after2.failureCount).toBe(2);
+
+    // Expire again
+    const pastAcquired2 = new Date(Date.now() - 120_000);
+    const pastExpires2 = new Date(Date.now() - 60_000);
+    await prisma.$executeRawUnsafe(
+      `UPDATE outbox_leases
+       SET lease_acquired_at = $1, lease_expires_at = $2
+       WHERE outbox_event_id = $3`,
+      pastAcquired2, pastExpires2, outboxEventId,
+    );
+
+    // Cycle 3: re-acquire lease (failure_count preserved at 2) → 3 → quarantine
+    const evt3 = await leaseOurEvent();
+    expect(evt3).not.toBeNull();
+    const disp3 = await relay.dispatch(evt3 as any, failingConsumer);
+    expect(disp3).toBe('quarantined');
+
+    const after3 = await prisma.outboxLease.findUnique({ where: { outboxEventId } });
+    expect(after3.failureCount).toBe(3);
+    expect(after3.deliveryStatus).toBe('quarantined');
+
+    // Quarantine evidence row exists
+    const qRow = await prisma.quarantineEvidence.findUnique({
+      where: { outboxEventId },
+    });
+    expect(qRow).not.toBeNull();
+    expect(qRow.failureCount).toBe(3);
+
+    // Delivery attempt evidence rows exist (3 failed attempts)
+    const attemptRows = await prisma.deliveryAttemptEvidence.findMany({
+      where: { outboxEventId },
+    });
+    expect(attemptRows.length).toBeGreaterThanOrEqual(3);
+
+    // Event is not re-polled after quarantine (status is 'quarantined')
+    const afterQuarantineEvents = await relay.poll();
+    const rePolled = afterQuarantineEvents.filter((e: any) => e.id === outboxEventId);
+    expect(rePolled).toHaveLength(0);
+  }, 30_000);
+
+  // -- F2: wrong-plane quarantine durability (real DB) -------------------------
+
+  it('F2: wrong-plane quarantine evidence persists and event is not re-polled (real DB)', async () => {
+    const { OutboxRelay } = require('../src/outbox/outbox.relay');
+    const { normaliseConfig } = require('../src/outbox/outbox.types');
+    const { WrongPlanePayloadError } = require('../src/outbox/outbox.errors');
+
+    await seedTask();
+
+    // Create an event with a wrong-plane payload (contains forbidden key)
+    const { outboxEventId } = await seedOutboxEvent('task:completed', {
+      deliveryStatus: 'pending',
+      failureCount: 0,
+      deliveryOrdinal: 0,
+      eventPayload: {
+        schema: 'muneral-outbox-v1',
+        transitionEventType: 'attempt:succeeded',
+        committedResult: { status: 'done' },
+        idempotencyKey: randomUUID(),
+        aggregateVersion: 5,
+        attemptId: randomUUID(),
+        attemptOrdinal: 1,
+        retryCount: 0,
+        retryBudget: 3,
+        host_id: 'h-wrong-plane',  // FORBIDDEN KEY
+      },
+    });
+
+    const config = normaliseConfig({
+      relayId: `f2-relay-${randomUUID().slice(0, 8)}`,
+      leaseTtlMs: 60_000,
+      maxRetries: 3,
+      batchSize: 10,
+    });
+
+    const clock = { now: () => new Date() };
+    const idSource = { generate: () => randomUUID() };
+
+    const relay = new OutboxRelay(prisma, clock, idSource, config);
+    await relay.resume();
+
+    // Poll and lease
+    const events = await relay.poll();
+    expect(events.length).toBeGreaterThanOrEqual(1);
+    const leased = await relay.lease(events);
+    expect(leased.length).toBeGreaterThanOrEqual(1);
+
+    const fencedEvent = leased.find((e: any) => e.id === outboxEventId);
+    expect(fencedEvent).toBeDefined();
+
+    const consumer = {
+      consumerId: 'f2-consumer',
+      consume: jest.fn().mockResolvedValue({ digest: 'sha256:unused' }),
+    };
+
+    // Dispatch should throw WrongPlanePayloadError
+    await expect(
+      relay.dispatch(fencedEvent as any, consumer),
+    ).rejects.toThrow(WrongPlanePayloadError);
+
+    // Consumer must NOT have been called
+    expect(consumer.consume).not.toHaveBeenCalled();
+
+    // Quarantine evidence EXISTS in the database (durable, not rolled back)
+    const qRow = await prisma.quarantineEvidence.findUnique({
+      where: { outboxEventId },
+    });
+    expect(qRow).not.toBeNull();
+    expect(qRow.lastErrorCode).toBe('WRONG_PLANE');
+    expect(qRow.failureCount).toBe(1);
+
+    // Lease status is 'quarantined'
+    const leaseRow = await prisma.outboxLease.findUnique({
+      where: { outboxEventId },
+    });
+    expect(leaseRow.deliveryStatus).toBe('quarantined');
+
+    // Event is NOT re-polled (poll excludes 'quarantined' status)
+    const rePollEvents = await relay.poll();
+    const rePolled = rePollEvents.find((e: any) => e.id === outboxEventId);
+    expect(rePolled).toBeUndefined();
+  }, 30_000);
 });

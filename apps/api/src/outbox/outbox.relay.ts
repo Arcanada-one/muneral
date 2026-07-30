@@ -106,8 +106,7 @@ export class OutboxRelay {
              lease_acquired_at = $2,
              lease_expires_at = $3,
              delivery_ordinal = delivery_ordinal + 1,
-             delivery_status = 'leased',
-             failure_count = 0
+             delivery_status = 'leased'
          WHERE outbox_event_id = ANY($4::uuid[])
            AND (delivery_status = 'pending'
                 OR (delivery_status = 'leased' AND lease_expires_at < $2))
@@ -144,7 +143,6 @@ export class OutboxRelay {
                     leaseExpiresAt: expiresAt,
                     deliveryOrdinal: { increment: 1 },
                     deliveryStatus: 'leased',
-                    failureCount: 0,
                   },
                 })
               : null;
@@ -200,21 +198,19 @@ export class OutboxRelay {
     const fence = (event as unknown as { _fence?: LeaseFence })._fence;
     const now = this.clock.now();
 
-    return this.prisma.$transaction(async (tx) => {
-      // ---- 0. Wrong-plane payload check (pre-mutation, safe) ----
-      const planeErr = validatePayloadPlane(
-        event.eventPayload as unknown as Record<string, unknown>,
-      );
-      if (planeErr !== null) {
-        // Quarantine immediately without consumer invocation
-        await this.recordQuarantine(tx, event.id, fence?.deliveryOrdinal ?? 0, 1, 'WRONG_PLANE');
-        await this.recordDeliveryAttempt(
-          tx, event.id, fence?.deliveryOrdinal ?? 0, 'quarantined', null, { reason: planeErr },
-        );
-        await this.updateLeaseFenced(tx, event.id, 'quarantined', fence);
-        throw new WrongPlanePayloadError(event.id, planeErr);
-      }
+    // ---- 0. Wrong-plane payload check (pre-tx, fail-closed) ----
+    // Must happen BEFORE any transaction so that quarantine evidence is not
+    // rolled back by a subsequent throw. If the payload is wrong-plane we
+    // record quarantine in a durable mini-transaction, then throw.
+    const planeErr = validatePayloadPlane(
+      event.eventPayload as unknown as Record<string, unknown>,
+    );
+    if (planeErr !== null) {
+      await this.recordWrongPlaneQuarantine(event.id, fence, planeErr);
+      throw new WrongPlanePayloadError(event.id, planeErr);
+    }
 
+    return this.prisma.$transaction(async (tx) => {
       // ---- 1. Fence check — verify holder+ordinal match ----
       const leaseRow = await (tx as any).outboxLease.findUnique({
         where: { outboxEventId: event.id },
@@ -227,7 +223,6 @@ export class OutboxRelay {
         (leaseRow.leaseHolder !== fence.leaseHolder ||
           leaseRow.deliveryOrdinal !== fence.deliveryOrdinal)
       ) {
-        // Stale fence — another worker reclaimed the lease
         return 'expired' as DeliveryDisposition;
       }
       if (
@@ -235,7 +230,6 @@ export class OutboxRelay {
         leaseRow.leaseExpiresAt &&
         new Date(leaseRow.leaseExpiresAt) < now
       ) {
-        // Lease expired
         return 'expired' as DeliveryDisposition;
       }
 
@@ -250,7 +244,6 @@ export class OutboxRelay {
       });
 
       if (inboxRow) {
-        // Already delivered — idempotent
         await this.updateLeaseFenced(tx, event.id, 'delivered', fence);
         await this.recordDeliveryAttempt(
           tx, event.id, fence?.deliveryOrdinal ?? 0, 'delivered',
@@ -263,7 +256,6 @@ export class OutboxRelay {
       try {
         const consumerResult = await consumer.consume(event, tx);
 
-        // Insert inbox row
         await (tx as any).consumerInbox.create({
           data: {
             consumerId: consumer.consumerId,
@@ -273,10 +265,8 @@ export class OutboxRelay {
           },
         });
 
-        // Update lease
         await this.updateLeaseFenced(tx, event.id, 'delivered', fence);
 
-        // Record delivery attempt evidence
         await this.recordDeliveryAttempt(
           tx, event.id, fence?.deliveryOrdinal ?? 0, 'delivered',
           consumerResult.digest, null,
@@ -289,7 +279,6 @@ export class OutboxRelay {
         const errorMessage =
           err instanceof Error ? err.message : String(err);
 
-        // Bump failure count
         const updatedLease = await this.bumpFailureCountFenced(
           tx, event.id, fence,
         );
@@ -300,7 +289,6 @@ export class OutboxRelay {
           updatedLease &&
           failureCount >= this.config.maxRetries
         ) {
-          // ---- Quarantine ----
           await this.recordQuarantine(
             tx, event.id, currentOrdinal, failureCount, errorCode,
           );
@@ -315,14 +303,17 @@ export class OutboxRelay {
           return 'quarantined' as DeliveryDisposition;
         }
 
-        // Record the failed attempt without quarantine
+        // Record the failed attempt without quarantine.
+        // Return 'expired' instead of throwing so this transaction commits
+        // and the failure_count increment + delivery-attempt evidence are
+        // durable. The consumer's own side effects were never committed
+        // (the consumer threw inside this tx) — that is correct.
         await this.recordDeliveryAttempt(
           tx, event.id, currentOrdinal, 'expired', null,
           { error: errorMessage, code: errorCode },
         );
 
-        // Re-throw so caller knows dispatch failed; lease stays 'leased' for expiry/reclaim
-        throw err;
+        return 'expired' as DeliveryDisposition;
       }
     });
   }
@@ -466,6 +457,28 @@ export class OutboxRelay {
   }
 
   // -- private helpers -------------------------------------------------------
+
+  /**
+   * Record wrong-plane quarantine in a durable mini-transaction that commits
+   * before the WrongPlanePayloadError is thrown. This ensures the quarantine
+   * evidence survives and the event is not endlessly re-polled.
+   */
+  private async recordWrongPlaneQuarantine(
+    outboxEventId: string,
+    fence: LeaseFence | undefined,
+    reason: string,
+  ): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      await this.recordQuarantine(
+        tx, outboxEventId, fence?.deliveryOrdinal ?? 0, 1, 'WRONG_PLANE',
+      );
+      await this.recordDeliveryAttempt(
+        tx, outboxEventId, fence?.deliveryOrdinal ?? 0, 'quarantined', null,
+        { reason },
+      );
+      await this.updateLeaseFenced(tx, outboxEventId, 'quarantined', fence);
+    });
+  }
 
   private async updateLeaseFenced(
     tx: PrismaTx,
