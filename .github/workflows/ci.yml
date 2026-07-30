@@ -47,8 +47,8 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
       - name: Test Ops Bot secret gate contract
         run: bash scripts/ci/opsbot-secret-gate.test.sh
-      - name: Test runner Docker/Compose preflight contract
-        run: bash scripts/ci/runner-docker-preflight.test.sh
+      - name: Test runner deploy-broker preflight contract
+        run: bash scripts/ci/runner-broker-preflight.test.sh
       - name: Enable corepack (pnpm@11.5.2 from packageManager field)
         run: |
           COREPACK_HOME="${RUNNER_TEMP}/corepack-bin"
@@ -100,12 +100,12 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
 
-      - name: Verify runner Docker/Compose capability
-        env:
-          RUNNER_PREFLIGHT_COMPOSE_FILE: /srv/apps/muneral/docker-compose.prod.yml
-          RUNNER_PREFLIGHT_EXPECTED_PLUGIN: /usr/libexec/docker/cli-plugins/docker-compose
-          RUNNER_PREFLIGHT_VAULT_ADDR: ${{ env.VAULT_ADDR }}
-        run: bash scripts/ci/runner-docker-preflight.sh
+      # SEC-0028: the previous check asserted this runner *is* in the host
+      # `docker` group. That group is root-equivalent on a host that also
+      # carries the Control Arcana root deploy broker, so the check gated on
+      # the presence of the escalation being removed.
+      - name: Verify deploy-broker capability
+        run: bash scripts/ci/runner-broker-preflight.sh
 
       - name: Pre-deploy host readiness
         id: preflight
@@ -113,29 +113,56 @@ jobs:
         with:
           target-host: arcana-prod
           service-name: muneral
+          # `docker-pressure` is deliberately absent: it shells out to
+          # `docker system df`, which this runner is losing access to on
+          # purpose, and the check degrades to a permanent warning rather than
+          # to silence. Disk pressure on /var/lib/docker is still covered by
+          # the mandatory disk check, which only needs `df`.
           extra-checks: |
             vault
             tailscale
             time-skew
-            docker-pressure
           ops-bot-key: ${{ secrets.OPSBOT_API_KEY }}
 
-      - name: Deploy
+      # Every step below hands the broker a service name and a commit SHA and
+      # nothing else. The broker refuses any SHA not already reachable from
+      # origin/main, works from its own root-owned checkout, and supplies the
+      # container environment from a root-owned file this runner cannot read
+      # or write.
+      - name: Sync broker checkout to this commit
+        if: steps.preflight.outputs.status != 'fail'
+        run: sudo -n /usr/local/sbin/arcanada-compose-broker muneral sync "$GITHUB_SHA"
+
+      - name: Apply database migrations
+        if: steps.preflight.outputs.status != 'fail'
+        run: sudo -n /usr/local/sbin/arcanada-compose-broker muneral migrate
+
+      - name: Build image
+        if: steps.preflight.outputs.status != 'fail'
+        run: sudo -n /usr/local/sbin/arcanada-compose-broker muneral build
+
+      - name: Bring up stack
+        if: steps.preflight.outputs.status != 'fail'
+        run: sudo -n /usr/local/sbin/arcanada-compose-broker muneral up
+
+      - name: Wait for healthy
         if: steps.preflight.outputs.status != 'fail'
         run: |
           set -e
-          cd /srv/apps/muneral
-          git pull --ff-only origin main
-          # Apply schema migrations before starting the new image.
-          # prisma.config.ts lives at repo root; migrate deploy resolves the
-          # schema path and DATABASE_URL from the .env file in this directory.
-          set -o allexport && source .env && set +o allexport
-          # Run from repo root so prisma.config.ts resolves schema + DATABASE_URL
-          pnpm exec prisma migrate deploy
-          docker compose -f docker-compose.prod.yml up -d --build
-          sleep 10
-          curl -fsS http://localhost:3500/health
-          echo "Deploy OK: $(docker compose -f docker-compose.prod.yml ps --format '{{.Name}} {{.Status}}')"
+          for i in $(seq 1 20); do
+            if curl -fsS http://localhost:3500/health > /dev/null 2>&1; then
+              echo "muneral healthy on attempt $i"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Health check failed after 100s"
+          sudo -n /usr/local/sbin/arcanada-compose-broker muneral logs 100
+          exit 1
+
+      - name: Status snapshot
+        if: steps.preflight.outputs.status != 'fail'
+        run: sudo -n /usr/local/sbin/arcanada-compose-broker muneral ps
 
       - name: Notify Ops Bot on failure
         if: failure()
