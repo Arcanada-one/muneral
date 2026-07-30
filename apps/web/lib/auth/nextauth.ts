@@ -96,9 +96,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      (session as Record<string, unknown>).accessToken = token.accessToken;
-      (session as Record<string, unknown>).refreshToken = token.refreshToken;
-      return session;
+      return Object.assign(session, {
+        accessToken: token.accessToken,
+        refreshToken: token.refreshToken,
+      });
     },
   },
   pages: {

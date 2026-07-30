@@ -3,9 +3,7 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@muneral/types'],
-  experimental: {
-    typedRoutes: false,
-  },
+  typedRoutes: false,
   async headers() {
     return [
       {
