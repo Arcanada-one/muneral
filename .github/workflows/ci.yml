@@ -50,7 +50,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Enable corepack (pnpm@11.5.2 from packageManager field)
-        run: sudo corepack enable
+        run: |
+          COREPACK_HOME="${RUNNER_TEMP}/corepack-bin"
+          mkdir -p "${COREPACK_HOME}"
+          corepack enable --install-directory "${COREPACK_HOME}"
+          echo "${COREPACK_HOME}" >> "${GITHUB_PATH}"
       - uses: actions/setup-node@v4
         with:
           node-version: 22
