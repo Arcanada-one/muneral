@@ -12,11 +12,7 @@ import { reduce } from './execution-authority.reducer';
 import { replayJournal } from './execution-authority.replay';
 import {
   IdempotencyCollisionError,
-  InvalidTransitionError,
-  RetryBackoffError,
-  RetryBudgetExhaustedError,
   StaleVersionError,
-  UnissuedAttemptError,
 } from './execution-authority.errors';
 import type { ExecutionAuthorityError } from './execution-authority.errors';
 import { validateEvidenceRefs } from './evidence-ref.validator';
@@ -25,7 +21,6 @@ import type {
   Clock,
   ExecutionAuthorityCommand,
   IdSource,
-  IssueRetryAttemptCommand,
   TaskExecutionAttempt,
   TaskExecutionState,
   TaskExecutionTransition,
@@ -67,11 +62,11 @@ const TX_OPTS = {
 };
 
 export interface TransactionalClient {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   $transaction<T>(
-    fn: (tx: any) => Promise<T>,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    options?: Record<string, any>,
+    fn: (tx: PrismaTx) => Promise<T>,
+     
+    options?: Record<string, unknown>,
   ): Promise<T>;
 }
 
@@ -200,7 +195,7 @@ export class ExecutionAuthorityService {
       orderBy: { aggregateVersion: 'asc' },
     });
 
-    const typed = (transitions as any[]).map((t: any) => ({
+    const typed = (transitions as PrismaTx[]).map((t: PrismaTx) => ({
       id: t.id, taskId: t.taskId, attemptId: t.attemptId,
       aggregateVersion: Number(t.aggregateVersion), eventType: t.eventType,
       idempotencyKey: t.idempotencyKey, commandDigest: t.commandDigest ?? t.command_digest,
@@ -234,7 +229,7 @@ export class ExecutionAuthorityService {
     const transitionId = (transitionRow as Record<string, unknown>).id as string;
     let outboxEvent: OutboxEvent | undefined;
     try {
-      const outboxRow = await (tx as any).taskOutboxEvent.findUnique({
+      const outboxRow = await (tx as PrismaTx).taskOutboxEvent.findUnique({
         where: { transitionId },
       });
       if (outboxRow) {
@@ -633,14 +628,14 @@ export class ExecutionAuthorityService {
     };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   private marshalTransition(
     id: string,
     t: Omit<TaskExecutionTransition, 'id' | 'recordedAt'> & {
       commandDigest: string;
     },
     now: Date,
-  ): Record<string, any> {
+  ): Record<string, unknown> {
     return {
       id,
       taskId: t.taskId,

@@ -113,6 +113,16 @@ function requirePositiveInt(
   return null;
 }
 
+/** Return a copy of `value` without `key` — the identity fields a digest covers. */
+function stripKey<T extends object, K extends keyof T>(
+  value: T,
+  key: K,
+): Omit<T, K> {
+  const copy = { ...value };
+  delete copy[key];
+  return copy;
+}
+
 function first(
   ...checks: Array<ResultContractError | null>
 ): ResultContractError | null {
@@ -226,8 +236,7 @@ export function validateCommittedResultRefV0(
     aggregateVersion: value.aggregateVersion as number,
   };
 
-  const { resultRefId: _stated, ...withoutId } = ref;
-  if (computeResultRefId(withoutId) !== ref.resultRefId) {
+  if (computeResultRefId(stripKey(ref, 'resultRefId')) !== ref.resultRefId) {
     return new ResultContractError(
       'resultRefId',
       'does not match the identity recomputed from the reference fields',
@@ -291,8 +300,7 @@ export function validateCompletionReceiptV0(
     correlationId: value.correlationId as string,
   };
 
-  const { receiptId: _stated, ...withoutId } = receipt;
-  if (computeReceiptId(withoutId) !== receipt.receiptId) {
+  if (computeReceiptId(stripKey(receipt, 'receiptId')) !== receipt.receiptId) {
     return new ResultContractError(
       'receiptId',
       'does not match the identity recomputed from the receipt fields',
