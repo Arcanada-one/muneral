@@ -1,39 +1,56 @@
 // MUN-0021: task-owned disposable PostgreSQL harness.
 //
 // Every empirical database proof in this task runs against a uniquely named
-// throwaway container on a dynamic loopback port. No shared or production
-// database is ever reachable from here: the connection string is built from
-// the container this module started, and nothing reads DATABASE_URL.
+// throwaway target. Two provisioning modes exist, because the two environments
+// that must run these proofs have different capabilities:
 //
-// Cleanup is fail-closed. Post-test removal that leaves a container, a
-// task-named volume, or a listening port throws, so a leaked resource fails
-// the suite instead of silently surviving.
+//   container — spawn a uniquely named PostgreSQL container on a dynamic
+//               loopback port. Used on a developer machine with docker access.
+//
+//   database  — create a uniquely named database on an already-ephemeral
+//               PostgreSQL server and drop it afterwards. Used on the CI
+//               runner, which deliberately has no docker escalation (SEC-0028)
+//               but does provide a per-job PostgreSQL service container.
+//
+// Both modes are task-owned and disposable, and both clean up fail-closed: a
+// surviving container, task-named volume, listening port or leftover database
+// throws, so a leaked resource fails the suite instead of silently persisting.
+//
+// If neither mode is available the harness throws. It never degrades to
+// "skipped but reported green" — an unrun database proof is not a passing one.
 
-import { execSync, spawnSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { join } from 'node:path';
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+const { Client } = require('pg');
 
 const PG_IMAGE = 'postgres:16-alpine';
 const PG_USER = 'muneral_test';
 const PG_PASS = 'muneral_test_pass';
 
+export type ProvisioningMode = 'container' | 'database';
+
 export interface DisposablePostgres {
-  /** Container name — unique per instance, always task-prefixed. */
+  /** Unique task-owned identity — container name, or database name in
+   *  database mode. Always task-prefixed. */
   readonly containerName: string;
-  /** Connection string for the disposable instance. Empty until start(). */
+  /** How this instance was provisioned. Empty until start(). */
+  mode(): ProvisioningMode;
+  /** Connection string for the disposable target. Empty until start(). */
   url(): string;
   port(): number;
-  /** Start the container, wait for readiness, and apply every migration. */
   start(): Promise<void>;
-  /** Remove the container and prove no residue survives. Throws if any does. */
   stop(): Promise<void>;
 }
 
-/** Allocate a free loopback port by binding to port 0 and reading it back.
- *  The socket closes immediately; the window before `docker run` binds is
- *  unavoidable but bounded by the immediate call in start(). */
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
 function allocatePort(): Promise<number> {
   return new Promise((resolve, reject) => {
     const server = createServer();
@@ -52,103 +69,217 @@ function allocatePort(): Promise<number> {
   });
 }
 
-function run(cmd: string, args: string[]): string {
-  const result = spawnSync(cmd, args, { encoding: 'utf8', stdio: 'pipe' });
-  if (result.error) throw result.error;
-  if (result.status !== 0) {
+/** Resolve how docker can be invoked, or null when it cannot. */
+function resolveDockerCommand(): string[] | null {
+  for (const candidate of [['docker'], ['sudo', '-n', 'docker']]) {
+    const probe = spawnSync(candidate[0], [...candidate.slice(1), 'info'], {
+      encoding: 'utf8',
+      stdio: 'pipe',
+    });
+    if (!probe.error && probe.status === 0) return candidate;
+  }
+  return null;
+}
+
+function migrationSqlFiles(): string[] {
+  const migrationsDir = join(__dirname, '..', '..', 'prisma', 'migrations');
+  return readdirSync(migrationsDir)
+    .filter((d: string) => d.startsWith('202'))
+    .sort()
+    .map((d: string) => join(migrationsDir, d, 'migration.sql'))
+    .filter((p: string) => existsSync(p));
+}
+
+/**
+ * Apply every migration to `url`. The simple query protocol is used
+ * deliberately: migration files contain dollar-quoted trigger function bodies
+ * and several statements per file, neither of which survives the extended
+ * protocol.
+ */
+async function applyMigrations(url: string, label: string): Promise<void> {
+  const client = new Client({ connectionString: url });
+  await client.connect();
+  try {
+    for (const sqlPath of migrationSqlFiles()) {
+      console.log(`[${label}-pg]   Applying ${sqlPath.split('/').slice(-2).join('/')}`);
+      await client.query(readFileSync(sqlPath, 'utf8'));
+    }
+  } finally {
+    await client.end();
+  }
+}
+
+async function waitForReady(url: string, label: string): Promise<void> {
+  for (let i = 0; i < 60; i += 1) {
+    const client = new Client({ connectionString: url, connectionTimeoutMillis: 2_000 });
+    try {
+      await client.connect();
+      await client.query('SELECT 1');
+      await client.end();
+      console.log(`[${label}-pg] PostgreSQL is ready.`);
+      return;
+    } catch {
+      try {
+        await client.end();
+      } catch {
+        // The connection never opened; nothing to close.
+      }
+      if (i === 59) {
+        throw new Error('PostgreSQL did not become ready within 60s');
+      }
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+  }
+}
+
+/** Swap the database component of a connection string. */
+function withDatabase(url: string, database: string): string {
+  const parsed = new URL(url);
+  parsed.pathname = `/${database}`;
+  return parsed.toString();
+}
+
+/**
+ * Refuse to provision against anything that is not an obviously ephemeral
+ * local server. The harness creates and drops databases, so pointing it at a
+ * shared or production host must be impossible rather than merely discouraged.
+ */
+function assertEphemeralBase(url: string): void {
+  const parsed = new URL(url);
+  const host = parsed.hostname;
+  if (host !== 'localhost' && host !== '127.0.0.1' && host !== '::1') {
     throw new Error(
-      `${cmd} ${args.join(' ')} exited ${result.status}: ${String(result.stderr ?? '').slice(0, 500)}`,
+      `Refusing to provision a disposable database on non-local host "${host}". ` +
+      'The disposable harness may only target a per-job or per-developer PostgreSQL instance.',
     );
   }
-  return (result.stdout ?? '').trim();
-}
-
-function docker(...args: string[]): string {
-  return run('sudo', ['docker', ...args]);
-}
-
-/**
- * Fail-closed container removal. Only the pre-test sweep of a stale container
- * from a prior crashed run is best-effort; post-test removal must surface.
- */
-function stopAndRemove(name: string, failClosed: boolean): void {
-  try {
-    docker('rm', '-f', name);
-  } catch (err) {
-    if (failClosed) throw err;
+  for (const forbidden of ['prod', 'production', 'rds.amazonaws.com', 'supabase', 'neon.tech']) {
+    if (url.includes(forbidden)) {
+      throw new Error(
+        `Refusing to provision a disposable database against a URL containing "${forbidden}".`,
+      );
+    }
   }
 }
 
+// ---------------------------------------------------------------------------
+// Factory
+// ---------------------------------------------------------------------------
+
 /**
- * Create a disposable PostgreSQL instance for one test suite.
+ * Create a disposable PostgreSQL target for one test suite.
  *
- * @param label short suite identifier, used in the container and database name
+ * @param label short suite identifier, used in the container/database name
  */
 export function createDisposablePostgres(label: string): DisposablePostgres {
-  const containerName = `muneral-${label}-test-${randomUUID().slice(0, 8)}`;
-  const database = `muneral_${label.replace(/-/g, '_')}_test`;
+  const suffix = randomUUID().slice(0, 8);
+  const containerName = `muneral-${label}-test-${suffix}`;
+  const baseDatabase = `muneral_${label.replace(/-/g, '_')}_test`;
+  // In database mode the name must also be unique — the server is shared with
+  // whatever else runs in the same CI job.
+  const scratchDatabase = `${baseDatabase}_${suffix}`;
+
+  let resolvedMode: ProvisioningMode | '' = '';
+  let dockerCmd: string[] | null = null;
   let assignedPort = 0;
   let connectionString = '';
+  let adminUrl = '';
   let started = false;
+
+  function docker(...args: string[]): string {
+    if (!dockerCmd) throw new Error('docker is not available');
+    const result = spawnSync(dockerCmd[0], [...dockerCmd.slice(1), ...args], {
+      encoding: 'utf8',
+      stdio: 'pipe',
+    });
+    if (result.error) throw result.error;
+    if (result.status !== 0) {
+      throw new Error(
+        `docker ${args.join(' ')} exited ${result.status}: ${String(result.stderr ?? '').slice(0, 500)}`,
+      );
+    }
+    return (result.stdout ?? '').trim();
+  }
+
+  /** Only the pre-test sweep of a stale container is best-effort. */
+  function stopAndRemove(failClosed: boolean): void {
+    try {
+      docker('rm', '-f', containerName);
+    } catch (err) {
+      if (failClosed) throw err;
+    }
+  }
 
   return {
     containerName,
+    mode: () => {
+      if (!resolvedMode) throw new Error('start() has not run yet');
+      return resolvedMode;
+    },
     url: () => connectionString,
     port: () => assignedPort,
 
     async start(): Promise<void> {
-      assignedPort = await allocatePort();
-      console.log(`\n[${label}-pg] Allocated dynamic port: ${assignedPort}`);
+      dockerCmd = resolveDockerCommand();
+      const base = process.env.MUN0021_PG_BASE_URL ?? process.env.DATABASE_URL;
 
-      stopAndRemove(containerName, false);
+      if (dockerCmd) {
+        resolvedMode = 'container';
+        assignedPort = await allocatePort();
+        console.log(
+          `\n[${label}-pg] Mode: container. Allocated dynamic port: ${assignedPort}`,
+        );
+        stopAndRemove(false);
 
-      console.log(`[${label}-pg] Starting disposable container: ${containerName}`);
-      docker(
-        'run', '-d',
-        '--name', containerName,
-        '-e', `POSTGRES_USER=${PG_USER}`,
-        '-e', `POSTGRES_PASSWORD=${PG_PASS}`,
-        '-e', `POSTGRES_DB=${database}`,
-        '-p', `127.0.0.1:${assignedPort}:5432`,
-        PG_IMAGE,
-      );
-      started = true;
+        console.log(`[${label}-pg] Starting disposable container: ${containerName}`);
+        docker(
+          'run', '-d',
+          '--name', containerName,
+          '-e', `POSTGRES_USER=${PG_USER}`,
+          '-e', `POSTGRES_PASSWORD=${PG_PASS}`,
+          '-e', `POSTGRES_DB=${baseDatabase}`,
+          '-p', `127.0.0.1:${assignedPort}:5432`,
+          PG_IMAGE,
+        );
+        started = true;
+        connectionString =
+          `postgresql://${PG_USER}:${PG_PASS}@localhost:${assignedPort}/${baseDatabase}?schema=public`;
+      } else if (base) {
+        resolvedMode = 'database';
+        assertEphemeralBase(base);
+        adminUrl = base;
+        assignedPort = Number(new URL(base).port || 5432);
+        console.log(
+          `\n[${label}-pg] Mode: database (no docker escalation available). ` +
+          `Creating disposable database: ${scratchDatabase}`,
+        );
 
-      connectionString =
-        `postgresql://${PG_USER}:${PG_PASS}@localhost:${assignedPort}/${database}?schema=public`;
+        await waitForReady(adminUrl, label);
+        const admin = new Client({ connectionString: adminUrl });
+        await admin.connect();
+        try {
+          // Identifier is generated here from a fixed prefix and a UUID
+          // fragment, so it cannot carry caller-controlled SQL.
+          await admin.query(`DROP DATABASE IF EXISTS "${scratchDatabase}"`);
+          await admin.query(`CREATE DATABASE "${scratchDatabase}"`);
+        } finally {
+          await admin.end();
+        }
+        started = true;
+        connectionString = withDatabase(base, scratchDatabase);
+      } else {
+        throw new Error(
+          'No disposable PostgreSQL target available: docker is not reachable and ' +
+          'neither MUN0021_PG_BASE_URL nor DATABASE_URL is set. The database proofs ' +
+          'must run — they are not optional coverage.',
+        );
+      }
 
       console.log(`[${label}-pg] Waiting for PostgreSQL to accept connections...`);
-      for (let i = 0; i < 60; i += 1) {
-        try {
-          execSync(
-            `pg_isready -h localhost -p ${assignedPort} -U ${PG_USER} -d ${database}`,
-            { stdio: 'pipe', env: { ...process.env, PGPASSWORD: PG_PASS } },
-          );
-          console.log(`[${label}-pg] PostgreSQL is ready.`);
-          break;
-        } catch {
-          if (i === 59) {
-            throw new Error('PostgreSQL did not become ready within 60s');
-          }
-          await new Promise((r) => setTimeout(r, 1000));
-        }
-      }
+      await waitForReady(connectionString, label);
 
-      console.log(`[${label}-pg] Applying migrations via psql...`);
-      const migrationsDir = join(__dirname, '..', '..', 'prisma', 'migrations');
-      const dirs = readdirSync(migrationsDir)
-        .filter((d: string) => d.startsWith('202'))
-        .sort();
-      for (const dir of dirs) {
-        const sqlPath = join(migrationsDir, dir, 'migration.sql');
-        if (existsSync(sqlPath)) {
-          console.log(`[${label}-pg]   Applying ${dir}/migration.sql`);
-          execSync(
-            `psql -h localhost -p ${assignedPort} -U ${PG_USER} -d ${database} -f ${sqlPath} -v ON_ERROR_STOP=1`,
-            { stdio: 'pipe', env: { ...process.env, PGPASSWORD: PG_PASS } },
-          );
-        }
-      }
+      console.log(`[${label}-pg] Applying migrations...`);
+      await applyMigrations(connectionString, label);
       console.log(`[${label}-pg] All migrations applied.`);
     },
 
@@ -156,16 +287,56 @@ export function createDisposablePostgres(label: string): DisposablePostgres {
       if (!started) return;
       const failures: string[] = [];
 
+      if (resolvedMode === 'database') {
+        console.log(`\n[${label}-pg] Dropping disposable database: ${scratchDatabase}`);
+        const admin = new Client({ connectionString: adminUrl });
+        try {
+          await admin.connect();
+          await admin.query(
+            `SELECT pg_terminate_backend(pid) FROM pg_stat_activity
+              WHERE datname = $1 AND pid <> pg_backend_pid()`,
+            [scratchDatabase],
+          );
+          await admin.query(`DROP DATABASE IF EXISTS "${scratchDatabase}"`);
+          const remaining = await admin.query(
+            'SELECT 1 FROM pg_database WHERE datname = $1',
+            [scratchDatabase],
+          );
+          if (remaining.rowCount && remaining.rowCount > 0) {
+            failures.push(`disposable database survived cleanup: ${scratchDatabase}`);
+          }
+        } catch (err) {
+          failures.push(
+            `database cleanup failed: ${err instanceof Error ? err.message : String(err)}`,
+          );
+        } finally {
+          try {
+            await admin.end();
+          } catch {
+            // Already closed.
+          }
+        }
+        console.log(
+          `[${label}-pg] Cleanup evidence: database=${scratchDatabase} dropped from the ` +
+          'per-job PostgreSQL service. No shared or production database was touched.',
+        );
+        if (failures.length > 0) {
+          throw new Error(`Disposable PostgreSQL cleanup failed: ${failures.join('; ')}`);
+        }
+        return;
+      }
+
       console.log(`\n[${label}-pg] Removing container: ${containerName}`);
       try {
-        stopAndRemove(containerName, true);
+        stopAndRemove(true);
       } catch (err) {
         failures.push(
           `docker removal failed: ${err instanceof Error ? err.message : String(err)}`,
         );
       }
 
-      const inspect = spawnSync('sudo', ['docker', 'inspect', containerName], {
+      const cmd = dockerCmd ?? ['docker'];
+      const inspect = spawnSync(cmd[0], [...cmd.slice(1), 'inspect', containerName], {
         encoding: 'utf8',
         stdio: 'pipe',
       });
@@ -180,8 +351,8 @@ export function createDisposablePostgres(label: string): DisposablePostgres {
       }
 
       const remaining = spawnSync(
-        'sudo',
-        ['docker', 'ps', '-a', '--filter', `name=${containerName}`, '--format', '{{.Names}}'],
+        cmd[0],
+        [...cmd.slice(1), 'ps', '-a', '--filter', `name=${containerName}`, '--format', '{{.Names}}'],
         { encoding: 'utf8', stdio: 'pipe' },
       );
       if (remaining.error || remaining.status !== 0) {
@@ -209,8 +380,8 @@ export function createDisposablePostgres(label: string): DisposablePostgres {
       }
 
       const volumes = spawnSync(
-        'sudo',
-        ['docker', 'volume', 'ls', '--filter', `name=${containerName}`, '--format', '{{.Name}}'],
+        cmd[0],
+        [...cmd.slice(1), 'volume', 'ls', '--filter', `name=${containerName}`, '--format', '{{.Name}}'],
         { encoding: 'utf8', stdio: 'pipe' },
       );
       if (volumes.error || volumes.status !== 0) {
