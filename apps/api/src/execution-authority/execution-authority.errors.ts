@@ -138,6 +138,39 @@ export class ExecutionStateAlreadyExistsError extends Error {
   }
 }
 
+/**
+ * A unique-constraint violation on a constraint that cannot express a lost
+ * version race — for example a duplicate attempt or transition UUID produced by
+ * a faulty IdSource.
+ *
+ * This is deliberately NOT a member of `ExecutionAuthorityError`. Every member
+ * of that union is a domain outcome the caller is expected to handle by
+ * re-reading the aggregate and re-issuing the command. This condition is not:
+ * re-issuing would collide identically forever, so it is thrown rather than
+ * returned, joining the other unexpected infrastructure failures.
+ *
+ * It exists because the previous code reported such violations as
+ * `StaleVersionError`, producing self-contradictory diagnostics
+ * ("expected 0, got 0") and an unbounded caller retry loop (QA finding F4).
+ */
+export class UnexpectedUniqueViolationError extends Error {
+  public readonly code = 'UNEXPECTED_UNIQUE_VIOLATION' as const;
+
+  constructor(
+    public readonly taskId: string,
+    /** Constraint name, or the violated column set, or 'unknown'. */
+    public readonly constraint: string,
+    public readonly cause?: unknown,
+  ) {
+    super(
+      `Unexpected unique-constraint violation for task ${taskId} on ${constraint}: ` +
+        `this constraint cannot express a lost version race, so the command ` +
+        `must not be retried as a stale-version conflict`,
+    );
+    this.name = 'UnexpectedUniqueViolationError';
+  }
+}
+
 export type { EvidenceRefValidationError } from './evidence-ref.validator';
 
 /**

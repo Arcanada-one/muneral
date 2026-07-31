@@ -46,12 +46,18 @@ import {
   ResultPlaneError,
 } from '../src/result-authority/result-authority.errors';
 import { ResultAuthorityService } from '../src/result-authority/result-authority.service';
-import type { TransactionalClient } from '../src/execution-authority/execution-authority.service';
+import type {
+  ExecutionAuthorityService,
+  TransactionalClient,
+} from '../src/execution-authority/execution-authority.service';
 import type {
   Clock,
   IdSource,
 } from '../src/execution-authority/execution-authority.types';
-import { IdempotencyCollisionError } from '../src/execution-authority/execution-authority.errors';
+import {
+  IdempotencyCollisionError,
+  StaleVersionError,
+} from '../src/execution-authority/execution-authority.errors';
 
 // ---------------------------------------------------------------------------
 // Fixtures — fixed card, projection and committed result node
@@ -801,6 +807,29 @@ describe('D. authoritative commit seam', () => {
       validProposal(),
     );
     expect(outcome).toBeInstanceOf(ResultBindingError);
+  });
+
+  it('F5: a returned authority stale-version race maps to ResultBindingError', async () => {
+    const tx = makeTx();
+    const authority = {
+      executeWithinTransaction: jest.fn().mockResolvedValue(
+        new StaleVersionError(TASK_ID, 2, 3),
+      ),
+    } as unknown as ExecutionAuthorityService;
+    const racingService = new ResultAuthorityService(
+      clock,
+      makeIdSource(),
+      authority,
+    );
+
+    const outcome = await racingService.commitOwnedResult(
+      makePrisma(tx),
+      validProposal(),
+    );
+
+    expect(outcome).toBeInstanceOf(ResultBindingError);
+    expect(outcome).not.toBeInstanceOf(StaleVersionError);
+    expectZeroWrites(tx);
   });
 
   it('F6: repeating the same mutation returns a byte-identical reference and receipt', async () => {

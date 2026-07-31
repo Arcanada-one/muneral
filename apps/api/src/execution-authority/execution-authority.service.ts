@@ -4,15 +4,24 @@
 // are safe (no writes yet). Post-mutation database exceptions throw to roll
 // back the transaction; the public method catches them, re-reads task-scoped
 // idempotency, and returns a typed conflict.
-// Unexpected infrastructure errors (connection drops, P2034 serialization
-// failures after retries) propagate to the caller as thrown Errors.
+// Unexpected infrastructure errors propagate to the caller as thrown Errors.
+// This module performs NO retry of its own: a P2034 serialization failure is
+// reconciled once against task-scoped idempotency and then reported, and a
+// P2002 on a constraint that cannot express a version race is rethrown as
+// UnexpectedUniqueViolationError. Any retry policy belongs to the caller.
 
-import { commandDigest } from './canonical-json';
+import { commandDigest, CanonicalJsonError } from './canonical-json';
 import { reduce } from './execution-authority.reducer';
 import { replayJournal } from './execution-authority.replay';
+// InvalidTransitionError, UnissuedAttemptError, RetryBackoffError and
+// RetryBudgetExhaustedError are intentionally NOT imported here: the pure
+// reducer is the single source of truth for those validations and the service
+// returns its typed error unchanged (see `if (result instanceof Error) return
+// result;`). They were previously imported but never referenced.
 import {
   IdempotencyCollisionError,
   StaleVersionError,
+  UnexpectedUniqueViolationError,
 } from './execution-authority.errors';
 import type { ExecutionAuthorityError } from './execution-authority.errors';
 import { validateEvidenceRefs } from './evidence-ref.validator';
@@ -46,14 +55,16 @@ export interface ExecutionResult {
 
 /**
  * Every typed outcome the public method can return.
- * Unexpected infrastructure failures (DB connection loss, serialization
- * conflicts after retry exhaustion) throw to the caller.
+ * Unexpected infrastructure failures (DB connection loss, an unresolvable
+ * serialization conflict, a unique violation on a constraint that cannot
+ * express a version race) throw to the caller.
  */
 export type ExecutionOutcome =
   | ExecutionResult
   | ExecutionAuthorityError
   | EvidenceRefValidationError
-  | WrongPlanePayloadError;
+  | WrongPlanePayloadError
+  | CanonicalJsonError;
 
 const TX_OPTS = {
   maxWait: 10_000,
@@ -62,10 +73,8 @@ const TX_OPTS = {
 };
 
 export interface TransactionalClient {
-   
   $transaction<T>(
     fn: (tx: PrismaTx) => Promise<T>,
-     
     options?: Record<string, unknown>,
   ): Promise<T>;
 }
@@ -105,13 +114,27 @@ export class ExecutionAuthorityService {
     } catch (err) {
       // Post-mutation exception: transaction was rolled back.
       // Reconcile: StaleVersionError (thrown explicitly on zero-row update),
-      // P2002 (unique constraint race), P2034 (serialization conflict).
+      // P2034 (serialization conflict), and P2002 only on the constraints that
+      // can actually express a lost version race.
       if (
         err instanceof StaleVersionError ||
-        isPrismaUniqueViolation(err) ||
         isPrismaSerializationConflict(err)
       ) {
         return this.reconcileAfterRollback(prisma, command);
+      }
+      if (isPrismaUniqueViolation(err)) {
+        if (isVersionRaceUniqueViolation(err)) {
+          return this.reconcileAfterRollback(prisma, command);
+        }
+        // Any other unique violation (e.g. a duplicate attempt or transition
+        // UUID from a faulty IdSource) is not a concurrency conflict. Reporting
+        // it as StaleVersionError told the caller to re-read and re-issue, which
+        // would collide identically forever (QA finding F4).
+        throw new UnexpectedUniqueViolationError(
+          command.taskId,
+          describeUniqueViolation(err),
+          err,
+        );
       }
       throw err;
     }
@@ -164,7 +187,11 @@ export class ExecutionAuthorityService {
         );
       }
 
-      // Not an idempotency race — must be a version race
+      // No transition recorded under this key, so this is not an idempotency
+      // race. The caller has already established that the rollback cause was a
+      // version-race-capable constraint (or an explicit StaleVersionError, or a
+      // serialization conflict), so a version race is the only remaining
+      // explanation and re-reading gives the caller the version to retry from.
       const freshState = await this.readState(tx, command.taskId);
       return new StaleVersionError(
         command.taskId,
@@ -195,6 +222,7 @@ export class ExecutionAuthorityService {
       orderBy: { aggregateVersion: 'asc' },
     });
 
+    // Raw driver rows: camelCase from Prisma, snake_case from raw queries.
     const typed = (transitions as PrismaTx[]).map((t: PrismaTx) => ({
       id: t.id, taskId: t.taskId, attemptId: t.attemptId,
       aggregateVersion: Number(t.aggregateVersion), eventType: t.eventType,
@@ -299,7 +327,17 @@ export class ExecutionAuthorityService {
     if (evidenceErr) return evidenceErr;
 
     const now = this.clock.now();
-    const digest = commandDigest(command);
+
+    // Canonicalization is a pre-mutation validation like every other one here,
+    // so a malformed command returns its typed error instead of escaping as an
+    // untyped throw. Fail-closed behaviour is unchanged: no write has happened.
+    let digest: string;
+    try {
+      digest = commandDigest(command);
+    } catch (err) {
+      if (err instanceof CanonicalJsonError) return err;
+      throw err;
+    }
 
     // ---- 1. Idempotency check (pre-mutation, safe) ----
     const existingTransition =
@@ -628,7 +666,6 @@ export class ExecutionAuthorityService {
     };
   }
 
-   
   private marshalTransition(
     id: string,
     t: Omit<TaskExecutionTransition, 'id' | 'recordedAt'> & {
@@ -682,6 +719,136 @@ function isPrismaUniqueViolation(err: unknown): boolean {
   if (typeof err !== 'object') return false;
   const e = err as { code?: string };
   return e.code === 'P2002';
+}
+
+// ---------------------------------------------------------------------------
+// Unique-violation classification (QA finding F4)
+// ---------------------------------------------------------------------------
+//
+// Not every P2002 means "another writer advanced this aggregate". Treating them
+// all as a version race made a duplicate attempt UUID surface as
+// `StaleVersionError: ... expected 0, got 0` — self-contradictory, and a caller
+// following the documented "re-read and re-issue" contract retries forever.
+//
+// Constraint                                        | lost version race? | why
+// --------------------------------------------------+--------------------+-----
+// task_execution_state_pkey (task_id)                | YES  | concurrent initial issuance: the aggregate appeared between our read and our create
+// task_execution_attempts_task_ordinal_unique        | YES  | ordinal is derived from the state we read, so a collision means the state moved
+// task_execution_transitions_task_version_unique     | YES  | the canonical lost-update signal
+// task_execution_transitions_task_idempotency_unique | YES  | concurrent same-key command; reconciliation returns the recorded result
+// task_execution_attempts_pkey (attempt_id)          | NO   | duplicate UUID from IdSource
+// task_execution_attempts_attempt_task_unique        | NO   | duplicate UUID from IdSource
+// task_execution_transitions_pkey (id)               | NO   | duplicate UUID from IdSource
+// anything else / unidentifiable                     | NO   | fail closed rather than invent a version race
+
+const VERSION_RACE_CONSTRAINTS: ReadonlySet<string> = new Set([
+  'task_execution_state_pkey',
+  'task_execution_attempts_task_ordinal_unique',
+  'task_execution_transitions_task_version_unique',
+  'task_execution_transitions_task_idempotency_unique',
+]);
+
+/** Same set keyed by violated columns, sorted and comma-joined. */
+const VERSION_RACE_COLUMN_SETS: ReadonlySet<string> = new Set([
+  'task_id', // task_execution_state_pkey
+  'ordinal,task_id', // task_execution_attempts_task_ordinal_unique
+  'aggregate_version,task_id', // task_execution_transitions_task_version_unique
+  'idempotency_key,task_id', // task_execution_transitions_task_idempotency_unique
+]);
+
+function toSnakeCase(value: string): string {
+  return value.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase();
+}
+
+function normalizeColumns(columns: readonly string[]): string {
+  return columns.map(toSnakeCase).sort().join(',');
+}
+
+/**
+ * Extract what a P2002 actually violated.
+ *
+ * Prisma's documented `err.meta.target` is NOT populated by this project's
+ * driver-adapter configuration (`@prisma/adapter-pg`) — it is always undefined
+ * there, and the detail lives under `meta.driverAdapterError.cause` instead.
+ * Both shapes are read, plus the raw PostgreSQL message as a last resort, and
+ * an unidentifiable violation is reported as such rather than guessed.
+ */
+function uniqueViolationSignature(err: unknown): {
+  constraint: string | null;
+  columns: string | null;
+} {
+  const empty = { constraint: null, columns: null };
+  if (err === null || typeof err !== 'object') return empty;
+
+  const meta = (err as { meta?: Record<string, unknown> }).meta;
+  if (meta === null || typeof meta !== 'object') return empty;
+
+  let constraint: string | null = null;
+  let columns: string | null = null;
+
+  // Shape 1: classic Prisma `meta.target`.
+  const target = (meta as { target?: unknown }).target;
+  if (typeof target === 'string') {
+    constraint = target;
+  } else if (Array.isArray(target) && target.every((t) => typeof t === 'string')) {
+    columns = normalizeColumns(target as string[]);
+  }
+
+  // Shape 2: driver-adapter error detail.
+  const cause = (
+    meta as { driverAdapterError?: { cause?: Record<string, unknown> } }
+  ).driverAdapterError?.cause;
+  if (cause !== null && typeof cause === 'object') {
+    const c = (cause as { constraint?: unknown }).constraint;
+    if (c !== null && typeof c === 'object') {
+      const fields = (c as { fields?: unknown }).fields;
+      if (
+        columns === null &&
+        Array.isArray(fields) &&
+        fields.every((f) => typeof f === 'string')
+      ) {
+        columns = normalizeColumns(fields as string[]);
+      }
+      const index = (c as { index?: unknown }).index;
+      if (constraint === null && typeof index === 'string') {
+        constraint = index;
+      }
+    }
+
+    // Shape 3: parse the constraint name out of the raw PostgreSQL message.
+    const original = (cause as { originalMessage?: unknown }).originalMessage;
+    if (constraint === null && typeof original === 'string') {
+      const match = /unique constraint "([^"]+)"/.exec(original);
+      if (match) constraint = match[1];
+    }
+  }
+
+  return { constraint, columns };
+}
+
+/**
+ * True only when the violated constraint can express a lost version race.
+ * Fails closed: an absent or unrecognized signature returns false.
+ */
+function isVersionRaceUniqueViolation(err: unknown): boolean {
+  const { constraint, columns } = uniqueViolationSignature(err);
+  if (constraint !== null && VERSION_RACE_CONSTRAINTS.has(constraint)) {
+    return true;
+  }
+  if (constraint !== null) {
+    // The constraint was identified and is not in the allow-list. Trust that
+    // over the column set, which is ambiguous across tables.
+    return false;
+  }
+  return columns !== null && VERSION_RACE_COLUMN_SETS.has(columns);
+}
+
+/** Human-readable identification of the violated constraint for diagnostics. */
+function describeUniqueViolation(err: unknown): string {
+  const { constraint, columns } = uniqueViolationSignature(err);
+  if (constraint !== null) return constraint;
+  if (columns !== null) return `(${columns})`;
+  return 'unknown';
 }
 
 function isPrismaSerializationConflict(err: unknown): boolean {

@@ -20,9 +20,75 @@ const rollback = readFileSync(
   ),
   'utf8',
 );
+const truncateGuard = readFileSync(
+  join(
+    apiRoot,
+    'prisma/migrations/20260731090000_add_execution_truncate_guard/migration.sql',
+  ),
+  'utf8',
+);
+const truncateGuardRollback = readFileSync(
+  join(
+    apiRoot,
+    'prisma/migrations/20260731090000_add_execution_truncate_guard/rollback.sql',
+  ),
+  'utf8',
+);
+const smokeHarness = readFileSync(
+  join(apiRoot, 'prisma/tests/run_execution_authority_smoke.sh'),
+  'utf8',
+);
 const schema = readFileSync(join(apiRoot, 'prisma/schema.prisma'), 'utf8');
 
+/** Drop `--` line comments so assertions target executable SQL, not prose. */
+function stripSqlComments(sql: string): string {
+  return sql
+    .split('\n')
+    .map((line) => line.replace(/--.*$/, ''))
+    .join('\n');
+}
+
 describe('Execution authority migration', () => {
+  describe('disposable PostgreSQL harness', () => {
+    it('captures and reports a failing service-path test command', () => {
+      expect(smokeHarness).toContain('service_status=0');
+      expect(smokeHarness).toMatch(
+        /service_output="\$\([\s\S]+?\)" \|\|\s+service_status="\$\?"/,
+      );
+      expect(smokeHarness).toContain('service-path integration tests failed');
+    });
+
+    it('applies all current-main migrations in timestamp order', () => {
+      const executionAuthority = smokeHarness.indexOf(
+        '20260730000000_add_execution_authority/migration.sql',
+      );
+      const outbox = smokeHarness.indexOf(
+        '20260730010000_add_outbox_relay/migration.sql',
+      );
+      const committedResults = smokeHarness.indexOf(
+        '20260731010000_add_committed_result_refs/migration.sql',
+      );
+      const truncateGuardIndex = smokeHarness.indexOf(
+        '20260731090000_add_execution_truncate_guard/migration.sql',
+      );
+
+      expect(executionAuthority).toBeGreaterThan(-1);
+      expect(outbox).toBeGreaterThan(executionAuthority);
+      expect(committedResults).toBeGreaterThan(outbox);
+      expect(truncateGuardIndex).toBeGreaterThan(committedResults);
+    });
+
+    it('generates the current Prisma client before service-path tests', () => {
+      const generate = smokeHarness.indexOf('pnpm exec prisma generate');
+      const serviceTests = smokeHarness.indexOf(
+        "npx jest --testPathPattern='execution-authority.service-smoke'",
+      );
+
+      expect(generate).toBeGreaterThan(-1);
+      expect(serviceTests).toBeGreaterThan(generate);
+    });
+  });
+
   describe('Task model relations are additive', () => {
     it('adds executionState, attempts, and transitions relations to Task', () => {
       // The Task model must expose the new relations without replacing
@@ -227,6 +293,76 @@ describe('Execution authority migration', () => {
       expect(rollback).toContain('cannot be rolled back');
       expect(rollback).not.toMatch(/DROP /);
       expect(rollback).not.toMatch(
+        /\bDROP\s+(TABLE|TRIGGER|FUNCTION|INDEX|CONSTRAINT)\b/i,
+      );
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // QA finding F1 — TRUNCATE bypassed the append-only guard.
+  // The fix has to live in a NEW migration: 20260730000000 is already applied
+  // in production and Prisma stores its checksum, so editing it would break
+  // `prisma migrate deploy` on every environment.
+  // -------------------------------------------------------------------------
+  describe('TRUNCATE guard migration (20260731090000)', () => {
+    it('leaves the already-applied 20260730000000 migration free of TRUNCATE handling', () => {
+      // Regression guard: if a future change "fixes" F1 by editing the applied
+      // migration instead of adding a new one, this fails.
+      expect(migration).not.toMatch(/TRUNCATE/i);
+    });
+
+    it('guards the journal with a statement-level BEFORE TRUNCATE trigger', () => {
+      // A row-level BEFORE UPDATE OR DELETE trigger never observes TRUNCATE;
+      // PostgreSQL requires BEFORE TRUNCATE ... FOR EACH STATEMENT.
+      expect(truncateGuard).toMatch(
+        /CREATE TRIGGER task_execution_transitions_no_truncate\s+BEFORE TRUNCATE ON public\.task_execution_transitions\s+FOR EACH STATEMENT/,
+      );
+    });
+
+    it('guards the attempt fact table with the same statement-level trigger', () => {
+      expect(truncateGuard).toMatch(
+        /CREATE TRIGGER task_execution_attempts_no_truncate\s+BEFORE TRUNCATE ON public\.task_execution_attempts\s+FOR EACH STATEMENT/,
+      );
+    });
+
+    it('uses a separate guard function because TRUNCATE has neither OLD nor NEW', () => {
+      expect(truncateGuard).toContain(
+        'CREATE FUNCTION public.task_execution_truncate_guard()',
+      );
+      // The append-only guard reads OLD.id and returns NEW; a statement-level
+      // TRUNCATE trigger has neither, so that function cannot be reused.
+      // Assert against executable SQL only — the file's header comment
+      // legitimately names OLD/NEW when explaining why.
+      const executable = stripSqlComments(truncateGuard);
+      expect(executable).not.toMatch(/\bOLD\./);
+      expect(executable).not.toMatch(/\bRETURN NEW\b/);
+    });
+
+    it('raises the same guard-specific MUN00 SQLSTATE as the append-only guard', () => {
+      expect(truncateGuard).toContain("USING ERRCODE = 'MUN00'");
+    });
+
+    it('applies the same hardening: SECURITY DEFINER, fixed search_path, REVOKE', () => {
+      expect(truncateGuard).toContain('SECURITY DEFINER');
+      expect(truncateGuard).toContain('SET search_path = pg_catalog');
+      expect(truncateGuard).toContain(
+        'REVOKE ALL ON FUNCTION public.task_execution_truncate_guard() FROM PUBLIC;',
+      );
+    });
+
+    it('is additive: creates no table and drops nothing', () => {
+      expect(truncateGuard).not.toMatch(/\bCREATE TABLE\b/i);
+      expect(truncateGuard).not.toMatch(
+        /\bDROP\s+(TABLE|TRIGGER|FUNCTION|INDEX|CONSTRAINT)\b/i,
+      );
+      expect(truncateGuard).not.toMatch(/INSERT INTO|UPDATE public\./i);
+    });
+
+    it('has a forward-only rollback refusal with no DROP statements', () => {
+      expect(truncateGuardRollback).toContain(
+        'MUN-0020 migration is forward-only',
+      );
+      expect(truncateGuardRollback).not.toMatch(
         /\bDROP\s+(TABLE|TRIGGER|FUNCTION|INDEX|CONSTRAINT)\b/i,
       );
     });
