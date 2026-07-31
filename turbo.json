@@ -10,6 +10,7 @@
       "env": [
         "NODE_ENV",
         "DATABASE_URL",
+        "MUN0020_DB_URL",
         "REDIS_URL",
         "JWT_SECRET"
       ]

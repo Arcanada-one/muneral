@@ -162,20 +162,23 @@ model Task {
   updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz()
 
   // Relations
-  project         Project                @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  sprint          Sprint?                @relation(fields: [sprintId], references: [id], onDelete: SetNull)
-  parent          Task?                  @relation("TaskChildren", fields: [parentId], references: [id], onDelete: SetNull)
-  children        Task[]                 @relation("TaskChildren")
-  tags            TaskTag[]
-  checklists      TaskChecklist[]
-  depsFrom        TaskDependency[]       @relation("DepsFrom")
-  depsTo          TaskDependency[]       @relation("DepsTo")
-  agents          TaskAgent[]
-  activityLogs    ActivityLog[]
-  gitRefs         TaskGitRef[]
-  executionState  TaskExecutionState?
-  attempts        TaskExecutionAttempt[]
-  transitions     TaskExecutionTransition[]
+  project        Project                   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sprint         Sprint?                   @relation(fields: [sprintId], references: [id], onDelete: SetNull)
+  parent         Task?                     @relation("TaskChildren", fields: [parentId], references: [id], onDelete: SetNull)
+  children       Task[]                    @relation("TaskChildren")
+  tags           TaskTag[]
+  checklists     TaskChecklist[]
+  depsFrom       TaskDependency[]          @relation("DepsFrom")
+  depsTo         TaskDependency[]          @relation("DepsTo")
+  agents         TaskAgent[]
+  activityLogs   ActivityLog[]
+  gitRefs        TaskGitRef[]
+  executionState TaskExecutionState?
+  attempts       TaskExecutionAttempt[]
+  transitions    TaskExecutionTransition[]
+  outboxEvents   TaskOutboxEvent[]
+  resultNodes    TaskResultNode[]
+  resultRefs     TaskCommittedResultRef[]
 
   @@index([projectId], name: "idx_tasks_project_id")
   @@index([sprintId], name: "idx_tasks_sprint_id")
@@ -450,8 +453,11 @@ model TaskExecutionAttempt {
   completedAt DateTime? @map("completed_at") @db.Timestamptz()
 
   // Relations
-  task        Task                     @relation(fields: [taskId], references: [id], onDelete: Restrict)
-  transitions TaskExecutionTransition[]
+  task         Task                      @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  transitions  TaskExecutionTransition[]
+  outboxEvents TaskOutboxEvent[]
+  resultNodes  TaskResultNode[]
+  resultRefs   TaskCommittedResultRef[]
 
   @@unique([taskId, ordinal])
   @@unique([attemptId, taskId])
@@ -468,20 +474,218 @@ model TaskExecutionTransition {
   eventType         String   @map("event_type") @db.VarChar(64)
   idempotencyKey    String   @map("idempotency_key") @db.VarChar(256)
   commandDigest     String   @map("command_digest") @db.VarChar(64)
-  transitionPayload Json     @map("transition_payload") @default("{}")
-  committedResult   Json     @map("committed_result") @default("{}")
-  evidenceRefs      Json     @map("evidence_refs") @default("[]")
+  transitionPayload Json     @default("{}") @map("transition_payload")
+  committedResult   Json     @default("{}") @map("committed_result")
+  evidenceRefs      Json     @default("[]") @map("evidence_refs")
   causationId       String   @map("causation_id") @db.VarChar(256)
   correlationId     String   @map("correlation_id") @db.VarChar(256)
   recordedAt        DateTime @map("recorded_at") @db.Timestamptz()
 
   // Relations
-  task    Task                @relation(fields: [taskId], references: [id], onDelete: Restrict)
-  attempt TaskExecutionAttempt @relation(fields: [attemptId, taskId], references: [attemptId, taskId], onDelete: Restrict)
+  task        Task                 @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  attempt     TaskExecutionAttempt @relation(fields: [attemptId, taskId], references: [attemptId, taskId], onDelete: Restrict)
+  outboxEvent TaskOutboxEvent?
+  resultRef   TaskCommittedResultRef?
 
   @@unique([taskId, aggregateVersion])
   @@unique([taskId, idempotencyKey])
+  @@unique([id, taskId])
   @@index([taskId])
   @@index([attemptId])
   @@map("task_execution_transitions")
+}
+
+// ---------------------------------------------------------------------------
+// MUN-0021 outbox-relay — additive models extending MUN-0020 execution authority
+// ---------------------------------------------------------------------------
+// Typed outbox events atomically committed with authority transitions.
+// Mutable lease bookkeeping, append-only delivery-attempt and quarantine
+// evidence, and durable consumer inbox/deduplication.
+// Disabled-by-default (not wired into AppModule).
+
+// One row per committed authority transition — server-derived from the
+// transition and aggregate state. Callers cannot choose routing or payload.
+// Immutable after insert — append-only trigger enforced via migration SQL.
+model TaskOutboxEvent {
+  id               String   @id @db.Uuid
+  taskId           String   @map("task_id") @db.Uuid
+  aggregateVersion BigInt   @map("aggregate_version")
+  attemptId        String   @map("attempt_id") @db.Uuid
+  transitionId     String   @map("transition_id") @db.Uuid
+  eventType        String   @map("event_type") @db.VarChar(64)
+  eventPayload     Json     @default("{}") @map("event_payload")
+  recordedAt       DateTime @map("recorded_at") @db.Timestamptz()
+
+  // Relations
+  task             Task                      @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  attempt          TaskExecutionAttempt      @relation(fields: [attemptId, taskId], references: [attemptId, taskId], onDelete: Restrict)
+  transition       TaskExecutionTransition   @relation(fields: [transitionId, taskId], references: [id, taskId], onDelete: Restrict)
+  lease            OutboxLease?
+  deliveryAttempts DeliveryAttemptEvidence[]
+  quarantines      QuarantineEvidence[]
+  inboxEntries     ConsumerInbox[]
+
+  @@unique([taskId, transitionId])
+  @@unique([transitionId, taskId])
+  @@unique([transitionId])
+  @@index([taskId])
+  @@index([attemptId])
+  @@index([recordedAt])
+  @@map("task_outbox_events")
+}
+
+// Mutable delivery bookkeeping — one row per outbox event.
+// This is the ONLY table whose rows are updated during normal operation.
+// Lease acquisition is a single-writer atomic UPDATE with RETURNING.
+// Fenced: every mutation must match lease_holder + delivery_ordinal so a
+// stale worker cannot commit a status change after the lease was reclaimed.
+// The migration also installs a database trigger that permits only
+// pending -> leased -> delivered|quarantined (or unchanged status).
+model OutboxLease {
+  outboxEventId   String    @id @map("outbox_event_id") @db.Uuid
+  leaseHolder     String?   @map("lease_holder") @db.VarChar(128)
+  leaseAcquiredAt DateTime? @map("lease_acquired_at") @db.Timestamptz()
+  leaseExpiresAt  DateTime? @map("lease_expires_at") @db.Timestamptz()
+  deliveryStatus  String    @default("pending") @map("delivery_status") @db.VarChar(32)
+  deliveryOrdinal Int       @default(0) @map("delivery_ordinal")
+  failureCount    Int       @default(0) @map("failure_count")
+  lastErrorCode   String?   @map("last_error_code") @db.VarChar(64)
+
+  // Relations
+  outboxEvent TaskOutboxEvent @relation(fields: [outboxEventId], references: [id], onDelete: Restrict)
+
+  @@map("outbox_leases")
+}
+
+// Append-only record of each dispatch attempt.
+// UPDATE and DELETE rejected by database trigger.
+model DeliveryAttemptEvidence {
+  id              String   @id @db.Uuid
+  outboxEventId   String   @map("outbox_event_id") @db.Uuid
+  deliveryOrdinal Int      @map("delivery_ordinal")
+  disposition     String   @db.VarChar(32)
+  consumerDigest  String?  @map("consumer_digest") @db.VarChar(64)
+  errorDetail     Json?    @map("error_detail")
+  attemptedAt     DateTime @map("attempted_at") @db.Timestamptz()
+
+  // Relations
+  outboxEvent TaskOutboxEvent @relation(fields: [outboxEventId], references: [id], onDelete: Restrict)
+
+  @@index([outboxEventId])
+  @@map("delivery_attempt_evidence")
+}
+
+// Append-only poison record — one row per quarantined event.
+// UPDATE and DELETE rejected by database trigger.
+model QuarantineEvidence {
+  id              String   @id @db.Uuid
+  outboxEventId   String   @map("outbox_event_id") @db.Uuid
+  deliveryOrdinal Int      @map("delivery_ordinal")
+  failureCount    Int      @map("failure_count")
+  lastErrorCode   String?  @map("last_error_code") @db.VarChar(64)
+  lastErrorDetail Json?    @map("last_error_detail")
+  quarantinedAt   DateTime @map("quarantined_at") @db.Timestamptz()
+
+  // Relations
+  outboxEvent TaskOutboxEvent @relation(fields: [outboxEventId], references: [id], onDelete: Restrict)
+
+  @@unique([outboxEventId])
+  @@map("quarantine_evidence")
+}
+
+// Durable deduplication boundary per consumer.
+// Append-only — UPDATE/DELETE rejected by database trigger. Application
+// code has no mutation path after insert.
+model ConsumerInbox {
+  consumerId       String   @map("consumer_id") @db.VarChar(128)
+  outboxEventId    String   @map("outbox_event_id") @db.Uuid
+  consumedAt       DateTime @map("consumed_at") @db.Timestamptz()
+  sideEffectDigest String   @map("side_effect_digest") @db.VarChar(64)
+
+  // Relations
+  outboxEvent TaskOutboxEvent @relation(fields: [outboxEventId], references: [id], onDelete: Restrict)
+
+  @@id([consumerId, outboxEventId])
+  @@unique([consumerId, outboxEventId])
+  @@map("consumer_inbox")
+}
+
+// ---------------------------------------------------------------------------
+// MUN-0021 adoption gate — Muneral-owned committed-result nodes and references
+// ---------------------------------------------------------------------------
+// Ratified in the ARCA-0194 result-reference consilium. Muneral authors the
+// reference and the deterministic completion receipt in the same transaction
+// as the accepted node mutation, transition journal, aggregate update and
+// outbox fact. Execution adapters propose mutations; they never author
+// receipts or supply authoritative digests.
+// Disabled-by-default (not wired into AppModule).
+
+// One row per accepted owned mutation of a Task Card result node.
+// Append-only — a new result is a new node version, never an in-place rewrite.
+model TaskResultNode {
+  id           String   @id @db.Uuid
+  taskId       String   @map("task_id") @db.Uuid
+  attemptId    String   @map("attempt_id") @db.Uuid
+  cardId       String   @map("card_id") @db.VarChar(256)
+  nodeId       String   @map("node_id") @db.VarChar(256)
+  nodeVersion  Int      @map("node_version")
+  mutationId   String   @map("mutation_id") @db.VarChar(256)
+  principalId  String   @map("principal_id") @db.VarChar(256)
+  nodePayload  Json     @map("node_payload")
+  resultDigest String   @map("result_digest") @db.VarChar(64)
+  recordedAt   DateTime @map("recorded_at") @db.Timestamptz()
+
+  // Relations
+  task       Task                     @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  attempt    TaskExecutionAttempt     @relation(fields: [attemptId, taskId], references: [attemptId, taskId], onDelete: Restrict)
+  resultRefs TaskCommittedResultRef[]
+
+  @@unique([id, taskId])
+  @@unique([taskId, nodeId, nodeVersion])
+  @@unique([taskId, mutationId])
+  @@index([taskId, nodeId])
+  @@index([attemptId])
+  @@map("task_result_nodes")
+}
+
+// One row per committed result — the closed CommittedResultRefV0 identity plus
+// the deterministic completion-receipt identity. The receipt is a pure
+// function of these columns, so a receipt exists exactly when its reference
+// does. The reference carries no result body: the committed node bytes live in
+// TaskResultNode and are addressed by resultDigest.
+model TaskCommittedResultRef {
+  resultRefId      String   @id @map("result_ref_id") @db.VarChar(64)
+  taskId           String   @map("task_id") @db.Uuid
+  attemptId        String   @map("attempt_id") @db.Uuid
+  cardId           String   @map("card_id") @db.VarChar(256)
+  cardDigest       String   @map("card_digest") @db.VarChar(64)
+  projectionId     String   @map("projection_id") @db.VarChar(256)
+  projectionDigest String   @map("projection_digest") @db.VarChar(64)
+  nodeId           String   @map("node_id") @db.VarChar(256)
+  nodeVersion      Int      @map("node_version")
+  resultDigest     String   @map("result_digest") @db.VarChar(64)
+  mutationId       String   @map("mutation_id") @db.VarChar(256)
+  principalId      String   @map("principal_id") @db.VarChar(256)
+  transitionId     String   @map("transition_id") @db.Uuid
+  aggregateVersion BigInt   @map("aggregate_version")
+  resultNodeId     String   @map("result_node_id") @db.Uuid
+  receiptId        String   @map("receipt_id") @db.VarChar(64)
+  causationId      String   @map("causation_id") @db.VarChar(256)
+  correlationId    String   @map("correlation_id") @db.VarChar(256)
+  recordedAt       DateTime @map("recorded_at") @db.Timestamptz()
+
+  // Relations
+  task       Task                    @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  attempt    TaskExecutionAttempt    @relation(fields: [attemptId, taskId], references: [attemptId, taskId], onDelete: Restrict)
+  transition TaskExecutionTransition @relation(fields: [transitionId, taskId], references: [id, taskId], onDelete: Restrict)
+  resultNode TaskResultNode          @relation(fields: [resultNodeId, taskId], references: [id, taskId], onDelete: Restrict)
+
+  @@unique([transitionId])
+  @@unique([transitionId, taskId])
+  @@unique([taskId, attemptId, cardId, nodeId, nodeVersion])
+  @@unique([taskId, mutationId])
+  @@unique([receiptId])
+  @@index([taskId, cardId])
+  @@index([recordedAt])
+  @@map("task_committed_result_refs")
 }

@@ -33,6 +33,7 @@ class TestAppModule {}
 describe('Field-change tracking (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
+  let disconnectSpy: jest.SpyInstance;
   let authSvc: AuthService;
   let fsSvc: TaskFieldStateService;
 
@@ -59,12 +60,14 @@ describe('Field-change tracking (e2e)', () => {
     await app.init();
 
     prisma = moduleRef.get(PrismaService);
+    disconnectSpy = jest.spyOn(prisma, '$disconnect');
     authSvc = moduleRef.get(AuthService);
     fsSvc = moduleRef.get(TaskFieldStateService);
   });
 
   afterAll(async () => {
     await app.close();
+    expect(disconnectSpy).toHaveBeenCalledTimes(1);
   });
 
   beforeEach(async () => {
