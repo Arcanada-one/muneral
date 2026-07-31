@@ -1509,4 +1509,237 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
     expect(CONTAINER_NAME).toContain('muneral-outbox-test');
     expect(CONTAINER_NAME.length).toBeGreaterThanOrEqual(27); // includes random suffix (8 hex chars)
   });
+
+  // -- operator expectation: lease-reclaims-same-event -----------------------
+
+  it('21. lease expiry reclaims the SAME event identity and leaves authority untouched', async () => {
+    // Operator expectation `lease-reclaims-same-event`: expiry and reclaim may
+    // move bounded delivery bookkeeping only. It must never mint a replacement
+    // Muneral attempt, bump the aggregate, or spend retry authority. Unit
+    // mocks cannot prove this — the authority fingerprint has to be read back
+    // from a real database on both sides of the reclaim.
+    const tId = await seedTask();
+    const { outboxEventId, transitionId, attemptId } = await seedOutboxRow(tId, {
+      deliveryStatus: 'pending',
+      failureCount: 0,
+      deliveryOrdinal: 0,
+    });
+
+    async function authorityFingerprint() {
+      const transitions = await prisma.taskExecutionTransition.findMany({
+        where: { taskId: tId },
+        orderBy: { aggregateVersion: 'asc' },
+      });
+      const attempts = await prisma.taskExecutionAttempt.findMany({
+        where: { taskId: tId },
+        orderBy: { ordinal: 'asc' },
+      });
+      const outbox = await prisma.taskOutboxEvent.findMany({
+        where: { taskId: tId },
+        orderBy: { recordedAt: 'asc' },
+      });
+      return JSON.stringify({
+        transitions: transitions.map((t: Record<string, unknown>) => ({
+          id: t.id,
+          attemptId: t.attemptId,
+          aggregateVersion: String(t.aggregateVersion),
+          eventType: t.eventType,
+          commandDigest: t.commandDigest,
+        })),
+        attempts: attempts.map((a: Record<string, unknown>) => ({
+          attemptId: a.attemptId,
+          ordinal: a.ordinal,
+          status: a.status,
+        })),
+        outbox: outbox.map((o: Record<string, unknown>) => ({
+          id: o.id,
+          transitionId: o.transitionId,
+          attemptId: o.attemptId,
+          aggregateVersion: String(o.aggregateVersion),
+        })),
+      });
+    }
+
+    const { OutboxRelay } = require('../src/outbox/outbox.relay');
+    const { normaliseConfig } = require('../src/outbox/outbox.types');
+    const idSource = { generate: () => randomUUID() };
+
+    // A clock the test drives, so expiry is deterministic rather than timed.
+    let nowMs = Date.now();
+    const clock = { now: () => new Date(nowMs) };
+
+    const before = await authorityFingerprint();
+
+    const firstHolder = new OutboxRelay(
+      prisma,
+      clock,
+      idSource,
+      normaliseConfig({
+        relayId: `expiry-holder-a-${randomUUID().slice(0, 6)}`,
+        leaseTtlMs: 1_000,
+        // Earlier tests in this suite leave pending rows behind. Poll the
+        // maximum window so this event is inside the batch deterministically
+        // rather than by seeding order.
+        batchSize: 100,
+      }),
+    );
+    await firstHolder.resume();
+
+    const polled = (await firstHolder.poll()).filter(
+      (e: { id: string }) => e.id === outboxEventId,
+    );
+    expect(polled).toHaveLength(1);
+    const leasedFirst = await firstHolder.lease(polled);
+    expect(leasedFirst).toHaveLength(1);
+
+    const afterFirstLease = await prisma.outboxLease.findUnique({
+      where: { outboxEventId },
+    });
+    expect(afterFirstLease.deliveryStatus).toBe('leased');
+    const firstOrdinal = afterFirstLease.deliveryOrdinal;
+    const firstHolderId = afterFirstLease.leaseHolder;
+
+    // The first holder dies without acknowledging. Advance past the TTL.
+    nowMs += 60_000;
+
+    const secondHolder = new OutboxRelay(
+      prisma,
+      clock,
+      idSource,
+      normaliseConfig({
+        relayId: `expiry-holder-b-${randomUUID().slice(0, 6)}`,
+        leaseTtlMs: 1_000,
+        batchSize: 100,
+      }),
+    );
+    await secondHolder.resume();
+
+    const repolled = (await secondHolder.poll()).filter(
+      (e: { id: string }) => e.id === outboxEventId,
+    );
+    expect(repolled).toHaveLength(1);
+    const leasedSecond = await secondHolder.lease(repolled);
+    expect(leasedSecond).toHaveLength(1);
+
+    // Same event identity — same outbox row, same transition, same attempt.
+    expect(leasedSecond[0].id).toBe(outboxEventId);
+    expect(leasedSecond[0].transitionId).toBe(transitionId);
+    expect(leasedSecond[0].attemptId).toBe(attemptId);
+
+    // Only bounded delivery bookkeeping moved.
+    const afterReclaim = await prisma.outboxLease.findUnique({
+      where: { outboxEventId },
+    });
+    expect(afterReclaim.deliveryOrdinal).toBe(firstOrdinal + 1);
+    expect(afterReclaim.leaseHolder).not.toBe(firstHolderId);
+    expect(afterReclaim.deliveryStatus).toBe('leased');
+    expect(afterReclaim.failureCount).toBe(0);
+
+    // Authority, journal and outbox identity are byte-identical either side.
+    expect(await authorityFingerprint()).toBe(before);
+  }, 30_000);
+
+  // -- operator expectation: poison-quarantine-no-hol ------------------------
+
+  it('22. a quarantined poison event does not block an unrelated aggregate', async () => {
+    // Operator expectation `poison-quarantine-no-hol`: bounded failures must
+    // quarantine the poison event while unrelated task aggregates keep making
+    // progress. Interleave a poison event and a healthy one belonging to two
+    // different tasks and prove both outcomes in the same relay run.
+    const poisonTask = await seedTask();
+    const healthyTask = await seedTask();
+    const poison = await seedOutboxRow(poisonTask, {
+      deliveryStatus: 'pending',
+      failureCount: 0,
+      deliveryOrdinal: 0,
+    });
+    const healthy = await seedOutboxRow(healthyTask, {
+      deliveryStatus: 'pending',
+      failureCount: 0,
+      deliveryOrdinal: 0,
+    });
+
+    const { OutboxRelay } = require('../src/outbox/outbox.relay');
+    const { normaliseConfig } = require('../src/outbox/outbox.types');
+    const clock = { now: () => new Date() };
+    const idSource = { generate: () => randomUUID() };
+    const relay = new OutboxRelay(
+      prisma,
+      clock,
+      idSource,
+      normaliseConfig({
+        relayId: `hol-relay-${randomUUID().slice(0, 6)}`,
+        maxRetries: 2,
+        batchSize: 100,
+      }),
+    );
+    await relay.resume();
+
+    // One consumer, one side-effect surface. It poisons only the event that
+    // belongs to the poison task; the unrelated aggregate is untouched by the
+    // failure and must still be delivered.
+    const delivered: string[] = [];
+    const interleavedConsumer = {
+      consumerId: `hol-consumer-${randomUUID().slice(0, 6)}`,
+      consume: async (event: { id: string }) => {
+        if (event.id === poison.outboxEventId) {
+          throw new Error('poison payload rejected by consumer');
+        }
+        delivered.push(event.id);
+        return { digest: 'a'.repeat(64) };
+      },
+    };
+
+    async function expireLease(outboxEventId: string) {
+      await prisma.$executeRawUnsafe(
+        `UPDATE outbox_leases
+            SET lease_acquired_at = $1, lease_expires_at = $2
+          WHERE outbox_event_id = $3 AND delivery_status = 'leased'`,
+        new Date(Date.now() - 120_000), new Date(Date.now() - 60_000),
+        outboxEventId,
+      );
+    }
+
+    // Drive cycles until the poison event exhausts its bounded retry budget.
+    for (let i = 0; i < 3; i += 1) {
+      await relay.cycle(interleavedConsumer);
+      await expireLease(poison.outboxEventId);
+    }
+
+    const poisonLease = await prisma.outboxLease.findUnique({
+      where: { outboxEventId: poison.outboxEventId },
+    });
+    const healthyLease = await prisma.outboxLease.findUnique({
+      where: { outboxEventId: healthy.outboxEventId },
+    });
+
+    // The poison event is isolated with bounded immutable evidence...
+    expect(poisonLease.deliveryStatus).toBe('quarantined');
+    const quarantine = await prisma.quarantineEvidence.findUnique({
+      where: { outboxEventId: poison.outboxEventId },
+    });
+    expect(quarantine).not.toBeNull();
+    expect(quarantine.failureCount).toBeGreaterThanOrEqual(1);
+
+    // ...and the unrelated aggregate made progress in the very same run.
+    expect(healthyLease.deliveryStatus).toBe('delivered');
+    expect(delivered).toContain(healthy.outboxEventId);
+    const inbox = await prisma.consumerInbox.findFirst({
+      where: {
+        consumerId: interleavedConsumer.consumerId,
+        outboxEventId: healthy.outboxEventId,
+      },
+    });
+    expect(inbox).not.toBeNull();
+
+    // No side effect leaked from the quarantined event.
+    expect(delivered).not.toContain(poison.outboxEventId);
+    const poisonInbox = await prisma.consumerInbox.findFirst({
+      where: {
+        consumerId: interleavedConsumer.consumerId,
+        outboxEventId: poison.outboxEventId,
+      },
+    });
+    expect(poisonInbox).toBeNull();
+  }, 30_000);
 });
