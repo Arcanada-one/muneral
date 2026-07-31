@@ -88,6 +88,8 @@ pg_psql -f - < "$PRISMA_DIR/migrations/20260715170000_add_muneral_kb_task_change
 echo 'MUNERAL_EXEC_AUTH_PHASE_KB_REGISTRY_APPLIED'
 pg_psql -f - < "$PRISMA_DIR/migrations/20260730000000_add_execution_authority/migration.sql" >/dev/null
 echo 'MUNERAL_EXEC_AUTH_PHASE_EXECUTION_AUTHORITY_APPLIED'
+pg_psql -f - < "$PRISMA_DIR/migrations/20260731090000_add_execution_truncate_guard/migration.sql" >/dev/null
+echo 'MUNERAL_EXEC_AUTH_PHASE_TRUNCATE_GUARD_APPLIED'
 
 # ---- Preseed minimal workspace/project/task rows ----
 pg_psql -f - < "$SCRIPT_DIR/execution_authority_preseed.sql" >/dev/null
@@ -112,7 +114,10 @@ if ! grep -qF 'MUNERAL_EXEC_AUTH_SMOKE_PASS' <<< "$smoke_output"; then
 fi
 
 # ---- Count individual proof passes ----
-for proof_num in 1 2 3 4 5 6 7 8 9 10 11 12; do
+# 13/14 are the TRUNCATE-guard proofs and 15 the retry-to-success lifecycle that
+# gives proof 9 a discriminating journal. They carry appended numbers so the
+# existing ordered scenario did not have to be renumbered.
+for proof_num in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
   marker="MUNERAL_EXEC_AUTH_PROOF_${proof_num}_PASS"
   if ! grep -qF "$marker" <<< "$smoke_output"; then
     echo "Proof $proof_num did not pass" >&2
@@ -128,6 +133,11 @@ fingerprint_sql()
 SELECT
   (SELECT EXISTS (SELECT 1 FROM pg_catalog.pg_trigger
                   WHERE tgname = 'task_execution_transitions_append_only'))::text
+  || ' | truncate_guards=' ||
+  (SELECT string_agg(tgname, ',' ORDER BY tgname)
+   FROM pg_catalog.pg_trigger
+   WHERE tgname IN ('task_execution_transitions_no_truncate',
+                    'task_execution_attempts_no_truncate'))
   || ' | ' ||
   (SELECT string_agg(indexname, ',' ORDER BY indexname)
    FROM pg_catalog.pg_indexes
@@ -143,6 +153,12 @@ ENDFP
 
 pre_fp="$(fingerprint_sql 2>&1)"
 
+# Assert both statement-level TRUNCATE guards are installed before rollback
+if ! grep -qF 'truncate_guards=task_execution_attempts_no_truncate,task_execution_transitions_no_truncate' <<< "$pre_fp"; then
+  echo "pre-rollback fingerprint missing the statement-level TRUNCATE guards: $pre_fp" >&2
+  exit 1
+fi
+
 # Assert the expected index set exists before rollback
 if ! grep -qF 'idx_task_exec_attempts_task_id,idx_task_exec_transitions_attempt_id,idx_task_exec_transitions_task_id' <<< "$pre_fp"; then
   echo "pre-rollback fingerprint missing expected index set: $pre_fp" >&2
@@ -153,13 +169,19 @@ if ! grep -qF 'true' <<< "$pre_fp"; then
   exit 1
 fi
 
-# Run rollback.sql — MUST fail
-rollback_status=0
-pg_psql -f - < "$PRISMA_DIR/migrations/20260730000000_add_execution_authority/rollback.sql" >/dev/null 2>&1 || rollback_status="$?"
-if [[ "$rollback_status" -eq 0 ]]; then
-  echo 'rollback.sql unexpectedly succeeded' >&2
-  exit 1
-fi
+# Run every rollback.sql — each MUST fail
+for rollback_migration in \
+  20260730000000_add_execution_authority \
+  20260731090000_add_execution_truncate_guard
+do
+  rollback_status=0
+  pg_psql -f - < "$PRISMA_DIR/migrations/$rollback_migration/rollback.sql" >/dev/null 2>&1 ||
+    rollback_status="$?"
+  if [[ "$rollback_status" -eq 0 ]]; then
+    echo "rollback.sql for $rollback_migration unexpectedly succeeded" >&2
+    exit 1
+  fi
+done
 
 # Post-rollback fingerprint must be byte-identical
 post_fp="$(fingerprint_sql 2>&1)"
@@ -185,8 +207,25 @@ for i in $(seq 1 10); do
   sleep 1
 done
 service_output="$(cd "$PRISMA_DIR/.." && MUN0020_DB_URL="$pg_url" npx jest --testPathPattern='execution-authority.service-smoke' --no-coverage --forceExit 2>&1)"
-if ! grep -qE 'Tests:\s+21 passed,\s+21 total' <<< "$service_output"; then
-  echo 'service-path integration smoke: expected exactly 21 passed, 21 total' >&2
+
+# Require every test in the suite to have run and passed: passed == total, and
+# total is at least the number of tests the suite is known to contain. A bare
+# equality against a hard-coded count also fails when tests are legitimately
+# added; a floor plus passed==total still catches a silently skipped or
+# describe.skip'd suite, which is what this guard exists for.
+MIN_SERVICE_TESTS=24
+tests_line="$(grep -E '^Tests:' <<< "$service_output" | tail -1)"
+# NOTE: this script sets IFS=$'\n\t', so `read` will not split on spaces.
+# Restore a space-only IFS for this one command.
+IFS=' ' read -r service_passed service_total <<< "$(
+  sed -nE 's/^Tests:[[:space:]]+([0-9]+) passed,[[:space:]]+([0-9]+) total[[:space:]]*$/\1 \2/p' \
+    <<< "$tests_line"
+)"
+if [[ -z "${service_passed:-}" || -z "${service_total:-}" ]] ||
+   [[ "$service_passed" != "$service_total" ]] ||
+   [[ "$service_total" -lt "$MIN_SERVICE_TESTS" ]]; then
+  echo "service-path integration smoke: expected N passed, N total with N >= $MIN_SERVICE_TESTS" >&2
+  echo "got: ${tests_line:-<no Tests: line>}" >&2
   echo "--- service output ---" >&2
   echo "$service_output" >&2
   exit 1

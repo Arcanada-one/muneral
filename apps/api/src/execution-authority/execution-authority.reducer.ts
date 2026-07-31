@@ -13,7 +13,6 @@ import {
   isValidAttemptTransition,
 } from './execution-authority.types';
 import type {
-  AttemptStatus,
   ExecutionAuthorityCommand,
   IssueInitialAttemptCommand,
   IssueRetryAttemptCommand,
