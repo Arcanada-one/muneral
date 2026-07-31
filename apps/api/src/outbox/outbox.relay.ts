@@ -38,11 +38,11 @@ const FENCE_REQUIRED_MSG =
   'OutboxRelay: event has no fence token — was it leased? Fencing is mandatory.';
 
 export interface TransactionalClient {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   $transaction<T>(
-    fn: (tx: any) => Promise<T>,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    options?: Record<string, any>,
+    fn: (tx: PrismaTx) => Promise<T>,
+     
+    options?: Record<string, unknown>,
   ): Promise<T>;
 }
 
@@ -74,7 +74,7 @@ export class OutboxRelay {
     const now = this.clock.now();
 
     const rows = await this.prisma.$transaction(async (tx) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       return tx.taskOutboxEvent.findMany({
         where: {
           lease: {
@@ -113,9 +113,9 @@ export class OutboxRelay {
     const result = await this.prisma.$transaction(async (tx) => {
       // Atomic fenced lease acquisition.
       // Increments delivery_ordinal so every acquisition has a unique fence.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const updated = await (tx as any).$queryRawUnsafe?.call?.(
-        tx as any,
+       
+      const updated = await (tx as PrismaTx).$queryRawUnsafe?.call?.(
+        tx as PrismaTx,
         `UPDATE outbox_leases
          SET lease_holder = $1,
              lease_acquired_at = $2,
@@ -139,9 +139,9 @@ export class OutboxRelay {
         const acquired: Array<{ outbox_event_id: string; delivery_ordinal: number }> = [];
         for (const event of events) {
           try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const leaseRow = (tx as any).outboxLease?.updateMany
-              ? await (tx as any).outboxLease.updateMany({
+             
+            const leaseRow = (tx as PrismaTx).outboxLease?.updateMany
+              ? await (tx as PrismaTx).outboxLease.updateMany({
                   where: {
                     outboxEventId: event.id,
                     OR: [
@@ -164,7 +164,7 @@ export class OutboxRelay {
 
             if (leaseRow && leaseRow.count > 0) {
               // Re-read to get the new ordinal
-              const reRead = await (tx as any).outboxLease.findUnique({
+              const reRead = await (tx as PrismaTx).outboxLease.findUnique({
                 where: { outboxEventId: event.id },
               });
               acquired.push({
@@ -251,7 +251,7 @@ export class OutboxRelay {
         if (!leaseValid) return 'expired' as DeliveryDisposition;
 
         // -- 1b. Inbox dedup check --
-        const inboxRow = await (tx as any).consumerInbox.findUnique({
+        const inboxRow = await (tx as PrismaTx).consumerInbox.findUnique({
           where: {
             consumerId_outboxEventId: {
               consumerId: consumer.consumerId,
@@ -265,7 +265,7 @@ export class OutboxRelay {
           // state. If already 'delivered' (prior dispatch completed), skip the
           // update — terminal rows are forward-only. The inbox row proves
           // delivery already happened.
-          const currentLease = await (tx as any).outboxLease.findUnique({
+          const currentLease = await (tx as PrismaTx).outboxLease.findUnique({
             where: { outboxEventId: event.id },
             select: { deliveryStatus: true },
           });
@@ -287,7 +287,7 @@ export class OutboxRelay {
         // No partial consumer writes, no evidence rows survive.
         const consumerResult = await consumer.consume(event, tx);
 
-        await (tx as any).consumerInbox.create({
+        await (tx as PrismaTx).consumerInbox.create({
           data: {
             consumerId: consumer.consumerId,
             outboxEventId: event.id,
@@ -403,7 +403,7 @@ export class OutboxRelay {
   /** Read-only reconciliation snapshot across all surfaces. */
   async reconciliation(): Promise<ReconciliationSnapshot> {
     return this.prisma.$transaction(async (tx) => {
-      const t = tx as any;
+      const t = tx as PrismaTx;
 
       // Lease summary
       const leaseRows: Array<{ deliveryStatus: string }> =
@@ -511,7 +511,7 @@ export class OutboxRelay {
       return await this.prisma.$transaction(async (tx) => {
         // Re-validate fence — it may have been reclaimed while the
         // consumer was running.
-        const leaseRow = await (tx as any).outboxLease.findUnique({
+        const leaseRow = await (tx as PrismaTx).outboxLease.findUnique({
           where: { outboxEventId },
         });
         if (!leaseRow) return 'expired' as DeliveryDisposition;
@@ -592,7 +592,7 @@ export class OutboxRelay {
     fence: LeaseFence,
     now: Date,
   ): Promise<boolean> {
-    const leaseRow = await (tx as any).outboxLease.findUnique({
+    const leaseRow = await (tx as PrismaTx).outboxLease.findUnique({
       where: { outboxEventId },
     });
     if (!leaseRow) return false;
@@ -636,7 +636,7 @@ export class OutboxRelay {
       // Atomic fenced status update FIRST — gates all evidence writes.
       // updateMany WHERE includes holder+ordinal+status='leased'. A stale
       // or reclaimed worker matches zero rows.
-      const updated = await (tx as any).outboxLease.updateMany({
+      const updated = await (tx as PrismaTx).outboxLease.updateMany({
         where: {
           outboxEventId,
           leaseHolder: fence.leaseHolder,
@@ -672,7 +672,7 @@ export class OutboxRelay {
     status: string,
     fence: LeaseFence,
   ): Promise<boolean> {
-    const result = await (tx as any).outboxLease.updateMany({
+    const result = await (tx as PrismaTx).outboxLease.updateMany({
       where: {
         outboxEventId,
         leaseHolder: fence.leaseHolder,
@@ -693,7 +693,7 @@ export class OutboxRelay {
     // Increment failure_count atomically, gated on fence and mutable state.
     // IMP5: Only rows in 'leased' state can be bumped — delivered/quarantined
     // rows are forward-only and immutable.
-    const updated = await (tx as any).outboxLease.updateMany({
+    const updated = await (tx as PrismaTx).outboxLease.updateMany({
       where: {
         outboxEventId,
         leaseHolder: fence.leaseHolder,
@@ -708,7 +708,7 @@ export class OutboxRelay {
     if ((updated?.count ?? 0) !== 1) return null;
 
     // Re-read for the new values
-    const row = await (tx as any).outboxLease.findUnique({
+    const row = await (tx as PrismaTx).outboxLease.findUnique({
       where: { outboxEventId },
     });
     if (!row) return null;
@@ -727,7 +727,7 @@ export class OutboxRelay {
     consumerDigest: string | null,
     errorDetail: Record<string, unknown> | null,
   ): Promise<void> {
-    await (tx as any).deliveryAttemptEvidence.create({
+    await (tx as PrismaTx).deliveryAttemptEvidence.create({
       data: {
         id: this.idSource.generate(),
         outboxEventId,
@@ -747,7 +747,7 @@ export class OutboxRelay {
     failureCount: number,
     lastErrorCode: string,
   ): Promise<void> {
-    await (tx as any).quarantineEvidence.create({
+    await (tx as PrismaTx).quarantineEvidence.create({
       data: {
         id: this.idSource.generate(),
         outboxEventId,
