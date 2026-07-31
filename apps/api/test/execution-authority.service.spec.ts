@@ -60,6 +60,8 @@ function makeTx(overrides: Record<string, any> = {}): any {
     // MUN-0021: Outbox tables added to execution-authority transaction
     taskOutboxEvent: {
       create: jest.fn().mockResolvedValue({}),
+      findFirst: jest.fn().mockResolvedValue(null),
+      findUnique: jest.fn().mockResolvedValue(null),
     },
     outboxLease: {
       create: jest.fn().mockResolvedValue({}),
@@ -128,6 +130,14 @@ describe('ExecutionAuthorityService', () => {
       expect(prisma.$transaction).toHaveBeenCalledTimes(1);
       expect(result).not.toBeInstanceOf(Error);
       expect(tx.taskExecutionState.create).toHaveBeenCalled();
+      expect(tx.taskOutboxEvent.create).toHaveBeenCalledTimes(1);
+      expect(tx.outboxLease.create).toHaveBeenCalledTimes(1);
+      expect(result).toMatchObject({
+        outboxEvent: {
+          eventType: 'attempt:issued',
+          aggregateVersion: 1,
+        },
+      });
     });
 
     it('rolls back and reconciles on post-mutation version race', async () => {
@@ -601,6 +611,14 @@ describe('ExecutionAuthorityService', () => {
       });
 
       expect(result).not.toBeInstanceOf(Error);
+      expect(tx.taskOutboxEvent.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            eventType: 'attempt:started',
+            attemptId: 'att-1',
+          }),
+        }),
+      );
 
       // CRITICAL: the WHERE clause MUST include aggregateVersion for the
       // stale-write guard. If this fails, the version predicate is absent.

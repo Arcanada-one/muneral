@@ -39,10 +39,10 @@ describe('Outbox relay migration', () => {
         'taskId           String   @map("task_id") @db.Uuid',
         'aggregateVersion BigInt   @map("aggregate_version")',
         'attemptId        String   @map("attempt_id") @db.Uuid',
-        'transitionId     String   @unique @map("transition_id") @db.Uuid',
-        'eventType        String   @map("event_type")',
-        'eventPayload     Json     @map("event_payload")',
-        'recordedAt       DateTime @map("recorded_at")',
+        'transitionId     String   @map("transition_id") @db.Uuid',
+        'eventType        String   @map("event_type") @db.VarChar(64)',
+        'eventPayload     Json     @default("{}") @map("event_payload")',
+        'recordedAt       DateTime @map("recorded_at") @db.Timestamptz()',
       ]) {
         expect(schema).toContain(field);
       }
@@ -52,14 +52,14 @@ describe('Outbox relay migration', () => {
       expect(schema).toContain('model OutboxLease');
       expect(schema).toContain('outbox_leases');
       for (const field of [
-        'outboxEventId  String    @id @map("outbox_event_id")',
-        'leaseHolder    String?   @map("lease_holder")',
-        'leaseAcquiredAt DateTime? @map("lease_acquired_at")',
-        'leaseExpiresAt DateTime? @map("lease_expires_at")',
-        'deliveryStatus String    @map("delivery_status")',
-        'deliveryOrdinal Int      @map("delivery_ordinal")',
-        'failureCount   Int       @map("failure_count")',
-        'lastErrorCode  String?   @map("last_error_code")',
+        'outboxEventId   String    @id @map("outbox_event_id") @db.Uuid',
+        'leaseHolder     String?   @map("lease_holder") @db.VarChar(128)',
+        'leaseAcquiredAt DateTime? @map("lease_acquired_at") @db.Timestamptz()',
+        'leaseExpiresAt  DateTime? @map("lease_expires_at") @db.Timestamptz()',
+        'deliveryStatus  String    @default("pending") @map("delivery_status") @db.VarChar(32)',
+        'deliveryOrdinal Int       @default(0) @map("delivery_ordinal")',
+        'failureCount    Int       @default(0) @map("failure_count")',
+        'lastErrorCode   String?   @map("last_error_code") @db.VarChar(64)',
       ]) {
         expect(schema).toContain(field);
       }
@@ -69,13 +69,13 @@ describe('Outbox relay migration', () => {
       expect(schema).toContain('model DeliveryAttemptEvidence');
       expect(schema).toContain('delivery_attempt_evidence');
       for (const field of [
-        'id             String    @id @db.Uuid',
-        'outboxEventId  String    @map("outbox_event_id")',
+        'id              String   @id @db.Uuid',
+        'outboxEventId   String   @map("outbox_event_id") @db.Uuid',
         'deliveryOrdinal Int      @map("delivery_ordinal")',
-        'disposition    String',
-        'consumerDigest String?   @map("consumer_digest")',
-        'errorDetail    Json?     @map("error_detail")',
-        'attemptedAt    DateTime  @map("attempted_at")',
+        'disposition     String   @db.VarChar(32)',
+        'consumerDigest  String?  @map("consumer_digest") @db.VarChar(64)',
+        'errorDetail     Json?    @map("error_detail")',
+        'attemptedAt     DateTime @map("attempted_at") @db.Timestamptz()',
       ]) {
         expect(schema).toContain(field);
       }
@@ -99,10 +99,10 @@ describe('Outbox relay migration', () => {
         /model TaskOutboxEvent \{[\s\S]*?\n\}/,
       );
       expect(model).not.toBeNull();
-      expect(model![0]).toContain('task       Task');
-      expect(model![0]).toContain('attempt    TaskExecutionAttempt');
-      expect(model![0]).toContain('transition TaskExecutionTransition');
-      expect(model![0]).toContain('lease      OutboxLease?');
+      expect(model![0]).toContain('task             Task');
+      expect(model![0]).toContain('attempt          TaskExecutionAttempt');
+      expect(model![0]).toContain('transition       TaskExecutionTransition');
+      expect(model![0]).toContain('lease            OutboxLease?');
       expect(model![0]).toContain('deliveryAttempts DeliveryAttemptEvidence[]');
       expect(model![0]).toContain('quarantines      QuarantineEvidence[]');
       expect(model![0]).toContain('inboxEntries     ConsumerInbox[]');
@@ -153,6 +153,9 @@ describe('Outbox relay migration', () => {
     });
 
     it('enforces valid event_type values on task_outbox_events', () => {
+      expect(migration).toContain("'attempt:issued'");
+      expect(migration).toContain("'attempt:started'");
+      expect(migration).toContain("'attempt:retry_issued'");
       expect(migration).toContain("'task:completed'");
       expect(migration).toContain("'task:failed'");
       expect(migration).toContain("'task:terminal_failed'");
@@ -231,9 +234,9 @@ describe('Outbox relay migration', () => {
       );
     });
 
-    it('adds FK from task_outbox_events to task_execution_transitions with RESTRICT', () => {
+    it('adds composite FK from task_outbox_events to task_execution_transitions with RESTRICT (IMP4 composite guard)', () => {
       expect(migration).toMatch(
-        /task_outbox_events_transition_fkey[\s\S]*FOREIGN KEY \(transition_id\)[\s\S]*REFERENCES public\.task_execution_transitions\(id\)[\s\S]*ON DELETE RESTRICT/,
+        /task_outbox_events_transition_task_fkey[\s\S]*FOREIGN KEY \(transition_id, task_id\)[\s\S]*REFERENCES public\.task_execution_transitions\(id, task_id\)[\s\S]*ON DELETE RESTRICT/,
       );
     });
 
@@ -354,6 +357,30 @@ describe('Outbox relay migration', () => {
     it('outbox_leases does NOT have an append-only trigger (it is mutable)', () => {
       expect(migration).not.toMatch(/outbox_leases_append_only/);
       expect(migration).not.toContain('CREATE FUNCTION public.outbox_leases_guard()');
+    });
+
+    it('makes outbox lease delivery status forward-only at the database boundary', () => {
+      expect(migration).toContain(
+        'CREATE FUNCTION public.outbox_leases_forward_only_guard()',
+      );
+      expect(migration).toContain('SECURITY DEFINER');
+      expect(migration).toContain('SET search_path = pg_catalog');
+      expect(migration).toContain(
+        'REVOKE ALL ON FUNCTION public.outbox_leases_forward_only_guard() FROM PUBLIC;',
+      );
+      expect(migration).toContain(
+        'CREATE TRIGGER outbox_leases_forward_only',
+      );
+      expect(migration).toMatch(
+        /CREATE TRIGGER outbox_leases_forward_only\s+BEFORE UPDATE ON public\.outbox_leases[\s\S]*EXECUTE FUNCTION public\.outbox_leases_forward_only_guard\(\)/,
+      );
+      expect(migration).toContain("OLD.delivery_status = 'pending'");
+      expect(migration).toContain("NEW.delivery_status = 'leased'");
+      expect(migration).toContain("OLD.delivery_status = 'leased'");
+      expect(migration).toContain(
+        "NEW.delivery_status IN ('delivered', 'quarantined')",
+      );
+      expect(migration).toContain("USING ERRCODE = 'MUN01'");
     });
   });
 

@@ -32,8 +32,9 @@ import type {
   TransitionAttemptCommand,
 } from './execution-authority.types';
 import { EVENT_TO_ATTEMPT_STATUS } from './execution-authority.types';
-import { deriveOutboxEventType } from '../outbox/outbox.types';
+import { deriveOutboxEventType, validatePayloadPlane } from '../outbox/outbox.types';
 import type { OutboxEvent } from '../outbox/outbox.types';
+import { WrongPlanePayloadError } from '../outbox/outbox.errors';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -56,7 +57,8 @@ export interface ExecutionResult {
 export type ExecutionOutcome =
   | ExecutionResult
   | ExecutionAuthorityError
-  | EvidenceRefValidationError;
+  | EvidenceRefValidationError
+  | WrongPlanePayloadError;
 
 const TX_OPTS = {
   maxWait: 10_000,
@@ -181,6 +183,10 @@ export class ExecutionAuthorityService {
    * Reconstruct the ExecutionResult exactly as originally returned, using
    * journal facts up to the stored aggregateVersion. The caller must pass the
    * stored committed result and the raw transition row from the DB.
+   *
+   * IMP3: Also reads and returns the existing outbox event identity for
+   * idempotent replay callers — same-key replay returns the committed
+   * outbox event without creating a new row.
    */
   private async reconstructHistoricalResult(
     tx: PrismaTx,
@@ -219,14 +225,69 @@ export class ExecutionAuthorityService {
       );
     }
 
+    // BLOCKER2/3: Read back the existing outbox event for this transition.
+    // Idempotent replay callers must receive the already-committed outbox
+    // identity without creating a duplicate row.
+    // Prisma schema now declares @@unique([transitionId]) matching the
+    // migration's UNIQUE(transition_id), so findUnique is correct and
+    // Prisma/SQL uniqueness no longer drifts.
+    const transitionId = (transitionRow as Record<string, unknown>).id as string;
+    let outboxEvent: OutboxEvent | undefined;
+    try {
+      const outboxRow = await (tx as any).taskOutboxEvent.findUnique({
+        where: { transitionId },
+      });
+      if (outboxRow) {
+        outboxEvent = {
+          id: outboxRow.id,
+          taskId: outboxRow.taskId ?? outboxRow.task_id,
+          aggregateVersion: Number(outboxRow.aggregateVersion ?? outboxRow.aggregate_version),
+          attemptId: outboxRow.attemptId ?? outboxRow.attempt_id,
+          transitionId: outboxRow.transitionId ?? outboxRow.transition_id,
+          eventType: outboxRow.eventType ?? outboxRow.event_type,
+          eventPayload: outboxRow.eventPayload ?? outboxRow.event_payload ?? {},
+          recordedAt: new Date(outboxRow.recordedAt ?? outboxRow.recorded_at),
+        };
+      }
+    } catch (err: unknown) {
+      // Only suppress errors caused by the outbox table not existing.
+      // Schema/programming errors must not be silently swallowed.
+      if (isMissingTableError(err)) {
+        // Outbox tables may not exist in environments that haven't applied
+        // the MUN-0021 migration yet. Gracefully omit outboxEvent.
+      } else {
+        throw err;
+      }
+    }
+
     return {
       committedResult: storedResult,
       transition: this.unmarshalTransition(transitionRow),
       state,
+      outboxEvent,
     };
   }
 
   // -- private in-transaction logic -----------------------------------------
+
+  /**
+   * MUN-0021 adoption gate: run the authority seam inside a transaction the
+   * caller already owns, so a committed-result node, reference and receipt can
+   * be written atomically with the transition, aggregate update and outbox
+   * fact. The caller may pre-allocate the transition id when it must compute a
+   * reference identity that binds to that transition before the write.
+   *
+   * Pre-mutation errors are still returned (not thrown), so the caller can
+   * refuse with zero durable rows. Post-mutation errors throw and roll the
+   * caller's transaction back.
+   */
+  async executeWithinTransaction(
+    tx: PrismaTx,
+    command: ExecutionAuthorityCommand,
+    preAllocated?: { transitionId?: string },
+  ): Promise<ExecutionOutcome> {
+    return this.executeInTransaction(tx, command, preAllocated);
+  }
 
   /**
    * Runs inside an already-open transaction. Pre-mutation errors are returned
@@ -236,6 +297,7 @@ export class ExecutionAuthorityService {
   private async executeInTransaction(
     tx: PrismaTx,
     command: ExecutionAuthorityCommand,
+    preAllocated?: { transitionId?: string },
   ): Promise<ExecutionOutcome> {
     // ---- 0. Validate evidence references (pre-mutation, safe) ----
     const evidenceErr = validateEvidenceRefs(command.evidenceRefs ?? []);
@@ -306,7 +368,7 @@ export class ExecutionAuthorityService {
         ? this.idSource.generate()
         : command.attemptId;
 
-    const transitionId = this.idSource.generate();
+    const transitionId = preAllocated?.transitionId ?? this.idSource.generate();
 
     const result = reduce(currentState, currentAttempt, command, {
       attemptId,
@@ -317,6 +379,60 @@ export class ExecutionAuthorityService {
     if (result instanceof Error) return result;
 
     result.transition.commandDigest = digest;
+
+    // ---- IMP5: Wrong-plane payload guard (pre-mutation, safe) ----
+    // Validate every persisted payload field before any append-only journal
+    // or outbox persistence. Fleet/supervisor-shaped data must leave zero
+    // durable rows. Both committedResult (the reducer's output) and
+    // transitionPayload (the caller-supplied transition input) are checked.
+    const committedPlaneErr = validatePayloadPlane(
+      result.transition.committedResult as Record<string, unknown>,
+    );
+    if (committedPlaneErr !== null) {
+      return new WrongPlanePayloadError(
+        `transition-${transitionId}`,
+        committedPlaneErr,
+      );
+    }
+    const payloadPlaneErr = validatePayloadPlane(
+      (result.transition.transitionPayload ?? {}) as Record<string, unknown>,
+    );
+    if (payloadPlaneErr !== null) {
+      return new WrongPlanePayloadError(
+        `transition-${transitionId}`,
+        payloadPlaneErr,
+      );
+    }
+
+    // Derive and validate the complete outbox envelope before the first
+    // durable write. Returning a typed error after journal/state mutation
+    // would allow the transaction callback to commit an orphan transition.
+    const derivedType = deriveOutboxEventType(
+      result.transition.eventType,
+      result.nextState.retryCount,
+      result.nextState.retryBudget,
+    );
+    const outboxId = this.idSource.generate();
+    const outboxPayload = {
+      schema: 'muneral-outbox-v1' as const,
+      transitionEventType: result.transition.eventType,
+      committedResult: result.transition.committedResult,
+      idempotencyKey: command.idempotencyKey,
+      aggregateVersion: result.nextState.aggregateVersion,
+      attemptId: result.transition.attemptId,
+      attemptOrdinal: result.attempt?.ordinal ?? currentAttempt?.ordinal ?? 1,
+      retryCount: result.nextState.retryCount,
+      retryBudget: result.nextState.retryBudget,
+    };
+    const outboxPlaneErr = validatePayloadPlane(
+      outboxPayload as unknown as Record<string, unknown>,
+    );
+    if (outboxPlaneErr !== null) {
+      return new WrongPlanePayloadError(
+        `outbox-${outboxId}`,
+        outboxPlaneErr,
+      );
+    }
 
     // ---- 5. Atomic writes (POST-MUTATION: throw on error) ----
     if (currentState === null) {
@@ -363,71 +479,43 @@ export class ExecutionAuthorityService {
         ),
       });
 
-    // ---- MUN-0021: Derive and atomically insert outbox event ----
-    let outboxEvent: OutboxEvent | undefined;
+    // ---- MUN-0021: Atomically insert one outbox identity per transition ----
+    await tx.taskOutboxEvent.create({
+      data: {
+        id: outboxId,
+        taskId: command.taskId,
+        aggregateVersion: BigInt(result.nextState.aggregateVersion),
+        attemptId: result.transition.attemptId,
+        transitionId,
+        eventType: derivedType,
+        eventPayload: outboxPayload,
+        recordedAt: now,
+      },
+    });
 
-    if (command.kind === 'transition_attempt') {
-      const derivedType = deriveOutboxEventType(
-        command.eventType,
-        result.nextState.retryCount,
-        result.nextState.retryBudget,
-      );
+    await tx.outboxLease.create({
+      data: {
+        outboxEventId: outboxId,
+        leaseHolder: null,
+        leaseAcquiredAt: null,
+        leaseExpiresAt: null,
+        deliveryStatus: 'pending',
+        deliveryOrdinal: 0,
+        failureCount: 0,
+        lastErrorCode: null,
+      },
+    });
 
-      if (derivedType !== null) {
-        const outboxId = this.idSource.generate();
-        const outboxPayload = {
-          schema: 'muneral-outbox-v1' as const,
-          transitionEventType: command.eventType,
-          committedResult: result.transition.committedResult,
-          idempotencyKey: command.idempotencyKey,
-          aggregateVersion: result.nextState.aggregateVersion,
-          attemptId: command.attemptId,
-          attemptOrdinal: (
-            currentAttempt?.ordinal ??
-            (result.attempt?.ordinal ?? 1)
-          ),
-          retryCount: result.nextState.retryCount,
-          retryBudget: result.nextState.retryBudget,
-        };
-
-        await tx.taskOutboxEvent.create({
-          data: {
-            id: outboxId,
-            taskId: command.taskId,
-            aggregateVersion: BigInt(result.nextState.aggregateVersion),
-            attemptId: command.attemptId,
-            transitionId,
-            eventType: derivedType,
-            eventPayload: outboxPayload,
-            recordedAt: now,
-          },
-        });
-
-        await tx.outboxLease.create({
-          data: {
-            outboxEventId: outboxId,
-            leaseHolder: null,
-            leaseAcquiredAt: null,
-            leaseExpiresAt: null,
-            deliveryStatus: 'pending',
-            deliveryOrdinal: 0,
-            failureCount: 0,
-            lastErrorCode: null,
-          },
-        });
-
-        outboxEvent = {
-          id: outboxId,
-          taskId: command.taskId,
-          aggregateVersion: result.nextState.aggregateVersion,
-          attemptId: command.attemptId,
-          transitionId,
-          eventType: derivedType,
-          eventPayload: outboxPayload,
-          recordedAt: now,
-        };
-      }
-    }
+    const outboxEvent: OutboxEvent = {
+      id: outboxId,
+      taskId: command.taskId,
+      aggregateVersion: result.nextState.aggregateVersion,
+      attemptId: result.transition.attemptId,
+      transitionId,
+      eventType: derivedType,
+      eventPayload: outboxPayload,
+      recordedAt: now,
+    };
 
     return {
       committedResult: result.transition.committedResult,
@@ -606,4 +694,22 @@ function isPrismaSerializationConflict(err: unknown): boolean {
   if (typeof err !== 'object') return false;
   const e = err as { code?: string };
   return e.code === 'P2034';
+}
+
+/**
+ * Detect errors caused by a missing table (e.g. outbox migration not applied).
+ * Prisma error P2021 = "Table <name> does not exist in the current database."
+ * PostgreSQL error 42P01 = undefined_table.
+ * Only these specific errors are safe to suppress; all others (schema drift,
+ * programming errors, connection failures) must propagate.
+ */
+function isMissingTableError(err: unknown): boolean {
+  if (err === null || err === undefined) return false;
+  if (typeof err !== 'object') return false;
+  const e = err as { code?: string; meta?: { code?: string } };
+  // Prisma P2021: table does not exist
+  if (e.code === 'P2021') return true;
+  // PostgreSQL error code 42P01: undefined_table (may be wrapped by Prisma)
+  if (e.meta?.code === '42P01') return true;
+  return false;
 }

@@ -11,8 +11,13 @@
 // committed Muneral task facts only: no fleet registry, lifecycle, placement,
 // update, watchdog, telemetry aggregation, or direct command routing.
 
-import { WrongPlanePayloadError } from './outbox.errors';
-import { validatePayloadPlane } from './outbox.types';
+import { StaleFenceError, WrongPlanePayloadError } from './outbox.errors';
+import {
+  normaliseConfig,
+  validatePayloadPlane,
+  MAX_ERROR_DETAIL_LENGTH,
+  sanitiseErrorDetail,
+} from './outbox.types';
 import type {
   OutboxEvent,
   OutboxConsumer,
@@ -28,6 +33,9 @@ import type {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PrismaTx = any;
+
+const FENCE_REQUIRED_MSG =
+  'OutboxRelay: event has no fence token — was it leased? Fencing is mandatory.';
 
 export interface TransactionalClient {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -46,11 +54,18 @@ export class OutboxRelay {
     private readonly prisma: TransactionalClient,
     private readonly clock: Clock,
     private readonly idSource: IdSource,
-    private readonly config: RelayConfig,
+    config: RelayConfig | Partial<RelayConfig> & { relayId: string },
   ) {
+    // IMP10: normaliseConfig enforced at the public constructor boundary.
+    // Raw RelayConfig callers cannot bypass identifier and numeric bounds.
+    this.config = normaliseConfig(
+      config as Partial<RelayConfig> & { relayId: string },
+    );
     this.stopped = true; // disabled by default
     this.cycleId = null;
   }
+
+  private readonly config: RelayConfig;
 
   // -- public API -----------------------------------------------------------
 
@@ -189,13 +204,26 @@ export class OutboxRelay {
 
   /**
    * Dispatch one event to the consumer with fenced inbox deduplication.
-   * Runs inside a single PostgreSQL transaction.
+   *
+   * CRIT1: The consumer runs inside a bounded PostgreSQL transaction. If
+   * the consumer throws, that entire transaction rolls back — no partial
+   * consumer writes survive. A second, separate bounded transaction then
+   * writes retry/quarantine evidence, gated on the same holder/ordinal
+   * fence. A stale or reclaimed lease commits no consumer effect, inbox,
+   * delivery evidence, or success state.
+   *
+   * CRIT2: Fencing is mandatory. The event MUST carry a _fence token from
+   * lease(). Every mutation checks holder+ordinal and detects
+   * updateMany.count=0 (stale/reclaimed lease).
    */
   async dispatch(
     event: OutboxEvent,
     consumer: OutboxConsumer,
   ): Promise<DeliveryDisposition> {
     const fence = (event as unknown as { _fence?: LeaseFence })._fence;
+    if (!fence) {
+      throw new Error(FENCE_REQUIRED_MSG);
+    }
     const now = this.clock.now();
 
     // ---- 0. Wrong-plane payload check (pre-tx, fail-closed) ----
@@ -210,50 +238,53 @@ export class OutboxRelay {
       throw new WrongPlanePayloadError(event.id, planeErr);
     }
 
-    return this.prisma.$transaction(async (tx) => {
-      // ---- 1. Fence check — verify holder+ordinal match ----
-      const leaseRow = await (tx as any).outboxLease.findUnique({
-        where: { outboxEventId: event.id },
-      });
-      if (!leaseRow) {
-        return 'expired' as DeliveryDisposition;
-      }
-      if (
-        fence &&
-        (leaseRow.leaseHolder !== fence.leaseHolder ||
-          leaseRow.deliveryOrdinal !== fence.deliveryOrdinal)
-      ) {
-        return 'expired' as DeliveryDisposition;
-      }
-      if (
-        leaseRow.deliveryStatus === 'leased' &&
-        leaseRow.leaseExpiresAt &&
-        new Date(leaseRow.leaseExpiresAt) < now
-      ) {
-        return 'expired' as DeliveryDisposition;
-      }
-
-      // ---- 2. Inbox dedup check ----
-      const inboxRow = await (tx as any).consumerInbox.findUnique({
-        where: {
-          consumerId_outboxEventId: {
-            consumerId: consumer.consumerId,
-            outboxEventId: event.id,
-          },
-        },
-      });
-
-      if (inboxRow) {
-        await this.updateLeaseFenced(tx, event.id, 'delivered', fence);
-        await this.recordDeliveryAttempt(
-          tx, event.id, fence?.deliveryOrdinal ?? 0, 'delivered',
-          inboxRow.sideEffectDigest ?? inboxRow.side_effect_digest, null,
+    // ---- 1. Consumer transaction (may roll back) ----
+    // The consumer runs inside its own transaction. If the consumer throws,
+    // every consumer write is rolled back. On success, inbox, delivery
+    // evidence, and lease status commit together.
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        // -- 1a. Fence check — verify holder+ordinal match (mandatory) --
+        const leaseValid = await this.validateLeaseFence(
+          tx, event.id, fence, now,
         );
-        return 'delivered' as DeliveryDisposition;
-      }
+        if (!leaseValid) return 'expired' as DeliveryDisposition;
 
-      // ---- 3. Call consumer inside the transaction ----
-      try {
+        // -- 1b. Inbox dedup check --
+        const inboxRow = await (tx as any).consumerInbox.findUnique({
+          where: {
+            consumerId_outboxEventId: {
+              consumerId: consumer.consumerId,
+              outboxEventId: event.id,
+            },
+          },
+        });
+
+        if (inboxRow) {
+          // IMP5: Only attempt to update the lease if it is still in 'leased'
+          // state. If already 'delivered' (prior dispatch completed), skip the
+          // update — terminal rows are forward-only. The inbox row proves
+          // delivery already happened.
+          const currentLease = await (tx as any).outboxLease.findUnique({
+            where: { outboxEventId: event.id },
+            select: { deliveryStatus: true },
+          });
+          if (currentLease?.deliveryStatus === 'leased') {
+            const updated = await this.updateLeaseFenced(
+              tx, event.id, 'delivered', fence,
+            );
+            if (!updated) return 'expired' as DeliveryDisposition;
+          }
+          await this.recordDeliveryAttempt(
+            tx, event.id, fence.deliveryOrdinal, 'delivered',
+            inboxRow.sideEffectDigest ?? inboxRow.side_effect_digest, null,
+          );
+          return 'delivered' as DeliveryDisposition;
+        }
+
+        // -- 1c. Call consumer inside the transaction --
+        // If the consumer throws, this ENTIRE transaction rolls back.
+        // No partial consumer writes, no evidence rows survive.
         const consumerResult = await consumer.consume(event, tx);
 
         await (tx as any).consumerInbox.create({
@@ -265,62 +296,44 @@ export class OutboxRelay {
           },
         });
 
-        await this.updateLeaseFenced(tx, event.id, 'delivered', fence);
+        const leaseUpdated = await this.updateLeaseFenced(
+          tx, event.id, 'delivered', fence,
+        );
+        if (!leaseUpdated) {
+          // CRIT1: Fence was reclaimed between consumer success and the
+          // final fenced lease update. THROW to roll back the entire tx —
+          // consumer effect, inbox row, and all evidence. A stale/reclaimed
+          // lease commits zero consumer effect, inbox, evidence, or status
+          // change.
+          throw new StaleFenceError(
+            event.id,
+            { holder: fence.leaseHolder, ordinal: fence.deliveryOrdinal },
+            { holder: null, ordinal: -1 },
+          );
+        }
 
         await this.recordDeliveryAttempt(
-          tx, event.id, fence?.deliveryOrdinal ?? 0, 'delivered',
+          tx, event.id, fence.deliveryOrdinal, 'delivered',
           consumerResult.digest, null,
         );
 
         return 'delivered' as DeliveryDisposition;
-      } catch (err) {
-        const errorCode =
-          err instanceof Error ? err.constructor.name : 'UNKNOWN';
-        const errorMessage =
-          err instanceof Error ? err.message : String(err);
+      });
+    } catch (err) {
+      // ---- 2. Consumer threw → transaction rolled back ----
+      // The consumer's writes are completely gone. Now open a SECOND
+      // bounded transaction to write failure evidence, gated on the
+      // same holder/ordinal fence. A stale/reclaimed lease records
+      // no evidence.
+      if (err instanceof WrongPlanePayloadError) throw err;
+      // CRIT1: Stale fence after consumer success → tx was rolled back,
+      // no failure evidence needed (consumer didn't fail, fence was reclaimed).
+      if (err instanceof StaleFenceError) return 'expired' as DeliveryDisposition;
+      // Re-throw infrastructure errors
+      if (isInfrastructureError(err)) throw err;
 
-        const updatedLease = await this.bumpFailureCountFenced(
-          tx, event.id, errorCode, fence,
-        );
-        if (!updatedLease) {
-          // The holder/ordinal fence was lost while the consumer ran. A stale
-          // worker must not append evidence or mutate the reclaimed lease.
-          return 'expired' as DeliveryDisposition;
-        }
-        const failureCount = updatedLease?.failureCount ?? 0;
-        const currentOrdinal = updatedLease?.deliveryOrdinal ?? (fence?.deliveryOrdinal ?? 0);
-
-        if (
-          updatedLease &&
-          failureCount >= this.config.maxRetries
-        ) {
-          await this.recordQuarantine(
-            tx, event.id, currentOrdinal, failureCount, errorCode,
-          );
-          await this.recordDeliveryAttempt(
-            tx, event.id, currentOrdinal, 'quarantined', null,
-            { error: errorMessage, code: errorCode },
-          );
-          await this.updateLeaseFenced(tx, event.id, 'quarantined', {
-            leaseHolder: updatedLease.leaseHolder ?? (fence?.leaseHolder ?? ''),
-            deliveryOrdinal: currentOrdinal,
-          });
-          return 'quarantined' as DeliveryDisposition;
-        }
-
-        // Record the failed attempt without quarantine.
-        // Return 'expired' instead of throwing so this transaction commits
-        // and the failure_count increment + delivery-attempt evidence are
-        // durable. The consumer's own side effects were never committed
-        // (the consumer threw inside this tx) — that is correct.
-        await this.recordDeliveryAttempt(
-          tx, event.id, currentOrdinal, 'expired', null,
-          { error: errorMessage, code: errorCode },
-        );
-
-        return 'expired' as DeliveryDisposition;
-      }
-    });
+      return this.recordFailureEvidence(event.id, fence, err);
+    }
   }
 
   /** Full cycle: poll → lease → dispatch each → return result. */
@@ -343,7 +356,15 @@ export class OutboxRelay {
     let quarantined = 0;
     let skipped = 0;
 
+    // IMP9: stop() must prevent dispatch of the remainder of an already
+    // leased batch. Check stopped before each dispatch iteration.
     for (const event of leased) {
+      if (this.stopped) {
+        // Remainder of batch left pending/recoverable — lease will expire
+        // naturally and be re-acquired after resume().
+        skipped++;
+        continue;
+      }
       try {
         const disposition = await this.dispatch(event, consumer);
         if (disposition === 'delivered') delivered++;
@@ -354,6 +375,10 @@ export class OutboxRelay {
           // Wrong-plane dispatch records durable quarantine evidence before
           // throwing, so the cycle result must expose it as quarantined.
           quarantined++;
+        } else if (isInfrastructureError(err)) {
+          // Infrastructure errors (connection loss) — skip, event will be
+          // re-polled after lease expiry.
+          skipped++;
         } else {
           skipped++;
         }
@@ -363,7 +388,9 @@ export class OutboxRelay {
     return { polled, leased: leasedCount, delivered, quarantined, skipped };
   }
 
-  /** Stop the relay. In-flight dispatch completes; new cycles are no-ops. */
+  /** Stop the relay. Rejects new cycles. In-flight dispatch completes;
+   *  unstarted remainder of a leased batch is left pending/recoverable.
+   *  IMP9: stop() prevents dispatch of the remainder. */
   stop(): void {
     this.stopped = true;
   }
@@ -469,58 +496,210 @@ export class OutboxRelay {
   // -- private helpers -------------------------------------------------------
 
   /**
+   * IMP6 / CRIT1 / CRIT2: Record failure evidence in a SECOND bounded
+   * transaction that opens AFTER the consumer transaction has rolled back.
+   * All writes are gated on the same holder/ordinal fence. A stale/reclaimed
+   * lease records no evidence. Error detail is bounded, redacted, and
+   * non-secret.
+   */
+  private async recordFailureEvidence(
+    outboxEventId: string,
+    fence: LeaseFence,
+    err: unknown,
+  ): Promise<DeliveryDisposition> {
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        // Re-validate fence — it may have been reclaimed while the
+        // consumer was running.
+        const leaseRow = await (tx as any).outboxLease.findUnique({
+          where: { outboxEventId },
+        });
+        if (!leaseRow) return 'expired' as DeliveryDisposition;
+        if (
+          leaseRow.leaseHolder !== fence.leaseHolder ||
+          leaseRow.deliveryOrdinal !== fence.deliveryOrdinal
+        ) {
+          return 'expired' as DeliveryDisposition;
+        }
+        const now = this.clock.now();
+        if (
+          leaseRow.deliveryStatus === 'leased' &&
+          leaseRow.leaseExpiresAt &&
+          new Date(leaseRow.leaseExpiresAt) < now
+        ) {
+          return 'expired' as DeliveryDisposition;
+        }
+
+        const errorCode =
+          err instanceof Error ? err.constructor.name : 'UNKNOWN';
+        const rawMessage =
+          err instanceof Error ? err.message : String(err);
+
+        // IMP6: Bound and redact error detail. Raw exception messages
+        // and attacker-sized content must not enter error_detail.
+        const boundedError = sanitiseErrorDetail(rawMessage);
+
+        const updatedLease = await this.bumpFailureCountFenced(
+          tx, outboxEventId, errorCode, fence,
+        );
+        if (!updatedLease) {
+          // Fence was lost — stale worker must not append evidence.
+          return 'expired' as DeliveryDisposition;
+        }
+        const failureCount = updatedLease.failureCount;
+        const currentOrdinal = updatedLease.deliveryOrdinal;
+
+        if (failureCount >= this.config.maxRetries) {
+          await this.recordQuarantine(
+            tx, outboxEventId, currentOrdinal, failureCount, errorCode,
+          );
+          await this.recordDeliveryAttempt(
+            tx, outboxEventId, currentOrdinal, 'quarantined', null,
+            boundedError,
+          );
+          await this.updateLeaseFenced(tx, outboxEventId, 'quarantined', {
+            leaseHolder: updatedLease.leaseHolder ?? fence.leaseHolder,
+            deliveryOrdinal: currentOrdinal,
+          });
+          return 'quarantined' as DeliveryDisposition;
+        }
+
+        // Record the failed attempt without quarantine.
+        await this.recordDeliveryAttempt(
+          tx, outboxEventId, currentOrdinal, 'expired', null,
+          boundedError,
+        );
+
+        return 'expired' as DeliveryDisposition;
+      });
+    } catch (innerErr) {
+      // If the evidence transaction itself fails (e.g., connection loss),
+      // the event will be re-polled after lease expiry. Return expired
+      // so the caller doesn't abort the cycle.
+      if (isInfrastructureError(innerErr)) return 'expired' as DeliveryDisposition;
+      throw innerErr;
+    }
+  }
+
+  /**
+   * Validate that the current lease row matches the holder+ordinal fence
+   * and has not expired. Returns false (stale/expired) or true (valid).
+   * CRIT2: This check is mandatory before any dispatch-side write.
+   */
+  private async validateLeaseFence(
+    tx: PrismaTx,
+    outboxEventId: string,
+    fence: LeaseFence,
+    now: Date,
+  ): Promise<boolean> {
+    const leaseRow = await (tx as any).outboxLease.findUnique({
+      where: { outboxEventId },
+    });
+    if (!leaseRow) return false;
+    if (
+      leaseRow.leaseHolder !== fence.leaseHolder ||
+      leaseRow.deliveryOrdinal !== fence.deliveryOrdinal
+    ) {
+      return false;
+    }
+    if (
+      leaseRow.deliveryStatus === 'leased' &&
+      leaseRow.leaseExpiresAt &&
+      new Date(leaseRow.leaseExpiresAt) < now
+    ) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
    * Record wrong-plane quarantine in a durable mini-transaction that commits
    * before the WrongPlanePayloadError is thrown. This ensures the quarantine
    * evidence survives and the event is not endlessly re-polled.
+   *
+   * BLOCKER1: The fenced status update is the FIRST write and its result
+   * gates all evidence persistence. A stale/reclaimed worker's updateMany
+   * returns count=0 → zero quarantine, zero attempt evidence, zero status
+   * change. The prior code SELECT-checked the fence (read-then-write race
+   * window), wrote both evidence rows, then ignored a failed fenced status
+   * update return value — a stale worker could persist evidence rows while
+   * failing to change status. Now the entire block is one atomic fail-closed
+   * transaction: the fenced update gates evidence; if the fence was lost,
+   * nothing is written.
    */
   private async recordWrongPlaneQuarantine(
     outboxEventId: string,
-    fence: LeaseFence | undefined,
+    fence: LeaseFence,
     reason: string,
   ): Promise<void> {
     await this.prisma.$transaction(async (tx) => {
+      // Atomic fenced status update FIRST — gates all evidence writes.
+      // updateMany WHERE includes holder+ordinal+status='leased'. A stale
+      // or reclaimed worker matches zero rows.
+      const updated = await (tx as any).outboxLease.updateMany({
+        where: {
+          outboxEventId,
+          leaseHolder: fence.leaseHolder,
+          deliveryOrdinal: fence.deliveryOrdinal,
+          deliveryStatus: 'leased',
+        },
+        data: { deliveryStatus: 'quarantined' },
+      });
+      if ((updated?.count ?? 0) === 0) {
+        // Stale worker — atomically forward-only, zero evidence persisted.
+        return;
+      }
+
       await this.recordQuarantine(
-        tx, outboxEventId, fence?.deliveryOrdinal ?? 0, 1, 'WRONG_PLANE',
+        tx, outboxEventId, fence.deliveryOrdinal, 1, 'WRONG_PLANE',
       );
       await this.recordDeliveryAttempt(
-        tx, outboxEventId, fence?.deliveryOrdinal ?? 0, 'quarantined', null,
-        { reason },
+        tx, outboxEventId, fence.deliveryOrdinal, 'quarantined', null,
+        { error: 'wrong-plane', code: 'WRONG_PLANE', detail: reason.slice(0, MAX_ERROR_DETAIL_LENGTH) },
       );
-      await this.updateLeaseFenced(tx, outboxEventId, 'quarantined', fence);
     });
   }
 
+  /**
+   * CRIT2 / IMP5: Update lease status with mandatory fence. Returns true if
+   * the update affected a row, false if the fence was stale or the row is
+   * in a terminal (delivered/quarantined) state. Terminal rows are
+   * forward-only and cannot be mutated.
+   */
   private async updateLeaseFenced(
     tx: PrismaTx,
     outboxEventId: string,
     status: string,
-    fence?: LeaseFence,
-  ): Promise<void> {
-    const where: Record<string, unknown> = { outboxEventId };
-    if (fence) {
-      where.leaseHolder = fence.leaseHolder;
-      where.deliveryOrdinal = fence.deliveryOrdinal;
-    }
-    await (tx as any).outboxLease.updateMany({
-      where,
+    fence: LeaseFence,
+  ): Promise<boolean> {
+    const result = await (tx as any).outboxLease.updateMany({
+      where: {
+        outboxEventId,
+        leaseHolder: fence.leaseHolder,
+        deliveryOrdinal: fence.deliveryOrdinal,
+        deliveryStatus: 'leased', // IMP5: only mutable while leased
+      },
       data: { deliveryStatus: status },
     });
+    return (result?.count ?? 0) > 0;
   }
 
   private async bumpFailureCountFenced(
     tx: PrismaTx,
     outboxEventId: string,
     errorCode: string,
-    fence?: LeaseFence,
+    fence: LeaseFence,
   ): Promise<{ failureCount: number; deliveryOrdinal: number; leaseHolder: string | null } | null> {
-    const where: Record<string, unknown> = { outboxEventId };
-    if (fence) {
-      where.leaseHolder = fence.leaseHolder;
-      where.deliveryOrdinal = fence.deliveryOrdinal;
-    }
-    // Increment failure_count atomically
+    // Increment failure_count atomically, gated on fence and mutable state.
+    // IMP5: Only rows in 'leased' state can be bumped — delivered/quarantined
+    // rows are forward-only and immutable.
     const updated = await (tx as any).outboxLease.updateMany({
-      where,
+      where: {
+        outboxEventId,
+        leaseHolder: fence.leaseHolder,
+        deliveryOrdinal: fence.deliveryOrdinal,
+        deliveryStatus: 'leased',
+      },
       data: {
         failureCount: { increment: 1 },
         lastErrorCode: errorCode,
@@ -529,7 +708,9 @@ export class OutboxRelay {
     if ((updated?.count ?? 0) !== 1) return null;
 
     // Re-read for the new values
-    const row = await (tx as any).outboxLease.findUnique({ where });
+    const row = await (tx as any).outboxLease.findUnique({
+      where: { outboxEventId },
+    });
     if (!row) return null;
     return {
       failureCount: row.failureCount ?? row.failure_count ?? 0,
@@ -581,7 +762,6 @@ export class OutboxRelay {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private unmarshalOutboxEvent(row: Record<string, any>): OutboxEvent {
-    const lease = row.lease as Record<string, unknown> | undefined;
     return {
       id: row.id as string,
       taskId: (row.taskId ?? row.task_id) as string,
@@ -594,4 +774,26 @@ export class OutboxRelay {
       recordedAt: new Date((row.recordedAt ?? row.recorded_at) as string),
     };
   }
+}
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function isInfrastructureError(err: unknown): boolean {
+  if (err === null || err === undefined) return false;
+  if (typeof err !== 'object') return false;
+  const e = err as { code?: string };
+  // Prisma connection / transaction errors
+  return (
+    e.code === 'P1000' ||
+    e.code === 'P1001' ||
+    e.code === 'P1002' ||
+    e.code === 'P1010' ||
+    e.code === 'P1011' ||
+    e.code === 'P1017' ||
+    e.code === 'P2024' ||
+    e.code === 'P2028' ||
+    e.code === 'P2034'
+  );
 }

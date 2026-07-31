@@ -27,9 +27,9 @@ describe('Execution authority migration', () => {
     it('adds executionState, attempts, and transitions relations to Task', () => {
       // The Task model must expose the new relations without replacing
       // existing fields or the status machine.
-      expect(schema).toContain('executionState  TaskExecutionState?');
-      expect(schema).toContain('attempts        TaskExecutionAttempt[]');
-      expect(schema).toContain('transitions     TaskExecutionTransition[]');
+      expect(schema).toContain('executionState TaskExecutionState?');
+      expect(schema).toContain('attempts       TaskExecutionAttempt[]');
+      expect(schema).toContain('transitions    TaskExecutionTransition[]');
     });
 
     it('retains the existing Task status field and enum check', () => {
@@ -88,7 +88,7 @@ describe('Execution authority migration', () => {
       expect(attemptModel).not.toBeNull();
       expect(transitionModel).not.toBeNull();
       expect(attemptModel![0]).toContain(
-        'transitions TaskExecutionTransition[]',
+        'transitions  TaskExecutionTransition[]',
       );
       expect(transitionModel![0]).toMatch(
         /attempt\s+TaskExecutionAttempt\s+@relation\(fields: \[attemptId, taskId\], references: \[attemptId, taskId\], onDelete: Restrict\)/,

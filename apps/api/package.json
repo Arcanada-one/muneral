@@ -6,7 +6,7 @@
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
     "start": "node dist/main.js",
-    "test": "jest --passWithNoTests",
+    "test": "jest --passWithNoTests --runInBand",
     "test:cov": "jest --coverage --passWithNoTests",
     "lint": "eslint src --ext .ts",
     "migration:run": "ts-node -r tsconfig-paths/register src/migration-runner.ts",

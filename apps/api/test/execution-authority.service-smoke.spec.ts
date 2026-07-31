@@ -1,6 +1,7 @@
 // MUN-0020: Service-path disposable PostgreSQL integration tests.
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
+import { randomUUID } from 'node:crypto';
 import { ExecutionAuthorityService } from '../src/execution-authority/execution-authority.service';
 import type { Clock, IdSource } from '../src/execution-authority/execution-authority.types';
 import {
@@ -13,17 +14,19 @@ import { commandDigest } from '../src/execution-authority/canonical-json';
 import { EvidenceRefValidationError } from '../src/execution-authority/evidence-ref.validator';
 
 // Separate task IDs for test isolation
-const TID = 'a0000000-0000-0000-0000-000000000002';
-const TID_CONC = 'a0000000-0000-0000-0000-000000000004'; // needs own task in preseed
-// Use task-2 for sequential tests, task-4 for concurrency (preseed has tasks 1-2 only)
-// We'll create task-4 dynamically or use a fresh initial attempt on task-2
+const TID = randomUUID();
+const TID_CONC = randomUUID();
+const FIXTURE_OWNER_ID = '10000000-0000-0000-0000-000000000001';
+const FIXTURE_WORKSPACE_ID = '11000000-0000-0000-0000-000000000001';
+const FIXTURE_PROJECT_ID = '20000000-0000-0000-0000-000000000001';
 
 let att1: string;
 let origAtt1: string;    // original attempt from test 1, never reassigned
 let storedResult: any = null;  // stored full result from test 2 for replay comparison
 
+const ID_NAMESPACE = randomUUID().slice(0, 23);
 function makeUuid(seq: number): string {
-  return `d0000000-0000-0000-0000-${String(seq).padStart(12,'0')}`;
+  return `${ID_NAMESPACE}-${String(seq).padStart(12, '0')}`;
 }
 let uuidSeq = 0;
 const idSrc: IdSource = { generate: () => makeUuid(++uuidSeq) };
@@ -53,10 +56,46 @@ async function snapCounts(p: any, tid: string) {
 async function seedTask(p: any, tid: string, title: string): Promise<void> {
   await p.$executeRawUnsafe(
     `INSERT INTO public.tasks (id, project_id, title, status, priority, updated_at)
-     VALUES ($1::uuid, '20000000-0000-0000-0000-000000000001', $2, 'todo', 'medium', now())
+     VALUES ($1::uuid, $2::uuid, $3, 'todo', 'medium', now())
      ON CONFLICT DO NOTHING`,
     tid,
+    FIXTURE_PROJECT_ID,
     title,
+  );
+}
+
+async function seedFixtureParents(p: any): Promise<void> {
+  await p.$executeRawUnsafe(
+    `INSERT INTO public.users (id, name, created_at, updated_at)
+     VALUES ($1::uuid, 'execution-authority-test', now(), now())
+     ON CONFLICT DO NOTHING`,
+    FIXTURE_OWNER_ID,
+  );
+  await p.$executeRawUnsafe(
+    `INSERT INTO public.workspaces (id, slug, name, owner_id, created_at)
+     VALUES (
+       $1::uuid,
+       'mun0020-execution-authority-test',
+       'Execution Authority Test',
+       $2::uuid,
+       now()
+     )
+     ON CONFLICT DO NOTHING`,
+    FIXTURE_WORKSPACE_ID,
+    FIXTURE_OWNER_ID,
+  );
+  await p.$executeRawUnsafe(
+    `INSERT INTO public.projects (id, workspace_id, slug, name, created_at)
+     VALUES (
+       $1::uuid,
+       $2::uuid,
+       'mun0020-execution-authority-test',
+       'Execution Authority Test',
+       now()
+     )
+     ON CONFLICT DO NOTHING`,
+    FIXTURE_PROJECT_ID,
+    FIXTURE_WORKSPACE_ID,
   );
 }
 
@@ -90,9 +129,12 @@ describeIf('ExecutionAuthorityService — disposable PostgreSQL', () => {
   let prisma: any;
   let svc: ExecutionAuthorityService;
 
-  beforeAll(() => {
+  beforeAll(async () => {
     prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.MUN0020_DB_URL! }) });
     svc = new ExecutionAuthorityService(clk, idSrc);
+    await seedFixtureParents(prisma);
+    await seedTask(prisma, TID, 'Execution authority sequential test');
+    await seedTask(prisma, TID_CONC, 'Execution authority concurrency test');
   });
   afterAll(async () => { await prisma.$disconnect(); });
 
@@ -101,7 +143,7 @@ describeIf('ExecutionAuthorityService — disposable PostgreSQL', () => {
   // =====================================================================
 
   it('0a: non-enumerable uri is rejected with no database residue', async () => {
-    const taskId = 'a0000000-0000-0000-0000-000000000020';
+    const taskId = randomUUID();
     await seedTask(prisma, taskId, 'Hidden URI validation');
     const before = await snapCounts(prisma, taskId);
     const ref = {
@@ -127,7 +169,7 @@ describeIf('ExecutionAuthorityService — disposable PostgreSQL', () => {
   });
 
   it('0b: uri accessor is rejected without invocation or database residue', async () => {
-    const taskId = 'a0000000-0000-0000-0000-000000000021';
+    const taskId = randomUUID();
     await seedTask(prisma, taskId, 'Accessor URI validation');
     const before = await snapCounts(prisma, taskId);
     let getterHits = 0;
@@ -154,7 +196,7 @@ describeIf('ExecutionAuthorityService — disposable PostgreSQL', () => {
   });
 
   it('0c: class instance is rejected before canonicalization with no residue', async () => {
-    const taskId = 'a0000000-0000-0000-0000-000000000022';
+    const taskId = randomUUID();
     await seedTask(prisma, taskId, 'Class instance validation');
     const before = await snapCounts(prisma, taskId);
 
@@ -180,7 +222,7 @@ describeIf('ExecutionAuthorityService — disposable PostgreSQL', () => {
   });
 
   it('0d: Object.prototype evidence pollution is rejected with no residue', async () => {
-    const taskId = 'a0000000-0000-0000-0000-000000000023';
+    const taskId = randomUUID();
     await seedTask(prisma, taskId, 'Prototype pollution validation');
     const before = await snapCounts(prisma, taskId);
     const fieldNames = ['uri', 'digest', 'contentType'] as const;
@@ -234,7 +276,7 @@ describeIf('ExecutionAuthorityService — disposable PostgreSQL', () => {
   });
 
   it('0e: attacker-sized unknown key has bounded diagnostics and no residue', async () => {
-    const taskId = 'a0000000-0000-0000-0000-000000000024';
+    const taskId = randomUUID();
     await seedTask(prisma, taskId, 'Bounded diagnostic validation');
     const before = await snapCounts(prisma, taskId);
     const attackerKey = 'x'.repeat(100_000);
@@ -257,7 +299,7 @@ describeIf('ExecutionAuthorityService — disposable PostgreSQL', () => {
   });
 
   it('0f: JSON-wire evidence persists completely with the canonical digest', async () => {
-    const taskId = 'a0000000-0000-0000-0000-000000000025';
+    const taskId = randomUUID();
     await seedTask(prisma, taskId, 'JSON wire evidence');
     const command = initialCommandWithEvidence(
       taskId,
@@ -404,7 +446,7 @@ describeIf('ExecutionAuthorityService — disposable PostgreSQL', () => {
 
   it('8: foreign current_attempt_id rejected by DEFERRABLE composite FK', async () => {
     // Seed a fresh task that exists in tasks but has NO execution state
-    const FK_TID = 'a0000000-0000-0000-0000-000000000010';
+    const FK_TID = randomUUID();
     await prisma.$executeRawUnsafe(
       `INSERT INTO public.tasks (id, project_id, title, status, priority, updated_at)
        VALUES ($1::uuid, '20000000-0000-0000-0000-000000000001', 'FK Test', 'todo', 'medium', now())
@@ -546,7 +588,7 @@ describeIf('ExecutionAuthorityService — disposable PostgreSQL', () => {
 
   it('12: concurrent same-expectedVersion → exactly one succeeds', async () => {
     // Fresh task with its own initial attempt — avoid budget exhaustion from prior tests
-    const CONC_TID = 'a0000000-0000-0000-0000-000000000005';
+    const CONC_TID = randomUUID();
     await prisma.$executeRawUnsafe(
       `INSERT INTO public.tasks (id, project_id, title, status, priority, updated_at)
        VALUES ($1::uuid, '20000000-0000-0000-0000-000000000001', 'Concurrency', 'todo', 'medium', now())
@@ -626,7 +668,7 @@ describeIf('ExecutionAuthorityService — disposable PostgreSQL', () => {
   // =====================================================================
 
   it('13: trigger-induced post-write exception → full rollback, no residue', async () => {
-    const ROLLBACK_TID = 'a0000000-0000-0000-0000-000000000003';
+    const ROLLBACK_TID = randomUUID();
 
     // Seed the task row (needed for FK), then verify zero execution rows
     await prisma.$executeRawUnsafe(

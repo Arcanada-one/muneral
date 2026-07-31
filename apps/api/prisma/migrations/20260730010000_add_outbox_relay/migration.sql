@@ -30,6 +30,9 @@ CREATE TABLE public.task_outbox_events (
     CONSTRAINT task_outbox_events_version_check CHECK (aggregate_version > 0),
     CONSTRAINT task_outbox_events_event_type_check
         CHECK (event_type IN (
+            'attempt:issued',
+            'attempt:started',
+            'attempt:retry_issued',
             'task:completed',
             'task:failed',
             'task:terminal_failed',
@@ -128,6 +131,15 @@ CREATE INDEX idx_delivery_attempt_evidence_outbox
 -- ---------------------------------------------------------------------------
 -- Foreign keys (additive — RESTRICT prevents silent cascade-delete)
 -- ---------------------------------------------------------------------------
+
+-- Composite uniqueness needed to support the cross-check FK that prevents
+-- an outbox row from referencing a transition that belongs to a different
+-- task than the outbox's own task_id. id is already the PK (hence unique),
+-- so (id, task_id) is trivially unique.
+ALTER TABLE public.task_execution_transitions
+    ADD CONSTRAINT task_execution_transitions_id_task_unique
+    UNIQUE (id, task_id);
+
 ALTER TABLE public.task_outbox_events
     ADD CONSTRAINT task_outbox_events_task_id_fkey
     FOREIGN KEY (task_id) REFERENCES public.tasks(id)
@@ -139,10 +151,14 @@ ALTER TABLE public.task_outbox_events
     REFERENCES public.task_execution_attempts(attempt_id, task_id)
     ON DELETE RESTRICT ON UPDATE RESTRICT;
 
+-- IMP4: Composite FK — outbox(transition_id, task_id) references
+-- transition(id, task_id). It is structurally impossible for an outbox row
+-- with task_id=A to reference a transition that belongs to task_id=B while
+-- this FK passes.
 ALTER TABLE public.task_outbox_events
-    ADD CONSTRAINT task_outbox_events_transition_fkey
-    FOREIGN KEY (transition_id)
-    REFERENCES public.task_execution_transitions(id)
+    ADD CONSTRAINT task_outbox_events_transition_task_fkey
+    FOREIGN KEY (transition_id, task_id)
+    REFERENCES public.task_execution_transitions(id, task_id)
     ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 ALTER TABLE public.outbox_leases
@@ -268,3 +284,36 @@ REVOKE ALL ON FUNCTION public.consumer_inbox_guard() FROM PUBLIC;
 CREATE TRIGGER consumer_inbox_append_only
 BEFORE UPDATE OR DELETE ON public.consumer_inbox
 FOR EACH ROW EXECUTE FUNCTION public.consumer_inbox_guard();
+
+-- outbox_leases is mutable, but its delivery state is forward-only. Holder,
+-- ordinal, expiry, failure-count and error-code updates may keep the current
+-- status; status rewinds, skips and terminal-to-nonterminal changes fail at
+-- the database boundary even if an application fence is accidentally bypassed.
+CREATE FUNCTION public.outbox_leases_forward_only_guard()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog
+AS $function$
+BEGIN
+    IF NEW.delivery_status = OLD.delivery_status THEN
+        RETURN NEW;
+    ELSIF OLD.delivery_status = 'pending'
+          AND NEW.delivery_status = 'leased' THEN
+        RETURN NEW;
+    ELSIF OLD.delivery_status = 'leased'
+          AND NEW.delivery_status IN ('delivered', 'quarantined') THEN
+        RETURN NEW;
+    END IF;
+
+    RAISE EXCEPTION 'outbox_leases forward-only violation: % -> % for outbox_event_id=%',
+        OLD.delivery_status, NEW.delivery_status, OLD.outbox_event_id
+        USING ERRCODE = 'MUN01';
+END;
+$function$;
+
+REVOKE ALL ON FUNCTION public.outbox_leases_forward_only_guard() FROM PUBLIC;
+
+CREATE TRIGGER outbox_leases_forward_only
+BEFORE UPDATE ON public.outbox_leases
+FOR EACH ROW EXECUTE FUNCTION public.outbox_leases_forward_only_guard();

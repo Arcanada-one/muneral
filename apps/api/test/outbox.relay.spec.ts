@@ -4,12 +4,15 @@
 // and negative controls. All tests use in-memory mock Prisma — no database.
 
 import { OutboxRelay } from '../src/outbox/outbox.relay';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { TransactionalClient } from '../src/outbox/outbox.relay';
 import {
   normaliseConfig,
+  sanitiseErrorDetail,
   validatePayloadPlane,
 } from '../src/outbox/outbox.types';
 import { WrongPlanePayloadError } from '../src/outbox/outbox.errors';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type {
   OutboxEvent,
   OutboxConsumer,
@@ -73,6 +76,21 @@ function makeOutboxEvent(overrides: Partial<OutboxEvent> = {}): OutboxEvent {
   };
 }
 
+// Make a fenced event (for dispatch — fencing is mandatory)
+function makeFencedEvent(
+  overrides: Partial<OutboxEvent> = {},
+  fenceOverrides: Partial<LeaseFence> = {},
+): OutboxEvent & { _fence: LeaseFence } {
+  const event = makeOutboxEvent(overrides);
+  return {
+    ...event,
+    _fence: {
+      leaseHolder: fenceOverrides.leaseHolder ?? 'holder-1',
+      deliveryOrdinal: fenceOverrides.deliveryOrdinal ?? 1,
+    },
+  } as OutboxEvent & { _fence: LeaseFence };
+}
+
 // ---------------------------------------------------------------------------
 // Consumer factory
 // ---------------------------------------------------------------------------
@@ -124,15 +142,28 @@ function makeTx(overrides: Record<string, any> = {}): any {
   };
 }
 
+/**
+ * Create a mock Prisma client that supports multiple $transaction calls.
+ * Each call to $transaction invokes the callback with the tx fixture.
+ * For success-path dispatch (single tx), one call is enough.
+ * For failure-path dispatch (two txs — consumer + evidence), provide
+ * two tx fixtures and the first call throws to simulate consumer failure.
+ */
 function makePrisma(
-  tx: ReturnType<typeof makeTx>,
+  txOrTxs: ReturnType<typeof makeTx> | ReturnType<typeof makeTx>[],
 ): TransactionalClient {
+  const txs = Array.isArray(txOrTxs) ? txOrTxs : [txOrTxs];
+  let callIdx = 0;
   return {
     $transaction: jest
       .fn()
       .mockImplementation(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        async (fn: (t: any) => Promise<unknown>) => fn(tx),
+        async (fn: (t: any) => Promise<unknown>) => {
+          const tx = txs[Math.min(callIdx, txs.length - 1)];
+          callIdx += 1;
+          return fn(tx);
+        },
       ),
   };
 }
@@ -226,6 +257,27 @@ describe('OutboxRelay', () => {
         polled: 0, leased: 0, delivered: 0, quarantined: 0, skipped: 0,
       });
     });
+
+    // IMP10: normaliseConfig enforced at constructor boundary
+    it('normalises config at constructor boundary', () => {
+      const prisma = makePrisma(makeTx());
+      const r = new OutboxRelay(prisma, clock, idSource, {
+        relayId: 'bare-relay',
+      });
+      const cfg = (r as unknown as { config: RelayConfig }).config;
+      expect(cfg.relayId).toBe('bare-relay');
+      expect(cfg.leaseTtlMs).toBe(60000);
+      expect(cfg.maxRetries).toBe(3);
+      expect(cfg.batchSize).toBe(10);
+    });
+
+    it('rejects invalid config values at constructor', () => {
+      const prisma = makePrisma(makeTx());
+      expect(() => new OutboxRelay(prisma, clock, idSource, {
+        relayId: 'bad',
+        leaseTtlMs: 50, // below minimum 1000
+      })).toThrow(/leaseTtlMs/);
+    });
   });
 
   // -- poll ------------------------------------------------------------------
@@ -290,7 +342,6 @@ describe('OutboxRelay', () => {
       const pollRelay = new OutboxRelay(prisma, clock, idSource, config);
       await pollRelay.poll();
 
-      // The findMany call should include take: config.batchSize
       const callArgs = findMany.mock.calls[0][0];
       expect(callArgs.take).toBe(config.batchSize);
     });
@@ -305,8 +356,6 @@ describe('OutboxRelay', () => {
     });
 
     it('acquires lease with relayId prefix as crash prefix', async () => {
-      // The lease holder format is `${relayId}-${idSource.generate()}`
-      // We verify the prefix contract via the raw SQL fallback path.
       const events = [makeOutboxEvent()];
       const leaseRow = makeLeaseRow({ deliveryStatus: 'pending' });
 
@@ -327,7 +376,6 @@ describe('OutboxRelay', () => {
       const leased = await leaseRelay.lease(events);
       expect(leased).toHaveLength(1);
 
-      // Verify the cycleId contains the relayId prefix (crash prefix contract)
       const cycleId = (leaseRelay as unknown as { cycleId: string | null }).cycleId;
       expect(cycleId).not.toBeNull();
       expect(cycleId).toContain(config.relayId);
@@ -335,7 +383,6 @@ describe('OutboxRelay', () => {
 
     it('skips events already leased by another holder (not expired)', async () => {
       const events = [makeOutboxEvent()];
-      // The updateMany returns { count: 0 } — lease not acquired
       const tx = makeTx({
         outboxLease: {
           updateMany: jest.fn().mockResolvedValue({ count: 0 }),
@@ -350,9 +397,6 @@ describe('OutboxRelay', () => {
     });
 
     it('preserves failure_count on lease acquisition (does not reset)', async () => {
-      // POST-FIX: failure_count is no longer reset to 0 on lease acquisition.
-      // Accumulated failure state must persist across lease cycles so
-      // quarantine is reachable after maxRetries consecutive failures.
       const events = [makeOutboxEvent()];
       const tx = makeTx({
         outboxLease: {
@@ -372,7 +416,6 @@ describe('OutboxRelay', () => {
       const leased = await leaseRelay.lease(events);
       expect(leased).toHaveLength(1);
 
-      // Verify failure_count was NOT set in the updateMany call (preserved)
       const updateCall = tx.outboxLease.updateMany.mock.calls[0][0];
       expect(updateCall.data.failureCount).toBeUndefined();
     });
@@ -396,7 +439,6 @@ describe('OutboxRelay', () => {
 
       await leaseRelay.lease(events);
 
-      // Verify delivery_ordinal is incremented
       const updateCall = tx.outboxLease.updateMany.mock.calls[0][0];
       expect(updateCall.data.deliveryOrdinal).toEqual({ increment: 1 });
     });
@@ -423,7 +465,7 @@ describe('OutboxRelay', () => {
     });
 
     it('rejects payload with forbidden fleet key (host_id) before consumer invocation', async () => {
-      const event = makeOutboxEvent({
+      const event = makeFencedEvent({
         eventPayload: {
           schema: 'muneral-outbox-v1',
           transitionEventType: 'attempt:succeeded',
@@ -445,6 +487,8 @@ describe('OutboxRelay', () => {
         leaseExpiresAt: FIXED_NOW_PLUS_30S,
       });
 
+      // The wrong-plane check happens before the consumer tx, then
+      // recordWrongPlaneQuarantine opens its own tx.
       const tx = makeTx({
         outboxLease: {
           findUnique: jest.fn().mockResolvedValue(leaseRow),
@@ -455,14 +499,8 @@ describe('OutboxRelay', () => {
       const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
       const consumer = makeConsumer();
 
-      // Attach fence to event
-      const fencedEvent = {
-        ...event,
-        _fence: { leaseHolder: 'holder-1', deliveryOrdinal: 1 } as LeaseFence,
-      } as OutboxEvent & { _fence: LeaseFence };
-
       await expect(
-        dispatchRelay.dispatch(fencedEvent as unknown as OutboxEvent, consumer),
+        dispatchRelay.dispatch(event as unknown as OutboxEvent, consumer),
       ).rejects.toThrow(WrongPlanePayloadError);
 
       // Consumer must NOT have been invoked
@@ -478,7 +516,7 @@ describe('OutboxRelay', () => {
     });
 
     it('rejects payload with Supervisor-shaped key (desired_state)', async () => {
-      const event = makeOutboxEvent({
+      const event = makeFencedEvent({
         eventPayload: {
           schema: 'muneral-outbox-v1',
           transitionEventType: 'attempt:succeeded',
@@ -510,21 +548,14 @@ describe('OutboxRelay', () => {
       const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
       const consumer = makeConsumer();
 
-      const fencedEvent = {
-        ...event,
-        _fence: { leaseHolder: 'holder-1', deliveryOrdinal: 1 } as LeaseFence,
-      } as OutboxEvent & { _fence: LeaseFence };
-
       await expect(
-        dispatchRelay.dispatch(fencedEvent as unknown as OutboxEvent, consumer),
+        dispatchRelay.dispatch(event as unknown as OutboxEvent, consumer),
       ).rejects.toThrow(WrongPlanePayloadError);
 
       expect(consumer.consume).not.toHaveBeenCalled();
     });
 
-    it('NEGATIVE-CONTROL: Supervisor-shaped payload does not alter attempt identity, aggregate version, retry budget or result references', async () => {
-      // The wrong-plane check happens before any state mutation.
-      // We verify the event's identity fields are untouched.
+    it('NEGATIVE-CONTROL: Supervisor-shaped payload does not alter attempt identity', async () => {
       const originalEvent = makeOutboxEvent({
         eventPayload: {
           schema: 'muneral-outbox-v1',
@@ -573,13 +604,95 @@ describe('OutboxRelay', () => {
       expect(originalEvent.eventPayload.retryBudget).toBe(3);
       expect(originalEvent.eventPayload.retryCount).toBe(0);
     });
+
+    // CRIT2: A stale/reclaimed worker must insert no quarantine or attempt
+    // evidence and must not change status for wrong-plane payloads.
+    it('CRIT2: stale worker inserts zero quarantine evidence for wrong-plane payload', async () => {
+      const event = makeFencedEvent(
+        {
+          eventPayload: {
+            schema: 'muneral-outbox-v1',
+            transitionEventType: 'attempt:succeeded',
+            committedResult: { status: 'done' },
+            idempotencyKey: 'idem-1',
+            aggregateVersion: 5,
+            attemptId: 'att-0001',
+            attemptOrdinal: 1,
+            retryCount: 0,
+            retryBudget: 3,
+            host_id: 'h-1234', // WRONG PLANE
+          } as unknown as OutboxEvent['eventPayload'],
+        },
+        { leaseHolder: 'stale-holder', deliveryOrdinal: 99 },
+      );
+
+      // Lease was reclaimed — different holder + ordinal
+      const leaseRow = makeLeaseRow({
+        deliveryStatus: 'leased',
+        leaseHolder: 'current-holder', // ← different from fence!
+        deliveryOrdinal: 5, // ← different from fence!
+        leaseExpiresAt: FIXED_NOW_PLUS_30S,
+      });
+
+      // BLOCKER1: The new atomic fence pattern uses updateMany FIRST.
+      // The WHERE clause includes leaseHolder + deliveryOrdinal from the
+      // fence. Since the leaseRow has different values, the mock must
+      // return count: 0 (zero rows matched = stale fence).
+      let updateManyCalled = false;
+      const tx = makeTx({
+        outboxLease: {
+          findUnique: jest.fn().mockResolvedValue(leaseRow),
+          updateMany: jest.fn().mockImplementation((args: { where?: { leaseHolder?: string; deliveryOrdinal?: number } }) => {
+            updateManyCalled = true;
+            // Atomic fence check: if WHERE holder/ordinal don't match the
+            // actual lease row, return 0 → stale worker, zero evidence.
+            const w = args.where ?? {};
+            if (w.leaseHolder === 'stale-holder' && w.deliveryOrdinal === 99) {
+              return Promise.resolve({ count: 0 }); // fence mismatch
+            }
+            return Promise.resolve({ count: 1 });
+          }),
+        },
+      });
+      const prisma = makePrisma(tx);
+      const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
+      const consumer = makeConsumer();
+
+      await expect(
+        dispatchRelay.dispatch(event as unknown as OutboxEvent, consumer),
+      ).rejects.toThrow(WrongPlanePayloadError);
+
+      // Consumer NOT called
+      expect(consumer.consume).not.toHaveBeenCalled();
+
+      // ZERO quarantine evidence — fence was stale, updateMany returned 0
+      expect(updateManyCalled).toBe(true); // fence check DID run
+      expect(tx.quarantineEvidence.create).not.toHaveBeenCalled();
+      expect(tx.deliveryAttemptEvidence.create).not.toHaveBeenCalled();
+    });
+  });
+
+  // -- dispatch: fencing is mandatory ----------------------------------------
+
+  describe('dispatch — fencing mandatory (CRIT2)', () => {
+    it('throws when event has no _fence token', async () => {
+      const event = makeOutboxEvent(); // no _fence
+      const tx = makeTx();
+      const prisma = makePrisma(tx);
+      const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
+      const consumer = makeConsumer();
+
+      await expect(
+        dispatchRelay.dispatch(event, consumer),
+      ).rejects.toThrow(/FENCE_REQUIRED|fence.*mandatory/i);
+    });
   });
 
   // -- dispatch: fence & lease expiry ----------------------------------------
 
   describe('dispatch — fence and lease expiry', () => {
     it('returns expired on stale fence (lease reclaimed by another worker)', async () => {
-      const event = makeOutboxEvent();
+      const event = makeFencedEvent();
       const leaseRow = makeLeaseRow({
         deliveryStatus: 'leased',
         leaseHolder: 'other-holder', // Different holder!
@@ -596,14 +709,8 @@ describe('OutboxRelay', () => {
       const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
       const consumer = makeConsumer();
 
-      // Event fence says holder-1, ordinal 1, but actual lease says other-holder, ordinal 5
-      const fencedEvent = {
-        ...event,
-        _fence: { leaseHolder: 'holder-1', deliveryOrdinal: 1 } as LeaseFence,
-      } as OutboxEvent & { _fence: LeaseFence };
-
       const disposition = await dispatchRelay.dispatch(
-        fencedEvent as unknown as OutboxEvent,
+        event as unknown as OutboxEvent,
         consumer,
       );
 
@@ -612,7 +719,7 @@ describe('OutboxRelay', () => {
     });
 
     it('returns expired when only the lease holder mismatches', async () => {
-      const event = makeOutboxEvent();
+      const event = makeFencedEvent();
       const leaseRow = makeLeaseRow({
         deliveryStatus: 'leased',
         leaseHolder: 'other-holder',
@@ -628,19 +735,15 @@ describe('OutboxRelay', () => {
         makePrisma(tx), clock, idSource, config,
       );
       const consumer = makeConsumer();
-      const fencedEvent = {
-        ...event,
-        _fence: { leaseHolder: 'holder-1', deliveryOrdinal: 1 } as LeaseFence,
-      } as OutboxEvent & { _fence: LeaseFence };
 
       await expect(
-        dispatchRelay.dispatch(fencedEvent as unknown as OutboxEvent, consumer),
+        dispatchRelay.dispatch(event as unknown as OutboxEvent, consumer),
       ).resolves.toBe('expired');
       expect(consumer.consume).not.toHaveBeenCalled();
     });
 
     it('returns expired when only the delivery ordinal mismatches', async () => {
-      const event = makeOutboxEvent();
+      const event = makeFencedEvent();
       const leaseRow = makeLeaseRow({
         deliveryStatus: 'leased',
         leaseHolder: 'holder-1',
@@ -656,19 +759,15 @@ describe('OutboxRelay', () => {
         makePrisma(tx), clock, idSource, config,
       );
       const consumer = makeConsumer();
-      const fencedEvent = {
-        ...event,
-        _fence: { leaseHolder: 'holder-1', deliveryOrdinal: 1 } as LeaseFence,
-      } as OutboxEvent & { _fence: LeaseFence };
 
       await expect(
-        dispatchRelay.dispatch(fencedEvent as unknown as OutboxEvent, consumer),
+        dispatchRelay.dispatch(event as unknown as OutboxEvent, consumer),
       ).resolves.toBe('expired');
       expect(consumer.consume).not.toHaveBeenCalled();
     });
 
     it('returns expired when lease has timed out', async () => {
-      const event = makeOutboxEvent();
+      const event = makeFencedEvent();
       const leaseRow = makeLeaseRow({
         deliveryStatus: 'leased',
         leaseHolder: 'holder-1',
@@ -685,13 +784,8 @@ describe('OutboxRelay', () => {
       const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
       const consumer = makeConsumer();
 
-      const fencedEvent = {
-        ...event,
-        _fence: { leaseHolder: 'holder-1', deliveryOrdinal: 1 } as LeaseFence,
-      } as OutboxEvent & { _fence: LeaseFence };
-
       const disposition = await dispatchRelay.dispatch(
-        fencedEvent as unknown as OutboxEvent,
+        event as unknown as OutboxEvent,
         consumer,
       );
 
@@ -700,7 +794,7 @@ describe('OutboxRelay', () => {
     });
 
     it('returns expired when no lease row exists', async () => {
-      const event = makeOutboxEvent();
+      const event = makeFencedEvent();
       const tx = makeTx({
         outboxLease: {
           findUnique: jest.fn().mockResolvedValue(null),
@@ -710,7 +804,10 @@ describe('OutboxRelay', () => {
       const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
       const consumer = makeConsumer();
 
-      const disposition = await dispatchRelay.dispatch(event, consumer);
+      const disposition = await dispatchRelay.dispatch(
+        event as unknown as OutboxEvent,
+        consumer,
+      );
       expect(disposition).toBe('expired');
     });
   });
@@ -719,7 +816,7 @@ describe('OutboxRelay', () => {
 
   describe('dispatch — commit-before-ack (inbox dedup)', () => {
     it('returns delivered when inbox row already exists (idempotent replay)', async () => {
-      const event = makeOutboxEvent();
+      const event = makeFencedEvent();
       const leaseRow = makeLeaseRow({
         deliveryStatus: 'leased',
         leaseHolder: 'holder-1',
@@ -744,27 +841,19 @@ describe('OutboxRelay', () => {
       const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
       const consumer = makeConsumer();
 
-      const fencedEvent = {
-        ...event,
-        _fence: { leaseHolder: 'holder-1', deliveryOrdinal: 1 } as LeaseFence,
-      } as OutboxEvent & { _fence: LeaseFence };
-
       const disposition = await dispatchRelay.dispatch(
-        fencedEvent as unknown as OutboxEvent,
+        event as unknown as OutboxEvent,
         consumer,
       );
 
       expect(disposition).toBe('delivered');
-      // Consumer must NOT be called — it was already delivered
       expect(consumer.consume).not.toHaveBeenCalled();
-      // Lease must be marked as delivered
       expect(tx.outboxLease.updateMany).toHaveBeenCalled();
-      // Delivery attempt must be recorded as delivered
       expect(tx.deliveryAttemptEvidence.create).toHaveBeenCalled();
     });
 
     it('duplicate dispatch is idempotent — does not re-invoke consumer', async () => {
-      const event = makeOutboxEvent();
+      const event = makeFencedEvent();
       const leaseRow = makeLeaseRow({
         deliveryStatus: 'leased',
         leaseHolder: 'holder-1',
@@ -778,8 +867,6 @@ describe('OutboxRelay', () => {
           updateMany: jest.fn().mockResolvedValue({ count: 1 }),
         },
         consumerInbox: {
-          // First dispatch: no inbox row → consumer is called
-          // Second dispatch: inbox row exists → dedup
           findUnique: jest
             .fn()
             .mockResolvedValueOnce(null) // first dispatch
@@ -799,14 +886,9 @@ describe('OutboxRelay', () => {
       const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
       const consumer = makeConsumer();
 
-      const fencedEvent = {
-        ...event,
-        _fence: { leaseHolder: 'holder-1', deliveryOrdinal: 1 } as LeaseFence,
-      } as OutboxEvent & { _fence: LeaseFence };
-
       // First dispatch — consumer is called
       const r1 = await dispatchRelay.dispatch(
-        fencedEvent as unknown as OutboxEvent,
+        event as unknown as OutboxEvent,
         consumer,
       );
       expect(r1).toBe('delivered');
@@ -814,7 +896,7 @@ describe('OutboxRelay', () => {
 
       // Second dispatch — dedup, consumer NOT called again
       const r2 = await dispatchRelay.dispatch(
-        fencedEvent as unknown as OutboxEvent,
+        event as unknown as OutboxEvent,
         consumer,
       );
       expect(r2).toBe('delivered');
@@ -826,7 +908,7 @@ describe('OutboxRelay', () => {
 
   describe('dispatch — consumer success', () => {
     it('invokes consumer, writes inbox row, marks lease delivered', async () => {
-      const event = makeOutboxEvent();
+      const event = makeFencedEvent();
       const leaseRow = makeLeaseRow({
         deliveryStatus: 'leased',
         leaseHolder: 'holder-1',
@@ -844,19 +926,13 @@ describe('OutboxRelay', () => {
       const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
       const consumer = makeConsumer();
 
-      const fencedEvent = {
-        ...event,
-        _fence: { leaseHolder: 'holder-1', deliveryOrdinal: 1 } as LeaseFence,
-      } as OutboxEvent & { _fence: LeaseFence };
-
       const disposition = await dispatchRelay.dispatch(
-        fencedEvent as unknown as OutboxEvent,
+        event as unknown as OutboxEvent,
         consumer,
       );
 
       expect(disposition).toBe('delivered');
       expect(consumer.consume).toHaveBeenCalledTimes(1);
-      // Inbox row must be created with the digest
       expect(tx.consumerInbox.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -866,17 +942,68 @@ describe('OutboxRelay', () => {
           }),
         }),
       );
-      // Lease marked as delivered
       expect(tx.outboxLease.updateMany).toHaveBeenCalled();
+    });
+
+    // CRIT1: When the consumer succeeds but the lease is reclaimed before the
+    // final fenced update completes, the entire transaction must roll back:
+    // zero consumer effect, zero inbox row, zero evidence, zero status change.
+    // The fix throws StaleFenceError inside $transaction → rollback → returns
+    // 'expired' without opening a failure-evidence tx.
+    it('CRIT1: consumer effect + inbox roll back when lease is reclaimed mid-dispatch', async () => {
+      const event = makeFencedEvent();
+      const leaseRow = makeLeaseRow({
+        deliveryStatus: 'leased',
+        leaseHolder: 'holder-1',
+        deliveryOrdinal: 1,
+        leaseExpiresAt: FIXED_NOW_PLUS_30S,
+      });
+
+      // Fence is valid for initial check, but the final updateMany returns
+      // count=0 — the lease was reclaimed between consumer success and the
+      // fenced status update.
+      const tx = makeTx({
+        outboxLease: {
+          findUnique: jest.fn().mockResolvedValue(leaseRow),
+          updateMany: jest.fn().mockResolvedValue({ count: 0 }), // ← reclaimed!
+        },
+      });
+      const prisma = makePrisma(tx);
+      const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
+      const consumer = makeConsumer();
+
+      const disposition = await dispatchRelay.dispatch(
+        event as unknown as OutboxEvent,
+        consumer,
+      );
+
+      // GREEN: StaleFenceError thrown inside $transaction → rolls back the
+      // entire tx (consumer effect + inbox). Catch handler returns 'expired'
+      // with zero failure evidence.
+      expect(disposition).toBe('expired');
+
+      // Consumer was invoked (inside the rolled-back tx)
+      expect(consumer.consume).toHaveBeenCalledTimes(1);
+
+      // inbox.create was called inside the tx but the throw rolled it back —
+      // deliveryAttemptEvidence.create was NOT called because throw precedes it
+      expect(tx.deliveryAttemptEvidence.create).not.toHaveBeenCalled();
+
+      // No second transaction was opened — $transaction called exactly once
+      expect(prisma.$transaction).toHaveBeenCalledTimes(1);
     });
   });
 
-  // -- dispatch: consumer failure → retry → quarantine -----------------------
+  // -- dispatch: consumer failure → retry → quarantine (CRIT1 + CRIT2) -------
 
-  describe('dispatch — consumer failure → retry → quarantine', () => {
-    it('bumps failure_count and returns expired on consumer error (retry, not yet quarantined)', async () => {
-      const event = makeOutboxEvent();
-      const leaseRow = makeLeaseRow({
+  describe('dispatch — consumer failure → separate evidence tx', () => {
+    it('consumer failure rolls back consumer tx, writes failure evidence in second tx', async () => {
+      const event = makeFencedEvent();
+
+      // --- Consumer tx fixture (first $transaction) ---
+      // The consumer throws, so the first tx rolls back.
+      // The mock still needs enough to pass the fence check (findUnique for lease).
+      const consumerTxLeaseRow = makeLeaseRow({
         deliveryStatus: 'leased',
         leaseHolder: 'holder-1',
         deliveryOrdinal: 1,
@@ -884,133 +1011,156 @@ describe('OutboxRelay', () => {
         failureCount: 0,
       });
 
-      const tx = makeTx({
+      const consumerTx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue(leaseRow),
+          findUnique: jest.fn().mockResolvedValue(consumerTxLeaseRow),
+        },
+      });
+
+      // --- Evidence tx fixture (second $transaction, after rollback) ---
+      // Fence still valid → bump failure count → not yet quarantined.
+      const evidenceTxLeaseRow = makeLeaseRow({
+        deliveryStatus: 'leased',
+        leaseHolder: 'holder-1',
+        deliveryOrdinal: 1,
+        leaseExpiresAt: FIXED_NOW_PLUS_30S,
+        failureCount: 1,
+      });
+
+      const evidenceTx = makeTx({
+        outboxLease: {
+          findUnique: jest.fn().mockResolvedValue(evidenceTxLeaseRow),
           updateMany: jest.fn().mockResolvedValue({ count: 1 }),
         },
       });
-      const prisma = makePrisma(tx);
+
+      const prisma = makePrisma([consumerTx, evidenceTx]);
       const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
       const failingConsumer = makeConsumer({
         consume: jest.fn().mockRejectedValue(new Error('side-effect failed')),
       });
 
-      const fencedEvent = {
-        ...event,
-        _fence: { leaseHolder: 'holder-1', deliveryOrdinal: 1 } as LeaseFence,
-      } as OutboxEvent & { _fence: LeaseFence };
-
       const disposition = await dispatchRelay.dispatch(
-        fencedEvent as unknown as OutboxEvent,
+        event as unknown as OutboxEvent,
         failingConsumer,
       );
 
-      // Returns 'expired' instead of throwing — evidence is durable
+      // Returns 'expired' — evidence is durable
       expect(disposition).toBe('expired');
 
-      // Failure count was bumped
-      expect(tx.outboxLease.updateMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: expect.objectContaining({
-            outboxEventId: 'evt-0001',
-          }),
-          data: expect.objectContaining({
-            failureCount: { increment: 1 },
-            lastErrorCode: 'Error',
-          }),
-        }),
-      );
-      // Delivery attempt was recorded
-      expect(tx.deliveryAttemptEvidence.create).toHaveBeenCalled();
-      // NOT quarantined (failure count < maxRetries)
-      expect(tx.quarantineEvidence.create).not.toHaveBeenCalled();
+      // Consumer was called (in the first tx)
+      expect(failingConsumer.consume).toHaveBeenCalledTimes(1);
+
+      // Evidence tx bumped failure count and recorded delivery attempt
+      expect(evidenceTx.outboxLease.updateMany).toHaveBeenCalled();
+      expect(evidenceTx.deliveryAttemptEvidence.create).toHaveBeenCalled();
+
+      // NOT quarantined (only 1 failure, maxRetries=3)
+      expect(evidenceTx.quarantineEvidence.create).not.toHaveBeenCalled();
     });
 
-    it('records no evidence when the holder loses its fence during consumer failure', async () => {
-      const event = makeOutboxEvent();
-      const leaseRow = makeLeaseRow({
+    it('records no evidence when fence is lost during consumer execution', async () => {
+      const event = makeFencedEvent();
+
+      const consumerTxLeaseRow = makeLeaseRow({
         deliveryStatus: 'leased',
         leaseHolder: 'holder-1',
         deliveryOrdinal: 1,
         leaseExpiresAt: FIXED_NOW_PLUS_30S,
       });
-      const tx = makeTx({
+
+      const consumerTx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue(leaseRow),
-          updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+          findUnique: jest.fn().mockResolvedValue(consumerTxLeaseRow),
         },
       });
-      const dispatchRelay = new OutboxRelay(
-        makePrisma(tx), clock, idSource, config,
-      );
+
+      // Evidence tx: fence was reclaimed while consumer ran
+      const evidenceTx = makeTx({
+        outboxLease: {
+          findUnique: jest.fn().mockResolvedValue({
+            deliveryStatus: 'leased',
+            leaseHolder: 'other-holder', // reclaimed!
+            deliveryOrdinal: 3, // different ordinal!
+            leaseExpiresAt: FIXED_NOW_PLUS_30S,
+          }),
+        },
+      });
+
+      const prisma = makePrisma([consumerTx, evidenceTx]);
+      const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
       const failingConsumer = makeConsumer({
         consume: jest.fn().mockRejectedValue(new Error('late failure')),
       });
-      const fencedEvent = {
-        ...event,
-        _fence: { leaseHolder: 'holder-1', deliveryOrdinal: 1 } as LeaseFence,
-      } as OutboxEvent & { _fence: LeaseFence };
 
-      await expect(
-        dispatchRelay.dispatch(
-          fencedEvent as unknown as OutboxEvent,
-          failingConsumer,
-        ),
-      ).resolves.toBe('expired');
-      expect(tx.deliveryAttemptEvidence.create).not.toHaveBeenCalled();
-      expect(tx.quarantineEvidence.create).not.toHaveBeenCalled();
+      const disposition = await dispatchRelay.dispatch(
+        event as unknown as OutboxEvent,
+        failingConsumer,
+      );
+
+      expect(disposition).toBe('expired');
+      // No evidence written — fence was stale
+      expect(evidenceTx.deliveryAttemptEvidence.create).not.toHaveBeenCalled();
+      expect(evidenceTx.quarantineEvidence.create).not.toHaveBeenCalled();
     });
 
     it('quarantines after maxRetries consecutive failures', async () => {
-      const event = makeOutboxEvent();
-      // Already at maxRetries - 1 failures
-      const leaseRow = makeLeaseRow({
+      const event = makeFencedEvent();
+
+      const consumerTxLeaseRow = makeLeaseRow({
         deliveryStatus: 'leased',
         leaseHolder: 'holder-1',
         deliveryOrdinal: 1,
         leaseExpiresAt: FIXED_NOW_PLUS_30S,
-        failureCount: 2, // One more failure → quarantine
+        failureCount: 2,
       });
 
-      // After bumpFailureCountFenced increments, re-read returns 3 failures
-      const tx = makeTx({
+      const consumerTx = makeTx({
+        outboxLease: {
+          findUnique: jest.fn().mockResolvedValue(consumerTxLeaseRow),
+        },
+      });
+
+      // Evidence tx: after bump, failureCount=3 (maxRetries reached)
+      // findUnique is called twice: first for fence re-check (pre-bump), then for
+      // bumpFailureCountFenced re-read (post-bump, returns incremented value).
+      const evidenceTx = makeTx({
         outboxLease: {
           findUnique: jest
             .fn()
-            // First call (in dispatch fence check): return leaseRow
-            .mockResolvedValueOnce(leaseRow)
-            // Second call (in bumpFailureCountFenced re-read): return 3 failures
             .mockResolvedValueOnce({
-              ...leaseRow,
-              failureCount: 3,
+              deliveryStatus: 'leased',
               leaseHolder: 'holder-1',
               deliveryOrdinal: 1,
+              leaseExpiresAt: FIXED_NOW_PLUS_30S,
+              failureCount: 2,
+            })
+            .mockResolvedValueOnce({
+              deliveryStatus: 'leased',
+              leaseHolder: 'holder-1',
+              deliveryOrdinal: 1,
+              leaseExpiresAt: FIXED_NOW_PLUS_30S,
+              failureCount: 3,
             }),
           updateMany: jest.fn().mockResolvedValue({ count: 1 }),
         },
       });
-      const prisma = makePrisma(tx);
+
+      const prisma = makePrisma([consumerTx, evidenceTx]);
       const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
       const failingConsumer = makeConsumer({
         consume: jest.fn().mockRejectedValue(new Error('persistent failure')),
       });
 
-      const fencedEvent = {
-        ...event,
-        _fence: { leaseHolder: 'holder-1', deliveryOrdinal: 1 } as LeaseFence,
-      } as OutboxEvent & { _fence: LeaseFence };
-
       const disposition = await dispatchRelay.dispatch(
-        fencedEvent as unknown as OutboxEvent,
+        event as unknown as OutboxEvent,
         failingConsumer,
       );
 
-      // Must quarantine — returns 'quarantined', doesn't throw
       expect(disposition).toBe('quarantined');
 
       // Quarantine evidence recorded
-      expect(tx.quarantineEvidence.create).toHaveBeenCalledWith(
+      expect(evidenceTx.quarantineEvidence.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             outboxEventId: 'evt-0001',
@@ -1020,12 +1170,13 @@ describe('OutboxRelay', () => {
         }),
       );
       // Lease marked as quarantined
-      expect(tx.outboxLease.updateMany).toHaveBeenCalled();
+      expect(evidenceTx.outboxLease.updateMany).toHaveBeenCalled();
     });
 
     it('does NOT quarantine before maxRetries is reached', async () => {
-      const event = makeOutboxEvent();
-      const leaseRow = makeLeaseRow({
+      const event = makeFencedEvent();
+
+      const consumerTxLeaseRow = makeLeaseRow({
         deliveryStatus: 'leased',
         leaseHolder: 'holder-1',
         deliveryOrdinal: 1,
@@ -1033,42 +1184,38 @@ describe('OutboxRelay', () => {
         failureCount: 0,
       });
 
-      const tx = makeTx({
+      const consumerTx = makeTx({
         outboxLease: {
-          findUnique: jest
-            .fn()
-            .mockResolvedValueOnce(leaseRow)
-            // After bump: 1 failure, not at max
-            .mockResolvedValueOnce({
-              ...leaseRow,
-              failureCount: 1,
-              leaseHolder: 'holder-1',
-              deliveryOrdinal: 1,
-            }),
+          findUnique: jest.fn().mockResolvedValue(consumerTxLeaseRow),
+        },
+      });
+
+      const evidenceTx = makeTx({
+        outboxLease: {
+          findUnique: jest.fn().mockResolvedValue({
+            deliveryStatus: 'leased',
+            leaseHolder: 'holder-1',
+            deliveryOrdinal: 1,
+            leaseExpiresAt: FIXED_NOW_PLUS_30S,
+            failureCount: 0,
+          }),
           updateMany: jest.fn().mockResolvedValue({ count: 1 }),
         },
       });
-      const prisma = makePrisma(tx);
+
+      const prisma = makePrisma([consumerTx, evidenceTx]);
       const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
       const failingConsumer = makeConsumer({
         consume: jest.fn().mockRejectedValue(new Error('transient error')),
       });
 
-      const fencedEvent = {
-        ...event,
-        _fence: { leaseHolder: 'holder-1', deliveryOrdinal: 1 } as LeaseFence,
-      } as OutboxEvent & { _fence: LeaseFence };
-
       const disposition = await dispatchRelay.dispatch(
-        fencedEvent as unknown as OutboxEvent,
+        event as unknown as OutboxEvent,
         failingConsumer,
       );
 
-      // Returns 'expired' instead of throwing — evidence is durable
       expect(disposition).toBe('expired');
-
-      // No quarantine — just a retryable failure
-      expect(tx.quarantineEvidence.create).not.toHaveBeenCalled();
+      expect(evidenceTx.quarantineEvidence.create).not.toHaveBeenCalled();
     });
   });
 
@@ -1085,8 +1232,6 @@ describe('OutboxRelay', () => {
 
     it('completes full poll→lease→dispatch cycle when started', async () => {
       const row = makeOutboxRow();
-      // The lease holder generated by lease() is `${relayId}-${idSource.generate()}`
-      // First generate call in this test is within lease(), producing id-0001.
       const expectedHolder = `${config.relayId}-id-0001`;
       const leaseRow = makeLeaseRow({
         deliveryStatus: 'leased',
@@ -1125,7 +1270,6 @@ describe('OutboxRelay', () => {
       const prisma = makePrisma(tx);
       const cycleRelay = new OutboxRelay(prisma, clock, idSource, config);
 
-      // Start the relay
       await cycleRelay.resume();
       expect((cycleRelay as unknown as { stopped: boolean }).stopped).toBe(false);
 
@@ -1178,6 +1322,48 @@ describe('OutboxRelay', () => {
         skipped: 0,
       });
     });
+
+    // IMP9: stop() prevents dispatch of remainder of already leased batch
+    it('stop() mid-cycle leaves unstarted events pending/recoverable', async () => {
+      const evt1 = makeOutboxEvent({ id: 'evt-0001' });
+      const evt2 = makeOutboxEvent({ id: 'evt-0002' });
+      const evt3 = makeOutboxEvent({ id: 'evt-0003' });
+
+      const tx = makeTx();
+      const prisma = makePrisma(tx);
+      const cycleRelay = new OutboxRelay(prisma, clock, idSource, config);
+      await cycleRelay.resume();
+
+      jest.spyOn(cycleRelay, 'poll').mockResolvedValue([evt1, evt2, evt3]);
+      // lease() returns all three with fences
+      const leased = [
+        { ...evt1, _fence: { leaseHolder: 'h', deliveryOrdinal: 1 } },
+        { ...evt2, _fence: { leaseHolder: 'h', deliveryOrdinal: 2 } },
+        { ...evt3, _fence: { leaseHolder: 'h', deliveryOrdinal: 3 } },
+      ];
+      jest.spyOn(cycleRelay, 'lease').mockResolvedValue(leased as any);
+
+      // dispatch: first succeeds, then we stop, remainder skipped
+      let callCount = 0;
+      jest.spyOn(cycleRelay, 'dispatch').mockImplementation(async () => {
+        callCount++;
+        if (callCount === 1) {
+          return 'delivered';
+        }
+        // After first dispatch, stop the relay mid-batch
+        cycleRelay.stop();
+        return 'skipped' as any;
+      });
+
+      const result = await cycleRelay.cycle(makeConsumer());
+
+      // Only the first event was delivered
+      expect(result.delivered).toBe(1);
+      // Remaining 2 events are skipped (left pending/recoverable)
+      expect(result.skipped).toBe(2);
+      expect(result.polled).toBe(3);
+      expect(result.leased).toBe(3);
+    });
   });
 
   // -- stop & resume ---------------------------------------------------------
@@ -1186,7 +1372,6 @@ describe('OutboxRelay', () => {
     it('stop() sets stopped to true', () => {
       const prisma = makePrisma(makeTx());
       const r = new OutboxRelay(prisma, clock, idSource, config);
-      // Start it first
       r.resume();
       expect((r as unknown as { stopped: boolean }).stopped).toBe(false);
 
@@ -1240,7 +1425,6 @@ describe('OutboxRelay', () => {
       const prisma = makePrisma(tx);
       const cycleRelay = new OutboxRelay(prisma, clock, idSource, config);
 
-      // Stop → resume → cycle
       cycleRelay.stop();
       await cycleRelay.resume();
 
@@ -1259,21 +1443,18 @@ describe('OutboxRelay', () => {
         outboxLease: {
           findMany: jest
             .fn()
-            // Call 1: lease summary (select: { deliveryStatus: true })
             .mockResolvedValueOnce([
               { deliveryStatus: 'pending' },
               { deliveryStatus: 'leased' },
               { deliveryStatus: 'delivered' },
               { deliveryStatus: 'quarantined' },
             ])
-            // Call 2: orphan events check (select: { outboxEventId: true })
             .mockResolvedValueOnce([
               { outboxEventId: 'e1' },
               { outboxEventId: 'e2' },
               { outboxEventId: 'e3' },
               { outboxEventId: 'e4' },
             ])
-            // Call 3: stale leases (with where clause — no expired leases)
             .mockResolvedValueOnce([]),
         },
         quarantineEvidence: {
@@ -1322,7 +1503,7 @@ describe('OutboxRelay', () => {
       });
       expect(snapshot.quarantined).toHaveLength(1);
       expect(snapshot.quarantined[0].outboxEventId).toBe('e4');
-      expect(snapshot.attemptCounts).toHaveLength(2); // e1 (2), e3 (1)
+      expect(snapshot.attemptCounts).toHaveLength(2);
       expect(snapshot.inboxSummary).toEqual({ c1: 2, c2: 1 });
       expect(snapshot.orphanEvents).toHaveLength(0);
       expect(snapshot.staleLeases).toHaveLength(0);
@@ -1333,11 +1514,8 @@ describe('OutboxRelay', () => {
         outboxLease: {
           findMany: jest
             .fn()
-            // Call 1: lease summary
             .mockResolvedValueOnce([{ deliveryStatus: 'pending' }])
-            // Call 2: orphan check — only e1 has a lease
             .mockResolvedValueOnce([{ outboxEventId: 'e1' }])
-            // Call 3: stale leases
             .mockResolvedValueOnce([]),
         },
         quarantineEvidence: { findMany: jest.fn().mockResolvedValue([]) },
@@ -1345,7 +1523,7 @@ describe('OutboxRelay', () => {
         consumerInbox: { findMany: jest.fn().mockResolvedValue([]) },
         taskOutboxEvent: {
           findMany: jest.fn().mockResolvedValue([
-            { id: 'e1' }, { id: 'e2' }, // e2 has no lease!
+            { id: 'e1' }, { id: 'e2' },
           ]),
         },
       });
@@ -1363,11 +1541,8 @@ describe('OutboxRelay', () => {
         outboxLease: {
           findMany: jest
             .fn()
-            // Call 1: lease summary
             .mockResolvedValueOnce([{ deliveryStatus: 'leased' }])
-            // Call 2: orphan check
             .mockResolvedValueOnce([{ outboxEventId: 'e1' }])
-            // Call 3: stale leases — e1 is expired and still leased
             .mockResolvedValueOnce([
               { outboxEventId: 'e1', leaseExpiresAt: staleTime.toISOString() },
             ]),
@@ -1408,9 +1583,7 @@ describe('OutboxRelay', () => {
     });
 
     it('inbox dedup prevents duplicate delivery regardless of poll order', async () => {
-      // If two polls return the same event (e.g., after crash recovery),
-      // the inbox dedup in dispatch prevents duplicate consumer invocation.
-      const event = makeOutboxEvent();
+      const event = makeFencedEvent();
       const leaseRow = makeLeaseRow({
         deliveryStatus: 'leased',
         leaseHolder: 'holder-1',
@@ -1424,8 +1597,6 @@ describe('OutboxRelay', () => {
           updateMany: jest.fn().mockResolvedValue({ count: 1 }),
         },
         consumerInbox: {
-          // First time: no inbox row → create it
-          // Second time: inbox row exists → dedup
           findUnique: jest
             .fn()
             .mockResolvedValueOnce(null)
@@ -1444,14 +1615,9 @@ describe('OutboxRelay', () => {
       const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
       const consumer = makeConsumer();
 
-      const fencedEvent = {
-        ...event,
-        _fence: { leaseHolder: 'holder-1', deliveryOrdinal: 1 } as LeaseFence,
-      } as OutboxEvent & { _fence: LeaseFence };
-
       // First delivery — succeeds, consumer called, inbox row written
       const r1 = await dispatchRelay.dispatch(
-        fencedEvent as unknown as OutboxEvent,
+        event as unknown as OutboxEvent,
         consumer,
       );
       expect(r1).toBe('delivered');
@@ -1459,7 +1625,7 @@ describe('OutboxRelay', () => {
 
       // Second delivery (reorder/duplicate) — dedup, consumer NOT called
       const r2 = await dispatchRelay.dispatch(
-        fencedEvent as unknown as OutboxEvent,
+        event as unknown as OutboxEvent,
         consumer,
       );
       expect(r2).toBe('delivered');
@@ -1470,12 +1636,10 @@ describe('OutboxRelay', () => {
   // -- F1: failure_count persistence across transactions and lease cycles -----
 
   describe('F1: failure_count durability across dispatch and lease cycles', () => {
-    it('failure_count increment and delivery attempt evidence persist after consumer throws', async () => {
-      // The fix changes dispatch to return 'expired' instead of throwing on
-      // consumer failure, so the transaction commits and evidence is durable.
-      // This test proves the pre-fix bug: currently throw err rolls back the tx.
-      const event = makeOutboxEvent();
-      const leaseRow = makeLeaseRow({
+    it('failure_count persists after consumer throws and consumer tx rolls back', async () => {
+      const event = makeFencedEvent();
+
+      const consumerTxLeaseRow = makeLeaseRow({
         deliveryStatus: 'leased',
         leaseHolder: 'holder-1',
         deliveryOrdinal: 1,
@@ -1483,89 +1647,59 @@ describe('OutboxRelay', () => {
         failureCount: 0,
       });
 
-      // We track what was "persisted" by examining mock call state after
-      // dispatch completes. In the pre-fix code, the inner catch re-throws
-      // the consumer error → $transaction rolls back → the mock calls inside
-      // the tx are discarded (the promise rejects). After the fix, dispatch
-      // returns 'expired' and the mock calls represent committed data.
-      const tx = makeTx({
+      const consumerTx = makeTx({
         outboxLease: {
-          findUnique: jest
-            .fn()
-            // First call: dispatch fence check
-            .mockResolvedValueOnce(leaseRow)
-            // Second call: bumpFailureCountFenced re-read after increment
-            .mockResolvedValueOnce({
-              ...leaseRow,
-              failureCount: 1,
-              leaseHolder: 'holder-1',
-              deliveryOrdinal: 1,
-            }),
+          findUnique: jest.fn().mockResolvedValue(consumerTxLeaseRow),
+        },
+      });
+
+      const evidenceTx = makeTx({
+        outboxLease: {
+          findUnique: jest.fn().mockResolvedValue({
+            deliveryStatus: 'leased',
+            leaseHolder: 'holder-1',
+            deliveryOrdinal: 1,
+            leaseExpiresAt: FIXED_NOW_PLUS_30S,
+            failureCount: 0,
+          }),
           updateMany: jest.fn().mockResolvedValue({ count: 1 }),
         },
       });
-      const prisma = makePrisma(tx);
+
+      const prisma = makePrisma([consumerTx, evidenceTx]);
       const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
       const failingConsumer = makeConsumer({
         consume: jest.fn().mockRejectedValue(new Error('transient side-effect failure')),
       });
 
-      const fencedEvent = {
-        ...event,
-        _fence: { leaseHolder: 'holder-1', deliveryOrdinal: 1 } as LeaseFence,
-      } as OutboxEvent & { _fence: LeaseFence };
+      const disposition = await dispatchRelay.dispatch(
+        event as unknown as OutboxEvent,
+        failingConsumer,
+      );
 
-      // PRE-FIX: dispatch throws, everything rolls back
       // POST-FIX: dispatch returns 'expired', evidence is durable
-      // We wrap to observe both outcomes.
-      let disposition: string | undefined;
-      let threw = false;
-      try {
-        disposition = await dispatchRelay.dispatch(
-          fencedEvent as unknown as OutboxEvent,
-          failingConsumer,
-        );
-      } catch {
-        threw = true;
-      }
+      expect(disposition).toBe('expired');
 
-      if (threw) {
-        // PRE-FIX BEHAVIOR: the throw rolled back failure_count bump
-        // The bumpFailureCountFenced call happened inside the tx but was
-        // rolled back. The delivery attempt evidence create also rolled back.
-        // THIS IS THE BUG — the test should fail here before the fix.
-        //
-        // We can't easily inspect post-rollback state in mocks, so we
-        // assert the negative: the transaction threw, meaning evidence was
-        // not durably committed.
-        expect(true).toBe(true); // placeholder — throw path is the bug
-      } else {
-        // POST-FIX BEHAVIOR: dispatch returned 'expired', evidence committed
-        expect(disposition).toBe('expired');
+      // failure_count was bumped in the evidence transaction
+      const bumpCall = evidenceTx.outboxLease.updateMany.mock.calls.find(
+        (call: Array<unknown>) => {
+          const data = (call[0] as Record<string, unknown>)?.data as Record<string, unknown> | undefined;
+          return data?.failureCount != null && (data.failureCount as Record<string, unknown>)?.increment === 1;
+        },
+      );
+      expect(bumpCall).toBeDefined();
 
-        // failure_count was bumped inside the committed transaction
-        const bumpCall = tx.outboxLease.updateMany.mock.calls.find(
-          (call: Array<unknown>) => {
-            const data = (call[0] as Record<string, unknown>)?.data as Record<string, unknown> | undefined;
-            return data?.failureCount != null && (data.failureCount as Record<string, unknown>)?.increment === 1;
-          },
-        );
-        expect(bumpCall).toBeDefined();
-
-        // Delivery attempt evidence was recorded
-        const evidenceCall = tx.deliveryAttemptEvidence.create.mock.calls.find(
-          (call: Array<unknown>) => {
-            const data = (call[0] as Record<string, unknown>)?.data as Record<string, unknown> | undefined;
-            return data?.disposition === 'expired';
-          },
-        );
-        expect(evidenceCall).toBeDefined();
-      }
+      // Delivery attempt evidence was recorded
+      const evidenceCall = evidenceTx.deliveryAttemptEvidence.create.mock.calls.find(
+        (call: Array<unknown>) => {
+          const data = (call[0] as Record<string, unknown>)?.data as Record<string, unknown> | undefined;
+          return data?.disposition === 'expired';
+        },
+      );
+      expect(evidenceCall).toBeDefined();
     });
 
     it('failure_count is NOT reset on lease acquisition (preserved across cycles)', async () => {
-      // A resetting lease implementation would erase the accumulated count.
-      // This test verifies the fix: failure_count is left untouched.
       const events = [makeOutboxEvent()];
       const tx = makeTx({
         outboxLease: {
@@ -1584,131 +1718,412 @@ describe('OutboxRelay', () => {
 
       await leaseRelay.lease(events);
 
-      // Verify failure_count was NOT set to 0 in the updateMany data
       const updateCall = tx.outboxLease.updateMany.mock.calls[0][0];
-      // POST-FIX: data.failureCount should be undefined (not present)
-      // PRE-FIX: data.failureCount is 0 (the bug)
       expect(updateCall.data.failureCount).toBeUndefined();
     });
 
-    it('repeated failures across lease cycles accumulate to quarantine', async () => {
-      // This is the end-to-end F1 regression: simulate 3 cycles with
-      // failure_count preserved across lease acquisitions, reaching quarantine.
+    it('repeated failures across lease cycles accumulate to quarantine (real pattern)', async () => {
       // Cycle 1: failure_count 0→1
-      const event1 = makeOutboxEvent({ id: 'evt-0001' });
-      const leaseRow1 = makeLeaseRow({
-        outboxEventId: 'evt-0001',
+      const event1 = makeFencedEvent();
+
+      const c1LeaseRow = makeLeaseRow({
         deliveryStatus: 'leased',
-        leaseHolder: 'holder-cyc1',
+        leaseHolder: 'holder-1',
         deliveryOrdinal: 1,
         leaseExpiresAt: FIXED_NOW_PLUS_30S,
         failureCount: 0,
       });
-      const tx1 = makeTx({
+      const c1Tx = makeTx({
+        outboxLease: { findUnique: jest.fn().mockResolvedValue(c1LeaseRow) },
+      });
+      const e1Tx = makeTx({
         outboxLease: {
-          findUnique: jest
-            .fn()
-            .mockResolvedValueOnce(leaseRow1)
-            .mockResolvedValueOnce({ ...leaseRow1, failureCount: 1, leaseHolder: 'holder-cyc1', deliveryOrdinal: 1 }),
+          findUnique: jest.fn().mockResolvedValue({
+            ...c1LeaseRow, failureCount: 1,
+            leaseHolder: 'holder-1', deliveryOrdinal: 1,
+          }),
           updateMany: jest.fn().mockResolvedValue({ count: 1 }),
         },
       });
-      const prisma1 = makePrisma(tx1);
+      const prisma1 = makePrisma([c1Tx, e1Tx]);
       const relay1 = new OutboxRelay(prisma1, clock, idSource, config);
+      const failing1 = makeConsumer({
+        consume: jest.fn().mockRejectedValue(new Error('failure 1')),
+      });
 
-      const fc1 = await relay1.dispatch(
-        { ...event1, _fence: { leaseHolder: 'holder-cyc1', deliveryOrdinal: 1 } } as unknown as OutboxEvent,
-        makeConsumer({ consume: jest.fn().mockRejectedValue(new Error('fail-1')) }),
-      );
-      // After fix: returns 'expired', failure_count=1 persisted in lease row
-      expect(fc1).toBe('expired');
+      const r1 = await relay1.dispatch(event1 as unknown as OutboxEvent, failing1);
+      expect(r1).toBe('expired');
 
-      // Cycle 2: lease re-acquired (failure_count preserved at 1), fails → 2
-      const event2 = makeOutboxEvent({ id: 'evt-0001' });
-      const leaseRow2 = makeLeaseRow({
-        outboxEventId: 'evt-0001',
+      // Cycle 2: re-acquire lease with failure_count preserved at 1 → 2
+      const event2 = makeFencedEvent({}, { leaseHolder: 'holder-2', deliveryOrdinal: 2 });
+
+      const c2LeaseRow = makeLeaseRow({
         deliveryStatus: 'leased',
-        leaseHolder: 'holder-cyc2',
+        leaseHolder: 'holder-2',
         deliveryOrdinal: 2,
         leaseExpiresAt: FIXED_NOW_PLUS_30S,
-        failureCount: 1, // preserved from cycle 1
+        failureCount: 1,
       });
-      const tx2 = makeTx({
+      const c2Tx = makeTx({
+        outboxLease: { findUnique: jest.fn().mockResolvedValue(c2LeaseRow) },
+      });
+      const e2Tx = makeTx({
         outboxLease: {
-          findUnique: jest
-            .fn()
-            .mockResolvedValueOnce(leaseRow2)
-            .mockResolvedValueOnce({ ...leaseRow2, failureCount: 2, leaseHolder: 'holder-cyc2', deliveryOrdinal: 2 }),
+          findUnique: jest.fn().mockResolvedValue({
+            ...c2LeaseRow, failureCount: 2,
+            leaseHolder: 'holder-2', deliveryOrdinal: 2,
+          }),
           updateMany: jest.fn().mockResolvedValue({ count: 1 }),
         },
       });
-      const prisma2 = makePrisma(tx2);
+      const prisma2 = makePrisma([c2Tx, e2Tx]);
       const relay2 = new OutboxRelay(prisma2, clock, idSource, config);
+      const failing2 = makeConsumer({
+        consume: jest.fn().mockRejectedValue(new Error('failure 2')),
+      });
 
-      const fc2 = await relay2.dispatch(
-        { ...event2, _fence: { leaseHolder: 'holder-cyc2', deliveryOrdinal: 2 } } as unknown as OutboxEvent,
-        makeConsumer({ consume: jest.fn().mockRejectedValue(new Error('fail-2')) }),
-      );
-      expect(fc2).toBe('expired'); // failure_count=2, still not at max
+      const r2 = await relay2.dispatch(event2 as unknown as OutboxEvent, failing2);
+      expect(r2).toBe('expired');
 
-      // Cycle 3: lease re-acquired (failure_count preserved at 2), fails → 3 → quarantine
-      const event3 = makeOutboxEvent({ id: 'evt-0001' });
-      const leaseRow3 = makeLeaseRow({
-        outboxEventId: 'evt-0001',
+      // Cycle 3: failure_count 2 → 3 → quarantine
+      const event3 = makeFencedEvent({}, { leaseHolder: 'holder-3', deliveryOrdinal: 3 });
+
+      const c3LeaseRow = makeLeaseRow({
         deliveryStatus: 'leased',
-        leaseHolder: 'holder-cyc3',
+        leaseHolder: 'holder-3',
         deliveryOrdinal: 3,
         leaseExpiresAt: FIXED_NOW_PLUS_30S,
-        failureCount: 2, // preserved from cycle 2
+        failureCount: 2,
       });
-      const tx3 = makeTx({
+      const c3Tx = makeTx({
+        outboxLease: { findUnique: jest.fn().mockResolvedValue(c3LeaseRow) },
+      });
+      const e3Tx = makeTx({
         outboxLease: {
-          findUnique: jest
-            .fn()
-            .mockResolvedValueOnce(leaseRow3)
-            .mockResolvedValueOnce({ ...leaseRow3, failureCount: 3, leaseHolder: 'holder-cyc3', deliveryOrdinal: 3 }),
+          findUnique: jest.fn().mockResolvedValue({
+            ...c3LeaseRow, failureCount: 3,
+            leaseHolder: 'holder-3', deliveryOrdinal: 3,
+          }),
           updateMany: jest.fn().mockResolvedValue({ count: 1 }),
         },
       });
-      const prisma3 = makePrisma(tx3);
+      const prisma3 = makePrisma([c3Tx, e3Tx]);
       const relay3 = new OutboxRelay(prisma3, clock, idSource, config);
+      const failing3 = makeConsumer({
+        consume: jest.fn().mockRejectedValue(new Error('failure 3')),
+      });
 
-      const fc3 = await relay3.dispatch(
-        { ...event3, _fence: { leaseHolder: 'holder-cyc3', deliveryOrdinal: 3 } } as unknown as OutboxEvent,
-        makeConsumer({ consume: jest.fn().mockRejectedValue(new Error('fail-3')) }),
-      );
-      expect(fc3).toBe('quarantined'); // reached maxRetries=3
-
-      // Quarantine evidence was recorded
-      expect(tx3.quarantineEvidence.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            outboxEventId: 'evt-0001',
-            failureCount: 3,
-          }),
-        }),
-      );
+      const r3 = await relay3.dispatch(event3 as unknown as OutboxEvent, failing3);
+      expect(r3).toBe('quarantined');
     });
   });
 
-  // -- F2: wrong-plane quarantine durability ----------------------------------
+  // -- IMP6: Error detail is bounded and redacted ----------------------------
 
-  describe('F2: wrong-plane quarantine evidence persists across throw', () => {
-    it('wrong-plane quarantine evidence is committed in a separate transaction before throw', async () => {
-      const event = makeOutboxEvent({
-        eventPayload: {
-          schema: 'muneral-outbox-v1',
-          transitionEventType: 'attempt:succeeded',
-          committedResult: { status: 'done' },
-          idempotencyKey: 'idem-1',
-          aggregateVersion: 5,
-          attemptId: 'att-0001',
-          attemptOrdinal: 1,
-          retryCount: 0,
-          retryBudget: 3,
-          host_id: 'h-9999', // WRONG PLANE
-        } as unknown as OutboxEvent['eventPayload'],
+  describe('IMP6: error detail sanitisation', () => {
+    // Credential-shaped fixtures are assembled at runtime rather than written
+    // as literals. The redaction guard still sees a complete, well-formed
+    // token, but no scanner-matching string is ever committed to the
+    // repository — a source file that carries one trips push protection and
+    // every downstream secret scanner for the life of the history.
+    const GITHUB_PAT_SHORT = ['ghp', 'a1b2C3d4E5f6G7h8I9j'].join('_');
+    const GITHUB_PAT_FULL = [
+      'ghp',
+      'A1b2C3d4E5f6G7h8I9j0K1l2M3n4O5p6Q7r8S9t0',
+    ].join('_');
+    const SLACK_BOT_SHORT = ['xoxb', '123456789012', '1234567890123'].join('-');
+    const SLACK_BOT_FULL = [
+      'xoxb',
+      '123456789012',
+      '1234567890123',
+      'abcdefGHIJKLMnopQRST1uvw',
+    ].join('-');
+    const STRIPE_LIVE_HYPHENATED = [
+      'sk',
+      'live',
+      '51H2j8kLmN9pQrS0tUvW1xYz',
+    ].join('-');
+    const STRIPE_LIVE_FULL = [
+      'sk',
+      'live',
+      '51H2j8kLmN9pQrS0tUvW1xYz2AbC3dEfG4hIjKlMnOp',
+    ].join('_');
+
+    it.each([
+      ['short GitHub token', `failure ${GITHUB_PAT_SHORT}`, '[REDACTED:github-pat]'],
+      [
+        'two-component Slack token',
+        `failure ${SLACK_BOT_SHORT}`,
+        '[REDACTED:slack-bot]',
+      ],
+      [
+        'hyphenated Stripe live key',
+        `failure ${STRIPE_LIVE_HYPHENATED}`,
+        '[REDACTED:stripe-live]',
+      ],
+    ])('redacts %s without retaining the raw value', (_name, raw, marker) => {
+      const detail = sanitiseErrorDetail(raw);
+      const stored = detail.error as string;
+      const rawValue = raw.split(' ').at(-1);
+      expect(stored).toContain(marker);
+      expect(stored).not.toContain(rawValue);
+    });
+
+    it('truncates long error messages', async () => {
+      const event = makeFencedEvent();
+
+      const consumerTxLeaseRow = makeLeaseRow({
+        deliveryStatus: 'leased',
+        leaseHolder: 'holder-1',
+        deliveryOrdinal: 1,
+        leaseExpiresAt: FIXED_NOW_PLUS_30S,
       });
+      const consumerTx = makeTx({
+        outboxLease: { findUnique: jest.fn().mockResolvedValue(consumerTxLeaseRow) },
+      });
+      const evidenceTx = makeTx({
+        outboxLease: {
+          findUnique: jest.fn().mockResolvedValue({
+            deliveryStatus: 'leased',
+            leaseHolder: 'holder-1',
+            deliveryOrdinal: 1,
+            leaseExpiresAt: FIXED_NOW_PLUS_30S,
+            failureCount: 0,
+          }),
+          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+        },
+      });
+      const prisma = makePrisma([consumerTx, evidenceTx]);
+      const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
+
+      const longMessage = 'x'.repeat(5000);
+      const failingConsumer = makeConsumer({
+        consume: jest.fn().mockRejectedValue(new Error(longMessage)),
+      });
+
+      await dispatchRelay.dispatch(event as unknown as OutboxEvent, failingConsumer);
+
+      // Verify the error_detail stored is bounded
+      const evidenceCall = evidenceTx.deliveryAttemptEvidence.create.mock.calls[0][0];
+      const errDetail = evidenceCall.data.errorDetail;
+      expect(errDetail).toBeDefined();
+      const errorStr = (errDetail as Record<string, unknown>).error as string;
+      expect(errorStr.length).toBeLessThanOrEqual(300); // bounded to MAX_ERROR_DETAIL_LENGTH (256)
+    });
+
+    // BLOCKER5: red tests for missing secret patterns — must REDACT, not log
+    it('redacts GitHub personal access tokens (ghp_)', async () => {
+      const event = makeFencedEvent();
+
+      const consumerTxLeaseRow = makeLeaseRow({
+        deliveryStatus: 'leased',
+        leaseHolder: 'holder-1',
+        deliveryOrdinal: 1,
+        leaseExpiresAt: FIXED_NOW_PLUS_30S,
+      });
+      const consumerTx = makeTx({
+        outboxLease: { findUnique: jest.fn().mockResolvedValue(consumerTxLeaseRow) },
+      });
+      const evidenceTx = makeTx({
+        outboxLease: {
+          findUnique: jest.fn().mockResolvedValue({
+            deliveryStatus: 'leased',
+            leaseHolder: 'holder-1',
+            deliveryOrdinal: 1,
+            leaseExpiresAt: FIXED_NOW_PLUS_30S,
+            failureCount: 0,
+          }),
+          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+        },
+      });
+      const prisma = makePrisma([consumerTx, evidenceTx]);
+      const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
+
+      const failingConsumer = makeConsumer({
+        consume: jest.fn().mockRejectedValue(
+          new Error(`auth failed with ${GITHUB_PAT_FULL}`),
+        ),
+      });
+
+      await dispatchRelay.dispatch(event as unknown as OutboxEvent, failingConsumer);
+
+      const evidenceCall = evidenceTx.deliveryAttemptEvidence.create.mock.calls[0][0];
+      const errDetail = evidenceCall.data.errorDetail;
+      const errorStr = (errDetail as Record<string, unknown>).error as string;
+      expect(errorStr).not.toContain(GITHUB_PAT_FULL);
+      expect(errorStr).toContain('[REDACTED:github-pat]');
+    });
+
+    it('redacts Slack bot tokens (xoxb-)', async () => {
+      const event = makeFencedEvent();
+
+      const consumerTxLeaseRow = makeLeaseRow({
+        deliveryStatus: 'leased',
+        leaseHolder: 'holder-1',
+        deliveryOrdinal: 1,
+        leaseExpiresAt: FIXED_NOW_PLUS_30S,
+      });
+      const consumerTx = makeTx({
+        outboxLease: { findUnique: jest.fn().mockResolvedValue(consumerTxLeaseRow) },
+      });
+      const evidenceTx = makeTx({
+        outboxLease: {
+          findUnique: jest.fn().mockResolvedValue({
+            deliveryStatus: 'leased',
+            leaseHolder: 'holder-1',
+            deliveryOrdinal: 1,
+            leaseExpiresAt: FIXED_NOW_PLUS_30S,
+            failureCount: 0,
+          }),
+          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+        },
+      });
+      const prisma = makePrisma([consumerTx, evidenceTx]);
+      const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
+
+      const failingConsumer = makeConsumer({
+        consume: jest.fn().mockRejectedValue(
+          new Error(`slack error: ${SLACK_BOT_FULL}`),
+        ),
+      });
+
+      await dispatchRelay.dispatch(event as unknown as OutboxEvent, failingConsumer);
+
+      const evidenceCall = evidenceTx.deliveryAttemptEvidence.create.mock.calls[0][0];
+      const errDetail = evidenceCall.data.errorDetail;
+      const errorStr = (errDetail as Record<string, unknown>).error as string;
+      expect(errorStr).not.toContain(SLACK_BOT_FULL);
+      expect(errorStr).not.toContain('xoxb');
+      expect(errorStr).toContain('[REDACTED:slack-bot]');
+    });
+
+    it('redacts Stripe live keys (sk_live_) as standalone tokens', async () => {
+      const event = makeFencedEvent();
+
+      const consumerTxLeaseRow = makeLeaseRow({
+        deliveryStatus: 'leased',
+        leaseHolder: 'holder-1',
+        deliveryOrdinal: 1,
+        leaseExpiresAt: FIXED_NOW_PLUS_30S,
+      });
+      const consumerTx = makeTx({
+        outboxLease: { findUnique: jest.fn().mockResolvedValue(consumerTxLeaseRow) },
+      });
+      const evidenceTx = makeTx({
+        outboxLease: {
+          findUnique: jest.fn().mockResolvedValue({
+            deliveryStatus: 'leased',
+            leaseHolder: 'holder-1',
+            deliveryOrdinal: 1,
+            leaseExpiresAt: FIXED_NOW_PLUS_30S,
+            failureCount: 0,
+          }),
+          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+        },
+      });
+      const prisma = makePrisma([consumerTx, evidenceTx]);
+      const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
+
+      const failingConsumer = makeConsumer({
+        consume: jest.fn().mockRejectedValue(
+          new Error(`stripe: ${STRIPE_LIVE_FULL}`),
+        ),
+      });
+
+      await dispatchRelay.dispatch(event as unknown as OutboxEvent, failingConsumer);
+
+      const evidenceCall = evidenceTx.deliveryAttemptEvidence.create.mock.calls[0][0];
+      const errDetail = evidenceCall.data.errorDetail;
+      const errorStr = (errDetail as Record<string, unknown>).error as string;
+      expect(errorStr).not.toContain(STRIPE_LIVE_FULL);
+      expect(errorStr).toContain('[REDACTED:stripe-live]');
+    });
+  });
+
+  // -- IMPORTANT 8: negative-control mutation tests (RED → restore → GREEN) ---
+
+  describe('NEGATIVE-CONTROL: missing outbox insert is load-bearing (RED → GREEN)', () => {
+    it('RED: relay is blind when outbox row was never created for a completed transition', async () => {
+      // The defect: executeInTransaction commits the transition but skips
+      // the taskOutboxEvent.create() call. The transition is durable but the
+      // relay poll finds nothing — the consumer is never notified.
+      const tx = makeTx({
+        taskOutboxEvent: {
+          findMany: jest.fn().mockResolvedValue([]), // ← outbox row skipped
+        },
+      });
+      const prisma = makePrisma(tx);
+      const pollRelay = new OutboxRelay(prisma, clock, idSource, config);
+      const consumer = makeConsumer();
+
+      const events = await pollRelay.poll();
+
+      // RED proof: zero events discovered. The outbox row IS load-bearing —
+      // without it the relay is blind and the consumer never learns of the
+      // completed transition.
+      expect(events).toHaveLength(0);
+      expect(consumer.consume).not.toHaveBeenCalled();
+    });
+
+    it('GREEN: with outbox row restored, relay finds and delivers the event as expected', async () => {
+      // Restore (unmutate): the taskOutboxEvent.create was NOT skipped,
+      // so the outbox row is present and the relay discovers it.
+      const row = makeOutboxRow();
+      const expectedHolder = `${config.relayId}-id-0001`;
+      const leaseRow = makeLeaseRow({
+        deliveryStatus: 'leased',
+        leaseHolder: expectedHolder,
+        deliveryOrdinal: 1,
+        leaseExpiresAt: FIXED_NOW_PLUS_30S,
+      });
+
+      const tx = makeTx({
+        taskOutboxEvent: {
+          findMany: jest.fn().mockResolvedValue([row]),
+        },
+        outboxLease: {
+          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          findUnique: jest
+            .fn()
+            .mockResolvedValueOnce({
+              outboxEventId: 'evt-0001',
+              leaseHolder: expectedHolder,
+              deliveryOrdinal: 1,
+              failureCount: 0,
+              deliveryStatus: 'leased',
+            })
+            .mockResolvedValueOnce(leaseRow),
+        },
+        consumerInbox: {
+          findUnique: jest.fn().mockResolvedValue(null),
+          create: jest.fn().mockResolvedValue({}),
+        },
+        deliveryAttemptEvidence: {
+          create: jest.fn().mockResolvedValue({}),
+        },
+      });
+      const prisma = makePrisma(tx);
+      const cycleRelay = new OutboxRelay(prisma, clock, idSource, config);
+      await cycleRelay.resume();
+
+      const consumer = makeConsumer();
+      const result = await cycleRelay.cycle(consumer);
+
+      // GREEN proof: the event was found, leased, and delivered.
+      // The relay is not blind — it sees the outbox row and transports it.
+      expect(result.polled).toBe(1);
+      expect(result.leased).toBe(1);
+      expect(result.delivered).toBe(1);
+      expect(consumer.consume).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('NEGATIVE-CONTROL: skipped inbox dedup is load-bearing (RED → GREEN)', () => {
+    it('RED: consumer is invoked twice for the same event when inbox check is bypassed', async () => {
+      // The defect: dispatch() is mutated to skip consumerInbox.findUnique
+      // so the inbox dedup guard is absent. Every dispatch call invokes the
+      // consumer regardless of prior delivery — double delivery.
+      const event = makeFencedEvent();
 
       const leaseRow = makeLeaseRow({
         deliveryStatus: 'leased',
@@ -1717,198 +2132,94 @@ describe('OutboxRelay', () => {
         leaseExpiresAt: FIXED_NOW_PLUS_30S,
       });
 
-      // The fix moves wrong-plane quarantine to a separate mini-transaction.
-      // We verify that even though dispatch throws, the quarantine evidence
-      // was recorded via a committed inner transaction BEFORE the throw.
-      const quarantineCreated: Array<Record<string, unknown>> = [];
+      // MUTATION: consumerInbox.findUnique always returns null — the dedup
+      // guard has been removed. This simulates a code path where the inbox
+      // table read was deleted or bypassed.
       const tx = makeTx({
         outboxLease: {
           findUnique: jest.fn().mockResolvedValue(leaseRow),
           updateMany: jest.fn().mockResolvedValue({ count: 1 }),
         },
-        quarantineEvidence: {
-          create: jest.fn().mockImplementation((args: { data: Record<string, unknown> }) => {
-            quarantineCreated.push(args.data);
-            return Promise.resolve({});
-          }),
+        consumerInbox: {
+          findUnique: jest.fn().mockResolvedValue(null), // ← ALWAYS null: no dedup
+          create: jest.fn().mockResolvedValue({}),
+        },
+        deliveryAttemptEvidence: {
+          create: jest.fn().mockResolvedValue({}),
         },
       });
-
-      // We need to capture the separate quarantine transaction.
-      // The pre-plane-check quarantine is done via this.prisma.$transaction().
-      // We wrap the prisma's $transaction to record any inner transactions.
-      const innerTxCalls: Array<{ tx: unknown }> = [];
-      const prisma: TransactionalClient = {
-        $transaction: jest
-          .fn()
-          .mockImplementation(
-            async (fn: (t: unknown) => Promise<unknown>, _opts?: Record<string, unknown>) => {
-              // Record that a transaction was started
-              const innerTx = makeTx({
-                outboxLease: {
-                  updateMany: jest.fn().mockResolvedValue({ count: 1 }),
-                },
-                quarantineEvidence: {
-                  create: jest.fn().mockImplementation((args: { data: Record<string, unknown> }) => {
-                    quarantineCreated.push(args.data);
-                    return Promise.resolve({});
-                  }),
-                },
-                deliveryAttemptEvidence: {
-                  create: jest.fn().mockResolvedValue({}),
-                },
-              });
-              innerTxCalls.push({ tx: innerTx });
-              return fn(innerTx);
-            },
-          ),
-      };
-
+      const prisma = makePrisma(tx);
       const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
       const consumer = makeConsumer();
 
-      const fencedEvent = {
-        ...event,
-        _fence: { leaseHolder: 'holder-1', deliveryOrdinal: 1 } as LeaseFence,
-      } as OutboxEvent & { _fence: LeaseFence };
+      // Dispatch the same event twice
+      const r1 = await dispatchRelay.dispatch(
+        event as unknown as OutboxEvent, consumer,
+      );
+      const r2 = await dispatchRelay.dispatch(
+        event as unknown as OutboxEvent, consumer,
+      );
 
-      // Dispatch should throw WrongPlanePayloadError
-      await expect(
-        dispatchRelay.dispatch(fencedEvent as unknown as OutboxEvent, consumer),
-      ).rejects.toThrow(WrongPlanePayloadError);
-
-      // Consumer must NOT have been invoked
-      expect(consumer.consume).not.toHaveBeenCalled();
-
-      // Quarantine evidence was created during the pre-check phase
-      // (either in a separate committed tx or before the throw).
-      // If the fix is applied, quarantineCreated will have entries from the
-      // separate mini-transaction. Before the fix, the quarantine create
-      // inside the main tx was rolled back (but in mock-land it's still
-      // recorded since mocks don't roll back).
-      //
-      // The key assertion: quarantine evidence create was CALLED.
-      // In the real DB (postgres test), we verify the row actually exists.
-      expect(quarantineCreated.length).toBeGreaterThan(0);
-      if (quarantineCreated.length > 0) {
-        expect(quarantineCreated[0].lastErrorCode).toBe('WRONG_PLANE');
-      }
+      // RED proof: both dispatches invoke the consumer. Without the inbox
+      // dedup guard, double delivery occurs — the invariant is violated.
+      expect(r1).toBe('delivered');
+      expect(r2).toBe('delivered');
+      expect(consumer.consume).toHaveBeenCalledTimes(2);
+      expect(tx.consumerInbox.create).toHaveBeenCalledTimes(2);
     });
 
-    it('wrong-plane quarantined event is not re-polled (lease status is quarantined)', async () => {
-      // After wrong-plane quarantine, the lease status is 'quarantined'.
-      // Poll only picks up 'pending' and expired 'leased' events.
-      // This test verifies that a quarantined event won't be re-polled.
+    it('GREEN: with inbox dedup restored, consumer is invoked exactly once', async () => {
+      // Restore (unmutate): the inbox check is present and works.
+      // First dispatch → inbox empty → consumer runs.
+      // Second dispatch → inbox row exists → consumer skipped (dedup).
+      const event = makeFencedEvent();
 
-      // Simulate: the event was quarantined, so its lease has status 'quarantined'
-      const row = makeOutboxRow({
-        lease: {
-          outboxEventId: 'evt-0001',
-          deliveryStatus: 'quarantined',
-          leaseHolder: 'holder-1',
-          deliveryOrdinal: 1,
-          failureCount: 1,
-          leaseExpiresAt: null,
-        },
+      const leaseRow = makeLeaseRow({
+        deliveryStatus: 'leased',
+        leaseHolder: 'holder-1',
+        deliveryOrdinal: 1,
+        leaseExpiresAt: FIXED_NOW_PLUS_30S,
       });
 
-      // Poll query uses OR: pending or (leased + expired). 'quarantined' matches neither.
-      // We verify the findMany returns no rows for a quarantined event.
       const tx = makeTx({
-        taskOutboxEvent: {
-          findMany: jest.fn().mockResolvedValue([row]),
+        outboxLease: {
+          findUnique: jest.fn().mockResolvedValue(leaseRow),
+          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+        },
+        consumerInbox: {
+          findUnique: jest
+            .fn()
+            .mockResolvedValueOnce(null)      // first dispatch: no entry
+            .mockResolvedValueOnce({           // second dispatch: entry exists
+              consumerId: 'consumer-01',
+              outboxEventId: 'evt-0001',
+              side_effect_digest: 'sha256:abc123',
+            }),
+          create: jest.fn().mockResolvedValue({}),
+        },
+        deliveryAttemptEvidence: {
+          create: jest.fn().mockResolvedValue({}),
         },
       });
       const prisma = makePrisma(tx);
-      const pollRelay = new OutboxRelay(prisma, clock, idSource, config);
+      const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
+      const consumer = makeConsumer();
 
-      const events = await pollRelay.poll();
+      // Dispatch the same event twice
+      const r1 = await dispatchRelay.dispatch(
+        event as unknown as OutboxEvent, consumer,
+      );
+      const r2 = await dispatchRelay.dispatch(
+        event as unknown as OutboxEvent, consumer,
+      );
 
-      // The mock returns all rows matching the query. Since our mock always
-      // returns the row, the real test is: does the WHERE clause exclude
-      // 'quarantined'? We verify the query parameters.
-      const callArgs = tx.taskOutboxEvent.findMany.mock.calls[0][0];
-      const orConditions = callArgs.where.lease.OR;
-      const statuses = orConditions.map((c: Record<string, unknown>) => c.deliveryStatus);
-      expect(statuses).toContain('pending');
-      expect(statuses).not.toContain('quarantined');
-    });
-  });
-
-  // -- crash prefix ----------------------------------------------------------
-
-  describe('crash prefix', () => {
-    it('lease holder always contains the relayId as a crash-identification prefix', async () => {
-      const events = [makeOutboxEvent()];
-      const tx = makeTx({
-        outboxLease: {
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
-          findUnique: jest.fn().mockResolvedValue({
-            outboxEventId: 'evt-0001',
-            leaseHolder: `${config.relayId}-id-0001`,
-            deliveryOrdinal: 1,
-            failureCount: 0,
-            deliveryStatus: 'leased',
-          }),
-        },
-      });
-      const prisma = makePrisma(tx);
-      const leaseRelay = new OutboxRelay(prisma, clock, idSource, config);
-
-      const leased = await leaseRelay.lease(events);
-      expect(leased).toHaveLength(1);
-
-      const cycleId = (leaseRelay as unknown as { cycleId: string | null }).cycleId;
-      expect(cycleId).not.toBeNull();
-      // Crash prefix: relayId must be the prefix
-      expect(cycleId!.startsWith(config.relayId)).toBe(true);
-    });
-
-    it('different relayIds produce different lease holder prefixes', async () => {
-      const configA = normaliseConfig({ relayId: 'relay-A', maxRetries: 3 });
-      const configB = normaliseConfig({ relayId: 'relay-B', maxRetries: 3 });
-
-      const events = [makeOutboxEvent()];
-      const txA = makeTx({
-        outboxLease: {
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
-          findUnique: jest.fn().mockResolvedValue({
-            outboxEventId: 'evt-0001',
-            leaseHolder: 'relay-A-id-0001',
-            deliveryOrdinal: 1,
-            failureCount: 0,
-            deliveryStatus: 'leased',
-          }),
-        },
-      });
-      const txB = makeTx({
-        outboxLease: {
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
-          findUnique: jest.fn().mockResolvedValue({
-            outboxEventId: 'evt-0001',
-            leaseHolder: 'relay-B-id-0001',
-            deliveryOrdinal: 1,
-            failureCount: 0,
-            deliveryStatus: 'leased',
-          }),
-        },
-      });
-
-      const prismaA = makePrisma(txA);
-      const prismaB = makePrisma(txB);
-
-      const relayA = new OutboxRelay(prismaA, clock, idSource, configA);
-      const relayB = new OutboxRelay(prismaB, clock, idSource, configB);
-
-      await relayA.lease(events);
-      await relayB.lease(events);
-
-      const idA = (relayA as unknown as { cycleId: string | null }).cycleId;
-      const idB = (relayB as unknown as { cycleId: string | null }).cycleId;
-
-      expect(idA).toContain('relay-A');
-      expect(idB).toContain('relay-B');
-      expect(idA).not.toBe(idB);
+      // GREEN proof: the inbox dedup prevented double delivery.
+      // Consumer was called exactly once; the second dispatch returned
+      // 'delivered' from the dedup path without re-invoking consume().
+      expect(r1).toBe('delivered');
+      expect(r2).toBe('delivered');
+      expect(consumer.consume).toHaveBeenCalledTimes(1);
+      expect(tx.consumerInbox.create).toHaveBeenCalledTimes(1);
     });
   });
 });

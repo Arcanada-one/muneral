@@ -12,6 +12,9 @@ import type { TransitionEventType } from '../execution-authority/execution-autho
 // ---------------------------------------------------------------------------
 
 export type OutboxEventType =
+  | 'attempt:issued'
+  | 'attempt:started'
+  | 'attempt:retry_issued'
   | 'task:completed'
   | 'task:failed'
   | 'task:terminal_failed'
@@ -19,15 +22,21 @@ export type OutboxEventType =
 
 /**
  * Map a transition event type and post-transition retry state to the outbox
- * event type. Returns null when no outbox event should be emitted (e.g.
- * attempt:started, attempt:issued, attempt:retry_issued).
+ * event type. Every committed authority transition has one stable outbox
+ * identity; transport consumers may ignore event kinds they do not need.
  */
 export function deriveOutboxEventType(
   transitionEventType: TransitionEventType,
   retryCount: number,
   retryBudget: number,
-): OutboxEventType | null {
+): OutboxEventType {
   switch (transitionEventType) {
+    case 'attempt:issued':
+      return 'attempt:issued';
+    case 'attempt:started':
+      return 'attempt:started';
+    case 'attempt:retry_issued':
+      return 'attempt:retry_issued';
     case 'attempt:succeeded':
       return 'task:completed';
     case 'attempt:failed':
@@ -36,8 +45,6 @@ export function deriveOutboxEventType(
         : 'task:failed';
     case 'attempt:cancelled':
       return 'task:cancelled';
-    default:
-      return null;
   }
 }
 
@@ -309,8 +316,12 @@ export const FORBIDDEN_PAYLOAD_KEYS: readonly string[] = [
   'fleet',
   'controller_epoch',
   'controllerEpoch',
-  'node_id',
-  'nodeId',
+  // `nodeId` / `node_id` are deliberately NOT listed. The ARCA-0194 result
+  // consilium ratified that a valid Task Card `nodeId` is a result addressing
+  // field and must be accepted, while Supervisor lifecycle, placement,
+  // watchdog and command authority stay rejected. Per-message closed
+  // validators in src/result-authority own the result plane; this structural
+  // denylist remains the backstop for every other payload.
   'runtime_incarnation',
   'runtimeIncarnation',
   'start_process',
@@ -373,6 +384,71 @@ export function validatePayloadPlane(
   };
 
   return visit(payload, '$', 0);
+}
+
+// ---------------------------------------------------------------------------
+// Error detail sanitisation (IMP6)
+// ---------------------------------------------------------------------------
+
+/** Maximum length of error_detail stored in delivery attempt evidence. */
+export const MAX_ERROR_DETAIL_LENGTH = 256;
+
+/**
+ * Sanitise a raw error message for storage in error_detail.
+ * Truncates to MAX_ERROR_DETAIL_LENGTH, strips newlines and control
+ * characters, and redacts potential secret patterns.
+ * Returns a bounded Record<string, unknown> suitable for JSONB storage.
+ *
+ * Redaction order matters: credential/key patterns are redacted FIRST,
+ * then control characters stripped, then the result is truncated.
+ */
+export function sanitiseErrorDetail(raw: string): Record<string, unknown> {
+  // Redact credential/token/key shapes before any other processing.
+  // These patterns cover common secret formats without being exhaustive
+  // enough to require a domain-specific secret scanner.
+  let cleaned = raw
+    // JWT tokens (three base64url segments separated by dots)
+    .replace(/eyJ[a-zA-Z0-9_-]+\.eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+/g, '[REDACTED:jwt]')
+    // Bearer tokens
+    .replace(/bearer\s+[a-zA-Z0-9_\-+.%=]+/gi, 'Bearer [REDACTED]')
+    // GitHub personal access tokens (ghp_ prefix; redact partial values too)
+    .replace(/ghp_[a-zA-Z0-9]{16,}/g, '[REDACTED:github-pat]')
+    // Slack bot tokens (xoxb- prefix, digits + hyphens + alphanumeric)
+    .replace(
+      /xoxb-[0-9]+-[0-9]+(?:-[a-zA-Z0-9]+)?/g,
+      '[REDACTED:slack-bot]',
+    )
+    // Stripe live/secret keys (sk_live_ or sk-live-, standalone token form)
+    .replace(
+      /sk[-_]live[-_][a-zA-Z0-9]{20,}/g,
+      '[REDACTED:stripe-live]',
+    )
+    // API key patterns (sk-..., pk-..., etc.) with key=value delimiter
+    .replace(/\b(sk|pk|api[-_]?key|token|secret|password|passwd|pwd)\s*[:=]\s*\S+/gi, '$1=[REDACTED]')
+    // Connection strings with embedded credentials
+    .replace(/[a-z]+:\/\/[^:]+:[^@]+@/gi, '[REDACTED-URL]://')
+    // AWS-style access keys and secrets
+    .replace(/\b(AKIA|ASIA)[A-Z0-9]{16}\b/g, '[REDACTED:aws-key]')
+    // Private key headers/footers (PEM)
+    .replace(/-----BEGIN\s*(RSA |EC |DSA |OPENSSH |ENCRYPTED )?PRIVATE KEY-----[\s\S]*?-----END\s*(RSA |EC |DSA |OPENSSH |ENCRYPTED )?PRIVATE KEY-----/g, '[REDACTED:private-key]')
+    // Generic long hex/base64 strings (likely tokens)
+    .replace(/\b[a-fA-F0-9]{64,}\b/g, '[REDACTED:hex-64+]')
+    .replace(/\b[A-Za-z0-9+/]{40,}={0,2}\b/g, '[REDACTED:base64-40+]');
+
+  // Strip control characters (except tab, newline), then newlines
+  cleaned = cleaned
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '')
+    .replace(/\n/g, ' ')
+    .replace(/\r/g, '');
+
+  // Truncate to max length
+  const truncated = cleaned.length > MAX_ERROR_DETAIL_LENGTH;
+  cleaned = cleaned.slice(0, MAX_ERROR_DETAIL_LENGTH);
+
+  return {
+    error: cleaned,
+    truncated: truncated || raw.length > MAX_ERROR_DETAIL_LENGTH,
+  };
 }
 
 // ---------------------------------------------------------------------------

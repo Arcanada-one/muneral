@@ -40,6 +40,8 @@ export {
   validatePayloadPlane,
   FORBIDDEN_PAYLOAD_KEYS,
   normaliseConfig,
+  sanitiseErrorDetail,
+  MAX_ERROR_DETAIL_LENGTH,
   DEFAULT_LEASE_TTL_MS,
   DEFAULT_MAX_RETRIES,
   DEFAULT_BATCH_SIZE,
