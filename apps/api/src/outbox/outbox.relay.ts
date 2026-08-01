@@ -38,10 +38,10 @@ const FENCE_REQUIRED_MSG =
   'OutboxRelay: event has no fence token — was it leased? Fencing is mandatory.';
 
 export interface TransactionalClient {
-   
+
   $transaction<T>(
     fn: (tx: PrismaTx) => Promise<T>,
-     
+
     options?: Record<string, unknown>,
   ): Promise<T>;
 }
@@ -74,7 +74,7 @@ export class OutboxRelay {
     const now = this.clock.now();
 
     const rows = await this.prisma.$transaction(async (tx) => {
-       
+
       return tx.taskOutboxEvent.findMany({
         where: {
           lease: {
@@ -113,7 +113,7 @@ export class OutboxRelay {
     const result = await this.prisma.$transaction(async (tx) => {
       // Atomic fenced lease acquisition.
       // Increments delivery_ordinal so every acquisition has a unique fence.
-       
+
       const updated = await (tx as PrismaTx).$queryRawUnsafe?.call?.(
         tx as PrismaTx,
         `UPDATE outbox_leases
@@ -139,7 +139,7 @@ export class OutboxRelay {
         const acquired: Array<{ outbox_event_id: string; delivery_ordinal: number }> = [];
         for (const event of events) {
           try {
-             
+
             const leaseRow = (tx as PrismaTx).outboxLease?.updateMany
               ? await (tx as PrismaTx).outboxLease.updateMany({
                   where: {
