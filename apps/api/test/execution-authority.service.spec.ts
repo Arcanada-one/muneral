@@ -15,6 +15,7 @@ import {
   StaleVersionError,
   InvalidTransitionError,
   IdempotencyCollisionError,
+  UnexpectedUniqueViolationError,
 } from '../src/execution-authority/execution-authority.errors';
 import { commandDigest } from '../src/execution-authority/canonical-json';
 import { EvidenceRefValidationError } from '../src/execution-authority/evidence-ref.validator';
@@ -38,6 +39,43 @@ const idSource: IdSource = {
 // ---------------------------------------------------------------------------
 // Mock helpers
 // ---------------------------------------------------------------------------
+
+/**
+ * Build a P2002 in the shape `@prisma/adapter-pg` actually produces.
+ *
+ * Verified against PostgreSQL 18 with Prisma 7 + the pg driver adapter: the
+ * documented `meta.target` is NOT populated by driver adapters; the violated
+ * constraint appears under `meta.driverAdapterError.cause`. A bare
+ * `{ code: 'P2002' }` is not a realistic fixture, and the service now
+ * classifies unidentifiable unique violations as unexpected rather than
+ * inventing a version race (QA finding F4).
+ */
+function prismaUniqueViolation(
+  constraintName: string,
+  columns: string[],
+): unknown {
+  return {
+    code: 'P2002',
+    meta: {
+      driverAdapterError: {
+        name: 'DriverAdapterError',
+        cause: {
+          kind: 'UniqueConstraintViolation',
+          originalCode: '23505',
+          originalMessage: `duplicate key value violates unique constraint "${constraintName}"`,
+          constraint: { fields: columns },
+        },
+      },
+    },
+  };
+}
+
+/** The canonical lost-version-race signal: journal (task_id, aggregate_version). */
+const JOURNAL_VERSION_RACE = () =>
+  prismaUniqueViolation('task_execution_transitions_task_version_unique', [
+    'task_id',
+    'aggregate_version',
+  ]);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function makeTx(overrides: Record<string, any> = {}): any {
@@ -209,7 +247,7 @@ describe('ExecutionAuthorityService', () => {
           findFirst: jest
             .fn()
             .mockResolvedValueOnce(null), // first attempt: no existing
-          create: jest.fn().mockRejectedValue({ code: 'P2002' }),
+          create: jest.fn().mockRejectedValue(JOURNAL_VERSION_RACE()),
         },
       });
 
@@ -738,6 +776,148 @@ describe('ExecutionAuthorityService', () => {
     });
   });
 
+  // -------------------------------------------------------------------------
+  // QA finding F4 — unique-violation classification.
+  // The service must tell a lost version race apart from any other unique
+  // violation, across every error shape Prisma can produce, and must fail
+  // closed when it cannot identify the constraint at all.
+  // -------------------------------------------------------------------------
+  describe('unique-violation classification', () => {
+    const command = {
+      kind: 'issue_initial_attempt' as const,
+      taskId: 'task-1',
+      expectedVersion: 0,
+      idempotencyKey: 'idem-classify',
+      causationId: 'cause-1',
+      correlationId: 'corr-1',
+      retryBudget: 3,
+      retryBackoffMs: 1_000,
+      evidenceRefs: [],
+    };
+
+    /** Run a command whose journal insert rejects with `err`. */
+    async function executeWithFailure(err: unknown) {
+      const tx = makeTx({
+        taskExecutionTransition: {
+          findFirst: jest.fn().mockResolvedValue(null),
+          create: jest.fn().mockRejectedValue(err),
+        },
+      });
+      // The reconcile pass finds nothing, so a version race surfaces as
+      // StaleVersionError; anything else must never reach this point.
+      const prisma: TransactionalClient = {
+        $transaction: jest.fn().mockImplementation(
+          async (fn: (t: unknown) => Promise<unknown>) => fn(tx),
+        ),
+      };
+      return service.executeCommand(prisma, command);
+    }
+
+    it.each([
+      [
+        'driver-adapter column set — journal (task_id, aggregate_version)',
+        prismaUniqueViolation(
+          'task_execution_transitions_task_version_unique',
+          ['task_id', 'aggregate_version'],
+        ),
+      ],
+      [
+        'driver-adapter column set — idempotency (task_id, idempotency_key)',
+        prismaUniqueViolation(
+          'task_execution_transitions_task_idempotency_unique',
+          ['task_id', 'idempotency_key'],
+        ),
+      ],
+      [
+        'driver-adapter column set — state pkey (task_id)',
+        prismaUniqueViolation('task_execution_state_pkey', ['task_id']),
+      ],
+      [
+        'driver-adapter column set — attempts (task_id, ordinal)',
+        prismaUniqueViolation('task_execution_attempts_task_ordinal_unique', [
+          'task_id',
+          'ordinal',
+        ]),
+      ],
+      [
+        'classic meta.target as a constraint-name string',
+        {
+          code: 'P2002',
+          meta: { target: 'task_execution_transitions_task_version_unique' },
+        },
+      ],
+      [
+        'classic meta.target as camelCase model fields',
+        { code: 'P2002', meta: { target: ['taskId', 'aggregateVersion'] } },
+      ],
+      [
+        'classic meta.target as snake_case columns',
+        { code: 'P2002', meta: { target: ['task_id', 'idempotency_key'] } },
+      ],
+    ])('reconciles a version race: %s', async (_label, err) => {
+      const result = await executeWithFailure(err);
+      expect(result).toBeInstanceOf(StaleVersionError);
+    });
+
+    it.each([
+      [
+        'duplicate attempt UUID (attempts pkey)',
+        prismaUniqueViolation('task_execution_attempts_pkey', ['attempt_id']),
+        'task_execution_attempts_pkey',
+      ],
+      [
+        'duplicate transition UUID (transitions pkey)',
+        prismaUniqueViolation('task_execution_transitions_pkey', ['id']),
+        'task_execution_transitions_pkey',
+      ],
+      [
+        'duplicate (attempt_id, task_id)',
+        prismaUniqueViolation('task_execution_attempts_attempt_task_unique', [
+          'attempt_id',
+          'task_id',
+        ]),
+        'task_execution_attempts_attempt_task_unique',
+      ],
+      [
+        'a unique violation from an unrelated table',
+        prismaUniqueViolation('users_email_key', ['email']),
+        'users_email_key',
+      ],
+    ])(
+      'rethrows a non-version-race violation: %s',
+      async (_label, err, constraint) => {
+        await expect(executeWithFailure(err)).rejects.toBeInstanceOf(
+          UnexpectedUniqueViolationError,
+        );
+        await executeWithFailure(err).catch(
+          (e: UnexpectedUniqueViolationError) => {
+            expect(e.constraint).toBe(constraint);
+            expect(e).not.toBeInstanceOf(StaleVersionError);
+          },
+        );
+      },
+    );
+
+    it('fails closed when the constraint cannot be identified at all', async () => {
+      // No meta, so neither the constraint name nor the column set is
+      // recoverable. Guessing "version race" here is what produced the phantom
+      // StaleVersionError; the service must surface the ambiguity instead.
+      await expect(executeWithFailure({ code: 'P2002' })).rejects.toBeInstanceOf(
+        UnexpectedUniqueViolationError,
+      );
+      await executeWithFailure({ code: 'P2002' }).catch(
+        (e: UnexpectedUniqueViolationError) => {
+          expect(e.constraint).toBe('unknown');
+        },
+      );
+    });
+
+    it('still reconciles a P2034 serialization conflict', async () => {
+      const result = await executeWithFailure({ code: 'P2034' });
+      expect(result).toBeInstanceOf(StaleVersionError);
+    });
+  });
+
   describe('reconcileAfterRollback', () => {
     async function verifyHistoricalConflict(errorCode: 'P2002' | 'P2034') {
       // Simulate: existing transition for same key+digest, plus later journal facts.
@@ -780,7 +960,9 @@ describe('ExecutionAuthorityService', () => {
       const tx = makeTx();
       // First attempt: idempotency miss, then conflict on transition create.
       tx.taskExecutionTransition.findFirst = jest.fn().mockResolvedValue(null);
-      tx.taskExecutionTransition.create = jest.fn().mockRejectedValue({ code: errorCode });
+      tx.taskExecutionTransition.create = jest.fn().mockRejectedValue(
+        errorCode === 'P2002' ? JOURNAL_VERSION_RACE() : { code: errorCode },
+      );
 
       // Reconcile: findFirst returns existing transition
       const reconcileTx = makeTx({
@@ -848,7 +1030,7 @@ describe('ExecutionAuthorityService', () => {
       let callCount = 0;
       const tx = makeTx();
       tx.taskExecutionTransition.findFirst = jest.fn().mockResolvedValue(null);
-      tx.taskExecutionTransition.create = jest.fn().mockRejectedValue({ code: 'P2002' });
+      tx.taskExecutionTransition.create = jest.fn().mockRejectedValue(JOURNAL_VERSION_RACE());
 
       // Pre-compute the digest so reconcile's digest match passes and we reach
       // reconstructHistoricalResult (which should then fail on the malformed journal).

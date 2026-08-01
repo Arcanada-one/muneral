@@ -128,11 +128,7 @@ export class ResultAuthorityService {
       // The loser's transaction rolled back and produced no node, reference,
       // receipt, transition or outbox row.
       if (err instanceof StaleVersionError) {
-        return new ResultBindingError(
-          'aggregateVersion',
-          String(err.expectedVersion),
-          'a concurrently committed transition on the same aggregate',
-        );
+        return this.mapStaleVersionRace(err);
       }
       throw err;
     }
@@ -318,6 +314,13 @@ export class ResultAuthorityService {
       command,
       { transitionId },
     );
+    // A concurrent writer can be observed either at the conditional UPDATE
+    // (thrown StaleVersionError, mapped by commitOwnedResult) or during the
+    // reducer's pre-write re-read (returned StaleVersionError). Both represent
+    // the same result-binding race and must expose the same typed outcome.
+    if (authorityOutcome instanceof StaleVersionError) {
+      return this.mapStaleVersionRace(authorityOutcome);
+    }
     if (authorityOutcome instanceof Error) return authorityOutcome;
     const committed = authorityOutcome as ExecutionResult;
 
@@ -380,6 +383,16 @@ export class ResultAuthorityService {
       state: committed.state,
       outboxEvent: committed.outboxEvent,
     };
+  }
+
+  // -------------------------------------------------------------------------
+
+  private mapStaleVersionRace(err: StaleVersionError): ResultBindingError {
+    return new ResultBindingError(
+      'aggregateVersion',
+      String(err.expectedVersion),
+      'a concurrently committed transition on the same aggregate',
+    );
   }
 
   // -------------------------------------------------------------------------
