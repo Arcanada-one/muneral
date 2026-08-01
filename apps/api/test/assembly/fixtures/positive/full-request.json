@@ -1,43 +1,63 @@
 {
-  "description": "All fields present including deadline, attemptBudget, traceFields",
+  "description": "All optional fields",
   "input": {
     "schemaVersion": "v0",
     "taskId": "task-full",
-    "causationId": "caus-full",
-    "correlationId": "corr-full",
-    "tenant": "acme",
-    "principal": "user-2",
-    "purpose": "production",
-    "audience": "external",
-    "scope": "read,write",
+    "causationId": "cause-fixture",
+    "correlationId": "corr-fixture",
+    "evaluatedAt": "2026-08-01T12:00:00.000Z",
+    "authorityCeiling": {
+      "tenant": "acme",
+      "principal": "operator",
+      "purpose": "assembly",
+      "audience": "internal",
+      "scope": "read,write"
+    },
+    "requestedAuthority": {
+      "tenant": "acme",
+      "principal": "operator",
+      "purpose": "assembly",
+      "audience": "internal",
+      "scope": "read"
+    },
     "rolePolicy": {
-      "policyId": "policy-full",
-      "policyVersion": "2026-08-01T00:00:00Z",
-      "roleName": "reviewer"
+      "policyId": "roles",
+      "policyVersion": "v1",
+      "roleName": "assistant"
     },
     "candidateSet": {
       "candidates": [
         "assistant",
-        "reviewer",
-        "critic"
+        "reviewer"
       ],
-      "sourceDigest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-      "capturedAt": "2026-07-30T12:00:00Z"
+      "sourceDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "capturedAt": "2026-08-01T11:59:00.000Z"
     },
-    "deadline": "2027-01-01T00:00:00Z",
-    "attemptBudget": 10,
-    "traceFields": {
-      "requestId": "abc-999",
-      "source": "cli",
-      "debugHint": "test-mode"
-    },
+    "evidenceRefs": [
+      {
+        "uri": "evidence/a.json",
+        "digest": "1111111111111111111111111111111111111111111111111111111111111111",
+        "contentType": "application/json",
+        "label": "A"
+      },
+      {
+        "uri": "evidence/b.txt",
+        "digest": "2222222222222222222222222222222222222222222222222222222222222222",
+        "contentType": "text/plain"
+      }
+    ],
     "provenance": {
-      "policyUri": "content://policy-full",
-      "policyDigest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-      "issuedAt": "2026-07-30T00:00:00Z",
-      "expiresAt": "2027-07-30T00:00:00Z"
+      "policyUri": "policy/roles.json",
+      "policyDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "issuedAt": "2026-08-01T11:00:00.000Z",
+      "expiresAt": "2026-08-03T12:00:00.000Z"
+    },
+    "deadline": "2026-08-02T12:00:00.000Z",
+    "attemptBudget": 3,
+    "traceFields": {
+      "diagnostic": "fixture"
     }
   },
-  "expectedDigest": "02c5763042247e787680fb5ed1af158a6b74d2060393a5cb060ae8b7c3f4534e",
-  "expectedArtifactId": "02c5763042247e787680fb5ed1af158a6b74d2060393a5cb060ae8b7c3f4534e"
+  "expectedDigest": "b4b63ba2c117845540c8039899fef1b2cea1cb5c6b00def5ce36399c09e5d5fd",
+  "expectedArtifactId": "b4b63ba2c117845540c8039899fef1b2cea1cb5c6b00def5ce36399c09e5d5fd"
 }

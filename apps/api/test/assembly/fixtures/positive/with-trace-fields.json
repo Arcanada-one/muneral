@@ -1,18 +1,28 @@
 {
-  "description": "Non-empty traceFields — verify they do not affect digest",
+  "description": "Trace diagnostics excluded from identity",
   "input": {
     "schemaVersion": "v0",
     "taskId": "task-trace",
-    "causationId": "caus-trace",
-    "correlationId": "corr-trace",
-    "tenant": "acme",
-    "principal": "user-4",
-    "purpose": "test",
-    "audience": "internal",
-    "scope": "read",
+    "causationId": "cause-fixture",
+    "correlationId": "corr-fixture",
+    "evaluatedAt": "2026-08-01T12:00:00.000Z",
+    "authorityCeiling": {
+      "tenant": "acme",
+      "principal": "operator",
+      "purpose": "assembly",
+      "audience": "internal",
+      "scope": "read,write"
+    },
+    "requestedAuthority": {
+      "tenant": "acme",
+      "principal": "operator",
+      "purpose": "assembly",
+      "audience": "internal",
+      "scope": "read"
+    },
     "rolePolicy": {
-      "policyId": "policy-trace",
-      "policyVersion": "2026-07-30T00:00:00Z",
+      "policyId": "roles",
+      "policyVersion": "v1",
       "roleName": "assistant"
     },
     "candidateSet": {
@@ -21,20 +31,20 @@
         "reviewer"
       ],
       "sourceDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-      "capturedAt": "2026-07-30T00:00:00Z"
+      "capturedAt": "2026-08-01T11:59:00.000Z"
     },
-    "deadline": "2027-06-01T00:00:00Z",
-    "traceFields": {
-      "customRequestId": "xyz-789",
-      "originatingHost": "build-agent-3",
-      "pipelineRunId": "run-42"
-    },
+    "evidenceRefs": [],
     "provenance": {
-      "policyUri": "content://policy-trace",
+      "policyUri": "policy/roles.json",
       "policyDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-      "issuedAt": "2026-07-30T00:00:00Z"
+      "issuedAt": "2026-08-01T11:00:00.000Z"
+    },
+    "traceFields": {
+      "nested": {
+        "note": "non-authoritative"
+      }
     }
   },
-  "expectedDigest": "9e631421c8a570561695ae3ead64d1fc9569365536403e7df6655b2eeb6a9bf7",
-  "expectedArtifactId": "9e631421c8a570561695ae3ead64d1fc9569365536403e7df6655b2eeb6a9bf7"
+  "expectedDigest": "4296f6f0b11c44f7f23ccb914e96a45c26a4f65b2df7f91a62ab8237c5adbd45",
+  "expectedArtifactId": "4296f6f0b11c44f7f23ccb914e96a45c26a4f65b2df7f91a62ab8237c5adbd45"
 }

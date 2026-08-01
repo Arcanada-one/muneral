@@ -1,34 +1,46 @@
 {
-  "description": "Optional deadline omitted, attemptBudget present",
+  "description": "Attempt budget without deadline",
   "input": {
     "schemaVersion": "v0",
-    "taskId": "task-nodeadline",
-    "causationId": "caus-nd",
-    "correlationId": "corr-nd",
-    "tenant": "acme",
-    "principal": "user-5",
-    "purpose": "batch",
-    "audience": "internal",
-    "scope": "admin",
+    "taskId": "task-no-deadline",
+    "causationId": "cause-fixture",
+    "correlationId": "corr-fixture",
+    "evaluatedAt": "2026-08-01T12:00:00.000Z",
+    "authorityCeiling": {
+      "tenant": "acme",
+      "principal": "operator",
+      "purpose": "assembly",
+      "audience": "internal",
+      "scope": "read,write"
+    },
+    "requestedAuthority": {
+      "tenant": "acme",
+      "principal": "operator",
+      "purpose": "assembly",
+      "audience": "internal",
+      "scope": "read"
+    },
     "rolePolicy": {
-      "policyId": "policy-admin",
-      "policyVersion": "2026-07-30T00:00:00Z",
-      "roleName": "admin"
+      "policyId": "roles",
+      "policyVersion": "v1",
+      "roleName": "assistant"
     },
     "candidateSet": {
       "candidates": [
-        "admin"
+        "assistant",
+        "reviewer"
       ],
-      "sourceDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "capturedAt": "2026-07-30T00:00:00Z"
+      "sourceDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "capturedAt": "2026-08-01T11:59:00.000Z"
     },
-    "attemptBudget": 50,
+    "evidenceRefs": [],
     "provenance": {
-      "policyUri": "content://policy-admin",
-      "policyDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-      "issuedAt": "2026-07-30T00:00:00Z"
-    }
+      "policyUri": "policy/roles.json",
+      "policyDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "issuedAt": "2026-08-01T11:00:00.000Z"
+    },
+    "attemptBudget": 2
   },
-  "expectedDigest": "76bf4d07524d608ea614cb5b3b35e3f64068c836ac94f5881085d3ea21a9d68b",
-  "expectedArtifactId": "76bf4d07524d608ea614cb5b3b35e3f64068c836ac94f5881085d3ea21a9d68b"
+  "expectedDigest": "82a8ff704e0c5c6b525f9304b91e9d09c01483f854c6ce8a87f3c6638749ba03",
+  "expectedArtifactId": "82a8ff704e0c5c6b525f9304b91e9d09c01483f854c6ce8a87f3c6638749ba03"
 }

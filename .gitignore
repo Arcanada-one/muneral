@@ -43,3 +43,7 @@ pids/
 
 # TypeScript
 *.tsbuildinfo
+
+# Python bytecode from the cross-language fixture validator
+__pycache__/
+*.pyc

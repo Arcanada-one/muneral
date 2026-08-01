@@ -1,8 +1,8 @@
 {
-  "description": "Smallest valid request",
+  "description": "Requested scope exceeds ceiling",
   "input": {
     "schemaVersion": "v0",
-    "taskId": "task-minimal",
+    "taskId": "task-fixture",
     "causationId": "cause-fixture",
     "correlationId": "corr-fixture",
     "evaluatedAt": "2026-08-01T12:00:00.000Z",
@@ -18,7 +18,7 @@
       "principal": "operator",
       "purpose": "assembly",
       "audience": "internal",
-      "scope": "read"
+      "scope": "admin,read"
     },
     "rolePolicy": {
       "policyId": "roles",
@@ -40,6 +40,5 @@
       "issuedAt": "2026-08-01T11:00:00.000Z"
     }
   },
-  "expectedDigest": "46f341777bee715e908eebe8b8f021d3b922886a9b08894b4c81928f8aa7eabe",
-  "expectedArtifactId": "46f341777bee715e908eebe8b8f021d3b922886a9b08894b4c81928f8aa7eabe"
+  "expectedErrorCode": "AUTHORITY_WIDENING"
 }

@@ -1,33 +1,45 @@
 {
-  "description": "Scope is subset — narrow authority",
+  "description": "Requested scope is narrower than ceiling",
   "input": {
     "schemaVersion": "v0",
     "taskId": "task-narrow",
-    "causationId": "caus-narrow",
-    "correlationId": "corr-narrow",
-    "tenant": "acme",
-    "principal": "user-3",
-    "purpose": "review",
-    "audience": "internal",
-    "scope": "read",
+    "causationId": "cause-fixture",
+    "correlationId": "corr-fixture",
+    "evaluatedAt": "2026-08-01T12:00:00.000Z",
+    "authorityCeiling": {
+      "tenant": "acme",
+      "principal": "operator",
+      "purpose": "assembly",
+      "audience": "internal",
+      "scope": "admin,read,write"
+    },
+    "requestedAuthority": {
+      "tenant": "acme",
+      "principal": "operator",
+      "purpose": "assembly",
+      "audience": "internal",
+      "scope": "read"
+    },
     "rolePolicy": {
-      "policyId": "policy-narrow",
-      "policyVersion": "2026-07-30T00:00:00Z",
+      "policyId": "roles",
+      "policyVersion": "v1",
       "roleName": "assistant"
     },
     "candidateSet": {
       "candidates": [
-        "assistant"
+        "assistant",
+        "reviewer"
       ],
-      "sourceDigest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-      "capturedAt": "2026-07-30T00:00:00Z"
+      "sourceDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "capturedAt": "2026-08-01T11:59:00.000Z"
     },
+    "evidenceRefs": [],
     "provenance": {
-      "policyUri": "content://policy-narrow",
-      "policyDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "issuedAt": "2026-07-30T00:00:00Z"
+      "policyUri": "policy/roles.json",
+      "policyDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "issuedAt": "2026-08-01T11:00:00.000Z"
     }
   },
-  "expectedDigest": "0a94ee7f6f8044012bdd2e9919c83d0424b781d453fdf9da128c76e34fdd9663",
-  "expectedArtifactId": "0a94ee7f6f8044012bdd2e9919c83d0424b781d453fdf9da128c76e34fdd9663"
+  "expectedDigest": "3d979d54f74597230f4d21111b080c3c689661ab3db21af00983fd2043904a7d",
+  "expectedArtifactId": "3d979d54f74597230f4d21111b080c3c689661ab3db21af00983fd2043904a7d"
 }

@@ -1,32 +1,44 @@
 {
-  "description": "expiresAt in past → EXPIRED_POLICY",
+  "description": "Policy expired before evaluation",
   "input": {
     "schemaVersion": "v0",
-    "taskId": "task-exp",
-    "causationId": "c",
-    "correlationId": "c",
-    "tenant": "acme",
-    "principal": "user",
-    "purpose": "test",
-    "audience": "internal",
-    "scope": "read",
+    "taskId": "task-fixture",
+    "causationId": "cause-fixture",
+    "correlationId": "corr-fixture",
+    "evaluatedAt": "2026-08-01T12:00:00.000Z",
+    "authorityCeiling": {
+      "tenant": "acme",
+      "principal": "operator",
+      "purpose": "assembly",
+      "audience": "internal",
+      "scope": "read,write"
+    },
+    "requestedAuthority": {
+      "tenant": "acme",
+      "principal": "operator",
+      "purpose": "assembly",
+      "audience": "internal",
+      "scope": "read"
+    },
     "rolePolicy": {
-      "policyId": "p",
+      "policyId": "roles",
       "policyVersion": "v1",
-      "roleName": "r"
+      "roleName": "assistant"
     },
     "candidateSet": {
       "candidates": [
-        "a"
+        "assistant",
+        "reviewer"
       ],
-      "sourceDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "capturedAt": "2026-07-30T00:00:00Z"
+      "sourceDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "capturedAt": "2026-08-01T11:59:00.000Z"
     },
+    "evidenceRefs": [],
     "provenance": {
-      "policyUri": "u",
-      "policyDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-      "issuedAt": "2026-01-01T00:00:00Z",
-      "expiresAt": "2020-01-01T00:00:00Z"
+      "policyUri": "policy/roles.json",
+      "policyDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "issuedAt": "2026-08-01T11:00:00.000Z",
+      "expiresAt": "2026-08-01T11:59:59.999Z"
     }
   },
   "expectedErrorCode": "EXPIRED_POLICY"

@@ -1,0 +1,948 @@
+{
+  "targets": [
+    "apps/api/src/assembly/assembly.errors.ts",
+    "apps/api/src/assembly/assembly.validator.ts",
+    "apps/api/src/assembly/assembly.canonical.ts",
+    "apps/api/src/assembly/assembly.compiler.ts",
+    "apps/api/src/execution-authority/canonical-json-v1.ts"
+  ],
+  "count": 85,
+  "siteMapSha256": "07973162a1cd18b4e02ef7a7c9e189245b944c7475eb6b538c6d84c80dff89b4",
+  "sites": [
+    {
+      "id": 1,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 59,
+      "fn": "validateAssemblyRequest",
+      "codes": [
+        "via error()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "1aa525abc13fa027a5f691e390f3695e3527c0d77ebd58511f8fbda60fe6c5db"
+    },
+    {
+      "id": 2,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 88,
+      "fn": "validateSnapshot",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "720a84dd8e37ac04bb7b96cf8470bf39109baa826548e84c0e8e1788e5cfa496"
+    },
+    {
+      "id": 3,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 105,
+      "fn": "validateSnapshot",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "70f764c87560028bf3e0db16e0a132610ff2960c50fee5cbd32cb63ed49ef392"
+    },
+    {
+      "id": 4,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 114,
+      "fn": "validateSnapshot",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "b521c62fbf18359ec3f39f22d0bd8ee3f50592da1f7242ff26ca84d230601a67"
+    },
+    {
+      "id": 5,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 123,
+      "fn": "validateSnapshot",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "empty-if-body",
+      "pristineStatementSha256": "1301caa44bdb714735ab42639df6d0271ade4e4552070d40c51d02baa042c046"
+    },
+    {
+      "id": 6,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 143,
+      "fn": "validateSnapshot",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "f3e2f177c2c7f3855c5ea8806f9f6809a3326d187edfc6c83a4696c5a2d6cc02"
+    },
+    {
+      "id": 7,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 147,
+      "fn": "validateSnapshot",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "63f1926d6906879d1ea1aa9a51b8c337d4c0b7bb5fb1ed9d338a218f0de20cd1"
+    },
+    {
+      "id": 8,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 153,
+      "fn": "validateSnapshot",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "b8d2de3d453687c552a664e2db63a57a3c32821d3988b8a22834d48a428066db"
+    },
+    {
+      "id": 9,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 175,
+      "fn": "validateRequiredTypes",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "3be89a8a475a3a63d78c1b65562f6260f8038f6c04b2582ec05f632745c3d18e"
+    },
+    {
+      "id": 10,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 179,
+      "fn": "validateRequiredTypes",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "9c00753ba52a0a9b66473ecf52bfff0fc2bda870255bf523cbc774db08ad9eb5"
+    },
+    {
+      "id": 11,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 185,
+      "fn": "validateRequiredTypes",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "empty-if-body",
+      "pristineStatementSha256": "0c1a92240583abe979d0c33513bcd0a15dc6b8a99b5812520610f15cccff3148"
+    },
+    {
+      "id": 12,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 188,
+      "fn": "validateRequiredTypes",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "a47bb81e6038fe0a607d718503e0270bd94069e0d01d356353b27d7dc19b2849"
+    },
+    {
+      "id": 13,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 192,
+      "fn": "validateRequiredTypes",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "empty-if-body",
+      "pristineStatementSha256": "bd18ebc09690540278e3cfc084ede28e1179717b1f761c8bd44b7aeb3f8a63f0"
+    },
+    {
+      "id": 14,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 195,
+      "fn": "validateRequiredTypes",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "f10f55de8f3a36836b692153bda6c2c5d07e7ef3949265ba5e07c58ba3695bc5"
+    },
+    {
+      "id": 15,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 198,
+      "fn": "validateRequiredTypes",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "empty-if-body",
+      "pristineStatementSha256": "da332b7f38efcfef5d7b6bbd79526212572f6e06c6f1d04e918af6b782134da0"
+    },
+    {
+      "id": 16,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 200,
+      "fn": "validateRequiredTypes",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "3032c24aacea3528d4ce72961b30e0cd2926fe884808efb2877b5ea305a13f75"
+    },
+    {
+      "id": 17,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 203,
+      "fn": "validateRequiredTypes",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "0d2cefa8bf172c7762e17ac1b3211d2af25ca9c6f53496cbd18425b8989f9b9a"
+    },
+    {
+      "id": 18,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 206,
+      "fn": "validateRequiredTypes",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "75ba94e3f1037ca7a14e49061e0b22e666195b3406bf1fe146e7403561eac3b7"
+    },
+    {
+      "id": 19,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 209,
+      "fn": "validateRequiredTypes",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "f583268e5c400f5b587be24ab8ed0f3839e7fa38b5095ccccf4badd9c0d60a32"
+    },
+    {
+      "id": 20,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 212,
+      "fn": "validateRequiredTypes",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "c2a63907263ed4f12a79a21ae4fce52aedab07a578994c45f830c6b1a7440340"
+    },
+    {
+      "id": 21,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 215,
+      "fn": "validateRequiredTypes",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "0bb8e1e89ef267c2a971294cd51dc6ebe53a05403d0d38b8de22ae467759d7a6"
+    },
+    {
+      "id": 22,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 219,
+      "fn": "validateRequiredTypes",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "e0e42ce6566738282216418d3272aecec06180cc0a4f3d844d36c9a36178addf"
+    },
+    {
+      "id": 23,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 229,
+      "fn": "validateBoundedFields",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "3d5eec47ee48d6835122914e174d4a348aeae4543ef1d5e8af15a9b1754c4128"
+    },
+    {
+      "id": 24,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 239,
+      "fn": "validateBoundedFields",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "52276b753f6f9d04d450cff074af55dbcc5ca258fa23bba2bcee87ef0c616412"
+    },
+    {
+      "id": 25,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 246,
+      "fn": "validateBoundedFields",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "2f98997a1825589d29032f03e9af8c5e74c3b233c628f9ad74a72c5b02a2b2c8"
+    },
+    {
+      "id": 26,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 252,
+      "fn": "validateBoundedFields",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "db6071036e4530d98db54237ff8b6d4372dadf1bbf98910f5512244fff1b26a0"
+    },
+    {
+      "id": 27,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 257,
+      "fn": "validateBoundedFields",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "be67032864c0525bcd40f38c3f3e3e33f8817a44c867ba8240f6e4478917cba4"
+    },
+    {
+      "id": 28,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 264,
+      "fn": "validateInstantFields",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "002f50bd96d4f8c570d062058e38a28448b3738f8d2782eac5a89a1fe9d05dc5"
+    },
+    {
+      "id": 29,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 268,
+      "fn": "validateInstantFields",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "52087236ab8dac7aec4ec43cb94e407d76c9d585678f24bdd2328bca8a98fc2b"
+    },
+    {
+      "id": 30,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 272,
+      "fn": "validateInstantFields",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "83f53a90c62a67739126bdc45e6bbc4abb80cbff3c8d3d46701a3ff5c92fa7ff"
+    },
+    {
+      "id": 31,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 277,
+      "fn": "validateInstantFields",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "8fabaca4c03c604604d5c94fa7b714f76450abd3773b5f581b4692bb62a7c926"
+    },
+    {
+      "id": 32,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 282,
+      "fn": "validateInstantFields",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "452b6a10dc32892f424a92f918a5614d477153e30f36f51a469eb9af913f9a33"
+    },
+    {
+      "id": 33,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 295,
+      "fn": "validateNestedClosedFields",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "a2ff671e8780b3a8b7c8b51752fa23aed2b71e886006e9dc96de5ca0bde98bf5"
+    },
+    {
+      "id": 34,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 305,
+      "fn": "validateEvidenceRefs",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "6ae7b5d237586c8a3c32e49fc9641a81f1bf03eedad498e7b8b1f9e61dc9f9e9"
+    },
+    {
+      "id": 35,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 312,
+      "fn": "validateEvidenceRefs",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "5f13fdcdabeba6c19d7e3dfc7bf6d4f915680df60c27184a5cecd7039a624a33"
+    },
+    {
+      "id": 36,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 317,
+      "fn": "validateEvidenceRefs",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "6023ef89b879718c99c7337182d9ec4b4369155172c3e5751a26e504747ec14e"
+    },
+    {
+      "id": 37,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 322,
+      "fn": "validateEvidenceRefs",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "36b8258046cddf6eb6de84c9f4c64241c96754cbe2a88a69e955dcb526c95707"
+    },
+    {
+      "id": 38,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 337,
+      "fn": "validateAuthority",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "05041e9bd0f69a2ec965c0dba8ebdce6b59ddaedb8ac80849ccf0add418d65d7"
+    },
+    {
+      "id": 39,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 341,
+      "fn": "validateAuthority",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "empty-if-body",
+      "pristineStatementSha256": "8cb3c3041c0c99fec569232781bca56f061999a11c212833d47cbffb10defd70"
+    },
+    {
+      "id": 40,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 348,
+      "fn": "validateNarrowing",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "d1a8c7810a4aab5a1290635a70487bcd3fdaa5ee3aa8f4d404575f355b55c3bd"
+    },
+    {
+      "id": 41,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 353,
+      "fn": "validateNarrowing",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "3ed4e5e18f8222a867f7d782f7d6a5dd936e4729ddc522e96513499710c11dbb"
+    },
+    {
+      "id": 42,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 362,
+      "fn": "validateCandidateSet",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "c597be09dda78e696eab502d5f0a8308a3134b00aadc36b75b71838f43617777"
+    },
+    {
+      "id": 43,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 365,
+      "fn": "validateCandidateSet",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "19a4287b0b945409acbd5df4e2007fbef653dbdd0226649f2955561dc48b7e89"
+    },
+    {
+      "id": 44,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 377,
+      "fn": "validateProvenance",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "46327cc50ee4a018920bbbb5e85b94e8b7f749125555c4f6eee9585faff90188"
+    },
+    {
+      "id": 45,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 380,
+      "fn": "validateProvenance",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "993698b6f1f4daf3a752e004a1d61531d35b76c670d52d75743d5c4d2e787052"
+    },
+    {
+      "id": 46,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 384,
+      "fn": "validateProvenance",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "e4ef5dc50ccc5a7f910aa9a620a79f062944474396553495afdda333b23ccdc2"
+    },
+    {
+      "id": 47,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 414,
+      "fn": "scanCredentials",
+      "codes": [
+        "via error()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "a97cb1424ff5601955767bd369e1a71bccd7e3619bf9430ade31659f362044a0"
+    },
+    {
+      "id": 48,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 427,
+      "fn": "scanCredentials",
+      "codes": [
+        "via error()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "b9b81f861c9b8e256f1d0d8a63320a9dd3251e46839a793c76a52b45eda27693"
+    },
+    {
+      "id": 49,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 466,
+      "fn": "canonicalFailure",
+      "codes": [
+        "via error()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "66af9ffc4ffa120871c315b16555f1b89cc29ee36b8f2dab6a65afaa6acdebec"
+    },
+    {
+      "id": 50,
+      "path": "apps/api/src/assembly/assembly.validator.ts",
+      "line": 468,
+      "fn": "canonicalFailure",
+      "codes": [
+        "via error()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "25b7812fd19fda929c287b45d70874dd9df4051e375f7e4ec5ba95df0e43c365"
+    },
+    {
+      "id": 51,
+      "path": "apps/api/src/assembly/assembly.canonical.ts",
+      "line": 55,
+      "fn": "validateCanonicalValue",
+      "codes": [
+        "(computed)"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "c787d36392c067fdd33399f81df8dc719e66102dd272ab4be9ecddfdf9986771"
+    },
+    {
+      "id": 52,
+      "path": "apps/api/src/assembly/assembly.canonical.ts",
+      "line": 60,
+      "fn": "validateCanonicalValue",
+      "codes": [
+        "AMBIGUOUS_CANONICAL_VALUE"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "33465b090ee18520c8866b7068903684b6e91da4a1c323a37ea64c2d389c6284"
+    },
+    {
+      "id": 53,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 57,
+      "fn": "canonicalJsonV1",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "45ab4be65b2e8e634f830f094020428ce6e33aec365a43dfdb89b84b8f345878"
+    },
+    {
+      "id": 54,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 70,
+      "fn": "capture",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "39a2a34ab943862b3e6d926a89c17f32c196b4261aafb503fa9ad673b6473266"
+    },
+    {
+      "id": 55,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 74,
+      "fn": "capture",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "empty-if-body",
+      "pristineStatementSha256": "13d03b60a3c2023b5ca4349e9d9164c6105e45f1c201422cdf5608adb2999217"
+    },
+    {
+      "id": 56,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 80,
+      "fn": "capture",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "a6976b7b310549a31ef3d57b7932e18482480acd468a254b9d56af517745373b"
+    },
+    {
+      "id": 57,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 85,
+      "fn": "capture",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "d9aa22411dd7a97d4527be4c626245229fa051d257b912651c2f65eeae69d7b3"
+    },
+    {
+      "id": 58,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 90,
+      "fn": "capture",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "56b77a15e6243aaeb9349a4f1898ad552bc2b1efb283495310e6ea8974853046"
+    },
+    {
+      "id": 59,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 92,
+      "fn": "capture",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "empty-if-body",
+      "pristineStatementSha256": "755efa1e14126a2dd1004d6b5238dbe9e4819c1fb6f5ef6e7f62748f3c98016c"
+    },
+    {
+      "id": 60,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 97,
+      "fn": "capture",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "72f804312c6ff8f84f9685d6ec745e40e3ead27f3f0d35956e1d8c61291845df"
+    },
+    {
+      "id": 61,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 101,
+      "fn": "capture",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "5d326107db41241801bf550d56ee82e3b864da5145c3a253efe23a59632cc817"
+    },
+    {
+      "id": 62,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 108,
+      "fn": "capture",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "b7f4254f7f36ebf9c6e6e3e0fd798ba8eb2551a328c96a223c682be28f8f7b94"
+    },
+    {
+      "id": 63,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 113,
+      "fn": "capture",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "d5da068e2d33e7f05f5a2d3f3e6b34793a82749f907e4f9671bde4723682cc79"
+    },
+    {
+      "id": 64,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 119,
+      "fn": "capture",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "1e8dbdb2f92589189f10613dea3aa46afd659739337289abc104a157ee89622f"
+    },
+    {
+      "id": 65,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 128,
+      "fn": "capture",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "453fc0680c22a08d6760f1d77f3a5296d211935178ce5b7210a18f289dd06fa2"
+    },
+    {
+      "id": 66,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 131,
+      "fn": "capture",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "75c083fa712dbd08e85466c53b50e9e746143417a8fa4ef6373d8f6bebc223e8"
+    },
+    {
+      "id": 67,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 136,
+      "fn": "capture",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "7c40455dd17668bca4f885e35e5710a085abcc280d254e1da7ae8c7ff9c0bc7e"
+    },
+    {
+      "id": 68,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 149,
+      "fn": "capture",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "empty-if-body",
+      "pristineStatementSha256": "89313a448f42a2224d1f5de2ced5d99ead465c34ca6fade87370d52a4be56a50"
+    },
+    {
+      "id": 69,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 152,
+      "fn": "capture",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "3243cdcd0e58c20f145dbba622a3f23ee199cca3293030014176a9f86cb3a648"
+    },
+    {
+      "id": 70,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 212,
+      "fn": "parseCanonicalJsonV1",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "6a2bdd91b7eea4de3a71a18ad6a0d4a1e27672b6b3cc4c12fe37678ae5bf60b8"
+    },
+    {
+      "id": 71,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 223,
+      "fn": "assertRawBounds",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "33c10cf6975d703eb9688218bf61cca5a4e8c7c47cb9c13ae2b8c10a7d67e255"
+    },
+    {
+      "id": 72,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 242,
+      "fn": "assertRawBounds",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "empty-if-body",
+      "pristineStatementSha256": "413cf01db4902e8f0feda7270998c8c1db2f9c204dee996659c9217bc62d4730"
+    },
+    {
+      "id": 73,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 249,
+      "fn": "assertRawBounds",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "empty-if-body",
+      "pristineStatementSha256": "d2743a408844d1fc2ac1ab9a4d7e86a19020bfd89051ac6704b48343620df220"
+    },
+    {
+      "id": 74,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 251,
+      "fn": "assertRawBounds",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "empty-if-body",
+      "pristineStatementSha256": "17f53c98cca867add4b788927b5347ce9497f4a77919dfc9510585e696d11073"
+    },
+    {
+      "id": 75,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 266,
+      "fn": "stringToken",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "9fb017f1e2070236dde99a425ce46214fb324cf2f0958116f452ba98d8d6a8bc"
+    },
+    {
+      "id": 76,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 276,
+      "fn": "value",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "empty-if-body",
+      "pristineStatementSha256": "80e17878bb2ee6febe998513b439342725938adf181a56abceecc12b972a9f49"
+    },
+    {
+      "id": 77,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 278,
+      "fn": "value",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "empty-if-body",
+      "pristineStatementSha256": "f6170fc2ac34be7e9cdbb7fd67a92244eff7ee1c461ac30b3730296e5b81f294"
+    },
+    {
+      "id": 78,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 280,
+      "fn": "value",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "empty-if-body",
+      "pristineStatementSha256": "4b1eaa2acb6d279654a95bb4a28fbb59454d67a9f46872e8e29e80d36d0afb40"
+    },
+    {
+      "id": 79,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 283,
+      "fn": "value",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "empty-if-body",
+      "pristineStatementSha256": "6d432fdaf6d6487c0ceda590e9cb0e803a8c0a10f01b8972517fc8ebecf8d29d"
+    },
+    {
+      "id": 80,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 292,
+      "fn": "value",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "empty-if-body",
+      "pristineStatementSha256": "6d432fdaf6d6487c0ceda590e9cb0e803a8c0a10f01b8972517fc8ebecf8d29d"
+    },
+    {
+      "id": 81,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 298,
+      "fn": "value",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "empty-if-body",
+      "pristineStatementSha256": "9cd18123dd1361dc869779b279babd42ccc797cb110289e2634e5f93e5ecf5cf"
+    },
+    {
+      "id": 82,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 301,
+      "fn": "assertNoDuplicateKeys",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "empty-if-body",
+      "pristineStatementSha256": "e9ee54bc74886522ed708717fa83899cf48c9d9ea575a5d9808075e947737d48"
+    },
+    {
+      "id": 83,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 312,
+      "fn": "assertIntegerTokens",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "e64565b02ab6fcb403f2ef73082734da5ead3dbc1eaa291991a870bdada7b1df"
+    },
+    {
+      "id": 84,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 315,
+      "fn": "assertIntegerTokens",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "57ae40ac1268fe5d42fc4d9ad407230cc6f291f0222055cc95cd6f4b6cf198d4"
+    },
+    {
+      "id": 85,
+      "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
+      "line": 336,
+      "fn": "charge",
+      "codes": [
+        "via fail()"
+      ],
+      "mutationKind": "delete-statement",
+      "pristineStatementSha256": "37994d40f4015bbb470b547848629fb699728db8f14451ff45bf78b3c682afb4"
+    }
+  ]
+}
