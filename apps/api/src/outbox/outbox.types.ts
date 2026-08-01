@@ -92,6 +92,180 @@ export interface OutboxEvent {
   recordedAt: Date;
 }
 
+const OUTBOX_EVENT_FIELDS = new Set([
+  'id',
+  'taskId',
+  'aggregateVersion',
+  'attemptId',
+  'transitionId',
+  'eventType',
+  'eventPayload',
+  'recordedAt',
+  '_fence',
+]);
+
+const REQUIRED_OUTBOX_EVENT_FIELDS = [
+  'id',
+  'taskId',
+  'aggregateVersion',
+  'attemptId',
+  'transitionId',
+  'eventType',
+  'eventPayload',
+  'recordedAt',
+] as const;
+
+const OUTBOX_PAYLOAD_FIELDS = new Set([
+  'schema',
+  'transitionEventType',
+  'committedResult',
+  'idempotencyKey',
+  'aggregateVersion',
+  'attemptId',
+  'attemptOrdinal',
+  'retryCount',
+  'retryBudget',
+]);
+
+const TRANSITION_EVENT_TYPES = new Set<TransitionEventType>([
+  'attempt:issued',
+  'attempt:started',
+  'attempt:retry_issued',
+  'attempt:succeeded',
+  'attempt:failed',
+  'attempt:cancelled',
+]);
+
+const OUTBOX_EVENT_TYPES = new Set<OutboxEventType>([
+  'attempt:issued',
+  'attempt:started',
+  'attempt:retry_issued',
+  'task:completed',
+  'task:failed',
+  'task:terminal_failed',
+  'task:cancelled',
+]);
+
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    Object.getPrototypeOf(value) === Object.prototype
+  );
+}
+
+/**
+ * Validate the closed server-derived event and its row/payload identity.
+ * Returns a bounded reason on refusal and null on success. Wrong-plane content
+ * is checked separately so it retains its dedicated typed error/evidence code.
+ */
+export function validateOutboxEvent(value: unknown): string | null {
+  if (!isPlainRecord(value)) return 'outbox event must be a plain object';
+  for (const key of REQUIRED_OUTBOX_EVENT_FIELDS) {
+    if (!(key in value)) return `missing required field "${key}" on outbox event`;
+  }
+  for (const key of Object.keys(value)) {
+    if (!OUTBOX_EVENT_FIELDS.has(key)) {
+      return `unknown field "${key}" on closed outbox event`;
+    }
+  }
+  for (const key of ['id', 'taskId', 'attemptId', 'transitionId'] as const) {
+    if (typeof value[key] !== 'string' || value[key].length === 0) {
+      return `${key} must be a non-empty string`;
+    }
+  }
+  if (
+    typeof value.aggregateVersion !== 'number' ||
+    !Number.isSafeInteger(value.aggregateVersion) ||
+    value.aggregateVersion < 1
+  ) {
+    return 'aggregateVersion must be a positive safe integer';
+  }
+  if (
+    typeof value.eventType !== 'string' ||
+    !OUTBOX_EVENT_TYPES.has(value.eventType as OutboxEventType)
+  ) {
+    return 'eventType is not a supported Muneral outbox event type';
+  }
+  if (
+    !(value.recordedAt instanceof Date) ||
+    Number.isNaN(value.recordedAt.getTime())
+  ) {
+    return 'recordedAt must be a valid Date';
+  }
+
+  const payload = value.eventPayload;
+  if (!isPlainRecord(payload)) return 'eventPayload must be a plain object';
+  for (const key of OUTBOX_PAYLOAD_FIELDS) {
+    if (!(key in payload)) {
+      return `missing required field "${key}" on outbox event payload`;
+    }
+  }
+  for (const key of Object.keys(payload)) {
+    if (!OUTBOX_PAYLOAD_FIELDS.has(key)) {
+      return `unknown field "${key}" on closed outbox event payload`;
+    }
+  }
+  if (payload.schema !== 'muneral-outbox-v1') {
+    return 'eventPayload.schema must be "muneral-outbox-v1"';
+  }
+  if (
+    typeof payload.transitionEventType !== 'string' ||
+    !TRANSITION_EVENT_TYPES.has(
+      payload.transitionEventType as TransitionEventType,
+    )
+  ) {
+    return 'eventPayload.transitionEventType is unsupported';
+  }
+  if (!isPlainRecord(payload.committedResult)) {
+    return 'eventPayload.committedResult must be a plain object';
+  }
+  if (
+    typeof payload.idempotencyKey !== 'string' ||
+    payload.idempotencyKey.length === 0 ||
+    payload.idempotencyKey.length > 256
+  ) {
+    return 'eventPayload.idempotencyKey must be 1..256 characters';
+  }
+  for (const [key, minimum] of [
+    ['aggregateVersion', 1],
+    ['attemptOrdinal', 1],
+    ['retryCount', 0],
+    ['retryBudget', 0],
+  ] as const) {
+    const field = payload[key];
+    if (
+      typeof field !== 'number' ||
+      !Number.isSafeInteger(field) ||
+      field < minimum
+    ) {
+      return `eventPayload.${key} must be a safe integer of at least ${minimum}`;
+    }
+  }
+  if (typeof payload.attemptId !== 'string' || payload.attemptId.length === 0) {
+    return 'eventPayload.attemptId must be a non-empty string';
+  }
+  if ((payload.retryCount as number) > (payload.retryBudget as number)) {
+    return 'eventPayload.retryCount cannot exceed retryBudget';
+  }
+  if (payload.aggregateVersion !== value.aggregateVersion) {
+    return 'aggregateVersion mismatch between outbox row and event payload';
+  }
+  if (payload.attemptId !== value.attemptId) {
+    return 'attemptId mismatch between outbox row and event payload';
+  }
+  const derived = deriveOutboxEventType(
+    payload.transitionEventType as TransitionEventType,
+    payload.retryCount as number,
+    payload.retryBudget as number,
+  );
+  if (derived !== value.eventType) {
+    return 'eventType mismatch between outbox row and transition payload';
+  }
+  return null;
+}
+
 // ---------------------------------------------------------------------------
 // Delivery disposition
 // ---------------------------------------------------------------------------

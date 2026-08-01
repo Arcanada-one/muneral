@@ -11,9 +11,14 @@
 // committed Muneral task facts only: no fleet registry, lifecycle, placement,
 // update, watchdog, telemetry aggregation, or direct command routing.
 
-import { StaleFenceError, WrongPlanePayloadError } from './outbox.errors';
+import {
+  MalformedOutboxEventError,
+  StaleFenceError,
+  WrongPlanePayloadError,
+} from './outbox.errors';
 import {
   normaliseConfig,
+  validateOutboxEvent,
   validatePayloadPlane,
   MAX_ERROR_DETAIL_LENGTH,
   sanitiseErrorDetail,
@@ -38,10 +43,8 @@ const FENCE_REQUIRED_MSG =
   'OutboxRelay: event has no fence token — was it leased? Fencing is mandatory.';
 
 export interface TransactionalClient {
-
   $transaction<T>(
     fn: (tx: PrismaTx) => Promise<T>,
-
     options?: Record<string, unknown>,
   ): Promise<T>;
 }
@@ -220,8 +223,22 @@ export class OutboxRelay {
     event: OutboxEvent,
     consumer: OutboxConsumer,
   ): Promise<DeliveryDisposition> {
-    const fence = (event as unknown as { _fence?: LeaseFence })._fence;
-    if (!fence) {
+    const candidate = event as unknown as Record<string, unknown> | null;
+    const eventId = candidate?.id;
+    if (typeof eventId !== 'string' || eventId.length === 0) {
+      throw new MalformedOutboxEventError(
+        '<invalid-id>',
+        'id must be a non-empty string before any quarantine write',
+      );
+    }
+    const fence = candidate?._fence as LeaseFence | undefined;
+    if (
+      !fence ||
+      typeof fence.leaseHolder !== 'string' ||
+      fence.leaseHolder.length === 0 ||
+      !Number.isSafeInteger(fence.deliveryOrdinal) ||
+      fence.deliveryOrdinal < 1
+    ) {
       throw new Error(FENCE_REQUIRED_MSG);
     }
     const now = this.clock.now();
@@ -234,8 +251,25 @@ export class OutboxRelay {
       event.eventPayload as unknown as Record<string, unknown>,
     );
     if (planeErr !== null) {
-      await this.recordWrongPlaneQuarantine(event.id, fence, planeErr);
-      throw new WrongPlanePayloadError(event.id, planeErr);
+      const recorded = await this.recordInvalidEventQuarantine(
+        eventId,
+        fence,
+        planeErr,
+        'WRONG_PLANE',
+      );
+      if (!recorded) return 'expired';
+      throw new WrongPlanePayloadError(eventId, planeErr);
+    }
+    const contractErr = validateOutboxEvent(event);
+    if (contractErr !== null) {
+      const recorded = await this.recordInvalidEventQuarantine(
+        eventId,
+        fence,
+        contractErr,
+        'MALFORMED_EVENT',
+      );
+      if (!recorded) return 'expired';
+      throw new MalformedOutboxEventError(eventId, contractErr);
     }
 
     // ---- 1. Consumer transaction (may roll back) ----
@@ -371,9 +405,12 @@ export class OutboxRelay {
         else if (disposition === 'quarantined') quarantined++;
         else skipped++;
       } catch (err) {
-        if (err instanceof WrongPlanePayloadError) {
-          // Wrong-plane dispatch records durable quarantine evidence before
-          // throwing, so the cycle result must expose it as quarantined.
+        if (
+          err instanceof WrongPlanePayloadError ||
+          err instanceof MalformedOutboxEventError
+        ) {
+          // Invalid dispatch throws only after durable quarantine evidence
+          // commits. Stale/expired fences return `expired` instead.
           quarantined++;
         } else if (isInfrastructureError(err)) {
           // Infrastructure errors (connection loss) — skip, event will be
@@ -407,7 +444,10 @@ export class OutboxRelay {
 
       // Lease summary
       const leaseRows: Array<{ deliveryStatus: string }> =
-        await t.outboxLease.findMany({ select: { deliveryStatus: true } });
+        await t.outboxLease.findMany({
+          select: { deliveryStatus: true },
+          orderBy: { outboxEventId: 'asc' },
+        });
       const leaseSummary: Record<string, number> = {};
       for (const r of leaseRows) {
         const s = r.deliveryStatus ?? 'unknown';
@@ -416,7 +456,10 @@ export class OutboxRelay {
 
       // Quarantined
       const qRows = await t.quarantineEvidence.findMany({
-        orderBy: { quarantinedAt: 'desc' },
+        orderBy: [
+          { quarantinedAt: 'desc' },
+          { outboxEventId: 'asc' },
+        ],
       });
       const quarantined: QuarantineEntry[] = qRows.map(
         (r: Record<string, unknown>) => ({
@@ -433,6 +476,10 @@ export class OutboxRelay {
       // Attempt counts
       const attemptRows = await t.deliveryAttemptEvidence.findMany({
         select: { outboxEventId: true },
+        orderBy: [
+          { outboxEventId: 'asc' },
+          { attemptedAt: 'asc' },
+        ],
       });
       const attemptMap = new Map<string, number>();
       for (const r of attemptRows) {
@@ -446,6 +493,10 @@ export class OutboxRelay {
       // Inbox summary
       const inboxRows = await t.consumerInbox.findMany({
         select: { consumerId: true },
+        orderBy: [
+          { consumerId: 'asc' },
+          { outboxEventId: 'asc' },
+        ],
       });
       const inboxSummary: Record<string, number> = {};
       for (const r of inboxRows) {
@@ -456,9 +507,13 @@ export class OutboxRelay {
       // Orphan events (outbox rows with no lease)
       const outboxIds: Array<{ id: string }> = await t.taskOutboxEvent.findMany({
         select: { id: true },
+        orderBy: { id: 'asc' },
       });
       const leaseEventIds: Array<{ outboxEventId: string }> =
-        await t.outboxLease.findMany({ select: { outboxEventId: true } });
+        await t.outboxLease.findMany({
+          select: { outboxEventId: true },
+          orderBy: { outboxEventId: 'asc' },
+        });
       const leaseIdSet = new Set(
         leaseEventIds.map((r) => r.outboxEventId),
       );
@@ -474,6 +529,7 @@ export class OutboxRelay {
           leaseExpiresAt: { lt: now },
         },
         select: { outboxEventId: true, leaseExpiresAt: true },
+        orderBy: { outboxEventId: 'asc' },
       });
       const staleLeases = staleLeaseRows.map(
         (r: Record<string, unknown>) => ({
@@ -490,7 +546,7 @@ export class OutboxRelay {
         orphanEvents,
         staleLeases,
       };
-    });
+    }, { isolationLevel: 'RepeatableRead' });
   }
 
   // -- private helpers -------------------------------------------------------
@@ -627,12 +683,17 @@ export class OutboxRelay {
    * transaction: the fenced update gates evidence; if the fence was lost,
    * nothing is written.
    */
-  private async recordWrongPlaneQuarantine(
+  private async recordInvalidEventQuarantine(
     outboxEventId: string,
     fence: LeaseFence,
     reason: string,
-  ): Promise<void> {
-    await this.prisma.$transaction(async (tx) => {
+    errorCode: 'WRONG_PLANE' | 'MALFORMED_EVENT',
+  ): Promise<boolean> {
+    return this.prisma.$transaction(async (tx) => {
+      // Re-read time inside the evidence transaction. Dispatch validation may
+      // straddle the TTL boundary; quarantine is allowed only while the lease
+      // is live at the write gate, not merely when dispatch began.
+      const quarantineNow = this.clock.now();
       // Atomic fenced status update FIRST — gates all evidence writes.
       // updateMany WHERE includes holder+ordinal+status='leased'. A stale
       // or reclaimed worker matches zero rows.
@@ -642,21 +703,27 @@ export class OutboxRelay {
           leaseHolder: fence.leaseHolder,
           deliveryOrdinal: fence.deliveryOrdinal,
           deliveryStatus: 'leased',
+          leaseExpiresAt: { gt: quarantineNow },
         },
         data: { deliveryStatus: 'quarantined' },
       });
       if ((updated?.count ?? 0) === 0) {
         // Stale worker — atomically forward-only, zero evidence persisted.
-        return;
+        return false;
       }
 
       await this.recordQuarantine(
-        tx, outboxEventId, fence.deliveryOrdinal, 1, 'WRONG_PLANE',
+        tx, outboxEventId, fence.deliveryOrdinal, 1, errorCode,
       );
       await this.recordDeliveryAttempt(
         tx, outboxEventId, fence.deliveryOrdinal, 'quarantined', null,
-        { error: 'wrong-plane', code: 'WRONG_PLANE', detail: reason.slice(0, MAX_ERROR_DETAIL_LENGTH) },
+        {
+          error: errorCode === 'WRONG_PLANE' ? 'wrong-plane' : 'malformed-event',
+          code: errorCode,
+          detail: reason.slice(0, MAX_ERROR_DETAIL_LENGTH),
+        },
       );
+      return true;
     });
   }
 

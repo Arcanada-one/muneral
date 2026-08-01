@@ -53,6 +53,25 @@ export class ResultBindingError extends Error {
   }
 }
 
+/** A mutation id was reused for different canonical proposal bytes. */
+export class ResultMutationCollisionError extends Error {
+  public readonly code = 'RESULT_MUTATION_COLLISION' as const;
+
+  constructor(
+    public readonly taskId: string,
+    public readonly mutationId: string,
+    public readonly storedDigest: string,
+    public readonly receivedDigest: string,
+  ) {
+    super(
+      `Result mutation collision for task ${taskId} mutation ${mutationId}: ` +
+        `stored digest ${storedDigest.substring(0, 16)}... differs from ` +
+        `received digest ${receivedDigest.substring(0, 16)}...`,
+    );
+    this.name = 'ResultMutationCollisionError';
+  }
+}
+
 /**
  * An execution adapter attempted to author a receipt or supply an
  * authoritative digest. Adapters propose mutations; Muneral authors receipts.
@@ -72,4 +91,5 @@ export type ResultAuthorityErrorType =
   | ResultContractError
   | ResultPlaneError
   | ResultBindingError
+  | ResultMutationCollisionError
   | AdapterAuthorityError;

@@ -23,6 +23,7 @@ export type Sha256Hex = string;
 export const DOMAIN_CARD = 'task-card-v0';
 export const DOMAIN_PROJECTION = 'task-card-projection-v0';
 export const DOMAIN_RESULT_NODE = 'task-card-result-node-v0';
+export const DOMAIN_RESULT_MUTATION = 'muneral-result-mutation-v0';
 export const DOMAIN_RESULT_REF = 'muneral-result-ref-v0';
 export const DOMAIN_RECEIPT = 'assembly-completion-receipt-v0';
 

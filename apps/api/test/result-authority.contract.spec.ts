@@ -30,6 +30,7 @@ import {
   computeResultRefId,
   domainDigest,
   projectionDigest,
+  resultMutationDigest,
   resultNodeDigest,
 } from '../src/result-authority/result-authority.canonical';
 import {
@@ -43,6 +44,7 @@ import {
   AdapterAuthorityError,
   ResultBindingError,
   ResultContractError,
+  ResultMutationCollisionError,
   ResultPlaneError,
 } from '../src/result-authority/result-authority.errors';
 import { ResultAuthorityService } from '../src/result-authority/result-authority.service';
@@ -198,6 +200,7 @@ function makeIdSource(): IdSource {
 }
 
 interface MockTx {
+  taskResultBinding: Record<string, jest.Mock>;
   taskExecutionState: Record<string, jest.Mock>;
   taskExecutionAttempt: Record<string, jest.Mock>;
   taskExecutionTransition: Record<string, jest.Mock>;
@@ -211,6 +214,18 @@ interface MockTx {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function makeTx(overrides: Record<string, any> = {}): MockTx {
   const tx: MockTx = {
+    taskResultBinding: {
+      findUnique: jest.fn().mockResolvedValue({
+        taskId: TASK_ID,
+        attemptId: ATTEMPT_ID,
+        cardId: 'card-1',
+        cardDigest: GOLDEN.cardDigest,
+        projectionId: 'proj-1',
+        projectionDigest: GOLDEN.projectionDigest,
+        principalId: PRINCIPAL,
+        recordedAt: FIXED_NOW,
+      }),
+    },
     taskExecutionState: {
       findUnique: jest.fn().mockResolvedValue({
         taskId: TASK_ID,
@@ -626,6 +641,42 @@ describe('D. authoritative commit seam', () => {
     expectZeroWrites(tx);
   });
 
+  it('a first result without a pre-existing authority binding creates zero writes', async () => {
+    const tx = makeTx({
+      taskResultBinding: {
+        findUnique: jest.fn().mockResolvedValue(null),
+      },
+    });
+    const outcome = await service.commitOwnedResult(
+      makePrisma(tx),
+      validProposal(),
+    );
+
+    expect(outcome).toBeInstanceOf(ResultBindingError);
+    expect((outcome as ResultBindingError).subject).toBe('resultBinding');
+    expectZeroWrites(tx);
+  });
+
+  it.each([
+    ['cardDigest', GOLDEN.resultDigest],
+    ['projectionId', 'proj-forged'],
+    ['projectionDigest', GOLDEN.cardDigest],
+    ['principalId', 'agent-arcana:forged'],
+  ] as const)(
+    'a first result cannot establish a forged %s binding',
+    async (field, forged) => {
+      const tx = makeTx();
+      const outcome = await service.commitOwnedResult(
+        makePrisma(tx),
+        validProposal({ [field]: forged }),
+      );
+
+      expect(outcome).toBeInstanceOf(ResultBindingError);
+      expect((outcome as ResultBindingError).subject).toBe(field);
+      expectZeroWrites(tx);
+    },
+  );
+
   it('AC12: a successful commit writes node, transition, reference and outbox in one transaction', async () => {
     const tx = makeTx();
     const prisma = makePrisma(tx);
@@ -693,16 +744,16 @@ describe('D. authoritative commit seam', () => {
 
   it('F4: a wrong principal against an established binding creates zero writes', async () => {
     const tx = makeTx({
-      taskCommittedResultRef: {
-        findFirst: jest.fn().mockResolvedValue({
+      taskResultBinding: {
+        findUnique: jest.fn().mockResolvedValue({
           taskId: TASK_ID,
+          attemptId: ATTEMPT_ID,
           cardId: 'card-1',
           cardDigest: GOLDEN.cardDigest,
           projectionId: 'proj-1',
           projectionDigest: GOLDEN.projectionDigest,
           principalId: PRINCIPAL,
         }),
-        create: jest.fn().mockResolvedValue({}),
       },
     });
     const outcome = await service.commitOwnedResult(
@@ -715,16 +766,16 @@ describe('D. authoritative commit seam', () => {
 
   it('F4: a wrong card digest against an established binding creates zero writes', async () => {
     const tx = makeTx({
-      taskCommittedResultRef: {
-        findFirst: jest.fn().mockResolvedValue({
+      taskResultBinding: {
+        findUnique: jest.fn().mockResolvedValue({
           taskId: TASK_ID,
+          attemptId: ATTEMPT_ID,
           cardId: 'card-1',
           cardDigest: GOLDEN.cardDigest,
           projectionId: 'proj-1',
           projectionDigest: GOLDEN.projectionDigest,
           principalId: PRINCIPAL,
         }),
-        create: jest.fn().mockResolvedValue({}),
       },
     });
     const outcome = await service.commitOwnedResult(
@@ -737,16 +788,16 @@ describe('D. authoritative commit seam', () => {
 
   it('F4: a wrong projection digest against an established binding creates zero writes', async () => {
     const tx = makeTx({
-      taskCommittedResultRef: {
-        findFirst: jest.fn().mockResolvedValue({
+      taskResultBinding: {
+        findUnique: jest.fn().mockResolvedValue({
           taskId: TASK_ID,
+          attemptId: ATTEMPT_ID,
           cardId: 'card-1',
           cardDigest: GOLDEN.cardDigest,
           projectionId: 'proj-1',
           projectionDigest: GOLDEN.projectionDigest,
           principalId: PRINCIPAL,
         }),
-        create: jest.fn().mockResolvedValue({}),
       },
     });
     const outcome = await service.commitOwnedResult(
@@ -801,12 +852,41 @@ describe('D. authoritative commit seam', () => {
     // arbiter: the loser's insert raises P2002 and the transaction rolls back.
     tx.taskCommittedResultRef.create = jest
       .fn()
-      .mockRejectedValue(Object.assign(new Error('unique'), { code: 'P2002' }));
+      .mockRejectedValue(
+        Object.assign(new Error('unique'), {
+          code: 'P2002',
+          meta: {
+            target: [
+              'task_id',
+              'attempt_id',
+              'card_id',
+              'node_id',
+              'node_version',
+            ],
+          },
+        }),
+      );
     const outcome = await service.commitOwnedResult(
       makePrisma(tx),
       validProposal(),
     );
     expect(outcome).toBeInstanceOf(ResultBindingError);
+  });
+
+  it('an unidentified P2002 remains a loud persistence failure', async () => {
+    const tx = makeTx();
+    tx.taskCommittedResultRef.create = jest
+      .fn()
+      .mockRejectedValue(
+        Object.assign(new Error('unexpected unique collision'), {
+          code: 'P2002',
+          meta: { target: ['receipt_id'] },
+        }),
+      );
+
+    await expect(
+      service.commitOwnedResult(makePrisma(tx), validProposal()),
+    ).rejects.toThrow('unexpected unique collision');
   });
 
   it('F5: a returned authority stale-version race maps to ResultBindingError', async () => {
@@ -852,6 +932,7 @@ describe('D. authoritative commit seam', () => {
             : {
                 ...committed.resultRef,
                 receiptId: committed.receipt.receiptId,
+                mutationDigest: resultMutationDigest(validProposal()),
                 causationId: 'cause-1',
                 correlationId: 'corr-1',
               },
@@ -874,6 +955,52 @@ describe('D. authoritative commit seam', () => {
     expect(replayTx.taskCommittedResultRef.create).not.toHaveBeenCalled();
     expect(replayTx.taskOutboxEvent.create).not.toHaveBeenCalled();
   });
+
+  it.each([
+    ['resultNode', { resultNode: NODE_ALTERED }],
+    ['attemptId', { attemptId: '99999999-9999-4999-8999-999999999999' }],
+    ['cardId', { cardId: 'card-conflict' }],
+    ['cardDigest', { cardDigest: 'b'.repeat(64) }],
+    ['projectionId', { projectionId: 'projection-conflict' }],
+    ['projectionDigest', { projectionDigest: 'c'.repeat(64) }],
+    ['principalId', { principalId: 'agent-conflict' }],
+    [
+      'nodeId',
+      {
+        nodeId: 'node-2',
+        resultNode: { ...NODE, nodeId: 'node-2' },
+      },
+    ],
+    ['expectedNodeVersion', { expectedNodeVersion: 1 }],
+    ['idempotencyKey', { idempotencyKey: 'idem-conflict' }],
+    ['causationId', { causationId: 'cause-conflict' }],
+    ['correlationId', { correlationId: 'corr-conflict' }],
+  ] as const)(
+    'conflicting mutationId reuse with changed %s is a typed refusal',
+    async (_field, changed) => {
+      const stored = {
+        ...validRef(),
+        receiptId: GOLDEN.receiptId,
+        mutationDigest: resultMutationDigest(validProposal()),
+        causationId: 'cause-1',
+        correlationId: 'corr-1',
+      };
+      const tx = makeTx({
+        taskCommittedResultRef: {
+          findFirst: jest.fn().mockResolvedValue(stored),
+          create: jest.fn().mockResolvedValue({}),
+        },
+      });
+
+      const outcome = await service.commitOwnedResult(
+        makePrisma(tx),
+        validProposal(changed),
+      );
+
+      expect(outcome).toBeInstanceOf(ResultMutationCollisionError);
+      expectZeroWrites(tx);
+    },
+  );
 
   it('F7: reusing an idempotency key with different canonical bytes fails as a conflict', async () => {
     const tx = makeTx({

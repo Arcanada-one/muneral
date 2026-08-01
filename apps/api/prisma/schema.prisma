@@ -177,6 +177,7 @@ model Task {
   attempts       TaskExecutionAttempt[]
   transitions    TaskExecutionTransition[]
   outboxEvents   TaskOutboxEvent[]
+  resultBindings TaskResultBinding[]
   resultNodes    TaskResultNode[]
   resultRefs     TaskCommittedResultRef[]
 
@@ -453,11 +454,12 @@ model TaskExecutionAttempt {
   completedAt DateTime? @map("completed_at") @db.Timestamptz()
 
   // Relations
-  task         Task                      @relation(fields: [taskId], references: [id], onDelete: Restrict)
-  transitions  TaskExecutionTransition[]
-  outboxEvents TaskOutboxEvent[]
-  resultNodes  TaskResultNode[]
-  resultRefs   TaskCommittedResultRef[]
+  task           Task                      @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  transitions    TaskExecutionTransition[]
+  outboxEvents   TaskOutboxEvent[]
+  resultBindings TaskResultBinding[]
+  resultNodes    TaskResultNode[]
+  resultRefs     TaskCommittedResultRef[]
 
   @@unique([taskId, ordinal])
   @@unique([attemptId, taskId])
@@ -482,8 +484,8 @@ model TaskExecutionTransition {
   recordedAt        DateTime @map("recorded_at") @db.Timestamptz()
 
   // Relations
-  task        Task                 @relation(fields: [taskId], references: [id], onDelete: Restrict)
-  attempt     TaskExecutionAttempt @relation(fields: [attemptId, taskId], references: [attemptId, taskId], onDelete: Restrict)
+  task        Task                    @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  attempt     TaskExecutionAttempt    @relation(fields: [attemptId, taskId], references: [attemptId, taskId], onDelete: Restrict)
   outboxEvent TaskOutboxEvent?
   resultRef   TaskCommittedResultRef?
 
@@ -620,6 +622,29 @@ model ConsumerInbox {
 // receipts or supply authoritative digests.
 // Disabled-by-default (not wired into AppModule).
 
+// Pre-existing, trusted assignment of one Task Card projection/principal to
+// an execution attempt. Result adapters have read-only access through the
+// commit seam and cannot create or update this fact.
+model TaskResultBinding {
+  taskId           String   @map("task_id") @db.Uuid
+  attemptId        String   @map("attempt_id") @db.Uuid
+  cardId           String   @map("card_id") @db.VarChar(256)
+  cardDigest       String   @map("card_digest") @db.VarChar(64)
+  projectionId     String   @map("projection_id") @db.VarChar(256)
+  projectionDigest String   @map("projection_digest") @db.VarChar(64)
+  principalId      String   @map("principal_id") @db.VarChar(256)
+  recordedAt       DateTime @map("recorded_at") @db.Timestamptz()
+
+  task       Task                     @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  attempt    TaskExecutionAttempt     @relation(fields: [attemptId, taskId], references: [attemptId, taskId], onDelete: Restrict)
+  resultRefs TaskCommittedResultRef[]
+
+  @@id([taskId, attemptId, cardId])
+  @@unique([taskId, attemptId, cardId, cardDigest, projectionId, projectionDigest, principalId])
+  @@index([attemptId])
+  @@map("task_result_bindings")
+}
+
 // One row per accepted owned mutation of a Task Card result node.
 // Append-only — a new result is a new node version, never an in-place rewrite.
 model TaskResultNode {
@@ -665,6 +690,7 @@ model TaskCommittedResultRef {
   nodeVersion      Int      @map("node_version")
   resultDigest     String   @map("result_digest") @db.VarChar(64)
   mutationId       String   @map("mutation_id") @db.VarChar(256)
+  mutationDigest   String   @map("mutation_digest") @db.VarChar(64)
   principalId      String   @map("principal_id") @db.VarChar(256)
   transitionId     String   @map("transition_id") @db.Uuid
   aggregateVersion BigInt   @map("aggregate_version")
@@ -679,6 +705,7 @@ model TaskCommittedResultRef {
   attempt    TaskExecutionAttempt    @relation(fields: [attemptId, taskId], references: [attemptId, taskId], onDelete: Restrict)
   transition TaskExecutionTransition @relation(fields: [transitionId, taskId], references: [id, taskId], onDelete: Restrict)
   resultNode TaskResultNode          @relation(fields: [resultNodeId, taskId], references: [id, taskId], onDelete: Restrict)
+  binding    TaskResultBinding       @relation(fields: [taskId, attemptId, cardId, cardDigest, projectionId, projectionDigest, principalId], references: [taskId, attemptId, cardId, cardDigest, projectionId, projectionDigest, principalId], onDelete: Restrict)
 
   @@unique([transitionId])
   @@unique([transitionId, taskId])

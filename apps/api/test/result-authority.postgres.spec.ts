@@ -106,7 +106,7 @@ describe('Committed-result authority — PostgreSQL proofs', () => {
   }
 
   /** Seed a task and issue its initial attempt through the real seam. */
-  async function seedTaskWithAttempt(): Promise<{
+  async function seedTaskWithAttempt(bindResult = true): Promise<{
     taskId: string;
     attemptId: string;
   }> {
@@ -149,6 +149,20 @@ describe('Committed-result authority — PostgreSQL proofs', () => {
       committedResult: {},
     });
     if (started instanceof Error) throw started;
+    if (bindResult) {
+      await prisma.taskResultBinding.create({
+        data: {
+          taskId,
+          attemptId,
+          cardId: 'card-1',
+          cardDigest: CARD_DIGEST,
+          projectionId: 'proj-1',
+          projectionDigest: PROJECTION_DIGEST,
+          principalId: PRINCIPAL,
+          recordedAt: new Date(),
+        },
+      });
+    }
     return { taskId, attemptId };
   }
 
@@ -180,15 +194,16 @@ describe('Committed-result authority — PostgreSQL proofs', () => {
 
   // -- 1. schema -------------------------------------------------------------
 
-  it('1. both committed-result relations exist after migration', async () => {
+  it('1. all committed-result authority relations exist after migration', async () => {
     const rows = await prisma.$queryRawUnsafe(
       `SELECT table_name FROM information_schema.tables
        WHERE table_schema = 'public'
-         AND table_name IN ('task_result_nodes', 'task_committed_result_refs')
+         AND table_name IN ('task_result_bindings', 'task_result_nodes', 'task_committed_result_refs')
        ORDER BY table_name`,
     );
     expect((rows as Array<{ table_name: string }>).map((r) => r.table_name)).toEqual([
       'task_committed_result_refs',
+      'task_result_bindings',
       'task_result_nodes',
     ]);
   });
@@ -209,7 +224,9 @@ describe('Committed-result authority — PostgreSQL proofs', () => {
       confdeltype: string;
       confupdtype: string;
     }>;
-    expect(fks.length).toBe(6);
+    // Six original task/attempt/transition/node relations plus the exact
+    // committed-reference -> pre-existing binding relation.
+    expect(fks.length).toBe(7);
     for (const fk of fks) {
       // 'r' = RESTRICT in pg_constraint
       expect(fk.confdeltype).toBe('r');
@@ -269,6 +286,29 @@ describe('Committed-result authority — PostgreSQL proofs', () => {
     });
     expect(outbox).not.toBeNull();
     expect(outbox.eventType).toBe('task:completed');
+  });
+
+  it('4b. a first result without a pre-existing binding fails with zero writes', async () => {
+    const { taskId, attemptId } = await seedTaskWithAttempt(false);
+    const transitionsBefore = await prisma.taskExecutionTransition.count({
+      where: { taskId },
+    });
+    const outboxBefore = await prisma.taskOutboxEvent.count({ where: { taskId } });
+
+    const outcome = await service.commitOwnedResult(
+      prisma,
+      proposal(taskId, attemptId),
+    );
+
+    expect(outcome).toBeInstanceOf(ResultBindingError);
+    expect(await prisma.taskResultNode.count({ where: { taskId } })).toBe(0);
+    expect(await prisma.taskCommittedResultRef.count({ where: { taskId } })).toBe(0);
+    expect(await prisma.taskExecutionTransition.count({ where: { taskId } })).toBe(
+      transitionsBefore,
+    );
+    expect(await prisma.taskOutboxEvent.count({ where: { taskId } })).toBe(
+      outboxBefore,
+    );
   });
 
   it('5. the reference regenerates byte-identically from its stored columns', async () => {
@@ -421,18 +461,90 @@ describe('Committed-result authority — PostgreSQL proofs', () => {
         `INSERT INTO public.task_committed_result_refs
            (result_ref_id, task_id, attempt_id, card_id, card_digest,
             projection_id, projection_digest, node_id, node_version,
-            result_digest, mutation_id, principal_id, transition_id,
+            result_digest, mutation_id, mutation_digest, principal_id, transition_id,
             aggregate_version, result_node_id, receipt_id, causation_id,
             correlation_id, recorded_at)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14,
-                 $15, $16, $17, $18, NOW())`,
+                 $15, $16, $17, $18, $19, NOW())`,
         'f'.repeat(64), row.taskId, row.attemptId, row.cardId, row.cardDigest,
         row.projectionId, row.projectionDigest, row.nodeId, row.nodeVersion,
-        row.resultDigest, `mut-${randomUUID()}`, row.principalId,
+        row.resultDigest, `mut-${randomUUID()}`, row.mutationDigest, row.principalId,
         row.transitionId, row.aggregateVersion, row.resultNodeId,
         'e'.repeat(64), row.causationId, row.correlationId,
       ),
     ).rejects.toThrow();
+  });
+
+  it('9b. a direct reference with forged binding fields fails the composite FK atomically', async () => {
+    const { taskId, attemptId } = await seedTaskWithAttempt();
+    const resultNodeId = randomUUID();
+    const transitionId = randomUUID();
+    const mutationId = `mut-fk-${randomUUID()}`;
+    const resultDigest = 'f'.repeat(64);
+    const nodesBefore = await prisma.taskResultNode.count({ where: { taskId } });
+    const transitionsBefore = await prisma.taskExecutionTransition.count({
+      where: { taskId },
+    });
+
+    await expect(
+      prisma.$transaction(async (tx: typeof prisma) => {
+        await tx.$executeRawUnsafe(
+          `INSERT INTO public.task_result_nodes
+             (id, task_id, attempt_id, card_id, node_id, node_version,
+              mutation_id, principal_id, node_payload, result_digest, recorded_at)
+           VALUES ($1, $2, $3, 'card-1', 'node-fk', 1,
+                   $4, 'forged-principal', '{}'::jsonb, $5, NOW())`,
+          resultNodeId,
+          taskId,
+          attemptId,
+          mutationId,
+          resultDigest,
+        );
+        await tx.$executeRawUnsafe(
+          `INSERT INTO public.task_execution_transitions
+             (id, task_id, attempt_id, aggregate_version, event_type,
+              idempotency_key, command_digest, transition_payload,
+              committed_result, evidence_refs, causation_id, correlation_id,
+              recorded_at)
+           VALUES ($1, $2, $3, 3, 'attempt:succeeded', $4, $5,
+                   '{}'::jsonb, '{}'::jsonb, '[]'::jsonb,
+                   'cause-fk', 'corr-fk', NOW())`,
+          transitionId,
+          taskId,
+          attemptId,
+          `idem-fk-${randomUUID()}`,
+          'b'.repeat(64),
+        );
+        await tx.$executeRawUnsafe(
+          `INSERT INTO public.task_committed_result_refs
+             (result_ref_id, task_id, attempt_id, card_id, card_digest,
+              projection_id, projection_digest, node_id, node_version,
+              result_digest, mutation_id, mutation_digest, principal_id,
+              transition_id, aggregate_version, result_node_id, receipt_id,
+              causation_id, correlation_id, recorded_at)
+           VALUES ($1, $2, $3, 'card-1', $4, 'proj-1', $5,
+                   'node-fk', 1, $6, $7, $8, 'forged-principal',
+                   $9, 3, $10, $11, 'cause-fk', 'corr-fk', NOW())`,
+          'd'.repeat(64),
+          taskId,
+          attemptId,
+          CARD_DIGEST,
+          PROJECTION_DIGEST,
+          resultDigest,
+          mutationId,
+          'c'.repeat(64),
+          transitionId,
+          resultNodeId,
+          'e'.repeat(64),
+        );
+      }),
+    ).rejects.toThrow(/task_committed_result_refs_binding_fkey/);
+
+    expect(await prisma.taskResultNode.count({ where: { taskId } })).toBe(nodesBefore);
+    expect(
+      await prisma.taskExecutionTransition.count({ where: { taskId } }),
+    ).toBe(transitionsBefore);
+    expect(await prisma.taskCommittedResultRef.count({ where: { taskId } })).toBe(0);
   });
 
   it('10. the domain-separation check rejects a result digest equal to the card digest', async () => {
@@ -451,15 +563,15 @@ describe('Committed-result authority — PostgreSQL proofs', () => {
         `INSERT INTO public.task_committed_result_refs
            (result_ref_id, task_id, attempt_id, card_id, card_digest,
             projection_id, projection_digest, node_id, node_version,
-            result_digest, mutation_id, principal_id, transition_id,
+            result_digest, mutation_id, mutation_digest, principal_id, transition_id,
             aggregate_version, result_node_id, receipt_id, causation_id,
             correlation_id, recorded_at)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14,
-                 $15, $16, $17, $18, NOW())`,
+                 $15, $16, $17, $18, $19, NOW())`,
         'a'.repeat(64), row.taskId, row.attemptId, row.cardId, row.cardDigest,
         row.projectionId, row.projectionDigest, 'node-other', 1,
         // result_digest deliberately conflated with the instruction digest
-        row.cardDigest, `mut-${randomUUID()}`, row.principalId,
+        row.cardDigest, `mut-${randomUUID()}`, row.mutationDigest, row.principalId,
         row.transitionId, row.aggregateVersion, row.resultNodeId,
         'b'.repeat(64), row.causationId, row.correlationId,
       );
@@ -525,6 +637,38 @@ describe('Committed-result authority — PostgreSQL proofs', () => {
     expect(await prisma.taskCommittedResultRef.count({ where: { taskId } })).toBe(1);
   });
 
+  it('13b. result bindings and committed facts reject UPDATE, DELETE and TRUNCATE', async () => {
+    const { taskId, attemptId } = await seedTaskWithAttempt();
+    await service.commitOwnedResult(prisma, proposal(taskId, attemptId));
+
+    await expect(
+      prisma.$executeRawUnsafe(
+        `UPDATE public.task_result_bindings SET principal_id = 'tampered'
+          WHERE task_id = $1 AND attempt_id = $2 AND card_id = 'card-1'`,
+        taskId,
+        attemptId,
+      ),
+    ).rejects.toThrow(/append-only/);
+    await expect(
+      prisma.$executeRawUnsafe(
+        `DELETE FROM public.task_result_bindings
+          WHERE task_id = $1 AND attempt_id = $2 AND card_id = 'card-1'`,
+        taskId,
+        attemptId,
+      ),
+    ).rejects.toThrow(/append-only/);
+    await expect(
+      prisma.$executeRawUnsafe(
+        `TRUNCATE public.task_result_bindings CASCADE`,
+      ),
+    ).rejects.toThrow(/TRUNCATE rejected/);
+    await expect(
+      prisma.$executeRawUnsafe(
+        `TRUNCATE public.task_committed_result_refs CASCADE`,
+      ),
+    ).rejects.toThrow(/TRUNCATE rejected/);
+  });
+
   // -- 14-15. crash prefixes -------------------------------------------------
 
   it('14. F9/AC12: a crash before commit leaves zero rows in every relation', async () => {
@@ -576,6 +720,10 @@ describe('Committed-result authority — PostgreSQL proofs', () => {
     const { taskId, attemptId } = await seedTaskWithAttempt();
     for (const bad of [
       { principalId: 'supervisor:fleet-controller' },
+      { principalId: 'agent-arcana:forged' },
+      { cardDigest: 'a'.repeat(64) },
+      { projectionId: 'proj-forged' },
+      { projectionDigest: 'b'.repeat(64) },
       { attemptId: randomUUID() },
       { expectedNodeVersion: 7 },
       { resultNode: { nodeId: 'node-1', desiredState: 'running' } },

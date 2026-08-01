@@ -153,8 +153,8 @@ describe('Execution authority migration', () => {
       );
       expect(attemptModel).not.toBeNull();
       expect(transitionModel).not.toBeNull();
-      expect(attemptModel![0]).toContain(
-        'transitions  TaskExecutionTransition[]',
+      expect(attemptModel![0]).toMatch(
+        /transitions\s+TaskExecutionTransition\[\]/,
       );
       expect(transitionModel![0]).toMatch(
         /attempt\s+TaskExecutionAttempt\s+@relation\(fields: \[attemptId, taskId\], references: \[attemptId, taskId\], onDelete: Restrict\)/,

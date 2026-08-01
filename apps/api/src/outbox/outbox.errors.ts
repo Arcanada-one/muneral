@@ -20,6 +20,19 @@ export class WrongPlanePayloadError extends Error {
   }
 }
 
+/** A durable outbox row did not satisfy the closed server-derived envelope. */
+export class MalformedOutboxEventError extends Error {
+  public readonly code = 'MALFORMED_OUTBOX_EVENT' as const;
+
+  constructor(
+    public readonly outboxEventId: string,
+    public readonly reason: string,
+  ) {
+    super(`malformed outbox event ${outboxEventId}: ${reason}`);
+    this.name = 'MalformedOutboxEventError';
+  }
+}
+
 /** Outbox row creation failed — should roll back the authority transaction. */
 export class OutboxInsertError extends Error {
   public readonly taskId: string;
