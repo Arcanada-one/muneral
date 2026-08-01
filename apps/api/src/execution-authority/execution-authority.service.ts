@@ -75,6 +75,7 @@ const TX_OPTS = {
 export interface TransactionalClient {
   $transaction<T>(
     fn: (tx: PrismaTx) => Promise<T>,
+
     options?: Record<string, unknown>,
   ): Promise<T>;
 }
