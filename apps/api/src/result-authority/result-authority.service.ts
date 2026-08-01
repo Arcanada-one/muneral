@@ -318,6 +318,13 @@ export class ResultAuthorityService {
       command,
       { transitionId },
     );
+    if (authorityOutcome instanceof StaleVersionError) {
+      return new ResultBindingError(
+        'aggregateVersion',
+        String(authorityOutcome.expectedVersion),
+        'a concurrently committed transition on the same aggregate',
+      );
+    }
     if (authorityOutcome instanceof Error) return authorityOutcome;
     const committed = authorityOutcome as ExecutionResult;
 
