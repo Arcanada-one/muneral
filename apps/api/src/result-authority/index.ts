@@ -8,6 +8,7 @@ export {
   DOMAIN_CARD,
   DOMAIN_PROJECTION,
   DOMAIN_RECEIPT,
+  DOMAIN_RESULT_MUTATION,
   DOMAIN_RESULT_NODE,
   DOMAIN_RESULT_REF,
   LEGACY_NONE,
@@ -29,6 +30,7 @@ export {
   domainDigest,
   isSha256Hex,
   projectionDigest,
+  resultMutationDigest,
   resultNodeDigest,
 } from './result-authority.canonical';
 
@@ -45,6 +47,7 @@ export {
   AdapterAuthorityError,
   ResultBindingError,
   ResultContractError,
+  ResultMutationCollisionError,
   ResultPlaneError,
 } from './result-authority.errors';
 export type { ResultAuthorityErrorType } from './result-authority.errors';

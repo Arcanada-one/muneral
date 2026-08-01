@@ -20,12 +20,14 @@ import {
   DOMAIN_CARD,
   DOMAIN_PROJECTION,
   DOMAIN_RECEIPT,
+  DOMAIN_RESULT_MUTATION,
   DOMAIN_RESULT_NODE,
   DOMAIN_RESULT_REF,
 } from './result-authority.types';
 import type {
   CommittedResultRefV0,
   CompletionReceiptV0,
+  OwnedResultMutationV0,
   Sha256Hex,
 } from './result-authority.types';
 
@@ -54,6 +56,13 @@ export function projectionDigest(projection: unknown): Sha256Hex {
 /** Digest of the committed result node bytes. */
 export function resultNodeDigest(node: unknown): Sha256Hex {
   return domainDigest(DOMAIN_RESULT_NODE, node);
+}
+
+/** Server-owned identity of the complete closed adapter mutation proposal. */
+export function resultMutationDigest(
+  mutation: OwnedResultMutationV0,
+): Sha256Hex {
+  return domainDigest(DOMAIN_RESULT_MUTATION, mutation);
 }
 
 /** Identity of a committed-result reference — every field except its own id. */

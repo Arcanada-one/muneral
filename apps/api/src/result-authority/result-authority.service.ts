@@ -28,11 +28,17 @@ import type {
   TransitionAttemptCommand,
 } from '../execution-authority/execution-authority.types';
 import type { OutboxEvent } from '../outbox/outbox.types';
-import { computeReceiptId, computeResultRefId, resultNodeDigest } from './result-authority.canonical';
+import {
+  computeReceiptId,
+  computeResultRefId,
+  resultMutationDigest,
+  resultNodeDigest,
+} from './result-authority.canonical';
 import {
   AdapterAuthorityError,
   ResultBindingError,
   ResultContractError,
+  ResultMutationCollisionError,
   ResultPlaneError,
 } from './result-authority.errors';
 import {
@@ -81,6 +87,7 @@ export type CommitOwnedResultOutcome =
   | ResultContractError
   | ResultPlaneError
   | ResultBindingError
+  | ResultMutationCollisionError
   | AdapterAuthorityError
   | Error;
 
@@ -117,7 +124,7 @@ export class ResultAuthorityService {
       // node, node version) and (task, mutation) are the arbiters of a race.
       // The loser's transaction rolled back and produced no reference, no
       // receipt and no outbox row.
-      if (isPrismaUniqueViolation(err)) {
+      if (isResultVersionRaceUniqueViolation(err)) {
         return new ResultBindingError(
           'committed-result reference',
           'an unclaimed node version',
@@ -144,23 +151,65 @@ export class ResultAuthorityService {
     const validated = validateOwnedResultMutationV0(proposal);
     if (validated instanceof Error) return validated;
     const mutation: OwnedResultMutationV0 = validated;
+    const mutationDigest = resultMutationDigest(mutation);
 
-    // ---- 2. Card/projection/principal binding (safe) ----
-    const binding = await tx.taskCommittedResultRef.findFirst({
-      where: { taskId: mutation.taskId, cardId: mutation.cardId },
-    });
-    if (binding) {
-      const bindingErr = this.checkBinding(binding, mutation);
-      if (bindingErr !== null) return bindingErr;
-    }
-
-    // ---- 3. Mutation-scoped idempotent replay (safe) ----
+    // ---- 2. Mutation-scoped idempotent replay (safe) ----
+    // Check the task-scoped mutation identity before looking up proposal-named
+    // binding fields. A caller cannot evade collision detection by changing
+    // the attempt/card identity to one that has no binding.
     const existing = await tx.taskCommittedResultRef.findFirst({
       where: { taskId: mutation.taskId, mutationId: mutation.mutationId },
     });
     if (existing) {
+      const storedMutationDigest = String(
+        existing.mutationDigest ?? existing.mutation_digest ?? '',
+      );
+      if (storedMutationDigest !== mutationDigest) {
+        return new ResultMutationCollisionError(
+          mutation.taskId,
+          mutation.mutationId,
+          storedMutationDigest,
+          mutationDigest,
+        );
+      }
       return this.replayCommittedResult(tx, existing);
     }
+
+    // ---- 3. Pre-existing card/projection/principal binding (safe) ----
+    // The adapter proposal is never allowed to establish authority by being
+    // first. A trusted Muneral issuance/assignment path must have inserted
+    // this append-only fact before result commitment.
+    const binding = await tx.taskResultBinding.findUnique({
+      where: {
+        taskId_attemptId_cardId: {
+          taskId: mutation.taskId,
+          attemptId: mutation.attemptId,
+          cardId: mutation.cardId,
+        },
+      },
+    });
+    if (!binding) {
+      return new ResultBindingError(
+        'resultBinding',
+        'a pre-existing Muneral task/attempt/card binding',
+        `no binding for task ${mutation.taskId}, attempt ${mutation.attemptId}, card ${mutation.cardId}`,
+      );
+    }
+    const bindingErr = this.checkBinding(binding, mutation);
+    if (bindingErr !== null) return bindingErr;
+
+    const boundCardDigest = String(
+      binding.cardDigest ?? binding.card_digest,
+    );
+    const boundProjectionId = String(
+      binding.projectionId ?? binding.projection_id,
+    );
+    const boundProjectionDigest = String(
+      binding.projectionDigest ?? binding.projection_digest,
+    );
+    const boundPrincipalId = String(
+      binding.principalId ?? binding.principal_id,
+    );
 
     // ---- 4. Aggregate and attempt ownership (safe) ----
     const stateRow = await tx.taskExecutionState.findUnique({
@@ -239,14 +288,14 @@ export class ResultAuthorityService {
       taskId: mutation.taskId,
       attemptId: mutation.attemptId,
       cardId: mutation.cardId,
-      cardDigest: mutation.cardDigest,
-      projectionId: mutation.projectionId,
-      projectionDigest: mutation.projectionDigest,
+      cardDigest: boundCardDigest,
+      projectionId: boundProjectionId,
+      projectionDigest: boundProjectionDigest,
       nodeId: mutation.nodeId,
       nodeVersion,
       resultDigest,
       mutationId: mutation.mutationId,
-      principalId: mutation.principalId,
+      principalId: boundPrincipalId,
       transitionId,
       aggregateVersion,
     };
@@ -302,9 +351,9 @@ export class ResultAuthorityService {
         schema: 'muneral-result-mutation-v0',
         mutationId: mutation.mutationId,
         cardId: mutation.cardId,
-        projectionId: mutation.projectionId,
+        projectionId: boundProjectionId,
         nodeId: mutation.nodeId,
-        principalId: mutation.principalId,
+        principalId: boundPrincipalId,
       },
       committedResult: envelope as unknown as Record<string, unknown>,
     };
@@ -343,7 +392,7 @@ export class ResultAuthorityService {
         nodeId: mutation.nodeId,
         nodeVersion,
         mutationId: mutation.mutationId,
-        principalId: mutation.principalId,
+        principalId: boundPrincipalId,
         nodePayload: mutation.resultNode,
         resultDigest,
         recordedAt: now,
@@ -363,6 +412,7 @@ export class ResultAuthorityService {
         nodeVersion: resultRef.nodeVersion,
         resultDigest: resultRef.resultDigest,
         mutationId: resultRef.mutationId,
+        mutationDigest,
         principalId: resultRef.principalId,
         transitionId: resultRef.transitionId,
         aggregateVersion: BigInt(resultRef.aggregateVersion),
@@ -398,10 +448,9 @@ export class ResultAuthorityService {
   // -------------------------------------------------------------------------
 
   /**
-   * Compare a proposal against the binding established by the first accepted
-   * mutation for this (task, card). The binding is immutable: a later proposal
-   * with a different card digest, projection or principal is refused before
-   * any write.
+   * Compare the adapter's untrusted assertions against the append-only binding
+   * established before result commitment. The stored row is authoritative;
+   * proposal values are never copied into a committed reference directly.
    */
   private checkBinding(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -419,7 +468,7 @@ export class ResultAuthorityService {
       ['principalId', binding.principalId ?? binding.principal_id, mutation.principalId],
     ];
     for (const [field, expected, actual] of pairs) {
-      if (expected !== undefined && expected !== actual) {
+      if (typeof expected !== 'string' || expected !== actual) {
         return new ResultBindingError(field, String(expected), String(actual));
       }
     }
@@ -497,8 +546,38 @@ export class ResultAuthorityService {
   }
 }
 
-function isPrismaUniqueViolation(err: unknown): boolean {
+function isResultVersionRaceUniqueViolation(err: unknown): boolean {
   if (err === null || err === undefined) return false;
   if (typeof err !== 'object') return false;
-  return (err as { code?: string }).code === 'P2002';
+  const prismaError = err as {
+    code?: string;
+    meta?: { target?: unknown; constraint?: unknown };
+  };
+  if (prismaError.code !== 'P2002') return false;
+
+  const rawTarget =
+    prismaError.meta?.target ?? prismaError.meta?.constraint ?? null;
+  const target = Array.isArray(rawTarget)
+    ? rawTarget.map(String)
+    : rawTarget === null
+      ? []
+      : [String(rawTarget)];
+  const targetKey = target.join(',');
+
+  const namedConstraints = new Set([
+    'task_result_nodes_node_version_unique',
+    'task_committed_result_refs_semantic_unique',
+    'task_execution_transitions_task_version_unique',
+  ]);
+  if (target.some((value) => namedConstraints.has(value))) return true;
+
+  const fieldSignatures = new Set([
+    'task_id,node_id,node_version',
+    'taskId,nodeId,nodeVersion',
+    'task_id,attempt_id,card_id,node_id,node_version',
+    'taskId,attemptId,cardId,nodeId,nodeVersion',
+    'task_id,aggregate_version',
+    'taskId,aggregateVersion',
+  ]);
+  return fieldSignatures.has(targetKey);
 }

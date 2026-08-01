@@ -12,6 +12,8 @@ import { join } from 'node:path';
 const apiRoot = join(__dirname, '..');
 const MIGRATION_DIR =
   'prisma/migrations/20260731010000_add_committed_result_refs';
+const HARDENING_DIR =
+  'prisma/migrations/20260801093000_harden_result_authority_binding';
 
 const migration = readFileSync(
   join(apiRoot, MIGRATION_DIR, 'migration.sql'),
@@ -22,6 +24,14 @@ const rollback = readFileSync(
   'utf8',
 );
 const schema = readFileSync(join(apiRoot, 'prisma/schema.prisma'), 'utf8');
+const hardeningMigration = readFileSync(
+  join(apiRoot, HARDENING_DIR, 'migration.sql'),
+  'utf8',
+);
+const hardeningRollback = readFileSync(
+  join(apiRoot, HARDENING_DIR, 'rollback.sql'),
+  'utf8',
+);
 
 describe('Committed-result migration', () => {
   // -------------------------------------------------------------------------
@@ -312,5 +322,92 @@ describe('Committed-result migration', () => {
       expect(schema).toContain('resultNodes    TaskResultNode[]');
       expect(schema).toContain('resultRefs     TaskCommittedResultRef[]');
     });
+  });
+});
+
+describe('Independent-review authority hardening migration', () => {
+  it('aborts on unreconciled result rows before creating authority schema', () => {
+    const guard = hardeningMigration.indexOf(
+      'IF EXISTS (SELECT 1 FROM public.task_result_nodes LIMIT 1)',
+    );
+    const create = hardeningMigration.indexOf(
+      'CREATE TABLE public.task_result_bindings',
+    );
+    expect(guard).toBeGreaterThanOrEqual(0);
+    expect(create).toBeGreaterThan(guard);
+    expect(hardeningMigration).not.toMatch(/^\s*INSERT\s+INTO/m);
+    expect(hardeningMigration).not.toMatch(/^\s*UPDATE\s+/m);
+  });
+
+  it('creates an exact append-only task/attempt/card authority binding', () => {
+    expect(hardeningMigration).toContain(
+      'CREATE TABLE public.task_result_bindings',
+    );
+    expect(hardeningMigration).toContain(
+      'PRIMARY KEY (task_id, attempt_id, card_id)',
+    );
+    expect(hardeningMigration).toContain(
+      'CONSTRAINT task_result_bindings_authority_unique',
+    );
+    expect(hardeningMigration).toContain(
+      'task_result_bindings_append_only',
+    );
+    expect(hardeningMigration).toContain(
+      'task_result_bindings_no_truncate',
+    );
+  });
+
+  it('binds direct reference writes to the exact stored authority tuple', () => {
+    expect(hardeningMigration).toContain(
+      'CONSTRAINT task_committed_result_refs_binding_fkey',
+    );
+    expect(hardeningMigration).toContain(
+      'REFERENCES public.task_result_bindings',
+    );
+    expect(hardeningMigration).toContain(
+      'ON DELETE RESTRICT ON UPDATE RESTRICT',
+    );
+  });
+
+  it('persists a checked server-owned mutation digest', () => {
+    expect(hardeningMigration).toContain(
+      'ADD COLUMN mutation_digest VARCHAR(64) NOT NULL',
+    );
+    expect(hardeningMigration).toContain(
+      'task_committed_result_refs_mutation_digest_check',
+    );
+    expect(schema).toContain(
+      'mutationDigest   String   @map("mutation_digest") @db.VarChar(64)',
+    );
+  });
+
+  it('protects every MUN-0021 append-only fact from TRUNCATE', () => {
+    for (const trigger of [
+      'task_result_bindings_no_truncate',
+      'task_result_nodes_no_truncate',
+      'task_committed_result_refs_no_truncate',
+      'task_outbox_events_no_truncate',
+      'delivery_attempt_evidence_no_truncate',
+      'quarantine_evidence_no_truncate',
+      'consumer_inbox_no_truncate',
+    ]) {
+      expect(hardeningMigration).toContain(`CREATE TRIGGER ${trigger}`);
+    }
+  });
+
+  it('keeps rollback forward-only', () => {
+    expect(hardeningRollback).toContain('RAISE EXCEPTION');
+    expect(hardeningRollback).toContain('forward-only');
+    expect(hardeningRollback).not.toContain('DROP TABLE');
+    expect(hardeningRollback).not.toContain('DROP FUNCTION');
+  });
+
+  it('mirrors the binding and exact composite relation in Prisma', () => {
+    expect(schema).toContain('model TaskResultBinding');
+    expect(schema).toContain('@@id([taskId, attemptId, cardId])');
+    expect(schema).toContain('@@map("task_result_bindings")');
+    expect(schema).toContain(
+      '@relation(fields: [taskId, attemptId, cardId, cardDigest, projectionId, projectionDigest, principalId], references: [taskId, attemptId, cardId, cardDigest, projectionId, projectionDigest, principalId], onDelete: Restrict)',
+    );
   });
 });

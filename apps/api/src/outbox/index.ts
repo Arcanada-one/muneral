@@ -7,6 +7,7 @@ export { OutboxRelay } from './outbox.relay';
 export type { TransactionalClient } from './outbox.relay';
 
 export {
+  MalformedOutboxEventError,
   WrongPlanePayloadError,
   OutboxInsertError,
   LeaseAcquisitionError,
@@ -37,6 +38,7 @@ export type {
 
 export {
   deriveOutboxEventType,
+  validateOutboxEvent,
   validatePayloadPlane,
   FORBIDDEN_PAYLOAD_KEYS,
   normaliseConfig,

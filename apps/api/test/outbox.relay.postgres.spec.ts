@@ -145,9 +145,9 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
         transitionEventType: 'attempt:succeeded',
         committedResult: { status: 'done' },
         idempotencyKey: randomUUID(),
-        aggregateVersion: 5,
+        aggregateVersion: overrides.aggregateVersion ?? aggregateVersion,
         attemptId,
-        attemptOrdinal: 1,
+        attemptOrdinal,
         retryCount: 0,
         retryBudget: 3,
       }),
@@ -1206,6 +1206,88 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
     const rePoll = await relay.poll();
     const found = rePoll.find((e: { id: string }) => e.id === outboxEventId);
     expect(found).toBeUndefined();
+  }, 15_000);
+
+  it('14a. malformed closed envelope is durably quarantined before consumer invocation', async () => {
+    const { OutboxRelay } = require('../src/outbox/outbox.relay');
+    const { normaliseConfig } = require('../src/outbox/outbox.types');
+    const { MalformedOutboxEventError } = require('../src/outbox/outbox.errors');
+
+    const tId = await seedTask();
+    const { outboxEventId } = await seedOutboxRow(tId, {
+      deliveryStatus: 'pending',
+      eventPayload: {},
+    });
+    const relay = new OutboxRelay(
+      prisma,
+      { now: () => new Date() },
+      { generate: () => randomUUID() },
+      normaliseConfig({ relayId: `malformed-relay-${randomUUID().slice(0, 6)}` }),
+    );
+    const ours = (await relay.poll()).filter(
+      (event: { id: string }) => event.id === outboxEventId,
+    );
+    const [leased] = await relay.lease(ours);
+    const consumer = {
+      consumerId: 'malformed-consumer',
+      consume: jest.fn().mockResolvedValue({ digest: 'unused' }),
+    };
+
+    await expect(relay.dispatch(leased, consumer)).rejects.toThrow(
+      MalformedOutboxEventError,
+    );
+    expect(consumer.consume).not.toHaveBeenCalled();
+    await expect(
+      prisma.quarantineEvidence.findUnique({ where: { outboxEventId } }),
+    ).resolves.toMatchObject({ lastErrorCode: 'MALFORMED_EVENT' });
+    await expect(
+      prisma.outboxLease.findUnique({ where: { outboxEventId } }),
+    ).resolves.toMatchObject({ deliveryStatus: 'quarantined' });
+  }, 15_000);
+
+  it('14aa. an expired wrong-plane lease writes no quarantine evidence', async () => {
+    const { OutboxRelay } = require('../src/outbox/outbox.relay');
+    const { normaliseConfig } = require('../src/outbox/outbox.types');
+
+    const tId = await seedTask();
+    const { outboxEventId } = await seedOutboxRow(tId, {
+      deliveryStatus: 'pending',
+      eventPayload: {
+        schema: 'muneral-outbox-v1',
+        host_id: 'forbidden-host',
+      },
+    });
+    const relay = new OutboxRelay(
+      prisma,
+      { now: () => new Date() },
+      { generate: () => randomUUID() },
+      normaliseConfig({ relayId: `expired-wp-relay-${randomUUID().slice(0, 6)}` }),
+    );
+    const ours = (await relay.poll()).filter(
+      (event: { id: string }) => event.id === outboxEventId,
+    );
+    const [leased] = await relay.lease(ours);
+    const expiredAt = new Date(Date.now() - 1_000);
+    await prisma.outboxLease.update({
+      where: { outboxEventId },
+      data: {
+        leaseAcquiredAt: new Date(expiredAt.getTime() - 1_000),
+        leaseExpiresAt: expiredAt,
+      },
+    });
+
+    await expect(
+      relay.dispatch(leased, {
+        consumerId: 'expired-wp-consumer',
+        consume: jest.fn().mockResolvedValue({ digest: 'unused' }),
+      }),
+    ).resolves.toBe('expired');
+    await expect(
+      prisma.quarantineEvidence.count({ where: { outboxEventId } }),
+    ).resolves.toBe(0);
+    await expect(
+      prisma.deliveryAttemptEvidence.count({ where: { outboxEventId } }),
+    ).resolves.toBe(0);
   }, 15_000);
 
   // BLOCKER6: Wrong-plane through the actual executeCommand service path.

@@ -9,9 +9,13 @@ import type { TransactionalClient } from '../src/outbox/outbox.relay';
 import {
   normaliseConfig,
   sanitiseErrorDetail,
+  validateOutboxEvent,
   validatePayloadPlane,
 } from '../src/outbox/outbox.types';
-import { WrongPlanePayloadError } from '../src/outbox/outbox.errors';
+import {
+  MalformedOutboxEventError,
+  WrongPlanePayloadError,
+} from '../src/outbox/outbox.errors';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type {
   OutboxEvent,
@@ -447,6 +451,60 @@ describe('OutboxRelay', () => {
   // -- dispatch: wrong-plane rejection ---------------------------------------
 
   describe('dispatch — wrong-plane payload rejection', () => {
+    it('rejects an empty payload as a malformed closed envelope', () => {
+      const event = makeOutboxEvent({
+        eventPayload: {} as OutboxEvent['eventPayload'],
+      });
+      expect(validateOutboxEvent(event)).toMatch(/missing required field/i);
+    });
+
+    it('rejects row/payload identity mismatch', () => {
+      const event = makeOutboxEvent({
+        eventPayload: {
+          ...makeOutboxEvent().eventPayload,
+          aggregateVersion: 99,
+        },
+      });
+      expect(validateOutboxEvent(event)).toMatch(/aggregateVersion.*mismatch/i);
+    });
+
+    it('rejects retry state that exceeds its budget', () => {
+      const event = makeOutboxEvent({
+        eventPayload: {
+          ...makeOutboxEvent().eventPayload,
+          retryCount: 4,
+          retryBudget: 3,
+        },
+      });
+      expect(validateOutboxEvent(event)).toMatch(/retryCount.*retryBudget/i);
+    });
+
+    it('durably quarantines a malformed envelope before consumer invocation', async () => {
+      const event = makeFencedEvent({
+        eventPayload: {} as OutboxEvent['eventPayload'],
+      });
+      const tx = makeTx({
+        outboxLease: {
+          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+        },
+      });
+      const dispatchRelay = new OutboxRelay(
+        makePrisma(tx),
+        clock,
+        idSource,
+        config,
+      );
+      const consumer = makeConsumer();
+
+      await expect(dispatchRelay.dispatch(event, consumer)).rejects.toThrow(
+        MalformedOutboxEventError,
+      );
+      expect(consumer.consume).not.toHaveBeenCalled();
+      expect(tx.quarantineEvidence.create.mock.calls[0][0].data.lastErrorCode).toBe(
+        'MALFORMED_EVENT',
+      );
+    });
+
     it('rejects nested Supervisor keys in objects and arrays', () => {
       expect(
         validatePayloadPlane({
@@ -658,15 +716,80 @@ describe('OutboxRelay', () => {
       const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
       const consumer = makeConsumer();
 
-      await expect(
-        dispatchRelay.dispatch(event as unknown as OutboxEvent, consumer),
-      ).rejects.toThrow(WrongPlanePayloadError);
+      const disposition = await dispatchRelay.dispatch(
+        event as unknown as OutboxEvent,
+        consumer,
+      );
+      expect(disposition).toBe('expired');
 
       // Consumer NOT called
       expect(consumer.consume).not.toHaveBeenCalled();
 
       // ZERO quarantine evidence — fence was stale, updateMany returned 0
       expect(updateManyCalled).toBe(true); // fence check DID run
+      expect(tx.quarantineEvidence.create).not.toHaveBeenCalled();
+      expect(tx.deliveryAttemptEvidence.create).not.toHaveBeenCalled();
+    });
+
+    it('expired wrong-plane worker cannot quarantine and is reported expired', async () => {
+      const event = makeFencedEvent({
+        eventPayload: {
+          ...makeOutboxEvent().eventPayload,
+          host_id: 'forbidden-host',
+        } as unknown as OutboxEvent['eventPayload'],
+      });
+      const updateMany = jest.fn().mockResolvedValue({ count: 0 });
+      const tx = makeTx({
+        outboxLease: { updateMany },
+      });
+      const dispatchRelay = new OutboxRelay(
+        makePrisma(tx),
+        clock,
+        idSource,
+        config,
+      );
+
+      const disposition = await dispatchRelay.dispatch(event, makeConsumer());
+
+      expect(disposition).toBe('expired');
+      expect(updateMany.mock.calls[0][0].where.leaseExpiresAt).toEqual({
+        gt: FIXED_NOW,
+      });
+      expect(tx.quarantineEvidence.create).not.toHaveBeenCalled();
+      expect(tx.deliveryAttemptEvidence.create).not.toHaveBeenCalled();
+    });
+
+    it('does not quarantine when the lease expires during invalid-event validation', async () => {
+      const lateNow = new Date(FIXED_NOW_PLUS_30S.getTime() + 1);
+      const advancingClock: Clock = {
+        now: jest
+          .fn()
+          .mockReturnValueOnce(FIXED_NOW)
+          .mockReturnValueOnce(lateNow),
+      };
+      const updateMany = jest.fn().mockImplementation(
+        (args: { where: { leaseExpiresAt: { gt: Date } } }) =>
+          Promise.resolve({
+            count: args.where.leaseExpiresAt.gt < FIXED_NOW_PLUS_30S ? 1 : 0,
+          }),
+      );
+      const tx = makeTx({ outboxLease: { updateMany } });
+      const dispatchRelay = new OutboxRelay(
+        makePrisma(tx), advancingClock, idSource, config,
+      );
+      const event = makeFencedEvent({
+        eventPayload: {
+          ...makeOutboxEvent().eventPayload,
+          host_id: 'forbidden-host',
+        } as unknown as OutboxEvent['eventPayload'],
+      });
+
+      await expect(
+        dispatchRelay.dispatch(event, makeConsumer()),
+      ).resolves.toBe('expired');
+      expect(updateMany.mock.calls[0][0].where.leaseExpiresAt).toEqual({
+        gt: lateNow,
+      });
       expect(tx.quarantineEvidence.create).not.toHaveBeenCalled();
       expect(tx.deliveryAttemptEvidence.create).not.toHaveBeenCalled();
     });
@@ -685,6 +808,49 @@ describe('OutboxRelay', () => {
       await expect(
         dispatchRelay.dispatch(event, consumer),
       ).rejects.toThrow(/FENCE_REQUIRED|fence.*mandatory/i);
+    });
+
+    it('rejects a malformed fence before invalid-event quarantine writes', async () => {
+      const tx = makeTx();
+      const event = {
+        ...makeOutboxEvent({
+          eventPayload: {} as OutboxEvent['eventPayload'],
+        }),
+        _fence: {},
+      } as unknown as OutboxEvent;
+      const dispatchRelay = new OutboxRelay(
+        makePrisma(tx), clock, idSource, config,
+      );
+
+      await expect(
+        dispatchRelay.dispatch(event, makeConsumer()),
+      ).rejects.toThrow(/fence.*mandatory/i);
+      expect(tx.outboxLease.updateMany).not.toHaveBeenCalled();
+      expect(tx.quarantineEvidence.create).not.toHaveBeenCalled();
+      expect(tx.deliveryAttemptEvidence.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects a missing event id before any quarantine write', async () => {
+      const tx = makeTx();
+      const event = {
+        ...makeFencedEvent({
+          eventPayload: {
+            ...makeOutboxEvent().eventPayload,
+            host_id: 'forbidden-host',
+          } as unknown as OutboxEvent['eventPayload'],
+        }),
+        id: undefined,
+      } as unknown as OutboxEvent;
+      const dispatchRelay = new OutboxRelay(
+        makePrisma(tx), clock, idSource, config,
+      );
+
+      await expect(
+        dispatchRelay.dispatch(event, makeConsumer()),
+      ).rejects.toThrow(MalformedOutboxEventError);
+      expect(tx.outboxLease.updateMany).not.toHaveBeenCalled();
+      expect(tx.quarantineEvidence.create).not.toHaveBeenCalled();
+      expect(tx.deliveryAttemptEvidence.create).not.toHaveBeenCalled();
     });
   });
 
@@ -1494,6 +1660,19 @@ describe('OutboxRelay', () => {
       const recRelay = new OutboxRelay(prisma, clock, idSource, config);
 
       const snapshot = await recRelay.reconciliation();
+
+      expect(prisma.$transaction).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({ isolationLevel: 'RepeatableRead' }),
+      );
+      expect(tx.quarantineEvidence.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          orderBy: [
+            { quarantinedAt: 'desc' },
+            { outboxEventId: 'asc' },
+          ],
+        }),
+      );
 
       expect(snapshot.leaseSummary).toEqual({
         pending: 1,
