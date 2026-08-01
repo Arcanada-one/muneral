@@ -62,10 +62,10 @@ const TX_OPTS = {
 };
 
 export interface TransactionalClient {
-   
+
   $transaction<T>(
     fn: (tx: PrismaTx) => Promise<T>,
-     
+
     options?: Record<string, unknown>,
   ): Promise<T>;
 }
@@ -628,7 +628,7 @@ export class ExecutionAuthorityService {
     };
   }
 
-   
+
   private marshalTransition(
     id: string,
     t: Omit<TaskExecutionTransition, 'id' | 'recordedAt'> & {
