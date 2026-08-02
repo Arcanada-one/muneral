@@ -1,0 +1,46 @@
+{
+  "description": "Attempt budget without deadline",
+  "input": {
+    "schemaVersion": "v0",
+    "taskId": "task-no-deadline",
+    "causationId": "cause-fixture",
+    "correlationId": "corr-fixture",
+    "evaluatedAt": "2026-08-01T12:00:00.000Z",
+    "authorityCeiling": {
+      "tenant": "acme",
+      "principal": "operator",
+      "purpose": "assembly",
+      "audience": "internal",
+      "scope": "read,write"
+    },
+    "requestedAuthority": {
+      "tenant": "acme",
+      "principal": "operator",
+      "purpose": "assembly",
+      "audience": "internal",
+      "scope": "read"
+    },
+    "rolePolicy": {
+      "policyId": "roles",
+      "policyVersion": "v1",
+      "roleName": "assistant"
+    },
+    "candidateSet": {
+      "candidates": [
+        "assistant",
+        "reviewer"
+      ],
+      "sourceDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "capturedAt": "2026-08-01T11:59:00.000Z"
+    },
+    "evidenceRefs": [],
+    "provenance": {
+      "policyUri": "policy/roles.json",
+      "policyDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "issuedAt": "2026-08-01T11:00:00.000Z"
+    },
+    "attemptBudget": 2
+  },
+  "expectedDigest": "82a8ff704e0c5c6b525f9304b91e9d09c01483f854c6ce8a87f3c6638749ba03",
+  "expectedArtifactId": "82a8ff704e0c5c6b525f9304b91e9d09c01483f854c6ce8a87f3c6638749ba03"
+}

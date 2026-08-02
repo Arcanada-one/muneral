@@ -1,0 +1,63 @@
+{
+  "description": "All optional fields",
+  "input": {
+    "schemaVersion": "v0",
+    "taskId": "task-full",
+    "causationId": "cause-fixture",
+    "correlationId": "corr-fixture",
+    "evaluatedAt": "2026-08-01T12:00:00.000Z",
+    "authorityCeiling": {
+      "tenant": "acme",
+      "principal": "operator",
+      "purpose": "assembly",
+      "audience": "internal",
+      "scope": "read,write"
+    },
+    "requestedAuthority": {
+      "tenant": "acme",
+      "principal": "operator",
+      "purpose": "assembly",
+      "audience": "internal",
+      "scope": "read"
+    },
+    "rolePolicy": {
+      "policyId": "roles",
+      "policyVersion": "v1",
+      "roleName": "assistant"
+    },
+    "candidateSet": {
+      "candidates": [
+        "assistant",
+        "reviewer"
+      ],
+      "sourceDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "capturedAt": "2026-08-01T11:59:00.000Z"
+    },
+    "evidenceRefs": [
+      {
+        "uri": "evidence/a.json",
+        "digest": "1111111111111111111111111111111111111111111111111111111111111111",
+        "contentType": "application/json",
+        "label": "A"
+      },
+      {
+        "uri": "evidence/b.txt",
+        "digest": "2222222222222222222222222222222222222222222222222222222222222222",
+        "contentType": "text/plain"
+      }
+    ],
+    "provenance": {
+      "policyUri": "policy/roles.json",
+      "policyDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "issuedAt": "2026-08-01T11:00:00.000Z",
+      "expiresAt": "2026-08-03T12:00:00.000Z"
+    },
+    "deadline": "2026-08-02T12:00:00.000Z",
+    "attemptBudget": 3,
+    "traceFields": {
+      "diagnostic": "fixture"
+    }
+  },
+  "expectedDigest": "b4b63ba2c117845540c8039899fef1b2cea1cb5c6b00def5ce36399c09e5d5fd",
+  "expectedArtifactId": "b4b63ba2c117845540c8039899fef1b2cea1cb5c6b00def5ce36399c09e5d5fd"
+}

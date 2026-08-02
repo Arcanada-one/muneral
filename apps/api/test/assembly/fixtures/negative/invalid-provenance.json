@@ -1,0 +1,44 @@
+{
+  "description": "Policy issued after evaluation",
+  "input": {
+    "schemaVersion": "v0",
+    "taskId": "task-fixture",
+    "causationId": "cause-fixture",
+    "correlationId": "corr-fixture",
+    "evaluatedAt": "2026-08-01T12:00:00.000Z",
+    "authorityCeiling": {
+      "tenant": "acme",
+      "principal": "operator",
+      "purpose": "assembly",
+      "audience": "internal",
+      "scope": "read,write"
+    },
+    "requestedAuthority": {
+      "tenant": "acme",
+      "principal": "operator",
+      "purpose": "assembly",
+      "audience": "internal",
+      "scope": "read"
+    },
+    "rolePolicy": {
+      "policyId": "roles",
+      "policyVersion": "v1",
+      "roleName": "assistant"
+    },
+    "candidateSet": {
+      "candidates": [
+        "assistant",
+        "reviewer"
+      ],
+      "sourceDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "capturedAt": "2026-08-01T11:59:00.000Z"
+    },
+    "evidenceRefs": [],
+    "provenance": {
+      "policyUri": "policy/roles.json",
+      "policyDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "issuedAt": "2026-08-01T12:00:00.001Z"
+    }
+  },
+  "expectedErrorCode": "INVALID_PROVENANCE"
+}
