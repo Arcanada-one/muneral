@@ -44,8 +44,7 @@ export class SolutionLogHeadService {
     }
     this.assertSeparatedDigests(validated);
 
-    try {
-      return await this.prisma.$transaction(
+    return this.prisma.$transaction(
         async (tx) => {
           const context = await this.loadAuthorityContext(
             tx,
@@ -117,15 +116,7 @@ export class SolutionLogHeadService {
           maxWait: 10_000,
           timeout: 30_000,
         },
-      );
-    } catch (error) {
-      if (isUniqueRace(error)) {
-        throw new ConflictException(
-          'SolutionLog head lost a same-prior concurrent write race',
-        );
-      }
-      throw error;
-    }
+    );
   }
 
   async getCurrentHead(
@@ -289,16 +280,6 @@ function assertUuid(value: string, field: string): void {
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)) {
     throw new BadRequestException(`${field} must be a UUID`);
   }
-}
-
-function isUniqueRace(error: unknown): boolean {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    ('code' in error &&
-      ((error as { code?: string }).code === 'P2002' ||
-        (error as { code?: string }).code === '23505'))
-  );
 }
 
 function rowToReceipt(row: {
