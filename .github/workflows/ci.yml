@@ -110,7 +110,7 @@ jobs:
 
       - name: Pre-deploy host readiness
         id: preflight
-        uses: Arcanada-one/datarim/.github/actions/preflight-check@f01ab2034ee99321fe627b76e98641b672e12c0b  # v1, immutable pin
+        uses: Arcanada-one/datarim/.github/actions/preflight-check@dc34816fa581937011dfc91f65955e253ad58c27  # v1, immutable pin
         with:
           target-host: arcana-prod
           service-name: muneral
