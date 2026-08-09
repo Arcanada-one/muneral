@@ -180,6 +180,7 @@ model Task {
   resultBindings TaskResultBinding[]
   resultNodes    TaskResultNode[]
   resultRefs     TaskCommittedResultRef[]
+  solutionLogHeadReceipts SolutionLogHeadReceipt[]
 
   @@index([projectId], name: "idx_tasks_project_id")
   @@index([sprintId], name: "idx_tasks_sprint_id")
@@ -251,6 +252,7 @@ model Agent {
   workspace  Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   apiKeys    ApiKey[]
   taskAgents TaskAgent[]
+  solutionLogHeadReceipts SolutionLogHeadReceipt[]
 
   @@map("agents")
 }
@@ -460,6 +462,7 @@ model TaskExecutionAttempt {
   resultBindings TaskResultBinding[]
   resultNodes    TaskResultNode[]
   resultRefs     TaskCommittedResultRef[]
+  solutionLogHeadReceipts SolutionLogHeadReceipt[]
 
   @@unique([taskId, ordinal])
   @@unique([attemptId, taskId])
@@ -715,4 +718,36 @@ model TaskCommittedResultRef {
   @@index([taskId, cardId])
   @@index([recordedAt])
   @@map("task_committed_result_refs")
+}
+
+// ARCA-0198: producer-authenticated provenance for one accepted SolutionLog
+// head. This append-only fact is not a completion receipt and cannot authorize
+// model use.
+model SolutionLogHeadReceipt {
+  receiptId                 String   @id @map("receipt_id") @db.VarChar(64)
+  taskId                    String   @map("task_id") @db.Uuid
+  attemptId                 String   @map("attempt_id") @db.Uuid
+  principalId               String   @map("principal_id") @db.Uuid
+  taskRevision              BigInt   @map("task_revision")
+  projectionDigestSha256    String   @map("projection_digest_sha256") @db.VarChar(64)
+  logRevision               Int      @map("log_revision")
+  previousHeadDigestSha256  String?  @map("previous_head_digest_sha256") @db.VarChar(64)
+  headDigestSha256          String   @map("head_digest_sha256") @db.VarChar(64)
+  solutionLogDigestSha256   String   @map("solution_log_digest_sha256") @db.VarChar(64)
+  executionAggregateVersion BigInt   @map("execution_aggregate_version")
+  producerVersion           Int      @map("producer_version")
+  recordedAt                DateTime @map("recorded_at") @db.Timestamptz()
+  provenanceScope           String   @map("provenance_scope") @db.VarChar(64)
+  modelUseStatus            String   @map("model_use_status") @db.VarChar(32)
+
+  task      Task                 @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  attempt   TaskExecutionAttempt @relation(fields: [attemptId, taskId], references: [attemptId, taskId], onDelete: Restrict)
+  principal Agent                @relation(fields: [principalId], references: [id], onDelete: Restrict)
+
+  @@unique([taskId, attemptId, producerVersion])
+  @@unique([taskId, attemptId, logRevision])
+  @@unique([taskId, attemptId, headDigestSha256])
+  @@index([recordedAt])
+  @@index([principalId])
+  @@map("solution_log_head_receipts")
 }
