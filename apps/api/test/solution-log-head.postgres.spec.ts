@@ -205,6 +205,92 @@ describe('SolutionLog head authority — PostgreSQL proofs', () => {
     ).rejects.toBeInstanceOf(ConflictException);
   });
 
+  it('keeps executor authorization stable until the receipt transaction commits', async () => {
+    const { taskId, attemptId, taskRevision } = await runningTask();
+    const { PrismaClient } = require('@prisma/client');
+    const { PrismaPg } = require('@prisma/adapter-pg');
+    const holder = new PrismaClient({
+      adapter: new PrismaPg({ connectionString: pg.url() }),
+    });
+    const updater = new PrismaClient({
+      adapter: new PrismaPg({ connectionString: pg.url() }),
+    });
+    let releaseStateLock!: () => void;
+    let signalStateLock!: () => void;
+    const stateLockHeld = new Promise<void>((resolve) => {
+      releaseStateLock = resolve;
+    });
+    const stateLockTaken = new Promise<void>((resolve) => {
+      signalStateLock = resolve;
+    });
+    const holderTx = holder.$transaction(
+      async (tx: any) => {
+        await tx.$queryRawUnsafe(
+          `SELECT aggregate_version FROM public.task_execution_state
+            WHERE task_id = $1::uuid
+            FOR UPDATE`,
+          taskId,
+        );
+        signalStateLock();
+        await stateLockHeld;
+      },
+      { maxWait: 20_000, timeout: 60_000 },
+    );
+
+    let pendingReceipt: Promise<unknown> | undefined;
+    let roleUpdateError: unknown;
+    try {
+      await stateLockTaken;
+      pendingReceipt = service.commitHead(
+        taskId,
+        attemptId,
+        primaryAgentId,
+        proposal(taskRevision),
+      );
+      await waitUntilBlockedOnLock(prisma);
+      try {
+        await updater.$transaction(async (tx: any) => {
+          await tx.$executeRawUnsafe("SET LOCAL lock_timeout = '250ms'");
+          await tx.$executeRawUnsafe(
+            `UPDATE public.task_agents
+                SET role = 'reviewer'
+              WHERE task_id = $1::uuid AND agent_id = $2::uuid`,
+            taskId,
+            primaryAgentId,
+          );
+        });
+      } catch (error) {
+        roleUpdateError = error;
+      }
+    } finally {
+      releaseStateLock();
+      try {
+        await holderTx;
+      } finally {
+        await Promise.allSettled([
+          holder.$disconnect(),
+          updater.$disconnect(),
+        ]);
+      }
+    }
+
+    if (!pendingReceipt) throw new Error('receipt writer did not start');
+    await expect(pendingReceipt).resolves.toMatchObject({
+      taskId,
+      attemptId,
+      principalId: primaryAgentId,
+    });
+    expect(roleUpdateError).toBeDefined();
+    expect(String(roleUpdateError)).toMatch(
+      /lock timeout|canceling statement due to lock timeout|55P03/i,
+    );
+    await expect(
+      prisma.taskAgent.findUnique({
+        where: { taskId_agentId: { taskId, agentId: primaryAgentId } },
+      }),
+    ).resolves.toMatchObject({ role: 'executor' });
+  });
+
   it('rejects malformed route identities before database access', async () => {
     await expect(
       service.commitHead('not-a-uuid', randomUUID(), primaryAgentId, proposal(1)),
@@ -247,3 +333,16 @@ describe('SolutionLog head authority — PostgreSQL proofs', () => {
     ).rejects.toThrow(/non-destructible/);
   });
 });
+
+async function waitUntilBlockedOnLock(client: any): Promise<void> {
+  for (let attempt = 0; attempt < 200; attempt += 1) {
+    const rows = await client.$queryRawUnsafe(
+      'SELECT count(*)::int AS count FROM pg_locks WHERE NOT granted',
+    ) as Array<{ count: number }>;
+    if (Array.isArray(rows) && Number(rows[0]?.count) > 0) return;
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  }
+  throw new Error(
+    'timed out waiting for the receipt writer to block on execution state',
+  );
+}
