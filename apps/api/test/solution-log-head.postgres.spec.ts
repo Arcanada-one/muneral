@@ -20,6 +20,17 @@ const SHA_C = 'c'.repeat(64);
 const SHA_D = 'd'.repeat(64);
 const SHA_E = 'e'.repeat(64);
 
+function deferred<T = void>(): {
+  promise: Promise<T>;
+  resolve: (value: T | PromiseLike<T>) => void;
+} {
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  const promise = new Promise<T>((resolvePromise) => {
+    resolve = resolvePromise;
+  });
+  return { promise, resolve };
+}
+
 beforeAll(async () => pg.start(), 120_000);
 afterAll(async () => pg.stop(), 30_000);
 
@@ -225,6 +236,119 @@ describe('SolutionLog head authority — PostgreSQL proofs', () => {
     expect(writes.filter((item) => item.status === 'fulfilled')).toHaveLength(1);
     expect(writes.filter((item) => item.status === 'rejected')).toHaveLength(1);
     expect(await prisma.solutionLogHeadReceipt.count({ where: { taskId } })).toBe(1);
+  });
+
+  it('blocks an executor role change until stale authority validation rolls back', async () => {
+    const { taskId, attemptId, taskRevision } = await runningTask();
+    const assignmentRead = deferred();
+    const releaseAuthorityCheck = deferred();
+    const gatedPrisma = {
+      $transaction: (callback: (tx: unknown) => Promise<unknown>, options: unknown) =>
+        prisma.$transaction(async (tx: Record<PropertyKey, unknown>) => {
+          const gatedTx = new Proxy(tx, {
+            get(target, property) {
+              if (property === '$queryRawUnsafe') {
+                return async (sql: string, ...parameters: unknown[]) => {
+                  const result = await (target.$queryRawUnsafe as Function).call(
+                    target,
+                    sql,
+                    ...parameters,
+                  );
+                  if (sql.includes('FROM public.task_agents')) {
+                    assignmentRead.resolve();
+                    await releaseAuthorityCheck.promise;
+                  }
+                  return result;
+                };
+              }
+              const value = Reflect.get(target, property, target);
+              return typeof value === 'function' ? value.bind(target) : value;
+            },
+          });
+          return callback(gatedTx);
+        }, options),
+    };
+    const gatedService = new SolutionLogHeadService(gatedPrisma as never);
+    const commit = gatedService.commitHead(
+      taskId,
+      attemptId,
+      primaryAgentId,
+      proposal(taskRevision + 1),
+    );
+
+    await assignmentRead.promise;
+    const { Client } = require('pg');
+    const updateClient = new Client({ connectionString: pg.url() });
+    let updateTransactionOpen = false;
+    let roleUpdate: Promise<unknown> | undefined;
+    try {
+      await updateClient.connect();
+      await updateClient.query('BEGIN');
+      updateTransactionOpen = true;
+      const backend = await updateClient.query('SELECT pg_backend_pid() AS pid');
+      const updatePid = Number(backend.rows[0].pid);
+      let updateSettled = false;
+      roleUpdate = updateClient.query(
+        `UPDATE public.task_agents
+            SET role = 'reviewer'
+          WHERE task_id = $1::uuid AND agent_id = $2::uuid`,
+        [taskId, primaryAgentId],
+      ).then((result: unknown) => {
+        updateSettled = true;
+        return result;
+      });
+
+      let updateBeforeRelease: 'blocked' | 'completed' | undefined;
+      for (let attempt = 0; attempt < 100; attempt += 1) {
+        if (updateSettled) {
+          updateBeforeRelease = 'completed';
+          break;
+        }
+        const activity = await prisma.$queryRawUnsafe(
+          `SELECT wait_event_type
+             FROM pg_catalog.pg_stat_activity
+            WHERE pid = $1`,
+          updatePid,
+        ) as Array<{ wait_event_type: string | null }>;
+        if (activity[0]?.wait_event_type === 'Lock') {
+          updateBeforeRelease = 'blocked';
+          break;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      }
+      if (!updateBeforeRelease) {
+        throw new Error('role update neither completed nor waited on a lock');
+      }
+      if (updateBeforeRelease === 'completed') {
+        await updateClient.query('COMMIT');
+        updateTransactionOpen = false;
+      }
+
+      releaseAuthorityCheck.resolve();
+      const [commitOutcome, updateOutcome] = await Promise.allSettled([
+        commit,
+        roleUpdate,
+      ]);
+      if (updateTransactionOpen) {
+        await updateClient.query('COMMIT');
+        updateTransactionOpen = false;
+      }
+
+      expect(updateBeforeRelease).toBe('blocked');
+      expect(commitOutcome).toMatchObject({
+        status: 'rejected',
+        reason: expect.any(ConflictException),
+      });
+      expect(updateOutcome).toMatchObject({ status: 'fulfilled' });
+      expect(
+        await prisma.solutionLogHeadReceipt.count({ where: { taskId } }),
+      ).toBe(0);
+    } finally {
+      releaseAuthorityCheck.resolve();
+      if (roleUpdate) await Promise.allSettled([roleUpdate]);
+      if (updateTransactionOpen) await updateClient.query('ROLLBACK');
+      await updateClient.end();
+    }
   });
 
   it('rejects UPDATE, DELETE, and TRUNCATE at the database', async () => {

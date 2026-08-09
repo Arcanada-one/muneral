@@ -161,7 +161,7 @@ export class SolutionLogHeadService {
     const assignments = await tx.$queryRawUnsafe<Array<{ role: string }>>(
       `SELECT role FROM public.task_agents
         WHERE task_id = $1::uuid AND agent_id = $2::uuid
-        FOR KEY SHARE`,
+        FOR SHARE`,
       taskId,
       principalId,
     );
