@@ -9,6 +9,13 @@ const migration = readFileSync(
   ),
   'utf8',
 );
+const rollback = readFileSync(
+  join(
+    apiRoot,
+    'prisma/migrations/20260809180000_add_solution_log_head_receipts/rollback.sql',
+  ),
+  'utf8',
+);
 const schema = readFileSync(join(apiRoot, 'prisma/schema.prisma'), 'utf8');
 
 describe('solution-log head receipt migration', () => {
@@ -49,5 +56,13 @@ describe('solution-log head receipt migration', () => {
   it('maps the append-only receipt model in Prisma', () => {
     expect(schema).toContain('model SolutionLogHeadReceipt');
     expect(schema).toContain('@@map("solution_log_head_receipts")');
+  });
+
+  it('refuses rollback without destructive SQL', () => {
+    expect(rollback).toContain(
+      'ARCA-0198 solution-log head receipt migration is forward-only',
+    );
+    expect(rollback).toContain('RAISE EXCEPTION');
+    expect(rollback).not.toMatch(/\b(DROP|DELETE|TRUNCATE)\b/i);
   });
 });
