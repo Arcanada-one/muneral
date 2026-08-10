@@ -10,7 +10,6 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
 
 jobs:
   secrets-gate:
@@ -89,8 +88,22 @@ jobs:
       compose_paths: docker-compose.prod.yml
       datarim_ref: '57afdfcd6a2d71aa8e0b577de6e43846e93b60dd'
 
+  preflight-caller-contract:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          ref: ${{ github.workflow_sha }}
+      - uses: Arcanada-one/datarim/.github/actions/preflight-caller-contract@78970c8d868e75b31c3b25fe5c2ea4967ecd945c
+        with:
+          vault-addr: ${{ vars.VAULT_ADDR }}
+
   deploy:
-    needs: [lint-and-test, secrets-gate, network-exposure]
+    needs: [lint-and-test, secrets-gate, network-exposure, preflight-caller-contract]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: [self-hosted, linux, arcana-prod]
     concurrency:
@@ -99,18 +112,9 @@ jobs:
     env:
       VAULT_ADDR: ${{ vars.VAULT_ADDR }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
-
-      # SEC-0028: the previous check asserted this runner *is* in the host
-      # `docker` group. That group is root-equivalent on a host that also
-      # carries the Control Arcana root deploy broker, so the check gated on
-      # the presence of the escalation being removed.
-      - name: Verify deploy-broker capability
-        run: bash scripts/ci/runner-broker-preflight.sh
-
       - name: Pre-deploy host readiness
         id: preflight
-        uses: Arcanada-one/datarim/.github/actions/preflight-check@f01ab2034ee99321fe627b76e98641b672e12c0b  # v1, immutable pin
+        uses: Arcanada-one/datarim/.github/actions/preflight-check@78970c8d868e75b31c3b25fe5c2ea4967ecd945c
         with:
           target-host: arcana-prod
           service-name: muneral
@@ -123,7 +127,19 @@ jobs:
             vault
             tailscale
             time-skew
+          ops-bot-emit: "true"
+          ops-bot-agent: muneral
           ops-bot-key: ${{ secrets.OPSBOT_API_KEY }}
+          ops-bot-url: https://ops.arcanada.ai/events
+
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+
+      # SEC-0028: the previous check asserted this runner *is* in the host
+      # `docker` group. That group is root-equivalent on a host that also
+      # carries the Control Arcana root deploy broker, so the check gated on
+      # the presence of the escalation being removed.
+      - name: Verify deploy-broker capability
+        run: bash scripts/ci/runner-broker-preflight.sh
 
       # Every step below hands the broker a service name and a commit SHA and
       # nothing else. The broker refuses any SHA not already reachable from
@@ -165,8 +181,12 @@ jobs:
         if: steps.preflight.outputs.status != 'fail'
         run: sudo -n /usr/local/sbin/arcanada-compose-broker muneral ps
 
-      - name: Notify Ops Bot on failure
-        if: failure()
+  notify-deploy-failure:
+    needs: deploy
+    if: always() && needs.deploy.result == 'failure'
+    runs-on: [self-hosted, linux, ci-general]
+    steps:
+      - name: Notify Ops Bot on deploy failure
         run: |
           curl -fsS -X POST https://ops.arcanada.ai/events \
             -H "Authorization: Bearer ${{ secrets.OPSBOT_API_KEY }}" \
