@@ -48,6 +48,11 @@ jobs:
         run: bash scripts/ci/opsbot-secret-gate.test.sh
       - name: Test runner deploy-broker preflight contract
         run: bash scripts/ci/runner-broker-preflight.test.sh
+      - name: Test semantic aggregate readback contract
+        run: |
+          node --test apps/api/scripts/semantic-aggregate-readback.test.mjs
+          bash scripts/ci/semantic-readback-caller-contract.test.sh
+          bash scripts/ci/semantic-readback-caller-contract.sh
       - name: Enable corepack (pnpm@11.5.2 from packageManager field)
         run: |
           COREPACK_HOME="${RUNNER_TEMP}/corepack-bin"
@@ -74,6 +79,10 @@ jobs:
       - name: Apply DB migrations
         # Run from repo root — prisma.config.ts at root, schema at apps/api/prisma/schema.prisma
         run: pnpm exec prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/muneral_test
+      - name: Test semantic aggregate readback against disposable PostgreSQL
+        run: node apps/api/scripts/semantic-aggregate-readback.mjs
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/muneral_test
       - name: Test
@@ -176,6 +185,10 @@ jobs:
           echo "Health check failed after 100s"
           sudo -n /usr/local/sbin/arcanada-compose-broker muneral logs 100
           exit 1
+
+      - name: Semantic aggregate readback
+        if: steps.preflight.outputs.status != 'fail'
+        run: sudo -n /usr/local/sbin/arcanada-compose-broker muneral aggregate-readback
 
       - name: Status snapshot
         if: steps.preflight.outputs.status != 'fail'
