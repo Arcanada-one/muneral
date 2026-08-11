@@ -14,6 +14,8 @@ const MIGRATION_DIR =
   'prisma/migrations/20260731010000_add_committed_result_refs';
 const HARDENING_DIR =
   'prisma/migrations/20260801093000_harden_result_authority_binding';
+const INVOCATION_BINDING_DIR =
+  'prisma/migrations/20260808110000_bind_issued_task_invocation';
 
 const migration = readFileSync(
   join(apiRoot, MIGRATION_DIR, 'migration.sql'),
@@ -32,8 +34,49 @@ const hardeningRollback = readFileSync(
   join(apiRoot, HARDENING_DIR, 'rollback.sql'),
   'utf8',
 );
+const invocationBindingMigration = readFileSync(
+  join(apiRoot, INVOCATION_BINDING_DIR, 'migration.sql'),
+  'utf8',
+);
+const invocationBindingRollback = readFileSync(
+  join(apiRoot, INVOCATION_BINDING_DIR, 'rollback.sql'),
+  'utf8',
+);
 
 describe('Committed-result migration', () => {
+  describe('issued invocation binding hardening', () => {
+    it('refuses to infer the new authority fields from existing bindings', () => {
+      expect(invocationBindingMigration).toContain(
+        'IF EXISTS (SELECT 1 FROM public.task_result_bindings LIMIT 1)',
+      );
+      expect(invocationBindingMigration).not.toContain('UPDATE public.task_result_bindings');
+    });
+
+    it('binds invocation, tenant and exact owned node to canonical bytes', () => {
+      for (const column of [
+        'invocation_id',
+        'node_id',
+        'tenant_id',
+        'operation',
+        'card_canonical_bytes',
+        'projection_canonical_bytes',
+      ]) {
+        expect(invocationBindingMigration).toContain(`ADD COLUMN ${column}`);
+      }
+      expect(invocationBindingMigration).toContain(
+        'task_result_bindings_invocation_unique UNIQUE (invocation_id)',
+      );
+      expect(invocationBindingMigration).toContain(
+        "CHECK (operation = 'native.fixture.digest-v0')",
+      );
+    });
+
+    it('refuses rollback after issued authority exists', () => {
+      expect(invocationBindingRollback).toContain(
+        'IF EXISTS (SELECT 1 FROM public.task_result_bindings LIMIT 1)',
+      );
+    });
+  });
   // -------------------------------------------------------------------------
   // Tables
   // -------------------------------------------------------------------------

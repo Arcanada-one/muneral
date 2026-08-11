@@ -465,6 +465,7 @@ export class ResultAuthorityService {
         binding.projectionDigest ?? binding.projection_digest,
         mutation.projectionDigest,
       ],
+      ['nodeId', binding.nodeId ?? binding.node_id, mutation.nodeId],
       ['principalId', binding.principalId ?? binding.principal_id, mutation.principalId],
     ];
     for (const [field, expected, actual] of pairs) {

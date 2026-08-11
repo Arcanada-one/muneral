@@ -158,7 +158,13 @@ describe('Committed-result authority — PostgreSQL proofs', () => {
           cardDigest: CARD_DIGEST,
           projectionId: 'proj-1',
           projectionDigest: PROJECTION_DIGEST,
+          invocationId: `invocation-${taskId}`,
+          nodeId: 'node-1',
+          tenantId: 'tenant-1',
           principalId: PRINCIPAL,
+          operation: 'native.fixture.digest-v0',
+          cardCanonicalBytes: JSON.stringify(CARD),
+          projectionCanonicalBytes: JSON.stringify(PROJECTION),
           recordedAt: new Date(),
         },
       });

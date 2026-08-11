@@ -632,7 +632,13 @@ model TaskResultBinding {
   cardDigest       String   @map("card_digest") @db.VarChar(64)
   projectionId     String   @map("projection_id") @db.VarChar(256)
   projectionDigest String   @map("projection_digest") @db.VarChar(64)
+  invocationId     String   @unique(map: "task_result_bindings_invocation_unique") @map("invocation_id") @db.VarChar(256)
+  nodeId           String   @map("node_id") @db.VarChar(256)
+  tenantId         String   @map("tenant_id") @db.VarChar(256)
   principalId      String   @map("principal_id") @db.VarChar(256)
+  operation        String   @map("operation") @db.VarChar(64)
+  cardCanonicalBytes       String @map("card_canonical_bytes") @db.Text
+  projectionCanonicalBytes String @map("projection_canonical_bytes") @db.Text
   recordedAt       DateTime @map("recorded_at") @db.Timestamptz()
 
   task       Task                     @relation(fields: [taskId], references: [id], onDelete: Restrict)
@@ -642,6 +648,7 @@ model TaskResultBinding {
   @@id([taskId, attemptId, cardId])
   @@unique([taskId, attemptId, cardId, cardDigest, projectionId, projectionDigest, principalId])
   @@index([attemptId])
+  @@index([taskId, nodeId])
   @@map("task_result_bindings")
 }
 

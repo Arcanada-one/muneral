@@ -222,6 +222,7 @@ function makeTx(overrides: Record<string, any> = {}): MockTx {
         cardDigest: GOLDEN.cardDigest,
         projectionId: 'proj-1',
         projectionDigest: GOLDEN.projectionDigest,
+        nodeId: 'node-1',
         principalId: PRINCIPAL,
         recordedAt: FIXED_NOW,
       }),
@@ -805,6 +806,30 @@ describe('D. authoritative commit seam', () => {
       validProposal({ projectionDigest: GOLDEN.cardDigest }),
     );
     expect(outcome).toBeInstanceOf(ResultBindingError);
+    expectZeroWrites(tx);
+  });
+
+  it('F4: a mutation for a node not owned by the established binding creates zero writes', async () => {
+    const tx = makeTx({
+      taskResultBinding: {
+        findUnique: jest.fn().mockResolvedValue({
+          taskId: TASK_ID,
+          attemptId: ATTEMPT_ID,
+          cardId: 'card-1',
+          cardDigest: GOLDEN.cardDigest,
+          projectionId: 'proj-1',
+          projectionDigest: GOLDEN.projectionDigest,
+          nodeId: 'a-different-owned-node',
+          principalId: PRINCIPAL,
+        }),
+      },
+    });
+    const outcome = await service.commitOwnedResult(
+      makePrisma(tx),
+      validProposal(),
+    );
+    expect(outcome).toBeInstanceOf(ResultBindingError);
+    expect((outcome as ResultBindingError).subject).toBe('nodeId');
     expectZeroWrites(tx);
   });
 
