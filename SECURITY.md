@@ -89,10 +89,20 @@ Entries past `re_review` raise an ecosystem-wide stale-trigger event
 
 ## Hardening Baseline
 
-Verified in place for this repository:
+Verified in place for this repository, by reading the live GitHub API rather
+than by assuming the ecosystem default:
 
-- Branch protection on the default branch, with force-push and branch
-  deletion disabled.
+- Branch protection on `main`, with force-push and branch deletion disabled.
+
+Measured and NOT in place, stated here because a policy that lists a control
+it does not have is worse than one that admits the gap:
+
+- No required status checks and no required pull-request reviews on `main`.
+- No secret scanning in CI. `gitleaks.toml` is present at the repository root,
+  but the workflow step that consumed it was removed (the action moved behind a
+  paid plan) and nothing replaced it, so the config is inert.
+- The ecosystem reusable security-audit workflow is not wired; see the section
+  above.
 
 Ecosystem baseline this repository works toward (defined by the Arcanada
 Ecosystem Security Policy Mandate — listed as the target, not as a claim that
