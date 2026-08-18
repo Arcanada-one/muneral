@@ -136,7 +136,7 @@ jobs:
     steps:
       - name: Pre-deploy host readiness
         id: preflight
-        uses: Arcanada-one/datarim/.github/actions/preflight-check@78970c8d868e75b31c3b25fe5c2ea4967ecd945c
+        uses: Arcanada-one/datarim/.github/actions/preflight-check@48aab512da98f5990d0d25a062a0cc964205fee9
         with:
           target-host: arcana-prod
           service-name: muneral
