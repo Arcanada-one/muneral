@@ -114,7 +114,14 @@ jobs:
   deploy:
     needs: [lint-and-test, secrets-gate, network-exposure, preflight-caller-contract]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: [self-hosted, linux, arcana-prod]
+    # SEC-0063: `arcana-prod-host`, not `arcana-prod`. That label is not
+    # unique -- `arcana-prod-replacement` carries it too and physically
+    # lives on arcana-agents, a DIFFERENT machine, where this service has
+    # no containers and the root deploy broker has no row for it. Landing
+    # there fails inside the deploy at best, and builds a second empty
+    # stack that reports success at worst. Addition, not a swap: the
+    # `arcana-prod` label stays on both runners for other consumers.
+    runs-on: [self-hosted, linux, arcana-prod-host]
     concurrency:
       group: deploy-muneral
       cancel-in-progress: false
