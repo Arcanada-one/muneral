@@ -113,7 +113,7 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ github.workflow_sha }}
-      - uses: Arcanada-one/datarim/.github/actions/preflight-caller-contract@78970c8d868e75b31c3b25fe5c2ea4967ecd945c
+      - uses: Arcanada-one/datarim/.github/actions/preflight-caller-contract@48aab512da98f5990d0d25a062a0cc964205fee9
         with:
           vault-addr: ${{ vars.VAULT_ADDR }}
 
