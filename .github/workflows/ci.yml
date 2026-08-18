@@ -98,7 +98,7 @@ jobs:
           MUN0020_DB_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
 
   network-exposure:
-    uses: Arcanada-one/datarim/.github/workflows/network-exposure-lint.yml@57afdfcd6a2d71aa8e0b577de6e43846e93b60dd
+    uses: Arcanada-one/datarim/.github/workflows/network-exposure-lint.yml@48aab512da98f5990d0d25a062a0cc964205fee9
     with:
       compose_paths: docker-compose.prod.yml
       datarim_ref: '57afdfcd6a2d71aa8e0b577de6e43846e93b60dd'
