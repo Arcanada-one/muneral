@@ -41,7 +41,13 @@ jobs:
           --health-timeout 5s
           --health-retries 5
         ports:
-          - 5432:5432
+          # MUN: container port only -- Docker picks a free HOST port and
+          # Actions publishes it as job.services.postgres.ports['5432'].
+          # A fixed `5432:5432` died with "address already in use" before
+          # any test ran: `ci-general` resolves to several runners and one
+          # of them already serves Postgres on 5432. The job now runs
+          # anywhere instead of only where that port happens to be free.
+          - 5432
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
       - name: Test Ops Bot secret gate contract
@@ -73,23 +79,23 @@ jobs:
         # Run from repo root so prisma.config.ts (root) resolves apps/api/prisma/schema.prisma
         run: pnpm exec prisma generate
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/muneral_test
+          DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
       - name: Build
         run: pnpm build
       - name: Apply DB migrations
         # Run from repo root — prisma.config.ts at root, schema at apps/api/prisma/schema.prisma
         run: pnpm exec prisma migrate deploy
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/muneral_test
+          DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
       - name: Test semantic aggregate readback against disposable PostgreSQL
         run: node apps/api/scripts/semantic-aggregate-readback.mjs
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/muneral_test
+          DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
       - name: Test
         run: pnpm test
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/muneral_test
-          MUN0020_DB_URL: postgresql://test:test@localhost:5432/muneral_test
+          DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
+          MUN0020_DB_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
 
   network-exposure:
     uses: Arcanada-one/datarim/.github/workflows/network-exposure-lint.yml@57afdfcd6a2d71aa8e0b577de6e43846e93b60dd
@@ -114,7 +120,14 @@ jobs:
   deploy:
     needs: [lint-and-test, secrets-gate, network-exposure, preflight-caller-contract]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: [self-hosted, linux, arcana-prod]
+    # SEC-0063: `arcana-prod-host`, not `arcana-prod`. That label is not
+    # unique -- `arcana-prod-replacement` carries it too and physically
+    # lives on arcana-agents, a DIFFERENT machine, where this service has
+    # no containers and the root deploy broker has no row for it. Landing
+    # there fails inside the deploy at best, and builds a second empty
+    # stack that reports success at worst. Addition, not a swap: the
+    # `arcana-prod` label stays on both runners for other consumers.
+    runs-on: [self-hosted, linux, arcana-prod-host]
     concurrency:
       group: deploy-muneral
       cancel-in-progress: false
