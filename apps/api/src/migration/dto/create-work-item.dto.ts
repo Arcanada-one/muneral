@@ -2,6 +2,7 @@ import { Type } from 'class-transformer';
 import {
   IsDateString,
   IsIn,
+  IsInt,
   IsNotEmpty,
   IsObject,
   IsOptional,
@@ -9,6 +10,7 @@ import {
   IsUUID,
   Matches,
   MaxLength,
+  Min,
   ValidateNested,
 } from 'class-validator';
 import type { TaskPriority } from '@muneral/types';
@@ -126,6 +128,23 @@ export class CreateWorkItemDto {
   @IsNotEmpty()
   @MaxLength(64)
   historicalStatus: string;
+
+  /**
+   * MUN-0043: pin the HistoricalStatusMap revision this item is projected
+   * under.
+   *
+   * Omitted, the server projects with its current revision — the ordinary case
+   * for a fresh import. Given, it must be a revision the running build vendors,
+   * and an unknown one is a typed refusal (`UNKNOWN_STATUS_MAP_REVISION`)
+   * rather than a silent fall back onto the current map. That is what a REPLAY
+   * needs: an occurrence written under revision 2 records revision 2, and
+   * re-sending it with `statusMapRevision: 2` reproduces the projection that
+   * was actually stored instead of quietly re-deciding it under today's rules.
+   */
+  @IsInt()
+  @Min(1)
+  @IsOptional()
+  statusMapRevision?: number;
 
   @IsObject()
   @ValidateNested()

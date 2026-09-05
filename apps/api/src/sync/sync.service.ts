@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { TaskStatus, TaskPriority } from '@muneral/types';
+import { TASK_STATUSES, TaskStatus, TaskPriority } from '@muneral/types';
 
 /**
  * SyncService — bidirectional sync with Datarim tasks.md format.
@@ -26,10 +26,15 @@ export class SyncService {
       orderBy: { createdAt: 'asc' },
     });
 
+    // MUN-0043: `archived` is not active work — the card left the board — and
+    // it is not `done` either, so it belongs in neither of the two existing
+    // sections. It gets its own rather than being dropped: an export that
+    // silently omitted archived cards would lose them on the next import.
     const activeTasks = tasks.filter(
-      (t) => !['done', 'cancelled'].includes(t.status),
+      (t) => !['done', 'cancelled', 'archived'].includes(t.status),
     );
     const doneTasks = tasks.filter((t) => t.status === 'done');
+    const archivedTasks = tasks.filter((t) => t.status === 'archived');
 
     const lastUpdated = new Date().toISOString().split('T')[0];
     const lines: string[] = [
@@ -52,6 +57,17 @@ export class SyncService {
     if (doneTasks.length > 0) {
       lines.push('', '## Completed Tasks');
       for (const task of doneTasks) {
+        lines.push('', `### MUN-${task.id.slice(0, 4).toUpperCase()}: ${task.title}`);
+        lines.push(`- **Status:** ${task.status}`);
+        lines.push(`- **Priority:** ${task.priority}`);
+      }
+    }
+
+    if (archivedTasks.length > 0) {
+      // Deliberately NOT under "Completed Tasks": an archive card says where a
+      // card went, not that its work was finished (DEC-AUP-0014 rule 3).
+      lines.push('', '## Archived Tasks');
+      for (const task of archivedTasks) {
         lines.push('', `### MUN-${task.id.slice(0, 4).toUpperCase()}: ${task.title}`);
         lines.push(`- **Status:** ${task.status}`);
         lines.push(`- **Priority:** ${task.priority}`);
@@ -132,9 +148,7 @@ export class SyncService {
     const lines = markdown.split('\n');
     let current: (typeof blocks)[0] | null = null;
 
-    const VALID_STATUSES: TaskStatus[] = [
-      'todo', 'in_progress', 'review', 'blocked', 'done', 'cancelled',
-    ];
+    const VALID_STATUSES: readonly TaskStatus[] = TASK_STATUSES;
     const VALID_PRIORITIES: TaskPriority[] = [
       'critical', 'high', 'medium', 'low',
     ];

@@ -54,7 +54,13 @@ curl -X POST https://api.muneral.com/api/v1/workspaces/my-ws/agents \
 curl https://api.muneral.com/api/v1/agents/tasks \
   -H "Authorization: Bearer $API_KEY"
 
-# Update task status
+# Read a task the agent is assigned to, and move it along.
+# MUN-0043: an agent key reaches GET /tasks/:id, GET /tasks/project/:id and
+# PATCH /tasks/:id/status, scoped to the tasks that agent is assigned to —
+# 403 for anything else, and the rest of /tasks stays JWT-only.
+curl https://api.muneral.com/api/v1/tasks/$TASK_ID \
+  -H "Authorization: Bearer $API_KEY"
+
 curl -X PATCH https://api.muneral.com/api/v1/tasks/$TASK_ID/status \
   -H "Authorization: Bearer $API_KEY" \
   -d '{"status": "in_progress"}'

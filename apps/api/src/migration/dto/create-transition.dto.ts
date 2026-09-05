@@ -9,6 +9,7 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
+import { TASK_STATUSES } from '@muneral/types';
 import type { TaskStatus } from '@muneral/types';
 
 /** AUP-DAT-003: ONE compare-and-set transition, no Studio and no fleet. */
@@ -19,7 +20,7 @@ export class CreateTransitionDto {
   @Min(0)
   expectedRevision: number;
 
-  @IsIn(['todo', 'in_progress', 'review', 'blocked', 'done', 'cancelled'])
+  @IsIn(TASK_STATUSES)
   toStatus: TaskStatus;
 
   @IsString()

@@ -25,6 +25,7 @@ export const MIGRATION_ERROR_CODES = [
   'PROJECT_NOT_FOUND',
   'RAW_EXCERPT_TOO_LARGE',
   'STALE_REVISION',
+  'UNKNOWN_STATUS_MAP_REVISION',
   'WORK_ITEM_NOT_FOUND',
 ] as const;
 
@@ -137,6 +138,24 @@ export function mappingRevisionStale(
       `against mapping revision ${currentMappingRevision}.`,
     identityId,
     currentMappingRevision,
+  });
+}
+
+/** MUN-0043: the caller pinned a HistoricalStatusMap revision this build does
+ *  not vendor. Refused rather than served under the current revision: the
+ *  revision IS the provenance claim, and answering with a different one would
+ *  file a projection under a rule that never produced it. */
+export function unknownStatusMapRevision(
+  requested: number,
+  supported: readonly number[],
+): BadRequestException {
+  return new BadRequestException({
+    code: 'UNKNOWN_STATUS_MAP_REVISION' satisfies MigrationErrorCode,
+    message:
+      `Status map revision ${requested} is not vendored in this build. ` +
+      `Available revisions: ${supported.join(', ')}.`,
+    requestedRevision: requested,
+    supportedRevisions: [...supported],
   });
 }
 

@@ -179,8 +179,8 @@ describe('Migration import surface — PostgreSQL proofs', () => {
       await service.createWorkItem(importRequest(batchId, { historicalStatus: 'pending' }), AGENT);
 
       const receipt = (await service.commitBatch(batchId)).receipt as Record<string, unknown>;
-      expect(receipt.statusMapRevision).toBe(2);
-      expect(receipt.statusMapRevisions).toEqual([2]);
+      expect(receipt.statusMapRevision).toBe(3);
+      expect(receipt.statusMapRevisions).toEqual([3]);
       expect(receipt.unmappedCount).toBe(0);
       expect(receipt.counts).toEqual({ occurrences: 2, identities: 2, workItems: 2 });
     });
@@ -199,7 +199,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
 
       const receipt = (await service.commitBatch(batchId)).receipt as Record<string, unknown>;
       expect(receipt.unmappedCount).toBe(2);
-      expect(receipt.statusMapRevision).toBe(2);
+      expect(receipt.statusMapRevision).toBe(3);
     });
 
     it('reports the revisions actually stored, not the one this build loaded', async () => {
@@ -227,9 +227,9 @@ describe('Migration import surface — PostgreSQL proofs', () => {
       );
 
       const receipt = (await service.commitBatch(batchId)).receipt as Record<string, unknown>;
-      // 0 = "projected before this column existed", never backfilled to 2.
-      expect(receipt.statusMapRevisions).toEqual([0, 2]);
-      expect(receipt.statusMapRevision).toBe(2);
+      // 0 = "projected before this column existed", never backfilled.
+      expect(receipt.statusMapRevisions).toEqual([0, 3]);
+      expect(receipt.statusMapRevision).toBe(3);
       expect(receipt.unmappedCount).toBe(0);
     });
 
@@ -543,14 +543,18 @@ describe('Migration import surface — PostgreSQL proofs', () => {
       expect(result.body.occurrence).toMatchObject({
         unmapped: true,
         historicalAssertedDone: false,
-        statusMapRevision: 2,
+        statusMapRevision: 3,
       });
     });
 
-    // MUN-0041 (AUP-DAT-006 / I14): the headline case. 1,309 archive cards
-    // would land in `todo` under the shipped six-status logic — a semantic
-    // corruption of the history this map exists to prevent.
-    it('reads an archived import back as done, asserted but not revalidated', async () => {
+    // MUN-0041 (AUP-DAT-006 / I14) then MUN-0043 (DEC-AUP-0014 rule 3): the
+    // headline case, twice over. 1,340 archive cards would land in `todo` under
+    // MUN-0040's six-status logic — a semantic corruption the map removed. They
+    // then landed in `done` under revision 2, which reads as "the work was
+    // finished and checked" — a claim the archive step never made. Revision 3
+    // projects them onto `archived`: terminal, unverified, off the board, with
+    // the source's own completion assertion still recorded beside it.
+    it('reads an archived import back as archived, asserted but never done', async () => {
       const batchId = await openBatch();
       const created = await service.createWorkItem(
         importRequest(batchId, { historicalStatus: 'archived' }),
@@ -559,7 +563,8 @@ describe('Migration import surface — PostgreSQL proofs', () => {
       const legacyId = (created.body.identity as { legacyId: string }).legacyId;
 
       const readback = await service.getWorkItemByLegacy('datarim/root', legacyId);
-      expect((readback.workItem as { status: string }).status).toBe('done');
+      expect((readback.workItem as { status: string }).status).toBe('archived');
+      expect((readback.workItem as { status: string }).status).not.toBe('done');
       const occurrences = readback.occurrences as Array<Record<string, unknown>>;
       expect(occurrences).toHaveLength(1);
       expect(occurrences[0]).toMatchObject({
@@ -567,7 +572,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
         historicalAssertedDone: true,
         currentVerification: 'not_revalidated',
         unmapped: false,
-        statusMapRevision: 2,
+        statusMapRevision: 3,
       });
 
       // ...and the revision is durable in the column, not only in the presenter.
@@ -576,14 +581,51 @@ describe('Migration import surface — PostgreSQL proofs', () => {
         select: { statusMapRevision: true, unmapped: true, historicalStatus: true },
       });
       expect(row).toEqual({
-        statusMapRevision: 2,
+        statusMapRevision: 3,
         unmapped: false,
         historicalStatus: 'archived',
       });
     });
 
+    // MUN-0043: the replay guarantee, end to end. The 2,726 occurrences of the
+    // MUN-0041 import record revision 2; re-importing one under that revision
+    // must reproduce revision 2's answer — `done` — and stamp the row with 2,
+    // not silently re-decide it under the map this build ships.
+    it('replays an occurrence under the revision it was written with', async () => {
+      const batchId = await openBatch();
+      const created = await service.createWorkItem(
+        importRequest(batchId, { historicalStatus: 'archived', statusMapRevision: 2 }),
+        AGENT,
+      );
+
+      expect((created.body.workItem as { status: string }).status).toBe('done');
+      expect(created.body.occurrence).toMatchObject({
+        historicalStatus: 'archived',
+        historicalAssertedDone: true,
+        statusMapRevision: 2,
+      });
+      expect(created.body.statusMapping).toMatchObject({
+        taskStatus: 'done',
+        statusMapRevision: 2,
+      });
+    });
+
+    it('refuses a revision this build does not carry, rather than using its own', async () => {
+      const batchId = await openBatch();
+      await expect(
+        service.createWorkItem(
+          importRequest(batchId, { historicalStatus: 'archived', statusMapRevision: 99 }),
+          AGENT,
+        ),
+      ).rejects.toThrow(BadRequestException);
+
+      // Nothing was written under a revision the build cannot name.
+      const receipt = (await service.commitBatch(batchId)).receipt as Record<string, unknown>;
+      expect(receipt.counts).toEqual({ occurrences: 0, identities: 0, workItems: 0 });
+    });
+
     it.each([
-      ['archived', 'done', true],
+      ['archived', 'archived', true],
       ['done_pending_archive', 'done', true],
       ['completed', 'done', true],
       ['done', 'done', true],
@@ -605,7 +647,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
           historicalAssertedDone: assertedDone,
           currentVerification: 'not_revalidated',
           unmapped: false,
-          statusMapRevision: 2,
+          statusMapRevision: 3,
         });
       },
     );
@@ -1387,6 +1429,13 @@ describe('Migration import surface — PostgreSQL proofs', () => {
           idempotencyKey: `t-${randomUUID()}`,
           basis: 'stale',
         },
+        AGENT,
+      ),
+    );
+    // UNKNOWN_STATUS_MAP_REVISION
+    await collect(() =>
+      service.createWorkItem(
+        importRequest(batchId, { historicalStatus: 'archived', statusMapRevision: 42 }),
         AGENT,
       ),
     );
