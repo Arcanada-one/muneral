@@ -494,10 +494,30 @@ function baselineEvidence(run) {
 }
 
 function currentTools() {
+  const pnpmVersion = spawnSync('pnpm', ['--version'], { encoding: 'utf8' });
   return {
     node: process.version,
     jest: require('jest/package.json').version,
     typescript: ts.version,
+    pnpm: pnpmVersion.status === 0 ? pnpmVersion.stdout.trim() : null,
+  };
+}
+
+/**
+ * F9 (REPORT-PROJ-RULE0): evidence bound to the exact node PATCH that produced
+ * it re-pins the toolchain on every regeneration — green on a dev host, red on
+ * the CI runner's differing patch, for identical source. The toolchain a
+ * mutation record is actually valid FOR is wider than the single point that
+ * produced it: node agrees at major.minor (the patch stream a runtime engine
+ * ships within), pnpm at major (its lockfile/CLI contract). The exact patches
+ * stay in `tools` as provenance; this is the range verification checks.
+ */
+function toolchainCompatibility(tools) {
+  const node = /^v(\d+)\.(\d+)\.\d+/.exec(tools?.node || '');
+  const pnpm = /^(\d+)\./.exec(tools?.pnpm || '');
+  return {
+    nodeMajorMinor: node ? `${node[1]}.${node[2]}` : null,
+    pnpmMajor: pnpm ? Number(pnpm[1]) : null,
   };
 }
 
@@ -665,7 +685,7 @@ function verifyResults(jsonPath, replayOutcomes = true) {
   const binding = buildBinding();
   const { sites } = enumerateCurrentSites();
   const failures = [];
-  if (evidence.formatVersion !== 'assembly-mutation-evidence-v3') failures.push('formatVersion');
+  if (evidence.formatVersion !== 'assembly-mutation-evidence-v4') failures.push('formatVersion');
   if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(evidence.generatedAt || '')) {
     failures.push('generatedAt');
   }
@@ -673,7 +693,30 @@ function verifyResults(jsonPath, replayOutcomes = true) {
   if (JSON.stringify(evidence.invocation) !== JSON.stringify(canonicalInvocation(canonicalEvidencePath))) {
     failures.push('invocation');
   }
-  if (JSON.stringify(evidence.tools) !== JSON.stringify(currentTools())) failures.push('tools');
+  // Exact fingerprints stay pinned for jest/typescript (their outputs are
+  // asserted byte-for-byte elsewhere in this evidence); node/pnpm are checked
+  // as a compatibility RANGE below, not by exact patch — see
+  // toolchainCompatibility().
+  const actualTools = currentTools();
+  if (evidence.tools?.jest !== actualTools.jest || evidence.tools?.typescript !== actualTools.typescript) {
+    failures.push('tools');
+  }
+  const recordedCompat = evidence.toolchainCompatibility;
+  const expectedCompat = toolchainCompatibility(evidence.tools);
+  if (JSON.stringify(recordedCompat) !== JSON.stringify(expectedCompat)) {
+    failures.push('toolchain compatibility record');
+  }
+  const actualCompat = toolchainCompatibility(actualTools);
+  if (
+    !recordedCompat?.nodeMajorMinor || !recordedCompat?.pnpmMajor
+    || recordedCompat.nodeMajorMinor !== actualCompat.nodeMajorMinor
+    || recordedCompat.pnpmMajor !== actualCompat.pnpmMajor
+  ) {
+    console.error(
+      `TOOLCHAIN_MISMATCH recorded=${JSON.stringify(evidence.tools)} actual=${JSON.stringify(actualTools)}`,
+    );
+    failures.push('TOOLCHAIN_MISMATCH');
+  }
   if (evidence.binding?.aggregateSha256 !== binding.aggregateSha256) failures.push('binding aggregate');
   if (JSON.stringify(evidence.binding?.files) !== JSON.stringify(binding.files)) failures.push('binding files');
   if (evidence.siteMapSha256 !== siteMapDigest(sites)) failures.push('site map digest');
@@ -936,11 +979,13 @@ async function main() {
     const restorationFiles = Object.fromEntries(TARGETS.map((target) => [
       path.relative(REPO_ROOT, target), sha256Bytes(fs.readFileSync(target)),
     ]));
+    const generatedTools = currentTools();
     const evidence = {
-      formatVersion: 'assembly-mutation-evidence-v3',
+      formatVersion: 'assembly-mutation-evidence-v4',
       generatedAt: new Date().toISOString(),
       invocation: observedInvocation(jsonPath),
-      tools: currentTools(),
+      tools: generatedTools,
+      toolchainCompatibility: toolchainCompatibility(generatedTools),
       binding,
       supplementalGit: gitSupplement(),
       baseline: baselineEvidence(baseline),
@@ -973,9 +1018,11 @@ module.exports = {
   applyMutant,
   canonicalFailureDetail,
   classify,
+  currentTools,
   enumerateSites,
   gitSupplement,
   recordedOutcomeMatches,
+  toolchainCompatibility,
 };
 
 if (require.main === module) {

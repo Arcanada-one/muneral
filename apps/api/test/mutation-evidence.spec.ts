@@ -7,6 +7,8 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
+import { canonicalJsonV1 } from '../src/execution-authority/canonical-json-v1';
+
 jest.setTimeout(30_000);
 
 const API_ROOT = path.resolve(__dirname, '..');
@@ -42,6 +44,55 @@ describe('Assembly mutation evidence verification', () => {
 
   it('accepts the exact current evidence structure', () => {
     expect(verify(EVIDENCE).status).toBe(0);
+  });
+
+  // F9 (REPORT-PROJ-RULE0): the evidence document itself must still satisfy
+  // the canonical-JSON constraints (no floats, byte budget) after gaining the
+  // toolchain-compatibility fields — that contract does not get relaxed by
+  // this fix, only the exact-node-patch fingerprint check does.
+  it('satisfies the canonical JSON v1 verifier on the running node', () => {
+    expect(() => canonicalJsonV1(original)).not.toThrow();
+  });
+
+  // (a) same major/minor, different patch — still the toolchain the evidence
+  // is valid FOR.
+  it('accepts a node/pnpm record that differs only in patch version', () => {
+    const tampered = structuredClone(original);
+    const [major, minor, patch] = tampered.tools.node.replace(/^v/, '').split('.').map(Number);
+    tampered.tools.node = `v${major}.${minor}.${patch + 1}`;
+    const [pnpmMajor, pnpmMinor, pnpmPatch] = tampered.tools.pnpm.split('.').map(Number);
+    tampered.tools.pnpm = `${pnpmMajor}.${pnpmMinor}.${pnpmPatch + 1}`;
+    const file = path.join(directory, 'same-major-minor-different-patch.json');
+    fs.writeFileSync(file, `${JSON.stringify(tampered)}\n`);
+    expect(verify(file).status).toBe(0);
+  });
+
+  // (b) a different major is outside the recorded compatibility range and
+  // must fail with the typed TOOLCHAIN_MISMATCH reason, naming both
+  // fingerprints.
+  it('rejects a different-major node record as a typed TOOLCHAIN_MISMATCH', () => {
+    const tampered = structuredClone(original);
+    tampered.tools.node = 'v0.0.0';
+    tampered.toolchainCompatibility = { ...tampered.toolchainCompatibility, nodeMajorMinor: '0.0' };
+    const file = path.join(directory, 'different-major.json');
+    fs.writeFileSync(file, `${JSON.stringify(tampered)}\n`);
+    const result = verify(file);
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain('TOOLCHAIN_MISMATCH');
+    expect(result.stderr).toContain('v0.0.0');
+  });
+
+  // (c) tampered evidence still fails — the toolchain range widens only
+  // node/pnpm; jest/typescript stay pinned exact, so a plain tamper of
+  // either is still rejected the same as any other field.
+  it('still rejects tampered evidence unrelated to the toolchain range', () => {
+    const tampered = structuredClone(original);
+    tampered.tools.typescript = '0.0.0';
+    const file = path.join(directory, 'tampered-exact-tool.json');
+    fs.writeFileSync(file, `${JSON.stringify(tampered)}\n`);
+    const result = verify(file);
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain('mutation evidence verification failed');
   });
 
   it('uses a non-self-referential Git snapshot supplement', () => {
