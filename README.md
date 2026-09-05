@@ -42,18 +42,20 @@ Dashboard: http://localhost:3501 · API: http://localhost:3500
 
 ## Agent API Example
 
+Every route below `/health` sits behind the `api/v1` prefix.
+
 ```bash
 # Register agent and get API key
-curl -X POST https://api.muneral.com/workspaces/my-ws/agents \
+curl -X POST https://api.muneral.com/api/v1/workspaces/my-ws/agents \
   -H "Authorization: Bearer $HUMAN_JWT" \
   -d '{"name": "my-agent", "model": "claude-sonnet-4-6", "provider": "anthropic"}'
 
 # Get assigned tasks
-curl https://api.muneral.com/agents/tasks \
+curl https://api.muneral.com/api/v1/agents/tasks \
   -H "Authorization: Bearer $API_KEY"
 
 # Update task status
-curl -X PATCH https://api.muneral.com/tasks/$TASK_ID/status \
+curl -X PATCH https://api.muneral.com/api/v1/tasks/$TASK_ID/status \
   -H "Authorization: Bearer $API_KEY" \
   -d '{"status": "in_progress"}'
 ```
@@ -62,9 +64,28 @@ curl -X PATCH https://api.muneral.com/tasks/$TASK_ID/status \
 
 ```bash
 # Export project to Datarim format
-curl https://api.muneral.com/sync/datarim/$PROJECT_ID \
+curl https://api.muneral.com/api/v1/sync/datarim/$PROJECT_ID \
   -H "Authorization: Bearer $API_KEY"
 ```
+
+### Migration import
+
+For importing historical Datarim task cards, use the **migration import
+surface** — see [`apps/api/docs/migration-import.md`](apps/api/docs/migration-import.md).
+It keeps source occurrence, logical task, task revision and artifact reference
+separable, so an import can be resumed, read back after a lost response, and
+audited afterwards.
+
+```bash
+curl -X POST https://api.muneral.com/api/v1/migration/batches \
+  -H "Authorization: Bearer $API_KEY" -H 'Content-Type: application/json' \
+  -d '{"batchKey":"...","sourceSetEpoch":"...","producer":"...","projectId":"..."}'
+```
+
+`POST /sync/datarim/:projectId/import` is **legacy**. It still works and is not
+going away, but it answers with `{created, updated}` counts and matches tasks by
+title, so it loses identity, provenance and historical time. Prefer the
+migration import surface for anything that has to be audited or resumed.
 
 ## Links
 
