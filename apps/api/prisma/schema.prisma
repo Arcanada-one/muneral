@@ -96,6 +96,7 @@ model Project {
   milestones Milestone[]
   sprints    Sprint[]
   tasks      Task[]
+  migrationBatches MigrationBatch[]
 
   @@map("projects")
 }
@@ -161,6 +162,16 @@ model Task {
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz()
 
+  // MUN-0040 — migration import provenance.
+  // importedAt is when the row entered Muneral; the HISTORICAL task date lives
+  // on SourceOccurrence.historicalAt and is never overwritten by it.
+  importedAt     DateTime? @map("imported_at") @db.Timestamptz()
+  /// MIG-003 write-once bootstrap provenance receipt (DB trigger enforced).
+  bootstrapStamp Json?     @map("bootstrap_stamp")
+  /// Optimistic revision for the migration CAS transition path. Only that path
+  /// bumps it; every pre-existing writer leaves it at 0.
+  revision       Int       @default(0)
+
   // Relations
   project        Project                   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   sprint         Sprint?                   @relation(fields: [sprintId], references: [id], onDelete: SetNull)
@@ -181,6 +192,7 @@ model Task {
   resultNodes    TaskResultNode[]
   resultRefs     TaskCommittedResultRef[]
   solutionLogHeadReceipts SolutionLogHeadReceipt[]
+  legacyIdentities        LegacyIdentity[]
 
   @@index([projectId], name: "idx_tasks_project_id")
   @@index([sprintId], name: "idx_tasks_sprint_id")
@@ -750,4 +762,129 @@ model SolutionLogHeadReceipt {
   @@index([recordedAt])
   @@index([principalId])
   @@map("solution_log_head_receipts")
+}
+
+// ---------------------------------------------------------------------------
+// MUN-0040 — migration import surface (AUP-DAT-002 / AUP-DAT-003)
+// ---------------------------------------------------------------------------
+
+/// One idempotent unit of migration work plus its commit receipt.
+model MigrationBatch {
+  id             String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  batchKey       String    @unique @map("batch_key") @db.VarChar(200)
+  sourceSetEpoch String    @map("source_set_epoch") @db.VarChar(120)
+  producer       String    @db.VarChar(200)
+  projectId      String    @map("project_id") @db.Uuid
+  // status CHECK (status IN ('open','committed','failed')) in migration SQL
+  status         String    @default("open") @db.VarChar(16)
+  requestDigest  String    @map("request_digest") @db.VarChar(64)
+  receipt        Json?
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  committedAt    DateTime? @map("committed_at") @db.Timestamptz()
+
+  // Relations
+  project     Project            @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  occurrences SourceOccurrence[]
+
+  @@index([projectId], name: "idx_migration_batches_project_id")
+  @@index([status], name: "idx_migration_batches_status")
+  @@map("migration_batches")
+}
+
+/// The LOGICAL task behind one (source_namespace, legacy_id) pair.
+/// The unique constraint is AUP-DAT-002's core guarantee: `ARAS-0001` in a
+/// nested tracker and `ARAS-0001` in the root workspace are two identities.
+model LegacyIdentity {
+  id              String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  sourceNamespace String    @map("source_namespace") @db.VarChar(300)
+  legacyId        String    @map("legacy_id") @db.VarChar(200)
+  /// Null until the identity is bound to a Muneral WorkItem.
+  taskId          String?   @map("task_id") @db.Uuid
+  // mapping_kind CHECK (mapping_kind IN ('same','split','merge','candidate_conflict'))
+  mappingKind     String    @default("same") @map("mapping_kind") @db.VarChar(24)
+  /// Optimistic revision; bumped only by an explicit identity decision.
+  mappingRevision Int       @default(0) @map("mapping_revision")
+  decidedBy       String?   @map("decided_by") @db.VarChar(200)
+  decidedAt       DateTime? @map("decided_at") @db.Timestamptz()
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt       DateTime  @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  task         Task?              @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  occurrences  SourceOccurrence[]
+  mappingsFrom IdentityMapping[]  @relation("MappingFrom")
+  mappingsTo   IdentityMapping[]  @relation("MappingTo")
+
+  @@unique([sourceNamespace, legacyId])
+  @@index([legacyId], name: "idx_legacy_identities_legacy_id")
+  @@index([taskId], name: "idx_legacy_identities_task_id")
+  @@map("legacy_identities")
+}
+
+/// Append-only source receipt: one sighting of one identity in one source.
+model SourceOccurrence {
+  id                     String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  legacyIdentityId       String    @map("legacy_identity_id") @db.Uuid
+  batchId                String    @map("batch_id") @db.Uuid
+  sourceRoot             String    @map("source_root") @db.VarChar(500)
+  sourceLocator          String    @map("source_locator") @db.VarChar(1000)
+  /// Stable key for an anonymous record; must not be a bare line number.
+  sourceKey              String    @map("source_key") @db.VarChar(300)
+  contentDigest          String    @map("content_digest") @db.VarChar(64)
+  capturedAt             DateTime  @map("captured_at") @db.Timestamptz()
+  /// The raw status verbatim from the source, never rewritten.
+  historicalStatus       String    @map("historical_status") @db.VarChar(64)
+  historicalAssertedDone Boolean   @default(false) @map("historical_asserted_done")
+  // current_verification CHECK IN ('not_revalidated','revalidated_done','revalidated_not_done')
+  currentVerification    String    @default("not_revalidated") @map("current_verification") @db.VarChar(32)
+  /// The historical time the source states — never the import time.
+  historicalAt           DateTime? @map("historical_at") @db.Timestamptz()
+  rawExcerpt             String?   @map("raw_excerpt") @db.Text
+  recordedAt             DateTime  @default(now()) @map("recorded_at") @db.Timestamptz()
+
+  // Relations
+  identity LegacyIdentity @relation(fields: [legacyIdentityId], references: [id], onDelete: Restrict)
+  batch    MigrationBatch @relation(fields: [batchId], references: [id], onDelete: Restrict)
+
+  @@unique([legacyIdentityId, sourceLocator, contentDigest])
+  @@index([legacyIdentityId], name: "idx_source_occurrences_identity")
+  @@index([batchId], name: "idx_source_occurrences_batch")
+  @@index([recordedAt], name: "idx_source_occurrences_recorded_at")
+  @@map("source_occurrences")
+}
+
+/// Append-only reverse mapping for same/split/merge/candidate_conflict.
+model IdentityMapping {
+  id              String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  fromIdentityId  String   @map("from_identity_id") @db.Uuid
+  toIdentityId    String   @map("to_identity_id") @db.Uuid
+  // kind CHECK (kind IN ('same','split','merge','candidate_conflict'))
+  kind            String   @db.VarChar(24)
+  mappingRevision Int      @map("mapping_revision")
+  basis           String   @db.Text
+  decidedBy       String   @map("decided_by") @db.VarChar(200)
+  decidedAt       DateTime @default(now()) @map("decided_at") @db.Timestamptz()
+
+  // Relations
+  fromIdentity LegacyIdentity @relation("MappingFrom", fields: [fromIdentityId], references: [id], onDelete: Restrict)
+  toIdentity   LegacyIdentity @relation("MappingTo", fields: [toIdentityId], references: [id], onDelete: Restrict)
+
+  @@unique([fromIdentityId, toIdentityId, mappingRevision])
+  @@index([fromIdentityId], name: "idx_identity_mappings_from")
+  @@index([toIdentityId], name: "idx_identity_mappings_to")
+  @@map("identity_mappings")
+}
+
+/// Replay store for keyed import/transition requests. Holds only committed
+/// responses — the authoritative work item stays in `tasks`.
+model MigrationIdempotencyRecord {
+  // scope CHECK (scope IN ('work_item','transition'))
+  scope          String   @db.VarChar(32)
+  idempotencyKey String   @map("idempotency_key") @db.VarChar(200)
+  requestDigest  String   @map("request_digest") @db.VarChar(64)
+  response       Json
+  recordedAt     DateTime @default(now()) @map("recorded_at") @db.Timestamptz()
+
+  @@id([scope, idempotencyKey])
+  @@map("migration_idempotency_records")
 }

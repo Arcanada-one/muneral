@@ -306,8 +306,18 @@ describe('Committed-result migration', () => {
     });
 
     it('uses Restrict for every relation on both models', () => {
-      const model = schema.slice(schema.indexOf('model TaskResultNode'));
-      const relations = model.match(/@relation\([^)]*\)/g) ?? [];
+      // Scoped to the two models this suite owns. The slice used to run to the
+      // end of the file, which silently covered every model appended later and
+      // asserted `onDelete` on back-relation sides that cannot carry one.
+      const start = schema.indexOf('model TaskResultNode');
+      const end = schema.indexOf(
+        '@@map("task_committed_result_refs")',
+        schema.indexOf('model TaskCommittedResultRef'),
+      );
+      expect(start).toBeGreaterThan(-1);
+      expect(end).toBeGreaterThan(start);
+      const models = schema.slice(start, end);
+      const relations = models.match(/@relation\([^)]*\)/g) ?? [];
       expect(relations.length).toBeGreaterThanOrEqual(6);
       for (const relation of relations) {
         expect(relation).toContain('onDelete: Restrict');

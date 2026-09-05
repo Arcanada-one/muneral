@@ -3,6 +3,14 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Actor } from '@muneral/types';
 
+/**
+ * Either the root Prisma client or an interactive-transaction client. Callers
+ * that must write the audit entry atomically with the mutation it describes
+ * pass their `tx` here — an entry committed separately from its mutation can
+ * go missing on a crash, leaving a state change with no record of who made it.
+ */
+export type ActivityWriter = Pick<PrismaService, 'activityLog'>;
+
 export interface LogOptions {
   workspaceId: string;
   taskId?: string;
@@ -19,8 +27,8 @@ export interface LogOptions {
 export class ActivityService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async log(opts: LogOptions) {
-    return this.prisma.activityLog.create({
+  async log(opts: LogOptions, client: ActivityWriter = this.prisma) {
+    return client.activityLog.create({
       data: {
         workspaceId: opts.workspaceId,
         taskId: opts.taskId ?? null,
