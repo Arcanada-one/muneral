@@ -22,19 +22,38 @@ import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
 import { AddDependencyDto } from './dto/add-dependency.dto';
 import { CreateChecklistItemDto } from './dto/create-checklist-item.dto';
 import { AddCommentDto } from './dto/add-comment.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtOrApiKeyGuard } from '../auth/guards/jwt-or-api-key.guard';
+import {
+  AgentScopeContext,
+  AgentTaskScopeGuard,
+} from '../auth/guards/agent-task-scope.guard';
+import { AgentScope } from '../auth/agent-scope.decorator';
 import { ActorInterceptor } from '../common/interceptors/actor.interceptor';
 import { Actor } from '@muneral/types';
 import { FieldChangesService } from './field-state/field-changes.service';
 
-type AuthRequest = Request & { actor: Actor };
+type AuthRequest = Request & { actor: Actor; agentScope?: AgentScopeContext };
 
 /**
  * Tasks CRUD with status state machine, checklists, dependencies, comments.
  * Field-change tracking endpoints are in FieldChangesController (API-key auth).
+ *
+ * MUN-0043 — authentication here used to be JWT-only, so an agent holding a
+ * perfectly valid `mun_sk_` key was answered 401 on every route, including
+ * reading the task it had just been assigned and moving it along. That pushed
+ * automated executors onto a human's 15-minute access token, which is both a
+ * worse credential to hand an unattended process and one that expires under it.
+ *
+ * The guard pair below is an ALLOWLIST, not a widening: `JwtOrApiKeyGuard`
+ * accepts either credential, and `AgentTaskScopeGuard` then refuses an API key
+ * on every route that is not explicitly marked `@AgentScope(...)`, and on every
+ * marked route whose task the key's agent is not assigned to. Routes with no
+ * marker — create, delete, checklists, dependencies, comments — stay exactly as
+ * JWT-only as they were; the only visible difference is that a valid key is now
+ * told 403 instead of 401.
  */
 @Controller('tasks')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtOrApiKeyGuard, AgentTaskScopeGuard)
 @UseInterceptors(ActorInterceptor)
 export class TasksController {
   constructor(
@@ -47,7 +66,9 @@ export class TasksController {
     return this.tasksService.create(req.actor, dto);
   }
 
+  /** Readable by the assigned agent's API key (MUN-0043) or by a JWT. */
   @Get(':taskId')
+  @AgentScope('task')
   async findOne(
     @Param('taskId') taskId: string,
     @Headers('if-none-match') ifNoneMatch: string | undefined,
@@ -70,12 +91,27 @@ export class TasksController {
     return task;
   }
 
+  /**
+   * A JWT sees the project's tasks. An agent key sees the tasks in that project
+   * it is assigned to — the narrowing happens in the service, from the scope the
+   * guard resolved, so a handler that forgets to pass it cannot accidentally
+   * return the whole board.
+   */
   @Get('project/:projectId')
-  findByProject(@Param('projectId') projectId: string) {
-    return this.tasksService.findByProject(projectId);
+  @AgentScope('project')
+  findByProject(
+    @Param('projectId') projectId: string,
+    @Req() req: AuthRequest,
+  ) {
+    return this.tasksService.findByProject(projectId, req.agentScope?.agentId);
   }
 
+  /** Transitionable by the assigned agent's API key (MUN-0043) or by a JWT.
+   *  The state machine, the activity log and the actor recorded on it are
+   *  unchanged — `ActorInterceptor` already resolves an API key to an `agent`
+   *  actor, so the move is attributed to the agent, not to a human. */
   @Patch(':taskId/status')
+  @AgentScope('task')
   updateStatus(
     @Param('taskId') taskId: string,
     @Req() req: AuthRequest,

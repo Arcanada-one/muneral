@@ -40,12 +40,23 @@ Two consequences worth stating plainly:
 ### Status projection
 
 The projection from a source's own status onto a Muneral status is a **versioned
-artefact**, not an implicit default (AUP-DAT-006, review X-08). The artefact is
-`HistoricalStatusMap/v1`, vendored byte-identically from the program contract at
-`apps/api/src/migration/status-map/status-map-v1.json` and validated at boot: a
-map with a foreign schema, a non-integer revision, a projection target outside
-Muneral's six `TaskStatus` values, or a completion assertion on a card that is
-not `done` is a **startup failure**, never a silent fallback.
+artefact**, not an implicit default (AUP-DAT-006, review X-08). The artefacts are
+`HistoricalStatusMap/v1` files, vendored byte-identically from the program
+contract as `apps/api/src/migration/status-map/status-map-v1-rev<N>.json`, and
+**every vendored revision** is validated at boot: a map with a foreign schema, a
+non-integer revision, a projection target outside Muneral's `TaskStatus` values,
+a completion assertion on a card that projects onto neither `done` nor
+`archived`, or two artefacts claiming one revision is a **startup failure**,
+never a silent fallback.
+
+Revisions are **kept, not replaced** (MUN-0043). The build ships revisions 2 and
+3; the current revision is the highest one vendored, derived rather than written
+down. `POST /migration/work-items` takes an optional `statusMapRevision` to
+project under an older revision — that is how an occurrence written under
+revision 2 is replayed to the value it actually recorded. A revision this build
+does not carry is a typed `UNKNOWN_STATUS_MAP_REVISION` (400) listing the ones it
+does; it never falls back onto the current map, because that would file a
+projection under a rule that did not produce it.
 
 Three facts are kept apart, and all three are readable:
 
@@ -58,7 +69,7 @@ Three facts are kept apart, and all three are readable:
 An old `done` is an assertion about the past, not a verdict about now. **Which**
 raw values assert completion is the contract's decision, not the code's.
 
-#### The map at revision 2
+#### The map at revision 3 (current)
 
 Lookup is on the raw value **normalised** — NFC, then trim, then a
 locale-independent casefold. `Done ` and `  DONE  ` both find `done`; the raw
@@ -82,7 +93,7 @@ string stored on the occurrence is still `Done ` and `  DONE  `.
 | `paused` | `blocked` | `false` | paused by decision; the raw value carries the distinction |
 | `deferred` | `blocked` | `false` | deferred by decision; see `paused` |
 | `done` | `done` | **`true`** | |
-| `archived` | `done` | **`true`** | Datarim archive card exists; completion asserted by the archive step |
+| `archived` | `archived` | **`true`** | the archive card says the card LEFT THE BOARD — terminal and unverified. Revision 2 projected this onto `done`; revision 3 does not (DEC-AUP-0014 rule 3). The source's completion assertion is still recorded, in the column beside it |
 | `done_pending_archive` | `done` | **`true`** | done, archive card not yet written |
 | `completed` | `done` | **`true`** | synonym of `done` in older rows |
 | `cancelled` | `cancelled` | `false` | |
@@ -92,6 +103,20 @@ string stored on the occurrence is still `Done ` and `  DONE  `.
 
 `current_verification` is `not_revalidated` for **every** row, including the four
 that assert completion. This path never re-verifies anything (I14).
+
+`archived` is where the two facts come apart, and that is the point.
+`historical_asserted_done` records what the SOURCE claimed when it filed the
+archive card; `tasks.status` records what Muneral is willing to show. Revision 2
+collapsed them, so 1,340 filing decisions read as finished, verified work.
+Revision 3 keeps the assertion and refuses the projection.
+
+#### Revision 2 (retained for replay)
+
+Revision 2 is identical to revision 3 except for one row — `archived` → `done`
+— and is still vendored and still loadable. The MUN-0041 import wrote 2,726
+occurrences under it, every one stamped `status_map_revision = 2`. They are
+**not backfilled**: revision 3 did not produce them. Ask for revision 2
+explicitly to reproduce what they recorded.
 
 #### UNMAPPED
 
@@ -114,9 +139,11 @@ The contract carries its own negative controls: `frobnicated` → UNMAPPED;
 #### Revision provenance
 
 Every occurrence records `status_map_revision` — the revision that produced its
-projection. Rows imported before this column existed carry `0` and are
-**deliberately not backfilled**: revision 2 did not produce them, and saying it
-did would be the falsification the column exists to prevent. The commit receipt
+projection. Rows imported before this column existed carry `0`, rows from the
+MUN-0041 import carry `2`, and rows this build writes carry `3` unless the caller
+pinned an older revision. None of them is **ever backfilled**: a revision that
+did not produce a row may not be recorded against it, and saying otherwise would
+be the falsification the column exists to prevent. The commit receipt
 reports `statusMapRevision`, the full `statusMapRevisions` set observed in the
 batch, and `unmappedCount`, so an orchestrator can prove "0 unmapped" from the
 receipt alone.
@@ -423,10 +450,22 @@ the status-map provenance (MUN-0041):
 - `source_occurrences.unmapped BOOLEAN NOT NULL DEFAULT false`, with a `CHECK`
   that an unmapped occurrence can never assert completion.
 
-Both migrations are additive only — nothing is dropped, renamed or re-typed, and
-the six `TaskStatus` values are untouched — and both rollbacks are deliberately
-forward-only, because dropping these tables or columns would destroy the
-provenance they exist to keep.
+A third additive migration, `20260905210000_add_archived_task_status`, widens
+`tasks_status_check` from six values to seven (MUN-0043):
+
+- `archived` becomes a storable task status, so an import that projects an
+  archive card onto `archived` writes a row instead of failing on the CHECK.
+- No row is touched. The new constraint accepts a strict superset of the old
+  one, so rows imported under revision 2 keep the `done` they were projected
+  onto and keep `status_map_revision = 2`.
+- Its rollback **refuses** while any row holds `archived`, rather than folding
+  those rows back into `done` — that rewrite is the totalisation MUN-0043
+  removed, and a rollback script is not the place to perform it.
+
+All three migrations are additive only — nothing is dropped, renamed or
+re-typed — and the first two rollbacks are deliberately forward-only, because
+dropping those tables or columns would destroy the provenance they exist to
+keep.
 
 ---
 

@@ -1,0 +1,145 @@
+{
+ "schema": "HistoricalStatusMap/v1",
+ "task": "MUN-0043 (DEC-AUP-0014 rule 3): `archived` is a status of its own, not a synonym for `done`",
+ "revision": 3,
+ "issued_at_utc": "2026-09-05T12:55:00Z",
+ "muneral_statuses": [
+  "todo",
+  "in_progress",
+  "review",
+  "blocked",
+  "done",
+  "cancelled",
+  "archived"
+ ],
+ "observed_raw_statuses_source": "research/Arcanada/work/registry.json (1,419 cards, 5,325 occurrences) + census 2026-09-05",
+ "rules": [
+  "The occurrence ALWAYS keeps the raw status verbatim (historical_status); the Work Item status is a projection.",
+  "Any raw value equal to `done`/`archived`/`done_pending_archive`/`completed` sets historical_asserted_done=true and current_verification=not_revalidated — never an accepted result (I14). The assertion is a fact about the SOURCE and is recorded independently of which status the value projects onto.",
+  "`archived` projects onto `archived`, not onto `done` (DEC-AUP-0014 rule 3). An archive card records that a card LEFT THE BOARD; it is terminal and unverified, and reading it as completion is the silent totalisation I4 forbids. archived therefore carries asserted_done=true (the source did assert completion when it archived) while projecting onto a status that makes no completion claim of its own.",
+  "asserted_done may only be set where the projection is `done` or `archived` — the two statuses that can carry a historical completion assertion. On any other projection it is a contradiction the occurrence would carry forever.",
+  "A raw value absent from this table is UNMAPPED: producer0 (MUN-0040) projects it to `todo` with `unmapped=true` and keeps the raw string; DAT-006 requires that the bulk importer treat UNMAPPED as a typed refusal in tests until the value is added here in a new revision. Silent defaulting is the failure this table exists to prevent.",
+  "Revisions are kept, not replaced. Every occurrence records the revision that produced its projection (source_occurrences.status_map_revision); a replay of a batch imported under revision 2 must be able to ask for revision 2 and get byte-identical projections. Rows written under an earlier revision are NEVER backfilled to a later one."
+ ],
+ "map": {
+  "todo": {
+   "muneral": "todo",
+   "asserted_done": false
+  },
+  "pending": {
+   "muneral": "todo",
+   "asserted_done": false,
+   "note": "Datarim backlog default"
+  },
+  "open": {
+   "muneral": "todo",
+   "asserted_done": false
+  },
+  "planned": {
+   "muneral": "todo",
+   "asserted_done": false
+  },
+  "in_progress": {
+   "muneral": "in_progress",
+   "asserted_done": false
+  },
+  "prd_done": {
+   "muneral": "in_progress",
+   "asserted_done": false,
+   "note": "PRD accepted, implementation not started — a stage marker, not completion"
+  },
+  "review": {
+   "muneral": "review",
+   "asserted_done": false
+  },
+  "blocked": {
+   "muneral": "blocked",
+   "asserted_done": false
+  },
+  "paused": {
+   "muneral": "blocked",
+   "asserted_done": false,
+   "note": "paused by decision; blocked is the closest Muneral state, the raw value carries the distinction"
+  },
+  "deferred": {
+   "muneral": "blocked",
+   "asserted_done": false,
+   "note": "deferred by decision; see paused"
+  },
+  "done": {
+   "muneral": "done",
+   "asserted_done": true
+  },
+  "archived": {
+   "muneral": "archived",
+   "asserted_done": true,
+   "note": "Datarim archive card exists: the card left the board. Terminal and unverified — DEC-AUP-0014 rule 3 forbids projecting it onto `done`. Revision 2 projected it onto `done`; that projection is superseded, and the revision-2 artefact is kept so those occurrences can still be replayed exactly."
+  },
+  "done_pending_archive": {
+   "muneral": "done",
+   "asserted_done": true,
+   "note": "done but archive card not yet written"
+  },
+  "cancelled": {
+   "muneral": "cancelled",
+   "asserted_done": false
+  },
+  "withdrawn": {
+   "muneral": "cancelled",
+   "asserted_done": false
+  },
+  "superseded": {
+   "muneral": "cancelled",
+   "asserted_done": false,
+   "note": "superseded by another task — an identity decision (merge/split) is REQUIRED before import closes the card (AUP-DAT-002)"
+  },
+  "absorbed": {
+   "muneral": "cancelled",
+   "asserted_done": false,
+   "note": "absorbed into another task — identity decision required, see superseded"
+  },
+  "active": {
+   "muneral": "in_progress",
+   "asserted_done": false,
+   "note": "observed once; treated as in progress"
+  },
+  "backlog": {
+   "muneral": "todo",
+   "asserted_done": false
+  },
+  "not_started": {
+   "muneral": "todo",
+   "asserted_done": false
+  },
+  "completed": {
+   "muneral": "done",
+   "asserted_done": true,
+   "note": "synonym of done in older rows"
+  },
+  "absent": {
+   "muneral": "todo",
+   "asserted_done": false,
+   "note": "no status field in the source (e.g. a task-description without frontmatter status) — projected to todo, flagged, never asserted done"
+  },
+  "unknown": {
+   "muneral": "todo",
+   "asserted_done": false,
+   "note": "literal `unknown` in a source"
+  }
+ },
+ "negative_controls": [
+  {
+   "raw": "frobnicated",
+   "expect": "UNMAPPED → typed refusal in the bulk importer; producer0 → todo + unmapped=true + raw kept"
+  },
+  {
+   "raw": "Done ",
+   "expect": "normalized (trim, casefold) to `done`; raw string kept with its original spelling"
+  },
+  {
+   "raw": "archived",
+   "expect": "projects onto `archived` at revision 3 and onto `done` at revision 2 — the same input under two revisions, which is what keeping revision 2 is for"
+  }
+ ],
+ "revision_note": "rev 3 (2026-09-05, MUN-0043): `archived` becomes a Muneral status of its own and `archived` no longer projects onto `done` (DEC-AUP-0014 rule 3). No other entry changes. Revision 2 is retained verbatim as status-map-v1-rev2.json for replay; occurrences already written under revision 2 are not backfilled."
+}

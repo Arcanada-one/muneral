@@ -53,10 +53,18 @@ import {
   projectNotFound,
   rawExcerptTooLarge,
   staleRevision,
+  unknownStatusMapRevision,
   workItemNotFound,
 } from './migration.errors';
-import { mapHistoricalStatus, NOT_REVALIDATED } from './migration.status';
-import { STATUS_MAP_REVISION } from './status-map/status-map';
+import {
+  mapHistoricalStatus,
+  NOT_REVALIDATED,
+  UnknownStatusMapRevisionError,
+} from './migration.status';
+import {
+  STATUS_MAP_REVISION,
+  SUPPORTED_STATUS_MAP_REVISIONS,
+} from './status-map/status-map';
 
 /** PostgreSQL unique-violation code as surfaced by Prisma. */
 const UNIQUE_VIOLATION = 'P2002';
@@ -292,7 +300,19 @@ export class MigrationService {
     if (dto.bootstrapStamp) assertBoundedBootstrapStamp(dto.bootstrapStamp);
     assertBoundedExcerpt(dto.occurrence.rawExcerpt);
 
-    const mapped = mapHistoricalStatus(dto.historicalStatus);
+    // MUN-0043: an explicit `statusMapRevision` is a replay asking for the
+    // artefact that produced the row the first time. An unknown one is refused
+    // as a typed 400 — never served under the current revision, which would
+    // record a projection under a rule that did not make it.
+    let mapped;
+    try {
+      mapped = mapHistoricalStatus(dto.historicalStatus, dto.statusMapRevision);
+    } catch (error) {
+      if (error instanceof UnknownStatusMapRevisionError) {
+        throw unknownStatusMapRevision(error.revision, SUPPORTED_STATUS_MAP_REVISIONS);
+      }
+      throw error;
+    }
 
     const outcome = await this.prisma.$transaction(async (tx) => {
       // 0. Claim the idempotency key FIRST, inside the same transaction as the
@@ -862,6 +882,15 @@ function workItemRequestShape(dto: CreateWorkItemDto): JsonValue {
       rawExcerpt: dto.occurrence.rawExcerpt ?? null,
     },
     bootstrapStamp: (dto.bootstrapStamp ?? null) as JsonValue,
+    // MUN-0043: present in the digest ONLY when the caller pinned a revision.
+    // Writing `statusMapRevision: null` for the ordinary case would change the
+    // digest of every request shape that existed before this field did, and the
+    // already-imported batches would answer IDEMPOTENCY_KEY_CONFLICT to their
+    // own replay. A pinned revision is a materially different request and does
+    // get its own digest.
+    ...(dto.statusMapRevision === undefined
+      ? {}
+      : { statusMapRevision: dto.statusMapRevision }),
   };
 }
 

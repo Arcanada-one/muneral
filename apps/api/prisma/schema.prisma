@@ -150,7 +150,8 @@ model Task {
   parentId      String?  @map("parent_id") @db.Uuid
   title         String   @db.VarChar
   description   String?  @db.Text
-  // status CHECK (status IN ('todo','in_progress','review','blocked','done','cancelled')) in migration
+  // status CHECK (status IN ('todo','in_progress','review','blocked','done','cancelled','archived')) in migration
+  // MUN-0043: `archived` is terminal and unverified (the card left the board), never a synonym for `done`.
   status        String   @default("todo") @db.VarChar
   // priority CHECK (priority IN ('critical','high','medium','low')) in migration
   priority      String   @default("medium") @db.VarChar

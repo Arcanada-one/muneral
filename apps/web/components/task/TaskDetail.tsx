@@ -7,19 +7,29 @@ import { TaskDependencies } from './TaskDependencies';
 import { AuditLog } from './AuditLog';
 import { TaskGitRefs } from './TaskGitRefs';
 import type { Task } from '@/lib/api/tasks';
+import type { TaskStatus } from '@muneral/types';
 import { cn } from '@/lib/utils';
 
 interface TaskDetailProps {
   task: Task;
 }
 
-const statusConfig = {
-  todo: { label: 'To Do', variant: 'secondary' as const },
-  in_progress: { label: 'In Progress', variant: 'info' as const },
-  review: { label: 'Review', variant: 'warning' as const },
-  blocked: { label: 'Blocked', variant: 'destructive' as const },
-  done: { label: 'Done', variant: 'success' as const },
-  cancelled: { label: 'Cancelled', variant: 'outline' as const },
+// MUN-0043: typed Record<TaskStatus, ...> so a status added to the union fails the
+// build at this literal instead of at the indexing site below. Before rev 3 this was
+// an untyped object literal and adding `archived` broke `statusConfig[task.status]`.
+const statusConfig: Record<
+  TaskStatus,
+  { label: string; variant: 'secondary' | 'info' | 'warning' | 'destructive' | 'success' | 'outline' }
+> = {
+  todo: { label: 'To Do', variant: 'secondary' },
+  in_progress: { label: 'In Progress', variant: 'info' },
+  review: { label: 'Review', variant: 'warning' },
+  blocked: { label: 'Blocked', variant: 'destructive' },
+  done: { label: 'Done', variant: 'success' },
+  cancelled: { label: 'Cancelled', variant: 'outline' },
+  // archived is terminal and distinct from done (status map rev 3): it is rendered,
+  // never dropped, and never styled as a success.
+  archived: { label: 'Archived', variant: 'outline' },
 };
 
 const priorityConfig = {

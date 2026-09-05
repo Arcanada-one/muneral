@@ -22,7 +22,14 @@ jest.setTimeout(600_000);
 const API_ROOT = path.resolve(__dirname, '..');
 const MAPPER = path.join(API_ROOT, 'src', 'migration', 'migration.status.ts');
 const LOADER = path.join(API_ROOT, 'src', 'migration', 'status-map', 'status-map.ts');
-const TARGET_SUITE = 'test/migration.status.spec.ts';
+const ARTEFACT_REV3 = path.join(
+  API_ROOT, 'src', 'migration', 'status-map', 'status-map-v1-rev3.json',
+);
+// MUN-0043: two suites, because the behaviour under test now spans two
+// revisions — `migration.status.spec.ts` pins revision 2 (the replay guarantee)
+// and `status-map-rev3.spec.ts` pins revision 3 (archived is not done). A
+// mutant that only one of them can see is still killed.
+const TARGET_SUITES = ['test/migration.status.spec.ts', 'test/status-map-rev3.spec.ts'];
 
 interface Mutant {
   /** What the mutation represents — the way the map could stop being applied. */
@@ -37,14 +44,14 @@ const MUTANTS: readonly Mutant[] = [
     // The brief's named mutant: the lookup is gone, everything is unmapped.
     name: 'the map lookup is dropped entirely',
     file: MAPPER,
-    from: 'const entry = STATUS_MAP.map[normalizeRawStatus(raw)];',
-    to: 'const entry = undefined as undefined | (typeof STATUS_MAP.map)[string];',
+    from: 'const entry = artefact.map[normalizeRawStatus(raw)];',
+    to: 'const entry = undefined as undefined | (typeof artefact.map)[string];',
   },
   {
     // The regression this task removes: MUN-0040's six hard-coded statuses.
     name: 'the map lookup reverts to the hard-coded six statuses',
     file: MAPPER,
-    from: 'const entry = STATUS_MAP.map[normalizeRawStatus(raw)];',
+    from: 'const entry = artefact.map[normalizeRawStatus(raw)];',
     to:
       "const entry = (['todo', 'in_progress', 'review', 'blocked', 'done', 'cancelled'] as string[])\n" +
       "    .includes(normalizeRawStatus(raw))\n" +
@@ -68,8 +75,8 @@ const MUTANTS: readonly Mutant[] = [
   {
     name: 'normalisation is skipped before the lookup',
     file: MAPPER,
-    from: 'const entry = STATUS_MAP.map[normalizeRawStatus(raw)];',
-    to: 'const entry = STATUS_MAP.map[raw];',
+    from: 'const entry = artefact.map[normalizeRawStatus(raw)];',
+    to: 'const entry = artefact.map[raw];',
   },
   {
     name: 'nothing is ever flagged unmapped',
@@ -80,7 +87,7 @@ const MUTANTS: readonly Mutant[] = [
   {
     name: 'the recorded revision is not the one that was applied',
     file: MAPPER,
-    from: 'statusMapRevision: STATUS_MAP_REVISION,',
+    from: 'statusMapRevision: artefact.revision,',
     to: 'statusMapRevision: 0,',
   },
   {
@@ -104,8 +111,44 @@ const MUTANTS: readonly Mutant[] = [
   {
     name: 'the loader accepts a completion assertion on a card that is not done',
     file: LOADER,
-    from: "    if (entry.asserted_done && target !== 'done') {",
+    from:
+      '    if (entry.asserted_done && !ASSERTION_BEARING_STATUSES.includes(target as TaskStatus)) {',
     to: '    if (false) {',
+  },
+  {
+    // MUN-0043's headline claim. If `archived` projects onto `done` again, the
+    // 1,340 archive cards are once more asserted complete by a status nobody
+    // re-verified, which is the totalisation DEC-AUP-0014 rule 3 removed.
+    name: 'the revision 3 artefact projects archived back onto done',
+    file: ARTEFACT_REV3,
+    from: '"muneral": "archived"',
+    to: '"muneral": "done"',
+  },
+  {
+    // The replay guarantee. If a pinned revision is ignored, an occurrence
+    // written under revision 2 replays under today's map and silently changes
+    // the answer it originally recorded.
+    name: 'a pinned revision is ignored and the current map is used anyway',
+    file: MAPPER,
+    from: '    revision === undefined ? STATUS_MAP : statusMapForRevision(revision);',
+    to: '    STATUS_MAP;',
+  },
+  {
+    // The current revision must be derived from what is vendored, not written
+    // down: a hard-coded 2 would leave a build that ships revision 3 still
+    // projecting with revision 2 and stamping every occurrence with it.
+    name: 'the current revision is hard-coded instead of derived from the vendored set',
+    file: LOADER,
+    from: 'export const STATUS_MAP_REVISION: number = Math.max(...STATUS_MAP_REVISIONS.keys());',
+    to: 'export const STATUS_MAP_REVISION: number = 2;',
+  },
+  {
+    // Any status may bear a completion assertion — the invariant that keeps an
+    // occurrence from claiming `blocked` work was finished.
+    name: 'the loader lets any status bear a completion assertion',
+    file: LOADER,
+    from: "const ASSERTION_BEARING_STATUSES: readonly TaskStatus[] = ['done', 'archived'];",
+    to: 'const ASSERTION_BEARING_STATUSES: readonly TaskStatus[] = TASK_STATUSES;',
   },
   {
     name: 'the loader accepts a key its own normalisation could never match',
@@ -122,7 +165,7 @@ function runTargetSuite(): { status: number | null; output: string } {
       path.join(API_ROOT, 'node_modules', 'jest', 'bin', 'jest.js'),
       '--runInBand',
       '--ci',
-      TARGET_SUITE,
+      ...TARGET_SUITES,
     ],
     { cwd: API_ROOT, encoding: 'utf8', env: { ...process.env, CI: 'true' } },
   );
@@ -163,7 +206,9 @@ describe('status projection mutation battery', () => {
     // had nothing to do with.
     const baseline = runTargetSuite();
     if (baseline.status !== 0) {
-      throw new Error(`baseline ${TARGET_SUITE} does not pass:\n${baseline.output.slice(-4000)}`);
+      throw new Error(
+        `baseline ${TARGET_SUITES.join(' + ')} does not pass:\n${baseline.output.slice(-4000)}`,
+      );
     }
   });
 
@@ -183,7 +228,7 @@ describe('status projection mutation battery', () => {
     // kills; surviving means the projection is not actually pinned down.
     if (mutated.status === 0) {
       throw new Error(
-        `mutant SURVIVED (${mutant.name}) — ${TARGET_SUITE} passed against it:\n` +
+        `mutant SURVIVED (${mutant.name}) — ${TARGET_SUITES.join(' + ')} passed against it:\n` +
           `${mutant.from}\n  ->\n${mutant.to}`,
       );
     }

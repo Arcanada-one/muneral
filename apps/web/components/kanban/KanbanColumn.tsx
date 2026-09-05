@@ -21,6 +21,11 @@ const COLUMN_CONFIG: Record<TaskStatus, { label: string; color: string; bg: stri
   blocked: { label: 'Blocked', color: 'text-red-600', bg: 'bg-red-50' },
   done: { label: 'Done', color: 'text-green-600', bg: 'bg-green-50' },
   cancelled: { label: 'Cancelled', color: 'text-gray-400', bg: 'bg-gray-50' },
+  // MUN-0043: archived cards have left the board, so `archived` is absent from
+  // KANBAN_STATUSES and no column is rendered for it. The entry exists because
+  // the config is total over TaskStatus — a card that reaches this component
+  // by any other route still gets a label instead of an undefined config.
+  archived: { label: 'Archived', color: 'text-gray-400', bg: 'bg-gray-50' },
 };
 
 export function KanbanColumn({ status, tasks, wsSlug, projSlug }: KanbanColumnProps) {

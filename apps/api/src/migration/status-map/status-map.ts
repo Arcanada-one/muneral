@@ -1,28 +1,41 @@
 // MUN-0041 (AUP-DAT-006, review X-08): the raw-status → Muneral-status mapping
 // is a VERSIONED ARTEFACT, not an implicit default buried in a switch.
 //
-// `status-map-v1.json` in this directory is a byte-identical vendored copy of
-// the program's contract file
-// (`arcanada-universal-program/contracts/status-mapping/status-map-v1.json`).
-// It is vendored rather than fetched so that the projection an import performs
-// is pinned to the deployed artefact and can be reproduced from the image
-// alone; `revision` is the provenance token recorded on every occurrence.
+// `status-map-v1-rev<N>.json` in this directory are byte-identical vendored
+// copies of the program's contract files
+// (`arcanada-universal-program/contracts/status-mapping/status-map-v1-rev<N>.json`).
+// They are vendored rather than fetched so that the projection an import
+// performs is pinned to the deployed artefact and can be reproduced from the
+// image alone; `revision` is the provenance token recorded on every occurrence.
 //
-// This module validates the artefact's SHAPE at boot. A malformed or
-// unrecognised map is a startup failure, not a silent fallback: the whole point
-// of DAT-006 is that no import may quietly default a status it does not
-// understand, and a loader that shrugged and carried on would reintroduce
-// exactly that.
+// MUN-0043 (DEC-AUP-0014 rule 3): revisions are KEPT, not replaced. Revision 3
+// stops projecting `archived` onto `done` — an archive card records that a card
+// LEFT THE BOARD, which is terminal and unverified, and reading it as
+// completion is the silent totalisation the program's I4 forbids. Revision 2
+// stays loaded verbatim, because every occurrence already written carries the
+// revision that produced it and a replay of those rows must be able to ask for
+// revision 2 and get the same projection it got the first time. Backfilling
+// them to revision 3 would be a claim about the past that revision 3 did not
+// make.
+//
+// This module validates the SHAPE of every vendored artefact at boot. A
+// malformed or unrecognised map is a startup failure, not a silent fallback:
+// the whole point of DAT-006 is that no import may quietly default a status it
+// does not understand, and a loader that shrugged and carried on would
+// reintroduce exactly that.
 
 import type { TaskStatus } from '@muneral/types';
-import rawStatusMap from './status-map-v1.json';
+import rawStatusMapRev2 from './status-map-v1-rev2.json';
+import rawStatusMapRev3 from './status-map-v1-rev3.json';
 
 /** The schema this loader is written against. A different schema is refused. */
 export const STATUS_MAP_SCHEMA = 'HistoricalStatusMap/v1';
 
-/** The six statuses Muneral itself knows. The map may not project onto
- *  anything outside this set — the projection targets an existing vocabulary,
- *  it never extends one. */
+/** The statuses Muneral itself knows. The map may not project onto anything
+ *  outside this set — the projection targets an existing vocabulary, it never
+ *  extends one. `archived` joined the vocabulary in MUN-0043; it is declared
+ *  here because the type in `@muneral/types` declares it, not the other way
+ *  round. */
 const TASK_STATUSES: readonly TaskStatus[] = [
   'todo',
   'in_progress',
@@ -30,7 +43,17 @@ const TASK_STATUSES: readonly TaskStatus[] = [
   'blocked',
   'done',
   'cancelled',
+  'archived',
 ];
+
+/** The only projections a historical completion ASSERTION may accompany.
+ *
+ *  `done` says the work was completed; `archived` says the card left the board
+ *  after the source asserted it was finished. Both are assertions about the
+ *  past that this path never re-verifies (I14). Every other status describes
+ *  work that is not claimed finished at all, so `asserted_done` there is a
+ *  contradiction the occurrence would carry forever. */
+const ASSERTION_BEARING_STATUSES: readonly TaskStatus[] = ['done', 'archived'];
 
 export interface StatusMapEntry {
   /** The Muneral status this raw value projects onto. */
@@ -129,10 +152,11 @@ export function loadStatusMap(candidate: unknown): HistoricalStatusMapArtefact {
         `key ${JSON.stringify(raw)} is not in normalised form and could never be matched`,
       );
     }
-    // `asserted_done` may only be set where the projection is `done`: asserting
-    // completion for a card that lands anywhere else is a contradiction the
-    // occurrence would carry forever.
-    if (entry.asserted_done && target !== 'done') {
+    // `asserted_done` may only be set where the projection can bear the
+    // assertion (`done` or, since revision 3, `archived`). Asserting completion
+    // for a card that lands anywhere else is a contradiction the occurrence
+    // would carry forever.
+    if (entry.asserted_done && !ASSERTION_BEARING_STATUSES.includes(target as TaskStatus)) {
       throw new StatusMapError(
         `entry ${JSON.stringify(raw)} asserts done while projecting onto ${JSON.stringify(target)}`,
       );
@@ -167,8 +191,60 @@ export function normalizeRawStatus(raw: string): string {
   return raw.normalize('NFC').trim().toLowerCase();
 }
 
-/** The vendored artefact, validated at module load — i.e. at boot. */
-export const STATUS_MAP: HistoricalStatusMapArtefact = loadStatusMap(rawStatusMap);
+/**
+ * Every vendored revision, validated at module load — i.e. at boot. A build
+ * that ships a broken artefact for ANY revision it claims to support fails to
+ * start, rather than discovering the breakage the first time something asks to
+ * replay that revision.
+ *
+ * Exported, like `loadStatusMap`, so the tests can hand it a deliberately
+ * broken SET — two artefacts claiming one revision — and prove the refusal,
+ * instead of only asserting that the good set loads.
+ */
+export function buildStatusMapRegistry(
+  artefacts: readonly unknown[],
+): ReadonlyMap<number, HistoricalStatusMapArtefact> {
+  const registry = new Map<number, HistoricalStatusMapArtefact>();
+  for (const candidate of artefacts) {
+    const artefact = loadStatusMap(candidate);
+    const existing = registry.get(artefact.revision);
+    if (existing) {
+      throw new StatusMapError(
+        `two vendored artefacts both declare revision ${artefact.revision}`,
+      );
+    }
+    registry.set(artefact.revision, artefact);
+  }
+  return registry;
+}
 
-/** The revision recorded as provenance on every occurrence this build writes. */
-export const STATUS_MAP_REVISION: number = STATUS_MAP.revision;
+export const STATUS_MAP_REVISIONS: ReadonlyMap<number, HistoricalStatusMapArtefact> =
+  buildStatusMapRegistry([rawStatusMapRev2, rawStatusMapRev3]);
+
+/** The revision this build applies when the caller does not name one. The
+ *  highest vendored revision, computed rather than written down, so adding an
+ *  artefact cannot leave the current revision pointing at the previous one. */
+export const STATUS_MAP_REVISION: number = Math.max(...STATUS_MAP_REVISIONS.keys());
+
+/** The artefact for the current revision. */
+export const STATUS_MAP: HistoricalStatusMapArtefact = STATUS_MAP_REVISIONS.get(
+  STATUS_MAP_REVISION,
+) as HistoricalStatusMapArtefact;
+
+/** Every revision this build can project with, ascending. */
+export const SUPPORTED_STATUS_MAP_REVISIONS: readonly number[] = [
+  ...STATUS_MAP_REVISIONS.keys(),
+].sort((a, b) => a - b);
+
+/**
+ * The artefact for one revision, or `undefined` when this build does not carry
+ * it. `undefined` is deliberate: a replay that asks for a revision the image
+ * does not hold must be a typed refusal at the call site, never a silent
+ * fallback onto the current revision — that would relabel a revision-2 row as
+ * revision 3 and lose the only record of how it was actually projected.
+ */
+export function statusMapForRevision(
+  revision: number,
+): HistoricalStatusMapArtefact | undefined {
+  return STATUS_MAP_REVISIONS.get(revision);
+}
