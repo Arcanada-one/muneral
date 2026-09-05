@@ -170,6 +170,69 @@ describe('Migration import surface — PostgreSQL proofs', () => {
       await expect(service.getBatch(batchId)).resolves.toEqual(first);
     });
 
+    // MUN-0041 (AUP-DAT-006): the receipt is what an orchestrator quotes to
+    // prove "0 unmapped". It has to name the map revision that produced the
+    // projections and count the values the map did not carry.
+    it('reports the status map revision and an unmapped count of zero', async () => {
+      const batchId = await openBatch();
+      await service.createWorkItem(importRequest(batchId, { historicalStatus: 'archived' }), AGENT);
+      await service.createWorkItem(importRequest(batchId, { historicalStatus: 'pending' }), AGENT);
+
+      const receipt = (await service.commitBatch(batchId)).receipt as Record<string, unknown>;
+      expect(receipt.statusMapRevision).toBe(2);
+      expect(receipt.statusMapRevisions).toEqual([2]);
+      expect(receipt.unmappedCount).toBe(0);
+      expect(receipt.counts).toEqual({ occurrences: 2, identities: 2, workItems: 2 });
+    });
+
+    it('counts every unmapped occurrence, and only those', async () => {
+      const batchId = await openBatch();
+      await service.createWorkItem(importRequest(batchId, { historicalStatus: 'done' }), AGENT);
+      await service.createWorkItem(
+        importRequest(batchId, { historicalStatus: 'frobnicated' }),
+        AGENT,
+      );
+      await service.createWorkItem(
+        importRequest(batchId, { historicalStatus: 'Wontfix-2019' }),
+        AGENT,
+      );
+
+      const receipt = (await service.commitBatch(batchId)).receipt as Record<string, unknown>;
+      expect(receipt.unmappedCount).toBe(2);
+      expect(receipt.statusMapRevision).toBe(2);
+    });
+
+    it('reports the revisions actually stored, not the one this build loaded', async () => {
+      // A batch that spans a deploy carries receipts written by two different
+      // builds. The receipt must show both rather than describing every row
+      // with the revision that happens to be loaded now. The pre-MUN-0041 row
+      // is written the only way it can be — a direct INSERT that omits the
+      // column, exactly as the previous build's statement did; occurrences are
+      // append-only, so there is no UPDATE path to fake one with.
+      const batchId = await openBatch();
+      const created = await service.createWorkItem(
+        importRequest(batchId, { historicalStatus: 'done' }),
+        AGENT,
+      );
+      const identityId = (created.body.identity as { id: string }).id;
+      await prisma.$executeRawUnsafe(
+        `INSERT INTO public.source_occurrences (
+           legacy_identity_id, batch_id, source_root, source_locator, source_key,
+           content_digest, captured_at, historical_status, historical_asserted_done
+         ) VALUES ($1::uuid, $2::uuid, 'datarim/root', 'tasks.md#legacy-row',
+                   'heading:legacy-row', $3, now(), 'done', true)`,
+        identityId,
+        batchId,
+        digestOf('legacy-row'),
+      );
+
+      const receipt = (await service.commitBatch(batchId)).receipt as Record<string, unknown>;
+      // 0 = "projected before this column existed", never backfilled to 2.
+      expect(receipt.statusMapRevisions).toEqual([0, 2]);
+      expect(receipt.statusMapRevision).toBe(2);
+      expect(receipt.unmappedCount).toBe(0);
+    });
+
     it('digests the occurrence pairs in a stable order, not insertion order', async () => {
       // Two batches record the same receipts in opposite order. The digest is
       // over sorted (source_locator, content_digest) pairs, so they agree.
@@ -475,6 +538,131 @@ describe('Migration import surface — PostgreSQL proofs', () => {
         'wontfix',
       );
       expect(result.body.statusMapping).toMatchObject({ unmapped: true });
+      // producer0 flags; it never refuses a single item. DAT-006 makes UNMAPPED
+      // a typed refusal for the BULK importer, which is a different component.
+      expect(result.body.occurrence).toMatchObject({
+        unmapped: true,
+        historicalAssertedDone: false,
+        statusMapRevision: 2,
+      });
+    });
+
+    // MUN-0041 (AUP-DAT-006 / I14): the headline case. 1,309 archive cards
+    // would land in `todo` under the shipped six-status logic — a semantic
+    // corruption of the history this map exists to prevent.
+    it('reads an archived import back as done, asserted but not revalidated', async () => {
+      const batchId = await openBatch();
+      const created = await service.createWorkItem(
+        importRequest(batchId, { historicalStatus: 'archived' }),
+        AGENT,
+      );
+      const legacyId = (created.body.identity as { legacyId: string }).legacyId;
+
+      const readback = await service.getWorkItemByLegacy('datarim/root', legacyId);
+      expect((readback.workItem as { status: string }).status).toBe('done');
+      const occurrences = readback.occurrences as Array<Record<string, unknown>>;
+      expect(occurrences).toHaveLength(1);
+      expect(occurrences[0]).toMatchObject({
+        historicalStatus: 'archived',
+        historicalAssertedDone: true,
+        currentVerification: 'not_revalidated',
+        unmapped: false,
+        statusMapRevision: 2,
+      });
+
+      // ...and the revision is durable in the column, not only in the presenter.
+      const row = await prisma.sourceOccurrence.findUnique({
+        where: { id: occurrences[0].id as string },
+        select: { statusMapRevision: true, unmapped: true, historicalStatus: true },
+      });
+      expect(row).toEqual({
+        statusMapRevision: 2,
+        unmapped: false,
+        historicalStatus: 'archived',
+      });
+    });
+
+    it.each([
+      ['archived', 'done', true],
+      ['done_pending_archive', 'done', true],
+      ['completed', 'done', true],
+      ['done', 'done', true],
+      ['pending', 'todo', false],
+      ['prd_done', 'in_progress', false],
+      ['paused', 'blocked', false],
+      ['superseded', 'cancelled', false],
+    ])(
+      'projects a raw %s onto %s end to end, with the map revision recorded',
+      async (raw, projected, assertedDone) => {
+        const batchId = await openBatch();
+        const result = await service.createWorkItem(
+          importRequest(batchId, { historicalStatus: raw }),
+          AGENT,
+        );
+        expect((result.body.workItem as { status: string }).status).toBe(projected);
+        expect(result.body.occurrence).toMatchObject({
+          historicalStatus: raw,
+          historicalAssertedDone: assertedDone,
+          currentVerification: 'not_revalidated',
+          unmapped: false,
+          statusMapRevision: 2,
+        });
+      },
+    );
+
+    it('stores the source spelling, never the normalised one', async () => {
+      const batchId = await openBatch();
+      const result = await service.createWorkItem(
+        importRequest(batchId, { historicalStatus: 'Done ' }),
+        AGENT,
+      );
+      expect((result.body.workItem as { status: string }).status).toBe('done');
+      expect((result.body.occurrence as { historicalStatus: string }).historicalStatus).toBe(
+        'Done ',
+      );
+      expect(result.body.occurrence).toMatchObject({
+        historicalAssertedDone: true,
+        unmapped: false,
+      });
+    });
+
+    it('refuses at the database to call an unmapped occurrence asserted done', async () => {
+      // The service can never produce this pair, but the service is not the
+      // only possible writer. The CHECK is what makes it impossible — and it
+      // has to hold at INSERT, because occurrences are append-only and there
+      // is no UPDATE that could introduce the contradiction later.
+      const batchId = await openBatch();
+      const created = await service.createWorkItem(
+        importRequest(batchId, { historicalStatus: 'frobnicated' }),
+        AGENT,
+      );
+      const identityId = (created.body.identity as { id: string }).id;
+
+      await expect(
+        prisma.$executeRawUnsafe(
+          `INSERT INTO public.source_occurrences (
+             legacy_identity_id, batch_id, source_root, source_locator, source_key,
+             content_digest, captured_at, historical_status, historical_asserted_done,
+             status_map_revision, unmapped
+           ) VALUES ($1::uuid, $2::uuid, 'datarim/root', 'tasks.md#contradiction',
+                     'heading:contradiction', $3, now(), 'frobnicated', true, 2, true)`,
+          identityId,
+          batchId,
+          digestOf('contradiction'),
+        ),
+      ).rejects.toThrow(/source_occurrences_unmapped_not_asserted_done_check/);
+    });
+
+    it('keeps a source receipt append-only once the revision is stamped on it', async () => {
+      const batchId = await openBatch();
+      const created = await service.createWorkItem(
+        importRequest(batchId, { historicalStatus: 'archived' }),
+        AGENT,
+      );
+      const id = (created.body.occurrence as { id: string }).id;
+      await expect(
+        prisma.sourceOccurrence.update({ where: { id }, data: { statusMapRevision: 99 } }),
+      ).rejects.toThrow(/append-only/);
     });
 
     it('keeps the historical date off the import date', async () => {

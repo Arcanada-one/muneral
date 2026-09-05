@@ -837,6 +837,12 @@ model SourceOccurrence {
   historicalAssertedDone Boolean   @default(false) @map("historical_asserted_done")
   // current_verification CHECK IN ('not_revalidated','revalidated_done','revalidated_not_done')
   currentVerification    String    @default("not_revalidated") @map("current_verification") @db.VarChar(32)
+  /// MUN-0041: revision of the HistoricalStatusMap that produced the
+  /// projection. 0 = written before that map existed.
+  statusMapRevision      Int       @default(0) @map("status_map_revision")
+  /// MUN-0041: the normalised raw status was absent from the map at that
+  /// revision — projected to `todo`, flagged, never rewritten.
+  unmapped               Boolean   @default(false)
   /// The historical time the source states — never the import time.
   historicalAt           DateTime? @map("historical_at") @db.Timestamptz()
   rawExcerpt             String?   @map("raw_excerpt") @db.Text

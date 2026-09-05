@@ -134,3 +134,63 @@ describe('migration import surface migration', () => {
     expect(rollback).not.toMatch(/\b(DROP|DELETE|TRUNCATE)\b/i);
   });
 });
+
+// ---------------------------------------------------------------------------
+// MUN-0041 — status-map provenance
+// ---------------------------------------------------------------------------
+
+const rev2Dir = 'prisma/migrations/20260905190000_add_status_map_provenance';
+const rev2 = readFileSync(join(apiRoot, rev2Dir, 'migration.sql'), 'utf8');
+const rev2Statements = rev2
+  .split('\n')
+  .filter((line) => !line.trim().startsWith('--'))
+  .join('\n');
+const rev2Rollback = readFileSync(join(apiRoot, rev2Dir, 'rollback.sql'), 'utf8');
+
+describe('status-map provenance migration', () => {
+  it('adds both provenance columns with defaults that keep legacy rows truthful', () => {
+    expect(rev2).toContain('ADD COLUMN status_map_revision INTEGER NOT NULL DEFAULT 0');
+    expect(rev2).toContain('ADD COLUMN unmapped BOOLEAN NOT NULL DEFAULT false');
+  });
+
+  it('does not backfill existing rows to the current revision', () => {
+    // Claiming revision 2 for a row that revision 2 never touched is exactly
+    // the falsification this column exists to prevent.
+    expect(rev2Statements).not.toMatch(/\bUPDATE\s+public\./i);
+    expect(rev2Statements).not.toMatch(/DEFAULT\s+2\b/);
+  });
+
+  it('forbids an unmapped occurrence from asserting completion', () => {
+    expect(rev2).toContain('source_occurrences_unmapped_not_asserted_done_check');
+    expect(rev2).toContain('CHECK (NOT (unmapped AND historical_asserted_done))');
+  });
+
+  it('bounds the revision to a non-negative integer', () => {
+    expect(rev2).toContain('source_occurrences_status_map_revision_check');
+    expect(rev2).toContain('CHECK (status_map_revision >= 0)');
+  });
+
+  it('is additive only — nothing is dropped, renamed or re-typed', () => {
+    expect(rev2Statements).not.toMatch(/\bDROP\s+(TABLE|COLUMN|CONSTRAINT|INDEX)\b/i);
+    expect(rev2Statements).not.toMatch(/\bALTER\s+COLUMN\b/i);
+    expect(rev2Statements).not.toMatch(/\bTRUNCATE\s+(TABLE\s+)?public\./i);
+    expect(rev2Statements).not.toMatch(/\bRENAME\b/i);
+    expect(rev2Statements).not.toMatch(/\bDELETE\s+FROM\b/i);
+  });
+
+  it('leaves the six TaskStatus values alone', () => {
+    // The projection targets Muneral's vocabulary; it never extends it.
+    expect(rev2Statements).not.toMatch(/task_status|tasks_status_check/i);
+  });
+
+  it('maps both columns in Prisma', () => {
+    expect(schema).toContain('statusMapRevision      Int       @default(0) @map("status_map_revision")');
+    expect(schema).toContain('unmapped               Boolean   @default(false)');
+  });
+
+  it('refuses rollback without destructive SQL', () => {
+    expect(rev2Rollback).toContain('MUN-0041 status-map provenance is forward-only');
+    expect(rev2Rollback).toContain('RAISE EXCEPTION');
+    expect(rev2Rollback).not.toMatch(/\b(DROP|DELETE|TRUNCATE)\b/i);
+  });
+});

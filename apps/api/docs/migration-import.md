@@ -37,19 +37,89 @@ Two consequences worth stating plainly:
   entered Muneral; `source_occurrences.historical_at` is the date the source
   itself stated. Neither overwrites the other.
 
-### Historical status
+### Status projection
 
-An old `done` is an assertion about the past, not a verdict about now:
+The projection from a source's own status onto a Muneral status is a **versioned
+artefact**, not an implicit default (AUP-DAT-006, review X-08). The artefact is
+`HistoricalStatusMap/v1`, vendored byte-identically from the program contract at
+`apps/api/src/migration/status-map/status-map-v1.json` and validated at boot: a
+map with a foreign schema, a non-integer revision, a projection target outside
+Muneral's six `TaskStatus` values, or a completion assertion on a card that is
+not `done` is a **startup failure**, never a silent fallback.
 
-| Source status | `tasks.status` | `historical_asserted_done` | `current_verification` |
+Three facts are kept apart, and all three are readable:
+
+| fact | where it lives |
+|---|---|
+| what the source said | `source_occurrences.historical_status` — verbatim, never rewritten |
+| what Muneral shows | `tasks.status` — the projection |
+| what produced the projection | `source_occurrences.status_map_revision` |
+
+An old `done` is an assertion about the past, not a verdict about now. **Which**
+raw values assert completion is the contract's decision, not the code's.
+
+#### The map at revision 2
+
+Lookup is on the raw value **normalised** — NFC, then trim, then a
+locale-independent casefold. `Done ` and `  DONE  ` both find `done`; the raw
+string stored on the occurrence is still `Done ` and `  DONE  `.
+
+| raw status | `tasks.status` | `historical_asserted_done` | note |
 |---|---|---|---|
-| `done` | `done` | `true` | `not_revalidated` |
-| any other known status | the same status | `false` | `not_revalidated` |
-| anything unrecognised | `todo` | `false` | `not_revalidated` |
+| `todo` | `todo` | `false` | |
+| `pending` | `todo` | `false` | Datarim backlog default |
+| `open` | `todo` | `false` | |
+| `planned` | `todo` | `false` | |
+| `backlog` | `todo` | `false` | |
+| `not_started` | `todo` | `false` | |
+| `absent` | `todo` | `false` | the source carries no status field — a parser marker, not a source value |
+| `unknown` | `todo` | `false` | literal `unknown` in a source |
+| `in_progress` | `in_progress` | `false` | |
+| `prd_done` | `in_progress` | `false` | PRD accepted, implementation not started — a stage marker, not completion |
+| `active` | `in_progress` | `false` | observed once |
+| `review` | `review` | `false` | |
+| `blocked` | `blocked` | `false` | |
+| `paused` | `blocked` | `false` | paused by decision; the raw value carries the distinction |
+| `deferred` | `blocked` | `false` | deferred by decision; see `paused` |
+| `done` | `done` | **`true`** | |
+| `archived` | `done` | **`true`** | Datarim archive card exists; completion asserted by the archive step |
+| `done_pending_archive` | `done` | **`true`** | done, archive card not yet written |
+| `completed` | `done` | **`true`** | synonym of `done` in older rows |
+| `cancelled` | `cancelled` | `false` | |
+| `withdrawn` | `cancelled` | `false` | |
+| `superseded` | `cancelled` | `false` | an identity decision (merge/split) is required before import closes the card (AUP-DAT-002) |
+| `absorbed` | `cancelled` | `false` | absorbed into another task — identity decision required, see `superseded` |
 
-An unrecognised status is **never** invented into something plausible — the raw
-string survives verbatim on the occurrence, and the response reports
-`statusMapping.unmapped: true`.
+`current_verification` is `not_revalidated` for **every** row, including the four
+that assert completion. This path never re-verifies anything (I14).
+
+#### UNMAPPED
+
+A raw value whose normalised form is absent from the map is **UNMAPPED**. Two
+components treat it differently, on purpose:
+
+- **producer0** (this surface) projects it to `todo`, sets
+  `source_occurrences.unmapped = true`, records the map revision that failed to
+  recognise it, and keeps the raw string verbatim. It **never rejects a single
+  item** — a refusal here would lose the card, and the card is the evidence.
+  A `CHECK` makes it impossible for an unmapped occurrence to assert completion.
+- **A BULK importer** must treat UNMAPPED as a **typed refusal** (DAT-006) and
+  stop, until the value is added to the map in a new revision. Silent defaulting
+  is the failure the map exists to prevent, and a bulk run is precisely where it
+  would go unnoticed.
+
+The contract carries its own negative controls: `frobnicated` → UNMAPPED;
+`Done ` → normalises to `done` with the raw spelling kept.
+
+#### Revision provenance
+
+Every occurrence records `status_map_revision` — the revision that produced its
+projection. Rows imported before this column existed carry `0` and are
+**deliberately not backfilled**: revision 2 did not produce them, and saying it
+did would be the falsification the column exists to prevent. The commit receipt
+reports `statusMapRevision`, the full `statusMapRevisions` set observed in the
+batch, and `unmappedCount`, so an orchestrator can prove "0 unmapped" from the
+receipt alone.
 
 ### What this surface deliberately cannot do
 
@@ -108,9 +178,18 @@ Closes the batch and stores a receipt:
   "sourceSetEpoch": "…",
   "producer": "…",
   "counts": { "occurrences": 2, "identities": 2, "workItems": 2 },
+  "statusMapRevision": 2,
+  "statusMapRevisions": [2],
+  "unmappedCount": 0,
   "occurrenceDigest": "…sha256 hex…"
 }
 ```
+
+`statusMapRevision` / `statusMapRevisions` / `unmappedCount` report what is
+stored on this batch's receipts, not what this process happens to have loaded: a
+batch that spans a deploy shows every revision it actually contains, and
+`statusMapRevision` is the highest of them. `unmappedCount` is the number the
+map did not recognise — the number a bulk importer must see as `0`.
 
 `occurrenceDigest` is the SHA-256 of the canonical JSON of the batch's
 `(source_locator, content_digest)` pairs **sorted**, so two importers that
@@ -149,7 +228,10 @@ Behaviour:
 
 - Creates or reuses the `LegacyIdentity` for `(sourceNamespace, legacyId)`.
 - Creates the Work Item **once** and sets `imported_at`.
-- Records the `SourceOccurrence`.
+- Records the `SourceOccurrence`, stamped with `status_map_revision` and
+  `unmapped` — see [Status projection](#status-projection). The response carries
+  `statusMapping: { historicalStatus, taskStatus, unmapped,
+  historicalAssertedDone, statusMapRevision }`.
 - **Concurrency:** N parallel requests for one identity yield **one** identity,
   **one** task and **N** occurrences. The serialization point is a
   `SELECT … FOR UPDATE` on the identity row inside the transaction.
@@ -199,6 +281,11 @@ Full readback — identity, work item, current `revision`, `bootstrapStamp`, and
 the occurrences oldest-first. **This is the answer to a lost response:** create,
 lose the reply, read back, and you get the same thing. `404 WORK_ITEM_NOT_FOUND`
 when absent. Both path segments may be percent-encoded.
+
+Every occurrence in the response carries `historicalStatus` (the source's own
+string), `historicalAssertedDone`, `currentVerification`, `statusMapRevision`
+and `unmapped` — so the projection can be audited from the readback alone,
+without consulting the map that produced it.
 
 ### `GET /migration/work-items/search?legacyId=ARAS-0001`
 
@@ -327,9 +414,19 @@ One additive migration, `20260905120000_add_migration_import_surface`:
   DEFAULT 0`, plus a trigger making `bootstrap_stamp` write-once and a `CHECK`
   bounding it to 16 KiB.
 
-The migration is additive only — nothing is dropped, renamed or re-typed — and
-the rollback is deliberately forward-only, because dropping these tables would
-destroy the provenance they exist to keep.
+A second additive migration, `20260905190000_add_status_map_provenance`, adds
+the status-map provenance (MUN-0041):
+
+- `source_occurrences.status_map_revision INTEGER NOT NULL DEFAULT 0` — the map
+  revision that produced the projection. `0` means "written before this column
+  existed"; existing rows are not backfilled.
+- `source_occurrences.unmapped BOOLEAN NOT NULL DEFAULT false`, with a `CHECK`
+  that an unmapped occurrence can never assert completion.
+
+Both migrations are additive only — nothing is dropped, renamed or re-typed, and
+the six `TaskStatus` values are untouched — and both rollbacks are deliberately
+forward-only, because dropping these tables or columns would destroy the
+provenance they exist to keep.
 
 ---
 
