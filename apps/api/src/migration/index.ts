@@ -3,5 +3,14 @@ export { MigrationModule } from './migration.module';
 export { MigrationService } from './migration.service';
 export { mapHistoricalStatus, NOT_REVALIDATED } from './migration.status';
 export type { HistoricalStatusMapping } from './migration.status';
+export {
+  STATUS_MAP,
+  STATUS_MAP_REVISION,
+  STATUS_MAP_SCHEMA,
+  StatusMapError,
+  loadStatusMap,
+  normalizeRawStatus,
+} from './status-map/status-map';
+export type { HistoricalStatusMapArtefact, StatusMapEntry } from './status-map/status-map';
 export { MIGRATION_ERROR_CODES } from './migration.errors';
 export type { MigrationErrorCode } from './migration.errors';

@@ -56,6 +56,7 @@ import {
   workItemNotFound,
 } from './migration.errors';
 import { mapHistoricalStatus, NOT_REVALIDATED } from './migration.status';
+import { STATUS_MAP_REVISION } from './status-map/status-map';
 
 /** PostgreSQL unique-violation code as surfaced by Prisma. */
 const UNIQUE_VIOLATION = 'P2002';
@@ -207,6 +208,8 @@ export class MigrationService {
           sourceLocator: true,
           contentDigest: true,
           legacyIdentityId: true,
+          statusMapRevision: true,
+          unmapped: true,
           identity: { select: { taskId: true } },
         },
       });
@@ -214,6 +217,19 @@ export class MigrationService {
       const pairs = occurrences
         .map((o) => [o.sourceLocator, o.contentDigest] as [string, string])
         .sort((a, b) => (a[0] === b[0] ? compare(a[1], b[1]) : compare(a[0], b[0])));
+
+      // MUN-0041: the receipt is what an orchestrator quotes to prove
+      // "0 unmapped". It reports the revisions actually STORED on the receipts
+      // in this batch, not the revision this process happens to have loaded —
+      // a batch that spans a deploy would otherwise be described by the wrong
+      // artefact. `statusMapRevision` is the single revision when the batch is
+      // homogeneous, and the highest observed when it is not; the full sorted
+      // set is always listed beside it so a mixed batch is visible rather than
+      // summarised away.
+      const revisions = [...new Set(occurrences.map((o) => o.statusMapRevision))].sort(
+        (a, b) => a - b,
+      );
+      const unmappedCount = occurrences.filter((o) => o.unmapped).length;
 
       const receipt = {
         batchKey: batch.batchKey,
@@ -226,6 +242,11 @@ export class MigrationService {
             occurrences.map((o) => o.identity.taskId).filter((id): id is string => id !== null),
           ).size,
         },
+        // An empty batch has no stored revision to report; the loaded one is
+        // the truthful answer to "which map would this build have applied".
+        statusMapRevision: revisions.length > 0 ? revisions[revisions.length - 1] : STATUS_MAP_REVISION,
+        statusMapRevisions: revisions,
+        unmappedCount,
         occurrenceDigest: jsonDigest(pairs as unknown as JsonValue),
       };
 
@@ -370,6 +391,8 @@ export class MigrationService {
         historicalStatus: mapped.historicalStatus,
         historicalAssertedDone: mapped.historicalAssertedDone,
         currentVerification: NOT_REVALIDATED,
+        statusMapRevision: mapped.statusMapRevision,
+        unmapped: mapped.unmapped,
         historicalAt: dto.occurrence.historicalAt
           ? new Date(dto.occurrence.historicalAt)
           : null,
@@ -390,6 +413,8 @@ export class MigrationService {
           historicalStatus: mapped.historicalStatus,
           taskStatus: mapped.taskStatus,
           unmapped: mapped.unmapped,
+          historicalAssertedDone: mapped.historicalAssertedDone,
+          statusMapRevision: mapped.statusMapRevision,
         },
       };
 
@@ -735,6 +760,8 @@ export class MigrationService {
       historicalStatus: string;
       historicalAssertedDone: boolean;
       currentVerification: string;
+      statusMapRevision: number;
+      unmapped: boolean;
       historicalAt: Date | null;
       rawExcerpt: string | null;
     },
@@ -743,12 +770,14 @@ export class MigrationService {
       INSERT INTO public.source_occurrences (
         legacy_identity_id, batch_id, source_root, source_locator, source_key,
         content_digest, captured_at, historical_status, historical_asserted_done,
-        current_verification, historical_at, raw_excerpt
+        current_verification, status_map_revision, unmapped, historical_at,
+        raw_excerpt
       ) VALUES (
         ${data.legacyIdentityId}::uuid, ${data.batchId}::uuid, ${data.sourceRoot},
         ${data.sourceLocator}, ${data.sourceKey}, ${data.contentDigest},
         ${data.capturedAt}, ${data.historicalStatus}, ${data.historicalAssertedDone},
-        ${data.currentVerification}, ${data.historicalAt}, ${data.rawExcerpt}
+        ${data.currentVerification}, ${data.statusMapRevision}, ${data.unmapped},
+        ${data.historicalAt}, ${data.rawExcerpt}
       )
       ON CONFLICT (legacy_identity_id, source_locator, content_digest) DO NOTHING
       RETURNING id
@@ -904,6 +933,8 @@ type OccurrenceRow = {
   historicalStatus: string;
   historicalAssertedDone: boolean;
   currentVerification: string;
+  statusMapRevision: number;
+  unmapped: boolean;
   historicalAt: Date | null;
   rawExcerpt: string | null;
   recordedAt: Date;
@@ -922,6 +953,10 @@ function presentOccurrence(occurrence: OccurrenceRow): Record<string, unknown> {
     historicalStatus: occurrence.historicalStatus,
     historicalAssertedDone: occurrence.historicalAssertedDone,
     currentVerification: occurrence.currentVerification,
+    // MUN-0041: which versioned map produced the projection, and whether it
+    // had a row for this raw value at all.
+    statusMapRevision: occurrence.statusMapRevision,
+    unmapped: occurrence.unmapped,
     historicalAt: occurrence.historicalAt ? occurrence.historicalAt.toISOString() : null,
     rawExcerpt: occurrence.rawExcerpt,
     recordedAt: occurrence.recordedAt.toISOString(),
