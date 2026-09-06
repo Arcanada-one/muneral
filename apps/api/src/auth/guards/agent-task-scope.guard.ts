@@ -94,6 +94,10 @@ export class AgentTaskScopeGuard implements CanActivate {
       const taskId = this.paramOf(req, 'taskId');
       if (!taskId) throw new ForbiddenException('No task in scope for this key.');
       await this.assertTaskInWorkspace(agent, taskId);
+    } else if (kind === 'project-write') {
+      const projectId = this.bodyFieldOf(req, 'projectId');
+      if (!projectId) throw new ForbiddenException('No project in scope for this key.');
+      await this.assertProjectInWorkspace(agent, projectId);
     } else {
       const projectId = this.paramOf(req, 'projectId');
       if (!projectId) throw new ForbiddenException('No project in scope for this key.');
@@ -107,6 +111,17 @@ export class AgentTaskScopeGuard implements CanActivate {
   private paramOf(req: AgentScopedRequest, name: string): string | undefined {
     const params = req.params as Record<string, string> | undefined;
     const value = params?.[name];
+    return typeof value === 'string' && value.length > 0 ? value : undefined;
+  }
+
+  /** MUN-0045: 'project-write' reads its scoped id from the body, because
+   *  `POST /tasks` names the target project as a DTO field, not a route
+   *  param. This runs BEFORE the body is validated/transformed by the
+   *  handler's ValidationPipe, so it reads the raw field defensively rather
+   *  than trusting its shape. */
+  private bodyFieldOf(req: AgentScopedRequest, name: string): string | undefined {
+    const body = req.body as Record<string, unknown> | undefined;
+    const value = body?.[name];
     return typeof value === 'string' && value.length > 0 ? value : undefined;
   }
 
