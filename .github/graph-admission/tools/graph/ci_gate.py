@@ -132,9 +132,16 @@ def cmd_bundle(a) -> int:
     if getattr(a, "sign_key", None):
         key = Path(a.sign_key)
         sig = out / SIGNATURE_NAME
+        produced = mp.with_suffix(mp.suffix + ".sig")
+        # AUP-GRAPH-006:gate3a — `ssh-keygen -Y sign` PROMPTS «Overwrite (y/n)?» when its output file already
+        # exists and, with no tty to answer it, exits **0** while leaving the OLD signature on disk. Refreshing a
+        # bundle in place would therefore have shipped a stale signature over new bytes under a success exit code.
+        # Measured on this host (OpenSSH 9.6p1), not inferred. Removing the target first is the fix; the post-sign
+        # verification below is what caught it and stays.
+        for stale in {produced, sig}:
+            stale.unlink(missing_ok=True)
         r = subprocess.run(["ssh-keygen", "-Y", "sign", "-q", "-f", str(key), "-n", SIGNING_NAMESPACE,
                             "-O", "hashalg=sha512", str(mp)], capture_output=True, text=True)
-        produced = mp.with_suffix(mp.suffix + ".sig")
         if r.returncode != 0 or not produced.exists():
             print(f"SIGNING FAILED: ssh-keygen exited {r.returncode}: {(r.stderr or r.stdout).strip()[:300]}",
                   file=sys.stderr)
@@ -1071,6 +1078,39 @@ def selftest_gate2b() -> tuple[list[dict], int]:
                   accepted=both, tampered_rejected=not bad)
         else:
             print("not_measured  ssh-keygen could not generate a key here")
+
+    # AUP-GRAPH-006:gate3a — RE-SIGNING IN PLACE. `ssh-keygen -Y sign` prompts «Overwrite (y/n)?» when its output
+    # file exists and, with no tty, exits 0 leaving the OLD signature. A bundle refresh would then ship a stale
+    # signature over new bytes under a success exit code. Found by refreshing muneral's real bundle, not by reading.
+    kg = shutil.which("ssh-keygen")
+    if kg:
+        d = root / "resign"
+        d.mkdir(parents=True, exist_ok=True)
+        subprocess.run([kg, "-q", "-t", "ed25519", "-N", "", "-C", "x", "-f", str(d / "k")], capture_output=True)
+        msg1, msg2 = d / "m", d / "m"
+        msg1.write_bytes(b"first bundle bytes\n")
+        subprocess.run([kg, "-Y", "sign", "-q", "-f", str(d / "k"), "-n", SIGNING_NAMESPACE,
+                        "-O", "hashalg=sha512", str(msg1)], capture_output=True)
+        stale = (d / "m.sig").read_text()
+        msg2.write_bytes(b"second bundle bytes\n")
+        # (a) the pre-gate3a behaviour, reproduced: sign again WITHOUT removing the target
+        r_noclean = subprocess.run([kg, "-Y", "sign", "-q", "-f", str(d / "k"), "-n", SIGNING_NAMESPACE,
+                                    "-O", "hashalg=sha512", str(msg2)], capture_output=True, text=True, stdin=subprocess.DEVNULL)
+        kept_stale = (d / "m.sig").read_text() == stale
+        ok_stale, _, _ = sshsig.verify_detached(msg2.read_bytes(), (d / "m.sig").read_text(),
+                                                (d / "k.pub").read_text(), SIGNING_NAMESPACE)
+        check("RE-SIGN TRAP: `ssh-keygen -Y sign` over an existing .sig exits 0 and keeps the STALE signature, "
+              "which then does NOT verify over the new bytes — the defect gate3a fixes", 
+              r_noclean.returncode == 0 and kept_stale and not ok_stale,
+              exit_code=r_noclean.returncode, kept_stale=kept_stale, stale_verifies=ok_stale)
+        # (b) the fix: remove the target first, exactly as cmd_bundle now does
+        (d / "m.sig").unlink(missing_ok=True)
+        subprocess.run([kg, "-Y", "sign", "-q", "-f", str(d / "k"), "-n", SIGNING_NAMESPACE,
+                        "-O", "hashalg=sha512", str(msg2)], capture_output=True, stdin=subprocess.DEVNULL)
+        ok_fresh, _, _ = sshsig.verify_detached(msg2.read_bytes(), (d / "m.sig").read_text(),
+                                                (d / "k.pub").read_text(), SIGNING_NAMESPACE)
+        check("re-signing after removing the target produces a signature that verifies over the NEW bytes "
+              "(cmd_bundle unlinks it before signing, and still verifies what it produced)", ok_fresh)
 
     print(f"\nGATE2B SELFTEST {'PASS' if not red else 'FAIL'}: "
           f"{sum(1 for c in checks if c.get('ok')) }/{len([c for c in checks if c.get('ok') is not None])} "
