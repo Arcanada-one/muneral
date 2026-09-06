@@ -128,9 +128,16 @@ jobs:
     # and no retrievable annotation. Recorded as a hole, not as a solved problem.
     uses: ./.github/workflows/graph-admission.yml
     with:
-      program_ref: '166d716d2a0de81dbc7b82318a891dc4a38c5a66'
+      program_ref: '6d4e1ff494a5423ade5874b4ef45d6d3b5a8b027'
       verifier_job: 'lint-and-test'
       verifier_conclusion: ${{ needs.lint-and-test.result }}
+      # AUP-GRAPH-006:gate2b. The fingerprint of the Ed25519 key that signs the vendored bundle's
+      # BUNDLE.json. It lives HERE, in this repository's own workflow file, deliberately OUTSIDE
+      # .github/graph-admission/: a fingerprint kept inside the bundle would be replaced by the very
+      # change that replaces the key, and would prove only that the bundle agrees with itself. With
+      # it, a tamper re-signed by an attacker's own key is refused; without it the gate reports
+      # BUNDLE_SIGNATURE_UNPINNED as `not_measured`, which is never a pass.
+      signing_key_fingerprint: 'SHA256:9QFqysn44UjA8rXyfHjItP3b2Oadhnbf1bDNqXrsCig'
 
   network-exposure:
     uses: Arcanada-one/datarim/.github/workflows/network-exposure-lint.yml@57afdfcd6a2d71aa8e0b577de6e43846e93b60dd

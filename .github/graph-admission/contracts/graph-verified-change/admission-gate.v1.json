@@ -1,7 +1,7 @@
 {
  "schema": "AdmissionGatePolicy/v1",
  "id": "admission-gate.v1",
- "portion_id": "AUP-GRAPH-006:gate2a",
+ "portion_id": "AUP-GRAPH-006:gate2b",
  "epic": "AUP-E29",
  "decision_ref": "DEC-AUP-0008",
  "process_ref": "DEC-AUP-0007",
@@ -456,9 +456,45 @@
     "`.prettierignore` must exclude the digest-pinned bundle wherever prettier gates the repository — reformatting it would break the sha256 values the job verifies",
     "the caller workflow itself must be prettier-formatted with the repository's own resolved prettier version"
    ]
+  },
+  "bundle_signature": {
+   "status": "NORMATIVE_DRAFT — AUP-GRAPH-006:gate2b, 2026-09-06",
+   "problem": "Hole 2 of REPORT-GRAPH-RETROFIT1: BUNDLE.json is a TRIPWIRE, not a signature. It records a sha256 per vendored file, but a change that rewrites a tool AND its manifest entry keeps that map perfectly consistent. gate1 caught that with `BUNDLE_MODIFIED_BY_PR` — a rule about the SHAPE OF THE DIFF, which is blind to a tamper that is already in the base tree.",
+   "mechanism": {
+    "signed_object": "BUNDLE.json (it carries every file's sha256, so signing it binds the whole vendored set)",
+    "algorithm": "Ed25519, OpenSSH SSHSIG detached signature (PROTOCOL.sshsig), hashalg sha512",
+    "namespace": "graph-admission-bundle",
+    "signature_file": ".github/graph-admission/BUNDLE.json.sig",
+    "public_key_in_the_bundle": ".github/graph-admission/SIGNING-KEY.pub",
+    "public_key_in_the_program_repo": "contracts/graph-verified-change/bundle-signing-key.pub",
+    "public_key_fingerprint": "SHA256:9QFqysn44UjA8rXyfHjItP3b2Oadhnbf1bDNqXrsCig",
+    "private_key": "outside every repository, on the signing host, mode 600. It is never committed, never printed and never passed through an environment variable.",
+    "signer": "`ssh-keygen -Y sign` (OpenSSH 9.6p1 on arcana-devs)",
+    "verifier": "tools/graph/sshsig.py — Ed25519 + SSHSIG verification in Python 3.12 STDLIB. It is written rather than shelled out to because the gate runs on whatever runner the caller has, and a missing binary must never degrade into 'assume valid'. It is cross-checked BOTH WAYS against the real ssh-keygen in --selftest, and records not_measured where that binary is absent.",
+    "why_ssh_keygen": "of the signing tools present on this host — ssh-keygen (OpenSSH 9.6p1), gpg 2.4.4, openssl 3.0.13 — SSHSIG was chosen because it is a detached, namespaced, single-file-key format whose verification is ~200 lines of stdlib Python, whose keys GitHub already understands, and which carries no keyring, no trust database and no web-of-trust state to synchronise. minisign, age and signify are NOT installed here."
+   },
+   "order": "the signature is verified BEFORE any sha256 in BUNDLE.json is believed. A manifest signs nothing for itself.",
+   "fingerprint_pinning": {
+    "rule": "the caller passes the trusted fingerprint as the reusable workflow's `signing_key_fingerprint` input, set in the caller's OWN workflow file — deliberately OUTSIDE the bundle directory.",
+    "unpinned_is_not_a_pass": "without it the gate still verifies the signature but emits BUNDLE_SIGNATURE_UNPINNED with verdict `not_measured`: what is proven is that the bundle agrees with the key shipped beside it, which is self-consistency, not provenance."
+   },
+   "what_this_proves": [
+    "the vendored bytes are the bytes the program repository signed, for any tamper that does not have the key",
+    "a tamper already present in the BASE tree is caught — the diff-shape rule cannot see one",
+    "a signature made for another purpose (another SSHSIG namespace, e.g. a git commit signature) is refused",
+    "a non-Ed25519 signature is refused rather than accepted as a weaker algorithm the signature file chose",
+    "a non-canonical S value is refused (Ed25519 malleability)"
+   ],
+   "what_this_does_NOT_prove": [
+    "an attacker who can change the caller's own workflow file can change the pinned fingerprint, swap SIGNING-KEY.pub and re-sign with their own key. This is MEASURED, not argued: the gate2b battery includes that exact attack and records that it is refused WITH a pin and NOT refused without one. What it costs the attacker is a second, human-legible edit in a governance-guarded file (`.github/**` needs a GOVERNANCE-CHANGE line in muneral) on top of a bundle edit that BUNDLE_MODIFIED_BY_PR already refuses.",
+    "nothing at all against whoever HOLDS the private key. The layer that still stands there is BUNDLE_MODIFIED_BY_PR, proven independent by mutant (j2): the same tamper, correctly re-signed with the trusted key, is still refused.",
+    "the key is a single key on a single host with no rotation, revocation or transparency log. There is no way for a caller to learn that a key was compromised other than being told.",
+    "it says nothing about WHAT the tools do — only that they are the bytes the program signed."
+   ],
+   "rotation": "changing the key means re-bundling every caller and updating both the committed public key and every caller's pinned fingerprint. No automation exists for that yet: recorded as a cost, not as a solved problem."
   }
  },
- "updated_at_utc": "2026-09-06T10:32:29Z",
+ "updated_at_utc": "2026-09-06T11:02:48Z",
  "automated_authors": {
   "status": "NORMATIVE_DRAFT — AUP-GRAPH-006:gate2a, 2026-09-06",
   "purpose": "Close the operational hole the required check opened: a repository that auto-merged its dependency updates suddenly needed a human on every one of them, because a dependency bot cannot author a ChangeAdmissionReceipt/v1. The rule is not relaxed — the RECEIPT AUTHOR is typed. The gate itself authors the receipt for a registered automated author, over the identical impact computation, and the receipt is then subject to every check that any other receipt is subject to.",

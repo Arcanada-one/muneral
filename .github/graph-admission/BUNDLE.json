@@ -1,10 +1,10 @@
 {
- "bundle_digest": "sha256:085ca21bf2e3d38486e4b4252272e1534bf1a0d76c1e5a43d356cb4780152c3e",
+ "bundle_digest": "sha256:93ab5ccf36c8ef01822cff664b3f76183fd2d65b0836e482d39192e45e7f6183",
  "files": [
   {
    "note": "the workflow file itself; it is already running by the time the job checks the bundle",
    "path": ".github/workflows/graph-admission.yml",
-   "sha256": "sha256:57adf8ace44b289ea2dae24d57e6cfbd2a1b63f3fd3faa200cfadc3c33553d92",
+   "sha256": "sha256:e9fb01448d40fe067c0b91adcb3506b587068d03e7404fb35c7ac7078b71edcc",
    "vendored_to": "graph-admission.yml",
    "verified_by_the_job": false
   },
@@ -25,12 +25,16 @@
    "sha256": "sha256:38f99a00b54d47bca59635dbfe03d30710d17df9963bfcfa775ce5397caa1d5a"
   },
   {
+   "path": "tools/graph/sshsig.py",
+   "sha256": "sha256:c599bd4a27a19aa975cef8a208e5f629ba9f8bfee61e4c13168322ca02ef59ff"
+  },
+  {
    "path": "tools/graph/ci_gate.py",
-   "sha256": "sha256:7b7c21169470ad2b7082aff3abdfc54de84ab2f8bb4ccd0f26b01a274aa6d70c"
+   "sha256": "sha256:3336a0746ab2d02285d4e91d4acd8675ef0f66856be138d3ef1806487ddcd2a3"
   },
   {
    "path": "contracts/graph-verified-change/admission-gate.v1.json",
-   "sha256": "sha256:3a85a93dc4076c1589da0e5e0c1b9958b6d87ec3340497778963e4b740425cc5"
+   "sha256": "sha256:8e1c6c9b93b7e596f5914ebb13252fa5a0730a9e1cad0e80a7b3c7daddb43e90"
   },
   {
    "path": "contracts/graph-verified-change/relationship-graph.v1.json",
@@ -50,7 +54,7 @@
   "tool": "tools/graph/ci_gate.py",
   "version": "1.0.0"
  },
- "program_ref": "166d716d2a0de81dbc7b82318a891dc4a38c5a66",
+ "program_ref": "6d4e1ff494a5423ade5874b4ef45d6d3b5a8b027",
  "program_repo": "Arcanada-one/arcanada-universal-program",
  "provisional_until_fable_review": true,
  "rule": "The workflow refuses unless every file's sha256 matches this manifest AND the caller's `program_ref` input matches `program_ref` here. The bundle is a VENDORED copy of one pinned program-repo SHA (the program repository is private and no shared credential exists to check it out from a caller's CI). A pull request that changes anything under the bundle directory is refused by the gate job \u2014 a bundle refresh is its own pull request.",

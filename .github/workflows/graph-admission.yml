@@ -68,6 +68,17 @@ on:
         required: false
         default: ''
         type: string
+      signing_key_fingerprint:
+        description: >-
+          AUP-GRAPH-006:gate2b. The `SHA256:…` fingerprint of the Ed25519 key the caller trusts to sign
+          `BUNDLE.json`. It is set HERE, in the caller's own workflow file, deliberately OUTSIDE the bundle
+          directory: a fingerprint stored inside the bundle would be replaced by the same change that
+          replaces the key, and would prove only that the bundle agrees with itself. Leave it empty and the
+          gate still verifies the signature, but reports `BUNDLE_SIGNATURE_UNPINNED` as `not_measured` —
+          self-consistency, not provenance. `not_measured` is never a pass.
+        required: false
+        default: ''
+        type: string
       verifier_conclusion:
         description: >-
           AUP-GRAPH-006:gate2a. That job's `result` — the caller passes `needs.<job>.result` with
@@ -149,6 +160,7 @@ jobs:
           VERIFIER_JOB: ${{ inputs.verifier_job }}
           VERIFIER_CONCLUSION: ${{ inputs.verifier_conclusion }}
           VERIFIER_OUTPUT_REF: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SIGNING_KEY_FINGERPRINT: ${{ inputs.signing_key_fingerprint }}
         run: |
           set -uo pipefail
           # NOT `set -e`: the gate's non-zero exit is a VERDICT, not a crash. The step must still
@@ -162,6 +174,7 @@ jobs:
           if [ -n "${VERIFIER_JOB:-}" ]; then ARGS+=(--verifier-job "$VERIFIER_JOB"); fi
           if [ -n "${VERIFIER_CONCLUSION:-}" ]; then ARGS+=(--verifier-conclusion "$VERIFIER_CONCLUSION"); fi
           ARGS+=(--verifier-output-ref "$VERIFIER_OUTPUT_REF")
+          if [ -n "${SIGNING_KEY_FINGERPRINT:-}" ]; then ARGS+=(--signing-key-fingerprint "$SIGNING_KEY_FINGERPRINT"); fi
           python3 "${TOOLS_PATH}/tools/graph/ci_gate.py" run \
             --repo . \
             --repo-name "$REPO_NAME" \
