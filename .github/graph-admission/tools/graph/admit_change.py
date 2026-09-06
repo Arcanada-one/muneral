@@ -45,14 +45,17 @@ LEDGER_DIR = PROGRAM_ROOT / "receipts/graph/work-item-evidence"
 
 # The BLOCKING checks: the mutation battery disables each one and demands that at least one blocked
 # fixture then gets through — a check that cannot be killed that way is a check that never blocked.
-CHECK_IDS = ["C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09", "C10", "C11", "C12", "C13"]
+CHECK_IDS = ["C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09", "C10", "C11", "C12", "C13",
+             # AUP-GRAPH-006:gate4b — C16 REFUSES a structural exemption whose evidence the gate
+             # re-measures and does not confirm, so it blocks and belongs in the disable battery.
+             "C16"]
 # AUP-GRAPH-006:gate2a. C14/C15 are INFORMATIONAL: they name why the gate did or did not author a
 # receipt on the automated-author path, and they never raise the verdict (their policy verdict is
 # `admit`, rank 0). Disabling one therefore cannot let anything through, so the disabled-check battery
 # would report a permanent survivor for a check that does not block by design. They are held to the
 # property instead — asserted in the selftest — and their behaviour is measured by the dedicated
 # gate2a mutation battery in ci_gate.py, where the four mutants of the card each flip the verdict.
-INFORMATIONAL_CHECK_IDS = ["C14", "C15"]
+INFORMATIONAL_CHECK_IDS = ["C14", "C15", "C17"]
 VERDICT_RANK = {"admit": 0, "paused_safe": 1, "refuse": 2}
 EXIT_OF = {"admit": 0, "paused_safe": 3, "refuse": 5}
 
@@ -363,13 +366,487 @@ def synthesize_automated_receipt(repo: Path, base: str, head: str, files: list[d
                      f"global fallback over {total_nodes} nodes, repository entity {repo_verdict}")
 
 
+# ------------------------------------------------------------------ AUP-GRAPH-006:gate4b
+# Structural exemptions — the typed verdict for a change whose impact the gate structurally CANNOT
+# compute. Decided in contracts/graph-verified-change/impact-uncomputable.v1.md; the parameters and
+# the non-coverage of each battery live in admission-gate.v1.json → structural_exemptions.
+#
+# Two cases, ONE mechanism: synthesize the non-code entity that names the missing thing, give it the
+# verdict it actually has (`not_measured`), and cover it with an exemption BOUND TO THE DIFF whose
+# evidence the gate re-measures itself (C16) — the receipt is never believed about its own exemption.
+# The tri-valued entity vocabulary is deliberately NOT widened: a fourth value would be read as
+# «not one of the three» — i.e. silently not-a-problem — by every consumer not taught it.
+STRUCTURAL_CODES = ("NO_IMPACT_BY_CONSTRUCTION", "GATE_SELF_UPDATE")
+CODE_OF_CASE = {"no_impact_by_construction": "NO_IMPACT_BY_CONSTRUCTION",
+                "gate_self_update": "GATE_SELF_UPDATE"}
+ENTITY_PREFIX_OF_CASE = {"no_impact_by_construction": "impact_computability",
+                         "gate_self_update": "gate_self_update"}
+DEFAULT_BUNDLE_DIR = ".github/graph-admission"
+BUNDLE_MANIFEST_NAME = "BUNDLE.json"
+BUNDLE_SIG_NAME = "BUNDLE.json.sig"
+BUNDLE_PUBKEY_NAME = "SIGNING-KEY.pub"
+BUNDLE_SIGNING_NAMESPACE = "graph-admission-bundle"
+STRUCTURAL_EXEMPTION_TTL_HOURS = 24
+STRUCTURAL_EXEMPTION_OWNER = "AUP-E29/AUP-GRAPH-006 — issued by tools/graph/admit_change.py exempt, re-measured by the gate (C16)"
+
+
+def diff_digest(repo: Path, base: str, head: str) -> str:
+    """sha256 over the sorted `status \\t path \\t blob_sha` triples of base..head.
+
+    This is the expiry of a structural exemption. A calendar TTL (gate2a's 30 days) survives an
+    amend, an added file and a force-push; this digest survives none of them, which is the honest
+    lifetime of an assertion about ONE diff."""
+    rows = []
+    for line in git(repo, "diff", "--raw", "-M", base, head).splitlines():
+        if not line.startswith(":"):
+            continue
+        meta, _, rest = line.partition("\t")
+        parts = meta.split()
+        if len(parts) < 5 or not rest:
+            continue
+        status, dst_sha = parts[4], parts[3]
+        path = rest.split("\t")[-1]
+        rows.append(f"{status}\t{path}\t{dst_sha}")
+    return sha256_bytes("\n".join(sorted(rows)).encode())
+
+
+def bundle_paths_at(repo: Path, ref: str, bundle_rel: str) -> tuple[set[str], dict | None]:
+    """The caller-repository paths the bundle manifest at `ref` MANAGES → (paths, manifest).
+
+    Read from git, never from the working tree: the classification of a diff must not depend on
+    what happens to be checked out. An entry with `verified_by_the_job is False` (the vendored
+    workflow) lives at the repository root, everything else under the bundle directory."""
+    rel = bundle_rel.strip("/")
+    raw = git(repo, "show", f"{ref}:{rel}/{BUNDLE_MANIFEST_NAME}", check=False)
+    if not raw.strip():
+        return set(), None
+    try:
+        man = json.loads(raw)
+    except json.JSONDecodeError:
+        return set(), None
+    paths = {f"{rel}/{BUNDLE_MANIFEST_NAME}", f"{rel}/{BUNDLE_SIG_NAME}", f"{rel}/{BUNDLE_PUBKEY_NAME}"}
+    for f in man.get("files") or []:
+        p = f.get("path") if isinstance(f, dict) else None
+        if isinstance(p, str) and p:
+            paths.add(p if f.get("verified_by_the_job") is False else f"{rel}/{p}")
+    return paths, man
+
+
+# AUP-GRAPH-006:gate4b-pin — measured on the REAL subject (muneral), not predicted: a caller pins the
+# program SHA in its OWN workflow (`program_ref: '<40hex>'` in .github/workflows/ci.yml), OUTSIDE the
+# bundle, precisely so that the bundle cannot vouch for its own pin. A refresh must therefore move a
+# file B1 would otherwise call «not bundle-managed», and the shape rule as first written could never
+# admit the very change it exists for. The allowance is the narrowest one that is still checkable: the
+# ONLY edit tolerated outside the bundle is a `program_ref` line, and its new value must EQUAL the head
+# bundle's own program_ref. That is strictly stronger than silence — nothing checked the pin against
+# the manifest before the run; now the admission does.
+PROGRAM_REF_PIN_RE = re.compile(r"^\s*program_ref:\s*['\"]?([0-9a-f]{40})['\"]?\s*(?:#.*)?$")
+
+
+def pin_only_edit(repo: Path, base: str, head: str, path: str, expect_ref: str | None) -> tuple[bool, str]:
+    """→ (is a program_ref pin update and nothing else, why). Blobs are read from git, never the tree."""
+    import difflib
+    old = git(repo, "show", f"{base}:{path}", check=False)
+    new = git(repo, "show", f"{head}:{path}", check=False)
+    if not old or not new:
+        return False, "the file is added or removed by this change, which is not an in-place pin update"
+    diff = [l for l in difflib.unified_diff(old.splitlines(), new.splitlines(), n=0, lineterm="")
+            if l[:1] in "+-" and not l.startswith(("---", "+++"))]
+    if not diff:
+        return True, "no textual change"
+    for l in diff:
+        m = PROGRAM_REF_PIN_RE.match(l[1:])
+        if not m:
+            return False, f"a changed line is not a program_ref pin: {l[:90]!r}"
+        if l[0] == "+" and expect_ref and m.group(1) != expect_ref:
+            return False, (f"the new pin {m.group(1)[:12]} is not the head bundle's program_ref "
+                           f"{str(expect_ref)[:12]} — a caller that pins one SHA and vendors another")
+    return True, (f"{len(diff)} changed line(s), every one a program_ref pin, every new value equal to the "
+                  f"head bundle's program_ref {str(expect_ref)[:12]}")
+
+
+def split_outside(repo: Path, base: str, head: str, outside: list[str],
+                  expect_ref: str | None) -> tuple[list[str], list[str]]:
+    """→ (pin-only edits, everything else). Everything else makes the change an ordinary one."""
+    pin, rest = [], []
+    for p in outside:
+        ok, why = pin_only_edit(repo, base, head, p, expect_ref)
+        (pin if ok else rest).append(p if ok else f"{p}: {why}")
+    return pin, rest
+
+
+def structural_case(repo: Path, base: str, head: str, files: list[dict],
+                    bundle_rel: str = DEFAULT_BUNDLE_DIR) -> tuple[str | None, dict]:
+    """Classify the diff from GIT STATUSES ALONE (cheap, no graph, no subprocess beyond git).
+
+    → ('gate_self_update' | 'no_impact_by_construction' | None, evidence). The order matters: a
+    bundle refresh EDITS managed files, so it is tested first; a bundle INSTALLATION adds only new
+    files and is therefore an all-new-files change, which is why the two holes are one hole."""
+    changed = {f["path"]: str(f["status"])[0] for f in files}
+    ev = {"changed": len(changed), "bundle_dir": bundle_rel}
+    if not changed:
+        return None, {**ev, "reason": "empty diff — no case"}
+    managed_base, man_b = bundle_paths_at(repo, base, bundle_rel)
+    managed_head, man_h = bundle_paths_at(repo, head, bundle_rel)
+    managed = managed_base | managed_head
+    edited = {p: s for p, s in changed.items() if s != "A"}
+    outside = sorted(set(changed) - managed)
+    pin_only, outside_real = (split_outside(repo, base, head, outside, (man_h or {}).get("program_ref"))
+                              if outside and managed else ([], outside))
+    ev.update({"edited": sorted(edited), "outside_the_bundle": outside_real[:12],
+               "program_ref_pin_updates": pin_only,
+               "managed_at_base": len(managed_base), "managed_at_head": len(managed_head)})
+    if managed and not outside_real and any(p in managed_base for p in edited):
+        ev["program_ref"] = {"base": (man_b or {}).get("program_ref"), "head": (man_h or {}).get("program_ref")}
+        return "gate_self_update", ev
+    if not edited:
+        return "no_impact_by_construction", ev
+    ev["reason"] = (f"{len(edited)} path(s) are edited or removed and the change is not a bundle refresh "
+                    f"({len(outside)} changed path(s) are outside the bundle) — this is an ordinary change and "
+                    f"the ordinary rule applies")
+    return None, ev
+
+
+def _chk(ev: dict, cid: str, code: str, ok: bool | None, detail: str) -> bool:
+    ev["checks"].append({"id": cid, "code": code,
+                         "verdict": "not_measured" if ok is None else ("verified" if ok else "failed"),
+                         "detail": detail})
+    return bool(ok)
+
+
+def evaluate_no_impact(repo: Path, base: str, head: str, files: list[dict], workdir: Path) -> dict:
+    """A1-A4. The graph is rebuilt at HEAD: at base the added files do not exist and the question
+    «does anything reference them?» cannot be asked at all."""
+    import impact as impact_mod  # sibling tool, reused as a library (bundled)
+    ev: dict = {"case": "no_impact_by_construction", "checks": [], "eligible": False, "coverage_gap": []}
+    added = sorted(f["path"] for f in files if str(f["status"])[0] == "A")
+    others = sorted(f"{str(f['status'])[0]}:{f['path']}" for f in files if str(f["status"])[0] != "A")
+    a1 = _chk(ev, "A1", "ALL_PATHS_ADDED", not others,
+              f"{len(added)} added path(s), {len(others)} edited/removed/renamed" +
+              (f" ({', '.join(others[:4])}) — a rename is an edit of the old path, and an edit beside new files "
+               f"is an ordinary change: no exemption" if others else " — every path in this diff is a new file"))
+    fb = [p for p in added if impact_mod.classify_file(p, None) in impact_mod.FALLBACK_KINDS]
+    a3 = _chk(ev, "A3", "NO_GLOBAL_FALLBACK", not fb,
+              (f"{', '.join(fb)} is a lockfile / global config: the impact is the WHOLE repository "
+               f"(the Bazel/Nx rule of DEC-AUP-0008), never nothing" if fb else
+               "no added path is a lockfile or a global config, so the global fallback does not apply"))
+    gp = Path(workdir) / f"graph-head-{head[:12]}.json"
+    graph = build_graph_at(repo, head, gp)
+    if graph is None:
+        a2 = _chk(ev, "A2", "NO_INBOUND_EDGE_AT_HEAD", None,
+                  f"the graph could not be built at head {head[:12]} — the claim cannot be measured, and "
+                  f"not_measured is not a pass (DEC-AUP-0008 I4)")
+    else:
+        node_path = {n["id"]: n.get("path") for n in graph.get("nodes") or []}
+        addset = set(added)
+        new_ids = {nid for nid, p in node_path.items() if p in addset}
+        viol = [f"{e['from']} -[{e['type']}/{e['provenance']}]-> {e['to']}"
+                for e in (graph.get("edges") or [])
+                if e.get("to") in new_ids and e.get("from") not in new_ids]
+        a2 = _chk(ev, "A2", "NO_INBOUND_EDGE_AT_HEAD", not viol,
+                  (f"{len(viol)} pre-existing node(s) reference an added path at head "
+                   f"({'; '.join(sorted(viol)[:3])}) — the files were picked up by convention or glob, so this "
+                   f"change DOES reach existing behaviour with no textual edit anywhere" if viol else
+                   f"{len(new_ids)} node(s) of the {len(added)} added path(s); every incoming edge of each of them "
+                   f"originates from another added path — the blast radius is empty by construction, measured at "
+                   f"head over {len(graph.get('edges') or [])} edge(s)"))
+        have = {p for p in node_path.values() if p}
+        ev["coverage_gap"] = [p for p in added if p not in have]
+        ev["language_coverage"] = (graph.get("manifest") or {}).get("language_coverage")
+        ev["graph_at_head"] = {"source_commit": (graph.get("manifest") or {}).get("source_commit"),
+                               "graph_digest": (graph.get("manifest") or {}).get("graph_digest"),
+                               "nodes": len(graph.get("nodes") or []), "edges": len(graph.get("edges") or [])}
+        _chk(ev, "A4", "BUILDER_COVERAGE_NAMED", None if ev["coverage_gap"] else True,
+             (f"{len(ev['coverage_gap'])}/{len(added)} added path(s) yield NO node at head "
+              f"({', '.join(ev['coverage_gap'][:4])}); language_coverage={ev['language_coverage']} — A2 can only "
+              f"see edges the builder can build, so for these files «the graph sees nothing» is not «there is "
+              f"nothing to see»" if ev["coverage_gap"] else
+              f"every added path yields at least one node at head; language_coverage={ev['language_coverage']}"))
+    ev["eligible"] = bool(a1 and a2 and a3)
+    ev["added"] = added
+    return ev
+
+
+def _materialize_bundle(repo: Path, ref: str, rel: str, dest: Path) -> Path | None:
+    """Extract the bundle directory as it exists at `ref` — the head bundle is what is being
+    installed, the BASE bundle is the gate that judges it."""
+    r = subprocess.run(["git", "-C", str(repo), "archive", ref, rel.strip("/")], capture_output=True)
+    if r.returncode != 0 or not r.stdout:
+        return None
+    dest.mkdir(parents=True, exist_ok=True)
+    t = subprocess.run(["tar", "-x", "-C", str(dest)], input=r.stdout, capture_output=True)
+    if t.returncode != 0:
+        return None
+    out = dest / rel.strip("/")
+    return out if out.exists() else None
+
+
+_SIG_DRIVER = """import json, sys
+sys.path.insert(0, sys.argv[1])
+import sshsig
+ok, reason, det = sshsig.verify_detached(open(sys.argv[2], 'rb').read(), open(sys.argv[3]).read(),
+                                         open(sys.argv[4]).read(), sys.argv[5])
+print(json.dumps({"ok": bool(ok), "reason": reason, "detail": det}))
+"""
+
+
+def _bundle_selftest(bundle_root: Path) -> tuple[int | None, int | None, str]:
+    """→ (exit code, arm count, tail). `ci_gate.py --selftest` is the battery that runs from inside a
+    vendored bundle; `admit_change.py --selftest` does NOT (its fixture set is not bundled — measured,
+    `fixture-drift`), which is recorded as non-coverage rather than silently skipped."""
+    script = bundle_root / "tools/graph/ci_gate.py"
+    if not script.exists():
+        return None, None, "no tools/graph/ci_gate.py in this bundle"
+    r = subprocess.run([sys.executable, str(script), "--selftest"], capture_output=True, text=True,
+                       env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1", "AUP_GATE4B_NESTED": "1"})
+    m = re.search(r"TOTAL PASS: (\d+)/(\d+)", r.stdout)
+    arms = int(m.group(2)) if m else None
+    return r.returncode, arms, ((r.stdout or "") + (r.stderr or ""))[-400:]
+
+
+def _bundle_policy_check_ids(bundle_root: Path) -> list[str] | None:
+    p = bundle_root / "contracts/graph-verified-change/admission-gate.v1.json"
+    try:
+        return sorted(c["id"] for c in json.loads(p.read_text())["checks"])
+    except (OSError, json.JSONDecodeError, KeyError, TypeError):
+        return None
+
+
+def evaluate_self_update(repo: Path, base: str, head: str, files: list[dict], workdir: Path,
+                         bundle_rel: str = DEFAULT_BUNDLE_DIR) -> dict:
+    """B1-B5. The anchor is B2 and only B2: on a bundle-refresh pull request every byte of the head
+    checkout is written by the pull request, so evidence collected by the head bundle is evidence the
+    artefact under review collected about itself. B2 verifies the head manifest with the BASE tree's
+    sshsig.py against the BASE tree's public key — a self-update is judged by the gate it replaces."""
+    ev: dict = {"case": "gate_self_update", "checks": [], "eligible": False, "coverage_gap": []}
+    rel = bundle_rel.strip("/")
+    wd = Path(workdir)
+    managed_base, man_b = bundle_paths_at(repo, base, bundle_rel)
+    managed_head, man_h = bundle_paths_at(repo, head, bundle_rel)
+    ev["managed_paths_at_head"] = sorted(managed_head)
+    changed = {f["path"]: str(f["status"])[0] for f in files}
+    outside = sorted(set(changed) - (managed_base | managed_head))
+    pin_only, outside_real = (split_outside(repo, base, head, outside, (man_h or {}).get("program_ref"))
+                              if outside else ([], []))
+    ev["program_ref_pin_updates"] = pin_only
+    b1 = _chk(ev, "B1", "SELF_UPDATE_SHAPE", not outside_real,
+              (f"{len(outside_real)} changed path(s) are neither bundle-managed nor a bare program_ref pin "
+               f"update ({'; '.join(outside_real[:3])}) — this is an ordinary change wearing a bundle "
+               f"refresh's clothes"
+               if outside_real else
+               f"all {len(changed)} changed path(s) are bundle-managed at base or head"
+               + (f", except {len(pin_only)} caller workflow file(s) whose ONLY change is the program_ref pin, "
+                  f"updated to the head bundle's own program_ref "
+                  f"({str((man_h or {}).get('program_ref'))[:12]}) — the pin lives outside the bundle by "
+                  f"design, so that the bundle cannot vouch for it" if pin_only else "")))
+
+    base_bundle = _materialize_bundle(repo, base, rel, wd / "base")
+    head_bundle = _materialize_bundle(repo, head, rel, wd / "head")
+    base_sshsig = (base_bundle / "tools/graph/sshsig.py") if base_bundle else None
+    if not base_bundle or not base_sshsig or not base_sshsig.exists():
+        b2 = _chk(ev, "B2", "SELF_UPDATE_KEY_CONTINUITY", None,
+                  f"the bundle at base {base[:12]} carries no tools/graph/sshsig.py — a pin older than gate2b "
+                  f"has no signature code, so the only non-circular anchor cannot be evaluated. not_measured is "
+                  f"not a pass: no exemption, the change pauses")
+    else:
+        base_pub = base_bundle / BUNDLE_PUBKEY_NAME
+        man_p, sig_p = head_bundle and (head_bundle / BUNDLE_MANIFEST_NAME), head_bundle and (head_bundle / BUNDLE_SIG_NAME)
+        if not base_pub.exists() or not head_bundle or not man_p.exists() or not sig_p.exists():
+            b2 = _chk(ev, "B2", "SELF_UPDATE_KEY_CONTINUITY", None,
+                      f"missing " + ", ".join(n for n, e in ((f"{base}:{rel}/{BUNDLE_PUBKEY_NAME}", base_pub.exists()),
+                                                             (f"{head}:{rel}/{BUNDLE_MANIFEST_NAME}", bool(head_bundle) and man_p.exists()),
+                                                             (f"{head}:{rel}/{BUNDLE_SIG_NAME}", bool(head_bundle) and sig_p.exists())) if not e))
+        else:
+            drv = wd / "verify_with_base_sshsig.py"
+            drv.write_text(_SIG_DRIVER)
+            r = subprocess.run([sys.executable, str(drv), str(base_bundle / "tools/graph"), str(man_p),
+                                str(sig_p), str(base_pub), BUNDLE_SIGNING_NAMESPACE],
+                               capture_output=True, text=True,
+                               env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
+            try:
+                res = json.loads(r.stdout)
+            except json.JSONDecodeError:
+                res = {"ok": False, "reason": f"the base tree's sshsig.py could not be run: "
+                                              f"{(r.stderr or r.stdout).strip()[:200]}", "detail": {}}
+            ev["signature"] = {"verified": bool(res.get("ok")), "reason": res.get("reason"),
+                               "verifier_from": f"{base[:12]}:{rel}/tools/graph/sshsig.py",
+                               "key_from": f"{base[:12]}:{rel}/{BUNDLE_PUBKEY_NAME}",
+                               "key_fingerprint": (res.get("detail") or {}).get("public_key_fingerprint")}
+            b2 = _chk(ev, "B2", "SELF_UPDATE_KEY_CONTINUITY", bool(res.get("ok")),
+                      (f"the head bundle's {BUNDLE_MANIFEST_NAME} verifies with the sshsig.py of base {base[:12]} "
+                       f"against the {BUNDLE_PUBKEY_NAME} of base {base[:12]} "
+                       f"({(res.get('detail') or {}).get('public_key_fingerprint')}) — the key the repository "
+                       f"already trusted, in a tree this pull request did not write"
+                       if res.get("ok") else
+                       f"the head bundle does NOT verify against the key of base {base[:12]}: {res.get('reason')}"))
+
+    if not head_bundle:
+        b3 = _chk(ev, "B3", "SELF_UPDATE_SELFTEST", None, f"no bundle directory at head {head[:12]}")
+        b4 = _chk(ev, "B4", "SELF_UPDATE_MONOTONIC", None, "no head bundle to compare against")
+    else:
+        rc_h, arms_h, tail_h = _bundle_selftest(head_bundle)
+        ev["selftest"] = {"head": {"exit_code": rc_h, "arms": arms_h}}
+        b3 = _chk(ev, "B3", "SELF_UPDATE_SELFTEST", rc_h == 0,
+                  (f"the head bundle's ci_gate.py --selftest passes, {arms_h} arm(s). Self-consistency, made "
+                   f"meaningful only by B2 — admit_change.py --selftest is NOT runnable from a vendored bundle "
+                   f"(its fixture set is not bundled: `fixture-drift`), which is non-coverage, not a pass"
+                   if rc_h == 0 else
+                   f"the head bundle's ci_gate.py --selftest exits {rc_h}: {tail_h.strip()[-200:]}"))
+        ids_h = _bundle_policy_check_ids(head_bundle)
+        ids_b = _bundle_policy_check_ids(base_bundle) if base_bundle else None
+        rc_b, arms_b, _ = _bundle_selftest(base_bundle) if base_bundle else (None, None, "")
+        ev["selftest"]["base"] = {"exit_code": rc_b, "arms": arms_b}
+        ev["policy_check_ids"] = {"base": ids_b, "head": ids_h}
+        if ids_b is None or ids_h is None:
+            b4 = _chk(ev, "B4", "SELF_UPDATE_MONOTONIC", None,
+                      "one of the two bundles carries no readable admission-gate.v1.json — monotonicity cannot be measured")
+        else:
+            dropped = sorted(set(ids_b) - set(ids_h))
+            shrank = (arms_b is not None and arms_h is not None and arms_h < arms_b)
+            b4 = _chk(ev, "B4", "SELF_UPDATE_MONOTONIC", not dropped and not shrank,
+                      (f"the update DROPS check(s) {', '.join(dropped)}" if dropped else "") +
+                      ("; " if dropped and shrank else "") +
+                      (f"the battery SHRINKS from {arms_b} to {arms_h} arm(s)" if shrank else "") or
+                      (f"no policy check id is dropped ({len(ids_b)} → {len(ids_h)}) and the battery does not "
+                       f"shrink ({arms_b} → {arms_h} arm(s)) — a proxy for «the update does not weaken the gate», "
+                       f"never a comparison of semantics"))
+    _chk(ev, "B5", "SELF_UPDATE_PROVENANCE", None,
+         f"program_ref {str((man_b or {}).get('program_ref'))[:12]} → {str((man_h or {}).get('program_ref'))[:12]}; "
+         f"a caller's CI cannot read the private program repository, so this is the pointer an auditor follows, "
+         f"never an enforced check")
+    ev["program_ref"] = {"base": (man_b or {}).get("program_ref"), "head": (man_h or {}).get("program_ref")}
+    ev["eligible"] = bool(b1 and b2 and b3 and b4)
+    return ev
+
+
+def evaluate_structural(repo: Path, base: str, head: str, files: list[dict], case: str,
+                        workdir: Path, bundle_rel: str = DEFAULT_BUNDLE_DIR) -> dict:
+    Path(workdir).mkdir(parents=True, exist_ok=True)
+    if case == "no_impact_by_construction":
+        return evaluate_no_impact(repo, base, head, files, Path(workdir))
+    return evaluate_self_update(repo, base, head, files, Path(workdir), bundle_rel)
+
+
+def structural_covered_entities(case: str, synthesized: str, verdict_entities, managed: set[str]) -> set[str]:
+    """Which entities an exemption of this code may name — never more.
+
+    `NO_IMPACT_BY_CONSTRUCTION`: exactly the synthesized entity (there are no others; the receipt has
+    zero verdicts by construction). `GATE_SELF_UPDATE`: the synthesized entity plus the nodes whose
+    PATH is bundle-managed — the vendored foreign code itself, whose verification happened in the
+    program repository, which is the same principle gate3b already landed for vendored config keys.
+    An exemption that grows past this set is how a typed exception becomes a bypass."""
+    allowed = {synthesized}
+    if case == "gate_self_update":
+        for eid in verdict_entities:
+            _, _, path = str(eid).partition(":")
+            if path and path in managed:
+                allowed.add(eid)
+    return allowed
+
+
+def structural_exemption(repo: Path, base: str, head: str, files: list[dict], policy: dict, *,
+                         repo_name: str, workdir: Path, bundle_rel: str = DEFAULT_BUNDLE_DIR,
+                         verdict_entities=(), owner: str | None = None,
+                         program_receipt: str | None = None) -> tuple[list[dict], dict]:
+    """The gate issues the exemption(s). → (exemptions, evidence). [] means: not eligible, stay paused."""
+    case, cev = structural_case(repo, base, head, files, bundle_rel)
+    if case is None:
+        return [], {"case": None, "eligible": False, **cev}
+    ev = evaluate_structural(repo, base, head, files, case, workdir, bundle_rel)
+    ev.update({k: v for k, v in cev.items() if k not in ev})
+    if not ev["eligible"]:
+        return [], ev
+    captured = datetime.now(timezone.utc)
+    spec = ((policy.get("structural_exemptions") or {}).get("codes") or {}).get(CODE_OF_CASE[case]) or {}
+    synth = f"{ENTITY_PREFIX_OF_CASE[case]}:{repo_name}@{head[:12]}"
+    managed, _ = bundle_paths_at(repo, head, bundle_rel)
+    managed |= bundle_paths_at(repo, base, bundle_rel)[0]
+    covered = structural_covered_entities(case, synth, verdict_entities, managed)
+    binding = {"base": base, "head": head, "digest": diff_digest(repo, base, head)}
+    ev["change_binding"] = binding
+    ev["synthesized_entity"] = synth
+    out = []
+    for entity in sorted(covered):
+        out.append({
+            "entity": entity,
+            "code": CODE_OF_CASE[case],
+            "owner": owner or STRUCTURAL_EXEMPTION_OWNER,
+            "expires_at_utc": (captured + timedelta(hours=STRUCTURAL_EXEMPTION_TTL_HOURS)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "reason": spec.get("covers") or CODE_OF_CASE[case],
+            "scope": ("; ".join(spec.get("does_not_cover") or []) or "see impact-uncomputable.v1.md"),
+            "change_binding": binding,
+            "expiry_rule": ("the DIGEST is the expiry, not the clock: this exemption is void for any other diff. "
+                            f"expires_at_utc is a {STRUCTURAL_EXEMPTION_TTL_HOURS} h backstop because C10 requires "
+                            "an expiry, and removing that requirement would weaken a check"),
+            "evidence": {"checks": ev["checks"], "case": case,
+                         **({"language_coverage": ev["language_coverage"]} if "language_coverage" in ev else {}),
+                         **({"coverage_gap": ev["coverage_gap"]} if ev.get("coverage_gap") else {}),
+                         **({"signature": ev["signature"]} if "signature" in ev else {}),
+                         **({"selftest": ev["selftest"]} if "selftest" in ev else {}),
+                         **({"program_side_receipt": program_receipt} if program_receipt else {})},
+        })
+    return out, ev
+
+
+def recheck_structural(repo: Path, base: str, head: str, files: list[dict], policy: dict,
+                       exemptions: list[dict], *, repo_name: str, verdict_entities,
+                       workdir: Path, bundle_rel: str = DEFAULT_BUNDLE_DIR) -> tuple[list[str], dict]:
+    """C16 — the gate RE-MEASURES the battery of every structural exemption it is shown.
+
+    The cheap discriminators run first (binding digest, then the git-status classification), so a
+    receipt presenting a stale or forged exemption is refused without ever building a graph."""
+    problems: list[str] = []
+    ev: dict = {}
+    codes = {x.get("code") for x in exemptions}
+    if len(codes) > 1:
+        return [f"a receipt may carry at most one structural exemption code; it carries {sorted(codes)}"], ev
+    digest = diff_digest(repo, base, head)
+    bad = [x for x in exemptions
+           if (x.get("change_binding") or {}).get("digest") != digest
+           or (x.get("change_binding") or {}).get("base") != base
+           or (x.get("change_binding") or {}).get("head") != head]
+    if bad:
+        cb = bad[0].get("change_binding") or {}
+        return [f"{bad[0].get('code')}: change_binding {str(cb.get('digest'))[:23]}… / "
+                f"{str(cb.get('base'))[:12]}..{str(cb.get('head'))[:12]} does not bind this diff "
+                f"({digest[:23]}… / {base[:12]}..{head[:12]}) — a structural exemption expires WITH the change, "
+                f"never on a calendar"], ev
+    case, cev = structural_case(repo, base, head, files, bundle_rel)
+    want = CODE_OF_CASE.get(case or "")
+    code = sorted(codes)[0]
+    if want != code:
+        return [f"{code}: the gate's own classification of this diff is "
+                f"{want or 'an ordinary change'} — {cev.get('reason') or 'the exemption does not apply here'}"], ev
+    synth = f"{ENTITY_PREFIX_OF_CASE[case]}:{repo_name}@{head[:12]}"
+    managed, _ = bundle_paths_at(repo, head, bundle_rel)
+    managed |= bundle_paths_at(repo, base, bundle_rel)[0]
+    allowed = structural_covered_entities(case, synth, verdict_entities, managed)
+    named = {x.get("entity") for x in exemptions}
+    extra = sorted(named - allowed)
+    if extra:
+        problems.append(f"{code}: exempts {len(extra)} entity(ies) outside what this code may cover "
+                        f"({', '.join(map(str, extra[:4]))}); it may name {sorted(allowed)[:1]}"
+                        + (" plus the bundle-managed nodes" if case == "gate_self_update" else " and nothing else"))
+    if synth not in named:
+        problems.append(f"{code}: the synthesized entity {synth} carries no exemption — the code exists to cover "
+                        f"exactly that entity")
+    ev = evaluate_structural(repo, base, head, files, case, Path(workdir), bundle_rel)
+    if not ev.get("eligible"):
+        failed = [c for c in ev["checks"] if c["verdict"] != "verified"]
+        problems.append(f"{code}: the gate re-measured the evidence battery and it does not pass — "
+                        + "; ".join(f"{c['id']} {c['code']} {c['verdict']}: {c['detail'][:140]}" for c in failed[:3]))
+    return problems, ev
+
+
 def gate(repo: Path, base: str, head: str, receipt_paths: list[Path], policy: dict, *,
          description: str = "", bypass_flag: bool = False, disabled: frozenset[str] = frozenset(),
          work_item_enforcement: str | None = None, ledger_dir: Path = LEDGER_DIR,
          repo_name: str | None = None, explicit_receipts: bool = True,
          event: dict | None = None, verifier_job: str | None = None,
          verifier_conclusion: str | None = None, verifier_output_ref: str | None = None,
-         automated_workdir: Path | None = None) -> dict:
+         automated_workdir: Path | None = None,
+         bundle_rel: str = DEFAULT_BUNDLE_DIR,
+         structural_workdir: Path | None = None) -> dict:
     checks: list[dict] = []
     enforcement = work_item_enforcement or policy["work_item_evidence"]["enforcement"]
     pol_checks = {c["id"]: c for c in policy["checks"]}
@@ -505,6 +982,30 @@ def gate(repo: Path, base: str, head: str, receipt_paths: list[Path], policy: di
                 valid_exempt.add(x["entity"])
         if bad_exempt:
             add("C10", f"{Path(rec['path']).name}: " + "; ".join(bad_exempt[:6]))
+
+        # --- AUP-GRAPH-006:gate4b — C16/C17: the receipt is never believed about its own structural
+        # exemption. The gate re-measures A1-A4 / B1-B5 here, from git and from a graph rebuilt at
+        # head, every time it evaluates this range.
+        struct = [x for x in (doc.get("exemptions") or [])
+                  if isinstance(x, dict) and x.get("code") in STRUCTURAL_CODES]
+        if struct:
+            swd = Path(structural_workdir) if structural_workdir else Path(tempfile.mkdtemp(prefix="gate4b-"))
+            problems, sev = recheck_structural(repo, base, head, files, policy, struct,
+                                               repo_name=repo_name or repo_remote_name(repo),
+                                               verdict_entities=list(verdict_of), workdir=swd,
+                                               bundle_rel=bundle_rel)
+            rec["structural_exemption"] = {"code": sorted({x.get("code") for x in struct})[0],
+                                           "entities": sorted(str(x.get("entity")) for x in struct),
+                                           "re_measured": [c for c in (sev.get("checks") or [])],
+                                           "problems": problems}
+            if problems:
+                add("C16", f"{Path(rec['path']).name}: " + "; ".join(problems[:3]))
+                valid_exempt -= {x.get("entity") for x in struct}
+            elif sev.get("coverage_gap"):
+                add("C17", f"{Path(rec['path']).name}: {len(sev['coverage_gap'])} added path(s) yield no node at "
+                           f"head ({', '.join(sev['coverage_gap'][:4])}); language_coverage="
+                           f"{sev.get('language_coverage')} — the exemption is admitted on a WEAKER measurement "
+                           f"here than where the builder covers the files")
 
         failed = sorted(e for e, v in verdict_of.items() if v == "failed" and e not in valid_exempt)
         notm = sorted(e for e, v in verdict_of.items() if v == "not_measured" and e not in valid_exempt)
@@ -990,6 +1491,20 @@ def make_fixtures(base: str, head: str) -> dict[str, dict]:
     add("conformant-admit-with-exemptions", "admit", [],
         "one not_measured entity carried by an exemption with owner and expiry", exempt)
 
+    # AUP-GRAPH-006:gate4b — C16. The gate re-measures every structural exemption it is shown; a
+    # receipt that presents one bound to a DIFFERENT diff is refused, not merely ignored. This is
+    # the change-bound expiry made testable: the fixture range is an ordinary edit, so the code
+    # does not apply to it at all, and the binding digest is not this diff's digest either.
+    def stale_structural(r):
+        r["exemptions"] = [{"entity": "code_unit:src/b.ts", "code": "NO_IMPACT_BY_CONSTRUCTION",
+                            "owner": "AUP-E29", "expires_at_utc": "2027-01-01T00:00:00Z",
+                            "reason": "claims the impact set is empty by construction",
+                            "change_binding": {"base": "0" * 40, "head": "0" * 40,
+                                               "digest": "sha256:" + "0" * 64}}]
+    add("violation-STRUCTURAL_EXEMPTION_UNSOUND", "refuse", ["STRUCTURAL_EXEMPTION_UNSOUND"],
+        "a structural exemption bound to another diff is refused — the digest, not the clock, is the expiry",
+        stale_structural)
+
     F["violation-RECEIPT_MISSING"] = {"receipt": None, "expect_verdict": "refuse",
                                       "expect_codes": ["RECEIPT_MISSING"], "extra": [],
                                       "description": "negative control: no receipt at all", "kwargs": {}}
@@ -1385,7 +1900,9 @@ def cmd_gate(a) -> int:
                ledger_dir=Path(a.ledger_dir) if a.ledger_dir else LEDGER_DIR,
                repo_name=a.repo_name, event=event, verifier_job=a.verifier_job,
                verifier_conclusion=a.verifier_conclusion, verifier_output_ref=a.verifier_output_ref,
-               automated_workdir=Path(a.workdir) if a.workdir else None)
+               automated_workdir=Path(a.workdir) if a.workdir else None,
+               bundle_rel=getattr(a, "bundle_dir", None) or DEFAULT_BUNDLE_DIR,
+               structural_workdir=(Path(a.workdir) / "gate4b") if a.workdir else None)
     if a.out:
         write_json(Path(a.out), doc)
     if a.json:
@@ -1397,6 +1914,78 @@ def cmd_gate(a) -> int:
         for c in doc["checks"]:
             print(f"  [{c['verdict']}] {c['code']}: {c['detail']}")
     return doc["exit_code"]
+
+
+def cmd_exempt(a) -> int:
+    """AUP-GRAPH-006:gate4b — the GATE issues a structural exemption into a receipt.
+
+    Never hand-written: the codes are re-measured by the gate on every evaluation (C16), so an
+    exemption written by hand that the battery does not confirm is refused, not merely ignored."""
+    policy = load_policy(a.policy)
+    repo = Path(a.repo).resolve()
+    base, head = (a.range.split("..", 1) if a.range else (a.base, a.head))
+    base = git(repo, "rev-parse", base).strip()
+    head = git(repo, "rev-parse", head).strip()
+    files = range_files(repo, base, head)
+    rp = Path(a.receipt)
+    doc = json.loads(rp.read_text(encoding="utf-8"))
+    verdict_of = {v["entity"]: v.get("verdict") for v in (doc.get("verdicts") or [])
+                  if isinstance(v, dict) and "entity" in v}
+    wd = Path(a.workdir) if a.workdir else Path(tempfile.mkdtemp(prefix="gate4b-exempt-"))
+    repo_name = a.repo_name or (doc.get("repo") or {}).get("name") or repo_remote_name(repo)
+    exemptions, ev = structural_exemption(repo, base, head, files, policy, repo_name=repo_name,
+                                          workdir=wd, bundle_rel=a.bundle_dir,
+                                          verdict_entities=list(verdict_of), owner=a.owner,
+                                          program_receipt=a.program_receipt)
+    report = {"schema": "StructuralExemptionEvidence/v1", "producer": {"tool": TOOL, "version": VERSION},
+              "model": MODEL, "provisional_until_fable_review": True,
+              "decision_ref": "DEC-AUP-0008", "portion_id": "AUP-GRAPH-006:gate4b",
+              "contract": "contracts/graph-verified-change/impact-uncomputable.v1.md",
+              "repo": repo_name, "range": {"base": base, "head": head},
+              "case": ev.get("case"), "eligible": bool(exemptions), "evidence": ev,
+              "exemptions": exemptions}
+    if a.evidence_out:
+        write_json(Path(a.evidence_out), report)
+    for c in ev.get("checks") or []:
+        print(f"  [{c['verdict']}] {c['id']} {c['code']}: {c['detail']}")
+    if not exemptions:
+        print(f"NOT ELIGIBLE ({ev.get('case') or 'no structural case'}): the change stays paused_safe. "
+              f"{ev.get('reason') or 'the evidence battery does not pass; make it pass or split the pull request'}")
+        return 3
+    synth = ev["synthesized_entity"]
+    if synth not in verdict_of:
+        doc.setdefault("verdicts", []).append({
+            "entity": synth, "verdict": "not_measured",
+            "reason": ("the impact of this change is not computable by the graph: "
+                       + ("every path is a new file, so no node exists at change_set.base to seed the traversal "
+                          "with, and the impact set is dependents (seeds excluded)"
+                          if ev["case"] == "no_impact_by_construction" else
+                          "this change is the vendored admission-gate bundle itself, whose tools are the code that "
+                          "would do the measuring")
+                       + f". Covered by the typed exemption {CODE_OF_CASE[ev['case']]}, whose evidence the gate "
+                         f"re-measures on every evaluation (C16).")})
+    keep = [x for x in (doc.get("exemptions") or [])
+            if not (isinstance(x, dict) and x.get("code") in STRUCTURAL_CODES)]
+    doc["exemptions"] = keep + exemptions
+    verdict_of[synth] = "not_measured"
+    exempted = {x["entity"] for x in doc["exemptions"]}
+    left = sorted(e for e, v in verdict_of.items() if v != "verified" and e not in exempted)
+    adm = ("refused" if any(verdict_of[e] == "failed" for e in left) else
+           ("paused_safe" if left else "admitted_with_exemptions"))
+    doc["admission"] = {"verdict": adm,
+                        "rule": ("admitted_with_exemptions requires every non-verified entity to carry a valid "
+                                 "exemption (owner + expiry). The structural exemption issued here covers only the "
+                                 "entities its code may cover; anything else that is not verified still pauses or "
+                                 "refuses this change on its own.")}
+    doc.setdefault("notes", []).append(
+        f"AUP-GRAPH-006:gate4b — {CODE_OF_CASE[ev['case']]} issued by `{TOOL} exempt` over "
+        f"{len(exemptions)} entity(ies), bound to {ev['change_binding']['digest'][:23]}… "
+        f"({base[:12]}..{head[:12]}); the digest, not the clock, is the expiry.")
+    out = Path(a.out) if a.out else rp
+    write_json(out, doc)
+    print(f"{adm.upper()}  {CODE_OF_CASE[ev['case']]}  {len(exemptions)} exemption(s)  "
+          f"binding {ev['change_binding']['digest'][:23]}…  → {out}")
+    return 0 if adm == "admitted_with_exemptions" else 3
 
 
 def main(argv=None) -> int:
@@ -1430,7 +2019,25 @@ def main(argv=None) -> int:
                                                  "anything else, or absent, is not_measured — never an assumed pass")
     g.add_argument("--verifier-output-ref", help="a URL or id the verdict can be traced to (the workflow run)")
     g.add_argument("--workdir", help="scratch directory for the graph build and an authored receipt")
+    g.add_argument("--bundle-dir", default=DEFAULT_BUNDLE_DIR, help="the vendored gate bundle directory, for the gate4b self-update classification")
     g.set_defaults(fn=cmd_gate)
+
+    ex = sub.add_parser("exempt", help="issue a structural exemption into a receipt (gate4b) — the gate, "
+                                       "never the change author by hand")
+    ex.add_argument("--repo", required=True)
+    ex.add_argument("--range", help="<base>..<head>")
+    ex.add_argument("--base"), ex.add_argument("--head")
+    ex.add_argument("--receipt", required=True, help="the ChangeAdmissionReceipt/v1 to issue into")
+    ex.add_argument("--out", help="write the amended receipt here (default: in place)")
+    ex.add_argument("--evidence-out", help="write the StructuralExemptionEvidence/v1 report here")
+    ex.add_argument("--bundle-dir", default=DEFAULT_BUNDLE_DIR)
+    ex.add_argument("--owner", help="the exemption owner (default: the gate itself)")
+    ex.add_argument("--program-receipt", help="digest or path of the program-side ChangeAdmissionReceipt the "
+                                              "bundle's program_ref was admitted with (B5, recorded not enforced)")
+    ex.add_argument("--policy", type=Path)
+    ex.add_argument("--repo-name")
+    ex.add_argument("--workdir")
+    ex.set_defaults(fn=cmd_exempt)
 
     at = sub.add_parser("attach", help="attach a receipt to a Work Item as evidence (never a status)")
     at.add_argument("--receipt", required=True)

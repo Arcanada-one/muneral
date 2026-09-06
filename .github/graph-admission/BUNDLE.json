@@ -1,5 +1,5 @@
 {
- "bundle_digest": "sha256:2b7759b16b989f0fc09b5fe4e07750ddcaf9fd0fb2ec92db3697454de005e248",
+ "bundle_digest": "sha256:b776a083f1ded73a97ab01d128783d0e08f340cfe259ce18ac79b29233ee050c",
  "files": [
   {
    "note": "the workflow file itself; it is already running by the time the job checks the bundle",
@@ -10,7 +10,7 @@
   },
   {
    "path": "tools/graph/admit_change.py",
-   "sha256": "sha256:13319ae601b79a37026b5aa81a927928d90b4061102348b2ff81f1b23e5e7cb7"
+   "sha256": "sha256:32de0c8438ee207fb8dae8a8dbc0657385f88ef6732f67ecd50d3faa3eaf0489"
   },
   {
    "path": "tools/graph/schema_check.py",
@@ -18,7 +18,7 @@
   },
   {
    "path": "tools/graph/build_graph.py",
-   "sha256": "sha256:7714ddb87f2d9bf80115ef291c35e596ec4a4f4b674577ff42e0dfa9726bb1bc"
+   "sha256": "sha256:b61952efc7ba26ac1da69a33fcc0aa37483776d67aef4a6b1daabd71a9efb3ca"
   },
   {
    "path": "tools/graph/impact.py",
@@ -30,11 +30,11 @@
   },
   {
    "path": "tools/graph/ci_gate.py",
-   "sha256": "sha256:1e124db998a230b553287796157a059feb34442d00bee334039a6c16675e251b"
+   "sha256": "sha256:1cbcd42a3a4abcd3697805b0af82d70670707544fec8da369aa5df854deb7da8"
   },
   {
    "path": "contracts/graph-verified-change/admission-gate.v1.json",
-   "sha256": "sha256:8e1c6c9b93b7e596f5914ebb13252fa5a0730a9e1cad0e80a7b3c7daddb43e90"
+   "sha256": "sha256:0d4c4ee8091e44db3ca80fa6f1059195c06d12c4243eb88188339b1d4caef0c8"
   },
   {
    "path": "contracts/graph-verified-change/relationship-graph.v1.json",
@@ -54,7 +54,7 @@
   "tool": "tools/graph/ci_gate.py",
   "version": "1.0.0"
  },
- "program_ref": "9e5294c4463f3d0f87acce2fb5a863105f8543e6",
+ "program_ref": "dff273959c9bfaed4ed7be4bf598facce78aaa8a",
  "program_repo": "Arcanada-one/arcanada-universal-program",
  "provisional_until_fable_review": true,
  "rule": "The workflow refuses unless every file's sha256 matches this manifest AND the caller's `program_ref` input matches `program_ref` here. The bundle is a VENDORED copy of one pinned program-repo SHA (the program repository is private and no shared credential exists to check it out from a caller's CI). A pull request that changes anything under the bundle directory is refused by the gate job \u2014 a bundle refresh is its own pull request.",

@@ -1568,11 +1568,15 @@ def selftest(receipt_out: Path | None, pilot: Path | None, pilot_graph_out: Path
           **_classify(vb, ignore_dirty=True))
     vb_again = dump_graph(build(VENDORED_BUNDLE_FIXTURE_DIR, worktree=True, built_at=FIXED_BUILT_AT))
     check("vendored-bundle-mini: rebuild with the same --built-at is byte-identical", vb_again == dump_graph(vb))
-    check("a repository with NO vendored bundle keeps a byte-identical graph (the manifest key and the stat appear only when a "
-          "bundle is present, so the eight other registered repositories cannot move)",
+    # The pin is over the NODES AND EDGES, not over graph_digest: the digest covers the manifest, and the manifest
+    # carries source_commit, which moves with every commit to this repository. A digest pin therefore fails for a
+    # reason that has nothing to do with the builder — measured the hard way, one commit after it was written.
+    ts_mini_content = sha_bytes(canonical({"nodes": full["nodes"], "edges": full["edges"]}).encode())
+    check("a repository with NO vendored bundle keeps a byte-identical graph — same nodes, same edges, and neither "
+          "the manifest key nor the stat is emitted, so the eight other registered repositories cannot move",
           "vendored_bundles" not in full["manifest"] and "vendored_nodes" not in full["manifest"]["stats"]
-          and full["manifest"]["graph_digest"] == vb_exp["ts_mini_graph_digest_unchanged_by_gate3b"],
-          digest=full["manifest"]["graph_digest"])
+          and ts_mini_content == vb_exp["ts_mini_nodes_edges_sha256_unchanged_by_gate3b"],
+          content_sha=ts_mini_content, pinned=vb_exp["ts_mini_nodes_edges_sha256_unchanged_by_gate3b"])
 
     # negative controls of the selftest itself
     bogus = ("code_unit:apps/api/src/tasks/tasks.service.ts", "imports", "code_unit:does/not/exist.ts", "deterministic")

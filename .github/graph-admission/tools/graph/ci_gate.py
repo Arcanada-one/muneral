@@ -346,10 +346,37 @@ def cmd_run(a) -> int:
             # An EDIT or a DELETE of a vendored tool is the tamper path — refused. A pure ADDITION is
             # the installing pull request itself (the bundle cannot pre-exist its own installation);
             # it is recorded, and the sha256 check above still binds every added file to BUNDLE.json.
-            return fail("BUNDLE_MODIFIED_BY_PR",
-                        f"this pull request edits or removes {len(edited)} file(s) under the vendored gate bundle "
-                        f"({', '.join(sorted(edited)[:3])}) — a bundle refresh is its own pull request, gated on its own")
-        if touched:
+            #
+            # AUP-GRAPH-006:gate4b — with ONE typed exception: a bundle REFRESH, whose changed set is
+            # exactly the bundle-managed paths and nothing else. That is the gate updating itself, and
+            # it was the only change in this repository that «нет receipt — нет мержа» could not admit
+            # (measured: muneral #69 and #70, both merged with an admin override of the required check).
+            # It is not waved through here — it is handed to the gate, which must find a receipt
+            # carrying a GATE_SELF_UPDATE exemption whose B1-B5 battery the gate itself re-measures.
+            import admit_change as admit_mod  # sibling tool, reused as a library (bundled)
+            files_status = [{"path": f, "status": status.get(f, "M")} for f in files]
+            su_case, su_ev = admit_mod.structural_case(repo, base, head, files_status, bundle_rel)
+            if su_case != "gate_self_update":
+                return fail("BUNDLE_MODIFIED_BY_PR",
+                            f"this pull request edits or removes {len(edited)} file(s) under the vendored gate bundle "
+                            f"({', '.join(sorted(edited)[:3])}) — a bundle refresh is its own pull request, gated on its own"
+                            + (f"; and it is not one: {su_ev.get('reason') or 'the changed set is not exactly the '
+                               'bundle-managed paths'}" if su_ev.get("outside_the_bundle") or su_ev.get("reason") else ""))
+            result["self_update"] = su_ev
+            result["checks"].append({"code": "SELF_UPDATE_CANDIDATE", "verdict": "not_measured",
+                                     "detail": (f"this pull request refreshes the vendored gate bundle itself "
+                                                f"(program_ref {str((su_ev.get('program_ref') or {}).get('base'))[:12]} → "
+                                                f"{str((su_ev.get('program_ref') or {}).get('head'))[:12]}) and changes "
+                                                f"NOTHING else. BUNDLE_MODIFIED_BY_PR is therefore not the answer, and "
+                                                f"neither is a pass: the gate below must find a receipt carrying a "
+                                                f"GATE_SELF_UPDATE exemption, and it re-measures that exemption's whole "
+                                                f"battery — signature continuity against the key of the BASE tree, the "
+                                                f"head bundle's own selftest, and check-id/arm monotonicity. "
+                                                f"`not_measured` is not a pass (DEC-AUP-0008 I4).")})
+        if touched and not result.get("self_update"):
+            # …and NOT on the self-update path: there the bundle is REFRESHED, not installed, and
+            # saying «ADDS the vendored gate bundle» about a diff of six modified files is a check text
+            # that misdescribes what it measured. Caught by replaying the real muneral refresh locally.
             result["checks"].append({"code": "BUNDLE_INSTALLED_BY_PR", "verdict": "not_measured",
                                      "detail": f"this pull request ADDS the vendored gate bundle "
                                                f"({len(touched)} new file(s)); every added file matches BUNDLE.json and "
@@ -382,6 +409,8 @@ def cmd_run(a) -> int:
            "--range", f"{base}..{head}", "--json", "--out", str(work / "gate.json"),
            "--enforcement", a.enforcement, "--workdir", str(work / "gate2a"),
            "--repo-name", result["repo"]]
+    if bundle_rel:
+        cmd += ["--bundle-dir", bundle_rel]
     # AUP-GRAPH-006:gate2a — the automated-author path. The event payload is the ONLY source of author
     # identity; the head branch name is attacker-controllable and is never consulted.
     if getattr(a, "event_file", None) and Path(a.event_file).exists():
@@ -675,9 +704,13 @@ def selftest() -> int:
     g2b_checks, g2b_red = selftest_gate2b()
     red += g2b_red
     checks += g2b_checks
+    print("\n--- AUP-GRAPH-006:gate4b — the structural-exemption battery ---")
+    g4b_checks, g4b_red = selftest_gate4b()
+    red += g4b_red
+    checks += g4b_checks
     measured = [c for c in checks if c.get("ok") is not None]
     print(f"\nTOTAL {'PASS' if not red else 'FAIL'}: {len(measured) - red}/{len(measured)} checks across "
-          f"three batteries ({len(checks) - len(measured)} not_measured)")
+          f"four batteries ({len(checks) - len(measured)} not_measured)")
     return 0 if not red else 1
 
 
@@ -884,6 +917,372 @@ def sign_bundle(bundle: Path, seed: bytes = SELFTEST_SEED, namespace: str = SIGN
     (bundle / SIGNATURE_NAME).write_text(
         sshsig.make_detached(seed, mp.read_bytes(), namespace, hash_algorithm))
     return sshsig.fingerprint(sshsig.SUPPORTED_KEY_TYPE, pub)
+
+
+def reseal_bundle(bundle: Path, seed: bytes = SELFTEST_SEED, program_ref: str | None = None) -> str:
+    """Recompute BUNDLE.json over the bundle's current bytes and sign it. A mutant that rewrites a
+    tool AND its manifest entry AND the signature is exactly the attacker gate2b was built for, so
+    the batteries below must be able to build one."""
+    mp = bundle / "BUNDLE.json"
+    man = json.loads(mp.read_text())
+    if program_ref:
+        man["program_ref"] = program_ref
+    for f in man.get("files", []):
+        if f.get("verified_by_the_job") is False:
+            continue
+        p = bundle / f["path"]
+        if p.exists():
+            f["sha256"] = sha256_file(p)
+    man["bundle_digest"] = "sha256:" + hashlib.sha256(
+        json.dumps(man["files"], sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    mp.write_text(json.dumps(man, indent=1, sort_keys=True) + "\n")
+    return sign_bundle(bundle, seed)
+
+
+def selftest_gate4b() -> tuple[list[dict], int]:
+    """AUP-GRAPH-006:gate4b — the structural-exemption battery.
+
+    The gap: `admitted` requires every affected entity to carry `verified`, and two classes of real
+    change cannot produce that STRUCTURALLY — an all-new-files change (the impact set is dependents,
+    seeds excluded, and a file added by the change has no node at base) and the gate's own bundle
+    refresh. Both landed as `paused_safe` and were being worked around by hand; muneral #69 and #70
+    were BOTH merged with an admin override of the required check.
+
+    Every arm here is a mutant of the control that must FLIP it. A survivor is a hole, reported as
+    one — never accommodated by weakening the mutant."""
+    # B3 runs the bundle's OWN `ci_gate.py --selftest`, and this battery is part of that selftest — so a
+    # nested run would recurse without bound. The nested invocation is marked and skips this battery; it
+    # is reported as `not_measured`, never as a pass, and the base/head arm counts B4 compares are both
+    # taken with the same marker, so the monotonicity comparison stays like-for-like. NON-COVERAGE, stated:
+    # a self-update's B3 therefore exercises three batteries of the new bundle, not four.
+    if os.environ.get("AUP_GATE4B_NESTED"):
+        name = ("gate4b battery not run inside a nested bundle selftest (AUP_GATE4B_NESTED): B3 runs the "
+                "bundle's own selftest, so running it here would recurse without bound")
+        print("n/m  " + name)
+        return [{"name": name, "ok": None}], 0
+    import tempfile
+    root = Path(tempfile.mkdtemp(prefix="gate4b-selftest-"))
+    checks, red = [], 0
+
+    def check(name, ok, **kw):
+        nonlocal red
+        checks.append({"name": name, "ok": bool(ok), **kw})
+        if not ok:
+            red += 1
+        print(("ok   " if ok else "FAIL ") + name + ("" if ok else "  " + json.dumps(kw, ensure_ascii=False, default=str)[:500]))
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import admit_change  # noqa: E402
+
+    GIT_ENV = {"GIT_AUTHOR_NAME": "f", "GIT_AUTHOR_EMAIL": "f@x", "GIT_COMMITTER_NAME": "f",
+               "GIT_COMMITTER_EMAIL": "f@x", "GIT_AUTHOR_DATE": "2026-09-06T00:00:00Z",
+               "GIT_COMMITTER_DATE": "2026-09-06T00:00:00Z",
+               "PATH": os.environ.get("PATH", "/usr/bin:/bin")}
+
+    pristine = root / "pristine-bundle"
+    cmd_bundle(argparse.Namespace(out=str(pristine), program_ref="0" * 40, workflow_out=None, sign_key=None))
+    BASE_FP = sign_bundle(pristine)
+
+    def new_repo(name: str, with_bundle: bool = True, extra_under_bundle: bool = False):
+        repo = root / name / "repo"
+        repo.mkdir(parents=True)
+        env = {**GIT_ENV, "HOME": str(root / name)}
+
+        def g(*a):
+            r = subprocess.run(["git", "-C", str(repo), *a], capture_output=True, text=True, env=env)
+            if r.returncode != 0:
+                raise RuntimeError(f"git {' '.join(a)}: {r.stderr[:300]}")
+            return r.stdout
+        g("init", "-q", "-b", "main")
+        (repo / "src").mkdir()
+        (repo / "src/a.ts").write_text("export const a = 1;\n")
+        (repo / "src/b.ts").write_text("import { a } from './a';\nexport const b = a + 1;\n")
+        if with_bundle:
+            (repo / ".github").mkdir(exist_ok=True)
+            shutil.copytree(pristine, repo / ".github/graph-admission")
+            # the caller pins the program SHA in its OWN workflow, OUTSIDE the bundle — measured on
+            # muneral, where .github/workflows/ci.yml carries `program_ref: '<40hex>'` for exactly the
+            # reason the comment there gives: a pin inside the bundle would be replaced by the very
+            # change it is meant to constrain.
+            (repo / ".github/workflows").mkdir(parents=True, exist_ok=True)
+            (repo / ".github/workflows/ci.yml").write_text(
+                "jobs:\n  graph-admission:\n    uses: ./.github/workflows/graph-admission.yml\n"
+                "    with:\n      program_ref: '" + "0" * 40 + "'\n"
+                "      signing_key_fingerprint: 'SHA256:fixture'\n")
+            if extra_under_bundle:
+                (repo / ".github/graph-admission/NOTES.md").write_text("a note that is not bundle-managed\n")
+        g("add", "-A")
+        g("commit", "-q", "-m", "base")
+        return repo, g, g("rev-parse", "HEAD").strip()
+
+    def draft_receipt(repo_name: str, base: str, head: str, files: list[dict], verdicts: list[dict],
+                      empty_impact: bool, impact_core: list[dict] | None = None) -> dict:
+        r = {
+            "schema": "ChangeAdmissionReceipt/v1", "receipt_id": f"car-gate4b-{head[:8]}",
+            "captured_at_utc": "2026-09-06T12:00:00Z",
+            "producer": {"tool": "tools/graph/verify.py", "version": "1.0.0"},
+            "decision_ref": "DEC-AUP-0008", "repo": {"name": repo_name},
+            "graph": {"source_commit": base, "graph_digest": "sha256:" + "a" * 64,
+                      "builder_version": "1.0.0", "built_at_utc": "2026-09-06T11:00:00Z"},
+            "tree": {"commit": head, "dirty": False},
+            "staleness": {"method": "graph.source_commit == change_set.base; clean tree", "verdict": "fresh",
+                          "checked_at_utc": "2026-09-06T12:00:00Z"},
+            "change_set": {"mode": "diff", "base": base, "head": head, "files": files},
+            "impact_set": {"method": "reverse traversal (dependents; seeds excluded)", "max_depth": 3,
+                           "deterministic_core": impact_core or [], "inferred_tail": [],
+                           "global_fallback": {"triggered": False}},
+            "verifiers": [], "verdicts": verdicts, "exemptions": [],
+            "admission": {"verdict": "paused_safe",
+                          "rule": "admitted requires every verdict = verified; zero verdicts ⇒ paused_safe"},
+            "work_item": {"system": "muneral", "id": "AUP-GRAPH-006"},
+        }
+        if empty_impact:
+            r["empty_impact_explanation"] = {
+                "reason": "every changed path is a new file (status A): the graph in --diff mode is built at "
+                          "change_set.base, where none of these files exists, so no seed and no dependent can exist",
+                "graph_metadata": {"extractors": ["imports"], "language_coverage": ["typescript"],
+                                   "changed_node_known_to_graph": False, "reverse_edges_of_changed_nodes": 0}}
+        return r
+
+    def issue(repo: Path, base: str, head: str, receipt: dict, repo_name="Arcanada-one/fixture") -> tuple[int, dict]:
+        d = root / f"issue-{head[:8]}-{abs(hash(json.dumps(receipt, sort_keys=True))) % 10**6}"
+        d.mkdir(parents=True, exist_ok=True)
+        rp, out = d / "draft.json", d / "exempted.json"
+        rp.write_text(json.dumps(receipt, indent=1, sort_keys=True) + "\n")
+        rc = admit_change.cmd_exempt(argparse.Namespace(
+            repo=str(repo), range=f"{base}..{head}", base=None, head=None, receipt=str(rp), out=str(out),
+            evidence_out=str(d / "evidence.json"), bundle_dir=admit_change.DEFAULT_BUNDLE_DIR, owner=None,
+            program_receipt=None, policy=None, repo_name=repo_name, workdir=str(d / "wd")))
+        return rc, (json.loads(out.read_text()) if out.exists() else receipt)
+
+    def run_ci(repo: Path, base: str, head: str, receipt: dict | None, *, pin: str | None = BASE_FP,
+               program_ref: str = "0" * 40, tag: str = "run") -> dict:
+        d = root / f"ci-{tag}-{head[:8]}"
+        d.mkdir(parents=True, exist_ok=True)
+        body = "" if receipt is None else "```json\n" + json.dumps(receipt, indent=1, sort_keys=True) + "\n```\n"
+        (d / "body.txt").write_text(body)
+        out = d / "result.json"
+        rc = cmd_run(argparse.Namespace(
+            repo=str(repo), repo_name="Arcanada-one/fixture", tools=str(repo / ".github/graph-admission"),
+            program_ref=program_ref, base=base, head=head, pr_body_file=str(d / "body.txt"),
+            receipt_glob=["receipts/graph/*.json"], enforcement="off", build_graph=False,
+            workdir=str(d / "work"), out=str(out), summary=None, signing_key_fingerprint=pin))
+        doc = json.loads(out.read_text())
+        doc["_rc"] = rc
+        return doc
+
+    # ============================================================ case A — the all-new-files change
+    repo, g, base = new_repo("A-control")
+    (repo / "src/new1.ts").write_text("export const n1 = 1;\n")
+    (repo / "src/new2.ts").write_text("import { n1 } from './new1';\nexport const n2 = n1 + 1;\n")
+    g("add", "-A"); g("commit", "-q", "-m", "two new files, nothing else")
+    head_a = g("rev-parse", "HEAD").strip()
+    # node_id is None for an added path, which is what verify.py emits: in --diff mode the graph is
+    # built at base, where the file does not exist, so it has no node to name.
+    files_a = [{"path": p, "status": "A", "kind": "code", "node_id": None}
+               for p in ("src/new1.ts", "src/new2.ts")]
+    rc_ex, exempted = issue(repo, base, head_a, draft_receipt("Arcanada-one/fixture", base, head_a, files_a, [], True))
+    check("(a) CONTROL: an all-new-files change is issued NO_IMPACT_BY_CONSTRUCTION by the gate "
+          "(A1 all-added, A2 no pre-existing node references them at head, A3 no global fallback)",
+          rc_ex == 0 and exempted["admission"]["verdict"] == "admitted_with_exemptions"
+          and any(x["code"] == "NO_IMPACT_BY_CONSTRUCTION" for x in exempted["exemptions"]),
+          rc=rc_ex, admission=exempted["admission"]["verdict"],
+          codes=[x.get("code") for x in exempted.get("exemptions", [])])
+    ci_a = run_ci(repo, base, head_a, exempted, tag="a")
+    check("(a) …and the CI gate admits it — the permanent red of the seven dark-launch proposals is "
+          "structural, not a policy",
+          ci_a["_rc"] == 0 and ci_a["verdict"] == "admitted_with_exemptions",
+          rc=ci_a["_rc"], verdict=ci_a["verdict"], codes=ci_a["reason_codes"])
+
+    # ---- mutant (b): the abuse case — new files PLUS an edit to an existing file
+    repo_b, gb, base_b = new_repo("B-abuse")
+    (repo_b / "src/new1.ts").write_text("export const n1 = 1;\n")
+    (repo_b / "src/a.ts").write_text("export const a = 99;  // a real edit smuggled in beside the new file\n")
+    gb("add", "-A"); gb("commit", "-q", "-m", "a new file AND an edit")
+    head_b = gb("rev-parse", "HEAD").strip()
+    files_b = [{"path": "src/new1.ts", "status": "A", "kind": "code", "node_id": None},
+               {"path": "src/a.ts", "status": "M", "kind": "code", "node_id": None}]
+    rc_b, not_exempted = issue(repo_b, base_b, head_b, draft_receipt("Arcanada-one/fixture", base_b, head_b, files_b, [], True))
+    check("(b) MUTANT: adding files AND editing an existing one is NOT exempted — the gate refuses to issue",
+          rc_b != 0 and not any(x.get("code") in admit_change.STRUCTURAL_CODES
+                                for x in (not_exempted.get("exemptions") or [])),
+          rc=rc_b, exemptions=[x.get("code") for x in (not_exempted.get("exemptions") or [])])
+    # …and the same abuse, FORGED by hand with a correct change binding: the gate re-measures A1 and refuses
+    forged = draft_receipt("Arcanada-one/fixture", base_b, head_b, files_b, [], True)
+    synth_b = f"impact_computability:Arcanada-one/fixture@{head_b[:12]}"
+    forged["verdicts"] = [{"entity": synth_b, "verdict": "not_measured", "reason": "forged"}]
+    forged["exemptions"] = [{"entity": synth_b, "code": "NO_IMPACT_BY_CONSTRUCTION", "owner": "an attacker",
+                             "expires_at_utc": "2027-01-01T00:00:00Z", "reason": "claims an empty impact set",
+                             "change_binding": {"base": base_b, "head": head_b,
+                                                "digest": admit_change.diff_digest(repo_b, base_b, head_b)}}]
+    forged["admission"] = {"verdict": "admitted_with_exemptions", "rule": "claimed"}
+    ci_b = run_ci(repo_b, base_b, head_b, forged, tag="b")
+    check("(b) MUTANT: the same abuse with a HAND-WRITTEN exemption whose change binding is CORRECT → the gate "
+          "re-measures A1 itself and refuses (C16). The receipt is never believed about its own exemption",
+          ci_b["_rc"] != 0 and "STRUCTURAL_EXEMPTION_UNSOUND" in ci_b["reason_codes"],
+          rc=ci_b["_rc"], verdict=ci_b["verdict"], codes=ci_b["reason_codes"])
+
+    # ---- mutant (b2): a new file that a PRE-EXISTING node references at head (A2)
+    repo_b2, gb2, base_b2 = new_repo("B2-inbound")
+    (repo_b2 / "src/b.ts").write_text("import { a } from './a';\nimport { n } from './new1';\nexport const b = a + n;\n")
+    gb2("add", "-A"); gb2("commit", "-q", "-m", "base where b.ts already imports a file that does not exist yet")
+    base_b2 = gb2("rev-parse", "HEAD").strip()
+    (repo_b2 / "src/new1.ts").write_text("export const n = 1;\n")
+    gb2("add", "-A"); gb2("commit", "-q", "-m", "add the file the existing module already imports")
+    head_b2 = gb2("rev-parse", "HEAD").strip()
+    rc_b2, _ = issue(repo_b2, base_b2, head_b2, draft_receipt(
+        "Arcanada-one/fixture", base_b2, head_b2,
+        [{"path": "src/new1.ts", "status": "A", "kind": "code", "node_id": None}], [], True))
+    check("(b2) MUTANT: an all-new-files change whose file a PRE-EXISTING node references at head is refused "
+          "(A2) — a file picked up by convention or an existing import changes behaviour with no textual edit",
+          rc_b2 != 0, rc=rc_b2)
+
+    # ============================================================ case B — the gate updating itself
+    def refresh(name: str, mutate=None, seed: bytes = SELFTEST_SEED, pin: str | None = None,
+                wf_extra: str = ""):
+        """A repository whose base already carries the bundle, and a pull request that refreshes it
+        and changes NOTHING else — the shape that was merged twice with an admin override."""
+        repo_r, gr, base_r = new_repo(name)
+        newb = root / f"{name}-newbundle"
+        shutil.copytree(pristine, newb)
+        (newb / "tools/graph/build_graph.py").write_text(
+            (newb / "tools/graph/build_graph.py").read_text() + "\n# refreshed at a newer program ref\n")
+        if mutate:
+            mutate(newb)
+        reseal_bundle(newb, seed, program_ref="1" * 40)
+        shutil.rmtree(repo_r / ".github/graph-admission")
+        shutil.copytree(newb, repo_r / ".github/graph-admission")
+        wf = repo_r / ".github/workflows/ci.yml"
+        wf.write_text(wf.read_text().replace("0" * 40, pin if pin is not None else "1" * 40))
+        if wf_extra:
+            wf.write_text(wf.read_text() + wf_extra)
+        gr("add", "-A"); gr("commit", "-q", "-m", "refresh the vendored gate bundle")
+        return repo_r, gr, base_r, gr("rev-parse", "HEAD").strip()
+
+    def self_update_receipt(repo_r: Path, base_r: str, head_r: str) -> dict:
+        changed = [l.split("\t") for l in admit_change.git(repo_r, "diff", "--name-status", base_r, head_r).splitlines() if l]
+        files = [{"path": c[-1], "status": c[0][0], "kind": "config", "node_id": None} for c in changed]
+        tools_changed = [f["path"] for f in files if f["path"].endswith(".py")][:3]
+        verdicts = [{"entity": f"code_unit:{p}", "verdict": "not_measured",
+                     "reason": "vendored foreign code: this file is a byte-copy of the program repository at "
+                               "the bundle's program_ref, and it is the code that would do the measuring"}
+                    for p in tools_changed]
+        core = [{"entity": v["entity"], "depth": 1,
+                 "path": [{"from": v["entity"], "to": f"code_unit:{tools_changed[0]}",
+                           "edge_type": "imports", "provenance": "deterministic"}]}
+                for v in verdicts]
+        return draft_receipt("Arcanada-one/fixture", base_r, head_r, files, verdicts, False, core)
+
+    repo_c, gc, base_c, head_c = refresh("C-control")
+    rc_su, su_receipt = issue(repo_c, base_c, head_c, self_update_receipt(repo_c, base_c, head_c))
+    check("(control) CONTROL: a legitimate bundle refresh is issued GATE_SELF_UPDATE — signature continuity "
+          "against the key of the BASE tree, the head bundle's own selftest, and check-id/arm monotonicity",
+          rc_su == 0 and su_receipt["admission"]["verdict"] == "admitted_with_exemptions"
+          and all(x["code"] == "GATE_SELF_UPDATE" for x in su_receipt["exemptions"]),
+          rc=rc_su, admission=su_receipt["admission"]["verdict"], n=len(su_receipt.get("exemptions") or []))
+    ci_c = run_ci(repo_c, base_c, head_c, su_receipt, program_ref="1" * 40, tag="c")
+    check("(control) …and the CI gate admits it WITHOUT an admin override, with BUNDLE_MODIFIED_BY_PR replaced "
+          "by SELF_UPDATE_CANDIDATE — «нет receipt — нет мержа» now holds for changes to the rule too",
+          ci_c["_rc"] == 0 and ci_c["verdict"] == "admitted_with_exemptions"
+          and "BUNDLE_MODIFIED_BY_PR" not in ci_c["reason_codes"]
+          and any(c["code"] == "SELF_UPDATE_CANDIDATE" for c in ci_c["checks"]),
+          rc=ci_c["_rc"], verdict=ci_c["verdict"], codes=ci_c["reason_codes"])
+
+    # ---- mutant (c): the refreshed bundle's own selftest FAILS
+    def break_selftest(b: Path):
+        f = b / "tools/graph/ci_gate.py"
+        t = f.read_text()
+        assert "def selftest() -> int:" in t
+        f.write_text(t.replace("def selftest() -> int:", "def selftest() -> int:\n    return 7", 1))
+    repo_d, gd, base_d, head_d = refresh("D-selftest", break_selftest)
+    rc_d, rec_d = issue(repo_d, base_d, head_d, self_update_receipt(repo_d, base_d, head_d))
+    check("(c) MUTANT: a self-update whose own selftest FAILS is refused (B3) — a bundle that cannot pass its "
+          "own battery is not admitted by being the gate",
+          rc_d != 0 and not (rec_d.get("exemptions") or []),
+          rc=rc_d, exemptions=[x.get("code") for x in (rec_d.get("exemptions") or [])])
+
+    # ---- mutant (d): the refreshed bundle is signed by a DIFFERENT key (no continuity with base)
+    repo_e, ge, base_e, head_e = refresh("E-key", seed=SELFTEST_OTHER_SEED)
+    rc_e, rec_e = issue(repo_e, base_e, head_e, self_update_receipt(repo_e, base_e, head_e))
+    check("(d) MUTANT: a self-update whose bundle is signed by another key is refused (B2) — the anchor is the "
+          "SIGNING-KEY.pub and the sshsig.py of the BASE tree, which the pull request did not write, so the "
+          "refusal holds even though the head bundle is perfectly self-consistent",
+          rc_e != 0 and not (rec_e.get("exemptions") or []), rc=rc_e)
+    ci_e = run_ci(repo_e, base_e, head_e, None, pin=None, program_ref="1" * 40, tag="e")
+    check("(d) …and with NO fingerprint pinned in the caller's workflow — where verify_bundle can only say "
+          "BUNDLE_SIGNATURE_UNPINNED (not_measured) — the change is still red, never admitted",
+          ci_e["_rc"] != 0 and ci_e["verdict"] != "admitted"
+          and any(c["code"] == "BUNDLE_SIGNATURE_UNPINNED" for c in ci_e["checks"]),
+          rc=ci_e["_rc"], verdict=ci_e["verdict"], codes=ci_e["reason_codes"])
+
+    # ---- mutant (e): a change that merely TOUCHES a file under the bundle path is not a self-update
+    repo_f, gf, base_f = new_repo("F-underpath", extra_under_bundle=True)
+    (repo_f / ".github/graph-admission/NOTES.md").write_text("edited, and this file is not bundle-managed\n")
+    gf("add", "-A"); gf("commit", "-q", "-m", "touch a non-managed file under the bundle directory")
+    head_f = gf("rev-parse", "HEAD").strip()
+    case_f, ev_f = admit_change.structural_case(
+        repo_f, base_f, head_f,
+        [{"path": ".github/graph-admission/NOTES.md", "status": "M"}])
+    ci_f = run_ci(repo_f, base_f, head_f, None, tag="f")
+    check("(e) MUTANT: a non-bundle change that merely touches a file under the bundle path is NOT a "
+          "self-update — BUNDLE_MODIFIED_BY_PR still stands and no exemption is on offer",
+          case_f is None and ci_f["_rc"] != 0 and "BUNDLE_MODIFIED_BY_PR" in ci_f["reason_codes"]
+          and not any(c["code"] == "SELF_UPDATE_CANDIDATE" for c in ci_f["checks"]),
+          case=case_f, rc=ci_f["_rc"], codes=ci_f["reason_codes"])
+
+    # ---- mutant (g): the refresh DROPS a policy check id
+    def drop_a_check(b: Path):
+        p = b / "contracts/graph-verified-change/admission-gate.v1.json"
+        d = json.loads(p.read_text())
+        d["checks"] = [c for c in d["checks"] if c["id"] != "C17"]
+        p.write_text(json.dumps(d, indent=1, ensure_ascii=False) + "\n")
+    repo_g, gg, base_g, head_g = refresh("G-monotonic", drop_a_check)
+    rc_g, rec_g = issue(repo_g, base_g, head_g, self_update_receipt(repo_g, base_g, head_g))
+    check("(g) MUTANT: a self-update that REMOVES a policy check id is refused (B4) — «the rule holds for every "
+          "change except changes to the rule» is exactly the shape this proxy exists to catch",
+          rc_g != 0 and not (rec_g.get("exemptions") or []), rc=rc_g)
+
+    # ---- mutant (h): the caller workflow edit carries MORE than the pin
+    repo_i, gi, base_i, head_i = refresh("I-wfextra", wf_extra="      extra_input: 'smuggled in beside the pin'\n")
+    rc_i, rec_i = issue(repo_i, base_i, head_i, self_update_receipt(repo_i, base_i, head_i))
+    check("(h) MUTANT: a refresh whose caller-workflow edit carries anything BESIDES the program_ref pin is "
+          "refused (B1) — the allowance for the pin is the narrowest one that is still checkable, never a "
+          "licence to edit the workflow that decides which code runs",
+          rc_i != 0 and not (rec_i.get("exemptions") or []), rc=rc_i)
+
+    # ---- mutant (i): the pin is updated to a DIFFERENT SHA than the bundle carries
+    repo_j, gj, base_j, head_j = refresh("J-wrongpin", pin="2" * 40)
+    rc_j, rec_j = issue(repo_j, base_j, head_j, self_update_receipt(repo_j, base_j, head_j))
+    check("(i) MUTANT: a refresh whose caller pins a DIFFERENT SHA than the bundle it vendors is refused (B1) "
+          "— the pin lives outside the bundle so the bundle cannot vouch for it, and nothing checked it "
+          "against the manifest before the run until now",
+          rc_j != 0 and not (rec_j.get("exemptions") or []), rc=rc_j)
+
+    # ---- mutant (f): an exemption presented against a DIFFERENT diff
+    repo_h, gh, base_h = new_repo("H-binding")
+    (repo_h / "src/new1.ts").write_text("export const n1 = 1;\n")
+    gh("add", "-A"); gh("commit", "-q", "-m", "one new file")
+    head_h1 = gh("rev-parse", "HEAD").strip()
+    files_h = [{"path": "src/new1.ts", "status": "A", "kind": "code", "node_id": None}]
+    rc_h, exempted_h = issue(repo_h, base_h, head_h1, draft_receipt("Arcanada-one/fixture", base_h, head_h1, files_h, [], True))
+    (repo_h / "src/new2.ts").write_text("export const n2 = 2;\n")
+    gh("add", "-A"); gh("commit", "-q", "-m", "one more new file — the same KIND of change, a different change")
+    head_h2 = gh("rev-parse", "HEAD").strip()
+    reused = json.loads(json.dumps(exempted_h))
+    reused["change_set"]["head"] = head_h2
+    reused["tree"]["commit"] = head_h2
+    reused["change_set"]["files"] = files_h + [{"path": "src/new2.ts", "status": "A", "kind": "code",
+                                                "node_id": None}]
+    ci_h = run_ci(repo_h, base_h, head_h2, reused, tag="h")
+    check("(f) MUTANT: the SAME exemption re-presented against a different diff is refused (C16) — the digest, "
+          "not the clock, is the expiry; gate2a's 30-day calendar exemption would still be inside its window",
+          rc_h == 0 and ci_h["_rc"] != 0 and "STRUCTURAL_EXEMPTION_UNSOUND" in ci_h["reason_codes"],
+          issued=rc_h, rc=ci_h["_rc"], codes=ci_h["reason_codes"])
+
+    print(f"\nGATE4B SELFTEST {'PASS' if not red else 'FAIL'}: {len(checks) - red}/{len(checks)} checks, "
+          f"{red} failing")
+    shutil.rmtree(root, ignore_errors=True)
+    return checks, red
 
 
 def selftest_gate2b() -> tuple[list[dict], int]:
