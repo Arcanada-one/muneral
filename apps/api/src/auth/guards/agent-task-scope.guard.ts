@@ -86,22 +86,39 @@ export class AgentTaskScopeGuard implements CanActivate {
       );
     }
 
-    if (kind === 'task') {
-      const taskId = this.paramOf(req, 'taskId');
-      if (!taskId) throw new ForbiddenException('No task in scope for this key.');
-      await this.assertAssignedToTask(agent, taskId);
-    } else if (kind === 'task-workspace') {
-      const taskId = this.paramOf(req, 'taskId');
-      if (!taskId) throw new ForbiddenException('No task in scope for this key.');
-      await this.assertTaskInWorkspace(agent, taskId);
-    } else if (kind === 'project-write') {
-      const projectId = this.bodyFieldOf(req, 'projectId');
-      if (!projectId) throw new ForbiddenException('No project in scope for this key.');
-      await this.assertProjectInWorkspace(agent, projectId);
-    } else {
-      const projectId = this.paramOf(req, 'projectId');
-      if (!projectId) throw new ForbiddenException('No project in scope for this key.');
-      await this.assertProjectInWorkspace(agent, projectId);
+    switch (kind) {
+      case 'task': {
+        const taskId = this.paramOf(req, 'taskId');
+        if (!taskId) throw new ForbiddenException('No task in scope for this key.');
+        await this.assertAssignedToTask(agent, taskId);
+        break;
+      }
+      case 'task-workspace': {
+        const taskId = this.paramOf(req, 'taskId');
+        if (!taskId) throw new ForbiddenException('No task in scope for this key.');
+        await this.assertTaskInWorkspace(agent, taskId);
+        break;
+      }
+      case 'project-write': {
+        const projectId = this.bodyFieldOf(req, 'projectId');
+        if (!projectId) throw new ForbiddenException('No project in scope for this key.');
+        await this.assertProjectInWorkspace(agent, projectId);
+        break;
+      }
+      case 'project': {
+        const projectId = this.paramOf(req, 'projectId');
+        if (!projectId) throw new ForbiddenException('No project in scope for this key.');
+        await this.assertProjectInWorkspace(agent, projectId);
+        break;
+      }
+      // MUN-0045 (contract_diff ENUM_VALUE_ADDED): a future AgentScopeKind that
+      // reaches here without its own case is a COMPILE ERROR, not a route that
+      // silently falls back onto 'project' — the if/else chain this replaced
+      // could not make that guarantee.
+      default: {
+        const exhaustive: never = kind;
+        throw new ForbiddenException(`Unhandled agent scope kind: ${String(exhaustive)}`);
+      }
     }
 
     req.agentScope = { agentId: agent.id, kind };
