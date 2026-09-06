@@ -110,7 +110,17 @@ jobs:
     # to read a receipt from, and `deploy` must not gain a dependency that is skipped there (a skipped
     # need skips the dependent). "Required for merge" is enforced where it belongs — as a required
     # status check on `main` in branch protection.
-    if: github.event_name == 'pull_request'
+    #
+    # AUP-GRAPH-006:gate2a. `needs: lint-and-test` + `if: always()` is what makes the automated-author
+    # path honest. A dependency-manifest or lockfile change triggers the graph's global fallback — the
+    # blast radius is the WHOLE repository (the Bazel/Nx rule of DEC-AUP-0008) — and the verifier for
+    # that is this repository's own suite. So the gate is handed `needs.lint-and-test.result`, and it
+    # maps success -> verified, failure/cancelled/timed_out -> failed, anything else -> not_measured.
+    # `always()` is required for the gate to SEE a failure: without it a failed need would skip this
+    # job, and a skipped check is not a red one. `deploy` does not depend on this job, so its
+    # dependency graph is unchanged.
+    needs: lint-and-test
+    if: always() && github.event_name == 'pull_request'
     # The workflow file is the program repository's own, vendored byte-for-byte from the pinned SHA
     # below (its sha256 is recorded in .github/graph-admission/BUNDLE.json). It is called LOCALLY
     # because the cross-repository reference to the reusable workflow of the PRIVATE program
@@ -118,7 +128,9 @@ jobs:
     # and no retrievable annotation. Recorded as a hole, not as a solved problem.
     uses: ./.github/workflows/graph-admission.yml
     with:
-      program_ref: 'cdc9ee682821edc53c98f40c025aba6935b6f621'
+      program_ref: '166d716d2a0de81dbc7b82318a891dc4a38c5a66'
+      verifier_job: 'lint-and-test'
+      verifier_conclusion: ${{ needs.lint-and-test.result }}
 
   network-exposure:
     uses: Arcanada-one/datarim/.github/workflows/network-exposure-lint.yml@57afdfcd6a2d71aa8e0b577de6e43846e93b60dd

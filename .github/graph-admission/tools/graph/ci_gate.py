@@ -50,6 +50,9 @@ BUNDLE_FILES = [
     "tools/graph/admit_change.py",
     "tools/graph/schema_check.py",
     "tools/graph/build_graph.py",
+    # AUP-GRAPH-006:gate2a — the automated-author path classifies changed paths and decides the global
+    # fallback with the SAME code the local gate uses, so the classifier travels with the bundle.
+    "tools/graph/impact.py",
     "tools/graph/ci_gate.py",
     "contracts/graph-verified-change/admission-gate.v1.json",
     "contracts/graph-verified-change/relationship-graph.v1.json",
@@ -282,7 +285,22 @@ def cmd_run(a) -> int:
     receipts = tree_receipts + body_receipts
     cmd = [sys.executable, str(tools / "tools/graph/admit_change.py"), "gate", "--repo", str(repo),
            "--range", f"{base}..{head}", "--json", "--out", str(work / "gate.json"),
-           "--enforcement", a.enforcement]
+           "--enforcement", a.enforcement, "--workdir", str(work / "gate2a"),
+           "--repo-name", result["repo"]]
+    # AUP-GRAPH-006:gate2a — the automated-author path. The event payload is the ONLY source of author
+    # identity; the head branch name is attacker-controllable and is never consulted.
+    if getattr(a, "event_file", None) and Path(a.event_file).exists():
+        cmd += ["--event-file", a.event_file]
+        result["automated_author_inputs"] = {
+            "event_file": a.event_file,
+            "verifier_job": getattr(a, "verifier_job", None) or None,
+            "verifier_conclusion": getattr(a, "verifier_conclusion", None) or None,
+        }
+    for flag, val in (("--verifier-job", getattr(a, "verifier_job", None)),
+                      ("--verifier-conclusion", getattr(a, "verifier_conclusion", None)),
+                      ("--verifier-output-ref", getattr(a, "verifier_output_ref", None))):
+        if val:
+            cmd += [flag, val]
     if receipts:
         for p in receipts:
             cmd += ["--receipt", str(p)]
@@ -293,6 +311,10 @@ def cmd_run(a) -> int:
         empty = work / "no-receipts"
         empty.mkdir(exist_ok=True)
         cmd += ["--receipt-dir", str(empty)]
+        # NOTE: `refuse` here is the DRIVER's finding about the two human-facing sources. The gate may
+        # still author a receipt itself on the automated-author path (AUP-GRAPH-006:gate2a); when it does,
+        # this entry is downgraded below, after the gate has spoken, so a driver-level note can never
+        # outvote the gate's own verdict.
         result["checks"].append({"code": "RECEIPT_SOURCES_EMPTY", "verdict": "refuse",
                                  "detail": "no ChangeAdmissionReceipt/v1 in the head tree "
                                            f"({', '.join(a.receipt_glob or DEFAULT_RECEIPT_GLOBS)}) and none as a "
@@ -309,14 +331,22 @@ def cmd_run(a) -> int:
     result["gate"] = {"gate_receipt_id": gate_doc.get("gate_receipt_id"), "verdict": gate_doc.get("verdict"),
                       "exit_code": gate_doc.get("exit_code"), "reason_codes": gate_doc.get("reason_codes"),
                       "receipts": gate_doc.get("receipts"), "policy": gate_doc.get("policy")}
+    result["automated_author"] = gate_doc.get("automated_author")
     result["checks"] += [{"code": c["code"], "verdict": c["verdict"], "detail": c["detail"]} for c in gate_doc["checks"]]
     result["reason_codes"] = sorted(set(result["reason_codes"] + list(gate_doc.get("reason_codes") or [])))
 
     # the caller repository's own graph, built here from the pinned bundle, cross-checked against the receipt
     if a.build_graph:
         bound = [r for r in gate_doc.get("receipts", []) if r.get("bound")]
+        # …including a receipt the gate AUTHORED itself on the automated-author path: it is not one of
+        # the driver's two sources, but it is a receipt like any other and is rebuilt against like one.
+        pool = list(map(str, receipts))
+        au_path = (gate_doc.get("automated_author") or {}).get("receipt_path")
+        if au_path:
+            pool.append(au_path)
         for rec in bound:
-            src = next((json.loads(Path(p).read_text()) for p in map(str, receipts) if Path(p).name == Path(rec["path"]).name), None)
+            src = next((json.loads(Path(p).read_text()) for p in pool
+                        if Path(p).exists() and Path(p).name == Path(rec["path"]).name), None)
             g = (src or {}).get("graph") or {}
             if not g.get("source_commit") or not g.get("graph_digest"):
                 result["checks"].append({"code": "GRAPH_NOT_REBUILT", "verdict": "not_measured",
@@ -342,12 +372,23 @@ def cmd_run(a) -> int:
             if not same:
                 result["reason_codes"] = sorted(set(result["reason_codes"] + ["GRAPH_DIGEST_MISMATCH"]))
 
+    if (gate_doc.get("automated_author") or {}).get("eligible"):
+        for c in result["checks"]:
+            if c["code"] == "RECEIPT_SOURCES_EMPTY":
+                c["verdict"] = "not_measured"
+                c["detail"] += (" — the gate then AUTHORED one itself on the automated-author path "
+                                f"({(gate_doc['automated_author'].get('author_match') or {}).get('author', {}).get('login')}), "
+                                "and that receipt was checked exactly like any other.")
     hard = [c for c in result["checks"] if c["verdict"] == "refuse"]
     gv = gate_doc.get("verdict")
     result["verdict"] = {"admit": "admitted", "paused_safe": "paused", "refuse": "refused"}.get(gv, gv)
     if hard and result["verdict"] == "admitted":
         result["verdict"] = "refused"
-    exempt = any(r.get("exemptions") for r in gate_doc.get("receipts", []) if r.get("bound"))
+    # The gate's receipt rows carry `entity_counts.exempted` and `admission`, never an `exemptions` key:
+    # keying on `r["exemptions"]` (gate1) made `admitted_with_exemptions` unreachable in CI. Read the
+    # fields the gate actually emits.
+    exempt = any((r.get("entity_counts") or {}).get("exempted") or r.get("admission") == "admitted_with_exemptions"
+                 for r in gate_doc.get("receipts", []) if r.get("bound"))
     if result["verdict"] == "admitted" and exempt:
         result["verdict"] = "admitted_with_exemptions"
     result["conclusion"] = "success" if result["verdict"].startswith("admitted") else "failure"
@@ -377,7 +418,7 @@ def selftest() -> int:
     repo, base, head = admit_change.scratch_repo(root)
     F = admit_change.make_fixtures(base, head)
     bundle = root / "bundle"
-    cmd_bundle(argparse.Namespace(out=str(bundle), program_ref="0" * 40))
+    cmd_bundle(argparse.Namespace(out=str(bundle), program_ref="0" * 40, workflow_out=None))
     (repo / ".github").mkdir(exist_ok=True)
     shutil.copytree(bundle, repo / ".github/graph-admission")
     rdir = repo / "receipts/graph"
@@ -509,7 +550,198 @@ def selftest() -> int:
           f"{len(mutants) + 1}/{len(mutants) + 1} mutants" if not red else
           f"\nSELFTEST FAIL: {len(checks) - red}/{len(checks)} checks")
     shutil.rmtree(root, ignore_errors=True)
+
+    print("\n--- AUP-GRAPH-006:gate2a — the automated-author battery ---")
+    g2a_checks, g2a_red = selftest_gate2a()
+    red += g2a_red
+    checks += g2a_checks
+    print(f"\nTOTAL {'PASS' if not red else 'FAIL'}: {len(checks) - red}/{len(checks)} checks across both batteries")
     return 0 if not red else 1
+
+
+def selftest_gate2a() -> tuple[list[dict], int]:
+    """AUP-GRAPH-006:gate2a — the automated-author mutation battery.
+
+    Control: a dependabot pull request touching ONLY a lockfile is green with the typed exemption.
+    Every mutant must FLIP it. A survivor is a hole, reported as one.
+    """
+    import tempfile
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import admit_change  # noqa: E402
+
+    root = Path(tempfile.mkdtemp(prefix="gate2a-selftest-"))
+    checks, red = [], 0
+
+    def check(name, ok, **kw):
+        nonlocal red
+        checks.append({"name": name, "ok": bool(ok), **kw})
+        if not ok:
+            red += 1
+        print(("ok   " if ok else "FAIL ") + name + ("" if ok else "  " + json.dumps(kw, ensure_ascii=False)[:400]))
+
+    # a repository with a lockfile, a manifest and source — the shape a dependency bump lands in
+    repo = root / "repo"
+    repo.mkdir(parents=True)
+    env = {"GIT_AUTHOR_NAME": "fixture", "GIT_AUTHOR_EMAIL": "f@x", "GIT_COMMITTER_NAME": "fixture",
+           "GIT_COMMITTER_EMAIL": "f@x", "GIT_AUTHOR_DATE": "2026-09-05T00:00:00Z",
+           "GIT_COMMITTER_DATE": "2026-09-05T00:00:00Z", "PATH": os.environ.get("PATH", "/usr/bin:/bin"),
+           "HOME": str(root)}
+
+    def g(*args):
+        r = subprocess.run(["git", "-C", str(repo), *args], capture_output=True, text=True, env=env)
+        if r.returncode != 0:
+            raise RuntimeError(f"git {' '.join(args)}: {r.stderr[:300]}")
+        return r.stdout
+
+    g("init", "-q", "-b", "main")
+    (repo / "src").mkdir()
+    (repo / "src/a.ts").write_text("export const a = 1;\n")
+    (repo / "src/b.ts").write_text("import { a } from './a';\nexport const b = a + 1;\n")
+    (repo / "package.json").write_text('{\n "name": "fixture",\n "dependencies": {"left-pad": "1.0.0"}\n}\n')
+    (repo / "pnpm-lock.yaml").write_text("lockfileVersion: '9.0'\npackages:\n  left-pad@1.0.0: {}\n")
+    g("add", "-A"); g("commit", "-q", "-m", "base")
+    base = g("rev-parse", "HEAD").strip()
+
+    bundle = root / "bundle"
+    cmd_bundle(argparse.Namespace(out=str(bundle), program_ref="0" * 40, workflow_out=None))
+    shutil.copytree(bundle, repo / ".github/graph-admission")
+    g("add", "-A"); g("commit", "-q", "-m", "install the gate bundle")
+    base = g("rev-parse", "HEAD").strip()
+
+    def commit(files: dict[str, str], msg: str, branch: str) -> str:
+        """One branch per mutant, each a single commit on `base`: a mutant must differ from the control
+        in exactly the one thing it mutates, and sequential commits would carry the previous one's files
+        into the diff (observed: mutant (d) inherited mutant (b)'s src/a.ts and refused for the wrong reason)."""
+        g("checkout", "-q", "-B", branch, base)
+        for rel, body in files.items():
+            fp = repo / rel
+            fp.parent.mkdir(parents=True, exist_ok=True)
+            fp.write_text(body)
+        g("add", "-A"); g("commit", "-q", "-m", msg)
+        return g("rev-parse", "HEAD").strip()
+
+    DEPENDABOT = {"login": "dependabot[bot]", "id": 49699333, "type": "Bot"}
+    HUMAN = {"login": "mallory", "id": 12345, "type": "User"}
+
+    def event(user: dict, head_ref: str) -> str:
+        p = root / f"event-{user['login']}-{abs(hash(head_ref)) % 10 ** 6}.json"
+        p.write_text(json.dumps({"action": "opened", "pull_request": {
+            "number": 1, "user": user, "author_association": "NONE",
+            "head": {"ref": head_ref}, "base": {"ref": "main"}}}, indent=1))
+        return str(p)
+
+    def run(head: str, *, event_file: str | None, conclusion: str | None, job: str = "lint-and-test",
+            body: str = "") -> dict:
+        bp = root / "body.txt"
+        bp.write_text(body)
+        out = root / "result.json"
+        rc = cmd_run(argparse.Namespace(
+            repo=str(repo), repo_name="Arcanada-one/fixture", tools=str(repo / ".github/graph-admission"),
+            program_ref="0" * 40, base=base, head=head, pr_body_file=str(bp),
+            receipt_glob=["receipts/graph/*.json"], enforcement="off", build_graph=True,
+            workdir=str(root / f"work-{head[:8]}"), out=str(out), summary=None,
+            event_file=event_file, verifier_job=job, verifier_conclusion=conclusion,
+            verifier_output_ref="https://example.invalid/run/1"))
+        doc = json.loads(out.read_text())
+        doc["_rc"] = rc
+        return doc
+
+    # ---------------------------------------------------------------- control (a)
+    lock_head = commit({"pnpm-lock.yaml": "lockfileVersion: '9.0'\npackages:\n  left-pad@1.1.0: {}\n",
+                        "package.json": '{\n "name": "fixture",\n "dependencies": {"left-pad": "1.1.0"}\n}\n'},
+                       "build(deps): bump left-pad from 1.0.0 to 1.1.0", "mut-a")
+    control = run(lock_head, event_file=event(DEPENDABOT, "dependabot/npm_and_yarn/left-pad-1.1.0"),
+                  conclusion="success")
+    au = control.get("automated_author") or {}
+    check("(a) dependabot pull request touching only dependency manifests → green with the typed exemption",
+          control["_rc"] == 0 and control["verdict"] == "admitted_with_exemptions"
+          and au.get("eligible") is True and au.get("exemption_code") == "AUTOMATED_DEPENDENCY_UPDATE"
+          and "AUTOMATED_AUTHOR_RECEIPT_ISSUED" in control["reason_codes"],
+          verdict=control["verdict"], rc=control["_rc"], codes=control["reason_codes"],
+          exemption=au.get("exemption_code"))
+    check("(a2) the control's receipt states impact = whole_repository and is verified by the repository's "
+          "own test job — the exemption never covers the repository entity",
+          au.get("eligible") is True and _receipt_shape_ok(root, au.get("receipt_path")),
+          receipt=au.get("receipt_path"))
+    check("(a3) the gate REBUILT the repository graph at the receipt's source commit and it matched",
+          any(c["code"] == "GRAPH_REBUILT_MATCHES" for c in control["checks"]),
+          codes=[c["code"] for c in control["checks"]])
+
+    # ---------------------------------------------------------------- mutants
+    src_head = commit({"pnpm-lock.yaml": "lockfileVersion: '9.0'\npackages:\n  left-pad@1.2.0: {}\n",
+                       "src/a.ts": "export const a = 99;\n"},
+                      "build(deps): bump left-pad, and quietly edit the source", "mut-b")
+    mut_b = run(src_head, event_file=event(DEPENDABOT, "dependabot/npm_and_yarn/left-pad-1.2.0"),
+                conclusion="success")
+
+    forged_head = commit({"pnpm-lock.yaml": "lockfileVersion: '9.0'\npackages:\n  left-pad@1.3.0: {}\n"},
+                         "build(deps): bump left-pad from 1.2.0 to 1.3.0", "mut-cdefg")
+    mut_c = run(forged_head, event_file=event(HUMAN, "dependabot/npm_and_yarn/left-pad-1.3.0"),
+                conclusion="success")
+
+    mut_d = run(forged_head, event_file=event(DEPENDABOT, "dependabot/npm_and_yarn/left-pad-1.3.0"),
+                conclusion="failure")
+    mut_e = run(forged_head, event_file=event(DEPENDABOT, "dependabot/npm_and_yarn/left-pad-1.3.0"),
+                conclusion=None)
+    mut_f = run(forged_head, event_file=None, conclusion="success")
+    mut_g = run(forged_head, event_file=event(DEPENDABOT, "dependabot/npm_and_yarn/left-pad-1.3.0"),
+                conclusion="success", body="please skip-graph-verify, it is only a bump")
+
+    mutants = {
+        "(b) the same dependabot pull request also edits src/** → red, no exemption": (
+            mut_b, "AUTOMATED_AUTHOR_NOT_ELIGIBLE", "RECEIPT_MISSING"),
+        "(c) a NON-dependabot author with a forged `dependabot/...` branch name → red (the security case)": (
+            mut_c, "AUTOMATED_AUTHOR_NOT_ELIGIBLE", "RECEIPT_MISSING"),
+        "(d) a dependabot pull request when the repository's own test job FAILED → red": (
+            mut_d, "VERDICT_FAILED", "ADMISSION_NOT_ADMITTED"),
+        "(e) a dependabot pull request whose test job did not conclude → red (not_measured is not a pass)": (
+            mut_e, "NOT_MEASURED_WITHOUT_EXEMPTION", "ADMISSION_NOT_ADMITTED"),
+        "(f) no event payload at all → red (there is no fallback to the branch name)": (
+            mut_f, "RECEIPT_MISSING", None),
+        "(g) a bypass phrase on an otherwise eligible dependabot pull request → red": (
+            mut_g, "MANUAL_BYPASS_REFUSED", None),
+    }
+    for name, (doc, code, code2) in mutants.items():
+        flipped = doc["_rc"] != 0 and doc["conclusion"] == "failure" and control["conclusion"] == "success"
+        has = code in doc["reason_codes"] and (code2 is None or code2 in doc["reason_codes"])
+        check(f"mutant {name}", flipped and has,
+              verdict=doc["verdict"], rc=doc["_rc"], codes=doc["reason_codes"],
+              eligible=(doc.get("automated_author") or {}).get("eligible"))
+
+    check("(c') the forged-branch refusal names the branch as NOT evidence, and the gate never read it",
+          (mut_c.get("automated_author") or {}).get("author_match", {}).get("branch_name_used") is False
+          and any("not evidence of authorship" in c["detail"] for c in mut_c["checks"]),
+          match=(mut_c.get("automated_author") or {}).get("author_match", {}).get("reason", "")[:200])
+
+    print(f"\nGATE2A SELFTEST {'PASS' if not red else 'FAIL'}: {len(checks) - red}/{len(checks)} checks, "
+          f"{len(mutants)}/{len(mutants)} mutants")
+    if not red:
+        shutil.rmtree(root, ignore_errors=True)
+    else:
+        print(f"scratch kept at {root}")
+    return checks, red
+
+
+def _receipt_shape_ok(root: Path, receipt_path: str | None) -> bool:
+    """The control's authored receipt must make exactly the claims the policy says it makes."""
+    if not receipt_path or not Path(receipt_path).exists():
+        return False
+    r = json.loads(Path(receipt_path).read_text())
+    gf = r["impact_set"]["global_fallback"]
+    verdict_of = {v["entity"]: v["verdict"] for v in r["verdicts"]}
+    exempt = {x["entity"] for x in r["exemptions"]}
+    repo_ent = next((e for e in verdict_of if e.startswith("repository:")), None)
+    auth_ent = next((e for e in verdict_of if e.startswith("receipt_authorship:")), None)
+    return bool(
+        gf.get("triggered") is True and gf.get("scope") == "whole_repository" and gf.get("total_nodes")
+        and r["impact_set"]["scope"] == "whole_repository"
+        and repo_ent and verdict_of[repo_ent] == "verified" and repo_ent not in exempt
+        and auth_ent and verdict_of[auth_ent] == "not_measured" and auth_ent in exempt
+        and r["exemptions"][0]["owner"] and r["exemptions"][0]["expires_at_utc"]
+        and r["verifiers"][0]["kind"] == "other"
+        and r["admission"]["verdict"] == "admitted_with_exemptions"
+        and r["authored_by"]["path"] == "automated_author"
+    )
 
 
 def main(argv=None) -> int:
@@ -537,6 +769,11 @@ def main(argv=None) -> int:
     r.add_argument("--workdir", default=os.environ.get("RUNNER_TEMP", "/tmp") + "/graph-admission")
     r.add_argument("--out", default="graph-admission-result.json")
     r.add_argument("--summary")
+    r.add_argument("--event-file", help="GITHUB_EVENT_PATH — the pull_request event payload; the automated-author "
+                                        "path reads the author from it and from nothing else")
+    r.add_argument("--verifier-job", help="the repository's own test job, verifier of a whole-repository impact")
+    r.add_argument("--verifier-conclusion", help="that job's conclusion; absent/unknown is not_measured, never a pass")
+    r.add_argument("--verifier-output-ref", help="URL the verdict can be traced to")
     r.set_defaults(fn=cmd_run)
     a = ap.parse_args(argv)
     if a.selftest:
