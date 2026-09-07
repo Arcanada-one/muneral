@@ -301,12 +301,7 @@ describe('Agent-key scope on /tasks (e2e)', () => {
     await assign(task.id);
 
     // 403, not 401: the key is valid, the route is simply not scoped for keys.
-    await supertest(app.getHttpServer())
-      .post('/tasks')
-      .set('Authorization', `Bearer ${assignedKey}`)
-      .send({ projectId, title: 'should not be created' })
-      .expect(403);
-
+    // POST /tasks is no longer in this set — see MUN-0045 below.
     await supertest(app.getHttpServer())
       .delete(`/tasks/${task.id}`)
       .set('Authorization', `Bearer ${assignedKey}`)
@@ -319,6 +314,84 @@ describe('Agent-key scope on /tasks (e2e)', () => {
       .expect(403);
 
     expect(await prisma.task.count({ where: { projectId } })).toBe(1);
+  });
+
+  // -------------------------------------------------------------------------
+  // MUN-0045: creating — the write route the agent key was missing entirely
+  // -------------------------------------------------------------------------
+
+  it('lets an agent key create a task inside its own workspace, attributed to the agent', async () => {
+    const res = await supertest(app.getHttpServer())
+      .post('/tasks')
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .send({ projectId, title: 'AUP-3001 registered by the agent' })
+      .expect(201);
+
+    expect(res.body.projectId).toBe(projectId);
+
+    const stored = await prisma.task.findUniqueOrThrow({ where: { id: res.body.id } });
+    // Authorship is the CREDENTIAL's agent, never a value the caller sent —
+    // the request body above named no actor at all.
+    expect(stored.actorType).toBe('agent');
+    expect(stored.createdById).toBe(assignedAgentId);
+  });
+
+  it('the negative control: a key not entitled to this project is still refused, not 201', async () => {
+    // Same answer `GET /tasks/project/:projectId` already gives a
+    // cross-workspace caller under the sibling 'project' scope (MUN-0043): 404,
+    // not 403, so a key cannot use the difference to map another workspace's
+    // ids. What this proves is the one thing that must never happen — a key
+    // outside the grant still cannot create the row — not the exact status
+    // code, which the unmarked-route unit tests already pin at 403
+    // (agent-task-scope.guard.spec.ts: "the negative control: a key WITHOUT
+    // this scope still gets 403 on POST /tasks").
+    await supertest(app.getHttpServer())
+      .post('/tasks')
+      .set('Authorization', `Bearer ${foreignKey}`)
+      .send({ projectId, title: 'should not be created' })
+      .expect(404);
+
+    expect(await prisma.task.count({ where: { projectId, title: 'should not be created' } })).toBe(0);
+  });
+
+  it('the abuse case: an agent key cannot create a task claiming a principal it is not', async () => {
+    const foreignAgent = await prisma.agent.findFirstOrThrow({
+      where: { workspaceId: otherWorkspaceId },
+    });
+
+    // CreateTaskDto has no owner/actor/agentId field, and the global
+    // ValidationPipe (`whitelist: true`) strips anything that is not on the
+    // DTO — so even a caller who tries to forge one gets ignored, not honoured.
+    const res = await supertest(app.getHttpServer())
+      .post('/tasks')
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .send({
+        projectId,
+        title: 'forged authorship attempt',
+        createdById: foreignAgent.id,
+        actorType: 'human',
+        actor: { id: foreignAgent.id, type: 'human', name: 'not-me' },
+      })
+      .expect(201);
+
+    const stored = await prisma.task.findUniqueOrThrow({ where: { id: res.body.id } });
+    expect(stored.createdById).toBe(assignedAgentId);
+    expect(stored.actorType).toBe('agent');
+    expect(stored.createdById).not.toBe(foreignAgent.id);
+  });
+
+  it('still refuses to create when the project belongs to another workspace (404, not the write)', async () => {
+    await supertest(app.getHttpServer())
+      .post('/tasks')
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .send({ projectId: otherProjectId, title: 'should not cross workspaces' })
+      .expect(404);
+
+    expect(
+      await prisma.task.count({
+        where: { projectId: otherProjectId, title: 'should not cross workspaces' },
+      }),
+    ).toBe(0);
   });
 
   // -------------------------------------------------------------------------

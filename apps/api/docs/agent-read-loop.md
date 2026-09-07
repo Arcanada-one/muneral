@@ -98,6 +98,23 @@ assignments**:
 | `GET /tasks/project/:projectId` | only the tasks in that project the agent is assigned to; `404` if the project is not in the agent's workspace |
 | `PATCH /tasks/:taskId/status` | the transition, if the agent is assigned to the task — otherwise `403` |
 
+## Creating a task with the agent key (MUN-0045)
+
+`POST /tasks` was closed to every agent key — even a well-formed request got
+`403`, the same default-deny answer any unmarked route gives, so an agent could
+not register the very work it was about to execute. It now accepts an agent key
+too, **scoped to the agent's own workspace** (not to an assignment — the task
+being created is what the agent would be assigned to next):
+
+| route | an agent key gets |
+|---|---|
+| `POST /tasks` | creates the task, if `projectId` in the body names a project in the agent's own workspace — otherwise `404`, the same answer a project id that never existed gets |
+
+The created task is attributed to the calling agent regardless of what the
+request body claims: `createdById`/`actorType` come from the credential, never
+from the body, and there is no field on the create request that names an owner
+at all.
+
 Everything else on `/tasks` stays JWT-only. It is an **allowlist**: a route with
 no `@AgentScope(...)` marker refuses an API key by default, so a route added
 later is closed the day it merges rather than open until somebody remembers to

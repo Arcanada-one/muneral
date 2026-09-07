@@ -23,10 +23,25 @@ import { SetMetadata } from '@nestjs/common';
  *                      cross-tenant read without changing what an agent can see
  *                      inside its own workspace, which is what an unattended
  *                      poller depends on. See the field-change routes.
+ *   'project-write'  — MUN-0045. The route names a project by `projectId` IN
+ *                      THE REQUEST BODY (not a route param — `POST /tasks` has
+ *                      no `:projectId` segment) and creates a task inside it.
+ *                      The key's agent must be in the workspace that owns the
+ *                      project; the agent need not be assigned to anything
+ *                      yet, since the task being created is what it would be
+ *                      assigned to. Bounds what the key can write to its own
+ *                      workspace's projects — the same boundary 'project'
+ *                      already draws for reads, extended to the one write
+ *                      route an agent actually needs. Authorship of the
+ *                      created task is never taken from this scope or from
+ *                      the request body: it is `req.actor`, resolved by
+ *                      `ActorInterceptor` from the credential itself, so a key
+ *                      cannot claim a principal it is not (see
+ *                      CreateTaskDto — it carries no owner/actor field at all).
  */
 export const AGENT_SCOPE_KEY = 'mun0043:agentScope';
 
-export type AgentScopeKind = 'task' | 'project' | 'task-workspace';
+export type AgentScopeKind = 'task' | 'project' | 'task-workspace' | 'project-write';
 
 export const AgentScope = (kind: AgentScopeKind) =>
   SetMetadata(AGENT_SCOPE_KEY, kind);

@@ -48,9 +48,16 @@ type AuthRequest = Request & { actor: Actor; agentScope?: AgentScopeContext };
  * accepts either credential, and `AgentTaskScopeGuard` then refuses an API key
  * on every route that is not explicitly marked `@AgentScope(...)`, and on every
  * marked route whose task the key's agent is not assigned to. Routes with no
- * marker — create, delete, checklists, dependencies, comments — stay exactly as
+ * marker — delete, checklists, dependencies, comments — stay exactly as
  * JWT-only as they were; the only visible difference is that a valid key is now
  * told 403 instead of 401.
+ *
+ * MUN-0045 — `POST /tasks` (`create`) is the one exception: it is now marked
+ * `@AgentScope('project-write')`, because task creation with a `mun_sk_` key
+ * was blocked entirely (403, unmarked route) and AUP-E30 needs an agent to be
+ * able to register its own work. The scope binds the key to projects inside
+ * its own workspace — see the decorator's doc comment for what it does and
+ * does not grant.
  */
 @Controller('tasks')
 @UseGuards(JwtOrApiKeyGuard, AgentTaskScopeGuard)
@@ -61,7 +68,13 @@ export class TasksController {
     private readonly fieldChangesService: FieldChangesService,
   ) {}
 
+  /** Creatable by an agent's API key inside its own workspace (MUN-0045) or by
+   *  a JWT. `dto.projectId` is what the guard checks: a project outside the
+   *  agent's workspace is refused before the handler runs. Authorship comes
+   *  from `req.actor`, resolved server-side from the credential — the DTO has
+   *  no field a caller could use to claim a different principal. */
   @Post()
+  @AgentScope('project-write')
   create(@Req() req: AuthRequest, @Body() dto: CreateTaskDto) {
     return this.tasksService.create(req.actor, dto);
   }

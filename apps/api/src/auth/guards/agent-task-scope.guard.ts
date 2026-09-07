@@ -86,18 +86,39 @@ export class AgentTaskScopeGuard implements CanActivate {
       );
     }
 
-    if (kind === 'task') {
-      const taskId = this.paramOf(req, 'taskId');
-      if (!taskId) throw new ForbiddenException('No task in scope for this key.');
-      await this.assertAssignedToTask(agent, taskId);
-    } else if (kind === 'task-workspace') {
-      const taskId = this.paramOf(req, 'taskId');
-      if (!taskId) throw new ForbiddenException('No task in scope for this key.');
-      await this.assertTaskInWorkspace(agent, taskId);
-    } else {
-      const projectId = this.paramOf(req, 'projectId');
-      if (!projectId) throw new ForbiddenException('No project in scope for this key.');
-      await this.assertProjectInWorkspace(agent, projectId);
+    switch (kind) {
+      case 'task': {
+        const taskId = this.paramOf(req, 'taskId');
+        if (!taskId) throw new ForbiddenException('No task in scope for this key.');
+        await this.assertAssignedToTask(agent, taskId);
+        break;
+      }
+      case 'task-workspace': {
+        const taskId = this.paramOf(req, 'taskId');
+        if (!taskId) throw new ForbiddenException('No task in scope for this key.');
+        await this.assertTaskInWorkspace(agent, taskId);
+        break;
+      }
+      case 'project-write': {
+        const projectId = this.bodyFieldOf(req, 'projectId');
+        if (!projectId) throw new ForbiddenException('No project in scope for this key.');
+        await this.assertProjectInWorkspace(agent, projectId);
+        break;
+      }
+      case 'project': {
+        const projectId = this.paramOf(req, 'projectId');
+        if (!projectId) throw new ForbiddenException('No project in scope for this key.');
+        await this.assertProjectInWorkspace(agent, projectId);
+        break;
+      }
+      // MUN-0045 (contract_diff ENUM_VALUE_ADDED): a future AgentScopeKind that
+      // reaches here without its own case is a COMPILE ERROR, not a route that
+      // silently falls back onto 'project' — the if/else chain this replaced
+      // could not make that guarantee.
+      default: {
+        const exhaustive: never = kind;
+        throw new ForbiddenException(`Unhandled agent scope kind: ${String(exhaustive)}`);
+      }
     }
 
     req.agentScope = { agentId: agent.id, kind };
@@ -107,6 +128,17 @@ export class AgentTaskScopeGuard implements CanActivate {
   private paramOf(req: AgentScopedRequest, name: string): string | undefined {
     const params = req.params as Record<string, string> | undefined;
     const value = params?.[name];
+    return typeof value === 'string' && value.length > 0 ? value : undefined;
+  }
+
+  /** MUN-0045: 'project-write' reads its scoped id from the body, because
+   *  `POST /tasks` names the target project as a DTO field, not a route
+   *  param. This runs BEFORE the body is validated/transformed by the
+   *  handler's ValidationPipe, so it reads the raw field defensively rather
+   *  than trusting its shape. */
+  private bodyFieldOf(req: AgentScopedRequest, name: string): string | undefined {
+    const body = req.body as Record<string, unknown> | undefined;
+    const value = body?.[name];
     return typeof value === 'string' && value.length > 0 ? value : undefined;
   }
 

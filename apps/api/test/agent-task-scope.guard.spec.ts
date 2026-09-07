@@ -176,6 +176,69 @@ describe('AgentTaskScopeGuard', () => {
     await expect(guard.canActivate(ctx)).rejects.toThrow(NotFoundException);
   });
 
+  // --- MUN-0045: 'project-write' — POST /tasks, projectId in the BODY, not params
+  it('admits a create inside the agent workspace, reading projectId from the body', async () => {
+    reflector.getAllAndOverride.mockReturnValue('project-write');
+    prisma.project.findFirst.mockResolvedValue({ id: 'p-1' });
+    const { ctx, req } = makeContext({
+      apiKeyAgent: AGENT,
+      params: {},
+      body: { projectId: 'p-1', title: 'AUP-3001' },
+    });
+
+    await expect(guard.canActivate(ctx)).resolves.toBe(true);
+    expect(prisma.project.findFirst).toHaveBeenCalledWith({
+      where: { id: 'p-1', workspaceId: 'ws-1' },
+      select: { id: true },
+    });
+    expect(req.agentScope).toEqual({ agentId: 'agent-1', kind: 'project-write' });
+  });
+
+  it('the negative control: a key WITHOUT this scope still gets 403 on POST /tasks', async () => {
+    // The route carries no @AgentScope at all — the state MUN-0045 found it in.
+    reflector.getAllAndOverride.mockReturnValue(undefined);
+    const { ctx } = makeContext({
+      apiKeyAgent: AGENT,
+      params: {},
+      body: { projectId: 'p-1', title: 'AUP-3001' },
+    });
+
+    await expect(guard.canActivate(ctx)).rejects.toThrow(ForbiddenException);
+    expect(prisma.project.findFirst).not.toHaveBeenCalled();
+  });
+
+  it('refuses to create in a project outside the agent workspace, 404 like a missing one', async () => {
+    reflector.getAllAndOverride.mockReturnValue('project-write');
+    prisma.project.findFirst.mockResolvedValue(null);
+    const { ctx } = makeContext({
+      apiKeyAgent: AGENT,
+      params: {},
+      body: { projectId: 'p-elsewhere', title: 'x' },
+    });
+
+    await expect(guard.canActivate(ctx)).rejects.toThrow(NotFoundException);
+  });
+
+  it('refuses a project-write route whose body carries no projectId at all', async () => {
+    reflector.getAllAndOverride.mockReturnValue('project-write');
+    const { ctx } = makeContext({ apiKeyAgent: AGENT, params: {}, body: { title: 'x' } });
+
+    await expect(guard.canActivate(ctx)).rejects.toThrow(ForbiddenException);
+    expect(prisma.project.findFirst).not.toHaveBeenCalled();
+  });
+
+  it('ignores a non-string projectId in the body rather than passing it to Prisma', async () => {
+    reflector.getAllAndOverride.mockReturnValue('project-write');
+    const { ctx } = makeContext({
+      apiKeyAgent: AGENT,
+      params: {},
+      body: { projectId: { $ne: null }, title: 'x' },
+    });
+
+    await expect(guard.canActivate(ctx)).rejects.toThrow(ForbiddenException);
+    expect(prisma.project.findFirst).not.toHaveBeenCalled();
+  });
+
   it('reads the scope from the handler first, then the controller', async () => {
     reflector.getAllAndOverride.mockReturnValue('task');
     prisma.taskAgent.findFirst.mockResolvedValue({ taskId: 't-1' });
