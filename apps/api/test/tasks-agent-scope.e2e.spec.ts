@@ -301,16 +301,11 @@ describe('Agent-key scope on /tasks (e2e)', () => {
     await assign(task.id);
 
     // 403, not 401: the key is valid, the route is simply not scoped for keys.
-    // POST /tasks is no longer in this set — see MUN-0045 below.
+    // POST /tasks is no longer in this set — see MUN-0045 below. Neither is
+    // POST /tasks/:taskId/comments — see MUN-0046 below.
     await supertest(app.getHttpServer())
       .delete(`/tasks/${task.id}`)
       .set('Authorization', `Bearer ${assignedKey}`)
-      .expect(403);
-
-    await supertest(app.getHttpServer())
-      .post(`/tasks/${task.id}/comments`)
-      .set('Authorization', `Bearer ${assignedKey}`)
-      .send({ body: 'should not be posted' })
       .expect(403);
 
     expect(await prisma.task.count({ where: { projectId } })).toBe(1);
@@ -392,6 +387,81 @@ describe('Agent-key scope on /tasks (e2e)', () => {
         where: { projectId: otherProjectId, title: 'should not cross workspaces' },
       }),
     ).toBe(0);
+  });
+
+  // -------------------------------------------------------------------------
+  // MUN-0046: commenting — the second instance of the MUN-0045 omission
+  // -------------------------------------------------------------------------
+
+  it('lets an assigned agent post a comment, attributed to the agent', async () => {
+    const task = await createTask();
+    await assign(task.id);
+
+    await supertest(app.getHttpServer())
+      .post(`/tasks/${task.id}/comments`)
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .send({ body: 'progress note from the agent' })
+      .expect(201);
+
+    const log = await prisma.activityLog.findFirst({
+      where: { taskId: task.id, action: 'comment' },
+      orderBy: { createdAt: 'desc' },
+    });
+    expect(log?.actorType).toBe('agent');
+    expect(log?.actorId).toBe(assignedAgentId);
+    expect((log?.payload as { body?: string } | null)?.body).toBe(
+      'progress note from the agent',
+    );
+  });
+
+  it('the negative control: a key without the scope still 403s on comments', async () => {
+    const task = await createTask();
+    await assign(task.id);
+
+    // Unassigned agent, same workspace.
+    await supertest(app.getHttpServer())
+      .post(`/tasks/${task.id}/comments`)
+      .set('Authorization', `Bearer ${strangerKey}`)
+      .send({ body: 'should not be posted' })
+      .expect(403);
+
+    // Agent from another workspace entirely.
+    await supertest(app.getHttpServer())
+      .post(`/tasks/${task.id}/comments`)
+      .set('Authorization', `Bearer ${foreignKey}`)
+      .send({ body: 'should not be posted either' })
+      .expect(403);
+
+    expect(await prisma.activityLog.count({ where: { taskId: task.id, action: 'comment' } })).toBe(0);
+  });
+
+  it('the abuse case: an agent key cannot post a comment attributed to a principal it is not', async () => {
+    const foreignAgent = await prisma.agent.findFirstOrThrow({
+      where: { workspaceId: otherWorkspaceId },
+    });
+    const task = await createTask();
+    await assign(task.id);
+
+    // AddCommentDto has only `body`; the global ValidationPipe (`whitelist:
+    // true`) strips anything else, so a forged actor claim is never honoured.
+    await supertest(app.getHttpServer())
+      .post(`/tasks/${task.id}/comments`)
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .send({
+        body: 'forged authorship attempt',
+        actorId: foreignAgent.id,
+        actorType: 'human',
+        actor: { id: foreignAgent.id, type: 'human', name: 'not-me' },
+      })
+      .expect(201);
+
+    const log = await prisma.activityLog.findFirst({
+      where: { taskId: task.id, action: 'comment' },
+      orderBy: { createdAt: 'desc' },
+    });
+    expect(log?.actorType).toBe('agent');
+    expect(log?.actorId).toBe(assignedAgentId);
+    expect(log?.actorId).not.toBe(foreignAgent.id);
   });
 
   // -------------------------------------------------------------------------

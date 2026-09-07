@@ -48,16 +48,27 @@ type AuthRequest = Request & { actor: Actor; agentScope?: AgentScopeContext };
  * accepts either credential, and `AgentTaskScopeGuard` then refuses an API key
  * on every route that is not explicitly marked `@AgentScope(...)`, and on every
  * marked route whose task the key's agent is not assigned to. Routes with no
- * marker — delete, checklists, dependencies, comments — stay exactly as
- * JWT-only as they were; the only visible difference is that a valid key is now
- * told 403 instead of 401.
+ * marker — delete, checklists, dependencies — stay exactly as JWT-only as they
+ * were; the only visible difference is that a valid key is now told 403
+ * instead of 401.
  *
- * MUN-0045 — `POST /tasks` (`create`) is the one exception: it is now marked
+ * MUN-0045 — `POST /tasks` (`create`) is one exception: it is marked
  * `@AgentScope('project-write')`, because task creation with a `mun_sk_` key
  * was blocked entirely (403, unmarked route) and AUP-E30 needs an agent to be
  * able to register its own work. The scope binds the key to projects inside
  * its own workspace — see the decorator's doc comment for what it does and
  * does not grant.
+ *
+ * MUN-0046 — `POST /tasks/:taskId/comments` is the other: it carried the SAME
+ * omission MUN-0045 fixed on `POST /tasks` (measured live: 403 "not available
+ * to an agent API key", the unmarked-route default-deny, not a permissions
+ * decision). Marked `@AgentScope('task')` — the same scope `findOne` and
+ * `updateStatus` already use — because a comment, like a status move, is an
+ * act on a specific task the agent must already be assigned to; there is no
+ * body-carried project id here to invent a wider scope for; `'task'` is the
+ * narrowest existing scope that fits. Authorship is unaffected — `AddCommentDto`
+ * carries no actor field, and `req.actor` (via `ActorInterceptor`) is resolved
+ * from the credential, never the body.
  */
 @Controller('tasks')
 @UseGuards(JwtOrApiKeyGuard, AgentTaskScopeGuard)
@@ -195,7 +206,11 @@ export class TasksController {
 
   // --- Comments (activity log entries) ---
 
+  /** Postable by the assigned agent's API key (MUN-0046) or by a JWT. Attributed
+   *  to `req.actor`, resolved from the credential — the DTO carries no field a
+   *  caller could use to claim a different principal. */
   @Post(':taskId/comments')
+  @AgentScope('task')
   addComment(
     @Param('taskId') taskId: string,
     @Req() req: AuthRequest,
