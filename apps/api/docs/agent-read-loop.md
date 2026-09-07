@@ -115,7 +115,30 @@ request body claims: `createdById`/`actorType` come from the credential, never
 from the body, and there is no field on the create request that names an owner
 at all.
 
-Everything else on `/tasks` stays JWT-only. It is an **allowlist**: a route with
+## Commenting with the agent key (MUN-0046)
+
+`POST /tasks/:taskId/comments` carried the same omission MUN-0045 fixed on
+`POST /tasks`: an unmarked route, so a well-formed request from a valid agent
+key got `403` regardless of assignment. It now accepts an agent key, **scoped
+to the agent's own assignment** — the same `'task'` scope `GET /tasks/:taskId`
+and `PATCH /tasks/:taskId/status` already use, since posting a comment is an
+act on one specific task, not a workspace-wide write:
+
+| route | an agent key gets |
+|---|---|
+| `POST /tasks/:taskId/comments` | posts the comment, if the agent is assigned to the task — otherwise `403` |
+
+The comment is attributed to the calling agent regardless of what the request
+body claims: `AddCommentDto` carries only `body`, and the actor comes from the
+credential (`req.actor`, via `ActorInterceptor`), never from the request.
+
+Remaining unmarked routes on `/tasks` — delete, checklists, dependencies —
+stay JWT-only, refused with `403` for a valid key rather than granted. This is
+not a claim that every write an agent needs is now open; see
+`universal-program/cards/MUN-0046-*.md` for the full route sweep this card
+produced and which of those routes are `not_measured` for agent intent.
+
+The rest of `/tasks` stays JWT-only. It is an **allowlist**: a route with
 no `@AgentScope(...)` marker refuses an API key by default, so a route added
 later is closed the day it merges rather than open until somebody remembers to
 close it. The only visible change on those routes is `403` (valid key, out of
