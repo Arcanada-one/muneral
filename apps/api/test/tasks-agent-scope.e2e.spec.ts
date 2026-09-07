@@ -302,7 +302,8 @@ describe('Agent-key scope on /tasks (e2e)', () => {
 
     // 403, not 401: the key is valid, the route is simply not scoped for keys.
     // POST /tasks is no longer in this set — see MUN-0045 below. Neither is
-    // POST /tasks/:taskId/comments — see MUN-0046 below.
+    // POST /tasks/:taskId/comments — see MUN-0046 below. Neither is
+    // GET /tasks/:taskId/activity — see MUN-0047 below.
     await supertest(app.getHttpServer())
       .delete(`/tasks/${task.id}`)
       .set('Authorization', `Bearer ${assignedKey}`)
@@ -462,6 +463,64 @@ describe('Agent-key scope on /tasks (e2e)', () => {
     expect(log?.actorType).toBe('agent');
     expect(log?.actorId).toBe(assignedAgentId);
     expect(log?.actorId).not.toBe(foreignAgent.id);
+  });
+
+  // -------------------------------------------------------------------------
+  // MUN-0047: reading activity — the write MUN-0046 opened had no read route
+  // -------------------------------------------------------------------------
+
+  it('round-trip: an assigned agent reads back its own comment via activity, byte for byte', async () => {
+    const task = await createTask();
+    await assign(task.id);
+    const posted = 'MUN-0047 round-trip note from the agent';
+
+    await supertest(app.getHttpServer())
+      .post(`/tasks/${task.id}/comments`)
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .send({ body: posted })
+      .expect(201);
+
+    const res = await supertest(app.getHttpServer())
+      .get(`/tasks/${task.id}/activity`)
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .expect(200);
+
+    const entry = res.body.data.find(
+      (e: { action: string }) => e.action === 'comment',
+    );
+    expect(entry).toBeDefined();
+    // Byte-compare, not just "truthy": the activity payload is the ONLY
+    // surface an agent key can read this content back from (no GET
+    // .../comments route exists at all — see docs/agent-read-loop.md).
+    expect(entry.payload.body).toBe(posted);
+    expect(entry.actorType).toBe('agent');
+    expect(entry.actorId).toBe(assignedAgentId);
+  });
+
+  it('the negative control (= the abuse case, same mechanism): an unassigned agent cannot read activity, in or out of workspace', async () => {
+    const task = await createTask();
+    await assign(task.id);
+    await supertest(app.getHttpServer())
+      .post(`/tasks/${task.id}/comments`)
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .send({ body: 'not for the stranger or the foreigner' })
+      .expect(201);
+
+    // Unassigned agent, same workspace — the negative control.
+    await supertest(app.getHttpServer())
+      .get(`/tasks/${task.id}/activity`)
+      .set('Authorization', `Bearer ${strangerKey}`)
+      .expect(403);
+
+    // Agent from another workspace entirely — the abuse case this card names:
+    // reading the activity of a task the key's agent is not assigned to.
+    // `AgentTaskScopeGuard`'s 'task' kind runs the identical
+    // `assertAssignedToTask` check MUN-0046 already uses for posting, so this
+    // is not a second mechanism — the same one, read direction.
+    await supertest(app.getHttpServer())
+      .get(`/tasks/${task.id}/activity`)
+      .set('Authorization', `Bearer ${foreignKey}`)
+      .expect(403);
   });
 
   // -------------------------------------------------------------------------

@@ -52,6 +52,18 @@ type AuthRequest = Request & { actor: Actor; agentScope?: AgentScopeContext };
  * were; the only visible difference is that a valid key is now told 403
  * instead of 401.
  *
+ * MUN-0047 — `GET /tasks/:taskId/activity` is scoped the same way (below).
+ * Before this, `POST /tasks/:taskId/comments` (MUN-0046) was write-only to an
+ * agent key: the comment landed in the ActivityLog but no route an agent key
+ * could reach ever read it back — `getActivity` was unmarked (403) and there
+ * is no separate `GET .../comments` route at all. A write no writer can read
+ * back is not an audit trail. Deliberately reused `'task'`, not a new kind:
+ * reading a task's history requires the same assignment `findOne` and
+ * `updateStatus` already require, and `ActivityService.findForTask` returns
+ * full `ActivityLog` rows including `payload.body` for a `comment` action, so
+ * this one route also makes a dedicated `GET .../comments` unnecessary — see
+ * `docs/agent-read-loop.md` for the measurement.
+ *
  * MUN-0045 — `POST /tasks` (`create`) is one exception: it is marked
  * `@AgentScope('project-write')`, because task creation with a `mun_sk_` key
  * was blocked entirely (403, unmarked route) and AUP-E30 needs an agent to be
@@ -219,7 +231,12 @@ export class TasksController {
     return this.tasksService.addComment(taskId, req.actor, dto.body);
   }
 
+  /** Readable by the assigned agent's API key (MUN-0047) or by a JWT. Returns
+   *  the full `ActivityLog` rows for the task, comment bodies included — this
+   *  is the only read surface for a comment an agent key posted (MUN-0046),
+   *  and there is no separate comments route to keep in sync with this one. */
   @Get(':taskId/activity')
+  @AgentScope('task')
   getActivity(
     @Param('taskId') taskId: string,
     @Query('page') page = '1',

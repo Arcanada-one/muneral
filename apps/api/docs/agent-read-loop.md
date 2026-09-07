@@ -138,6 +138,32 @@ not a claim that every write an agent needs is now open; see
 `universal-program/cards/MUN-0046-*.md` for the full route sweep this card
 produced and which of those routes are `not_measured` for agent intent.
 
+## Reading activity with the agent key (MUN-0047)
+
+MUN-0046 opened `POST /tasks/:taskId/comments` but no route an agent key could
+reach ever read that content back: `GET /tasks/:taskId/activity` was unmarked
+(`403`), and there is no separate `GET /tasks/:taskId/comments` route at all —
+an agent could write a record neither it nor any other agent could ever read.
+`getActivity` now accepts an agent key too, **scoped to the agent's own
+assignment** — the identical `'task'` scope (and the identical
+`assertAssignedToTask` check) `POST .../comments` already uses, since reading
+a task's history is bounded by the same assignment as acting on it:
+
+| route | an agent key gets |
+|---|---|
+| `GET /tasks/:taskId/activity` | the task's `ActivityLog` entries, if the agent is assigned to the task — otherwise `403` |
+
+`ActivityService.findForTask` returns the full stored row, so a `comment`
+action's response includes `payload.body` verbatim — the same content
+`POST .../comments` accepted. **This is why no dedicated `GET
+.../comments` route was added**: the activity stream already carries comment
+bodies in full, unfiltered, and a second route returning the same rows in a
+different shape would be duplication to maintain, not a new capability.
+Because reading and posting share one scope check, there is no separate
+"read-only" abuse case here distinct from the negative control: an unassigned
+agent (same workspace) and an agent from another workspace both get the same
+`403` an unassigned agent already gets on `POST .../comments`.
+
 The rest of `/tasks` stays JWT-only. It is an **allowlist**: a route with
 no `@AgentScope(...)` marker refuses an API key by default, so a route added
 later is closed the day it merges rather than open until somebody remembers to
