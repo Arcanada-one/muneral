@@ -31,9 +31,9 @@
    },
    {
     "kind": "receipt",
-    "path": "receipts/archive/node-pin-20260909T175500Z.json",
+    "path": "receipts/archive/next-critical-rce-20260909T194700Z.json",
     "status": "R",
-    "note": "archived out of the graph-admission discovery globs; renamed from receipts/graph/change-admission-MUN-node-pin-20260909T175500Z.json, content unchanged"
+    "note": "archived #79 own receipt out of the graph-admission discovery globs after its squash-merge disconnected receipt.head (397a5382255c) from main ancestry; renamed from receipts/graph/change-admission-next-critical-rce-20260909T194700Z.json, content unchanged"
    }
   ],
   "head": "4cef876aefa93ba243700c29a9cf6001eb55cf11",
