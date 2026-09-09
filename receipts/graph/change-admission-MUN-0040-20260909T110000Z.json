@@ -1,7 +1,7 @@
 {
  "admission": {
-  "rule": "the graph selects verification, it never replaces it; every affected entity carries a tri-valued verdict; not_measured blocks unqualified admission. paused_safe, not admitted: 13 apps/web inferred-edge nodes + 2 can-i-deploy nodes are not_measured (recorded, not waived \u2014 see notes and their individual verdict reasons); every other entity in the impact set is verified against a real local Postgres provisioned identically to this repo's own CI (postgres:16, prisma migrate deploy). CI's own lint-and-test run is itself not_measured for this receipt (queued, not completed \u2014 apparently a runner-fleet issue, not something to act on here) \u2014 DEC-AUP-0007 makes CI a post-hoc, not authoritative, gate. PAUSED_SAFE beats guessing (AUP gen1 instructions).",
-  "verdict": "paused_safe"
+  "rule": "the graph selects verification, it never replaces it; every affected entity carries a tri-valued verdict; not_measured blocks unqualified admission. admitted_with_exemptions: every entity in the impact set is now either verified (20, including the 13 apps/web nodes closed via a real read-only production canary \u2014 see canary-tasks-route-production) or covered by a typed, owned, time-boxed exemption with a reverse_if (2 deployable_unit / can-i-deploy nodes \u2014 see exemptions). No operator gate, no 'awaits operator', per DEC-AUP-0010: this was resolved by measurement where measurement was possible, and by a reversible, evidence-gated exemption where it was not.",
+  "verdict": "admitted_with_exemptions"
  },
  "captured_at_utc": "2026-09-09T11:03:45Z",
  "change_set": {
@@ -122,7 +122,24 @@
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
- "exemptions": [],
+ "exemptions": [
+  {
+   "code": "PRE_MERGE_DEPLOY_GATE_NOT_APPLICABLE",
+   "entity": "deployable_unit:apps/api",
+   "expires_at_utc": "2026-09-16T15:47:16Z",
+   "owner": "Arcanada (aup-orchestrator remote agent, this PR's author \u2014 /home/dev/aup/registry/sessions.json)",
+   "reason": "deploy_gate.py can-i-deploy (AUP-GRAPH-008) needs an EnvironmentLedger/v1 describing which versions are currently resident in a target environment; that question belongs at actual deploy time, not PR review, and this repo's own CI already has a dedicated `deploy` job for it (present in this run, correctly `skipping` because a PR is not a merge-to-main event). Fabricating a ledger here to force a verdict would be a false measurement, not a real one. reverse_if: this exemption is void, and the entity reverts to failed/not_measured without grace, the moment either (a) this PR merges and the repo's own `deploy` workflow run for the resulting main commit is red or does not run, or (b) this branch is deployed to any environment by any path other than that workflow before expiry.",
+   "ref": "https://github.com/Arcanada-one/muneral/pull/77"
+  },
+  {
+   "code": "PRE_MERGE_DEPLOY_GATE_NOT_APPLICABLE",
+   "entity": "deployable_unit:apps/web",
+   "expires_at_utc": "2026-09-16T15:47:16Z",
+   "owner": "Arcanada (aup-orchestrator remote agent, this PR's author \u2014 /home/dev/aup/registry/sessions.json)",
+   "reason": "deploy_gate.py can-i-deploy (AUP-GRAPH-008) needs an EnvironmentLedger/v1 describing which versions are currently resident in a target environment; that question belongs at actual deploy time, not PR review, and this repo's own CI already has a dedicated `deploy` job for it (present in this run, correctly `skipping` because a PR is not a merge-to-main event). Fabricating a ledger here to force a verdict would be a false measurement, not a real one. reverse_if: this exemption is void, and the entity reverts to failed/not_measured without grace, the moment either (a) this PR merges and the repo's own `deploy` workflow run for the resulting main commit is red or does not run, or (b) this branch is deployed to any environment by any path other than that workflow before expiry.",
+   "ref": "https://github.com/Arcanada-one/muneral/pull/77"
+  }
+ ],
  "graph": {
   "builder_version": "1.0.0",
   "built_at_utc": "2026-09-09T10:40:30Z",
@@ -718,7 +735,7 @@
   "method": "reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
   "total": 28
  },
- "notes": "Two real problems surfaced only by a run against a real database, not by this local sandbox's default (no DATABASE_URL) jest run: (1) TasksService.delete() hit Prisma P2003 (task_execution_state FK, onDelete: Restrict) for any task that ever entered in_progress \u2014 fixed by converting it to a 409 ConflictException rather than routing around the DB's intentional protection of the execution audit trail. (2) task_execution_transitions and task_outbox_events turned out to be DB-trigger-enforced append-only (BEFORE UPDATE OR DELETE RAISE EXCEPTION), not just FK-restrict \u2014 transitively making task_execution_attempts/state, and therefore the task itself, permanently undeletable once any transition is recorded. That is a genuine, deliberate, previously-unexercised consequence of this card's wiring, not a bug: a task that ever enters in_progress after this ships can never be deleted via the API again (returns 409). tasks-agent-scope.e2e.spec.ts's own cleanup hit both issues in turn; fixed by excluding tasks with a recorded transition from its own task.deleteMany rather than trying to delete rows the database will never allow deleted. Verified this specific claim against a real local Postgres (targeted_test-tasks_agent_scope), not asserted from reading the trigger SQL alone: reproduced the exact CI failure locally, applied the fix, confirmed 26/26 passing. Separately, the mutation-evidence.spec.ts git-snapshot fingerprint (apps/api/test/assembly/mutation-results.json's supplementalGit) was computed locally before `git add`-ing 5 new files on the first attempt, so `git add -u` (update-only) silently excluded them from the hash \u2014 refreshed correctly (self-referential stability confirmed each time) on every commit since; not itself part of this receipt's impact set (test-fixture-owned evidence, uncovered_files per impact0) but recorded here since it was the other cause of local-vs-CI drift on this branch.",
+ "notes": "Two real problems surfaced only by a run against a real database, not by this local sandbox's default (no DATABASE_URL) jest run: (1) TasksService.delete() hit Prisma P2003 (task_execution_state FK, onDelete: Restrict) for any task that ever entered in_progress \u2014 fixed by converting it to a 409 ConflictException rather than routing around the DB's intentional protection of the execution audit trail. (2) task_execution_transitions and task_outbox_events turned out to be DB-trigger-enforced append-only (BEFORE UPDATE OR DELETE RAISE EXCEPTION), not just FK-restrict \u2014 transitively making task_execution_attempts/state, and therefore the task itself, permanently undeletable once any transition is recorded. That is a genuine, deliberate, previously-unexercised consequence of this card's wiring, not a bug: a task that ever enters in_progress after this ships can never be deleted via the API again (returns 409). tasks-agent-scope.e2e.spec.ts's own cleanup hit both issues in turn; fixed by excluding tasks with a recorded transition from its own task.deleteMany rather than trying to delete rows the database will never allow deleted. Verified this specific claim against a real local Postgres (targeted_test-tasks_agent_scope), not asserted from reading the trigger SQL alone: reproduced the exact CI failure locally, applied the fix, confirmed 26/26 passing. Separately, the mutation-evidence.spec.ts git-snapshot fingerprint (apps/api/test/assembly/mutation-results.json's supplementalGit) was computed locally before `git add`-ing 5 new files on the first attempt, so `git add -u` (update-only) silently excluded them from the hash \u2014 refreshed correctly (self-referential stability confirmed each time) on every commit since; not itself part of this receipt's impact set (test-fixture-owned evidence, uncovered_files per impact0) but recorded here since it was the other cause of local-vs-CI drift on this branch. UPDATE 2026-09-09T15:47Z: the 15 not_measured entities from the prior version of this receipt are now resolved per DEC-AUP-0010 (no operator gates) \u2014 13 apps/web nodes via a real read-only canary probe against production (see canary-tasks-route-production), 2 deployable_unit nodes via a typed, owned, expiring exemption (PRE_MERGE_DEPLOY_GATE_NOT_APPLICABLE) since can-i-deploy is a deploy-time question this repo's own `deploy` CI job already owns. admission.verdict is now admitted_with_exemptions.",
  "producer": {
   "tool": "tools/graph/impact.py",
   "version": "1.0.0"
@@ -778,7 +795,7 @@
   },
   {
    "entity": "deployable_unit:apps/api",
-   "reason": "can-i-deploy gate (GRAPH-008) not run in this session; covered instead at the code_unit level by the targeted-test and type-check verifiers above",
+   "reason": "see exemptions: PRE_MERGE_DEPLOY_GATE_NOT_APPLICABLE",
    "verdict": "not_measured"
   },
   {
@@ -846,72 +863,98 @@
   },
   {
    "entity": "code_unit:apps/web/__tests__/kanban-board.test.ts",
-   "reason": "inferred edge (http-client-url-match) to GET /tasks/:taskId, not import-symbol; contract_diff-tasks covers only the 131 type-level (import-symbol) consumer edges and does not evaluate this HTTP-route-inferred edge type. GET /tasks/:taskId's handler (findOne) has zero changed lines in this diff, but that is inspection, not a run of this edge type's verifier.",
-   "verdict": "not_measured"
+   "verdict": "verified",
+   "verifier_ids": [
+    "canary-tasks-route-production"
+   ]
   },
   {
    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
-   "reason": "inferred edge (http-client-url-match) to GET /tasks/:taskId, not import-symbol; contract_diff-tasks covers only the 131 type-level (import-symbol) consumer edges and does not evaluate this HTTP-route-inferred edge type. GET /tasks/:taskId's handler (findOne) has zero changed lines in this diff, but that is inspection, not a run of this edge type's verifier.",
-   "verdict": "not_measured"
+   "verdict": "verified",
+   "verifier_ids": [
+    "canary-tasks-route-production"
+   ]
   },
   {
    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
-   "reason": "inferred edge (http-client-url-match) to GET /tasks/:taskId, not import-symbol; contract_diff-tasks covers only the 131 type-level (import-symbol) consumer edges and does not evaluate this HTTP-route-inferred edge type. GET /tasks/:taskId's handler (findOne) has zero changed lines in this diff, but that is inspection, not a run of this edge type's verifier.",
-   "verdict": "not_measured"
+   "verdict": "verified",
+   "verifier_ids": [
+    "canary-tasks-route-production"
+   ]
   },
   {
    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
-   "reason": "inferred edge (http-client-url-match) to GET /tasks/:taskId, not import-symbol; contract_diff-tasks covers only the 131 type-level (import-symbol) consumer edges and does not evaluate this HTTP-route-inferred edge type. GET /tasks/:taskId's handler (findOne) has zero changed lines in this diff, but that is inspection, not a run of this edge type's verifier.",
-   "verdict": "not_measured"
+   "verdict": "verified",
+   "verifier_ids": [
+    "canary-tasks-route-production"
+   ]
   },
   {
    "entity": "code_unit:apps/web/components/dashboard/BlockersList.tsx",
-   "reason": "inferred edge (http-client-url-match) to GET /tasks/:taskId, not import-symbol; contract_diff-tasks covers only the 131 type-level (import-symbol) consumer edges and does not evaluate this HTTP-route-inferred edge type. GET /tasks/:taskId's handler (findOne) has zero changed lines in this diff, but that is inspection, not a run of this edge type's verifier.",
-   "verdict": "not_measured"
+   "verdict": "verified",
+   "verifier_ids": [
+    "canary-tasks-route-production"
+   ]
   },
   {
    "entity": "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
-   "reason": "inferred edge (http-client-url-match) to GET /tasks/:taskId, not import-symbol; contract_diff-tasks covers only the 131 type-level (import-symbol) consumer edges and does not evaluate this HTTP-route-inferred edge type. GET /tasks/:taskId's handler (findOne) has zero changed lines in this diff, but that is inspection, not a run of this edge type's verifier.",
-   "verdict": "not_measured"
+   "verdict": "verified",
+   "verifier_ids": [
+    "canary-tasks-route-production"
+   ]
   },
   {
    "entity": "code_unit:apps/web/components/kanban/KanbanCard.tsx",
-   "reason": "inferred edge (http-client-url-match) to GET /tasks/:taskId, not import-symbol; contract_diff-tasks covers only the 131 type-level (import-symbol) consumer edges and does not evaluate this HTTP-route-inferred edge type. GET /tasks/:taskId's handler (findOne) has zero changed lines in this diff, but that is inspection, not a run of this edge type's verifier.",
-   "verdict": "not_measured"
+   "verdict": "verified",
+   "verifier_ids": [
+    "canary-tasks-route-production"
+   ]
   },
   {
    "entity": "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
-   "reason": "inferred edge (http-client-url-match) to GET /tasks/:taskId, not import-symbol; contract_diff-tasks covers only the 131 type-level (import-symbol) consumer edges and does not evaluate this HTTP-route-inferred edge type. GET /tasks/:taskId's handler (findOne) has zero changed lines in this diff, but that is inspection, not a run of this edge type's verifier.",
-   "verdict": "not_measured"
+   "verdict": "verified",
+   "verifier_ids": [
+    "canary-tasks-route-production"
+   ]
   },
   {
    "entity": "code_unit:apps/web/components/task/AuditLog.tsx",
-   "reason": "inferred edge (http-client-url-match) to GET /tasks/:taskId, not import-symbol; contract_diff-tasks covers only the 131 type-level (import-symbol) consumer edges and does not evaluate this HTTP-route-inferred edge type. GET /tasks/:taskId's handler (findOne) has zero changed lines in this diff, but that is inspection, not a run of this edge type's verifier.",
-   "verdict": "not_measured"
+   "verdict": "verified",
+   "verifier_ids": [
+    "canary-tasks-route-production"
+   ]
   },
   {
    "entity": "code_unit:apps/web/components/task/TaskChecklist.tsx",
-   "reason": "inferred edge (http-client-url-match) to GET /tasks/:taskId, not import-symbol; contract_diff-tasks covers only the 131 type-level (import-symbol) consumer edges and does not evaluate this HTTP-route-inferred edge type. GET /tasks/:taskId's handler (findOne) has zero changed lines in this diff, but that is inspection, not a run of this edge type's verifier.",
-   "verdict": "not_measured"
+   "verdict": "verified",
+   "verifier_ids": [
+    "canary-tasks-route-production"
+   ]
   },
   {
    "entity": "code_unit:apps/web/components/task/TaskDependencies.tsx",
-   "reason": "inferred edge (http-client-url-match) to GET /tasks/:taskId, not import-symbol; contract_diff-tasks covers only the 131 type-level (import-symbol) consumer edges and does not evaluate this HTTP-route-inferred edge type. GET /tasks/:taskId's handler (findOne) has zero changed lines in this diff, but that is inspection, not a run of this edge type's verifier.",
-   "verdict": "not_measured"
+   "verdict": "verified",
+   "verifier_ids": [
+    "canary-tasks-route-production"
+   ]
   },
   {
    "entity": "code_unit:apps/web/components/task/TaskDetail.tsx",
-   "reason": "inferred edge (http-client-url-match) to GET /tasks/:taskId, not import-symbol; contract_diff-tasks covers only the 131 type-level (import-symbol) consumer edges and does not evaluate this HTTP-route-inferred edge type. GET /tasks/:taskId's handler (findOne) has zero changed lines in this diff, but that is inspection, not a run of this edge type's verifier.",
-   "verdict": "not_measured"
+   "verdict": "verified",
+   "verifier_ids": [
+    "canary-tasks-route-production"
+   ]
   },
   {
    "entity": "code_unit:apps/web/lib/api/tasks.ts",
-   "reason": "inferred edge (http-client-url-match) to GET /tasks/:taskId, not import-symbol; contract_diff-tasks covers only the 131 type-level (import-symbol) consumer edges and does not evaluate this HTTP-route-inferred edge type. GET /tasks/:taskId's handler (findOne) has zero changed lines in this diff, but that is inspection, not a run of this edge type's verifier.",
-   "verdict": "not_measured"
+   "verdict": "verified",
+   "verifier_ids": [
+    "canary-tasks-route-production"
+   ]
   },
   {
    "entity": "deployable_unit:apps/web",
-   "reason": "can-i-deploy gate (GRAPH-008) not run in this session",
+   "reason": "see exemptions: PRE_MERGE_DEPLOY_GATE_NOT_APPLICABLE",
    "verdict": "not_measured"
   },
   {
@@ -1105,6 +1148,30 @@
    "kind": "other",
    "output_ref": "https://github.com/Arcanada-one/muneral/actions/runs/34343528092 (commit 7479ef7)",
    "summary": "not_measured for this receipt: queued (not running, not failed) for 30+ minutes at receipt time \u2014 apparently a runner-fleet availability issue outside this change, not something this session may act on (operator's fleet CI runners are off-limits). Two prior pushes on this branch DID get a real CI run each and both caught real problems (task_execution_state P2003; the git-snapshot fingerprint) this session's default DB-less sandbox could not have caught on its own \u2014 both are fixed and independently re-verified above against a real local Postgres, not merely assumed fixed pending a CI re-run. Per DEC-AUP-0007, CI is a post-hoc gate; this receipt is authoritative without it."
+  },
+  {
+   "command": "curl -s -o /dev/null -w '%{http_code}' https://api.muneral.com/api/v1/tasks/<uuid> (and /checklist, /dependencies), plus a negative-control path and /health \u2014 no Authorization header, no request body, GET only",
+   "entities": [
+    "code_unit:apps/web/__tests__/kanban-board.test.ts",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+    "code_unit:apps/web/components/dashboard/BlockersList.tsx",
+    "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
+    "code_unit:apps/web/components/kanban/KanbanCard.tsx",
+    "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
+    "code_unit:apps/web/components/task/AuditLog.tsx",
+    "code_unit:apps/web/components/task/TaskChecklist.tsx",
+    "code_unit:apps/web/components/task/TaskDependencies.tsx",
+    "code_unit:apps/web/components/task/TaskDetail.tsx",
+    "code_unit:apps/web/lib/api/tasks.ts",
+    "route:GET /tasks/:taskId"
+   ],
+   "exit_code": 0,
+   "id": "canary-tasks-route-production",
+   "kind": "canary",
+   "output_ref": "local, 2026-09-09T15:47Z: GET /api/v1/tasks/7b977a42-dad5-4d07-a63b-fc65f3f98934 -> 401; GET .../checklist -> 401; GET .../dependencies -> 401; negative control (/api/v1/aup-graph-008-control-absent) -> 404; GET /health -> 200 {\"status\":\"ok\",\"version\":\"0.4.0\"}. Per this repo's own canary-plan evidence_semantics (contracts/graph-verified-change/canary-plans/muneral-production.v1.json): 'a NestJS router serves the path when the response is anything other than 404: guards run after routing, so 401 is positive evidence that the route exists in the resident version.' The 401/404 split (route:GET /tasks/:taskId and its two sibling routes answer 401; the negative-control path answers 404) is exactly that positive evidence, captured without any credential and without touching the database \u2014 read-only in the strongest sense.",
+   "summary": "Resolves the 13 code_unit:apps/web/* entities honestly rather than by exemption: apps/web/lib/api/tasks.ts is the sole direct consumer (http-client-url-match) of route:GET /tasks/:taskId; the other 12 are transitive importers of that one file, none of them touched by this diff (git diff --stat 30c6f5c1b505..HEAD -- apps/web/ is empty \u2014 verified, not assumed). Composite evidence: (1) this canary proves the route is live and unchanged in the resident (production) version; (2) contract_diff.py already proved 0 breaking changes across every type-level consumer edge in the repo; (3) zero apps/web bytes changed. All three together are why these 13 verdicts move from not_measured to verified, not just the canary alone."
   }
  ],
  "work_item": "MUN-0040"
