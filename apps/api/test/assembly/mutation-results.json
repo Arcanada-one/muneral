@@ -1,6 +1,6 @@
 {
   "formatVersion": "assembly-mutation-evidence-v4",
-  "generatedAt": "2026-09-09T16:18:02.238Z",
+  "generatedAt": "2026-09-09T18:50:39.230Z",
   "invocation": {
     "cwd": ".",
     "argv": [
@@ -11,18 +11,18 @@
     ]
   },
   "tools": {
-    "node": "v22.23.2",
+    "node": "v24.20.0",
     "jest": "29.7.0",
     "typescript": "5.9.3",
     "pnpm": "11.5.2"
   },
   "toolchainCompatibility": {
-    "nodeMajorMinor": "22.23",
+    "nodeMajorMinor": "24.20",
     "pnpmMajor": 11
   },
   "binding": {
     "algorithm": "sha256",
-    "aggregateSha256": "54368e9be4d2a9bfe8f3606aa6f092ead15f00751a2f265b035d4d1b51254cc3",
+    "aggregateSha256": "cf8c3da60891a435a4e473bef92d7dc1c055341d6f279e7c07a9413c4a1a16ce",
     "files": [
       {
         "path": "apps/api/package.json",
@@ -262,17 +262,17 @@
       },
       {
         "path": "package.json",
-        "sha256": "96546688085ce0bcd29f68bfecc0df855b49e146459f07c14d196e19e885e34d"
+        "sha256": "0119d2f445b2be74c92b8ad263c6fb104ca0527936ffc457837453357bbbd77e"
       },
       {
         "path": "pnpm-lock.yaml",
-        "sha256": "3cad095e8a8fe9e5ad4f0d0585890cc8a251c426a1f3de73e42357ed69384482"
+        "sha256": "cbf4c7f9c12fb3e9cb4541b5ccae5bfb1e8aba10b80a2ba69e106219ad0e9139"
       }
     ]
   },
   "supplementalGit": {
-    "trackedTreeWithoutEvidence": "731d1d29c6e3dda60df15642d390c3615bed8b90",
-    "trackedSnapshotDiffSha256": "cb24010ab3c40cb167525dcbc08562f016803a9184e3b81bc11ae8ef2fab63b5"
+    "trackedTreeWithoutEvidence": "6e8094c18661ed055ac84e1c2040580cf466aa93",
+    "trackedSnapshotDiffSha256": "7e3feb1dbc13bb206e85bbb1ce3e1e85a7e1dc1182e63119a56c64975ec93ad2"
   },
   "baseline": {
     "outcome": "SURVIVED",

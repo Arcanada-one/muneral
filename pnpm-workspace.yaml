@@ -45,6 +45,10 @@ overrides:
   # 5.x breaks it with `expand is not a function` — measured, not feared.
   'brace-expansion@^1.0.0': ^1.1.18
   'brace-expansion@^5.0.0': ^5.0.9
+  # ARCA-0209: @prisma/config 7.8.0 pins deepmerge-ts 7.1.5, which carries a high
+  # advisory fixed only in 8.0.0. Version-selector key, so it applies by RESOLVED
+  # version rather than by declared range.
+  'deepmerge-ts@<8.0.0': ^8.0.0
   esbuild: ">=0.28.1"
   fast-uri: ^3.1.5
   hono: ^4.12.34
