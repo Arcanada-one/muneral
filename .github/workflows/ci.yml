@@ -10,7 +10,6 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
 
 jobs:
   secrets-gate:
@@ -42,13 +41,24 @@ jobs:
           --health-timeout 5s
           --health-retries 5
         ports:
-          - 5432:5432
+          # MUN: container port only -- Docker picks a free HOST port and
+          # Actions publishes it as job.services.postgres.ports['5432'].
+          # A fixed `5432:5432` died with "address already in use" before
+          # any test ran: `ci-general` resolves to several runners and one
+          # of them already serves Postgres on 5432. The job now runs
+          # anywhere instead of only where that port happens to be free.
+          - 5432
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
       - name: Test Ops Bot secret gate contract
         run: bash scripts/ci/opsbot-secret-gate.test.sh
       - name: Test runner deploy-broker preflight contract
         run: bash scripts/ci/runner-broker-preflight.test.sh
+      - name: Test semantic aggregate readback contract
+        run: |
+          node --test apps/api/scripts/semantic-aggregate-readback.test.mjs
+          bash scripts/ci/semantic-readback-caller-contract.test.sh
+          bash scripts/ci/semantic-readback-caller-contract.sh
       - name: Enable corepack (pnpm@11.5.2 from packageManager field)
         run: |
           COREPACK_HOME="${RUNNER_TEMP}/corepack-bin"
@@ -69,19 +79,65 @@ jobs:
         # Run from repo root so prisma.config.ts (root) resolves apps/api/prisma/schema.prisma
         run: pnpm exec prisma generate
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/muneral_test
+          DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
       - name: Build
         run: pnpm build
       - name: Apply DB migrations
         # Run from repo root — prisma.config.ts at root, schema at apps/api/prisma/schema.prisma
         run: pnpm exec prisma migrate deploy
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/muneral_test
+          DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
+      - name: Test semantic aggregate readback against disposable PostgreSQL
+        run: node apps/api/scripts/semantic-aggregate-readback.mjs
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
       - name: Test
         run: pnpm test
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/muneral_test
-          MUN0020_DB_URL: postgresql://test:test@localhost:5432/muneral_test
+          DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
+          MUN0020_DB_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
+
+  # AUP-GRAPH-006 `gate1` (DEC-AUP-0008): «нет receipt — нет мержа». A pull request is admitted only
+  # when a ChangeAdmissionReceipt/v1 is bound to exactly this change range — in the head tree under
+  # receipts/graph/, or as a ```json block in the pull-request body. Doc-only changes report
+  # `not_measured` and stay green; a missing, unbound, stale or two-valued receipt is red.
+  # `program_ref` MUST be the same SHA as the `uses:` ref and as .github/graph-admission/BUNDLE.json
+  # (the gate tools travel as a digest-pinned vendored bundle: the program repository is private, so a
+  # cross-repo checkout would need a credential this rule does not create). DEC-AUP-0007 keeps CI
+  # post-hoc: the authoritative run is the local `admit_change.py gate` of the agent that changed the code.
+  graph-admission:
+    # Pull requests only: this gate is about MERGES. On a push to main there is no pull-request body
+    # to read a receipt from, and `deploy` must not gain a dependency that is skipped there (a skipped
+    # need skips the dependent). "Required for merge" is enforced where it belongs — as a required
+    # status check on `main` in branch protection.
+    #
+    # AUP-GRAPH-006:gate2a. `needs: lint-and-test` + `if: always()` is what makes the automated-author
+    # path honest. A dependency-manifest or lockfile change triggers the graph's global fallback — the
+    # blast radius is the WHOLE repository (the Bazel/Nx rule of DEC-AUP-0008) — and the verifier for
+    # that is this repository's own suite. So the gate is handed `needs.lint-and-test.result`, and it
+    # maps success -> verified, failure/cancelled/timed_out -> failed, anything else -> not_measured.
+    # `always()` is required for the gate to SEE a failure: without it a failed need would skip this
+    # job, and a skipped check is not a red one. `deploy` does not depend on this job, so its
+    # dependency graph is unchanged.
+    needs: lint-and-test
+    if: always() && github.event_name == 'pull_request'
+    # The workflow file is the program repository's own, vendored byte-for-byte from the pinned SHA
+    # below (its sha256 is recorded in .github/graph-admission/BUNDLE.json). It is called LOCALLY
+    # because the cross-repository reference to the reusable workflow of the PRIVATE program
+    # repository does not start a run here — GitHub reports only "workflow file issue", with no job
+    # and no retrievable annotation. Recorded as a hole, not as a solved problem.
+    uses: ./.github/workflows/graph-admission.yml
+    with:
+      program_ref: '446e8dcee93b1b7dad748a431d5a817a3afb8052'
+      verifier_job: 'lint-and-test'
+      verifier_conclusion: ${{ needs.lint-and-test.result }}
+      # AUP-GRAPH-006:gate2b. The fingerprint of the Ed25519 key that signs the vendored bundle's
+      # BUNDLE.json. It lives HERE, in this repository's own workflow file, deliberately OUTSIDE
+      # .github/graph-admission/: a fingerprint kept inside the bundle would be replaced by the very
+      # change that replaces the key, and would prove only that the bundle agrees with itself. With
+      # it, a tamper re-signed by an attacker's own key is refused; without it the gate reports
+      # BUNDLE_SIGNATURE_UNPINNED as `not_measured`, which is never a pass.
+      signing_key_fingerprint: 'SHA256:9QFqysn44UjA8rXyfHjItP3b2Oadhnbf1bDNqXrsCig'
 
   network-exposure:
     uses: Arcanada-one/datarim/.github/workflows/network-exposure-lint.yml@57afdfcd6a2d71aa8e0b577de6e43846e93b60dd
@@ -89,28 +145,40 @@ jobs:
       compose_paths: docker-compose.prod.yml
       datarim_ref: '57afdfcd6a2d71aa8e0b577de6e43846e93b60dd'
 
+  preflight-caller-contract:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          ref: ${{ github.workflow_sha }}
+      - uses: Arcanada-one/datarim/.github/actions/preflight-caller-contract@78970c8d868e75b31c3b25fe5c2ea4967ecd945c
+        with:
+          vault-addr: ${{ vars.VAULT_ADDR }}
+
   deploy:
-    needs: [lint-and-test, secrets-gate, network-exposure]
+    needs: [lint-and-test, secrets-gate, network-exposure, preflight-caller-contract]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: [self-hosted, linux, arcana-prod]
+    # SEC-0063: `arcana-prod-host`, not `arcana-prod`. That label is not
+    # unique -- `arcana-prod-replacement` carries it too and physically
+    # lives on arcana-agents, a DIFFERENT machine, where this service has
+    # no containers and the root deploy broker has no row for it. Landing
+    # there fails inside the deploy at best, and builds a second empty
+    # stack that reports success at worst. Addition, not a swap: the
+    # `arcana-prod` label stays on both runners for other consumers.
+    runs-on: [self-hosted, linux, arcana-prod-host]
     concurrency:
       group: deploy-muneral
       cancel-in-progress: false
     env:
       VAULT_ADDR: ${{ vars.VAULT_ADDR }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
-
-      # SEC-0028: the previous check asserted this runner *is* in the host
-      # `docker` group. That group is root-equivalent on a host that also
-      # carries the Control Arcana root deploy broker, so the check gated on
-      # the presence of the escalation being removed.
-      - name: Verify deploy-broker capability
-        run: bash scripts/ci/runner-broker-preflight.sh
-
       - name: Pre-deploy host readiness
         id: preflight
-        uses: Arcanada-one/datarim/.github/actions/preflight-check@f01ab2034ee99321fe627b76e98641b672e12c0b  # v1, immutable pin
+        uses: Arcanada-one/datarim/.github/actions/preflight-check@78970c8d868e75b31c3b25fe5c2ea4967ecd945c
         with:
           target-host: arcana-prod
           service-name: muneral
@@ -123,7 +191,19 @@ jobs:
             vault
             tailscale
             time-skew
+          ops-bot-emit: "true"
+          ops-bot-agent: muneral
           ops-bot-key: ${{ secrets.OPSBOT_API_KEY }}
+          ops-bot-url: https://ops.arcanada.ai/events
+
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+
+      # SEC-0028: the previous check asserted this runner *is* in the host
+      # `docker` group. That group is root-equivalent on a host that also
+      # carries the Control Arcana root deploy broker, so the check gated on
+      # the presence of the escalation being removed.
+      - name: Verify deploy-broker capability
+        run: bash scripts/ci/runner-broker-preflight.sh
 
       # Every step below hands the broker a service name and a commit SHA and
       # nothing else. The broker refuses any SHA not already reachable from
@@ -161,12 +241,20 @@ jobs:
           sudo -n /usr/local/sbin/arcanada-compose-broker muneral logs 100
           exit 1
 
+      - name: Semantic aggregate readback
+        if: steps.preflight.outputs.status != 'fail'
+        run: sudo -n /usr/local/sbin/arcanada-compose-broker muneral aggregate-readback
+
       - name: Status snapshot
         if: steps.preflight.outputs.status != 'fail'
         run: sudo -n /usr/local/sbin/arcanada-compose-broker muneral ps
 
-      - name: Notify Ops Bot on failure
-        if: failure()
+  notify-deploy-failure:
+    needs: deploy
+    if: always() && needs.deploy.result == 'failure'
+    runs-on: [self-hosted, linux, ci-general]
+    steps:
+      - name: Notify Ops Bot on deploy failure
         run: |
           curl -fsS -X POST https://ops.arcanada.ai/events \
             -H "Authorization: Bearer ${{ secrets.OPSBOT_API_KEY }}" \

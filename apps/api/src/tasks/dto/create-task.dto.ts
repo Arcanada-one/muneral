@@ -9,7 +9,7 @@ import {
   MaxLength,
   IsArray,
 } from 'class-validator';
-import { TaskStatus, TaskPriority } from '@muneral/types';
+import { TASK_STATUSES, TaskStatus, TaskPriority } from '@muneral/types';
 
 export class CreateTaskDto {
   @IsUUID()
@@ -32,7 +32,7 @@ export class CreateTaskDto {
   @IsOptional()
   description?: string;
 
-  @IsIn(['todo', 'in_progress', 'review', 'blocked', 'done', 'cancelled'])
+  @IsIn(TASK_STATUSES)
   @IsOptional()
   status?: TaskStatus;
 

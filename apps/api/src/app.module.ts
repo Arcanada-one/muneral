@@ -20,6 +20,8 @@ import { ActivityModule } from './activity/activity.module';
 import { SyncModule } from './sync/sync.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { WsModule } from './ws/ws.module';
+import { SolutionLogHeadModule } from './solution-log-head/solution-log-head.module';
+import { MigrationModule } from './migration/migration.module';
 
 @Module({
   controllers: [HealthController],
@@ -56,6 +58,8 @@ import { WsModule } from './ws/ws.module';
     SyncModule,
     WebhooksModule,
     WsModule,
+    SolutionLogHeadModule,
+    MigrationModule,
   ],
   providers: [
     {
