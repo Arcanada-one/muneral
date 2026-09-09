@@ -41,6 +41,11 @@
     "status": "A",
     "kind": "receipt",
     "new": true
+   },
+   {
+    "path": "receipts/archive/arca0209-deepmerge-20260909T171700Z.json",
+    "status": "R",
+    "kind": "receipt"
    }
   ],
   "head": "9e141d1664f0d47f57d22149f017aa0db65f2e94",
