@@ -1,0 +1,170 @@
+{
+ "admission": {
+  "counts": {
+   "exemptions": 1,
+   "failed": 0,
+   "not_measured": 1,
+   "verified": 0
+  },
+  "rule": "admitted requires every verdict = verified; admitted_with_exemptions requires every non-verified entity to have an unexpired exemption (owner + expiry); failed without exemption -> refused; not_measured without exemption -> paused_safe or refused.",
+  "verdict": "admitted_with_exemptions"
+ },
+ "captured_at_utc": "2026-09-09T16:50:13Z",
+ "change_set": {
+  "base": "733d44ec3cab244e241437cdae5d030075df7249",
+  "files": [
+   {
+    "kind": "config",
+    "path": ".github/workflows/ci.yml",
+    "status": "M",
+    "uncovered": true
+   },
+   {
+    "kind": "test",
+    "path": "apps/api/test/assembly/mutation-results.json",
+    "status": "M",
+    "uncovered": true
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/archive/deps-floors-20260909T163519Z.json",
+    "renamed_from": "receipts/graph/change-admission-deps-floors-20260909T163519Z.json",
+    "status": "A"
+   },
+   {
+    "kind": "doc",
+    "note": "this receipt itself, and the evidence rebind commit; the receipt is bound to the code range 733d44e..d24dd09",
+    "path": "receipts/graph/change-admission-ci-node-pin-20260909T165013Z.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/change-admission-deps-floors-20260909T163519Z.json",
+    "node_ids": [
+     "receipt:receipts/graph/change-admission-deps-floors-20260909T163519Z.json"
+    ],
+    "path": "receipts/graph/change-admission-deps-floors-20260909T163519Z.json",
+    "renamed_to": "receipts/archive/deps-floors-20260909T163519Z.json",
+    "status": "R"
+   }
+  ],
+  "head": "d24dd0960c4763bd3401db599534dada8983f332",
+  "mode": "diff"
+ },
+ "decision_ref": "DEC-AUP-0008",
+ "empty_impact_explanation": {
+  "graph_metadata": {
+   "builder": "tools/graph/build_graph.py 1.0.0",
+   "built_at_commit": "733d44ec3cab244e241437cdae5d030075df7249",
+   "changed_nodes": [
+    {
+     "in_degree": 0,
+     "node_type": "code_unit",
+     "out_degree": 0,
+     "path": ".github/workflows/ci.yml"
+    }
+   ],
+   "extractors_ran": [
+    "typescript_code_unit",
+    "javascript_code_unit",
+    "nestjs_route",
+    "prisma_data_model",
+    "package_manifest",
+    "deployable_unit",
+    "contract",
+    "document",
+    "receipt",
+    "work_item"
+   ],
+   "graph_digest": "sha256:097213d0c586e1a1167b19e83ed4147e0e9082ba722bd15baf11975fb8dc544d",
+   "language_coverage": "TypeScript and JavaScript under apps/*/src, apps/*/test and tools; Prisma schema; JSON contracts and receipts; Markdown documents",
+   "program_ref": "446e8dcee93b1b7dad748a431d5a817a3afb8052",
+   "unsupported_language": "GitHub Actions workflow YAML",
+   "why_no_reverse_edges": "GitHub Actions workflow YAML is carried as a node by path but no extractor at this program revision produces incoming or outgoing edges for it: nothing in the repository imports, calls, or declares a dependency on .github/workflows/ci.yml, and the global fallback is a manifest/lockfile rule that no changed file triggers here. This is a coverage gap of the extractor set, not evidence that the file is isolated."
+  },
+  "reason": "The changed node is .github/workflows/ci.yml, a CI workflow definition. The RelationshipGraph has no reverse edge into a workflow file: nothing in this repository imports, calls or deploys from it, so the deterministic core and the inferred tail are both empty and the global fallback is not triggered (it is a lockfile / manifest rule, and no manifest changed). That empty set is a PREDICTION, not an approval, and the prediction is this: changing which Node minor `actions/setup-node` resolves cannot change any artefact this repository produces — it changes which interpreter runs the checks. The falsifier is the workflow's own run. Measured on this head instead of assumed: node v22.23.2 locally reproduces CI's own toolchain, --verify-structure exits 0, test/assembly + test/mutation-evidence are 421/421, and the pull request's own lint-and-test is the arbiter — if the pinned line cannot be resolved on a runner, that job goes red here, before the merge, which is exactly the signal this change exists to make deterministic. The rebound mutation evidence is a consequence of the tree hash, not of a behaviour change: no binding.files entry changed."
+ },
+ "exemptions": [
+  {
+   "entity": "receipt:receipts/graph/change-admission-deps-floors-20260909T163519Z.json",
+   "expires_at_utc": "2026-09-23T00:00:00Z",
+   "owner": "aup-deliver-ours executor (card /home/dev/aup/card-deliver-20260909c.md, 2026-09-09, model claude-opus-5) — muneral CI Node pin",
+   "reason": "I14: a historical receipt is asserted, never re-verified. It is #45's receipt, archived by this change out of the gate's discovery globs exactly as #45 archived #77's and #77 archived #44's; content unchanged.",
+   "ref": "notes[historical-receipt]"
+  }
+ ],
+ "graph": {
+  "builder_version": "1.0.0",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:097213d0c586e1a1167b19e83ed4147e0e9082ba722bd15baf11975fb8dc544d",
+  "path": "/run/user/1002/orca-claude/claude-1002/-home-dev-aup-deliver-20260909-arcanada-universal-program/5d337e6f-bee3-4711-8138-4bb9c7f8e79c/scratchpad/verifypin/receipt.d/graph-733d44ec3cab.json",
+  "source_commit": "733d44ec3cab244e241437cdae5d030075df7249"
+ },
+ "host": "arcana-devs",
+ "impact_set": {
+  "deterministic_core": [],
+  "edge_types": "all",
+  "global_fallback": {
+   "triggered": false
+  },
+  "inferred_tail": [],
+  "max_depth": 3,
+  "method": "reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
+  "total": 0
+ },
+ "notes": [
+  "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.0.0) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
+  "profile: (auto-detected); baseline: contracts/graph-verified-change/fitness-baseline/Arcanada-one__muneral.v1.json (valid); selected: none; disabled: none",
+  "[historical-receipt] 1 receipt entity is #45's ChangeAdmissionReceipt, now on main; I14 asserts it, this receipt does not re-verify it.",
+  "[why] main is red and undeployed at beb1e5e: #77's merge run failed lint-and-test on arcana-prod-replacement (node v22.13.1, 1339/1341 tests, both failures in test/mutation-evidence.spec.ts) and `deploy` was skipped. A re-run landed on the same host and failed identically. 9f1369b (#44's merge) passed on arcana-ci-general (node v22.23.2) and deployed. The verdict is decided by which of five ci-general runners takes the job.",
+  "[hole] the runner tool caches remain divergent; this change only stops that divergence from deciding a merge. Refreshing arcana-prod-replacement's Node tool cache is a host change and is deliberately not attempted from here."
+ ],
+ "producer": {
+  "tool": "tools/graph/verify.py",
+  "version": "1.0.0"
+ },
+ "receipt_id": "car-verify-20260909T165013Z-d24dd096",
+ "repo": {
+  "name": "Arcanada-one/muneral",
+  "path": "/home/dev/aup/deliver-20260909/muneral"
+ },
+ "schema": "ChangeAdmissionReceipt/v1",
+ "staleness": {
+  "checked_at_utc": "2026-09-09T16:50:15Z",
+  "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+  "mismatched_nodes": [],
+  "verdict": "fresh"
+ },
+ "tree": {
+  "commit": "d24dd0960c4763bd3401db599534dada8983f332",
+  "dirty": false
+ },
+ "verdicts": [
+  {
+   "entity": "receipt:receipts/graph/change-admission-deps-floors-20260909T163519Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "verdict": "not_measured"
+  }
+ ],
+ "verifiers": [],
+ "verify": {
+  "events": [
+   {
+    "code": {
+     "code": "EMPTY_IMPACT_REQUIRES_EXPLANATION",
+     "text": "non-documentation change with an empty impact set: a prediction that must be explained in the receipt (empty_impact_explanation), never an approval"
+    }
+   }
+  ],
+  "required_by_entity": {
+   "receipt:receipts/graph/change-admission-deps-floors-20260909T163519Z.json": []
+  },
+  "seconds": {
+   "prepare": 2.4,
+   "total": 3.92,
+   "verifiers": 0
+  }
+ },
+ "work_item": "SEC-0052"
+}
