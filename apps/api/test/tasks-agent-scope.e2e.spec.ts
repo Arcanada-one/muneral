@@ -124,6 +124,15 @@ describe('Agent-key scope on /tasks (e2e)', () => {
         await prisma.agentFieldRead.deleteMany({ where: { taskId: { in: taskIds } } });
         await prisma.taskFieldState.deleteMany({ where: { taskId: { in: taskIds } } });
         await prisma.activityLog.deleteMany({ where: { taskId: { in: taskIds } } });
+        // MUN-0040: moving a task to in_progress/done/cancelled now records a
+        // MUN-0020 execution attempt (task_execution_state/attempts/
+        // transitions, all onDelete: Restrict — append-only journal), and a
+        // terminal transition can atomically commit a task_outbox_event too.
+        // Delete children before the task, same FK-safe-order pattern as above.
+        await prisma.taskOutboxEvent.deleteMany({ where: { taskId: { in: taskIds } } });
+        await prisma.taskExecutionTransition.deleteMany({ where: { taskId: { in: taskIds } } });
+        await prisma.taskExecutionAttempt.deleteMany({ where: { taskId: { in: taskIds } } });
+        await prisma.taskExecutionState.deleteMany({ where: { taskId: { in: taskIds } } });
         await prisma.task.deleteMany({ where: { id: { in: taskIds } } });
       }
       await prisma.project.delete({ where: { id: pid } }).catch(() => void 0);

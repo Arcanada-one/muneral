@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { TasksService } from '../src/tasks/tasks.service';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { ActivityService } from '../src/activity/activity.service';
@@ -255,6 +255,34 @@ describe('TasksService', () => {
         'task:deleted',
         { taskId: 'task-1' },
       );
+    });
+
+    it('converts a task_execution_state FK-restrict violation (P2003) into a 409, not a raw 500', async () => {
+      prisma.task.findUnique.mockResolvedValue({ ...MOCK_TASK });
+      prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
+      prisma.task.delete.mockRejectedValue({
+        code: 'P2003',
+        meta: { field_name: 'task_execution_state_task_id_fkey' },
+      });
+
+      await expect(service.delete('task-1', humanActor)).rejects.toThrow(
+        ConflictException,
+      );
+      expect(kanbanService.notify).not.toHaveBeenCalledWith(
+        'proj-1',
+        'task:deleted',
+        expect.anything(),
+      );
+    });
+
+    it('rethrows a delete error that is not a P2003 FK violation', async () => {
+      prisma.task.findUnique.mockResolvedValue({ ...MOCK_TASK });
+      prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
+      prisma.task.delete.mockRejectedValue({ code: 'P2025' });
+
+      await expect(service.delete('task-1', humanActor)).rejects.toMatchObject({
+        code: 'P2025',
+      });
     });
   });
 });

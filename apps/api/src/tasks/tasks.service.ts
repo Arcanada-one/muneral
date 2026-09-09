@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
@@ -258,7 +259,22 @@ export class TasksService {
       where: { id: task.projectId },
     });
 
-    await this.prisma.task.delete({ where: { id: taskId } });
+    // MUN-0040: a task that ever entered `in_progress` now has a
+    // task_execution_state row, and that FK is deliberately `onDelete:
+    // Restrict` (schema comment: append-only journal) — this is the DB
+    // protecting the execution audit trail from disappearing under a task
+    // delete, not something to route around. Surface it as a clear 409
+    // instead of letting the raw Prisma P2003 through as an opaque 500.
+    try {
+      await this.prisma.task.delete({ where: { id: taskId } });
+    } catch (err) {
+      if (isForeignKeyRestrictViolation(err)) {
+        throw new ConflictException(
+          'Task has recorded execution history and cannot be deleted',
+        );
+      }
+      throw err;
+    }
 
     if (project) {
       await this.activityService.log({
@@ -367,4 +383,9 @@ export class TasksService {
   async getActivity(taskId: string, page: number, limit: number) {
     return this.activityService.findForTask(taskId, page, limit);
   }
+}
+
+function isForeignKeyRestrictViolation(err: unknown): boolean {
+  if (err === null || err === undefined || typeof err !== 'object') return false;
+  return (err as { code?: string }).code === 'P2003';
 }
