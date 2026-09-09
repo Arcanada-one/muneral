@@ -1,0 +1,144 @@
+{
+ "schema": "HistoricalStatusMap/v1",
+ "task": "AUP-DAT-006 (review X-08): the mapping of raw source statuses to Muneral statuses is a versioned artifact, not an implicit default",
+ "revision": 2,
+ "issued_at_utc": "2026-09-05T01:40:00Z",
+ "muneral_statuses": [
+  "todo",
+  "in_progress",
+  "review",
+  "blocked",
+  "done",
+  "cancelled"
+ ],
+ "observed_raw_statuses_source": "research/Arcanada/work/registry.json (1,419 cards, 5,325 occurrences) + census 2026-09-05",
+ "rules": [
+  "The occurrence ALWAYS keeps the raw status verbatim (historical_status); the Work Item status is a projection.",
+  "Any raw value equal to `done`/`archived`/`done_pending_archive` sets historical_asserted_done=true and current_verification=not_revalidated — never an accepted result (I14).",
+  "A raw value absent from this table is UNMAPPED: producer0 (MUN-0040) projects it to `todo` with `unmapped=true` and keeps the raw string; DAT-006 requires that the bulk importer treat UNMAPPED as a typed refusal in tests until the value is added here in a new revision. Silent defaulting is the failure this table exists to prevent."
+ ],
+ "map": {
+  "todo": {
+   "muneral": "todo",
+   "asserted_done": false
+  },
+  "pending": {
+   "muneral": "todo",
+   "asserted_done": false,
+   "note": "Datarim backlog default"
+  },
+  "open": {
+   "muneral": "todo",
+   "asserted_done": false
+  },
+  "planned": {
+   "muneral": "todo",
+   "asserted_done": false
+  },
+  "in_progress": {
+   "muneral": "in_progress",
+   "asserted_done": false
+  },
+  "prd_done": {
+   "muneral": "in_progress",
+   "asserted_done": false,
+   "note": "PRD accepted, implementation not started — a stage marker, not completion"
+  },
+  "review": {
+   "muneral": "review",
+   "asserted_done": false
+  },
+  "blocked": {
+   "muneral": "blocked",
+   "asserted_done": false
+  },
+  "paused": {
+   "muneral": "blocked",
+   "asserted_done": false,
+   "note": "paused by decision; blocked is the closest Muneral state, the raw value carries the distinction"
+  },
+  "deferred": {
+   "muneral": "blocked",
+   "asserted_done": false,
+   "note": "deferred by decision; see paused"
+  },
+  "done": {
+   "muneral": "done",
+   "asserted_done": true
+  },
+  "archived": {
+   "muneral": "done",
+   "asserted_done": true,
+   "note": "Datarim archive card exists; completion asserted by the archive step"
+  },
+  "done_pending_archive": {
+   "muneral": "done",
+   "asserted_done": true,
+   "note": "done but archive card not yet written"
+  },
+  "cancelled": {
+   "muneral": "cancelled",
+   "asserted_done": false
+  },
+  "withdrawn": {
+   "muneral": "cancelled",
+   "asserted_done": false
+  },
+  "superseded": {
+   "muneral": "cancelled",
+   "asserted_done": false,
+   "note": "superseded by another task — an identity decision (merge/split) is REQUIRED before import closes the card (AUP-DAT-002)"
+  },
+  "absorbed": {
+   "muneral": "cancelled",
+   "asserted_done": false,
+   "note": "absorbed into another task — identity decision required, see superseded"
+  },
+  "active": {
+   "muneral": "in_progress",
+   "asserted_done": false,
+   "note": "observed once; treated as in progress"
+  },
+  "backlog": {
+   "muneral": "todo",
+   "asserted_done": false
+  },
+  "not_started": {
+   "muneral": "todo",
+   "asserted_done": false
+  },
+  "completed": {
+   "muneral": "done",
+   "asserted_done": true,
+   "note": "synonym of done in older rows"
+  },
+  "absent": {
+   "muneral": "todo",
+   "asserted_done": false,
+   "note": "no status field in the source (e.g. a task-description without frontmatter status) — projected to todo, flagged, never asserted done"
+  },
+  "unknown": {
+   "muneral": "todo",
+   "asserted_done": false,
+   "note": "literal `unknown` in a source"
+  }
+ },
+ "negative_controls": [
+  {
+   "raw": "frobnicated",
+   "expect": "UNMAPPED → typed refusal in the bulk importer; producer0 → todo + unmapped=true + raw kept"
+  },
+  {
+   "raw": "Done ",
+   "expect": "normalized (trim, casefold) to `done`; raw string kept with its original spelling"
+  }
+ ],
+ "shipped_implementation": {
+  "repo": "Arcanada-one/muneral",
+  "file": "apps/api/src/migration/migration.status.ts",
+  "pr": 62,
+  "behaviour": "known 6 statuses map 1:1; everything else → todo + unmapped=true; raw kept; historicalAssertedDone only for `done`",
+  "divergence_from_this_table": "archived / done_pending_archive are not treated as asserted_done by producer0 (they are UNMAPPED there); superseded/absorbed/withdrawn/paused/deferred/pending/prd_done are UNMAPPED. Applying this table is DAT-006 work (bulk importer), not a producer0 defect."
+ },
+ "revision_note": "rev 2 (2026-09-05): five raw statuses observed by the planner on the canonical Mac root added; `absent` = the source carries no status field (parser marker, not a source value)"
+}

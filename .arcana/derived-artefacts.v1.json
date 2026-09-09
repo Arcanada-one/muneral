@@ -1,0 +1,30 @@
+{
+ "schema": "GraphAdmissionDerivedArtefacts/v1",
+ "why_this_file_exists": "AUP-GRAPH-006:gate5a/gate5b. This repository's mutation evidence pins trackedTreeWithoutEvidence — a hash of the WHOLE tracked tree — so EVERY change here must rewrite apps/api/test/assembly/mutation-results.json in the same commit. The gate's SELF_UPDATE_SHAPE rule (B1) refused a bundle refresh that carried anything but the bundle and the program_ref pin, and its ALL_PATHS_ADDED rule (A1) refused an all-new-files change that also edited a file — so `graph-admission` and `lint-and-test`, BOTH required by this repository's ruleset, were green only in mutually exclusive states, and no change at all could be merged. This file is the narrow, checked exception: it declares which caller-owned artefacts a change may carry, and which of this repository's own required jobs verifies them. It is NOT a licence the gate takes on trust — the gate re-measures all six B6 arms on every evaluation, including CORRUPTING ONE BYTE of each declared artefact and requiring the named verifier to refuse it. Nothing about this repository's mutation evidence is weakened: the whole-tree hash still binds, --verify-structure is unchanged, and mutation-evidence.spec.ts is untouched. It lands in the same pull request as the bundle that understands it, under B6.1's BOOTSTRAP clause, which is admissible only on a bundle refresh — where B1 has already proved every other path is bundle-managed or the pin, so such a change may introduce this DECLARATION but never its VERIFIER.",
+ "artefacts": [
+  {
+   "path": "apps/api/test/assembly/mutation-results.json",
+   "verified_by_job": "lint-and-test",
+   "setup": {
+    "argv": [
+     "pnpm",
+     "install",
+     "--frozen-lockfile",
+     "--ignore-scripts"
+    ],
+    "cwd": ".",
+    "why": "--ignore-scripts on purpose: the gate must be able to run this repository's own verifier, not this repository's postinstall hooks. --frozen-lockfile means the toolchain the verifier runs on is the one the lockfile already pins, so this declaration names no version of its own and never goes stale against one. Measured 2026-09-06 in a clean worktree of main: install 4.5 s warm, then --verify-structure rc 0 in 0.88 s. The Node toolchain itself is installed by the vendored graph-admission workflow, guarded on this file existing."
+   },
+   "verify": {
+    "argv": [
+     "node",
+     "apps/api/test/assembly/mutation-harness.js",
+     "--verify-structure",
+     "apps/api/test/assembly/mutation-results.json"
+    ],
+    "cwd": "."
+   },
+   "why": "MUN-0022's evidence document. mutation-harness.js gitSupplement() recomputes trackedTreeWithoutEvidence and trackedSnapshotDiffSha256 from the tracked tree, and --verify-structure REFUSES the document when the recorded values differ from the recomputed ones — so the bytes of this file carry no free information: they are a function of the rest of the tree. Measured 2026-09-06 on 52e4869: rc 0 in 0.787 s on an unmoved tree; rc 1 (`mutation evidence verification failed: supplemental git`) when one newline is appended to README.md; rc 1 when the recorded hash is hand-edited."
+  }
+ ]
+}
