@@ -3,7 +3,7 @@
   "rule": "the graph selects verification, it never replaces it; every affected entity carries a tri-valued verdict; not_measured blocks unqualified admission. admitted_with_exemptions: every entity in the impact set is now either verified (32, including the 13 apps/web nodes closed via a real read-only production canary, and the unrelated SEC-0052-receipt entity closed by inspection) or covered by a typed, owned, time-boxed exemption with a reverse_if (2 deployable_unit / can-i-deploy nodes). No operator gate, no 'awaits operator', per DEC-AUP-0010: resolved by measurement where measurement was possible, by a reversible evidence-gated exemption where it was not. Regenerated against the corrected base (9f1369b, the actual main tip) after merging a concurrent PR (SEC-0052) that landed on main mid-session; the prior version of this receipt (base 30c6f5c) is superseded.",
   "verdict": "admitted_with_exemptions"
  },
- "captured_at_utc": "2026-09-09T16:05:19Z",
+ "captured_at_utc": "2026-09-09T16:18:16Z",
  "change_set": {
   "base": "9f1369b973122d7bd4590134ec4fa62b28f1707d",
   "files": [
@@ -114,11 +114,28 @@
    {
     "kind": "receipt",
     "new": true,
+    "path": "receipts/archive/sec0052-20260909T113000Z.json",
+    "renamed_from": "receipts/graph/change-admission-sec0052-20260909T113000Z.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
     "path": "receipts/graph/change-admission-MUN-0040-20260909T110000Z.json",
     "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/change-admission-sec0052-20260909T113000Z.json",
+    "node_ids": [
+     "receipt:receipts/graph/change-admission-sec0052-20260909T113000Z.json"
+    ],
+    "path": "receipts/graph/change-admission-sec0052-20260909T113000Z.json",
+    "renamed_to": "receipts/archive/sec0052-20260909T113000Z.json",
+    "status": "R"
    }
   ],
-  "head": "7763d48984e5494a1d19be8b04f77c044da930ae",
+  "head": "1006f4158fcc19c86ee516a6e8fc8d405663033a",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -284,22 +301,6 @@
      }
     ],
     "verifier_hint": "doc reference check (path/id still resolves)"
-   },
-   {
-    "boundary": "intra_unit",
-    "depth": 1,
-    "entity": "receipt:receipts/graph/change-admission-sec0052-20260909T113000Z.json",
-    "node_type": "receipt",
-    "path": [
-     {
-      "edge_type": "verifies",
-      "from": "receipt:receipts/graph/change-admission-sec0052-20260909T113000Z.json",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/execution-authority/index.ts",
-      "via": "explicit-path"
-     }
-    ],
-    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
    {
     "boundary": "intra_unit",
@@ -749,27 +750,27 @@
   ],
   "max_depth": 3,
   "method": "reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
-  "total": 29
+  "total": 28
  },
  "notes": "Regenerated in full against base=9f1369b (main's tip after SEC-0052 merged concurrently \u2014 the prior receipt's base, 30c6f5c, is now two commits stale) rather than patched, since the impact set itself changed (a new receipt: entity appeared, pulled in only because both this PR and SEC-0052 touch apps/api/test/assembly/mutation-results.json for unrelated reasons). \n\nHistory this receipt closes out: two real problems surfaced only by CI's real database, not by this sandbox's default (no DATABASE_URL) jest run: (1) TasksService.delete() hit Prisma P2003 (task_execution_state FK, onDelete: Restrict) for any task that ever entered in_progress \u2014 fixed by converting it to a 409 ConflictException. (2) task_execution_transitions and task_outbox_events are DB-trigger-enforced append-only \u2014 transitively making task_execution_attempts/state, and therefore the task itself, permanently undeletable once any transition is recorded; a genuine, deliberate, previously-unexercised consequence of this card's wiring. tasks-agent-scope.e2e.spec.ts's cleanup was fixed to exclude such tasks from its own deleteMany rather than try to delete rows the database will never allow deleted. Both independently re-verified against a real local Postgres, not just assumed fixed. \n\nA separate CI blocker (self-hosted runner user not in the docker group, so the Postgres service container never started) was diagnosed and fixed by the operator mid-session, not by this branch \u2014 confirmed by re-running lint-and-test after the fix and getting a clean pass. \n\nThe 15 not_measured entities from the earlier version of this receipt are resolved here per DEC-AUP-0010 (no operator gates): 13 apps/web nodes via a real read-only canary probe against production, 2 deployable_unit nodes via a typed, owned, expiring exemption since can-i-deploy is a deploy-time question this repo's own `deploy` CI job already owns.",
  "producer": {
   "tool": "tools/graph/impact.py",
   "version": "1.0.0"
  },
- "receipt_id": "car-impact-20260909T160519Z",
+ "receipt_id": "car-impact-20260909T161816Z",
  "repo": {
   "name": "Arcanada-one/muneral",
   "path": "/home/dev/aup/muneral"
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-09-09T16:05:19Z",
+  "checked_at_utc": "2026-09-09T16:18:16Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
  },
  "tree": {
-  "commit": "7763d48984e5494a1d19be8b04f77c044da930ae",
+  "commit": "1006f4158fcc19c86ee516a6e8fc8d405663033a",
   "dirty": false
  },
  "verdicts": [
@@ -837,13 +838,6 @@
    "verdict": "verified",
    "verifier_ids": [
     "doc_reference-grep"
-   ]
-  },
-  {
-   "entity": "receipt:receipts/graph/change-admission-sec0052-20260909T113000Z.json",
-   "verdict": "verified",
-   "verifier_ids": [
-    "doc_reference-sec0052-receipt"
    ]
   },
   {
@@ -1046,6 +1040,13 @@
     "targeted_test-full_suite_real_postgres",
     "gitleaks-protect"
    ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-sec0052-20260909T113000Z.json",
+   "verdict": "verified",
+   "verifier_ids": [
+    "doc_reference-sec0052-receipt"
+   ]
   }
  ],
  "verifiers": [
@@ -1145,7 +1146,7 @@
    "output_ref": "local: 1339/1341 passing; the only 2 failures are mutation-evidence.spec.ts's pre-existing toolchain-range assertions, known not-green per this card's own brief, unrelated to this change and unaffected by the origin/main merge"
   },
   {
-   "command": "python3 tools/graph/contract_diff.py --repo . --base 9f1369b973122d7bd4590134ec4fa62b28f1707d --head 7763d48984e5494a1d19be8b04f77c044da930ae",
+   "command": "python3 tools/graph/contract_diff.py --repo . --base 9f1369b973122d7bd4590134ec4fa62b28f1707d --head 1006f4158fcc19c86ee516a6e8fc8d405663033a",
    "entities": [
     "code_unit:apps/api/src/tasks/tasks.controller.ts",
     "code_unit:apps/api/src/tasks/tasks.service.ts"
