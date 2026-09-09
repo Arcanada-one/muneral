@@ -110,6 +110,12 @@
     ],
     "path": "apps/api/test/tasks.service.spec.ts",
     "status": "M"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/graph/change-admission-MUN-0040-20260909T110000Z.json",
+    "status": "A"
    }
   ],
   "head": "7479ef774687ac0c4b736ec8c995b921f5c15300",
