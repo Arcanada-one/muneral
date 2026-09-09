@@ -22,9 +22,15 @@
     "kind": "global_config",
     "path": "pnpm-workspace.yaml",
     "status": "M"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/graph/change-admission-sec-floors-round2-20260909T193000Z.json",
+    "status": "A"
    }
   ],
-  "head": "65b45b062bf4c56f67350d8638be4308c538b766",
+  "head": "b66c46ed7022fc6302eb6a7d3ca7159bc755271b",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
