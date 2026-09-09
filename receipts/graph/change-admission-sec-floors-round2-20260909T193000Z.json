@@ -36,7 +36,7 @@
     "note": "archived out of the graph-admission discovery globs; renamed from receipts/graph/change-admission-MUN-node-pin-20260909T175500Z.json, content unchanged"
    }
   ],
-  "head": "4cef876aefa9",
+  "head": "4cef876aefa93ba243700c29a9cf6001eb55cf11",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
