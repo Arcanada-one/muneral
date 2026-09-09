@@ -20,6 +20,7 @@ import type { Request, Response } from 'express';
 import { TasksService } from './tasks.service.js';
 import { CreateTaskDto } from './dto/create-task.dto.js';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto.js';
+import { QueryTasksDto } from './dto/query-tasks.dto.js';
 import { AddDependencyDto } from './dto/add-dependency.dto.js';
 import { CreateChecklistItemDto } from './dto/create-checklist-item.dto.js';
 import { AddCommentDto } from './dto/add-comment.dto.js';
@@ -114,6 +115,14 @@ export class TasksController {
   @AgentScope('project-write')
   create(@Req() req: AuthRequest, @Body() dto: CreateTaskDto) {
     return this.tasksService.create(req.actor, dto);
+  }
+
+  // Declared BEFORE `@Get(':taskId')`: Nest matches in declaration order, so
+  // the parameterised route would otherwise swallow this one and treat the
+  // empty path segment as a task id.
+  @Get()
+  query(@Query() dto: QueryTasksDto) {
+    return this.tasksService.query(dto);
   }
 
   /** Readable by the assigned agent's API key (MUN-0043) or by a JWT. */
