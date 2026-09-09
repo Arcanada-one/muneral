@@ -19,6 +19,7 @@ import { Request, Response } from 'express';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
+import { QueryTasksDto } from './dto/query-tasks.dto';
 import { AddDependencyDto } from './dto/add-dependency.dto';
 import { CreateChecklistItemDto } from './dto/create-checklist-item.dto';
 import { AddCommentDto } from './dto/add-comment.dto';
@@ -45,6 +46,14 @@ export class TasksController {
   @Post()
   create(@Req() req: AuthRequest, @Body() dto: CreateTaskDto) {
     return this.tasksService.create(req.actor, dto);
+  }
+
+  // Declared BEFORE `@Get(':taskId')`: Nest matches in declaration order, so
+  // the parameterised route would otherwise swallow this one and treat the
+  // empty path segment as a task id.
+  @Get()
+  query(@Query() dto: QueryTasksDto) {
+    return this.tasksService.query(dto);
   }
 
   @Get(':taskId')
