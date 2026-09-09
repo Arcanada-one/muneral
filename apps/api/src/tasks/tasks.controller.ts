@@ -48,9 +48,39 @@ type AuthRequest = Request & { actor: Actor; agentScope?: AgentScopeContext };
  * accepts either credential, and `AgentTaskScopeGuard` then refuses an API key
  * on every route that is not explicitly marked `@AgentScope(...)`, and on every
  * marked route whose task the key's agent is not assigned to. Routes with no
- * marker — create, delete, checklists, dependencies, comments — stay exactly as
- * JWT-only as they were; the only visible difference is that a valid key is now
- * told 403 instead of 401.
+ * marker — delete, checklists, dependencies — stay exactly as JWT-only as they
+ * were; the only visible difference is that a valid key is now told 403
+ * instead of 401.
+ *
+ * MUN-0047 — `GET /tasks/:taskId/activity` is scoped the same way (below).
+ * Before this, `POST /tasks/:taskId/comments` (MUN-0046) was write-only to an
+ * agent key: the comment landed in the ActivityLog but no route an agent key
+ * could reach ever read it back — `getActivity` was unmarked (403) and there
+ * is no separate `GET .../comments` route at all. A write no writer can read
+ * back is not an audit trail. Deliberately reused `'task'`, not a new kind:
+ * reading a task's history requires the same assignment `findOne` and
+ * `updateStatus` already require, and `ActivityService.findForTask` returns
+ * full `ActivityLog` rows including `payload.body` for a `comment` action, so
+ * this one route also makes a dedicated `GET .../comments` unnecessary — see
+ * `docs/agent-read-loop.md` for the measurement.
+ *
+ * MUN-0045 — `POST /tasks` (`create`) is one exception: it is marked
+ * `@AgentScope('project-write')`, because task creation with a `mun_sk_` key
+ * was blocked entirely (403, unmarked route) and AUP-E30 needs an agent to be
+ * able to register its own work. The scope binds the key to projects inside
+ * its own workspace — see the decorator's doc comment for what it does and
+ * does not grant.
+ *
+ * MUN-0046 — `POST /tasks/:taskId/comments` is the other: it carried the SAME
+ * omission MUN-0045 fixed on `POST /tasks` (measured live: 403 "not available
+ * to an agent API key", the unmarked-route default-deny, not a permissions
+ * decision). Marked `@AgentScope('task')` — the same scope `findOne` and
+ * `updateStatus` already use — because a comment, like a status move, is an
+ * act on a specific task the agent must already be assigned to; there is no
+ * body-carried project id here to invent a wider scope for; `'task'` is the
+ * narrowest existing scope that fits. Authorship is unaffected — `AddCommentDto`
+ * carries no actor field, and `req.actor` (via `ActorInterceptor`) is resolved
+ * from the credential, never the body.
  */
 @Controller('tasks')
 @UseGuards(JwtOrApiKeyGuard, AgentTaskScopeGuard)
@@ -61,7 +91,13 @@ export class TasksController {
     private readonly fieldChangesService: FieldChangesService,
   ) {}
 
+  /** Creatable by an agent's API key inside its own workspace (MUN-0045) or by
+   *  a JWT. `dto.projectId` is what the guard checks: a project outside the
+   *  agent's workspace is refused before the handler runs. Authorship comes
+   *  from `req.actor`, resolved server-side from the credential — the DTO has
+   *  no field a caller could use to claim a different principal. */
   @Post()
+  @AgentScope('project-write')
   create(@Req() req: AuthRequest, @Body() dto: CreateTaskDto) {
     return this.tasksService.create(req.actor, dto);
   }
@@ -182,7 +218,11 @@ export class TasksController {
 
   // --- Comments (activity log entries) ---
 
+  /** Postable by the assigned agent's API key (MUN-0046) or by a JWT. Attributed
+   *  to `req.actor`, resolved from the credential — the DTO carries no field a
+   *  caller could use to claim a different principal. */
   @Post(':taskId/comments')
+  @AgentScope('task')
   addComment(
     @Param('taskId') taskId: string,
     @Req() req: AuthRequest,
@@ -191,7 +231,12 @@ export class TasksController {
     return this.tasksService.addComment(taskId, req.actor, dto.body);
   }
 
+  /** Readable by the assigned agent's API key (MUN-0047) or by a JWT. Returns
+   *  the full `ActivityLog` rows for the task, comment bodies included — this
+   *  is the only read surface for a comment an agent key posted (MUN-0046),
+   *  and there is no separate comments route to keep in sync with this one. */
   @Get(':taskId/activity')
+  @AgentScope('task')
   getActivity(
     @Param('taskId') taskId: string,
     @Query('page') page = '1',
