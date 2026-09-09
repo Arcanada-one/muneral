@@ -11,8 +11,10 @@ import { AddDependencyDto } from './dto/add-dependency.dto';
 import { CreateChecklistItemDto } from './dto/create-checklist-item.dto';
 import { ActivityService } from '../activity/activity.service';
 import { KanbanService } from '../ws/kanban.service';
+import { randomUUID } from 'node:crypto';
 import { Actor, isValidTransition, TaskStatus } from '@muneral/types';
 import { TaskFieldStateService } from './field-state/task-field-state.service';
+import { TaskExecutionRecorderService } from '../execution-authority/task-execution-recorder.service';
 
 @Injectable()
 export class TasksService {
@@ -21,6 +23,7 @@ export class TasksService {
     private readonly activityService: ActivityService,
     private readonly kanbanService: KanbanService,
     private readonly fieldStateService: TaskFieldStateService,
+    private readonly executionRecorder: TaskExecutionRecorderService,
   ) {}
 
   async create(actor: Actor, dto: CreateTaskDto) {
@@ -81,6 +84,16 @@ export class TasksService {
     );
 
     this.kanbanService.notify(project.id, 'task:created', task);
+
+    // MUN-0040: additive — a task created directly in `in_progress` starts an
+    // execution attempt too. Best-effort, never blocks the response.
+    if (task.status === 'in_progress') {
+      await this.executionRecorder.onStatusTransition(
+        task.id,
+        'in_progress',
+        randomUUID(),
+      );
+    }
 
     return task;
   }
@@ -165,6 +178,15 @@ export class TasksService {
       from: previousStatus,
       to: dto.status,
     });
+
+    // MUN-0040: record the execution attempt this transition implies.
+    // Additive and best-effort — see TaskExecutionRecorderService header for
+    // why a recording failure must never fail the status transition itself.
+    await this.executionRecorder.onStatusTransition(
+      task.id,
+      dto.status,
+      randomUUID(),
+    );
 
     return updated;
   }

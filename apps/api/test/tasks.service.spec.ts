@@ -5,6 +5,7 @@ import { PrismaService } from '../src/prisma/prisma.service';
 import { ActivityService } from '../src/activity/activity.service';
 import { KanbanService } from '../src/ws/kanban.service';
 import { TaskFieldStateService } from '../src/tasks/field-state/task-field-state.service';
+import { TaskExecutionRecorderService } from '../src/execution-authority/task-execution-recorder.service';
 import { Actor } from '@muneral/types';
 
 const humanActor: Actor = { type: 'human', id: 'user-1', name: 'Pavel' };
@@ -83,18 +84,26 @@ const makeFieldStateService = () => ({
   onModuleInit: jest.fn(),
 });
 
+const makeExecutionRecorder = () => ({
+  onStatusTransition: jest
+    .fn()
+    .mockResolvedValue({ verdict: 'skipped', reason: 'stubbed in unit test' }),
+});
+
 describe('TasksService', () => {
   let service: TasksService;
   let prisma: ReturnType<typeof makePrisma>;
   let activityService: ReturnType<typeof makeActivityService>;
   let kanbanService: ReturnType<typeof makeKanbanService>;
   let fieldStateService: ReturnType<typeof makeFieldStateService>;
+  let executionRecorder: ReturnType<typeof makeExecutionRecorder>;
 
   beforeEach(async () => {
     prisma = makePrisma();
     activityService = makeActivityService();
     kanbanService = makeKanbanService();
     fieldStateService = makeFieldStateService();
+    executionRecorder = makeExecutionRecorder();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -103,6 +112,7 @@ describe('TasksService', () => {
         { provide: ActivityService, useValue: activityService },
         { provide: KanbanService, useValue: kanbanService },
         { provide: TaskFieldStateService, useValue: fieldStateService },
+        { provide: TaskExecutionRecorderService, useValue: executionRecorder },
       ],
     }).compile();
 
@@ -130,6 +140,28 @@ describe('TasksService', () => {
         expect.anything(),
       );
       void result;
+      expect(executionRecorder.onStatusTransition).not.toHaveBeenCalled();
+    });
+
+    it('records an execution attempt when the task is created directly in_progress', async () => {
+      prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
+      prisma.task.create.mockResolvedValue({
+        ...MOCK_TASK,
+        id: 'task-new',
+        status: 'in_progress',
+      });
+
+      await service.create(humanActor, {
+        projectId: 'proj-1',
+        title: 'Test task',
+        status: 'in_progress',
+      });
+
+      expect(executionRecorder.onStatusTransition).toHaveBeenCalledWith(
+        'task-new',
+        'in_progress',
+        expect.any(String),
+      );
     });
 
     it('throws NotFoundException for missing project', async () => {
@@ -174,6 +206,22 @@ describe('TasksService', () => {
         'task:moved',
         expect.objectContaining({ from: 'todo', to: 'in_progress' }),
       );
+      expect(executionRecorder.onStatusTransition).toHaveBeenCalledWith(
+        'task-1',
+        'in_progress',
+        expect.any(String),
+      );
+    });
+
+    it('does not call the execution recorder on an invalid transition (it never reaches that code)', async () => {
+      prisma.task.findUnique.mockResolvedValue({ ...MOCK_TASK, status: 'todo' });
+      prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
+
+      await expect(
+        service.updateStatus('task-1', humanActor, { status: 'done' }),
+      ).rejects.toThrow(BadRequestException);
+
+      expect(executionRecorder.onStatusTransition).not.toHaveBeenCalled();
     });
 
     it('throws BadRequestException for invalid transition', async () => {
