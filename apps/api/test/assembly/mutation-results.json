@@ -1,6 +1,6 @@
 {
-  "formatVersion": "assembly-mutation-evidence-v3",
-  "generatedAt": "2026-08-11T06:07:05.372Z",
+  "formatVersion": "assembly-mutation-evidence-v4",
+  "generatedAt": "2026-09-07T03:46:47.899Z",
   "invocation": {
     "cwd": ".",
     "argv": [
@@ -13,15 +13,20 @@
   "tools": {
     "node": "v22.23.1",
     "jest": "29.7.0",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "pnpm": "11.5.2"
+  },
+  "toolchainCompatibility": {
+    "nodeMajorMinor": "22.23",
+    "pnpmMajor": 11
   },
   "binding": {
     "algorithm": "sha256",
-    "aggregateSha256": "f2b1a680b1a6cb3b6790c68aeb2fe32d6181d21b7b34bfd4fb2fdfc67f205572",
+    "aggregateSha256": "f997e824344df129a3f0ef7c7a8a636c7aafdec09a9f167f93532c19465b6c32",
     "files": [
       {
         "path": "apps/api/package.json",
-        "sha256": "5b954022ee1f03313eebef1bd897303c95f97700b701aa605b2535d95223194d"
+        "sha256": "067887a778008abc34c0ced57c40672756d6a2522645e8c55c638e658796c8a9"
       },
       {
         "path": "apps/api/src/assembly/assembly.canonical.ts",
@@ -233,7 +238,7 @@
       },
       {
         "path": "apps/api/test/assembly/mutation-harness.js",
-        "sha256": "cb84a90a4288f976f45252c900300611cf2a1ef9f487eada2b1e5d6e8bc66bc4"
+        "sha256": "27f0a45469441ad006f20d0fd3b00432db0b25886ff803190b8bf89f2573daf4"
       },
       {
         "path": "apps/api/test/assembly/mutation-sites.json",
@@ -245,11 +250,11 @@
       },
       {
         "path": "apps/api/test/mutation-evidence.spec.ts",
-        "sha256": "e955f2620ec7aeef21775663304ab5b4e968c6366d62ddaf9d68f19de5eb9abc"
+        "sha256": "74ec9b61ecfa5e1b8dd70a47f7a43298bb08c6ad0618b6b386d6aae410417ab6"
       },
       {
         "path": "apps/api/tsconfig.json",
-        "sha256": "70dae2344522a5049c6abde021b7f6d00c491ced558103e7eec92eb499846861"
+        "sha256": "3802bd2fedf4c79cb5dba46a5d8893056cf305d0a6df8150a18c2401f50cb777"
       },
       {
         "path": "apps/api/tsconfig.test.json",
@@ -266,8 +271,8 @@
     ]
   },
   "supplementalGit": {
-    "trackedTreeWithoutEvidence": "e4d1c078774f67a856d834b9892ca85e89e3c6cb",
-    "trackedSnapshotDiffSha256": "3287ecadfa4479ad0ca6365285a70e67d29ad118844d40227ea274022d9d7509"
+    "trackedTreeWithoutEvidence": "047f478bca57d8c032620d70e6b5d0af25feac1c",
+    "trackedSnapshotDiffSha256": "8fafb191860c7ce15ce88b2186e17bd1075a9a3b073bea2002883c7f0fcd404c"
   },
   "baseline": {
     "outcome": "SURVIVED",

@@ -71,6 +71,38 @@ describe('SyncService', () => {
       expect(output).toContain('Done task');
     });
 
+    // MUN-0043: an archived card is neither active nor completed. It must not
+    // be silently dropped from the export either — the round trip would lose it.
+    it('gives archived tasks their own section, not the completed one', async () => {
+      prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
+
+      prisma.task.findMany.mockResolvedValue([
+        { id: 'aaaa-1234', title: 'Active task', status: 'in_progress', priority: 'high', actorType: 'human' },
+        { id: 'bbbb-5678', title: 'Done task', status: 'done', priority: 'medium', actorType: 'agent' },
+        { id: 'cccc-9012', title: 'Archived task', status: 'archived', priority: 'low', actorType: 'human' },
+      ]);
+
+      const output = await service.exportDatarim('proj-1');
+      expect(output).toContain('## Archived Tasks');
+      expect(output).toContain('Archived task');
+      expect(output).toContain('**Status:** archived');
+
+      // ...and it is under the archived heading rather than either of the others.
+      const archivedSection = output.slice(output.indexOf('## Archived Tasks'));
+      expect(archivedSection).toContain('Archived task');
+      const beforeArchived = output.slice(0, output.indexOf('## Archived Tasks'));
+      expect(beforeArchived).not.toContain('Archived task');
+    });
+
+    it('omits the archived section when there is nothing archived', async () => {
+      prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
+      prisma.task.findMany.mockResolvedValue([
+        { id: 'aaaa-1234', title: 'Active task', status: 'todo', priority: 'high', actorType: 'human' },
+      ]);
+
+      expect(await service.exportDatarim('proj-1')).not.toContain('## Archived Tasks');
+    });
+
     it('includes task metadata fields', async () => {
       prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
 
