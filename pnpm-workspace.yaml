@@ -50,11 +50,16 @@ overrides:
   # version rather than by declared range.
   'deepmerge-ts@<8.0.0': ^8.0.0
   esbuild: ">=0.28.1"
-  fast-uri: ^3.1.5
-  hono: ^4.12.34
+  # GHSA-jqff-g426-hqxp / GHSA-f65p-4m7j-42xc / GHSA-fph4-wmhf-6fwf / GHSA-5jgf-p345-68v8:
+  # the prior ^3.1.5 floor was satisfied at exactly 3.1.5, which a later advisory
+  # (patched 3.1.6) outran -- a caret floor pins a minimum, not a moving target.
+  fast-uri: ^3.1.6
+  hono: ^4.13.5
   '@hono/node-server': ">=2.0.5"
-  'js-yaml@^3.0.0': ^3.15.1
-  'js-yaml@^4.0.0': ^4.3.1
+  # GHSA-2883-xcg3-v3hh: same shape as fast-uri above -- 3.15.1/4.3.1 were the
+  # prior advisory's patched versions, a newer one needs 3.15.2/4.3.2.
+  'js-yaml@^3.0.0': ^3.15.2
+  'js-yaml@^4.0.0': ^4.3.2
   'nanoid@^3.0.0': ^3.3.17
   postcss: ^8.5.23
   socket.io-parser: ^4.2.7
@@ -64,3 +69,15 @@ overrides:
   multer: ">=2.2.0"
   sharp: ">=0.35.0"
   ws: ">=8.21.0"
+  # GHSA-73wf-gq98-2v4g / GHSA-c83g-rgw3-j3cx: unbounded memory growth / prototype
+  # write, both fixed in 4.28.7.
+  browserslist: ">=4.28.7"
+  # transitive of browserslist; GHSA-w5vr-8v7q-w6rv (process-termination DoS on
+  # invalid input) fixed in 2.11.0 -- pinned explicitly rather than trusting the
+  # browserslist bump above to drag it along.
+  baseline-browser-mapping: ">=2.11.0"
+  # GHSA-3f6p-5ww8-9rcr: auth-plugin downgrade leaking plaintext credentials.
+  mysql2: ">=3.22.0"
+  # GHSA-x5fp-wj9c-mxmx / GHSA-4mjr-xmp4-gh2g: bracket-key comma-parsing array-limit
+  # bypass and isBuffer-controlled DoS.
+  qs: ">=6.16.0"
