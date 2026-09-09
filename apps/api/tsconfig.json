@@ -18,6 +18,10 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "esModuleInterop": true,
+    // MUN-0041: the vendored HistoricalStatusMap ships as JSON so the deployed
+    // artefact is byte-comparable with the program contract. tsc copies it into
+    // outDir, which is what the production image carries.
+    "resolveJsonModule": true,
     "paths": {
       "@muneral/types": ["../../packages/types/dist/index"]
     }

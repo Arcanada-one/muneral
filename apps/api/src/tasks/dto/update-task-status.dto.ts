@@ -1,7 +1,7 @@
 import { IsIn } from 'class-validator';
-import { TaskStatus } from '@muneral/types';
+import { TASK_STATUSES, TaskStatus } from '@muneral/types';
 
 export class UpdateTaskStatusDto {
-  @IsIn(['todo', 'in_progress', 'review', 'blocked', 'done', 'cancelled'])
+  @IsIn(TASK_STATUSES)
   status: TaskStatus;
 }
