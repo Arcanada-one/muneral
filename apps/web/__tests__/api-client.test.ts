@@ -8,8 +8,15 @@ vi.mock('next-auth/react', () => ({
 }));
 
 import { getSession, signOut } from 'next-auth/react';
-const mockGetSession = getSession as ReturnType<typeof vi.fn>;
-const mockSignOut = signOut as ReturnType<typeof vi.fn>;
+// vitest 4 widened `ReturnType<typeof vi.fn>` to Mock<Procedure | Constructable>,
+// which is not callable without `new`, so the 3.x cast stops compiling. vi.mocked()
+// is not the substitute here: it binds the mock to next-auth's real signatures, and
+// these tests deliberately feed a Session carrying accessToken/refreshToken — fields
+// this app reads but never declares in a module augmentation. Naming the loose shape
+// keeps both the call signature and the test's freedom over the payload.
+type LooseMock = ReturnType<typeof vi.fn<(...args: any[]) => any>>;
+const mockGetSession = getSession as unknown as LooseMock;
+const mockSignOut = signOut as unknown as LooseMock;
 
 describe('API client JWT behavior', () => {
   // We test the interceptor logic without importing the singleton client
