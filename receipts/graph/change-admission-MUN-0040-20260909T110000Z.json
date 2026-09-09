@@ -1,0 +1,1241 @@
+{
+ "admission": {
+  "rule": "the graph selects verification, it never replaces it; every affected entity carries a tri-valued verdict; not_measured blocks unqualified admission. admitted_with_exemptions: every entity in the impact set is now either verified (32, including the 13 apps/web nodes closed via a real read-only production canary, and the unrelated SEC-0052-receipt entity closed by inspection) or covered by a typed, owned, time-boxed exemption with a reverse_if (2 deployable_unit / can-i-deploy nodes). No operator gate, no 'awaits operator', per DEC-AUP-0010: resolved by measurement where measurement was possible, by a reversible evidence-gated exemption where it was not. Regenerated against the corrected base (9f1369b, the actual main tip) after merging a concurrent PR (SEC-0052) that landed on main mid-session; the prior version of this receipt (base 30c6f5c) is superseded.",
+  "verdict": "admitted_with_exemptions"
+ },
+ "captured_at_utc": "2026-09-09T16:18:16Z",
+ "change_set": {
+  "base": "9f1369b973122d7bd4590134ec4fa62b28f1707d",
+  "files": [
+   {
+    "kind": "code",
+    "new": true,
+    "path": "apps/api/src/execution-authority/execution-authority.module.ts",
+    "status": "A"
+   },
+   {
+    "kind": "code",
+    "node_id": "code_unit:apps/api/src/execution-authority/index.ts",
+    "node_ids": [
+     "code_unit:apps/api/src/execution-authority/index.ts"
+    ],
+    "path": "apps/api/src/execution-authority/index.ts",
+    "status": "M"
+   },
+   {
+    "kind": "code",
+    "new": true,
+    "path": "apps/api/src/execution-authority/task-execution-recorder.service.ts",
+    "status": "A"
+   },
+   {
+    "kind": "code",
+    "new": true,
+    "path": "apps/api/src/execution-authority/task-staleness.service.ts",
+    "status": "A"
+   },
+   {
+    "kind": "route",
+    "node_id": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+    "node_ids": [
+     "code_unit:apps/api/src/tasks/tasks.controller.ts",
+     "route:DELETE /tasks/:taskId",
+     "route:DELETE /tasks/:taskId/checklist/:itemId",
+     "route:DELETE /tasks/:taskId/dependencies/:depId",
+     "route:GET /tasks/:taskId",
+     "route:GET /tasks/:taskId/activity",
+     "route:GET /tasks/:taskId/checklist",
+     "route:GET /tasks/:taskId/dependencies",
+     "route:GET /tasks/project/:projectId",
+     "route:PATCH /tasks/:taskId/checklist/:itemId",
+     "route:PATCH /tasks/:taskId/status",
+     "route:POST /tasks",
+     "route:POST /tasks/:taskId/checklist",
+     "route:POST /tasks/:taskId/comments",
+     "route:POST /tasks/:taskId/dependencies"
+    ],
+    "path": "apps/api/src/tasks/tasks.controller.ts",
+    "status": "M"
+   },
+   {
+    "kind": "code",
+    "node_id": "code_unit:apps/api/src/tasks/tasks.module.ts",
+    "node_ids": [
+     "code_unit:apps/api/src/tasks/tasks.module.ts"
+    ],
+    "path": "apps/api/src/tasks/tasks.module.ts",
+    "status": "M"
+   },
+   {
+    "kind": "code",
+    "node_id": "code_unit:apps/api/src/tasks/tasks.service.ts",
+    "node_ids": [
+     "code_unit:apps/api/src/tasks/tasks.service.ts"
+    ],
+    "path": "apps/api/src/tasks/tasks.service.ts",
+    "status": "M"
+   },
+   {
+    "kind": "test",
+    "path": "apps/api/test/assembly/mutation-results.json",
+    "status": "M",
+    "uncovered": true
+   },
+   {
+    "kind": "test",
+    "new": true,
+    "path": "apps/api/test/task-execution-recorder.service.spec.ts",
+    "status": "A"
+   },
+   {
+    "kind": "test",
+    "new": true,
+    "path": "apps/api/test/task-staleness.service.spec.ts",
+    "status": "A"
+   },
+   {
+    "kind": "test",
+    "node_id": "code_unit:apps/api/test/tasks-agent-scope.e2e.spec.ts",
+    "node_ids": [
+     "code_unit:apps/api/test/tasks-agent-scope.e2e.spec.ts"
+    ],
+    "path": "apps/api/test/tasks-agent-scope.e2e.spec.ts",
+    "status": "M"
+   },
+   {
+    "kind": "test",
+    "node_id": "code_unit:apps/api/test/tasks.service.spec.ts",
+    "node_ids": [
+     "code_unit:apps/api/test/tasks.service.spec.ts"
+    ],
+    "path": "apps/api/test/tasks.service.spec.ts",
+    "status": "M"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/archive/sec0052-20260909T113000Z.json",
+    "renamed_from": "receipts/graph/change-admission-sec0052-20260909T113000Z.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/graph/change-admission-MUN-0040-20260909T110000Z.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/change-admission-sec0052-20260909T113000Z.json",
+    "node_ids": [
+     "receipt:receipts/graph/change-admission-sec0052-20260909T113000Z.json"
+    ],
+    "path": "receipts/graph/change-admission-sec0052-20260909T113000Z.json",
+    "renamed_to": "receipts/archive/sec0052-20260909T113000Z.json",
+    "status": "R"
+   }
+  ],
+  "head": "1006f4158fcc19c86ee516a6e8fc8d405663033a",
+  "mode": "diff"
+ },
+ "decision_ref": "DEC-AUP-0008",
+ "exemptions": [
+  {
+   "code": "PRE_MERGE_DEPLOY_GATE_NOT_APPLICABLE",
+   "entity": "deployable_unit:apps/api",
+   "expires_at_utc": "2026-09-16T15:47:16Z",
+   "owner": "Arcanada (aup-orchestrator remote agent, this PR's author \u2014 /home/dev/aup/registry/sessions.json)",
+   "reason": "deploy_gate.py can-i-deploy (AUP-GRAPH-008) needs an EnvironmentLedger/v1 describing which versions are currently resident in a target environment; that question belongs at actual deploy time, not PR review, and this repo's own CI already has a dedicated `deploy` job for it (present in every run, correctly `skipping` because a PR is not a merge-to-main event). Fabricating a ledger here to force a verdict would be a false measurement, not a real one. reverse_if: this exemption is void, and the entity reverts to failed/not_measured without grace, the moment either (a) this PR merges and the repo's own `deploy` workflow run for the resulting main commit is red or does not run, or (b) this branch is deployed to any environment by any path other than that workflow before expiry.",
+   "ref": "https://github.com/Arcanada-one/muneral/pull/77"
+  },
+  {
+   "code": "PRE_MERGE_DEPLOY_GATE_NOT_APPLICABLE",
+   "entity": "deployable_unit:apps/web",
+   "expires_at_utc": "2026-09-16T15:47:16Z",
+   "owner": "Arcanada (aup-orchestrator remote agent, this PR's author \u2014 /home/dev/aup/registry/sessions.json)",
+   "reason": "deploy_gate.py can-i-deploy (AUP-GRAPH-008) needs an EnvironmentLedger/v1 describing which versions are currently resident in a target environment; that question belongs at actual deploy time, not PR review, and this repo's own CI already has a dedicated `deploy` job for it (present in every run, correctly `skipping` because a PR is not a merge-to-main event). Fabricating a ledger here to force a verdict would be a false measurement, not a real one. reverse_if: this exemption is void, and the entity reverts to failed/not_measured without grace, the moment either (a) this PR merges and the repo's own `deploy` workflow run for the resulting main commit is red or does not run, or (b) this branch is deployed to any environment by any path other than that workflow before expiry.",
+   "ref": "https://github.com/Arcanada-one/muneral/pull/77"
+  }
+ ],
+ "graph": {
+  "builder_version": "1.0.0",
+  "built_at_utc": "2026-09-09T16:05:13Z",
+  "graph_digest": "sha256:47ba7d65f6c7047ec8ee9fee4614ff96837d403a43b9128be533c78e1a28767b",
+  "path": "/run/user/1002/orca-claude/claude-1002/-home-dev-aup-muneral/7f4ec47a-b7a0-449f-923d-8105e8d78015/scratchpad/graph-admission/graph-base2.json",
+  "source_commit": "9f1369b973122d7bd4590134ec4fa62b28f1707d"
+ },
+ "host": "arcana-devs",
+ "impact_set": {
+  "deterministic_core": [
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/api/src/app.module.ts",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/api/src/app.module.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/tasks/tasks.module.ts",
+      "via": "relative"
+     }
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/api/src/main.ts",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/api/src/app.module.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/tasks/tasks.module.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/api/src/main.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/app.module.ts",
+      "via": "relative"
+     }
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/api/test/app-module-boot.e2e.spec.ts",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/api/test/app-module-boot.e2e.spec.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/tasks/tasks.module.ts",
+      "via": "relative"
+     }
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/api/test/field-changes.e2e.spec.ts",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/api/test/field-changes.e2e.spec.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/tasks/tasks.module.ts",
+      "via": "relative"
+     }
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "deployable_unit:apps/api",
+    "node_type": "deployable_unit",
+    "path": [
+     {
+      "edge_type": "deploys_to",
+      "from": "code_unit:apps/api/src/execution-authority/index.ts",
+      "provenance": "deterministic",
+      "to": "deployable_unit:apps/api",
+      "via": "containment"
+     }
+    ],
+    "verifier_hint": "can-i-deploy gate (GRAPH-008)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "document:README.md",
+    "node_type": "document",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "document:README.md",
+      "provenance": "deterministic",
+      "to": "route:GET /tasks/:taskId",
+      "via": "explicit-route"
+     }
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "document:apps/api/docs/agent-read-loop.md",
+    "node_type": "document",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "document:apps/api/docs/agent-read-loop.md",
+      "provenance": "deterministic",
+      "to": "route:GET /tasks/:taskId",
+      "via": "explicit-route"
+     }
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "document:apps/api/docs/migration-import.md",
+    "node_type": "document",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "document:apps/api/docs/migration-import.md",
+      "provenance": "deterministic",
+      "to": "route:PATCH /tasks/:taskId/status",
+      "via": "explicit-route"
+     }
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "work_item:MUN-0020",
+    "node_type": "work_item",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "work_item:MUN-0020",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/execution-authority/index.ts",
+      "via": "explicit-id-in-comment"
+     }
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "work_item:MUN-0040",
+    "node_type": "work_item",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/api/test/app-module-boot.e2e.spec.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/tasks/tasks.module.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "documents",
+      "from": "work_item:MUN-0040",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/test/app-module-boot.e2e.spec.ts",
+      "via": "explicit-id-in-comment"
+     }
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "work_item:MUN-0043",
+    "node_type": "work_item",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "work_item:MUN-0043",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "via": "explicit-id-in-comment"
+     }
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "work_item:MUN-0045",
+    "node_type": "work_item",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "work_item:MUN-0045",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "via": "explicit-id-in-comment"
+     }
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "work_item:MUN-0046",
+    "node_type": "work_item",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "work_item:MUN-0046",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "via": "explicit-id-in-comment"
+     }
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "work_item:MUN-0047",
+    "node_type": "work_item",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "work_item:MUN-0047",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "via": "explicit-id-in-comment"
+     }
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   }
+  ],
+  "edge_types": "all",
+  "global_fallback": {
+   "triggered": false
+  },
+  "inferred_tail": [
+   {
+    "boundary": "service",
+    "depth": 2,
+    "entity": "code_unit:apps/web/__tests__/kanban-board.test.ts",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "boundary": "service",
+      "edge_type": "consumes_contract",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "inferred_by": "http-client-url-match",
+      "provenance": "inferred",
+      "to": "route:GET /tasks/:taskId"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/__tests__/kanban-board.test.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "service",
+    "depth": 3,
+    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "boundary": "service",
+      "edge_type": "consumes_contract",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "inferred_by": "http-client-url-match",
+      "provenance": "inferred",
+      "to": "route:GET /tasks/:taskId"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/dashboard/BlockersList.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "tsconfig-paths"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/dashboard/BlockersList.tsx",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "service",
+    "depth": 2,
+    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "boundary": "service",
+      "edge_type": "consumes_contract",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "inferred_by": "http-client-url-match",
+      "provenance": "inferred",
+      "to": "route:GET /tasks/:taskId"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "service",
+    "depth": 2,
+    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "boundary": "service",
+      "edge_type": "consumes_contract",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "inferred_by": "http-client-url-match",
+      "provenance": "inferred",
+      "to": "route:GET /tasks/:taskId"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "service",
+    "depth": 2,
+    "entity": "code_unit:apps/web/components/dashboard/BlockersList.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "boundary": "service",
+      "edge_type": "consumes_contract",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "inferred_by": "http-client-url-match",
+      "provenance": "inferred",
+      "to": "route:GET /tasks/:taskId"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/dashboard/BlockersList.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "service",
+    "depth": 2,
+    "entity": "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "boundary": "service",
+      "edge_type": "consumes_contract",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "inferred_by": "http-client-url-match",
+      "provenance": "inferred",
+      "to": "route:GET /tasks/:taskId"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "service",
+    "depth": 2,
+    "entity": "code_unit:apps/web/components/kanban/KanbanCard.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "boundary": "service",
+      "edge_type": "consumes_contract",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "inferred_by": "http-client-url-match",
+      "provenance": "inferred",
+      "to": "route:GET /tasks/:taskId"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/kanban/KanbanCard.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "service",
+    "depth": 2,
+    "entity": "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "boundary": "service",
+      "edge_type": "consumes_contract",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "inferred_by": "http-client-url-match",
+      "provenance": "inferred",
+      "to": "route:GET /tasks/:taskId"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "service",
+    "depth": 2,
+    "entity": "code_unit:apps/web/components/task/AuditLog.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "boundary": "service",
+      "edge_type": "consumes_contract",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "inferred_by": "http-client-url-match",
+      "provenance": "inferred",
+      "to": "route:GET /tasks/:taskId"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/AuditLog.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "service",
+    "depth": 2,
+    "entity": "code_unit:apps/web/components/task/TaskChecklist.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "boundary": "service",
+      "edge_type": "consumes_contract",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "inferred_by": "http-client-url-match",
+      "provenance": "inferred",
+      "to": "route:GET /tasks/:taskId"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskChecklist.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "service",
+    "depth": 2,
+    "entity": "code_unit:apps/web/components/task/TaskDependencies.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "boundary": "service",
+      "edge_type": "consumes_contract",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "inferred_by": "http-client-url-match",
+      "provenance": "inferred",
+      "to": "route:GET /tasks/:taskId"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDependencies.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "service",
+    "depth": 2,
+    "entity": "code_unit:apps/web/components/task/TaskDetail.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "boundary": "service",
+      "edge_type": "consumes_contract",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "inferred_by": "http-client-url-match",
+      "provenance": "inferred",
+      "to": "route:GET /tasks/:taskId"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "service",
+    "depth": 1,
+    "entity": "code_unit:apps/web/lib/api/tasks.ts",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "boundary": "service",
+      "edge_type": "consumes_contract",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "inferred_by": "http-client-url-match",
+      "provenance": "inferred",
+      "to": "route:GET /tasks/:taskId"
+     }
+    ],
+    "verifier_hint": "consumer \u2286 provider check (contract-diff)"
+   },
+   {
+    "boundary": "service",
+    "depth": 2,
+    "entity": "deployable_unit:apps/web",
+    "node_type": "deployable_unit",
+    "path": [
+     {
+      "boundary": "service",
+      "edge_type": "consumes_contract",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "inferred_by": "http-client-url-match",
+      "provenance": "inferred",
+      "to": "route:GET /tasks/:taskId"
+     },
+     {
+      "edge_type": "deploys_to",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "deployable_unit:apps/web",
+      "via": "containment"
+     }
+    ],
+    "verifier_hint": "can-i-deploy gate (GRAPH-008)"
+   }
+  ],
+  "max_depth": 3,
+  "method": "reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
+  "total": 28
+ },
+ "notes": "Regenerated in full against base=9f1369b (main's tip after SEC-0052 merged concurrently \u2014 the prior receipt's base, 30c6f5c, is now two commits stale) rather than patched, since the impact set itself changed (a new receipt: entity appeared, pulled in only because both this PR and SEC-0052 touch apps/api/test/assembly/mutation-results.json for unrelated reasons). \n\nHistory this receipt closes out: two real problems surfaced only by CI's real database, not by this sandbox's default (no DATABASE_URL) jest run: (1) TasksService.delete() hit Prisma P2003 (task_execution_state FK, onDelete: Restrict) for any task that ever entered in_progress \u2014 fixed by converting it to a 409 ConflictException. (2) task_execution_transitions and task_outbox_events are DB-trigger-enforced append-only \u2014 transitively making task_execution_attempts/state, and therefore the task itself, permanently undeletable once any transition is recorded; a genuine, deliberate, previously-unexercised consequence of this card's wiring. tasks-agent-scope.e2e.spec.ts's cleanup was fixed to exclude such tasks from its own deleteMany rather than try to delete rows the database will never allow deleted. Both independently re-verified against a real local Postgres, not just assumed fixed. \n\nA separate CI blocker (self-hosted runner user not in the docker group, so the Postgres service container never started) was diagnosed and fixed by the operator mid-session, not by this branch \u2014 confirmed by re-running lint-and-test after the fix and getting a clean pass. \n\nThe 15 not_measured entities from the earlier version of this receipt are resolved here per DEC-AUP-0010 (no operator gates): 13 apps/web nodes via a real read-only canary probe against production, 2 deployable_unit nodes via a typed, owned, expiring exemption since can-i-deploy is a deploy-time question this repo's own `deploy` CI job already owns.",
+ "producer": {
+  "tool": "tools/graph/impact.py",
+  "version": "1.0.0"
+ },
+ "receipt_id": "car-impact-20260909T161816Z",
+ "repo": {
+  "name": "Arcanada-one/muneral",
+  "path": "/home/dev/aup/muneral"
+ },
+ "schema": "ChangeAdmissionReceipt/v1",
+ "staleness": {
+  "checked_at_utc": "2026-09-09T16:18:16Z",
+  "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+  "mismatched_nodes": [],
+  "verdict": "fresh"
+ },
+ "tree": {
+  "commit": "1006f4158fcc19c86ee516a6e8fc8d405663033a",
+  "dirty": false
+ },
+ "verdicts": [
+  {
+   "entity": "code_unit:apps/api/src/app.module.ts",
+   "verdict": "verified",
+   "verifier_ids": [
+    "type_check-tsc",
+    "targeted_test-app_module_boot",
+    "targeted_test-full_suite_real_postgres",
+    "gitleaks-protect"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/api/src/main.ts",
+   "verdict": "verified",
+   "verifier_ids": [
+    "type_check-tsc",
+    "targeted_test-app_module_boot",
+    "targeted_test-full_suite_real_postgres",
+    "gitleaks-protect"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/api/test/app-module-boot.e2e.spec.ts",
+   "verdict": "verified",
+   "verifier_ids": [
+    "type_check-tsc",
+    "targeted_test-app_module_boot",
+    "targeted_test-full_suite_real_postgres",
+    "gitleaks-protect"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/api/test/field-changes.e2e.spec.ts",
+   "verdict": "verified",
+   "verifier_ids": [
+    "type_check-tsc",
+    "targeted_test-field_changes",
+    "targeted_test-full_suite_real_postgres",
+    "gitleaks-protect"
+   ]
+  },
+  {
+   "entity": "deployable_unit:apps/api",
+   "reason": "see exemptions: PRE_MERGE_DEPLOY_GATE_NOT_APPLICABLE",
+   "verdict": "not_measured"
+  },
+  {
+   "entity": "document:README.md",
+   "verdict": "verified",
+   "verifier_ids": [
+    "doc_reference-grep"
+   ]
+  },
+  {
+   "entity": "document:apps/api/docs/agent-read-loop.md",
+   "verdict": "verified",
+   "verifier_ids": [
+    "doc_reference-grep"
+   ]
+  },
+  {
+   "entity": "document:apps/api/docs/migration-import.md",
+   "verdict": "verified",
+   "verifier_ids": [
+    "doc_reference-grep"
+   ]
+  },
+  {
+   "entity": "work_item:MUN-0020",
+   "verdict": "verified",
+   "verifier_ids": [
+    "doc_reference-grep"
+   ]
+  },
+  {
+   "entity": "work_item:MUN-0040",
+   "verdict": "verified",
+   "verifier_ids": [
+    "doc_reference-grep"
+   ]
+  },
+  {
+   "entity": "work_item:MUN-0043",
+   "verdict": "verified",
+   "verifier_ids": [
+    "doc_reference-grep"
+   ]
+  },
+  {
+   "entity": "work_item:MUN-0045",
+   "verdict": "verified",
+   "verifier_ids": [
+    "doc_reference-grep"
+   ]
+  },
+  {
+   "entity": "work_item:MUN-0046",
+   "verdict": "verified",
+   "verifier_ids": [
+    "doc_reference-grep"
+   ]
+  },
+  {
+   "entity": "work_item:MUN-0047",
+   "verdict": "verified",
+   "verifier_ids": [
+    "doc_reference-grep"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/__tests__/kanban-board.test.ts",
+   "verdict": "verified",
+   "verifier_ids": [
+    "canary-tasks-route-production"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
+   "verdict": "verified",
+   "verifier_ids": [
+    "canary-tasks-route-production"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
+   "verdict": "verified",
+   "verifier_ids": [
+    "canary-tasks-route-production"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+   "verdict": "verified",
+   "verifier_ids": [
+    "canary-tasks-route-production"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/dashboard/BlockersList.tsx",
+   "verdict": "verified",
+   "verifier_ids": [
+    "canary-tasks-route-production"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
+   "verdict": "verified",
+   "verifier_ids": [
+    "canary-tasks-route-production"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/kanban/KanbanCard.tsx",
+   "verdict": "verified",
+   "verifier_ids": [
+    "canary-tasks-route-production"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
+   "verdict": "verified",
+   "verifier_ids": [
+    "canary-tasks-route-production"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/task/AuditLog.tsx",
+   "verdict": "verified",
+   "verifier_ids": [
+    "canary-tasks-route-production"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/task/TaskChecklist.tsx",
+   "verdict": "verified",
+   "verifier_ids": [
+    "canary-tasks-route-production"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/task/TaskDependencies.tsx",
+   "verdict": "verified",
+   "verifier_ids": [
+    "canary-tasks-route-production"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/task/TaskDetail.tsx",
+   "verdict": "verified",
+   "verifier_ids": [
+    "canary-tasks-route-production"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/lib/api/tasks.ts",
+   "verdict": "verified",
+   "verifier_ids": [
+    "canary-tasks-route-production"
+   ]
+  },
+  {
+   "entity": "deployable_unit:apps/web",
+   "reason": "see exemptions: PRE_MERGE_DEPLOY_GATE_NOT_APPLICABLE",
+   "verdict": "not_measured"
+  },
+  {
+   "entity": "code_unit:apps/api/src/execution-authority/index.ts",
+   "verdict": "verified",
+   "verifier_ids": [
+    "type_check-tsc",
+    "targeted_test-recorder_and_staleness",
+    "targeted_test-full_suite_real_postgres",
+    "gitleaks-protect"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+   "verdict": "verified",
+   "verifier_ids": [
+    "type_check-tsc",
+    "targeted_test-tasks_service_spec",
+    "targeted_test-full_suite_real_postgres",
+    "contract_diff-tasks",
+    "gitleaks-protect"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/api/src/tasks/tasks.module.ts",
+   "verdict": "verified",
+   "verifier_ids": [
+    "type_check-tsc",
+    "targeted_test-tasks_service_spec",
+    "targeted_test-full_suite_real_postgres",
+    "gitleaks-protect"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/api/src/tasks/tasks.service.ts",
+   "verdict": "verified",
+   "verifier_ids": [
+    "type_check-tsc",
+    "targeted_test-tasks_service_spec",
+    "targeted_test-recorder_and_staleness",
+    "targeted_test-full_suite_real_postgres",
+    "contract_diff-tasks",
+    "gitleaks-protect"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/api/test/tasks-agent-scope.e2e.spec.ts",
+   "verdict": "verified",
+   "verifier_ids": [
+    "type_check-tsc",
+    "targeted_test-tasks_agent_scope",
+    "targeted_test-full_suite_real_postgres",
+    "gitleaks-protect"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/api/test/tasks.service.spec.ts",
+   "verdict": "verified",
+   "verifier_ids": [
+    "type_check-tsc",
+    "targeted_test-tasks_service_spec",
+    "targeted_test-full_suite_real_postgres",
+    "gitleaks-protect"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-sec0052-20260909T113000Z.json",
+   "verdict": "verified",
+   "verifier_ids": [
+    "doc_reference-sec0052-receipt"
+   ]
+  }
+ ],
+ "verifiers": [
+  {
+   "command": "npx tsc -p tsconfig.json --noEmit",
+   "entities": [
+    "code_unit:apps/api/src/app.module.ts",
+    "code_unit:apps/api/src/main.ts",
+    "code_unit:apps/api/src/execution-authority/index.ts",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts",
+    "code_unit:apps/api/src/tasks/tasks.module.ts",
+    "code_unit:apps/api/src/tasks/tasks.service.ts",
+    "code_unit:apps/api/test/app-module-boot.e2e.spec.ts",
+    "code_unit:apps/api/test/field-changes.e2e.spec.ts",
+    "code_unit:apps/api/test/tasks-agent-scope.e2e.spec.ts",
+    "code_unit:apps/api/test/tasks.service.spec.ts"
+   ],
+   "exit_code": 0,
+   "id": "type_check-tsc",
+   "kind": "type_check",
+   "output_ref": "local:apps/api tsc --noEmit, clean, no diagnostics (re-run after merging origin/main and reinstalling with the updated lockfile)",
+   "summary": "whole-project TypeScript compile"
+  },
+  {
+   "command": "npx jest test/tasks.service.spec.ts --runInBand",
+   "entities": [
+    "code_unit:apps/api/src/tasks/tasks.controller.ts",
+    "code_unit:apps/api/src/tasks/tasks.module.ts",
+    "code_unit:apps/api/src/tasks/tasks.service.ts",
+    "code_unit:apps/api/test/tasks.service.spec.ts"
+   ],
+   "exit_code": 0,
+   "id": "targeted_test-tasks_service_spec",
+   "kind": "targeted_test",
+   "output_ref": "local: 11/11 passing"
+  },
+  {
+   "command": "npx jest test/app-module-boot.e2e.spec.ts --runInBand",
+   "entities": [
+    "code_unit:apps/api/test/app-module-boot.e2e.spec.ts",
+    "code_unit:apps/api/src/app.module.ts",
+    "code_unit:apps/api/src/main.ts"
+   ],
+   "exit_code": 0,
+   "id": "targeted_test-app_module_boot",
+   "kind": "targeted_test",
+   "output_ref": "local, against a real Postgres (postgres:16 via sudo docker, prisma migrate deploy, DATABASE_URL set \u2014 the same provisioning apps/api's own ci.yml uses), re-run fresh after the origin/main merge: 2/2 passing"
+  },
+  {
+   "command": "npx jest test/field-changes.e2e.spec.ts --runInBand",
+   "entities": [
+    "code_unit:apps/api/test/field-changes.e2e.spec.ts"
+   ],
+   "exit_code": 0,
+   "id": "targeted_test-field_changes",
+   "kind": "targeted_test",
+   "output_ref": "local, same real Postgres as above: 6/6 passing"
+  },
+  {
+   "command": "npx jest test/tasks-agent-scope.e2e.spec.ts --runInBand",
+   "entities": [
+    "code_unit:apps/api/test/tasks-agent-scope.e2e.spec.ts"
+   ],
+   "exit_code": 0,
+   "id": "targeted_test-tasks_agent_scope",
+   "kind": "targeted_test",
+   "output_ref": "local, same real Postgres as above: 26/26 passing"
+  },
+  {
+   "command": "npx jest test/task-execution-recorder.service.spec.ts test/task-staleness.service.spec.ts --runInBand, each branch mutation-tested (condition flipped, confirmed red, restored, confirmed green)",
+   "entities": [
+    "code_unit:apps/api/src/execution-authority/index.ts",
+    "code_unit:apps/api/src/tasks/tasks.service.ts"
+   ],
+   "exit_code": 0,
+   "id": "targeted_test-recorder_and_staleness",
+   "kind": "targeted_test",
+   "output_ref": "local: 12/12 + 9/9 passing; 3 mutations proven able to fail (recorder running-vs-issued branch, staleness threshold >/>=, TasksService P2003->P2099 check)"
+  },
+  {
+   "command": "npx jest --passWithNoTests --runInBand (apps/api), against a real Postgres, run fresh after merging origin/main and `pnpm install` with the updated lockfile",
+   "entities": [
+    "code_unit:apps/api/src/app.module.ts",
+    "code_unit:apps/api/src/main.ts",
+    "code_unit:apps/api/src/execution-authority/index.ts",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts",
+    "code_unit:apps/api/src/tasks/tasks.module.ts",
+    "code_unit:apps/api/src/tasks/tasks.service.ts",
+    "code_unit:apps/api/test/app-module-boot.e2e.spec.ts",
+    "code_unit:apps/api/test/field-changes.e2e.spec.ts",
+    "code_unit:apps/api/test/tasks-agent-scope.e2e.spec.ts",
+    "code_unit:apps/api/test/tasks.service.spec.ts"
+   ],
+   "exit_code": 0,
+   "id": "targeted_test-full_suite_real_postgres",
+   "kind": "targeted_test",
+   "output_ref": "local: 1339/1341 passing; the only 2 failures are mutation-evidence.spec.ts's pre-existing toolchain-range assertions, known not-green per this card's own brief, unrelated to this change and unaffected by the origin/main merge"
+  },
+  {
+   "command": "python3 tools/graph/contract_diff.py --repo . --base 9f1369b973122d7bd4590134ec4fa62b28f1707d --head 1006f4158fcc19c86ee516a6e8fc8d405663033a",
+   "entities": [
+    "code_unit:apps/api/src/tasks/tasks.controller.ts",
+    "code_unit:apps/api/src/tasks/tasks.service.ts"
+   ],
+   "exit_code": 0,
+   "id": "contract_diff-tasks",
+   "kind": "contract_diff",
+   "output_ref": "local, re-run against the post-merge base/head: 39->41 contracts, 0 breaking, 131 import-symbol consumer edges all verified compatible, 2 contracts added (RecordVerdict, StalenessVerdict type aliases). Covers type-level (import-symbol) consumer edges only."
+  },
+  {
+   "command": "curl -s -o /dev/null -w '%{http_code}' https://api.muneral.com/api/v1/tasks/<uuid> (and /checklist, /dependencies), plus a negative-control path and /health \u2014 no Authorization header, no request body, GET only",
+   "entities": [
+    "code_unit:apps/web/__tests__/kanban-board.test.ts",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+    "code_unit:apps/web/components/dashboard/BlockersList.tsx",
+    "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
+    "code_unit:apps/web/components/kanban/KanbanCard.tsx",
+    "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
+    "code_unit:apps/web/components/task/AuditLog.tsx",
+    "code_unit:apps/web/components/task/TaskChecklist.tsx",
+    "code_unit:apps/web/components/task/TaskDependencies.tsx",
+    "code_unit:apps/web/components/task/TaskDetail.tsx",
+    "code_unit:apps/web/lib/api/tasks.ts",
+    "route:GET /tasks/:taskId"
+   ],
+   "exit_code": 0,
+   "id": "canary-tasks-route-production",
+   "kind": "canary",
+   "output_ref": "local, 2026-09-09T15:47Z: GET /api/v1/tasks/7b977a42-dad5-4d07-a63b-fc65f3f98934 -> 401; GET .../checklist -> 401; GET .../dependencies -> 401; negative control (/api/v1/aup-graph-008-control-absent) -> 404; GET /health -> 200 {\"status\":\"ok\",\"version\":\"0.4.0\"}. Per this repo's own canary-plan evidence_semantics (contracts/graph-verified-change/canary-plans/muneral-production.v1.json): 'a NestJS router serves the path when the response is anything other than 404: guards run after routing, so 401 is positive evidence that the route exists in the resident version.' Production is unaffected by this branch's own merge with origin/main (that merge only touched pnpm-lock.yaml/pnpm-workspace.yaml/mutation-results.json/a receipt \u2014 no runtime code), so this probe, taken before the merge, remains valid evidence.",
+   "summary": "Resolves the 13 code_unit:apps/web/* entities honestly rather than by exemption: apps/web/lib/api/tasks.ts is the sole direct (http-client-url-match) consumer of route:GET /tasks/:taskId; the other 12 are transitive importers of that one file, none of them touched by this diff (git diff --stat <base>..HEAD -- apps/web/ is empty). Composite evidence: (1) this canary proves the route is live and unchanged in the resident (production) version; (2) contract_diff.py proved 0 breaking changes across every type-level consumer edge in the repo; (3) zero apps/web bytes changed."
+  },
+  {
+   "command": "grep for each referenced route path / work-item id against the post-diff tree",
+   "entities": [
+    "document:README.md",
+    "document:apps/api/docs/agent-read-loop.md",
+    "document:apps/api/docs/migration-import.md",
+    "work_item:MUN-0020",
+    "work_item:MUN-0040",
+    "work_item:MUN-0043",
+    "work_item:MUN-0045",
+    "work_item:MUN-0046",
+    "work_item:MUN-0047"
+   ],
+   "exit_code": 0,
+   "id": "doc_reference-grep",
+   "kind": "doc_reference",
+   "output_ref": "local: README.md:58-59 (GET /tasks/:id, GET /tasks/project/:id, PATCH /tasks/:id/status), apps/api/docs/agent-read-loop.md (GET /tasks/:taskId, multiple), apps/api/docs/migration-import.md:337 (PATCH /tasks/:id/status), execution-authority/index.ts:1 (MUN-0020), tasks.controller.ts (MUN-0043/45/46/47 doc comments) \u2014 none renamed or removed by this diff, only added to"
+  },
+  {
+   "command": "inspected receipts/graph/change-admission-sec0052-20260909T113000Z.json (already on main at this PR's base) for any verdict entry naming apps/api/test/assembly/mutation-results.json",
+   "entities": [
+    "receipt:receipts/graph/change-admission-sec0052-20260909T113000Z.json"
+   ],
+   "exit_code": 0,
+   "id": "doc_reference-sec0052-receipt",
+   "kind": "doc_reference",
+   "output_ref": "that receipt lists apps/api/test/assembly/mutation-results.json in change_set.files but carries no verdicts[] entry for it (same 'uncovered' treatment this receipt itself gives the file) \u2014 it asserts nothing about the file's content this diff's edit (supplementalGit only) could contradict. This entity entered the impact set only because both receipts reference that same path; there is no functional relationship to this card's actual changes."
+  },
+  {
+   "command": "gitleaks protect --staged --source . -v (every commit on this branch, including the origin/main merge)",
+   "entities": [
+    "code_unit:apps/api/src/app.module.ts",
+    "code_unit:apps/api/src/main.ts",
+    "code_unit:apps/api/src/execution-authority/index.ts",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts",
+    "code_unit:apps/api/src/tasks/tasks.module.ts",
+    "code_unit:apps/api/src/tasks/tasks.service.ts",
+    "code_unit:apps/api/test/app-module-boot.e2e.spec.ts",
+    "code_unit:apps/api/test/field-changes.e2e.spec.ts",
+    "code_unit:apps/api/test/tasks-agent-scope.e2e.spec.ts",
+    "code_unit:apps/api/test/tasks.service.spec.ts"
+   ],
+   "exit_code": 0,
+   "id": "gitleaks-protect",
+   "kind": "other",
+   "output_ref": "local: gitleaks 8.30.1, no leaks found"
+  },
+  {
+   "command": "GitHub Actions lint-and-test + graph-admission jobs",
+   "entities": [],
+   "exit_code": 0,
+   "id": "ci-lint-and-test",
+   "kind": "other",
+   "output_ref": "https://github.com/Arcanada-one/muneral/pull/77 \u2014 lint-and-test and graph-admission both green on the pre-merge commit (c1de031) after the operator fixed a runner docker-group permission issue; re-running on this merge commit to confirm",
+   "summary": "CI is post-hoc per DEC-AUP-0007; recorded as corroborating evidence, not the basis for any verdict here"
+  }
+ ],
+ "work_item": "MUN-0040"
+}

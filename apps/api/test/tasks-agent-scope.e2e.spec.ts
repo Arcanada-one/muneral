@@ -124,7 +124,26 @@ describe('Agent-key scope on /tasks (e2e)', () => {
         await prisma.agentFieldRead.deleteMany({ where: { taskId: { in: taskIds } } });
         await prisma.taskFieldState.deleteMany({ where: { taskId: { in: taskIds } } });
         await prisma.activityLog.deleteMany({ where: { taskId: { in: taskIds } } });
-        await prisma.task.deleteMany({ where: { id: { in: taskIds } } });
+        // MUN-0040: moving a task to in_progress/done/cancelled now records a
+        // MUN-0020 execution attempt. task_execution_transitions and
+        // task_outbox_events are DB-trigger-enforced append-only (BEFORE
+        // UPDATE OR DELETE RAISE EXCEPTION — see
+        // 20260730000000_add_execution_authority/migration.sql and
+        // 20260730010000_add_outbox_relay/migration.sql), and that is
+        // transitive up through task_execution_attempts/state's plain
+        // onDelete: Restrict to Task: a task that ever recorded a transition
+        // can never be deleted again, by design — not a bug to route around.
+        // Leave those tasks (and their now-permanent execution-authority
+        // rows) in place; only delete tasks with no recorded transition. The
+        // disposable-postgres container this suite runs against is torn down
+        // whole afterwards, so the leftover rows are harmless.
+        const protectedTaskIds = await prisma.taskExecutionTransition
+          .findMany({ where: { taskId: { in: taskIds } }, select: { taskId: true }, distinct: ['taskId'] })
+          .then((rows) => new Set(rows.map((r) => r.taskId)));
+        const deletableTaskIds = taskIds.filter((id) => !protectedTaskIds.has(id));
+        if (deletableTaskIds.length > 0) {
+          await prisma.task.deleteMany({ where: { id: { in: deletableTaskIds } } });
+        }
       }
       await prisma.project.delete({ where: { id: pid } }).catch(() => void 0);
     }

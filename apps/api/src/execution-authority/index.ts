@@ -1,8 +1,19 @@
 // MUN-0020: Execution authority public API surface.
-// Deliberately narrow — no HTTP controller, no NestJS module, no provider
-// wiring. Consumers use the service directly with a Prisma transaction.
+// The pure reducer/service/replay core stays framework-free — no HTTP
+// controller, still no dependency on Nest beyond what's needed to hand it a
+// Prisma transaction. MUN-0040 adds the one NestJS seam
+// (ExecutionAuthorityModule) needed to let application code inject the
+// service instead of constructing it by hand, plus TaskExecutionRecorderService,
+// which is the thing that actually calls it from the real task lifecycle.
 
 export { ExecutionAuthorityService } from './execution-authority.service';
+export { ExecutionAuthorityModule } from './execution-authority.module';
+export {
+  TaskExecutionRecorderService,
+} from './task-execution-recorder.service';
+export type { RecordOutcome, RecordVerdict } from './task-execution-recorder.service';
+export { TaskStalenessService } from './task-staleness.service';
+export type { TaskStalenessEntry, StalenessVerdict } from './task-staleness.service';
 export type {
   ExecutionResult,
   ExecutionOutcome,
