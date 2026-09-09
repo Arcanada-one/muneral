@@ -98,7 +98,73 @@ assignments**:
 | `GET /tasks/project/:projectId` | only the tasks in that project the agent is assigned to; `404` if the project is not in the agent's workspace |
 | `PATCH /tasks/:taskId/status` | the transition, if the agent is assigned to the task — otherwise `403` |
 
-Everything else on `/tasks` stays JWT-only. It is an **allowlist**: a route with
+## Creating a task with the agent key (MUN-0045)
+
+`POST /tasks` was closed to every agent key — even a well-formed request got
+`403`, the same default-deny answer any unmarked route gives, so an agent could
+not register the very work it was about to execute. It now accepts an agent key
+too, **scoped to the agent's own workspace** (not to an assignment — the task
+being created is what the agent would be assigned to next):
+
+| route | an agent key gets |
+|---|---|
+| `POST /tasks` | creates the task, if `projectId` in the body names a project in the agent's own workspace — otherwise `404`, the same answer a project id that never existed gets |
+
+The created task is attributed to the calling agent regardless of what the
+request body claims: `createdById`/`actorType` come from the credential, never
+from the body, and there is no field on the create request that names an owner
+at all.
+
+## Commenting with the agent key (MUN-0046)
+
+`POST /tasks/:taskId/comments` carried the same omission MUN-0045 fixed on
+`POST /tasks`: an unmarked route, so a well-formed request from a valid agent
+key got `403` regardless of assignment. It now accepts an agent key, **scoped
+to the agent's own assignment** — the same `'task'` scope `GET /tasks/:taskId`
+and `PATCH /tasks/:taskId/status` already use, since posting a comment is an
+act on one specific task, not a workspace-wide write:
+
+| route | an agent key gets |
+|---|---|
+| `POST /tasks/:taskId/comments` | posts the comment, if the agent is assigned to the task — otherwise `403` |
+
+The comment is attributed to the calling agent regardless of what the request
+body claims: `AddCommentDto` carries only `body`, and the actor comes from the
+credential (`req.actor`, via `ActorInterceptor`), never from the request.
+
+Remaining unmarked routes on `/tasks` — delete, checklists, dependencies —
+stay JWT-only, refused with `403` for a valid key rather than granted. This is
+not a claim that every write an agent needs is now open; see
+`universal-program/cards/MUN-0046-*.md` for the full route sweep this card
+produced and which of those routes are `not_measured` for agent intent.
+
+## Reading activity with the agent key (MUN-0047)
+
+MUN-0046 opened `POST /tasks/:taskId/comments` but no route an agent key could
+reach ever read that content back: `GET /tasks/:taskId/activity` was unmarked
+(`403`), and there is no separate `GET /tasks/:taskId/comments` route at all —
+an agent could write a record neither it nor any other agent could ever read.
+`getActivity` now accepts an agent key too, **scoped to the agent's own
+assignment** — the identical `'task'` scope (and the identical
+`assertAssignedToTask` check) `POST .../comments` already uses, since reading
+a task's history is bounded by the same assignment as acting on it:
+
+| route | an agent key gets |
+|---|---|
+| `GET /tasks/:taskId/activity` | the task's `ActivityLog` entries, if the agent is assigned to the task — otherwise `403` |
+
+`ActivityService.findForTask` returns the full stored row, so a `comment`
+action's response includes `payload.body` verbatim — the same content
+`POST .../comments` accepted. **This is why no dedicated `GET
+.../comments` route was added**: the activity stream already carries comment
+bodies in full, unfiltered, and a second route returning the same rows in a
+different shape would be duplication to maintain, not a new capability.
+Because reading and posting share one scope check, there is no separate
+"read-only" abuse case here distinct from the negative control: an unassigned
+agent (same workspace) and an agent from another workspace both get the same
+`403` an unassigned agent already gets on `POST .../comments`.
+
+The rest of `/tasks` stays JWT-only. It is an **allowlist**: a route with
 no `@AgentScope(...)` marker refuses an API key by default, so a route added
 later is closed the day it merges rather than open until somebody remembers to
 close it. The only visible change on those routes is `403` (valid key, out of
