@@ -30,6 +30,7 @@ import { SyncModule } from '../src/sync/sync.module';
 import { WsModule } from '../src/ws/ws.module';
 import { HealthController } from '../src/health.controller';
 import { WebhooksService } from '../src/webhooks/webhooks.service';
+import { MigrationModule } from '../src/migration/migration.module';
 
 /**
  * Stub that satisfies any consumer of WebhooksService without registering a
@@ -69,6 +70,7 @@ class WebhooksStubModule {}
     AgentsModule,
     ActivityModule,
     SyncModule,       // ← the defect site; must import AuthModule itself
+    MigrationModule,  // MUN-0040: resolves ApiKeyGuard + JwtOrApiKeyGuard + ActivityService
     WebhooksStubModule,
     WsModule,
   ],
@@ -92,6 +94,12 @@ describe('AppModule boot (DI regression)', () => {
     const { SyncController } = await import('../src/sync/sync.controller');
     const syncController = moduleRef.get(SyncController, { strict: false });
     expect(syncController).toBeDefined();
+
+    // Same proof for MUN-0040: MigrationModule pulls ApiKeyGuard and
+    // JwtOrApiKeyGuard from AuthModule and ActivityService from ActivityModule,
+    // so a missing import here fails at .compile() rather than at first request.
+    const { MigrationController } = await import('../src/migration/migration.controller');
+    expect(moduleRef.get(MigrationController, { strict: false })).toBeDefined();
 
     await moduleRef.close();
   });

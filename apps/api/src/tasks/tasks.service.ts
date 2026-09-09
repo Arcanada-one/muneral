@@ -93,9 +93,23 @@ export class TasksService {
     return task;
   }
 
-  async findByProject(projectId: string) {
+  /**
+   * Tasks in a project.
+   *
+   * MUN-0043: when `scopedToAgentId` is given the answer is narrowed to the
+   * tasks that agent is assigned to. The parameter is the agent resolved from
+   * an API key by `AgentTaskScopeGuard`; a JWT caller passes nothing and the
+   * behaviour is unchanged. Narrowing lives here rather than in the controller
+   * so the database, not a post-filter, is what never returns the other rows.
+   */
+  async findByProject(projectId: string, scopedToAgentId?: string) {
     return this.prisma.task.findMany({
-      where: { projectId },
+      where: {
+        projectId,
+        ...(scopedToAgentId
+          ? { agents: { some: { agentId: scopedToAgentId } } }
+          : {}),
+      },
       orderBy: { createdAt: 'desc' },
     });
   }
