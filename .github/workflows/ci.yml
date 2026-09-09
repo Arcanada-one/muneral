@@ -97,6 +97,48 @@ jobs:
           DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
           MUN0020_DB_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
 
+  # AUP-GRAPH-006 `gate1` (DEC-AUP-0008): «нет receipt — нет мержа». A pull request is admitted only
+  # when a ChangeAdmissionReceipt/v1 is bound to exactly this change range — in the head tree under
+  # receipts/graph/, or as a ```json block in the pull-request body. Doc-only changes report
+  # `not_measured` and stay green; a missing, unbound, stale or two-valued receipt is red.
+  # `program_ref` MUST be the same SHA as the `uses:` ref and as .github/graph-admission/BUNDLE.json
+  # (the gate tools travel as a digest-pinned vendored bundle: the program repository is private, so a
+  # cross-repo checkout would need a credential this rule does not create). DEC-AUP-0007 keeps CI
+  # post-hoc: the authoritative run is the local `admit_change.py gate` of the agent that changed the code.
+  graph-admission:
+    # Pull requests only: this gate is about MERGES. On a push to main there is no pull-request body
+    # to read a receipt from, and `deploy` must not gain a dependency that is skipped there (a skipped
+    # need skips the dependent). "Required for merge" is enforced where it belongs — as a required
+    # status check on `main` in branch protection.
+    #
+    # AUP-GRAPH-006:gate2a. `needs: lint-and-test` + `if: always()` is what makes the automated-author
+    # path honest. A dependency-manifest or lockfile change triggers the graph's global fallback — the
+    # blast radius is the WHOLE repository (the Bazel/Nx rule of DEC-AUP-0008) — and the verifier for
+    # that is this repository's own suite. So the gate is handed `needs.lint-and-test.result`, and it
+    # maps success -> verified, failure/cancelled/timed_out -> failed, anything else -> not_measured.
+    # `always()` is required for the gate to SEE a failure: without it a failed need would skip this
+    # job, and a skipped check is not a red one. `deploy` does not depend on this job, so its
+    # dependency graph is unchanged.
+    needs: lint-and-test
+    if: always() && github.event_name == 'pull_request'
+    # The workflow file is the program repository's own, vendored byte-for-byte from the pinned SHA
+    # below (its sha256 is recorded in .github/graph-admission/BUNDLE.json). It is called LOCALLY
+    # because the cross-repository reference to the reusable workflow of the PRIVATE program
+    # repository does not start a run here — GitHub reports only "workflow file issue", with no job
+    # and no retrievable annotation. Recorded as a hole, not as a solved problem.
+    uses: ./.github/workflows/graph-admission.yml
+    with:
+      program_ref: '446e8dcee93b1b7dad748a431d5a817a3afb8052'
+      verifier_job: 'lint-and-test'
+      verifier_conclusion: ${{ needs.lint-and-test.result }}
+      # AUP-GRAPH-006:gate2b. The fingerprint of the Ed25519 key that signs the vendored bundle's
+      # BUNDLE.json. It lives HERE, in this repository's own workflow file, deliberately OUTSIDE
+      # .github/graph-admission/: a fingerprint kept inside the bundle would be replaced by the very
+      # change that replaces the key, and would prove only that the bundle agrees with itself. With
+      # it, a tamper re-signed by an attacker's own key is refused; without it the gate reports
+      # BUNDLE_SIGNATURE_UNPINNED as `not_measured`, which is never a pass.
+      signing_key_fingerprint: 'SHA256:9QFqysn44UjA8rXyfHjItP3b2Oadhnbf1bDNqXrsCig'
+
   network-exposure:
     uses: Arcanada-one/datarim/.github/workflows/network-exposure-lint.yml@57afdfcd6a2d71aa8e0b577de6e43846e93b60dd
     with:
