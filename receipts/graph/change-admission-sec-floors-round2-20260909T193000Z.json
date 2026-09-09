@@ -28,9 +28,15 @@
     "new": true,
     "path": "receipts/graph/change-admission-sec-floors-round2-20260909T193000Z.json",
     "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "path": "receipts/archive/node-pin-20260909T175500Z.json",
+    "status": "R",
+    "note": "archived out of the graph-admission discovery globs; renamed from receipts/graph/change-admission-MUN-node-pin-20260909T175500Z.json, content unchanged"
    }
   ],
-  "head": "b66c46ed7022fc6302eb6a7d3ca7159bc755271b",
+  "head": "4cef876aefa9",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
