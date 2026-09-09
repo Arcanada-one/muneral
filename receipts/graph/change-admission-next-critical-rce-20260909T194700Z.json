@@ -33,6 +33,12 @@
     "new": true,
     "path": "receipts/graph/change-admission-next-critical-rce-20260909T194700Z.json",
     "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "path": "receipts/archive/node-pin-20260909T175500Z.json",
+    "status": "R",
+    "note": "archived out of the graph-admission discovery globs; renamed from receipts/graph/change-admission-MUN-node-pin-20260909T175500Z.json, content unchanged"
    }
   ],
   "head": "397a5382255ce6b2f89230fc4d27230c44357f1a",
