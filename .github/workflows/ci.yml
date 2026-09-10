@@ -129,6 +129,12 @@ jobs:
     uses: ./.github/workflows/graph-admission.yml
     with:
       program_ref: 'c1018b10f26a8619b5c1670e9bf720f59831316b'
+      # AUP-GRAPH-006:gate5b. B6.4 runs THIS repository's declared verifier, and the harness
+      # records the toolchain it ran on. The workflow's default is Node 22, while package.json
+      # pins 24.20.0 and lint-and-test installs exactly that — so the gate re-measured the
+      # artefact on v22.23.2 against evidence recorded on v24.20.0 and reported
+      # TOOLCHAIN_MISMATCH. The version belongs here, next to the job it must match.
+      derived_artefact_node_version: '24.20.0'
       verifier_job: 'lint-and-test'
       verifier_conclusion: ${{ needs.lint-and-test.result }}
       # AUP-GRAPH-006:gate2b. The fingerprint of the Ed25519 key that signs the vendored bundle's
