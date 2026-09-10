@@ -1425,19 +1425,55 @@ def evaluate_structural(repo: Path, base: str, head: str, files: list[dict], cas
                                 verifier_conclusion=verifier_conclusion)
 
 
-def structural_covered_entities(case: str, synthesized: str, verdict_entities, managed: set[str]) -> set[str]:
+MATRIX_REL = "contracts/graph-verified-change/verifier-matrix.v1.json"
+
+
+def matrix_declared_unverifiable(repo: Path, ref: str, bundle_rel: str) -> frozenset[str]:
+    """Node types the verifier matrix gives no mandatory verifier — not_measured BY DECLARATION.
+
+    Read at BASE, never at head, for the same reason read_declaration is: a change must not widen
+    its own licence by shipping a matrix that declares its own affected types unverifiable. An
+    unreadable or malformed matrix yields the empty set, so every not_measured entity keeps owing
+    an exemption — failing closed costs a PAUSED_SAFE, failing open would admit unverified work."""
+    for rel in (f"{bundle_rel}/{MATRIX_REL}", MATRIX_REL):
+        raw = git(repo, "show", f"{ref}:{rel}", check=False)
+        if not raw.strip():
+            continue
+        try:
+            types = (json.loads(raw).get("node_types") or {})
+        except json.JSONDecodeError:
+            return frozenset()
+        return frozenset(t for t, spec in types.items()
+                         if isinstance(spec, dict) and not (spec.get("mandatory") or []))
+    return frozenset()
+
+
+def structural_covered_entities(case: str, synthesized: str, verdict_entities, managed: set[str],
+                                declared_unverifiable: frozenset[str] = frozenset()) -> set[str]:
     """Which entities an exemption of this code may name — never more.
 
     `NO_IMPACT_BY_CONSTRUCTION`: exactly the synthesized entity (there are no others; the receipt has
     zero verdicts by construction). `GATE_SELF_UPDATE`: the synthesized entity plus the nodes whose
     PATH is bundle-managed — the vendored foreign code itself, whose verification happened in the
     program repository, which is the same principle gate3b already landed for vendored config keys.
-    An exemption that grows past this set is how a typed exception becomes a bypass."""
+    An exemption that grows past this set is how a typed exception becomes a bypass.
+
+    On a self-update the set also admits entities whose NODE TYPE the verifier matrix at BASE gives
+    no mandatory verifier — `receipt` and `work_item` today. Those are not_measured BY DECLARATION:
+    verify.py reads the matrix's own `not_measured_reason` for them, so without this the gate would
+    demand an exemption for a limit it declared itself and no receipt could ever leave paused_safe.
+    The loop is not hypothetical — it re-arms on every change to gate code, because a `verifies`
+    edge points from each past receipt to the code it verified, pulling all of them into the impact
+    set. The narrowing is deliberately two-sided: the type must carry NO mandatory verifier at base
+    (a change cannot widen its own licence by shipping a matrix), and the case must be a self-update,
+    so an ordinary change still owes an exemption for every not_measured entity it produces."""
     allowed = {synthesized}
     if case == "gate_self_update":
         for eid in verdict_entities:
-            _, _, path = str(eid).partition(":")
+            node_type, _, path = str(eid).partition(":")
             if path and path in managed:
+                allowed.add(eid)
+            elif node_type in declared_unverifiable:
                 allowed.add(eid)
     return allowed
 
@@ -1467,7 +1503,8 @@ def structural_exemption(repo: Path, base: str, head: str, files: list[dict], po
     synth = f"{ENTITY_PREFIX_OF_CASE[case]}:{repo_name}@{head[:12]}"
     managed, _ = bundle_paths_at(repo, head, bundle_rel)
     managed |= bundle_paths_at(repo, base, bundle_rel)[0]
-    covered = structural_covered_entities(case, synth, verdict_entities, managed)
+    covered = structural_covered_entities(case, synth, verdict_entities, managed,
+                                          matrix_declared_unverifiable(repo, base, bundle_rel))
     binding = {"base": base, "head": head, "digest": diff_digest(repo, base, head)}
     ev["change_binding"] = binding
     ev["synthesized_entity"] = synth
@@ -1538,7 +1575,8 @@ def recheck_structural(repo: Path, base: str, head: str, files: list[dict], poli
     synth = f"{ENTITY_PREFIX_OF_CASE[case]}:{repo_name}@{head[:12]}"
     managed, _ = bundle_paths_at(repo, head, bundle_rel)
     managed |= bundle_paths_at(repo, base, bundle_rel)[0]
-    allowed = structural_covered_entities(case, synth, verdict_entities, managed)
+    allowed = structural_covered_entities(case, synth, verdict_entities, managed,
+                                          matrix_declared_unverifiable(repo, base, bundle_rel))
     named = {x.get("entity") for x in exemptions}
     extra = sorted(named - allowed)
     if extra:
