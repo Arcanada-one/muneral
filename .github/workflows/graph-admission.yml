@@ -135,12 +135,31 @@ jobs:
           else
             echo "declared=no" >> "$GITHUB_OUTPUT"
           fi
+          # B6.4 runs the caller's own verifier, and a verifier that records its toolchain compares
+          # what it ran on against what the evidence was built with. The input's default cannot know
+          # that: muneral pins engines.node 24.20.0 and its own test job installs exactly that, so
+          # the gate measured the artefact on the default 22 and reported TOOLCHAIN_MISMATCH —
+          # a red that says nothing about the artefact. The caller cannot fix it in its ci.yml
+          # either: pin_only_edit refuses a bundle refresh whose ci.yml carries any line that is not
+          # the program_ref pin, and rightly so.
+          # So the version is read from where the caller already declares it. An exact pin only
+          # ("24.20.0", not "^24"): a range would install some other patch and reintroduce the same
+          # mismatch under a different number. Nothing declared, or a range, falls back to the input.
+          node_version=""
+          if [ -f package.json ]; then
+            node_version=$(python3 -c "import json;print((json.load(open('package.json')).get('engines') or {}).get('node',''))" 2>/dev/null || true)
+          fi
+          case "$node_version" in
+            [0-9]*.[0-9]*.[0-9]*) : ;;
+            *) node_version="" ;;
+          esac
+          echo "node_version=$node_version" >> "$GITHUB_OUTPUT"
 
       - name: Node toolchain for the declared verifier (B6)
         if: steps.derived.outputs.declared == 'yes'
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
         with:
-          node-version: ${{ inputs.derived_artefact_node_version }}
+          node-version: ${{ steps.derived.outputs.node_version || inputs.derived_artefact_node_version }}
 
       - name: Corepack for the declared verifier (B6)
         if: steps.derived.outputs.declared == 'yes'
