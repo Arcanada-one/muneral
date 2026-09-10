@@ -50,9 +50,28 @@ BUNDLE_FILES = [
     "tools/graph/admit_change.py",
     "tools/graph/schema_check.py",
     "tools/graph/build_graph.py",
+    # build_graph.py imports this at module scope to classify .github/workflows/* paths, so a bundle
+    # without it is not merely reduced — the vendored builder raises ModuleNotFoundError on import
+    # and the caller's gate cannot build a graph at all. Measured: the pre-1.0.1 builder carried no
+    # such import, so the omission only became fatal when the import was added.
+    "tools/graph/workflow_config.py",
     # AUP-GRAPH-006:gate2a — the automated-author path classifies changed paths and decides the global
     # fallback with the SAME code the local gate uses, so the classifier travels with the bundle.
     "tools/graph/impact.py",
+    # The rest of admit_change.py's local imports. `impact_pair` is imported at module scope by
+    # admit_change.py (and inside impact.py), so a bundle without it raises ModuleNotFoundError the
+    # moment ci_gate imports admit_change — measured in muneral CI, where the gate died before
+    # producing any verdict at all. `verify` and `contract_diff` are imported inside admit_change's
+    # verification path: absent, they do not fail at import time, they fail when the gate reaches
+    # the work they do, which is worse — a bundle that starts and then cannot finish.
+    "tools/graph/impact_pair.py",
+    "tools/graph/verify.py",
+    "tools/graph/contract_diff.py",
+    # verify.py's own chain: canary_evidence at module scope, process_observation from there.
+    # Found by importing every bundled module from a directory that contains nothing else — a
+    # static import scan missed it, and so did testing one entry point by hand.
+    "tools/graph/canary_evidence.py",
+    "tools/graph/process_observation.py",
     # AUP-GRAPH-006:gate2b — the SSHSIG/Ed25519 verifier. It must travel with the bundle: the gate
     # verifies the bundle's signature before trusting anything in it, and a verifier the caller does
     # not have is a verification that silently does not happen.
@@ -242,20 +261,53 @@ def receipts_from_body(body: str, workdir: Path) -> list[Path]:
     return out
 
 
-def receipts_from_tree(repo: Path, globs: list[str]) -> list[Path]:
-    out = []
+def receipts_from_tree(repo: Path, globs: list[str], changed: set[str] | None = None,
+                       base: str | None = None) -> list[Path]:
+    """Receipts this CHANGE carries, not every receipt the repository has ever accumulated.
+
+    A receipt that already existed at `base` and is untouched by `base..head` was merged by an
+    EARLIER change. Its range can never be a subrange of this one, so judging it can only ever
+    produce RECEIPT_NOT_BOUND_TO_RANGE — a permanent refusal of every later pull request in the
+    repository. Observed in muneral: one merged node-pin receipt held #79, #81 and #83 red at once
+    while each carried a correct receipt of its own.
+
+    The exclusion is deliberately narrow: a receipt is dropped only when git can PROVE it is a
+    merged artefact — present at base AND absent from the diff. Anything else is judged, including
+    a receipt sitting in the working tree that was never committed. That matters beyond the
+    fixtures: `--receipt-glob` output and locally staged receipts must still reach the gate.
+
+    This narrows DISCOVERY only; it does not soften the check. A receipt the change adds or modifies
+    is still judged, so "pointing the gate at the wrong receipt is refused, never silently ignored"
+    (mutation arm violation-RECEIPT_NOT_BOUND_TO_RANGE-extra) still holds — that arm hands the gate
+    its extra receipt as an explicit --receipt path and never reaches this function.
+    """
+    at_base: set[str] = set()
+    if base is not None and changed is not None:
+        try:
+            listing = git(repo, "ls-tree", "-r", "--name-only", base)
+            at_base = {ln for ln in listing.splitlines() if ln}
+        except Exception:
+            # cannot prove anything is merged → judge everything, the pre-existing behaviour
+            at_base = set()
+    out, seen = [], set()
     for g in globs:
         for p in sorted(repo.glob(g)):
             if not p.is_file():
                 continue
+            rel = str(p.relative_to(repo))
+            # the default globs overlap, so the same receipt was collected — and reported — twice
+            if rel in seen:
+                continue
+            if changed is not None and rel in at_base and rel not in changed:
+                continue  # merged by an earlier change, and this one does not touch it
             try:
                 doc = json.loads(p.read_text())
             except (json.JSONDecodeError, UnicodeDecodeError):
                 continue
             if isinstance(doc, dict) and str(doc.get("schema", "")).startswith("ChangeAdmissionReceipt"):
+                seen.add(rel)
                 out.append(p)
     return out
-
 
 def cmd_run(a) -> int:
     repo = Path(a.repo).resolve()
@@ -401,7 +453,7 @@ def cmd_run(a) -> int:
     if a.pr_body_file and Path(a.pr_body_file).exists():
         body = Path(a.pr_body_file).read_text(errors="replace")
     body_receipts = receipts_from_body(body, work)
-    tree_receipts = receipts_from_tree(repo, a.receipt_glob or DEFAULT_RECEIPT_GLOBS)
+    tree_receipts = receipts_from_tree(repo, a.receipt_glob or DEFAULT_RECEIPT_GLOBS, changed=set(files), base=base)
     result["receipt_sources"]["tree"] = [str(p.relative_to(repo)) for p in tree_receipts]
     result["receipt_sources"]["pr_body"] = [p.name for p in body_receipts]
     receipts = tree_receipts + body_receipts
@@ -712,9 +764,13 @@ def selftest() -> int:
     g5b_checks, g5b_red = selftest_gate5b()
     red += g5b_red
     checks += g5b_checks
+    print("\n--- AUP-DEBT-002:B7 — the declaration-amendment battery (DEC-AUP-0020) ---")
+    b7_checks, b7_red = selftest_b7()
+    red += b7_red
+    checks += b7_checks
     measured = [c for c in checks if c.get("ok") is not None]
     print(f"\nTOTAL {'PASS' if not red else 'FAIL'}: {len(measured) - red}/{len(measured)} checks across "
-          f"five batteries ({len(checks) - len(measured)} not_measured)")
+          f"six batteries ({len(checks) - len(measured)} not_measured)")
     return 0 if not red else 1
 
 
@@ -1759,6 +1815,248 @@ def selftest_gate5b() -> tuple[list[dict], int]:
 
     print(f"\nGATE5B SELFTEST {'PASS' if not red else 'FAIL'}: {len(checks) - red}/{len(checks)} checks, "
           f"{len(checks) - 3} mutants")
+    shutil.rmtree(root, ignore_errors=True)
+    return checks, red
+
+
+def selftest_b7() -> tuple[list[dict], int]:
+    """AUP-DEBT-002 Card 1 — B7, DEC-AUP-0020. Sixth battery. Amending
+    `.arcana/derived-artefacts.v1.json` ITSELF, on its own narrow admission arm — never a general fix
+    to the graph-impact path. Reuses the real gate code (admit_change.py's `b7_*` helpers and
+    `evaluate_declaration_amend`), not a mock, on a scratch git repository built for this battery.
+
+    Every mutant below is a diff, or an authority pairing, that DEC-AUP-0020 says MUST be refused —
+    at least one per binding property (closed diff grammar; mandatory dry-run replay; a second,
+    independent authority; absolute refusal of grant-and-spend in one commit/PR) — plus two positive
+    controls (a legitimate ADD, and a legitimate REMOVE) that must be admitted. A survivor here is a
+    HOLE, reported as one, never accommodated by weakening the mutant."""
+    import tempfile
+    root = Path(tempfile.mkdtemp(prefix="b7-selftest-"))
+    checks, red = [], 0
+
+    def check(name, ok, **kw):
+        nonlocal red
+        checks.append({"name": name, "ok": bool(ok), **kw})
+        if not ok:
+            red += 1
+        print(("ok   " if ok else "FAIL ") + name
+              + ("" if ok else "  " + json.dumps(kw, ensure_ascii=False, default=str)[:600]))
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import admit_change as ac  # noqa: E402
+
+    ENV = {"GIT_AUTHOR_NAME": "f", "GIT_AUTHOR_EMAIL": "f@x", "GIT_COMMITTER_NAME": "f",
+           "GIT_COMMITTER_EMAIL": "f@x", "GIT_AUTHOR_DATE": "2026-09-07T00:00:00Z",
+           "GIT_COMMITTER_DATE": "2026-09-07T00:00:00Z", "PATH": os.environ.get("PATH", "/usr/bin:/bin")}
+    DECL_REL = ac.DEFAULT_DECLARATION_REL
+    VERIFY_SRC = ("import pathlib, sys\n"
+                  "d = pathlib.Path('data/derived2.txt').read_bytes()\n"
+                  "s = pathlib.Path('data/source2.txt').read_bytes()\n"
+                  "sys.exit(0 if d == s else 1)\n")
+    NOOP_VERIFY_SRC = "import sys\nsys.exit(0)\n"  # the ["true"] shape — never binds anything
+
+    repo = root / "repo"
+    repo.mkdir(parents=True)
+    env = {**ENV, "HOME": str(repo)}
+
+    def g(*a):
+        r = subprocess.run(["git", "-C", str(repo), *a], capture_output=True, text=True, env=env)
+        if r.returncode != 0:
+            raise RuntimeError(f"git {' '.join(a)}: {r.stderr[:300]}")
+        return r.stdout
+
+    g("init", "-q", "-b", "main")
+    (repo / "src").mkdir()
+    (repo / "src/a.ts").write_text("export const a = 1;\n")
+    (repo / "data").mkdir()
+    for stem, content in (("", "hello\n"), ("2", "world\n"), ("3", "x\n")):
+        (repo / f"data/source{stem}.txt").write_text(content)
+        (repo / f"data/derived{stem}.txt").write_text(content)
+    (repo / "tools").mkdir()
+    (repo / "tools/verify_derived.py").write_text(VERIFY_SRC)
+    (repo / "tools/verify_noop.py").write_text(NOOP_VERIFY_SRC)
+    base_artefacts = [{"path": "data/derived.txt", "verified_by_job": "lint-and-test",
+                       "verify": {"argv": ["python3", "tools/verify_derived.py"]}}]
+    (repo / DECL_REL).parent.mkdir(parents=True, exist_ok=True)
+    (repo / DECL_REL).write_text(json.dumps({"schema": ac.DECLARATION_SCHEMA, "artefacts": base_artefacts},
+                                            indent=1, sort_keys=True) + "\n")
+    g("add", "-A")
+    g("commit", "-q", "-m", "base")
+    base = g("rev-parse", "HEAD").strip()
+
+    def amend_from(parent: str, artefacts: list, msg: str) -> str:
+        g("checkout", "-q", parent)
+        (repo / DECL_REL).write_text(json.dumps({"schema": ac.DECLARATION_SCHEMA, "artefacts": artefacts},
+                                                indent=1, sort_keys=True) + "\n")
+        g("add", "-A")
+        g("commit", "-q", "-m", msg)
+        h = g("rev-parse", "HEAD").strip()
+        g("checkout", "-q", "main")
+        return h
+
+    def candidate_from(parent: str, edits, msg: str) -> str:
+        g("checkout", "-q", parent)
+        edits(repo)
+        g("add", "-A")
+        g("commit", "-q", "-m", msg)
+        h = g("rev-parse", "HEAD").strip()
+        g("checkout", "-q", "main")
+        return h
+
+    def opine(b, h, *, authority_id: str, candidate_range: str | None) -> dict:
+        files = ac.range_files(repo, b, h)
+        ev = ac.evaluate_declaration_amend(repo, b, h, files, root / f"wd-opine-{authority_id}",
+                                           candidate_range=candidate_range, authority_id=authority_id,
+                                           second_opinion=None, verifier_job="lint-and-test",
+                                           verifier_conclusion="success")
+        relevant = [c for c in ev["checks"] if c["code"] != "SECOND_AUTHORITY"]
+        verdict = ("verified" if relevant and all(c["verdict"] == "verified" for c in relevant) else
+                  ("failed" if any(c["verdict"] == "failed" for c in relevant) else "not_measured"))
+        return {"schema": "B7SecondOpinion/v1", "authority_id": authority_id, "base": b, "head": h,
+               "change_digest": ev.get("change_digest"), "candidate_range": candidate_range,
+               "op": ev.get("op"), "grammar": ev.get("grammar"), "verdict": verdict, "checks": relevant}
+
+    # ==== positive control 1 — a legitimate ADD, dry-run replayed, two distinct authorities ====
+    cand_head = candidate_from(base, lambda r: (
+        (r / "data/source2.txt").write_text("world v2\n"), (r / "data/derived2.txt").write_text("world v2\n")),
+        "candidate: regenerate derived2 from source2")
+    add_entry = {"path": "data/derived2.txt", "verified_by_job": "lint-and-test",
+                "verify": {"argv": ["python3", "tools/verify_derived.py"]}}
+    add_head = amend_from(base, base_artefacts + [add_entry], "declare data/derived2.txt")
+    second = opine(base, add_head, authority_id="reviewer-2", candidate_range=f"{base}..{cand_head}")
+    add_files = ac.range_files(repo, base, add_head)
+    add_case, _ = ac.structural_case(repo, base, add_head, add_files)
+    primary = ac.evaluate_declaration_amend(repo, base, add_head, add_files, root / "wd-control",
+                                            candidate_range=f"{base}..{cand_head}", authority_id="primary-1",
+                                            second_opinion=second, verifier_job="lint-and-test",
+                                            verifier_conclusion="success")
+    check("(control-1) a legitimate ADD, dry-run replayed against the real candidate diff it motivates, with a "
+         "second, distinct authority's independent re-derivation -> ELIGIBLE (admitted)",
+         add_case == "declaration_amend" and primary["eligible"],
+         case=add_case, checks=primary["checks"])
+
+    # ==== positive control 2 — a legitimate REMOVE, exempt from the dry-run requirement (rule 5) ====
+    rm_head = amend_from(base, [], "remove data/derived.txt from the declaration")
+    rm_files = ac.range_files(repo, base, rm_head)
+    rm_case, _ = ac.structural_case(repo, base, rm_head, rm_files)
+    rm_second = opine(base, rm_head, authority_id="reviewer-2", candidate_range=None)
+    rm_primary = ac.evaluate_declaration_amend(repo, base, rm_head, rm_files, root / "wd-control-rm",
+                                               candidate_range=None, authority_id="primary-1",
+                                               second_opinion=rm_second)
+    check("(control-2) a legitimate REMOVE is exempt from the dry-run requirement (DEC-AUP-0020 rule 5) and is "
+         "admitted on the closed-grammar + second-authority checks alone",
+         rm_case == "declaration_amend" and rm_primary["eligible"],
+         case=rm_case, checks=rm_primary["checks"])
+
+    # ==== property 1: closed diff grammar (rule 3) ====
+    glob_entry = {"path": "data/generated/*.txt", "verified_by_job": "lint-and-test",
+                 "verify": {"argv": ["python3", "tools/verify_noop.py"]}}
+    with_glob_head = amend_from(base, base_artefacts + [glob_entry], "declare data/generated/*.txt (fixture)")
+    widen_head = amend_from(with_glob_head, base_artefacts + [{**glob_entry, "path": "data/**"}],
+                            "WIDEN data/generated/*.txt -> data/**")
+    widen_files = ac.range_files(repo, with_glob_head, widen_head)
+    widen_ev = ac.evaluate_declaration_amend(repo, with_glob_head, widen_head, widen_files, root / "wd-widen")
+    check("mutant (grammar-widen) widening `data/generated/*.txt` -> `data/**` is refused, not approximated "
+         "(DEC-AUP-0020 rule 3: widening a glob is not narrowing)",
+         not widen_ev["eligible"] and any(c["code"] == "GRAMMAR" and c["verdict"] == "failed"
+                                          for c in widen_ev["checks"]),
+         checks=widen_ev["checks"])
+
+    bundle_head = amend_from(base, [{**base_artefacts[0], "verify": {"argv": ["python3", "tools/verify_noop.py"]}},
+                                    add_entry], "add data/derived2.txt AND edit derived.txt's verify, together")
+    bundle_files = ac.range_files(repo, base, bundle_head)
+    bundle_ev = ac.evaluate_declaration_amend(repo, base, bundle_head, bundle_files, root / "wd-bundle")
+    check("mutant (grammar-bundled) adding a new entry AND editing an existing entry's verify/setup in the SAME "
+         "diff is refused (DEC-AUP-0020 rule 3 forbids bundling)",
+         not bundle_ev["eligible"] and any(c["code"] == "GRAMMAR" and c["verdict"] == "failed"
+                                           for c in bundle_ev["checks"]),
+         checks=bundle_ev["checks"])
+
+    # ==== property 1b: no bare wildcard / no glob covering a graph source root (rule 3's abuse case) ====
+    srcglob_entry = {"path": "src/**", "verified_by_job": "lint-and-test",
+                     "verify": {"argv": ["python3", "tools/verify_noop.py"]}}
+    srcglob_head = amend_from(base, base_artefacts + [srcglob_entry], "declare src/** (the contract's own abuse case)")
+    srcglob_files = ac.range_files(repo, base, srcglob_head)
+    srcglob_ev = ac.evaluate_declaration_amend(repo, base, srcglob_head, srcglob_files, root / "wd-srcglob")
+    check("mutant (scope) declaring `src/**` — a graph source root — is refused outright (DEC-AUP-0020 rule 3's "
+         "own abuse case)",
+         not srcglob_ev["eligible"] and any(c["code"] == "SCOPE" and c["verdict"] == "failed"
+                                            for c in srcglob_ev["checks"]),
+         checks=srcglob_ev["checks"])
+
+    # ==== property 2: mandatory dry-run replay (rule 4) ====
+    no_cand_ev = ac.evaluate_declaration_amend(repo, base, add_head, add_files, root / "wd-nocand",
+                                               candidate_range=None, authority_id="primary-1",
+                                               second_opinion=second, verifier_job="lint-and-test",
+                                               verifier_conclusion="success")
+    check("mutant (dry-run missing) no --b7-candidate-range given for an ADD -> not eligible (not_measured is "
+         "not a pass)",
+         not no_cand_ev["eligible"],
+         checks=no_cand_ev["checks"])
+
+    weak_cand_head = candidate_from(base, lambda r: (r / "data/derived3.txt").write_text("tampered\n"),
+                                    "candidate: touch derived3 under a verifier that binds nothing")
+    weak_entry = {"path": "data/derived3.txt", "verified_by_job": "lint-and-test",
+                 "verify": {"argv": ["python3", "tools/verify_noop.py"]}}
+    weak_amend_head = amend_from(base, base_artefacts + [weak_entry], "declare data/derived3.txt (weak verifier)")
+    weak_files = ac.range_files(repo, base, weak_amend_head)
+    weak_ev = ac.evaluate_declaration_amend(repo, base, weak_amend_head, weak_files, root / "wd-weak",
+                                            candidate_range=f"{base}..{weak_cand_head}", authority_id="primary-1",
+                                            second_opinion=None, verifier_job="lint-and-test",
+                                            verifier_conclusion="success")
+    check("mutant (dry-run weak-verifier) a verifier that never refuses a corrupted artefact (the `[\"true\"]` "
+         "shape) is caught by B6.5 INSIDE the replay -> DRY_RUN fails, not eligible",
+         not weak_ev["eligible"] and any(c["code"] == "DRY_RUN" and c["verdict"] == "failed"
+                                         for c in weak_ev["checks"]),
+         checks=weak_ev["checks"])
+
+    # ==== property 3: a second, independent authority (rule 7 / reverse_if #2) ====
+    no_second_ev = ac.evaluate_declaration_amend(repo, base, add_head, add_files, root / "wd-nos2",
+                                                 candidate_range=f"{base}..{cand_head}", authority_id="primary-1",
+                                                 second_opinion=None, verifier_job="lint-and-test",
+                                                 verifier_conclusion="success")
+    check("mutant (second-authority missing) no --b7-second-opinion given -> not eligible",
+         not no_second_ev["eligible"], checks=no_second_ev["checks"])
+
+    same_id_ev = ac.evaluate_declaration_amend(repo, base, add_head, add_files, root / "wd-sameid",
+                                               candidate_range=f"{base}..{cand_head}", authority_id="primary-1",
+                                               second_opinion={**second, "authority_id": "primary-1"},
+                                               verifier_job="lint-and-test", verifier_conclusion="success")
+    check("mutant (second-authority same-id) primary and 'second' opinion share ONE authority_id -> refused "
+         "(reverse_if #2: a degraded single-body amendment is the exact failure DEC-AUP-0020 names as grounds "
+         "to reopen the decision)",
+         not same_id_ev["eligible"] and any(c["code"] == "SECOND_AUTHORITY" and c["verdict"] == "failed"
+                                            for c in same_id_ev["checks"]),
+         checks=same_id_ev["checks"])
+
+    stale_ev = ac.evaluate_declaration_amend(repo, base, add_head, add_files, root / "wd-stale",
+                                             candidate_range=f"{base}..{cand_head}", authority_id="primary-1",
+                                             second_opinion={**second, "change_digest": "0" * 64},
+                                             verifier_job="lint-and-test", verifier_conclusion="success")
+    check("mutant (second-authority stale) the second opinion is bound to a DIFFERENT diff digest — a stale or "
+         "forged vouch — -> refused",
+         not stale_ev["eligible"] and any(c["code"] == "SECOND_AUTHORITY" and c["verdict"] == "failed"
+                                          for c in stale_ev["checks"]),
+         checks=stale_ev["checks"])
+
+    # ==== property 4: absolute refusal of grant-and-spend in one commit/PR (rule 6) ====
+    gs_head = candidate_from(base, lambda r: (
+        (r / DECL_REL).write_text(json.dumps({"schema": ac.DECLARATION_SCHEMA,
+                                              "artefacts": base_artefacts + [add_entry]},
+                                             indent=1, sort_keys=True) + "\n"),
+        (r / "data/source2.txt").write_text("grant-and-spend\n"),
+        (r / "data/derived2.txt").write_text("grant-and-spend\n")),
+        "grant AND spend the exemption in one commit")
+    gs_files = ac.range_files(repo, base, gs_head)
+    gs_case, gs_cev = ac.structural_case(repo, base, gs_head, gs_files)
+    check("mutant (grant-and-spend) a diff that BOTH adds a declaration entry AND uses it in the SAME commit is "
+         "NEVER classified declaration_amend — it falls to the ordinary rule, where B6.1 refuses a declaration "
+         "changed in the same diff it is relied on (DEC-AUP-0020 rule 6, structurally enforced)",
+         gs_case is None,
+         case=gs_case, reason=gs_cev.get("reason"))
+
+    print(f"\nB7 SELFTEST {'PASS' if not red else 'FAIL'}: {len(checks) - red}/{len(checks)} checks, "
+          f"{len(checks) - 2} mutants, 2 positive controls")
     shutil.rmtree(root, ignore_errors=True)
     return checks, red
 

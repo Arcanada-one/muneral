@@ -178,6 +178,13 @@
    "verdict": "admit",
    "order": 17,
    "rule": "Informational, never raising the verdict. Names the added paths for which the builder yields no node at head (A4), together with manifest.language_coverage, so that «the graph sees nothing here» is stated in the check text and never confused with «there is nothing to see». A change admitted under NO_IMPACT_BY_CONSTRUCTION whose files are all invisible to the builder is admitted on a WEAKER measurement than one whose files the builder covers, and this check is what makes that difference legible."
+  },
+  {
+   "id": "C18",
+   "code": "HEAD_IMPACT_NOT_COVERED",
+   "verdict": "paused_safe",
+   "order": 18,
+   "rule": "Rebuild base/head graphs from actual committed change paths. New head obligations require matching head revision/digest and complete base/head selection and verdict coverage. Deleted base dependents remain required. Unmeasured head code or failed recomputation pauses admission; receipt node_ids and manual exemptions cannot substitute this measurement."
   }
  ],
  "work_item_evidence": {

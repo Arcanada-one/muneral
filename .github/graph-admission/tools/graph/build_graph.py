@@ -59,9 +59,10 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path.insert(0, str(HERE))
+import workflow_config
 import schema_check  # noqa: E402  (tools/graph/schema_check.py — the validator of GRAPH-001)
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 BUILDER = "tools/graph/build_graph.py"
 EXTRACTORS = ["imports", "routes", "contracts", "prisma", "config", "reuse", "di", "queue", "tests",
               "http_client", "deployables", "docs", "work_items", "receipts", "rust", "python"]
@@ -304,7 +305,7 @@ class Tree:
 
     def under(self, d: str) -> list[str]:
         d = d.rstrip("/")
-        return [p for p in self.paths if d == "" or p.startswith(d + "/")]
+        return [p for p in self.paths if d in ("", ".") or p.startswith(d + "/")]
 
 
 def vendored_bundle_roots(tree: Tree) -> dict[str, dict]:
@@ -545,6 +546,9 @@ class Builder:
     def base(self):
         t = self.tree
         for p in t.paths:
+            if workflow_config.is_workflow(p):
+                self.g.node(f"code_unit:{p}", "code_unit", sha_bytes(t.files[p]),
+                            path=p, kind="workflow_configuration")
             if p.endswith(CODE_EXT) or p.endswith(".prisma") or p.endswith(RUST_EXT) or p.endswith(PY_EXT):
                 self.g.node(f"code_unit:{p}", "code_unit", sha_bytes(t.files[p]), path=p)
             if p.endswith(CODE_EXT):
@@ -1339,6 +1343,8 @@ class Builder:
                     or p.endswith((".prisma", ".md", ".markdown", ".json", ".yaml", ".yml", ".toml"))):
                 uncovered[ext] = uncovered.get(ext, 0) + 1
         limitations = sorted(set(self.limitations))
+        if any(workflow_config.is_workflow(p) for p in self.tree.paths):
+            limitations.append("workflow configurations are opaque hash-bound code units; config_schema checks a bounded YAML shape; no job, expression, shell or hosted execution proof")
         limitations.append("parser: comment/string-aware regex (AST-lite), not the TypeScript compiler; decorators with computed "
                            "arguments, re-exports deeper than 6 hops and dynamic dispatch are not resolved")
         limitations.append("incremental build (manifest.incremental_from) not implemented in builder0; every build is a full rebuild")
