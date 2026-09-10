@@ -9,12 +9,14 @@ import re
 class OutOfScope(Exception):
     """Valid GitHub syntax this bounded checker deliberately does not cover.
 
-    The module header says it is bounded, and the job loop says so again:
-    "Deliberately bounded: reusable jobs, strategy, services and containers are
-    not supported." Reporting that as `failed` claims the workflow is malformed
-    when the truth is that nothing was measured about it — and under DEC-AUP-0008
-    not_measured is a third verdict, never to be collapsed into pass or fail.
-    Malformed YAML and shapes GitHub itself rejects stay `failed`.
+    Reporting that as `failed` claims the workflow is malformed when the truth is
+    that nothing was measured about it — and under DEC-AUP-0008 not_measured is a
+    third verdict, never to be collapsed into pass or fail. Malformed YAML and
+    shapes GitHub itself rejects stay `failed`.
+
+    Job-level `uses:`, `services`, `strategy` and a `runs-on` label array were in
+    this class until they were measured for SHAPE (not interpreted); the triggers
+    outside `events` still are.
     """
 
 
@@ -145,22 +147,56 @@ def validate(raw):
         for name, job in jobs.items():
             if not re.fullmatch(r'[A-Za-z_][A-Za-z0-9_-]*', name):
                 raise ValueError('unsupported job id')
-            mapping(job, 'name needs if runs-on permissions env defaults concurrency outputs steps timeout-minutes continue-on-error')
+            # A job is one of two shapes, and conflating them is what made this checker report
+            # not_measured for every caller that uses either. `uses:` at job level calls another
+            # workflow: it has no `runs-on` and no `steps` — the called workflow supplies both.
+            reusable = 'uses' in job
+            if reusable:
+                mapping(job, 'name needs if permissions concurrency uses with secrets')
+                scalar(job['uses'])
+                if 'with' in job:
+                    mapping(job['with'])
+                    for v in job['with'].values():
+                        if not isinstance(v, str):
+                            raise ValueError('reusable-workflow input must be a scalar')
+                if 'secrets' in job and not isinstance(job['secrets'], (str, dict)):
+                    raise ValueError('unsupported secrets shape')
+            else:
+                mapping(job, 'name needs if runs-on permissions env defaults concurrency outputs '
+                             'steps timeout-minutes continue-on-error services strategy')
             common(job)
             if 'needs' in job:
                 if isinstance(job['needs'], list):
                     string_list(job['needs'])
                 else:
                     scalar(job['needs'])
-            # Deliberately bounded: reusable jobs, strategy, services and containers are not supported.
+            if reusable:
+                continue
+            # `runs-on: [self-hosted, linux, ci-general]` is ordinary GitHub syntax for a label
+            # set. Declaring it out of scope made the WHOLE file not_measured for every caller on
+            # self-hosted runners — and not_measured is never a pass, so those callers could not be
+            # measured at all. A label set is a nonempty list of nonempty strings and nothing else,
+            # which is the check `needs` already uses.
             runs_on = job.get('runs-on')
-            if isinstance(runs_on, list) and runs_on and all(
-                    isinstance(label, str) and label for label in runs_on):
-                # `runs-on: [self-hosted, linux, ci-general]` is ordinary GitHub
-                # syntax for a self-hosted label set, not a malformed workflow.
-                raise OutOfScope('runs-on label array is outside this bounded checker')
-            if not isinstance(runs_on, str) or not runs_on:
-                raise ValueError('literal/scalar runs-on required')
+            if isinstance(runs_on, list):
+                string_list(runs_on)
+                # BaseLoader makes every scalar a str, so `[self-hosted, 5]` arrives as ['self-hosted',
+                # '5'] and a type check alone accepts it. Measured while counter-checking this very
+                # change: that mutation passed as `verified`. A runner label is not a number.
+                for label in runs_on:
+                    if re.fullmatch(r'[+-]?[0-9]+(\.[0-9]+)?', label):
+                        raise ValueError(f'runs-on label is a number, not a label: {label!r}')
+            elif not isinstance(runs_on, str) or not runs_on:
+                raise ValueError('literal/scalar runs-on or a label array required')
+            # `services` and `strategy` are validated for SHAPE, never interpreted: a service is a
+            # named image with optional env/ports/options, a strategy is a matrix with optional
+            # fail-fast. Accepting the shape is what lets the rest of the file be measured; the
+            # container itself is still nothing this checker reasons about.
+            for svc in (job.get('services') or {}).values() if isinstance(job.get('services'), dict) else []:
+                mapping(svc, 'image credentials env ports volumes options')
+                scalar(svc.get('image', ''))
+            if 'strategy' in job:
+                mapping(job['strategy'], 'matrix fail-fast max-parallel')
             steps = job.get('steps')
             if not isinstance(steps, list) or not steps:
                 raise ValueError('nonempty steps required')
