@@ -1687,7 +1687,12 @@ def gate(repo: Path, base: str, head: str, receipt_paths: list[Path], policy: di
         try:
             coverage_problems = impact_pair.receipt_problems(repo, doc)
         except Exception as exc:
-            coverage_problems = ["dual graph coverage could not be measured: " + type(exc).__name__]
+            # The class name alone ("Refusal") hides the whole diagnosis: the reason a coverage
+            # measurement refused (STALE_GRAPH, a dirty tree, a missing graph) is carried in the
+            # message, and C18 is the only place an operator ever sees it. Keep the text.
+            detail = str(exc).strip() or type(exc).__name__
+            coverage_problems = ["dual graph coverage could not be measured: "
+                                 + type(exc).__name__ + ": " + detail]
         if coverage_problems:
             add("C18", f"{Path(rec['path']).name}: " + "; ".join(coverage_problems[:4]))
 

@@ -592,7 +592,11 @@ def selftest() -> int:
         print(("ok   " if ok else "FAIL ") + name + ("" if ok else "  " + json.dumps(kw, ensure_ascii=False)[:300]))
 
     repo, base, head = admit_change.scratch_repo(root)
-    F = admit_change.make_fixtures(base, head)
+    # Without `repo`, make_fixtures cannot bind head_graph/revision_selection, and every receipt
+    # it builds is a base-only receipt — which the paired coverage check refuses by design
+    # (HEAD_IMPACT_NOT_COVERED). The conformant CONTROL was therefore unpassable, and each mutant
+    # that could not flip an already-red control was scored a failure too.
+    F = admit_change.make_fixtures(base, head, repo)
     bundle = root / "bundle"
     cmd_bundle(argparse.Namespace(out=str(bundle), program_ref="0" * 40, workflow_out=None, sign_key=None))
     sign_bundle(bundle)  # gate2b: an unsigned bundle is refused, so every fixture bundle is signed
@@ -600,6 +604,14 @@ def selftest() -> int:
     shutil.copytree(bundle, repo / ".github/graph-admission")
     rdir = repo / "receipts/graph"
     rdir.mkdir(parents=True, exist_ok=True)
+    # The bundle and the receipt directory are dropped into the WORKING TREE, which leaves it dirty.
+    # The dual-graph coverage measurement refuses a dirty tree outright (STALE_GRAPH, --diff mode),
+    # and that refusal surfaced only as a bare "Refusal", so every arm depending on the conformant
+    # control read as a failure of the CONTROL rather than of the fixture that set it up.
+    # Excluding them locally keeps the tree clean without touching base..head — committing them
+    # would move `head` and unbind the fixtures already built for that exact range.
+    (repo / ".git/info").mkdir(parents=True, exist_ok=True)
+    (repo / ".git/info/exclude").write_text(".github/graph-admission/\nreceipts/graph/\n")
 
     def run(receipt: dict | None, *, body: str = "", extra_files: list[str] | None = None,
             tamper: str | None = None, program_ref: str = "0" * 40, doc_only: bool = False) -> dict:
@@ -677,7 +689,7 @@ def selftest() -> int:
     added_head = admit_change.git(repo2, "rev-parse", "HEAD").strip()
     r2 = rdir2 = repo2 / "receipts/graph"
     rdir2.mkdir(parents=True, exist_ok=True)
-    F2 = admit_change.make_fixtures(base2, added_head)
+    F2 = admit_change.make_fixtures(base2, added_head, repo2)
     (rdir2 / "car.json").write_text(json.dumps(F2["conformant-admit"]["receipt"], indent=1, sort_keys=True) + "\n")
     body2 = root / "body2.txt"
     body2.write_text("")
