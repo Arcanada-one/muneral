@@ -1537,6 +1537,26 @@ def structural_exemption(repo: Path, base: str, head: str, files: list[dict], po
                                     "candidate_range": candidate_range, "authority_id": authority_id,
                                     "second_opinion": second_opinion}} if case == "declaration_amend" else {})},
         })
+    # The battery is measured ONCE for the whole change, and `evidence` and `scope` are that one
+    # measurement — byte-identical in every exemption the loop above emits. Storing a copy per
+    # entity is pure duplication, and it is not free: on muneral #84 nineteen copies made
+    # `exemptions` 83 % of a 177 KB receipt, past the 65 536-byte pull-request body limit that is
+    # the only channel a bundle refresh has (a receipt FILE would be a third path outside the
+    # bundle, which B1 refuses). Deduplicated: 52 778 bytes, and the receipt fits.
+    #
+    # Nothing is lost. The gate already reads the battery from the FIRST exemption only
+    # (`exemptions[0].get("evidence")`), and C16 re-measures every arm from the repository on each
+    # evaluation rather than trusting what the receipt says — so the copies were never the
+    # evidence, only a transcript of it. Each later exemption keeps a pointer naming where its
+    # battery lives, so a reader is never left guessing whether one was withheld.
+    if len(out) > 1:
+        for x in out[1:]:
+            if x.get("evidence") == out[0].get("evidence"):
+                x["evidence_ref"] = "exemptions[0].evidence — one battery per change, measured once"
+                del x["evidence"]
+            if x.get("scope") == out[0].get("scope"):
+                x["scope_ref"] = "exemptions[0].scope"
+                del x["scope"]
     return out, ev
 
 

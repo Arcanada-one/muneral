@@ -1,5 +1,5 @@
 {
- "bundle_digest": "sha256:f4b702b4a69b8824ccc8d3b49f2dd9e6f43b2a3821c281901ccb5d63b949086d",
+ "bundle_digest": "sha256:ce8ba6654b539d58feb0ea4910be14cb102f931dc1fc2a41f4e4cb9878374d6a",
  "files": [
   {
    "note": "the workflow file itself; it is already running by the time the job checks the bundle",
@@ -10,7 +10,7 @@
   },
   {
    "path": "tools/graph/admit_change.py",
-   "sha256": "sha256:767887f7031ff9e7d87e711a26975c16db0d3ce9dff53a4728b13d0558881e91"
+   "sha256": "sha256:52d642d608b131ed2c465af09eff77e13d3f92bc80b97cde5294815585508ccb"
   },
   {
    "path": "tools/graph/schema_check.py",
@@ -78,7 +78,7 @@
   "tool": "tools/graph/ci_gate.py",
   "version": "1.0.0"
  },
- "program_ref": "416fe5fc6c9b5c334bff25c1cf8a231096f0e60b",
+ "program_ref": "c1018b10f26a8619b5c1670e9bf720f59831316b",
  "program_repo": "Arcanada-one/arcanada-universal-program",
  "provisional_until_fable_review": true,
  "rule": "The workflow refuses unless every file's sha256 matches this manifest AND the caller's `program_ref` input matches `program_ref` here. The bundle is a VENDORED copy of one pinned program-repo SHA (the program repository is private and no shared credential exists to check it out from a caller's CI). A pull request that changes anything under the bundle directory is refused by the gate job \u2014 a bundle refresh is its own pull request.",
