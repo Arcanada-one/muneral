@@ -31,6 +31,7 @@ import { AgentScope } from '../auth/agent-scope.decorator';
 import { ActorInterceptor } from '../common/interceptors/actor.interceptor';
 import { Actor } from '@muneral/types';
 import { FieldChangesService } from './field-state/field-changes.service';
+import { TaskStalenessService } from '../execution-authority/task-staleness.service';
 
 type AuthRequest = Request & { actor: Actor; agentScope?: AgentScopeContext };
 
@@ -89,6 +90,7 @@ export class TasksController {
   constructor(
     private readonly tasksService: TasksService,
     private readonly fieldChangesService: FieldChangesService,
+    private readonly stalenessService: TaskStalenessService,
   ) {}
 
   /** Creatable by an agent's API key inside its own workspace (MUN-0045) or by
@@ -140,6 +142,30 @@ export class TasksController {
     @Req() req: AuthRequest,
   ) {
     return this.tasksService.findByProject(projectId, req.agentScope?.agentId);
+  }
+
+  /**
+   * MUN-0040: turns "this task has been in_progress too long" into a number.
+   * Tri-valued on purpose — `not_measured` for any in_progress task with no
+   * MUN-0020 execution-authority recording is never reported as healthy or
+   * stalled (see TaskStalenessService header). Same agent-key narrowing as
+   * `findByProject` above, for the same cross-tenant reason (MUN-0043).
+   */
+  @Get('project/:projectId/staleness')
+  @AgentScope('project')
+  getStalenessReport(
+    @Param('projectId') projectId: string,
+    @Req() req: AuthRequest,
+    @Query('thresholdHours') thresholdHours?: string,
+  ) {
+    const thresholdMs = thresholdHours
+      ? Number(thresholdHours) * 3_600_000
+      : undefined;
+    return this.stalenessService.reportForProject(
+      projectId,
+      thresholdMs,
+      req.agentScope?.agentId,
+    );
   }
 
   /** Transitionable by the assigned agent's API key (MUN-0043) or by a JWT.

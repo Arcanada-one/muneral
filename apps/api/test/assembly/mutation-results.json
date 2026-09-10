@@ -1,6 +1,6 @@
 {
   "formatVersion": "assembly-mutation-evidence-v4",
-  "generatedAt": "2026-09-07T03:46:47.899Z",
+  "generatedAt": "2026-09-09T21:45:02.182Z",
   "invocation": {
     "cwd": ".",
     "argv": [
@@ -11,22 +11,22 @@
     ]
   },
   "tools": {
-    "node": "v22.23.1",
+    "node": "v24.20.0",
     "jest": "29.7.0",
     "typescript": "5.9.3",
     "pnpm": "11.5.2"
   },
   "toolchainCompatibility": {
-    "nodeMajorMinor": "22.23",
+    "nodeMajorMinor": "24.20",
     "pnpmMajor": 11
   },
   "binding": {
     "algorithm": "sha256",
-    "aggregateSha256": "f997e824344df129a3f0ef7c7a8a636c7aafdec09a9f167f93532c19465b6c32",
+    "aggregateSha256": "a5a4f55871782951a4959153a59ece567e6be360f3b0c3a5986a3c3e75878a42",
     "files": [
       {
         "path": "apps/api/package.json",
-        "sha256": "067887a778008abc34c0ced57c40672756d6a2522645e8c55c638e658796c8a9"
+        "sha256": "6398dc996b6869944d40b7123e24cac7bc134ab493f216a5adbe9267ce238bdc"
       },
       {
         "path": "apps/api/src/assembly/assembly.canonical.ts",
@@ -262,17 +262,17 @@
       },
       {
         "path": "package.json",
-        "sha256": "96546688085ce0bcd29f68bfecc0df855b49e146459f07c14d196e19e885e34d"
+        "sha256": "0119d2f445b2be74c92b8ad263c6fb104ca0527936ffc457837453357bbbd77e"
       },
       {
         "path": "pnpm-lock.yaml",
-        "sha256": "c7e8be7441f0d3d4e0af0cfd5416c5a28d853c2c5326e824ca16fc2d964561ce"
+        "sha256": "e5e31b6248f99c99a5ecef3e2f09f67e783d75eea1aaa5f543978c1e38938e30"
       }
     ]
   },
   "supplementalGit": {
-    "trackedTreeWithoutEvidence": "047f478bca57d8c032620d70e6b5d0af25feac1c",
-    "trackedSnapshotDiffSha256": "8fafb191860c7ce15ce88b2186e17bd1075a9a3b073bea2002883c7f0fcd404c"
+    "trackedTreeWithoutEvidence": "586ca71c107dacf01053812e0175e19ba1fde3f0",
+    "trackedSnapshotDiffSha256": "2aab36345eccaa77273239cbbc2aca29170d5f6d1d9b90fdf7974ed840b90b8d"
   },
   "baseline": {
     "outcome": "SURVIVED",
