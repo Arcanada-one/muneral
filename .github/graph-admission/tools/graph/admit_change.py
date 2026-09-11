@@ -590,9 +590,14 @@ def split_outside(repo: Path, base: str, head: str, outside: list[str],
 #     B6.1 already refuses "the declaration is itself changed by this diff" for anything reaching B6.
 # ============================================================================================
 DECLARATION_AMEND_CASE = "declaration_amend"
+SPENT_RECEIPT_ARCHIVE_CASE = "spent_receipt_archive"
+CODE_OF_CASE["spent_receipt_archive"] = "SPENT_RECEIPT_ARCHIVE"
+ENTITY_PREFIX_OF_CASE["spent_receipt_archive"] = "spent_receipt_archive"
+RECEIPT_ARCHIVE_PREFIX = "receipts/archive/"
 CODE_OF_CASE["declaration_amend"] = "GATE_DECLARATION_AMEND"
 ENTITY_PREFIX_OF_CASE["declaration_amend"] = "gate_declaration_amend"
 STRUCTURAL_CODES = STRUCTURAL_CODES + ("GATE_DECLARATION_AMEND",)
+STRUCTURAL_CODES = STRUCTURAL_CODES + ("SPENT_RECEIPT_ARCHIVE",)
 SOURCE_EXTENSIONS = {".ts", ".tsx", ".js", ".jsx", ".py", ".go", ".rs", ".java", ".rb", ".mjs", ".cjs"}
 
 
@@ -906,6 +911,17 @@ def structural_case(repo: Path, base: str, head: str, files: list[dict],
     # `bundle_rel`: this is not a bundle-refresh concept.
     if changed == {DEFAULT_DECLARATION_REL: "M"}:
         return "declaration_amend", ev
+    # Moving a SPENT receipt into receipts/archive/ is the same shape of hole this file already
+    # names above: empty measured impact, no exemption, paused_safe by construction. Receipt nodes
+    # carry `mandatory: []` in the matrix, so a receipt that appears in ANY diff is not_measured by
+    # declaration; and archiving one is how a repository stops a spent receipt from pulling every
+    # later change into its impact set (the `verifies` edges are built from string literals, so a
+    # receipt naming ci.yml 131 times becomes a dependency of every change to ci.yml). Without this
+    # case the cleanup can never be merged: leave the receipt where it is and it stays a dependency;
+    # move it and the move itself is an "edit", which falls to the ordinary rule. Measured on
+    # muneral@fb390e7e: a diff containing ONLY that rename has impact core 0 and still paused.
+    if _is_spent_receipt_archive(repo, base, head, changed):
+        return "spent_receipt_archive", ev
     managed_base, man_b = bundle_paths_at(repo, base, bundle_rel)
     managed_head, man_h = bundle_paths_at(repo, head, bundle_rel)
     managed = managed_base | managed_head
@@ -942,6 +958,54 @@ def structural_case(repo: Path, base: str, head: str, files: list[dict],
                        f"counted against it" if derived_edits else ""))
     return None, ev
 
+
+
+def _is_spent_receipt_archive(repo: Path, base: str, head: str, changed: dict) -> bool:
+    """True only for a diff that does NOTHING but move receipt bytes into receipts/archive/.
+
+    Three conditions, all structural and all cheap to check: the diff touches exactly two paths (or
+    one, when git reports a rename), the destination is under receipts/archive/, and the bytes are
+    identical on both sides. Identical bytes is what makes this safe: the receipt is not rewritten,
+    only relocated, so no assertion it carries can change while it is being exempted. A receipt whose
+    CONTENT changes, or a move bundled with any other edit, falls through to the ordinary rule."""
+    paths = sorted(changed)
+    if not paths or len(paths) > 2:
+        return False
+    dests = [p for p in paths if p.startswith(RECEIPT_ARCHIVE_PREFIX)]
+    if len(dests) != 1:
+        return False
+    dest = dests[0]
+    srcs = [p for p in paths if p != dest]
+    if len(srcs) > 1:
+        return False
+    if not all(p.startswith("receipts/") and p.endswith(".json") for p in paths):
+        return False
+    new_raw = git(repo, "show", f"{head}:{dest}", check=False)
+    if not new_raw.strip():
+        return False
+    if srcs:
+        old_raw = git(repo, "show", f"{base}:{srcs[0]}", check=False)
+        if not old_raw.strip() or old_raw != new_raw:
+            return False   # relocated AND rewritten is an ordinary change
+    # A COPY changes only the destination path, so `srcs` is empty and the checks above never fire.
+    # The question is therefore asked of the head TREE, not of the diff: after the move, no receipt
+    # outside receipts/archive/ may still carry these bytes. Otherwise a diff that duplicates a
+    # receipt would be exempted as a cleanup while the original keeps dragging its edges.
+    if _same_receipt_outside_archive(repo, head, dest, new_raw):
+        return False
+    return True
+
+
+def _same_receipt_outside_archive(repo: Path, head: str, dest: str, raw: str) -> bool:
+    """True when the head tree still holds these exact receipt bytes somewhere outside the archive."""
+    listing = git(repo, "ls-tree", "-r", "--name-only", head, "receipts/", check=False)
+    for p in listing.splitlines():
+        p = p.strip()
+        if not p or p == dest or p.startswith(RECEIPT_ARCHIVE_PREFIX) or not p.endswith(".json"):
+            continue
+        if git(repo, "show", f"{head}:{p}", check=False) == raw:
+            return True
+    return False
 
 def _chk(ev: dict, cid: str, code: str, ok: bool | None, detail: str) -> bool:
     ev["checks"].append({"id": cid, "code": code,
@@ -1017,6 +1081,63 @@ def evaluate_no_impact(repo: Path, base: str, head: str, files: list[dict], work
     ev["added"] = added
     return ev
 
+
+
+def evaluate_spent_receipt_archive(repo: Path, base: str, head: str, files: list[dict],
+                                   workdir: Path, *, verifier_job: str | None = None,
+                                   verifier_conclusion: str | None = None) -> dict:
+    """S1-S3. Admits a diff that does NOTHING but relocate a spent receipt into receipts/archive/.
+
+    A receipt node carries `mandatory: []` in the verifier matrix, so ANY diff containing one is
+    not_measured by declaration — and not_measured pauses. Archiving is how a repository stops a
+    spent receipt from dragging every later change into its impact set, but the archiving move is
+    itself an edit of the old path, so it falls to the ordinary rule and pauses too. That is a
+    cleanup which can never be merged, the same shape of hole DEC-AUP-0020 rule 2 already named for
+    the declaration file. The three arms below are what keeps it narrow: the bytes must be identical
+    (the receipt is relocated, never rewritten, so no assertion it carries can change while it is
+    being exempted), the destination must be under receipts/archive/, and nothing else may change."""
+    ev: dict = {"case": "spent_receipt_archive", "checks": [], "eligible": False}
+    changed = {f_["path"]: str(f_["status"])[0] for f_ in files}
+    paths = sorted(changed)
+    ev["changed_paths"] = paths
+    dests = [p for p in paths if p.startswith(RECEIPT_ARCHIVE_PREFIX)]
+    srcs = [p for p in paths if p not in dests]
+    s1 = _chk(ev, "S1", "NOT_A_PURE_ARCHIVE_MOVE",
+              len(paths) <= 2 and len(dests) == 1 and len(srcs) <= 1
+              and all(p.startswith("receipts/") and p.endswith(".json") for p in paths),
+              (f"this diff changes {paths} — S1 admits ONLY a move of one receipt json into "
+               f"{RECEIPT_ARCHIVE_PREFIX}; anything else falls to the ordinary rule")
+              if not (len(paths) <= 2 and len(dests) == 1 and len(srcs) <= 1
+                      and all(p.startswith("receipts/") and p.endswith(".json") for p in paths))
+              else f"exactly one receipt json moves into {RECEIPT_ARCHIVE_PREFIX} and nothing else changes")
+    if not s1:
+        return ev
+    dest = dests[0]
+    new_raw = git(repo, "show", f"{head}:{dest}", check=False)
+    old_raw = git(repo, "show", f"{base}:{srcs[0]}", check=False) if srcs else ""
+    identical = bool(new_raw.strip()) and (not srcs or old_raw == new_raw)
+    s2 = _chk(ev, "S2", "RECEIPT_REWRITTEN_WHILE_ARCHIVED", identical,
+              "the receipt bytes are identical on both sides: relocated, never rewritten"
+              if identical else
+              "the receipt is rewritten as well as moved — a changed assertion may not ride an archive move")
+    still = _same_receipt_outside_archive(repo, head, dest, new_raw)
+    s3 = _chk(ev, "S3", "COPY_NOT_MOVE", not still,
+              "no receipt outside receipts/archive/ carries these bytes at head: this is a move"
+              if not still else "these receipt bytes still exist outside the archive at head — a copy duplicates "
+                               "the receipt, it does not spend it, and the original keeps its edges")
+    try:
+        doc = json.loads(new_raw) if new_raw.strip() else {}
+    except json.JSONDecodeError:
+        doc = {}
+    adm = (doc.get("admission") or {})
+    ev["receipt"] = {"path": dest, "schema": doc.get("schema"),
+                     "admission": adm.get("verdict") if isinstance(adm, dict) else adm}
+    _chk(ev, "S4", "RECEIPT_ADMISSION_RECORDED", None,
+         f"the archived receipt records admission={ev['receipt']['admission']!r}; whether its range is merged "
+         f"is NOT checked here — a squash merge rewrites the commit a receipt names, so that question has no "
+         f"answer in this repository (measured: 6 of 8 receipt ranges name commits main does not contain)")
+    ev["eligible"] = bool(s1 and s2 and s3)
+    return ev
 
 def _materialize_bundle(repo: Path, ref: str, rel: str, dest: Path) -> Path | None:
     """Extract the bundle directory as it exists at `ref` — the head bundle is what is being
@@ -1415,6 +1536,9 @@ def evaluate_structural(repo: Path, base: str, head: str, files: list[dict], cas
         return evaluate_no_impact(repo, base, head, files, Path(workdir),
                                   declaration_rel=declaration_rel, verifier_job=verifier_job,
                                   verifier_conclusion=verifier_conclusion)
+    if case == "spent_receipt_archive":
+        return evaluate_spent_receipt_archive(repo, base, head, files, Path(workdir),
+                                              verifier_job=verifier_job, verifier_conclusion=verifier_conclusion)
     if case == "declaration_amend":
         return evaluate_declaration_amend(repo, base, head, files, Path(workdir),
                                           declaration_rel=declaration_rel, candidate_range=candidate_range,
