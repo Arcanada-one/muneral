@@ -1288,6 +1288,17 @@ class Builder:
         for p in t.paths:
             if not (p.endswith(".json") and (p.startswith("receipts/") or "/receipts/" in p)):
                 continue
+            # A receipt under receipts/archive/ is SPENT: its change was admitted and the receipt was
+            # moved there by the convention the repositories already follow. It keeps its node — the
+            # history is not erased — but it stops emitting `verifies` edges. Those edges are built from
+            # string literals found in the document, so a spent receipt that happened to name a file 131
+            # times made itself a dependency of every later change touching that file, and each one then
+            # paused as `not_measured` under the matrix's own I14 reason ("asserted, never re-verified").
+            # Measured before the change on muneral@fb390e7e: 2145 verifies edges leave receipts, 1794 of
+            # them leave the archive, and exactly ONE entity is reachable only through an archived
+            # receipt — code_unit:.github/workflows/ci.yml, which carries its own mandatory verifiers.
+            if p.startswith("receipts/archive/") or "/receipts/archive/" in p:
+                continue
             try:
                 doc = json.loads(t.text(p))
             except json.JSONDecodeError:
