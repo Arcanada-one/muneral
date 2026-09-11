@@ -140,7 +140,7 @@ jobs:
       signing_key_fingerprint: 'SHA256:9QFqysn44UjA8rXyfHjItP3b2Oadhnbf1bDNqXrsCig'
 
   network-exposure:
-    uses: Arcanada-one/datarim/.github/workflows/network-exposure-lint.yml@57afdfcd6a2d71aa8e0b577de6e43846e93b60dd
+    uses: Arcanada-one/datarim/.github/workflows/network-exposure-lint.yml@dcba69e8811be8680fc1096b5ad572b73c65023b
     with:
       compose_paths: docker-compose.prod.yml
       datarim_ref: '57afdfcd6a2d71aa8e0b577de6e43846e93b60dd'
@@ -155,7 +155,7 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ github.workflow_sha }}
-      - uses: Arcanada-one/datarim/.github/actions/preflight-caller-contract@78970c8d868e75b31c3b25fe5c2ea4967ecd945c
+      - uses: Arcanada-one/datarim/.github/actions/preflight-caller-contract@dcba69e8811be8680fc1096b5ad572b73c65023b
         with:
           vault-addr: ${{ vars.VAULT_ADDR }}
 
@@ -178,7 +178,7 @@ jobs:
     steps:
       - name: Pre-deploy host readiness
         id: preflight
-        uses: Arcanada-one/datarim/.github/actions/preflight-check@78970c8d868e75b31c3b25fe5c2ea4967ecd945c
+        uses: Arcanada-one/datarim/.github/actions/preflight-check@dcba69e8811be8680fc1096b5ad572b73c65023b
         with:
           target-host: arcana-prod
           service-name: muneral
