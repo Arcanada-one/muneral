@@ -920,7 +920,24 @@ def structural_case(repo: Path, base: str, head: str, files: list[dict],
     # case the cleanup can never be merged: leave the receipt where it is and it stays a dependency;
     # move it and the move itself is an "edit", which falls to the ordinary rule. Measured on
     # muneral@fb390e7e: a diff containing ONLY that rename has impact core 0 and still paused.
-    if _is_spent_receipt_archive(repo, base, head, changed):
+    #
+    # The rename never travels alone in the repository this case was written for. muneral's mutation
+    # evidence pins `trackedTreeWithoutEvidence` — a hash of the WHOLE tracked tree — so moving one
+    # receipt rewrites apps/api/test/assembly/mutation-results.json in the same commit, and the shape
+    # check below («at most two paths») then reads a three-path diff and refuses. Measured on
+    # muneral@98bab50a: «1 path(s) are edited ... this is an ordinary change», with the rename itself
+    # already recognised — the case was correct and unreachable. That is the exact conflict
+    # .arcana/derived-artefacts.v1.json exists to resolve, and gate5b already resolves it for an
+    # ordinary edit; the declared set is subtracted HERE for the same reason and by the same rule:
+    # the declaration is read at BASE (a change may not widen its own licence), and every declared
+    # path is still re-measured by the six B6 arms afterwards. Subtracting it is not a pass — it only
+    # decides which case the diff belongs to.
+    decl_sr, _why_sr, _boot_sr = declaration_in_force(repo, base, head, changed)
+    declared_sr, _bad_sr = declared_artefacts(decl_sr)
+    receipt_move = {p: s for p, s in changed.items() if p not in set(declared_sr)}
+    if receipt_move != changed:
+        ev["declared_derived_artefacts_set_aside"] = sorted(set(changed) - set(receipt_move))
+    if receipt_move and _is_spent_receipt_archive(repo, base, head, receipt_move):
         return "spent_receipt_archive", ev
     managed_base, man_b = bundle_paths_at(repo, base, bundle_rel)
     managed_head, man_h = bundle_paths_at(repo, head, bundle_rel)
@@ -1098,6 +1115,19 @@ def evaluate_spent_receipt_archive(repo: Path, base: str, head: str, files: list
     being exempted), the destination must be under receipts/archive/, and nothing else may change."""
     ev: dict = {"case": "spent_receipt_archive", "checks": [], "eligible": False}
     changed = {f_["path"]: str(f_["status"])[0] for f_ in files}
+    # A declared derived artefact is set aside before S1 measures the shape, for the reason
+    # structural_case() records: in the repository this case was written for, EVERY change rewrites
+    # the mutation evidence, so the rename can never arrive alone and S1 would refuse a diff whose
+    # receipt half is exactly what it admits. The declaration is read at BASE — a change may not
+    # widen its own licence — and setting a path aside here decides SHAPE only: S5 below re-measures
+    # every path set aside, running the declared verifier on the honest tree and then on the same
+    # tree with one byte of the artefact corrupted.
+    decl, _why, _boot = declaration_in_force(repo, base, head, changed)
+    declared, _bad = declared_artefacts(decl)
+    set_aside = sorted(set(changed) & set(declared))
+    if set_aside:
+        changed = {p: s for p, s in changed.items() if p not in set(declared)}
+        ev["declared_derived_artefacts_set_aside"] = set_aside
     paths = sorted(changed)
     ev["changed_paths"] = paths
     dests = [p for p in paths if p.startswith(RECEIPT_ARCHIVE_PREFIX)]
@@ -1136,8 +1166,70 @@ def evaluate_spent_receipt_archive(repo: Path, base: str, head: str, files: list
          f"the archived receipt records admission={ev['receipt']['admission']!r}; whether its range is merged "
          f"is NOT checked here — a squash merge rewrites the commit a receipt names, so that question has no "
          f"answer in this repository (measured: 6 of 8 receipt ranges name commits main does not contain)")
-    ev["eligible"] = bool(s1 and s2 and s3)
+    # A path set aside for SHAPE must still be MEASURED, or setting it aside is a bypass wearing the
+    # word "declared". S5 runs the declaration's own verifier against the honest head tree and then
+    # corrupts one byte and requires that same verifier to refuse it — the B6.4/B6.5 pair, which the
+    # self-update case already applies to exactly this file. Without the second half, a declaration
+    # naming a verifier that accepts anything would launder any edit through this case.
+    if set_aside:
+        s5_ok, s5_why = _verify_declared_artefacts(repo, head, declared, set_aside, workdir)
+        s5 = _chk(ev, "S5", "DECLARED_ARTEFACT_UNVERIFIED", s5_ok, s5_why)
+    else:
+        s5 = True
+    ev["eligible"] = bool(s1 and s2 and s3 and s5)
     return ev
+
+def _verify_declared_artefacts(repo: Path, head: str, entries: dict, paths: list[str],
+                               workdir) -> tuple[bool | None, str]:
+    """Run a declared artefact's own verifier twice: on the honest head tree, then on the same tree
+    with ONE byte of the artefact corrupted. → (verdict, why), where None is not_measured.
+
+    This is the B6.4/B6.5 pair applied outside the self-update case. It is deliberately the same
+    measurement rather than a cheaper one: accepting a declared path on the strength of the
+    declaration alone would turn `declared` into a licence, and the second run is what proves the
+    named verifier actually binds these bytes. A scratch WORKTREE, because a caller's verifier may
+    need git plumbing of its own."""
+    wt = Path(workdir) / f"declared-wt-{head[:12]}"
+    made = subprocess.run(["git", "-C", str(repo), "worktree", "add", "--detach", "--force", str(wt), head],
+                          capture_output=True, text=True)
+    if made.returncode != 0:
+        return None, (f"a scratch worktree at head could not be created ({made.stderr.strip()[:160]}) — the "
+                      f"declared verifier cannot be run, and not_measured is not a pass")
+    try:
+        for pth in paths:
+            e = entries.get(pth) or {}
+            setup, ver = e.get("setup") or {}, e.get("verify") or {}
+            if not (ver.get("argv")):
+                return False, f"{pth}: the declaration names no verify.argv — nothing to measure"
+            vcwd = wt / str(ver.get("cwd") or ".")
+            if setup.get("argv"):
+                rc_s, tail_s = _run_declared(setup["argv"], wt / str(setup.get("cwd") or "."),
+                                             DERIVED_SETUP_TIMEOUT_S)
+                if rc_s != 0:
+                    return None, f"{pth}: the declared setup exited {rc_s}: {tail_s}"
+            rc_c, tail_c = _run_declared(ver["argv"], vcwd, DERIVED_VERIFY_TIMEOUT_S)
+            if rc_c != 0:
+                return False, f"{pth}: the declared verifier exits {rc_c} on the honest head tree: {tail_c}"
+            target = wt / pth
+            original = target.read_bytes()
+            mutated, off, what = corrupt_one_byte(original)
+            target.write_bytes(mutated)
+            try:
+                rc_m, tail_m = _run_declared(ver["argv"], vcwd, DERIVED_VERIFY_TIMEOUT_S)
+            finally:
+                target.write_bytes(original)
+            if rc_m in (0, None):
+                return False, (f"{pth}: the declared verifier ACCEPTS a corrupted artefact (exit {rc_m}, byte "
+                               f"{off} {what}): it does not bind these bytes, so the declaration is not "
+                               f"evidence. {tail_m}")
+        return True, (f"{len(paths)} declared artefact(s) measured, not assumed: the declared verifier accepts "
+                      f"the honest head tree and REFUSES it with one byte corrupted, so the declaration binds "
+                      f"these bytes")
+    finally:
+        subprocess.run(["git", "-C", str(repo), "worktree", "remove", "--force", str(wt)],
+                       capture_output=True, text=True)
+        subprocess.run(["git", "-C", str(repo), "worktree", "prune"], capture_output=True, text=True)
+
 
 def _materialize_bundle(repo: Path, ref: str, rel: str, dest: Path) -> Path | None:
     """Extract the bundle directory as it exists at `ref` — the head bundle is what is being
@@ -1598,6 +1690,23 @@ def structural_covered_entities(case: str, synthesized: str, verdict_entities, m
             if path and path in managed:
                 allowed.add(eid)
             elif node_type in declared_unverifiable:
+                allowed.add(eid)
+    elif case == "spent_receipt_archive":
+        # The receipt being archived is itself a `receipt` node, and `receipt` carries `mandatory: []`
+        # in the matrix — not_measured BY DECLARATION, for the reason the matrix states: a historical
+        # receipt is asserted, never re-verified. So the one entity this case exists to move is the one
+        # entity it could not cover, and the cleanup stayed paused_safe with its own subject uncovered.
+        # Measured on muneral@7e3470e6: `*** UNCOVERED *** receipt:receipts/graph/change-admission-
+        # sec-floors-round2-…json` while every S arm was verified.
+        #
+        # The narrowing is the same two-sided one the self-update branch already uses, and no wider:
+        # the type must carry NO mandatory verifier AT BASE (a change cannot widen its own licence by
+        # shipping a matrix), and only a node of such a type is admitted — a code_unit or a route
+        # appearing in this diff is still owed an ordinary exemption, which is what keeps S1's «nothing
+        # else changes» from being decorative.
+        for eid in verdict_entities:
+            node_type, _, _p = str(eid).partition(":")
+            if node_type in declared_unverifiable:
                 allowed.add(eid)
     return allowed
 
