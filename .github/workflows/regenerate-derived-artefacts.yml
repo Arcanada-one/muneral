@@ -211,6 +211,7 @@ jobs:
             --verify-structure apps/api/test/assembly/mutation-results.json
 
       - name: Commit only the declared paths
+        id: commit
         if: steps.pr.outputs.skip == 'false'
         env:
           DECLARED: ${{ steps.decl.outputs.paths }}
@@ -227,6 +228,22 @@ jobs:
           fi
           if git diff --quiet -- $DECLARED; then
             echo "the declared artefact already matches this head — nothing to push"
+            exit 0
+          fi
+          # A rerun rewrites `generatedAt` even when the measurement is byte-identical
+          # otherwise, so `git diff` is never empty and this step committed on EVERY run.
+          # Measured on PR #32: 9c087a3 and 3f517dc are two commits of this workflow whose
+          # entire diff is
+          #   -  "generatedAt": "2026-09-12T12:22:16.634Z",
+          #   +  "generatedAt": "2026-09-12T12:55:07.254Z",
+          # A bot that appends a commit per run to a branch whose CI it also re-triggers is
+          # an unbounded loop holding write access; it had already run twice here. The
+          # timestamp is not load-bearing: mutation-harness.js asserts its FORMAT only
+          # (--verify-structure), never a value. So a diff that reduces to it is no change,
+          # and pushing it buys nothing and costs a commit.
+          if [ -z "$(git diff -U0 -- $DECLARED | grep -E '^[-+][^-+]' | grep -v generatedAt || true)" ]; then
+            echo "only the generatedAt timestamp moved — the measurement is unchanged, nothing to push"
+            git checkout -- $DECLARED
             exit 0
           fi
           git config user.name  'Arcanada'
@@ -248,3 +265,29 @@ jobs:
           sed -i 's/^          //' "${RUNNER_TEMP}/derived-commit-msg.txt"
           git commit -F "${RUNNER_TEMP}/derived-commit-msg.txt"
           git push origin HEAD:"${{ steps.pr.outputs.ref }}"
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      # A push made with GITHUB_TOKEN raises no workflow event — GitHub's guard against a
+      # workflow triggering itself. The consequence here is not a saved run but a STUCK
+      # pull request: the head this step just created carries no checks at all, and a
+      # required check that never reports leaves the pull request `blocked` forever.
+      # Measured on PR #32 — after 9c087a3 the pull request had five checks on the previous
+      # head and none on the new one, and it moved only when a human closed and reopened it.
+      #
+      # Closing and reopening is the documented way to re-raise `pull_request` for exactly
+      # this case, and this step automates it. It is bounded: it runs only when a push
+      # actually happened, and the push is now bounded by the timestamp guard above, so it
+      # cannot become a reopen loop.
+      - name: Re-raise the pull_request event the push could not
+        if: steps.pr.outputs.skip == 'false' && steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          NUM: ${{ steps.pr.outputs.number }}
+        run: |
+          set -euo pipefail
+          echo "re-raising pull_request for #${NUM} so the required checks run on the pushed head"
+          gh api -X PATCH "repos/${REPO}/pulls/${NUM}" -f state=closed >/dev/null
+          sleep 3
+          gh api -X PATCH "repos/${REPO}/pulls/${NUM}" -f state=open  >/dev/null
+          echo "reopened; CI will now report on the head this workflow pushed"
