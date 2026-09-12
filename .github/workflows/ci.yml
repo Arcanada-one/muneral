@@ -128,7 +128,7 @@ jobs:
     # and no retrievable annotation. Recorded as a hole, not as a solved problem.
     uses: ./.github/workflows/graph-admission.yml
     with:
-      program_ref: '4cf7447fa6fec364e4c5dd0bceeb8418d8b2c6d6'
+      program_ref: 'ef720ec74a1281914a4ffdf436f9631a87e72707'
       verifier_job: 'lint-and-test'
       verifier_conclusion: ${{ needs.lint-and-test.result }}
       # AUP-GRAPH-006:gate2b. The fingerprint of the Ed25519 key that signs the vendored bundle's
