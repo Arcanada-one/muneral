@@ -1894,6 +1894,35 @@ def gate(repo: Path, base: str, head: str, receipt_paths: list[Path], policy: di
     if au_spec is not None:
         allowed = au_spec.get("path_allowlist") or []
         inside, outside = allowlist_split(sorted(changed), allowed)
+        # A declared derived artefact is not "outside the manifest allowlist" — it is the tree's own
+        # function of what the allowlist admits. MEASURED on muneral #32: the dependency bump is
+        # inside the list, but this repository's mutation evidence pins a hash of the whole tracked
+        # tree, so the bump is only green once apps/api/test/assembly/mutation-results.json is
+        # rewritten in the same head. The bot cannot do that, so a workflow does it — and that
+        # commit then put the pull request OUTSIDE the allowlist and refused it. `lint-and-test`
+        # green plus `graph-admission` refused, on a change whose every path is either a manifest or
+        # a declared artefact: the same mutually-exclusive-greens shape gate5a fixed for the
+        # self-update path, reappearing on the automated-author path one contract over.
+        #
+        # The licence is NOT taken on trust, exactly as B6 does not take it on trust: the entries
+        # come from the declaration READ AT BASE (a change may not widen its own licence), and each
+        # such path is put through the artefact's OWN verifier twice — once on the honest head tree,
+        # once with a single byte corrupted, which must be refused. An artefact whose verifier
+        # cannot be run, or does not catch the corruption, stays outside and the ordinary rule
+        # applies. not_measured is not a pass here either.
+        if outside:
+            decl_au, why_au, _boot_au = declaration_in_force(repo, base, head, {f["path"]: f["status"] for f in files})
+            declared_au, _bad_au = declared_artefacts(decl_au)
+            candidates = [p for p in outside if p in declared_au]
+            if candidates:
+                wd_au = Path(automated_workdir) if automated_workdir else Path(tempfile.mkdtemp(prefix="gate2a-decl-"))
+                wd_au.mkdir(parents=True, exist_ok=True)
+                ok_au, why_v = _verify_declared_artefacts(repo, head, declared_au, candidates, wd_au)
+                automated["declared_artefacts"] = {"paths": candidates, "verdict": ok_au,
+                                                   "why": why_v, "declaration": why_au}
+                if ok_au is True:
+                    outside = [p for p in outside if p not in set(candidates)]
+                    inside = sorted(set(inside) | set(candidates))
         automated["path_allowlist"] = {"inside": inside, "outside": outside}
         if outside:
             add("C15", f"{au_spec.get('login')} authored this pull request, but {len(outside)} changed path(s) are "
