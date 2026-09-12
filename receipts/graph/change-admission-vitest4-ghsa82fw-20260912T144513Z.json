@@ -3,7 +3,7 @@
   "rule": "admitted requires every verdict = verified; failed without exemption ⇒ refused; not_measured without exemption ⇒ paused_safe; exemptions (owner + expiry) are attached by the admitting agent, never by the verifier (DEC-AUP-0008, matrix P1/P4)",
   "verdict": "paused_safe"
  },
- "captured_at_utc": "2026-09-12T14:45:13Z",
+ "captured_at_utc": "2026-09-12T14:47:23Z",
  "change_set": {
   "base": "2d466271c81eb20a87c614167fb19e7e1ba223aa",
   "files": [
@@ -36,9 +36,18 @@
     "kind": "lockfile",
     "path": "pnpm-lock.yaml",
     "status": "M"
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/change-admission-vitest4-ghsa82fw-20260912T144513Z.json",
+    "node_ids": [
+     "receipt:receipts/graph/change-admission-vitest4-ghsa82fw-20260912T144513Z.json"
+    ],
+    "path": "receipts/graph/change-admission-vitest4-ghsa82fw-20260912T144513Z.json",
+    "status": "A"
    }
   ],
-  "head": "f7f8cfc21e90a482519a20811b9681bf8dd1050f",
+  "head": "9380b84edfc4e8f08538a0bfa02dee9b3788b3c6",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -47,18 +56,18 @@
   "builder_version": "1.0.1",
   "built_at_utc": "2026-09-05T00:00:00Z",
   "graph_digest": "sha256:983163c514c753b0e2abc96718862b0386a63a9f644cb807562b6f5eb333e49d",
-  "path": "/home/dev/r85.d/graph-2d466271c81e.json",
+  "path": "/home/dev/r85b.d/graph-2d466271c81e.json",
   "source_commit": "2d466271c81eb20a87c614167fb19e7e1ba223aa"
  },
  "head_graph": {
   "builder_version": "1.0.1",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:5979b6dc0a2e0c2967f8e3e6c30a61cf12c28fa6960e9d86e6981f2c4bdc5bb9",
-  "path": "/home/dev/r85.d/graph-head-f7f8cfc21e90.json",
-  "source_commit": "f7f8cfc21e90a482519a20811b9681bf8dd1050f",
+  "graph_digest": "sha256:b8ab1e62a93a782fa05c26f7271b72e2a1c5a506b48671ab636f25736681e6d6",
+  "path": "/home/dev/r85b.d/graph-head-9380b84edfc4.json",
+  "source_commit": "9380b84edfc4e8f08538a0bfa02dee9b3788b3c6",
   "staleness": {
-   "checked_at_utc": "2026-09-12T14:45:15Z",
-   "checked_nodes": 280,
+   "checked_at_utc": "2026-09-12T14:47:26Z",
+   "checked_nodes": 281,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -25037,7 +25046,7 @@
   "tool": "tools/graph/verify.py",
   "version": "1.0.1"
  },
- "receipt_id": "car-verify-20260912T144513Z-f7f8cfc2",
+ "receipt_id": "car-verify-20260912T144723Z-9380b84e",
  "repo": {
   "name": "Arcanada-one/muneral",
   "path": "/home/dev/mun85-evidence/work"
@@ -25896,6 +25905,7 @@
    "document:SECURITY.md",
    "document:apps/api/docs/agent-read-loop.md",
    "document:apps/api/docs/migration-import.md",
+   "receipt:receipts/graph/change-admission-vitest4-ghsa82fw-20260912T144513Z.json",
    "route:DELETE /agents/keys/:keyId",
    "route:DELETE /agents/tasks/:taskId/assign/:agentId",
    "route:DELETE /milestones/:milestoneId",
@@ -25980,13 +25990,13 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-09-12T14:45:15Z",
+  "checked_at_utc": "2026-09-12T14:47:26Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
  },
  "tree": {
-  "commit": "f7f8cfc21e90a482519a20811b9681bf8dd1050f",
+  "commit": "9380b84edfc4e8f08538a0bfa02dee9b3788b3c6",
   "dirty": false
  },
  "verdicts": [
@@ -29503,6 +29513,11 @@
    ]
   },
   {
+   "entity": "receipt:receipts/graph/change-admission-vitest4-ghsa82fw-20260912T144513Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "verdict": "not_measured"
+  },
+  {
    "entity": "route:DELETE /agents/keys/:keyId",
    "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
@@ -30310,7 +30325,7 @@
  "verifiers": [
   {
    "command": "/home/dev/mun85-evidence/work/apps/api/node_modules/.bin/tsc -p /home/dev/mun85-evidence/work/apps/api/tsconfig.json --noEmit --incremental false --listFiles",
-   "duration_s": 2.35,
+   "duration_s": 2.59,
    "entities": [
     "code_unit:apps/api/eslint.config.mjs",
     "code_unit:apps/api/migrations/1713100000000-InitialSchema.ts",
@@ -30502,13 +30517,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/r85.d/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-09-12T14:45:17Z",
+   "output_ref": "/home/dev/r85b.d/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-09-12T14:47:29Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1403 files listed"
   },
   {
    "command": "/home/dev/mun85-evidence/work/apps/api/node_modules/.bin/tsc -p /home/dev/mun85-evidence/work/apps/api/tsconfig.test.json --noEmit --incremental false --listFiles",
-   "duration_s": 3.38,
+   "duration_s": 3.61,
    "entities": [
     "code_unit:apps/api/scripts/semantic-aggregate-readback.test.mjs",
     "code_unit:apps/api/test/activity.service.spec.ts",
@@ -30584,13 +30599,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
-   "output_ref": "/home/dev/r85.d/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-09-12T14:45:20Z",
+   "output_ref": "/home/dev/r85b.d/v-type-check-apps-api-tsconfig-test.txt",
+   "started_at_utc": "2026-09-12T14:47:32Z",
    "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1478 files listed"
   },
   {
    "command": "/home/dev/mun85-evidence/work/apps/web/node_modules/.bin/tsc -p /home/dev/mun85-evidence/work/apps/web/tsconfig.json --noEmit --incremental false --listFiles",
-   "duration_s": 3.02,
+   "duration_s": 3.21,
    "entities": [
     "code_unit:apps/web/__tests__/api-client.test.ts",
     "code_unit:apps/web/__tests__/kanban-board.test.ts",
@@ -30662,13 +30677,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/r85.d/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-09-12T14:45:24Z",
+   "output_ref": "/home/dev/r85b.d/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-09-12T14:47:35Z",
    "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1079 files listed"
   },
   {
    "command": "/home/dev/mun85-evidence/work/packages/types/node_modules/.bin/tsc -p /home/dev/mun85-evidence/work/packages/types/tsconfig.json --noEmit --incremental false --listFiles",
-   "duration_s": 0.26,
+   "duration_s": 0.27,
    "entities": [
     "code_unit:packages/types/src/index.ts",
     "deployable_unit:packages/types"
@@ -30676,13 +30691,13 @@
    "exit_code": 0,
    "id": "v-type-check-packages-types-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/r85.d/v-type-check-packages-types-tsconfig.txt",
-   "started_at_utc": "2026-09-12T14:45:27Z",
+   "output_ref": "/home/dev/r85b.d/v-type-check-packages-types-tsconfig.txt",
+   "started_at_utc": "2026-09-12T14:47:39Z",
    "summary": "packages/types/tsconfig.json: exit 0, 0 error(s), 58 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=2d466271c81e, head=f7f8cfc21e90, graph=head graph)",
-   "duration_s": 1.8,
+   "command": "tools/graph/contract_diff.py.run_diff(base=2d466271c81e, head=9380b84edfc4, graph=head graph)",
+   "duration_s": 1.85,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.service.ts",
@@ -30874,8 +30889,8 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "/home/dev/r85.d/v-contract-diff.json",
-   "started_at_utc": "2026-09-12T14:45:27Z",
+   "output_ref": "/home/dev/r85b.d/v-contract-diff.json",
+   "started_at_utc": "2026-09-12T14:47:39Z",
    "summary": "41→41 contracts, breaking 0, edges {'verified': 131}"
   },
   {
@@ -30955,13 +30970,13 @@
    "exit_code": 0,
    "id": "v-route-config",
    "kind": "config_schema",
-   "output_ref": "/home/dev/r85.d/v-route-config.txt",
-   "started_at_utc": "2026-09-12T14:45:29Z",
+   "output_ref": "/home/dev/r85b.d/v-route-config.txt",
+   "started_at_utc": "2026-09-12T14:47:41Z",
    "summary": "69 route(s), 0 failed"
   },
   {
    "command": "verify.py prisma-lite diff base→head + /home/dev/mun85-evidence/work/node_modules/.bin/prisma validate",
-   "duration_s": 0.98,
+   "duration_s": 0.88,
    "entities": [
     "data_model:ActivityLog",
     "data_model:Agent",
@@ -31004,8 +31019,8 @@
    "exit_code": 0,
    "id": "v-schema-diff",
    "kind": "schema_diff",
-   "output_ref": "/home/dev/r85.d/v-schema-diff.json",
-   "started_at_utc": "2026-09-12T14:45:29Z",
+   "output_ref": "/home/dev/r85b.d/v-schema-diff.json",
+   "started_at_utc": "2026-09-12T14:47:41Z",
    "summary": "1 schema(s), 0 change(s), 0 failed, validate exit 0"
   },
   {
@@ -31017,8 +31032,8 @@
    "exit_code": 0,
    "id": "v-workflow-config-b803fcb7f17ed923",
    "kind": "config_schema",
-   "output_ref": "/home/dev/r85.d/v-workflow-config-b803fcb7f17ed923.txt",
-   "started_at_utc": "2026-09-12T14:45:30Z",
+   "output_ref": "/home/dev/r85b.d/v-workflow-config-b803fcb7f17ed923.txt",
+   "started_at_utc": "2026-09-12T14:47:42Z",
    "summary": "bounded workflow configuration shape valid; expressions, shell, actions and hosted execution NOT_MEASURED"
   },
   {
@@ -31030,8 +31045,8 @@
    "exit_code": 0,
    "id": "v-workflow-config-2fe48d1021006468",
    "kind": "config_schema",
-   "output_ref": "/home/dev/r85.d/v-workflow-config-2fe48d1021006468.txt",
-   "started_at_utc": "2026-09-12T14:45:30Z",
+   "output_ref": "/home/dev/r85b.d/v-workflow-config-2fe48d1021006468.txt",
+   "started_at_utc": "2026-09-12T14:47:42Z",
    "summary": "bounded workflow configuration shape valid; expressions, shell, actions and hosted execution NOT_MEASURED"
   },
   {
@@ -31043,8 +31058,8 @@
    "exit_code": 0,
    "id": "v-workflow-config-5844296ae241614c",
    "kind": "config_schema",
-   "output_ref": "/home/dev/r85.d/v-workflow-config-5844296ae241614c.txt",
-   "started_at_utc": "2026-09-12T14:45:30Z",
+   "output_ref": "/home/dev/r85b.d/v-workflow-config-5844296ae241614c.txt",
+   "started_at_utc": "2026-09-12T14:47:42Z",
    "summary": "bounded workflow configuration shape valid; expressions, shell, actions and hosted execution NOT_MEASURED"
   },
   {
@@ -31056,8 +31071,8 @@
    "exit_code": 1,
    "id": "v-workflow-config-dc49cc771602c92b",
    "kind": "config_schema",
-   "output_ref": "/home/dev/r85.d/v-workflow-config-dc49cc771602c92b.txt",
-   "started_at_utc": "2026-09-12T14:45:30Z",
+   "output_ref": "/home/dev/r85b.d/v-workflow-config-dc49cc771602c92b.txt",
+   "started_at_utc": "2026-09-12T14:47:42Z",
    "summary": "workflow configuration not measured: trigger outside this bounded checker: workflow_call"
   },
   {
@@ -31069,13 +31084,13 @@
    "exit_code": 0,
    "id": "v-workflow-config-f2afde09eeffcba0",
    "kind": "config_schema",
-   "output_ref": "/home/dev/r85.d/v-workflow-config-f2afde09eeffcba0.txt",
-   "started_at_utc": "2026-09-12T14:45:30Z",
+   "output_ref": "/home/dev/r85b.d/v-workflow-config-f2afde09eeffcba0.txt",
+   "started_at_utc": "2026-09-12T14:47:42Z",
    "summary": "bounded workflow configuration shape valid; expressions, shell, actions and hosted execution NOT_MEASURED"
   },
   {
    "command": "verify.py config_schema: keys read at head ⊆ declared keys",
-   "duration_s": 0.16,
+   "duration_s": 0.15,
    "entities": [
     "code_unit:.github/graph-admission/tools/graph/admit_change.py",
     "code_unit:.github/graph-admission/tools/graph/ci_gate.py",
@@ -31133,13 +31148,13 @@
    "exit_code": 0,
    "id": "v-config-schema",
    "kind": "config_schema",
-   "output_ref": "/home/dev/r85.d/v-config-schema.json",
-   "started_at_utc": "2026-09-12T14:45:30Z",
+   "output_ref": "/home/dev/r85b.d/v-config-schema.json",
+   "started_at_utc": "2026-09-12T14:47:42Z",
    "summary": "2 source(s), 0 new / 3 frozen undeclared reads, 0 failed; 4 vendored file(s) not attributed to this repository (Arcanada-one/arcanada-universal-program)"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.06,
+   "duration_s": 0.07,
    "entities": [
     "code_unit:.github/graph-admission/tools/graph/admit_change.py",
     "code_unit:.github/graph-admission/tools/graph/build_graph.py",
@@ -31421,8 +31436,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/home/dev/r85.d/v-fitness.json",
-   "started_at_utc": "2026-09-12T14:45:30Z",
+   "output_ref": "/home/dev/r85b.d/v-fitness.json",
+   "started_at_utc": "2026-09-12T14:47:42Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -31437,8 +31452,8 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/home/dev/r85.d/v-doc-reference.txt",
-   "started_at_utc": "2026-09-12T14:45:30Z",
+   "output_ref": "/home/dev/r85b.d/v-doc-reference.txt",
+   "started_at_utc": "2026-09-12T14:47:42Z",
    "summary": "4 document(s), 0 failed"
   },
   {
@@ -31582,8 +31597,8 @@
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/home/dev/r85.d/v-canary.json",
-   "started_at_utc": "2026-09-12T14:45:30Z",
+   "output_ref": "/home/dev/r85b.d/v-canary.json",
+   "started_at_utc": "2026-09-12T14:47:42Z",
    "summary": "0 canary result(s); 0 verified / 0 failed / 133 not_measured of 133 entities"
   }
  ],
@@ -33173,6 +33188,7 @@
    "document:apps/api/docs/migration-import.md": [
     "doc_reference"
    ],
+   "receipt:receipts/graph/change-admission-vitest4-ghsa82fw-20260912T144513Z.json": [],
    "route:DELETE /agents/keys/:keyId": [
     "canary",
     "contract_diff",
@@ -33598,9 +33614,9 @@
    "work_item:MUN-0047": []
   },
   "seconds": {
-   "prepare": 1.78,
-   "total": 17.56,
-   "verifiers": 12.01
+   "prepare": 2.15,
+   "total": 18.93,
+   "verifiers": 12.63
   }
  }
 }
