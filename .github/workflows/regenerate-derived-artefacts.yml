@@ -124,6 +124,7 @@ jobs:
       # workflow produce evidence that lint-and-test then rejects — a red PR whose cause
       # lives in a different file. Compare, and fail loudly if they part ways.
       - name: The pinned toolchain must be the one ci.yml pins
+        id: pin
         if: steps.pr.outputs.skip == 'false'
         run: |
           set -euo pipefail
@@ -142,6 +143,10 @@ jobs:
             echo "::error title=regenerate-derived-artefacts::ci.yml pins node ${want} but this workflow pins ${have}. Evidence generated on the wrong patch version is refused with TOOLCHAIN_MISMATCH, so this is a refusal rather than a warning."
             exit 1
           fi
+          # Hand the proven version on as a VALUE. setup-node's `node-version-file` reads the
+          # path out of the CHECKED-OUT tree — the pull request's — and a dependabot branch
+          # cut before the pin file existed does not have it.
+          echo "node=${want}" >> "$GITHUB_OUTPUT"
 
       # `workflow_run.workflows` matches by NAME. ci.yml is named `CI & Deploy`, and both
       # this workflow and dependabot-auto-merge shipped with `[ci]` — so neither ever ran,
@@ -177,11 +182,16 @@ jobs:
           done
           [ "$bad" -eq 0 ]
 
+      # The VALUE, not `node-version-file`. That input reads the path out of the CHECKED-OUT
+      # tree, which is the pull request's — and a dependabot branch cut before the pin file
+      # existed does not contain it: «The specified node version file at:
+      # …/.node-version-for-derived does not exist», measured on PR #32. Step 5 already read
+      # the version from the base branch and proved it matches ci.yml; pass that through.
       - name: Node toolchain the workflow pins
         if: steps.pr.outputs.skip == 'false'
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
-          node-version-file: .github/workflows/.node-version-for-derived
+          node-version: ${{ steps.pin.outputs.node }}
 
       - name: Install and generate
         if: steps.pr.outputs.skip == 'false'
