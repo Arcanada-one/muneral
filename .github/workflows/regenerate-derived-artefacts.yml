@@ -47,7 +47,11 @@ name: regenerate-derived-artefacts
 # than passing it (measured: «trigger outside this bounded checker: pull_request_target»).
 on:
   workflow_run:
-    workflows: [ci]
+    # `workflows:` matches a workflow by its NAME, not its filename. ci.yml is named
+    # `CI & Deploy`, so `[ci]` matched nothing and this workflow never ran once —
+    # measured 2026-09-12 against the API workflow list. The regenerate-derived-artefacts
+    # job below verifies the two stay in step, so this cannot rot silently again.
+    workflows: ['CI & Deploy']
     types: [completed]
 
 permissions:
@@ -130,6 +134,32 @@ jobs:
             echo "::error title=regenerate-derived-artefacts::ci.yml pins node ${want} but this workflow pins ${have}. Evidence generated on the wrong patch version is refused with TOOLCHAIN_MISMATCH, so this is a refusal rather than a warning."
             exit 1
           fi
+
+      # `workflow_run.workflows` matches by NAME. ci.yml is named `CI & Deploy`, and both
+      # this workflow and dependabot-auto-merge shipped with `[ci]` — so neither ever ran,
+      # silently, for as long as they have existed. A trigger that matches nothing produces
+      # no run, no red check and no log: there is nothing to notice. Assert the name here,
+      # where a run does exist, so the next rename fails loudly instead.
+      - name: Every workflow_run listener must name ci.yml as ci.yml names itself
+        if: steps.pr.outputs.skip == 'false'
+        run: |
+          set -euo pipefail
+          ci_name=$(grep -m1 '^name:' .github/workflows/ci.yml | sed 's/^name:[[:space:]]*//')
+          echo "ci.yml calls itself: ${ci_name}"
+          bad=0
+          for f in .github/workflows/*.yml; do
+            grep -q 'workflow_run:' "$f" || continue
+            # The KEY, not any line mentioning it: `grep 'workflows:'` first matched a
+            # COMMENT in this very file, so the check was red on its own repository —
+            # measured before this landed. An arm that is always red measures nothing.
+            listed=$(sed -n '/^  workflow_run:/,/^  [a-z]/p' "$f" | grep -m1 '^    workflows:' || true)
+            [ -n "$listed" ] || continue
+            case "$listed" in
+              *"$ci_name"*) echo "ok   $(basename "$f"): ${listed# *}" ;;
+              *) echo "::error title=regenerate-derived-artefacts::$(basename "$f") listens for ${listed# *} but ci.yml is named '${ci_name}' — workflow_run matches by name, so that listener never fires and never reports anything."; bad=1 ;;
+            esac
+          done
+          [ "$bad" -eq 0 ]
 
       - name: Node toolchain the workflow pins
         if: steps.pr.outputs.skip == 'false'

@@ -25,7 +25,11 @@ on:
     # Named explicitly per repository: workflow_run cannot glob, and check_suite
     # does NOT fire for Actions-created suites (anti-recursion rule) — verified
     # empirically in SEC-0039, the check_suite revision never triggered.
-    workflows: [ci]
+    # `workflows:` matches a workflow by its NAME, not its filename. ci.yml is named
+    # `CI & Deploy`, so `[ci]` matched nothing and this workflow never ran once —
+    # measured 2026-09-12 against the API workflow list. The regenerate-derived-artefacts
+    # job below verifies the two stay in step, so this cannot rot silently again.
+    workflows: ['CI & Deploy']
     types: [completed]
 
 permissions:
