@@ -1,0 +1,194 @@
+# The missing link between dependabot and dependabot-auto-merge.
+#
+# Measured on 2026-09-12, ten dependabot pull requests had been open for days with
+# lint-and-test red and graph-admission refused. Each of the three pieces around them
+# works: dependabot opens the bump, graph-admission recognises the automated author and
+# authors the receipt itself, and dependabot-auto-merge is ready to merge a green pull
+# request. What is missing sits between them.
+#
+# This repository's mutation evidence binds `pnpm-lock.yaml` and both `package.json`
+# files BY PATH (mutation-harness.js bindingPaths()), and rightly so — a different jest
+# or TypeScript can kill or spare a mutant, so the evidence is only valid for the
+# toolchain it was measured on. A dependency bump therefore MUST rewrite
+# apps/api/test/assembly/mutation-results.json in the same head, or
+# mutation-evidence.spec.ts fails and lint-and-test is red.
+#
+# dependabot cannot do that: its path allowlist in admission-gate.v1.json covers
+# manifests and lockfiles, never a derived artefact. So the bump can never go green,
+# auto-merge's `conclusion == 'success'` never fires, and the queue stalls — measured on
+# PR #32, recreated onto current main: 3 checks green, lint-and-test failed on
+# «accepts the exact current evidence structure», graph-admission refused with
+# `repository entity failed`.
+#
+# This workflow is that missing step and nothing more. It regenerates the ONE declared
+# derived artefact with the repository's own harness and pushes it to the same branch.
+#
+# What keeps it from becoming a way to smuggle code into a bot branch:
+#   * it runs only for pull requests authored by dependabot[bot]. The branch name only
+#     filters cheaply; the AUTHOR is read from the API and the job stops if it is anyone
+#     else — the branch name is chosen by whoever opens the pull request, so it is never
+#     the authorisation (the gate itself records that distinction);
+#   * it commits exactly the paths `.arcana/derived-artefacts.v1.json` DECLARES, and
+#     aborts if `git status` reports anything else dirty;
+#   * it runs the declaration's own verifier afterwards and fails if the artefact it
+#     just produced is refused;
+#   * it pushes with the default GITHUB_TOKEN, so the resulting commit does not carry a
+#     bypass of any required check — the full battery re-runs on the new head.
+#
+# It does not merge anything. dependabot-auto-merge decides that, on its own rules,
+# after a green CI it can now actually reach.
+name: regenerate-derived-artefacts
+
+# `workflow_run` after ci, which is exactly what dependabot-auto-merge already uses in
+# this repository — the same trigger, for the same reason: it runs in the BASE repository
+# context, so the workflow file and the token are the base branch's, never a fork's. It is
+# also the trigger the vendored gate's bounded workflow checker can measure;
+# `pull_request_target` is `OutOfScope` there, and `not_measured` pauses a change rather
+# than passing it (measured: «trigger outside this bounded checker: pull_request_target»).
+on:
+  workflow_run:
+    workflows: [ci]
+    types: [completed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: regenerate-derived-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: true
+
+jobs:
+  regenerate:
+    name: regenerate-derived-artefacts
+    # The branch name is a hint for cheap filtering, never the authorisation: it is chosen
+    # by whoever opens the pull request. The author is READ FROM THE API below, and the
+    # job stops if it is not dependabot[bot]. This mirrors dependabot-auto-merge, which
+    # makes the same distinction for the same reason.
+    if: >-
+      github.event.workflow_run.event == 'pull_request' &&
+      startsWith(github.event.workflow_run.head_branch, 'dependabot/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Find the pull request and confirm its author
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          num=$(gh api "repos/${REPO}/commits/${HEAD_SHA}/pulls" \
+                  --jq '[.[] | select(.state=="open")][0].number // empty')
+          if [ -z "$num" ]; then echo "no open pull request for ${HEAD_SHA}"; echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          meta=$(gh api "repos/${REPO}/pulls/${num}")
+          author=$(jq -r '.user.login' <<<"$meta")
+          ref=$(jq -r '.head.ref' <<<"$meta")
+          base=$(jq -r '.base.ref' <<<"$meta")
+          echo "pull request #${num}, author ${author}, head ${ref}, base ${base}"
+          if [ "$author" != 'dependabot[bot]' ]; then
+            echo "author is not the registered automated author — nothing to regenerate here"
+            echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if [ "$base" != "${{ github.event.repository.default_branch }}" ]; then
+            echo "base is ${base}, not the default branch"
+            echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          { echo "skip=false"; echo "number=${num}"; echo "ref=${ref}"; } >> "$GITHUB_OUTPUT"
+
+      - name: Checkout the pull request head
+        if: steps.pr.outputs.skip == 'false'
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ steps.pr.outputs.ref }}
+          fetch-depth: 0
+
+      - name: Read the declaration
+        if: steps.pr.outputs.skip == 'false'
+        id: decl
+        run: |
+          set -euo pipefail
+          test -f .arcana/derived-artefacts.v1.json || { echo "no declaration; nothing to regenerate"; exit 0; }
+          paths=$(python3 -c "import json;print(' '.join(a['path'] for a in json.load(open('.arcana/derived-artefacts.v1.json'))['artefacts']))")
+          echo "paths=$paths" >> "$GITHUB_OUTPUT"
+          echo "declared: $paths"
+
+      # The evidence records the toolchain it was measured on and its verifier rejects a
+      # mismatch OUTRIGHT — `TOOLCHAIN_MISMATCH recorded={node:v24.20.0} actual={node:v24.21.0}`
+      # is refused before the tree is even looked at, measured three times on 2026-09-12.
+      # So this step must use the version ci.yml pins. Keeping it in a file is not enough:
+      # a file can drift from ci.yml silently, and a silently-wrong version makes this
+      # workflow produce evidence that lint-and-test then rejects — a red PR whose cause
+      # lives in a different file. Compare, and fail loudly if they part ways.
+      - name: The pinned toolchain must be the one ci.yml pins
+        if: steps.pr.outputs.skip == 'false'
+        run: |
+          set -euo pipefail
+          want=$(grep -oE 'node-version: *[0-9][0-9.]*' .github/workflows/ci.yml | head -1 | grep -oE '[0-9][0-9.]*')
+          have=$(tr -d '[:space:]' < .github/workflows/.node-version-for-derived)
+          echo "ci.yml pins ${want}; this workflow pins ${have}"
+          if [ "$want" != "$have" ]; then
+            echo "::error title=regenerate-derived-artefacts::ci.yml pins node ${want} but this workflow pins ${have}. Evidence generated on the wrong patch version is refused with TOOLCHAIN_MISMATCH, so this is a refusal rather than a warning."
+            exit 1
+          fi
+
+      - name: Node toolchain the workflow pins
+        if: steps.pr.outputs.skip == 'false'
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .github/workflows/.node-version-for-derived
+
+      - name: Install and generate
+        if: steps.pr.outputs.skip == 'false'
+        run: |
+          set -euo pipefail
+          corepack enable
+          pnpm install --frozen-lockfile --ignore-scripts
+          DATABASE_URL='postgresql://unused:unused@localhost:5432/unused' pnpm exec prisma generate
+          pnpm build
+          node apps/api/test/assembly/mutation-harness.js --json apps/api/test/assembly/mutation-results.json
+
+      - name: Verify what was produced
+        if: steps.pr.outputs.skip == 'false'
+        run: |
+          set -euo pipefail
+          node apps/api/test/assembly/mutation-harness.js \
+            --verify-structure apps/api/test/assembly/mutation-results.json
+
+      - name: Commit only the declared paths
+        if: steps.pr.outputs.skip == 'false'
+        env:
+          DECLARED: ${{ steps.decl.outputs.paths }}
+        run: |
+          set -euo pipefail
+          # Anything dirty beyond the declared set means the run produced more than the
+          # artefact it is allowed to produce. That is a refusal, not something to filter
+          # out quietly: a workflow with write access must never push an unexplained edit.
+          unexpected=$(git status --porcelain -- . | awk '{print $2}' | grep -vxF -f <(printf '%s\n' $DECLARED) || true)
+          if [ -n "$unexpected" ]; then
+            echo "::error title=regenerate-derived-artefacts::the run modified paths outside the declaration:"
+            printf '  %s\n' $unexpected
+            exit 1
+          fi
+          if git diff --quiet -- $DECLARED; then
+            echo "the declared artefact already matches this head — nothing to push"
+            exit 0
+          fi
+          git config user.name  'Arcanada'
+          git config user.email 'dev@veritasarcana.ai'
+          git add -- $DECLARED
+          # The message body goes through a file, not an inline -m: a multi-line string
+          # written at column 0 inside a `run:` block leaves the block scalar and the
+          # workflow stops being YAML. Measured — v-workflow-config refused this very
+          # file with «while scanning a simple key, line 136, column 1».
+          cat > "${RUNNER_TEMP}/derived-commit-msg.txt" <<'MSG'
+          test(assembly): regenerate the declared derived artefact
+
+          The mutation evidence binds pnpm-lock.yaml and both package.json files by
+          path, so a dependency bump invalidates it until it is measured again on the
+          new tree. dependabot's path allowlist does not cover a derived artefact, so
+          this step does it: the repository's own harness, the declaration's own
+          verifier, and nothing outside .arcana/derived-artefacts.v1.json.
+          MSG
+          sed -i 's/^          //' "${RUNNER_TEMP}/derived-commit-msg.txt"
+          git commit -F "${RUNNER_TEMP}/derived-commit-msg.txt"
+          git push origin HEAD:"${{ steps.pr.outputs.ref }}"
