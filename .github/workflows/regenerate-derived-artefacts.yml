@@ -127,8 +127,16 @@ jobs:
         if: steps.pr.outputs.skip == 'false'
         run: |
           set -euo pipefail
-          want=$(grep -oE 'node-version: *[0-9][0-9.]*' .github/workflows/ci.yml | head -1 | grep -oE '[0-9][0-9.]*')
-          have=$(tr -d '[:space:]' < .github/workflows/.node-version-for-derived)
+          # From the BASE branch, never the checkout. A workflow_run job runs the workflow
+          # file that lives on the base branch but checks out the pull request's tree, and
+          # a dependabot branch cut before these files existed does not contain them —
+          # measured: «.node-version-for-derived: No such file or directory» on PR #32,
+          # whose branch predates the file. Anything this workflow needs ABOUT ITSELF has
+          # to be read where the workflow itself lives.
+          base='${{ github.event.repository.default_branch }}'
+          git fetch -q origin "$base"
+          want=$(git show "origin/${base}:.github/workflows/ci.yml" | grep -oE 'node-version: *[0-9][0-9.]*' | head -1 | grep -oE '[0-9][0-9.]*')
+          have=$(git show "origin/${base}:.github/workflows/.node-version-for-derived" | tr -d '[:space:]')
           echo "ci.yml pins ${want}; this workflow pins ${have}"
           if [ "$want" != "$have" ]; then
             echo "::error title=regenerate-derived-artefacts::ci.yml pins node ${want} but this workflow pins ${have}. Evidence generated on the wrong patch version is refused with TOOLCHAIN_MISMATCH, so this is a refusal rather than a warning."
@@ -144,10 +152,18 @@ jobs:
         if: steps.pr.outputs.skip == 'false'
         run: |
           set -euo pipefail
-          ci_name=$(grep -m1 '^name:' .github/workflows/ci.yml | sed 's/^name:[[:space:]]*//')
+          # Also from the base branch, for the same reason: these are facts about the
+          # workflows that RUN, which are the base branch's, not the pull request's.
+          base='${{ github.event.repository.default_branch }}'
+          ci_name=$(git show "origin/${base}:.github/workflows/ci.yml" | grep -m1 '^name:' | sed 's/^name:[[:space:]]*//')
           echo "ci.yml calls itself: ${ci_name}"
           bad=0
-          for f in .github/workflows/*.yml; do
+          work=$(mktemp -d)
+          for path in $(git ls-tree -r --name-only "origin/${base}" .github/workflows/ | grep -E '\.ya?ml$'); do
+            mkdir -p "${work}/$(dirname "$path")"
+            git show "origin/${base}:${path}" > "${work}/${path}"
+          done
+          for f in "${work}"/.github/workflows/*.yml; do
             grep -q 'workflow_run:' "$f" || continue
             # The KEY, not any line mentioning it: `grep 'workflows:'` first matched a
             # COMMENT in this very file, so the check was red on its own repository —
