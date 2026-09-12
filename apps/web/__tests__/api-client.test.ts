@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
 import axios, { AxiosError } from 'axios';
 
 // Hoist mocks before module import
@@ -8,8 +8,17 @@ vi.mock('next-auth/react', () => ({
 }));
 
 import { getSession, signOut } from 'next-auth/react';
-const mockGetSession = getSession as ReturnType<typeof vi.fn>;
-const mockSignOut = signOut as ReturnType<typeof vi.fn>;
+// vitest 4 types `ReturnType<typeof vi.fn>` as `Mock<Procedure | Constructable>`,
+// a union TypeScript will not let you CALL (TS2348) — vitest 3 resolved it to a
+// plain callable. Naming each mock's own signature restores the call site and is
+// stricter than what it replaced: the arguments and the resolved value are now
+// checked instead of being `any`.
+const mockGetSession = getSession as Mock<() => Promise<Record<string, unknown> | null>>;
+// `signOut` is overloaded (redirect true/false return different types), so the
+// mock is typed through `unknown` against the shape this suite actually calls.
+const mockSignOut = signOut as unknown as Mock<
+  (options?: { redirect?: boolean; callbackUrl?: string }) => Promise<void>
+>;
 
 describe('API client JWT behavior', () => {
   // We test the interceptor logic without importing the singleton client
