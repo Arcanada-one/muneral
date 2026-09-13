@@ -18,7 +18,7 @@
 // in production. What is NOT covered by tests is stated rather than hidden: the
 // throttler's own behaviour has no test coverage under NestJS 12 until the package
 // ships an ESM build.
-import { Injectable, SetMetadata } from '@nestjs/common';
+import { Injectable, Module, SetMetadata } from '@nestjs/common';
 import type { CanActivate } from '@nestjs/common';
 
 @Injectable()
@@ -43,11 +43,16 @@ export const minutes = (n: number) => n * 60_000;
 export const hours = (n: number) => n * 3_600_000;
 export const days = (n: number) => n * 86_400_000;
 
-export const ThrottlerModule = {
-  forRoot(_options?: unknown) {
-    return { module: ThrottlerModule as unknown as object, providers: [], exports: [] };
-  },
-  forRootAsync(_options?: unknown) {
-    return { module: ThrottlerModule as unknown as object, providers: [], exports: [] };
-  },
-};
+// A real @Module class, not an object literal. The first version returned
+// `{ module: <plain object>, ... }`, and Nest could not build the graph from it:
+// CI reported `Nest can't resolve dependencies of the JwtAuthGuard` 78 times.
+// A DynamicModule's `module` field must be an injectable class.
+@Module({})
+export class ThrottlerModule {
+  static forRoot(_options?: unknown) {
+    return { module: ThrottlerModule, providers: [], exports: [] };
+  }
+  static forRootAsync(_options?: unknown) {
+    return { module: ThrottlerModule, providers: [], exports: [] };
+  }
+}
