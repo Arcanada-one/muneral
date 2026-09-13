@@ -769,8 +769,22 @@ class Verify:
     def collect_entities(self, q: dict):
         imp = q["impact_set"]
         self.entities: dict[str, dict] = {}
+        # A global fallback (lockfile / global config) makes the impact the WHOLE REPOSITORY as ONE
+        # entity - the Bazel/Nx rule of DEC-AUP-0008 - and its verifier is the repository's own test
+        # job. impact.py still lists every node in deterministic_core so a reader can see the blast
+        # radius, and the receipt keeps that listing; but those rows ARE the radius, not N separate
+        # measurements. Enumerating them here creates one entity, and therefore one demanded
+        # verdict, per row - which is how the gate came to pause a receipt it had issued itself
+        # (measured on muneral #108: selected() 8 entities against 466 verdicts, 151 of them
+        # not_measured, PAUSED_SAFE). selected() and mandatory_by_entity() already honour the flag;
+        # this is the same disagreement at its source.
+        # `q["seeds"]` is exactly what impact_pair.selected() returns under a triggered fallback;
+        # read it directly rather than importing that module for one predicate.
+        selection = set(q["seeds"]) if imp.get("global_fallback", {}).get("triggered") else None
         for section in ("deterministic_core", "inferred_tail"):
             for e in imp[section]:
+                if selection is not None and e["entity"] not in selection:
+                    continue
                 hops = [h for p in e.get("revision_paths", [e]) for h in (p.get("path") or [])]
                 ent = {"id": e["entity"], "section": section, "hop_types": sorted({h["edge_type"] for h in hops}),
                        "inferred_boundary": any(h.get("provenance") in ("inferred", "observed") for h in hops) and e.get("boundary") in ("service", "repo"),
