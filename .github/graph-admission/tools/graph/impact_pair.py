@@ -25,6 +25,18 @@ def index_at(repo: impact.Repo, revision: str) -> impact.GraphIndex:
 
 
 def selected(q: dict) -> set[str]:
+    # A global fallback (lockfile / global config) makes the impact the WHOLE REPOSITORY as ONE
+    # entity - the Bazel/Nx rule of DEC-AUP-0008 - and its verifier is the repository's own test
+    # job. impact.py still lists every node in deterministic_core so a reader can see the blast
+    # radius, but those rows ARE the radius, not N separate measurements: enumerating them here
+    # demands N verdicts for one measurement, which no receipt can honestly supply.
+    # MEASURED on the real subject: muneral #32/#55/#60, where the gate issued
+    # AUTOMATED_AUTHOR_RECEIPT_ISSUED - authoring a receipt carrying exactly two verdicts, the
+    # repository entity and the missing author - and then paused that same receipt with
+    # HEAD_IMPACT_NOT_COVERED over 464 nodes it had itself collapsed into one. Two halves of one
+    # gate disagreeing about how many entities a fallback carries.
+    if q["impact_set"].get("global_fallback", {}).get("triggered"):
+        return set(q["seeds"])
     return set(q["seeds"]) | {e["entity"] for section in ("deterministic_core", "inferred_tail")
                              for e in q["impact_set"][section]}
 
