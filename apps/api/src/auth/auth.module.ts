@@ -20,7 +20,11 @@ if (process.env.GITHUB_CLIENT_ID) {
 
 @Module({
   imports: [
-    PassportModule,
+    // `.register()`, not the bare module: AuthModuleOptions is provided and
+    // exported only by the dynamic form, and JwtAuthGuard injects it. NestJS 11
+    // tolerated the bare import; 12 does not, and CI reported
+    // `Nest can't resolve dependencies of the JwtAuthGuard (?)` 80 times.
+    PassportModule.register({}),
     JwtModule.register({
       secret: process.env.JWT_SECRET ?? 'change-me-in-production',
       signOptions: { expiresIn: '15m' },
