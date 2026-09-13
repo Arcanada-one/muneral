@@ -1,11 +1,11 @@
 {
- "bundle_digest": "sha256:d9778716ceac5376846f250f57a95803cf273c0a60a37c16bf6a16d357d37563",
+ "bundle_digest": "sha256:1651faad94353dca2d969236118d781a7f543fd1afd5aa0aca542f8c31e45f7f",
  "files": [
   {
    "note": "the workflow file itself; it is already running by the time the job checks the bundle",
    "path": ".github/workflows/graph-admission.yml",
    "sha256": "sha256:96ace60ea3ccfdb36444090189ebe3fbf55404d3f80bbb59a274448c5324234a",
-   "vendored_to": "newbundle-workflow.yml",
+   "vendored_to": "graph-admission.yml",
    "verified_by_the_job": false
   },
   {
@@ -30,7 +30,7 @@
   },
   {
    "path": "tools/graph/impact_pair.py",
-   "sha256": "sha256:644b5ac981a2f61de30d903fc56e0afcfd5cb50dafe8478cc6d798a6278c3c2c"
+   "sha256": "sha256:99f0dfa94f71987ba74a7e101ed88e60725e8d359a24be891b68c53b812f9d95"
   },
   {
    "path": "tools/graph/verify.py",
@@ -78,7 +78,7 @@
   "tool": "tools/graph/ci_gate.py",
   "version": "1.0.0"
  },
- "program_ref": "dc7cb7b15fdbe122151de11722b2b68252fcba34",
+ "program_ref": "e3f4bab57f69e8666fcf654b2c2b7b2894f2be67",
  "program_repo": "Arcanada-one/arcanada-universal-program",
  "provisional_until_fable_review": true,
  "rule": "The workflow refuses unless every file's sha256 matches this manifest AND the caller's `program_ref` input matches `program_ref` here. The bundle is a VENDORED copy of one pinned program-repo SHA (the program repository is private and no shared credential exists to check it out from a caller's CI). A pull request that changes anything under the bundle directory is refused by the gate job \u2014 a bundle refresh is its own pull request.",

@@ -205,6 +205,13 @@ def mandatory_by_entity(before: impact.GraphIndex, after: impact.GraphIndex, q: 
     hops = {e: set() for e in affected}
     for section in ("deterministic_core", "inferred_tail"):
         for e in q["impact_set"][section]:
+            # A global fallback makes selected() return the seeds alone, while impact.py still
+            # lists the whole graph in deterministic_core as the readable blast radius. Rows
+            # outside the selection have no hops entry and are not entities to be verified -
+            # they ARE the radius. Skipping them keeps this function agreeing with selected()
+            # instead of raising KeyError on the first one (measured: muneral #108).
+            if e["entity"] not in hops:
+                continue
             for path in e.get("revision_paths", [e]):
                 hops[e["entity"]].update(h["edge_type"] for h in path.get("path", []))
     result = {}
