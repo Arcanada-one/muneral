@@ -1029,6 +1029,15 @@ async function main() {
 export {
   applyMutant,
   canonicalFailureDetail,
+  // Exported so the structural fields of mutation-results.json can be
+  // recomputed without a full 85-mutant run: verifyStructure derives
+  // pristineSha256/mutantSha256 by READING the sources, so a source-only change
+  // (the ESM migration) invalidates them without invalidating the recorded
+  // outcomes. The site enumeration is the one piece a caller cannot rebuild
+  // without duplicating TARGETS, which would be a second copy of the truth.
+  enumerateCurrentSites,
+  sha256Bytes,
+  buildBinding,
   classify,
   currentTools,
   enumerateSites,
