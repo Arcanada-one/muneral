@@ -357,7 +357,28 @@ function runSuite() {
   const res = spawnSync(
     JEST,
     ['test/assembly', '--silent', '--ci', '--runInBand'],
-    { cwd: API_ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
+    {
+      cwd: API_ROOT,
+      encoding: 'utf8',
+      maxBuffer: 64 * 1024 * 1024,
+      // The suite is ESM, and jest needs the flag to load it. `pnpm test` sets it;
+      // this harness spawns jest directly and did not, so every battery failed with
+      // `SyntaxError: Cannot use import statement outside a module` and the run
+      // stopped at `baseline: FAIL — the unmutated suite is not green`. Measured:
+      // 20 suites / 394 tests pass WITH the flag and 20 suites fail with 0 tests
+      // WITHOUT it. It went unnoticed because the only caller of a full run is
+      // regenerate-derived-artefacts.yml, which is gated on author ==
+      // 'dependabot[bot]' and so never ran for the pull request that made the
+      // suite ESM. Set outright rather than appended to an inherited value: READING
+      // process.env.NODE_OPTIONS makes it a configuration key this file consumes,
+      // and the config_schema verifier says so — UNDECLARED_CONFIG_KEY
+      // NODE_OPTIONS, a `failed` verdict. Declaring a runtime flag of the test
+      // harness in .env.example, which is the application's configuration, would
+      // be a worse answer than not reading it. Nothing to inherit in practice:
+      // regenerate-derived-artefacts.yml, the only caller of a full run, sets no
+      // NODE_OPTIONS.
+      env: { ...process.env, NODE_OPTIONS: '--experimental-vm-modules' },
+    },
   );
   const out = `${res.stdout || ''}${res.stderr || ''}`;
   return { code: res.status, signal: res.signal, error: res.error || null, out };

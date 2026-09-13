@@ -1,6 +1,6 @@
 {
   "formatVersion": "assembly-mutation-evidence-v4",
-  "generatedAt": "2026-09-13T19:01:00.239Z",
+  "generatedAt": "2026-09-14T00:01:14.018Z",
   "invocation": {
     "cwd": ".",
     "argv": [
@@ -11,22 +11,22 @@
     ]
   },
   "tools": {
-    "node": "v24.20.0",
+    "node": "v24.21.0",
     "jest": "29.7.0",
     "typescript": "5.9.3",
     "pnpm": "11.5.2"
   },
   "toolchainCompatibility": {
-    "nodeMajorMinor": "24.20",
+    "nodeMajorMinor": "24.21",
     "pnpmMajor": 11
   },
   "binding": {
     "algorithm": "sha256",
-    "aggregateSha256": "d3c66080268fc16f0257150b1b60bbd9cb737879ce57361ba3ad05bae35bc14c",
+    "aggregateSha256": "5fe2c7051ba7e6c384458bb9cb337f86f6768c9174b97faaa6904383b790b440",
     "files": [
       {
         "path": "apps/api/package.json",
-        "sha256": "60713f9cfc50d25ea4e6926054920fd13ea4edbb588d5fcd1e543d533ba2fe92"
+        "sha256": "2aa0e3bc4b31ae74a4246ea4544f0bb55381f93c89cad7143555528c2ee28e4a"
       },
       {
         "path": "apps/api/src/assembly/assembly.canonical.ts",
@@ -238,7 +238,7 @@
       },
       {
         "path": "apps/api/test/assembly/mutation-harness.js",
-        "sha256": "08db6d0862fe2fe2b8be1d4ecf37087487274497e1a93251d99a17c902e14513"
+        "sha256": "36496beb1daad480f1bf17c9d894bb9328ceef91717cf69fcb5bccafcbf72c60"
       },
       {
         "path": "apps/api/test/assembly/mutation-sites.json",
@@ -262,7 +262,7 @@
       },
       {
         "path": "package.json",
-        "sha256": "0119d2f445b2be74c92b8ad263c6fb104ca0527936ffc457837453357bbbd77e"
+        "sha256": "a325a4fab3dfd6d00398bd2d282c88d9321b3879b360c487b8b62b09fc4a0f6d"
       },
       {
         "path": "pnpm-lock.yaml",
@@ -271,8 +271,8 @@
     ]
   },
   "supplementalGit": {
-    "trackedTreeWithoutEvidence": "e8e6d607f102bf65053f2b262555c679a119e04f",
-    "trackedSnapshotDiffSha256": "c3b96e8de7889aec53aa4066a9264c5719f8deef669c50ac5f4d5d7abf41661b"
+    "trackedTreeWithoutEvidence": "2ba6d3546287dc336b54d63f9cd28deedc3394f1",
+    "trackedSnapshotDiffSha256": "a87df6567c778ea0a221200f5595c9d93f8e2776abab5f8397b9a565c2137589"
   },
   "baseline": {
     "outcome": "SURVIVED",
@@ -1825,10 +1825,10 @@
   "restoration": {
     "verified": true,
     "files": {
-      "apps/api/src/assembly/assembly.canonical.ts": "4e52a503637d583bc1292b3d9cd3c9a9dad25148790547ba15d91eff9ff0c28d",
-      "apps/api/src/assembly/assembly.compiler.ts": "9a37682a5558d2215caddc453e2edacab44eeb07c740054e7493e89a60abee99",
       "apps/api/src/assembly/assembly.errors.ts": "a1bf3c097c639034cae219cc4b8bb11fd60bc414409d15b980b85975874968df",
       "apps/api/src/assembly/assembly.validator.ts": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "apps/api/src/assembly/assembly.canonical.ts": "4e52a503637d583bc1292b3d9cd3c9a9dad25148790547ba15d91eff9ff0c28d",
+      "apps/api/src/assembly/assembly.compiler.ts": "9a37682a5558d2215caddc453e2edacab44eeb07c740054e7493e89a60abee99",
       "apps/api/src/execution-authority/canonical-json-v1.ts": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e"
     }
   }
