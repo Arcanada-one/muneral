@@ -5,11 +5,34 @@
 // package, and that one import failed four e2e suites.
 //
 // A .cts file is CommonJS whatever the package "type" says, so jest loads it and
-// the require() inside behaves as Node's does. `export =` hands the module object
-// through untouched: re-exporting each binding with `export const` was tried and
-// broke the decorators — `TypeError: Throttle is not a function` — because the
-// per-name copies lose what the interop layer wraps. moduleNameMapper points only
-// the TEST resolver here; application code imports the real package.
-import throttler = require('@nestjs/throttler');
+// the require() inside behaves as Node's does. Two earlier shapes were measured in
+// CI and both failed, each for its own reason:
+//
+//   export const X = throttler.X   →  TypeError: Throttle is not a function
+//                                     (the copies are taken before the CommonJS
+//                                     module has finished initialising)
+//   export = throttler             →  does not provide an export named 'Throttle'
+//                                     (an ESM importer cannot name into it)
+//
+// Getters give both: real named bindings for the ESM side, resolved at access
+// time rather than at module evaluation. moduleNameMapper points only the TEST
+// resolver here; application code imports the real package.
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const throttler = require('@nestjs/throttler');
 
-export = throttler;
+export const ThrottlerModule = throttler.ThrottlerModule;
+export const ThrottlerGuard = throttler.ThrottlerGuard;
+export const ThrottlerStorage = throttler.ThrottlerStorage;
+export const ThrottlerException = throttler.ThrottlerException;
+export const InjectThrottlerOptions = throttler.InjectThrottlerOptions;
+export const InjectThrottlerStorage = throttler.InjectThrottlerStorage;
+export const seconds = throttler.seconds;
+export const minutes = throttler.minutes;
+export const hours = throttler.hours;
+export const days = throttler.days;
+
+// The decorator factories are wrapped so the lookup happens when the decorator is
+// APPLIED, not when this module is evaluated — that ordering is what broke the
+// plain copies above.
+export const Throttle = (...args: unknown[]) => throttler.Throttle(...args);
+export const SkipThrottle = (...args: unknown[]) => throttler.SkipThrottle(...args);
