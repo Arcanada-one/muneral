@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { ActivityModule } from '../activity/activity.module';
-import { AuthModule } from '../auth/auth.module';
-import { MigrationController } from './migration.controller';
-import { MigrationService } from './migration.service';
+import { ActivityModule } from '../activity/activity.module.js';
+import { AuthModule } from '../auth/auth.module.js';
+import { MigrationController } from './migration.controller.js';
+import { MigrationService } from './migration.service.js';
 
 @Module({
   imports: [AuthModule, ActivityModule],

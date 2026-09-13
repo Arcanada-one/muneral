@@ -30,8 +30,8 @@
 //   entering in_progress to the task's resolution, not per-visit slices.
 import { Injectable, Logger } from '@nestjs/common';
 import type { TaskStatus } from '@muneral/types';
-import { PrismaService } from '../prisma/prisma.service';
-import { ExecutionAuthorityService } from './execution-authority.service';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { ExecutionAuthorityService } from './execution-authority.service.js';
 
 const DEFAULT_RETRY_BUDGET = 3;
 const DEFAULT_RETRY_BACKOFF_MS = 60_000;

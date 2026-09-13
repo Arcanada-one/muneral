@@ -12,13 +12,13 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { WorkspacesService } from './workspaces.service';
-import { CreateWorkspaceDto } from './dto/create-workspace.dto';
-import { UpdateMemberRoleDto } from './dto/update-member-role.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { WorkspaceMemberGuard } from '../common/guards/workspace-member.guard';
-import { WorkspaceRoleGuard } from '../common/guards/workspace-role.guard';
-import { ActorInterceptor } from '../common/interceptors/actor.interceptor';
+import { WorkspacesService } from './workspaces.service.js';
+import { CreateWorkspaceDto } from './dto/create-workspace.dto.js';
+import { UpdateMemberRoleDto } from './dto/update-member-role.dto.js';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
+import { WorkspaceMemberGuard } from '../common/guards/workspace-member.guard.js';
+import { WorkspaceRoleGuard } from '../common/guards/workspace-role.guard.js';
+import { ActorInterceptor } from '../common/interceptors/actor.interceptor.js';
 import { UseInterceptors } from '@nestjs/common';
 import { Actor } from '@muneral/types';
 import { User } from '@prisma/client';

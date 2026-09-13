@@ -13,7 +13,7 @@ export {
   DOMAIN_RESULT_REF,
   LEGACY_NONE,
   OWNED_RESULT_MUTATION_FIELDS,
-} from './result-authority.types';
+} from './result-authority.types.js';
 export type {
   CommittedResultEnvelopeV0,
   CommittedResultRefV0,
@@ -21,7 +21,7 @@ export type {
   LegacyNone,
   OwnedResultMutationV0,
   Sha256Hex,
-} from './result-authority.types';
+} from './result-authority.types.js';
 
 export {
   cardDigest,
@@ -32,7 +32,7 @@ export {
   projectionDigest,
   resultMutationDigest,
   resultNodeDigest,
-} from './result-authority.canonical';
+} from './result-authority.canonical.js';
 
 export {
   replayLegacyCommittedResult,
@@ -41,7 +41,7 @@ export {
   validateOwnedResultMutationV0,
   validateResultPlane,
   validateResultPrincipal,
-} from './result-authority.guards';
+} from './result-authority.guards.js';
 
 export {
   AdapterAuthorityError,
@@ -49,11 +49,11 @@ export {
   ResultContractError,
   ResultMutationCollisionError,
   ResultPlaneError,
-} from './result-authority.errors';
-export type { ResultAuthorityErrorType } from './result-authority.errors';
+} from './result-authority.errors.js';
+export type { ResultAuthorityErrorType } from './result-authority.errors.js';
 
-export { ResultAuthorityService } from './result-authority.service';
+export { ResultAuthorityService } from './result-authority.service.js';
 export type {
   CommittedResultOutcome,
   CommitOwnedResultOutcome,
-} from './result-authority.service';
+} from './result-authority.service.js';

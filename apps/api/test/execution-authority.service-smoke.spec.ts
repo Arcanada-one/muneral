@@ -14,17 +14,17 @@
 import { randomUUID } from 'node:crypto';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
-import { ExecutionAuthorityService } from '../src/execution-authority/execution-authority.service';
-import type { Clock, IdSource } from '../src/execution-authority/execution-authority.types';
+import { ExecutionAuthorityService } from '../src/execution-authority/execution-authority.service.js';
+import type { Clock, IdSource } from '../src/execution-authority/execution-authority.types.js';
 import {
   StaleVersionError, InvalidTransitionError,
   IdempotencyCollisionError, UnissuedAttemptError,
   RetryBudgetExhaustedError, RetryBackoffError,
   UnexpectedUniqueViolationError, ExecutionStateAlreadyExistsError,
-} from '../src/execution-authority/execution-authority.errors';
-import { replayJournal, decisionHash } from '../src/execution-authority/execution-authority.replay';
-import { commandDigest } from '../src/execution-authority/canonical-json';
-import { EvidenceRefValidationError } from '../src/execution-authority/evidence-ref.validator';
+} from '../src/execution-authority/execution-authority.errors.js';
+import { replayJournal, decisionHash } from '../src/execution-authority/execution-authority.replay.js';
+import { commandDigest } from '../src/execution-authority/canonical-json.js';
+import { EvidenceRefValidationError } from '../src/execution-authority/evidence-ref.validator.js';
 
 const FIXTURE_OWNER_ID = '10000000-0000-0000-0000-000000000001';
 const FIXTURE_WORKSPACE_ID = '11000000-0000-0000-0000-000000000001';

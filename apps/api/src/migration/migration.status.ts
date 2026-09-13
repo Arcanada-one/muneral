@@ -32,7 +32,7 @@ import {
   SUPPORTED_STATUS_MAP_REVISIONS,
   normalizeRawStatus,
   statusMapForRevision,
-} from './status-map/status-map';
+} from './status-map/status-map.js';
 
 export const NOT_REVALIDATED = 'not_revalidated' as const;
 

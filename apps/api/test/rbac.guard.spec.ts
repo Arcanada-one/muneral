@@ -1,5 +1,5 @@
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
-import { WorkspaceRoleGuard } from '../src/common/guards/workspace-role.guard';
+import { WorkspaceRoleGuard } from '../src/common/guards/workspace-role.guard.js';
 import { WorkspaceMemberRole } from '@muneral/types';
 
 function makeContext(role: WorkspaceMemberRole | null): ExecutionContext {

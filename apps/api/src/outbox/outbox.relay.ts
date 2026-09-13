@@ -15,14 +15,14 @@ import {
   MalformedOutboxEventError,
   StaleFenceError,
   WrongPlanePayloadError,
-} from './outbox.errors';
+} from './outbox.errors.js';
 import {
   normaliseConfig,
   validateOutboxEvent,
   validatePayloadPlane,
   MAX_ERROR_DETAIL_LENGTH,
   sanitiseErrorDetail,
-} from './outbox.types';
+} from './outbox.types.js';
 import type {
   OutboxEvent,
   OutboxConsumer,
@@ -34,7 +34,7 @@ import type {
   LeaseFence,
   Clock,
   IdSource,
-} from './outbox.types';
+} from './outbox.types.js';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PrismaTx = any;

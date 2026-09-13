@@ -14,44 +14,44 @@
 // fleet registry, lifecycle, placement, update, watchdog, telemetry
 // aggregation, or direct command routing.
 
-import { StaleVersionError } from '../execution-authority/execution-authority.errors';
-import { ExecutionAuthorityService } from '../execution-authority/execution-authority.service';
+import { StaleVersionError } from '../execution-authority/execution-authority.errors.js';
+import { ExecutionAuthorityService } from '../execution-authority/execution-authority.service.js';
 import type {
   ExecutionResult,
   TransactionalClient,
-} from '../execution-authority/execution-authority.service';
+} from '../execution-authority/execution-authority.service.js';
 import type {
   Clock,
   IdSource,
   TaskExecutionState,
   TaskExecutionTransition,
   TransitionAttemptCommand,
-} from '../execution-authority/execution-authority.types';
-import type { OutboxEvent } from '../outbox/outbox.types';
+} from '../execution-authority/execution-authority.types.js';
+import type { OutboxEvent } from '../outbox/outbox.types.js';
 import {
   computeReceiptId,
   computeResultRefId,
   resultMutationDigest,
   resultNodeDigest,
-} from './result-authority.canonical';
+} from './result-authority.canonical.js';
 import {
   AdapterAuthorityError,
   ResultBindingError,
   ResultContractError,
   ResultMutationCollisionError,
   ResultPlaneError,
-} from './result-authority.errors';
+} from './result-authority.errors.js';
 import {
   validateCommittedResultRefV0,
   validateCompletionReceiptV0,
   validateOwnedResultMutationV0,
-} from './result-authority.guards';
+} from './result-authority.guards.js';
 import type {
   CommittedResultEnvelopeV0,
   CommittedResultRefV0,
   CompletionReceiptV0,
   OwnedResultMutationV0,
-} from './result-authority.types';
+} from './result-authority.types.js';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PrismaTx = any;

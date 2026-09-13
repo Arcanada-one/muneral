@@ -11,7 +11,7 @@ import {
   clearsCurrentAttempt,
   EVENT_TO_ATTEMPT_STATUS,
   isValidAttemptTransition,
-} from './execution-authority.types';
+} from './execution-authority.types.js';
 import type {
   ExecutionAuthorityCommand,
   IssueInitialAttemptCommand,
@@ -20,7 +20,7 @@ import type {
   TaskExecutionAttempt,
   TaskExecutionState,
   TransitionAttemptCommand,
-} from './execution-authority.types';
+} from './execution-authority.types.js';
 import {
   ExecutionStateAlreadyExistsError,
   InvalidRetryConfigError,
@@ -29,9 +29,9 @@ import {
   RetryBudgetExhaustedError,
   StaleVersionError,
   UnissuedAttemptError,
-} from './execution-authority.errors';
-import { MAX_RETRY_BACKOFF_MS, MAX_RETRY_BUDGET } from './execution-authority.types';
-import type { ExecutionAuthorityError } from './execution-authority.errors';
+} from './execution-authority.errors.js';
+import { MAX_RETRY_BACKOFF_MS, MAX_RETRY_BUDGET } from './execution-authority.types.js';
+import type { ExecutionAuthorityError } from './execution-authority.errors.js';
 
 // ---------------------------------------------------------------------------
 // Reducer entry point

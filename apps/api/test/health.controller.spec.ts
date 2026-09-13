@@ -4,10 +4,15 @@
 
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { HealthController } from '../src/health.controller';
+import { HealthController } from '../src/health.controller.js';
+import * as url from 'node:url';
+import * as path from 'node:path';
+
+// ESM has no __dirname, and declaring that NAME would mark the module CommonJS.
+const thisDir = path.dirname(url.fileURLToPath(import.meta.url));
 
 const pkg = JSON.parse(
-  readFileSync(join(__dirname, '..', 'package.json'), 'utf8'),
+  readFileSync(join(thisDir, '..', 'package.json'), 'utf8'),
 ) as { version: string };
 
 describe('HealthController', () => {

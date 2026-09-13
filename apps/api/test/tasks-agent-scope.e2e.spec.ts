@@ -18,15 +18,15 @@ import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe, Module } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-import { PrismaModule } from '../src/prisma/prisma.module';
-import { TasksModule } from '../src/tasks/tasks.module';
-import { AgentsModule } from '../src/agents/agents.module';
-import { AuthModule } from '../src/auth/auth.module';
-import { ActivityModule } from '../src/activity/activity.module';
-import { PrismaService } from '../src/prisma/prisma.service';
-import { AuthService } from '../src/auth/auth.service';
-import { KanbanService } from '../src/ws/kanban.service';
-import { TaskFieldStateService } from '../src/tasks/field-state/task-field-state.service';
+import { PrismaModule } from '../src/prisma/prisma.module.js';
+import { TasksModule } from '../src/tasks/tasks.module.js';
+import { AgentsModule } from '../src/agents/agents.module.js';
+import { AuthModule } from '../src/auth/auth.module.js';
+import { ActivityModule } from '../src/activity/activity.module.js';
+import { PrismaService } from '../src/prisma/prisma.service.js';
+import { AuthService } from '../src/auth/auth.service.js';
+import { KanbanService } from '../src/ws/kanban.service.js';
+import { TaskFieldStateService } from '../src/tasks/field-state/task-field-state.service.js';
 
 @Module({
   imports: [PrismaModule, AuthModule, ActivityModule, AgentsModule, TasksModule],

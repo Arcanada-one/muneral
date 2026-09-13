@@ -5,7 +5,7 @@
 // registry, lifecycle, placement, update, watchdog, telemetry aggregation, or
 // direct command routing.
 
-import type { TransitionEventType } from '../execution-authority/execution-authority.types';
+import type { TransitionEventType } from '../execution-authority/execution-authority.types.js';
 
 // ---------------------------------------------------------------------------
 // Outbox event types — derived from MUN-0020 transition outcomes
@@ -629,4 +629,4 @@ export function sanitiseErrorDetail(raw: string): Record<string, unknown> {
 // Service dependencies (re-exported from execution-authority for convenience)
 // ---------------------------------------------------------------------------
 
-export type { Clock, IdSource } from '../execution-authority/execution-authority.types';
+export type { Clock, IdSource } from '../execution-authority/execution-authority.types.js';

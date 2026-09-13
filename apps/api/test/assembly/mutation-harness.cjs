@@ -76,8 +76,8 @@
  *                         reason.
  *
  * USAGE
- *   node test/assembly/mutation-harness.js --list
- *   node test/assembly/mutation-harness.js [--site <id>] [--json <path>]
+ *   node test/assembly/mutation-harness.cjs --list
+ *   node test/assembly/mutation-harness.cjs [--site <id>] [--json <path>]
  *
  * Run from `apps/api/`. Restores the source on every exit path, including
  * SIGINT — a crashed harness must never leave a mutant on disk.
@@ -817,7 +817,7 @@ function verifyResults(jsonPath, replayOutcomes = true) {
     }
     if (failures.length === 0) failures.push(...verifyRecordedOutcomes(evidence, sites));
   }
-  const freshness = spawnSync('node', [path.join(__dirname, 'generate-credential-policy.js'), '--check'], {
+  const freshness = spawnSync('node', [path.join(__dirname, 'generate-credential-policy.cjs'), '--check'], {
     cwd: REPO_ROOT, encoding: 'utf8',
   });
   if (freshness.status !== 0) failures.push('credential generated freshness');

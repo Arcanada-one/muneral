@@ -1,14 +1,14 @@
 // MUN-0022 pure compiler for the frozen AssemblyArtifactV0 contract.
 
 import { createHash } from 'node:crypto';
-import { canonicalJsonV1 } from '../execution-authority/canonical-json-v1';
+import { canonicalJsonV1 } from '../execution-authority/canonical-json-v1.js';
 import type {
   AssemblyArtifactV0,
   AssemblyCompileResultV0,
   AssemblyRequestV0,
-} from './assembly.types';
-import { createAssemblyDecision, createPreparedInvocation } from './assembly.canonical';
-import { validateAssemblyRequest } from './assembly.validator';
+} from './assembly.types.js';
+import { createAssemblyDecision, createPreparedInvocation } from './assembly.canonical.js';
+import { validateAssemblyRequest } from './assembly.validator.js';
 
 /** Compile provider-neutral data without I/O, clocks, randomness, or mutation. */
 export function compileAssembly(request: AssemblyRequestV0): AssemblyCompileResultV0 {

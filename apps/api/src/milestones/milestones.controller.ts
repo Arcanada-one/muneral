@@ -10,11 +10,11 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { MilestonesService } from './milestones.service';
-import { CreateMilestoneDto } from './dto/create-milestone.dto';
-import { CreateSprintDto } from './dto/create-sprint.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { ActorInterceptor } from '../common/interceptors/actor.interceptor';
+import { MilestonesService } from './milestones.service.js';
+import { CreateMilestoneDto } from './dto/create-milestone.dto.js';
+import { CreateSprintDto } from './dto/create-sprint.dto.js';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
+import { ActorInterceptor } from '../common/interceptors/actor.interceptor.js';
 
 /**
  * Milestones and Sprints CRUD.

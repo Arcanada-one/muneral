@@ -23,14 +23,14 @@ import {
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import type { Actor } from '@muneral/types';
-import { ApiKeyGuard } from '../auth/guards/api-key.guard';
-import { JwtOrApiKeyGuard } from '../auth/guards/jwt-or-api-key.guard';
-import { ActorInterceptor } from '../common/interceptors/actor.interceptor';
-import { CreateBatchDto } from './dto/create-batch.dto';
-import { CreateDecisionDto } from './dto/create-decision.dto';
-import { CreateTransitionDto } from './dto/create-transition.dto';
-import { CreateWorkItemDto } from './dto/create-work-item.dto';
-import { MigrationService } from './migration.service';
+import { ApiKeyGuard } from '../auth/guards/api-key.guard.js';
+import { JwtOrApiKeyGuard } from '../auth/guards/jwt-or-api-key.guard.js';
+import { ActorInterceptor } from '../common/interceptors/actor.interceptor.js';
+import { CreateBatchDto } from './dto/create-batch.dto.js';
+import { CreateDecisionDto } from './dto/create-decision.dto.js';
+import { CreateTransitionDto } from './dto/create-transition.dto.js';
+import { CreateWorkItemDto } from './dto/create-work-item.dto.js';
+import { MigrationService } from './migration.service.js';
 
 type ActorRequest = Request & { actor: Actor };
 

@@ -6,8 +6,14 @@ import {
   canonicalJson,
   commandDigest,
   jsonDigest,
-} from '../src/execution-authority/canonical-json';
-import type { IssueInitialAttemptCommand } from '../src/execution-authority/execution-authority.types';
+} from '../src/execution-authority/canonical-json.js';
+import type { IssueInitialAttemptCommand } from '../src/execution-authority/execution-authority.types.js';
+import { createRequire } from 'node:module';
+
+// ESM has no `require`; these call sites load lazily inside test bodies
+// (mostly behind a postgres-availability check), so the bridge is kept
+// rather than hoisting them to static imports that would always execute.
+const nodeRequire = createRequire(import.meta.url);
 
 describe('canonicalJson', () => {
   it('sorts object keys lexicographically', () => {
@@ -171,7 +177,7 @@ describe('jsonDigest', () => {
     const h1 = jsonDigest(obj);
 
     // Manual SHA-256 for cross-check
-    const { createHash } = require('node:crypto');
+    const { createHash } = nodeRequire('node:crypto');
     const h2 = createHash('sha256')
       .update(canonicalJson(obj), 'utf8')
       .digest('hex');

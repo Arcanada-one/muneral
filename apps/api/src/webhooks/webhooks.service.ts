@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateWebhookDto } from './dto/create-webhook.dto';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { CreateWebhookDto } from './dto/create-webhook.dto.js';
 
 export const WEBHOOK_QUEUE = 'webhook-dispatch';
 

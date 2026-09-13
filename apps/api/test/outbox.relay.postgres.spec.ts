@@ -10,7 +10,31 @@
 
 import { randomUUID } from 'node:crypto';
 
-import { createDisposablePostgres } from './support/disposable-postgres';
+import { createDisposablePostgres } from './support/disposable-postgres.js';
+// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
+// Its type, though, comes from @types/jest (already in tsconfig `types`),
+// which is what the 339 existing jest.fn() call sites are written against —
+// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
+// and would red 416 lines that are not otherwise wrong. Value from one,
+// type from the other.
+import { jest as _jestRuntime } from '@jest/globals';
+const jest = _jestRuntime as unknown as typeof globalThis.jest;
+import { createRequire } from 'node:module';
+// These four modules are pulled in statically. Under ESM a `nodeRequire()` cannot
+// resolve a .ts source module at all, and the createRequire bridge only reaches
+// real CommonJS files — so the previously lazy bindings inside each `it` had to
+// become imports. Loading them eagerly is safe: they are plain source modules
+// with no side effects, and the postgres guard that made laziness desirable
+// lives in beforeAll, not in module scope.
+import { ExecutionAuthorityService } from '../src/execution-authority/execution-authority.service.js';
+import { OutboxRelay } from '../src/outbox/outbox.relay.js';
+import { normaliseConfig } from '../src/outbox/outbox.types.js';
+import { MalformedOutboxEventError, WrongPlanePayloadError } from '../src/outbox/outbox.errors.js';
+
+// ESM has no `require`; these call sites load lazily inside test bodies
+// (mostly behind a postgres-availability check), so the bridge is kept
+// rather than hoisting them to static imports that would always execute.
+const nodeRequire = createRequire(import.meta.url);
 
 // ---------------------------------------------------------------------------
 // Disposable PostgreSQL — task-owned, uniquely named, fail-closed cleanup.
@@ -50,8 +74,8 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
 
   beforeAll(async () => {
     // Dynamically import after migrations are applied
-    const { PrismaClient } = require('@prisma/client');
-    const { PrismaPg } = require('@prisma/adapter-pg');
+    const { PrismaClient } = nodeRequire('@prisma/client');
+    const { PrismaPg } = nodeRequire('@prisma/adapter-pg');
     const adapter = new PrismaPg({ connectionString: DATABASE_URL });
     prisma = new PrismaClient({ adapter });
   });
@@ -379,10 +403,6 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
   // -- real service-path: ExecutionAuthorityService → outbox → OutboxRelay ---
 
   it('7. full service path: executeCommand emits outbox row, OutboxRelay delivers it', async () => {
-    const { ExecutionAuthorityService } = require('../src/execution-authority/execution-authority.service');
-    const { OutboxRelay } = require('../src/outbox/outbox.relay');
-    const { normaliseConfig } = require('../src/outbox/outbox.types');
-
     const tId = await seedTask();
     const now = new Date();
     const idSource = { generate: () => randomUUID() };
@@ -545,9 +565,6 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
   // -- mid-consumer lease reclaim (zero stale effects) -----------------------
 
   it('8. mid-consumer lease reclaim commits zero stale effects/evidence/inbox', async () => {
-    const { OutboxRelay } = require('../src/outbox/outbox.relay');
-    const { normaliseConfig } = require('../src/outbox/outbox.types');
-
     const tId = await seedTask();
     const { outboxEventId } = await seedOutboxRow(tId, {
       deliveryStatus: 'pending',
@@ -680,9 +697,6 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
   // -- crash-after-commit/pre-ack idempotency --------------------------------
 
   it('9. crash-after-commit/pre-ack: idempotent replay does not re-invoke consumer', async () => {
-    const { OutboxRelay } = require('../src/outbox/outbox.relay');
-    const { normaliseConfig } = require('../src/outbox/outbox.types');
-
     const tId = await seedTask();
     const { outboxEventId } = await seedOutboxRow(tId, {
       deliveryStatus: 'pending',
@@ -793,9 +807,6 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
   // -- mid-cycle stop/resume -------------------------------------------------
 
   it('10. mid-cycle stop/resume: unstarted events are recoverable on resume', async () => {
-    const { OutboxRelay } = require('../src/outbox/outbox.relay');
-    const { normaliseConfig } = require('../src/outbox/outbox.types');
-
     const tId = await seedTask();
 
     // Seed 3 outbox events
@@ -908,9 +919,6 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
   // -- failure_count accumulation across lease cycles (F1, real DB) ----------
 
   it('11. F1: repeated failures accumulate to quarantine through real OutboxRelay', async () => {
-    const { OutboxRelay } = require('../src/outbox/outbox.relay');
-    const { normaliseConfig } = require('../src/outbox/outbox.types');
-
     const tId = await seedTask();
     const { outboxEventId } = await seedOutboxRow(tId, {
       deliveryStatus: 'pending',
@@ -1012,9 +1020,6 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
   // -- reconciliation snapshot against real database -------------------------
 
   it('12. reconciliation snapshot reflects real database state', async () => {
-    const { OutboxRelay } = require('../src/outbox/outbox.relay');
-    const { normaliseConfig } = require('../src/outbox/outbox.types');
-
     const tId = await seedTask();
     await seedOutboxRow(tId, { deliveryStatus: 'pending', failureCount: 0 });
 
@@ -1047,9 +1052,6 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
   // IMP6: Prove cycle() stopping mid-leased batch leaves unstarted events
   // recoverable and delivers only started events.
   it('13. cycle() stops mid-batch: only started events delivered, remainder recoverable', async () => {
-    const { OutboxRelay } = require('../src/outbox/outbox.relay');
-    const { normaliseConfig } = require('../src/outbox/outbox.types');
-
     const tId = await seedTask();
 
     // Seed 3 fresh outbox events with unique consumer to avoid collisions
@@ -1140,10 +1142,6 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
   // -- wrong-plane payload rejection (real DB) -------------------------------
 
   it('14. wrong-plane payload rejected with durable quarantine (production path)', async () => {
-    const { OutboxRelay } = require('../src/outbox/outbox.relay');
-    const { normaliseConfig } = require('../src/outbox/outbox.types');
-    const { WrongPlanePayloadError } = require('../src/outbox/outbox.errors');
-
     const tId = await seedTask();
     const { outboxEventId } = await seedOutboxRow(tId, {
       deliveryStatus: 'pending',
@@ -1209,10 +1207,6 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
   }, 15_000);
 
   it('14a. malformed closed envelope is durably quarantined before consumer invocation', async () => {
-    const { OutboxRelay } = require('../src/outbox/outbox.relay');
-    const { normaliseConfig } = require('../src/outbox/outbox.types');
-    const { MalformedOutboxEventError } = require('../src/outbox/outbox.errors');
-
     const tId = await seedTask();
     const { outboxEventId } = await seedOutboxRow(tId, {
       deliveryStatus: 'pending',
@@ -1246,9 +1240,6 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
   }, 15_000);
 
   it('14aa. an expired wrong-plane lease writes no quarantine evidence', async () => {
-    const { OutboxRelay } = require('../src/outbox/outbox.relay');
-    const { normaliseConfig } = require('../src/outbox/outbox.types');
-
     const tId = await seedTask();
     const { outboxEventId } = await seedOutboxRow(tId, {
       deliveryStatus: 'pending',
@@ -1295,9 +1286,6 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
   // BEFORE any durable rows are persisted — zero transitions, zero outbox
   // rows, zero lease rows.
   it('14b. wrong-plane committedResult rejected at service level with zero durable rows', async () => {
-    const { ExecutionAuthorityService } = require('../src/execution-authority/execution-authority.service');
-    const { WrongPlanePayloadError } = require('../src/outbox/outbox.errors');
-
     const tId = await seedTask();
     const now = new Date();
     const idSource = { generate: () => randomUUID() };
@@ -1375,9 +1363,6 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
 
   // BLOCKER6: Wrong-plane transitionPayload rejected at service level.
   it('14c. wrong-plane transitionPayload rejected at service level with zero durable rows', async () => {
-    const { ExecutionAuthorityService } = require('../src/execution-authority/execution-authority.service');
-    const { WrongPlanePayloadError } = require('../src/outbox/outbox.errors');
-
     const tId = await seedTask();
     const now = new Date();
     const idSource = { generate: () => randomUUID() };
@@ -1641,9 +1626,6 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
         })),
       });
     }
-
-    const { OutboxRelay } = require('../src/outbox/outbox.relay');
-    const { normaliseConfig } = require('../src/outbox/outbox.types');
     const idSource = { generate: () => randomUUID() };
 
     // A clock the test drives, so expiry is deterministic rather than timed.
@@ -1740,9 +1722,6 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
       failureCount: 0,
       deliveryOrdinal: 0,
     });
-
-    const { OutboxRelay } = require('../src/outbox/outbox.relay');
-    const { normaliseConfig } = require('../src/outbox/outbox.types');
     const clock = { now: () => new Date() };
     const idSource = { generate: () => randomUUID() };
     const relay = new OutboxRelay(

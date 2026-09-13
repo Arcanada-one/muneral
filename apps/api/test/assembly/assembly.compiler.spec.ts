@@ -1,11 +1,23 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { compileAssembly } from '../../src/assembly/assembly.compiler';
-import type { AssemblyRequestV0 } from '../../src/assembly/assembly.types';
-import { FIXTURE_EVALUATED_AT } from './fixture-instant';
+import { compileAssembly } from '../../src/assembly/assembly.compiler.js';
+import type { AssemblyRequestV0 } from '../../src/assembly/assembly.types.js';
+import { FIXTURE_EVALUATED_AT } from './fixture-instant.js';
+import * as url from 'node:url';
+// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
+// Its type, though, comes from @types/jest (already in tsconfig `types`),
+// which is what the 339 existing jest.fn() call sites are written against —
+// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
+// and would red 416 lines that are not otherwise wrong. Value from one,
+// type from the other.
+import { jest as _jestRuntime } from '@jest/globals';
+const jest = _jestRuntime as unknown as typeof globalThis.jest;
+
+// ESM has no __dirname, and declaring that NAME would mark the module CommonJS.
+const thisDir = path.dirname(url.fileURLToPath(import.meta.url));
 
 const fixture = JSON.parse(
-  fs.readFileSync(path.join(__dirname, 'fixtures', 'positive', 'minimal-request.json'), 'utf8'),
+  fs.readFileSync(path.join(thisDir, 'fixtures', 'positive', 'minimal-request.json'), 'utf8'),
 ) as { input: AssemblyRequestV0; expectedDigest: string; expectedArtifactId: string };
 
 function compile(input: AssemblyRequestV0 = fixture.input) {

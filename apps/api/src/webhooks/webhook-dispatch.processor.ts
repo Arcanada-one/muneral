@@ -1,7 +1,7 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import * as crypto from 'crypto';
-import { WEBHOOK_QUEUE, WebhookJob } from './webhooks.service';
+import { WEBHOOK_QUEUE, WebhookJob } from './webhooks.service.js';
 
 /**
  * WebhookDispatchProcessor — BullMQ worker that POST-s webhook payloads

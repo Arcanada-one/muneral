@@ -4,10 +4,14 @@ import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
+import * as url from 'node:url';
 
-const apiRoot = path.join(__dirname, '..', '..');
+// ESM has no __dirname, and declaring that NAME would mark the module CommonJS.
+const thisDir = path.dirname(url.fileURLToPath(import.meta.url));
+
+const apiRoot = path.join(thisDir, '..', '..');
 const validator = path.join('test', 'assembly', 'validate_assembly_fixtures.py');
-const realFixtures = path.join(__dirname, 'fixtures');
+const realFixtures = path.join(thisDir, 'fixtures');
 
 type Run = { status: number; stdout: string };
 

@@ -14,7 +14,7 @@
 import {
   assemblyParseCanonicalJson,
   AssemblyCanonicalJsonError,
-} from '../../src/assembly/assembly.canonical';
+} from '../../src/assembly/assembly.canonical.js';
 
 describe('A2: non-integer numeric literals are rejected lexically', () => {
   // The exact case a value-level check cannot catch.

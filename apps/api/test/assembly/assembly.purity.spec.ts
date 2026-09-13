@@ -1,19 +1,37 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { compileAssembly } from '../../src/assembly';
-import type { AssemblyRequestV0 } from '../../src/assembly';
+import { compileAssembly } from '../../src/assembly/index.js';
+import type { AssemblyRequestV0 } from '../../src/assembly/index.js';
+import * as url from 'node:url';
+// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
+// Its type, though, comes from @types/jest (already in tsconfig `types`),
+// which is what the 339 existing jest.fn() call sites are written against —
+// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
+// and would red 416 lines that are not otherwise wrong. Value from one,
+// type from the other.
+import { jest as _jestRuntime } from '@jest/globals';
+const jest = _jestRuntime as unknown as typeof globalThis.jest;
+import { createRequire } from 'node:module';
+
+// ESM has no `require`; these call sites load lazily inside test bodies
+// (mostly behind a postgres-availability check), so the bridge is kept
+// rather than hoisting them to static imports that would always execute.
+const nodeRequire = createRequire(import.meta.url);
+
+// ESM has no __dirname, and declaring that NAME would mark the module CommonJS.
+const thisDir = path.dirname(url.fileURLToPath(import.meta.url));
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 const fixture = JSON.parse(
-  fs.readFileSync(path.join(__dirname, 'fixtures', 'positive', 'minimal-request.json'), 'utf8'),
+  fs.readFileSync(path.join(thisDir, 'fixtures', 'positive', 'minimal-request.json'), 'utf8'),
 ) as { input: AssemblyRequestV0 };
 
 function installRuntimeSentinels() {
-  const nodeFs = require('node:fs');
-  const http = require('node:http');
-  const childProcess = require('node:child_process');
-  const crypto = require('node:crypto');
+  const nodeFs = nodeRequire('node:fs');
+  const http = nodeRequire('node:http');
+  const childProcess = nodeRequire('node:child_process');
+  const crypto = nodeRequire('node:crypto');
   const sentinels = [
     jest.spyOn(nodeFs, 'readFileSync').mockImplementation(() => Buffer.from('sentinel')),
     jest.spyOn(http, 'request').mockImplementation(() => ({ end: jest.fn() })),
@@ -89,7 +107,7 @@ describe('database, configuration, and invocation dependency detector', () => {
       'assembly.compiler.ts', 'assembly.validator.ts', 'assembly.canonical.ts',
       'assembly.errors.ts', 'assembly.types.ts', 'credential-policy-v0.generated.ts',
     ]) {
-      const source = fs.readFileSync(path.join(__dirname, '..', '..', 'src', 'assembly', file), 'utf8');
+      const source = fs.readFileSync(path.join(thisDir, '..', '..', 'src', 'assembly', file), 'utf8');
       expect(prohibitedDependencyHits(source)).toEqual([]);
     }
   });

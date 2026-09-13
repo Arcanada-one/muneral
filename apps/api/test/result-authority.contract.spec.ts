@@ -18,12 +18,12 @@ import {
   DOMAIN_RESULT_NODE,
   DOMAIN_RESULT_REF,
   LEGACY_NONE,
-} from '../src/result-authority/result-authority.types';
+} from '../src/result-authority/result-authority.types.js';
 import type {
   CommittedResultRefV0,
   CompletionReceiptV0,
   OwnedResultMutationV0,
-} from '../src/result-authority/result-authority.types';
+} from '../src/result-authority/result-authority.types.js';
 import {
   cardDigest,
   computeReceiptId,
@@ -32,34 +32,42 @@ import {
   projectionDigest,
   resultMutationDigest,
   resultNodeDigest,
-} from '../src/result-authority/result-authority.canonical';
+} from '../src/result-authority/result-authority.canonical.js';
 import {
   replayLegacyCommittedResult,
   validateCommittedResultRefV0,
   validateCompletionReceiptV0,
   validateOwnedResultMutationV0,
   validateResultPlane,
-} from '../src/result-authority/result-authority.guards';
+} from '../src/result-authority/result-authority.guards.js';
 import {
   AdapterAuthorityError,
   ResultBindingError,
   ResultContractError,
   ResultMutationCollisionError,
   ResultPlaneError,
-} from '../src/result-authority/result-authority.errors';
-import { ResultAuthorityService } from '../src/result-authority/result-authority.service';
+} from '../src/result-authority/result-authority.errors.js';
+import { ResultAuthorityService } from '../src/result-authority/result-authority.service.js';
 import type {
   ExecutionAuthorityService,
   TransactionalClient,
-} from '../src/execution-authority/execution-authority.service';
+} from '../src/execution-authority/execution-authority.service.js';
 import type {
   Clock,
   IdSource,
-} from '../src/execution-authority/execution-authority.types';
+} from '../src/execution-authority/execution-authority.types.js';
 import {
   IdempotencyCollisionError,
   StaleVersionError,
-} from '../src/execution-authority/execution-authority.errors';
+} from '../src/execution-authority/execution-authority.errors.js';
+// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
+// Its type, though, comes from @types/jest (already in tsconfig `types`),
+// which is what the 339 existing jest.fn() call sites are written against —
+// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
+// and would red 416 lines that are not otherwise wrong. Value from one,
+// type from the other.
+import { jest as _jestRuntime } from '@jest/globals';
+const jest = _jestRuntime as unknown as typeof globalThis.jest;
 
 // ---------------------------------------------------------------------------
 // Fixtures — fixed card, projection and committed result node

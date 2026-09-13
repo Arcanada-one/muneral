@@ -5,12 +5,20 @@
 import { ExecutionContext, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Agent } from '@prisma/client';
-import { AGENT_SCOPE_KEY } from '../src/auth/agent-scope.decorator';
+import { AGENT_SCOPE_KEY } from '../src/auth/agent-scope.decorator.js';
 import {
   AgentScopedRequest,
   AgentTaskScopeGuard,
-} from '../src/auth/guards/agent-task-scope.guard';
-import { PrismaService } from '../src/prisma/prisma.service';
+} from '../src/auth/guards/agent-task-scope.guard.js';
+import { PrismaService } from '../src/prisma/prisma.service.js';
+// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
+// Its type, though, comes from @types/jest (already in tsconfig `types`),
+// which is what the 339 existing jest.fn() call sites are written against —
+// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
+// and would red 416 lines that are not otherwise wrong. Value from one,
+// type from the other.
+import { jest as _jestRuntime } from '@jest/globals';
+const jest = _jestRuntime as unknown as typeof globalThis.jest;
 
 const AGENT = {
   id: 'agent-1',

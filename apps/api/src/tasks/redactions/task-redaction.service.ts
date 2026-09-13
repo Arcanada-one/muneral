@@ -7,12 +7,12 @@ import {
 } from '@nestjs/common';
 import { Prisma, TaskRedaction } from '@prisma/client';
 import { Actor } from '@muneral/types';
-import { PrismaService } from '../../prisma/prisma.service';
-import { ActivityService } from '../../activity/activity.service';
-import { KanbanService } from '../../ws/kanban.service';
-import { TaskFieldStateService } from '../field-state/task-field-state.service';
-import { RedactFieldDto } from './redact-field.dto';
-import { findingsOf, ruleById, sha256Hex, spansOfRule } from './secret-rules';
+import { PrismaService } from '../../prisma/prisma.service.js';
+import { ActivityService } from '../../activity/activity.service.js';
+import { KanbanService } from '../../ws/kanban.service.js';
+import { TaskFieldStateService } from '../field-state/task-field-state.service.js';
+import { RedactFieldDto } from './redact-field.dto.js';
+import { findingsOf, ruleById, sha256Hex, spansOfRule } from './secret-rules.js';
 
 /** What the route answers. Never the field value, before or after. */
 export interface RedactionResult {

@@ -10,11 +10,11 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ProjectsService } from './projects.service';
-import { CreateProjectDto } from './dto/create-project.dto';
-import { AddGitRefDto } from './dto/add-git-ref.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { ActorInterceptor } from '../common/interceptors/actor.interceptor';
+import { ProjectsService } from './projects.service.js';
+import { CreateProjectDto } from './dto/create-project.dto.js';
+import { AddGitRefDto } from './dto/add-git-ref.dto.js';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
+import { ActorInterceptor } from '../common/interceptors/actor.interceptor.js';
 
 /**
  * Projects and git-refs management.

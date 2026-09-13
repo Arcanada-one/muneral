@@ -10,9 +10,9 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { AuthService } from './auth.service';
-import { GithubOAuthGuard } from './guards/github-oauth.guard';
-import { TelegramLoginDto } from './dto/telegram-login.dto';
+import { AuthService } from './auth.service.js';
+import { GithubOAuthGuard } from './guards/github-oauth.guard.js';
+import { TelegramLoginDto } from './dto/telegram-login.dto.js';
 import { User } from '@prisma/client';
 import { Throttle } from '@nestjs/throttler';
 

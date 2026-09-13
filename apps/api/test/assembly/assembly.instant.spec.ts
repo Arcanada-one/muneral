@@ -2,12 +2,24 @@
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { compileAssembly } from '../../src/assembly/assembly.compiler';
-import { validateAssemblyRequest } from '../../src/assembly/assembly.validator';
-import type { AssemblyRequestV0 } from '../../src/assembly/assembly.types';
+import { compileAssembly } from '../../src/assembly/assembly.compiler.js';
+import { validateAssemblyRequest } from '../../src/assembly/assembly.validator.js';
+import type { AssemblyRequestV0 } from '../../src/assembly/assembly.types.js';
+import * as url from 'node:url';
+// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
+// Its type, though, comes from @types/jest (already in tsconfig `types`),
+// which is what the 339 existing jest.fn() call sites are written against —
+// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
+// and would red 416 lines that are not otherwise wrong. Value from one,
+// type from the other.
+import { jest as _jestRuntime } from '@jest/globals';
+const jest = _jestRuntime as unknown as typeof globalThis.jest;
+
+// ESM has no __dirname, and declaring that NAME would mark the module CommonJS.
+const thisDir = path.dirname(url.fileURLToPath(import.meta.url));
 
 const fixture = JSON.parse(
-  fs.readFileSync(path.join(__dirname, 'fixtures', 'positive', 'full-request.json'), 'utf8'),
+  fs.readFileSync(path.join(thisDir, 'fixtures', 'positive', 'full-request.json'), 'utf8'),
 ) as { input: AssemblyRequestV0; expectedDigest: string };
 
 function request(overrides: Partial<AssemblyRequestV0> = {}): AssemblyRequestV0 {
@@ -118,7 +130,7 @@ describe('authority-supplied evaluatedAt', () => {
 
   it('contains no implicit wall-clock fallback in compiler or validator source', () => {
     for (const file of ['assembly.compiler.ts', 'assembly.validator.ts']) {
-      const source = fs.readFileSync(path.join(__dirname, '..', '..', 'src', 'assembly', file), 'utf8');
+      const source = fs.readFileSync(path.join(thisDir, '..', '..', 'src', 'assembly', file), 'utf8');
       expect(source).not.toContain('Date.now()');
       expect(source).not.toMatch(/new Date\(\s*\)/);
     }

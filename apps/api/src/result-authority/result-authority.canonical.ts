@@ -14,8 +14,8 @@
 
 import { createHash } from 'node:crypto';
 
-import { canonicalJson } from '../execution-authority/canonical-json';
-import type { JsonValue } from '../execution-authority/canonical-json';
+import { canonicalJson } from '../execution-authority/canonical-json.js';
+import type { JsonValue } from '../execution-authority/canonical-json.js';
 import {
   DOMAIN_CARD,
   DOMAIN_PROJECTION,
@@ -23,13 +23,13 @@ import {
   DOMAIN_RESULT_MUTATION,
   DOMAIN_RESULT_NODE,
   DOMAIN_RESULT_REF,
-} from './result-authority.types';
+} from './result-authority.types.js';
 import type {
   CommittedResultRefV0,
   CompletionReceiptV0,
   OwnedResultMutationV0,
   Sha256Hex,
-} from './result-authority.types';
+} from './result-authority.types.js';
 
 /**
  * SHA-256 over `domain`, a NUL separator, and the canonical JSON bytes of

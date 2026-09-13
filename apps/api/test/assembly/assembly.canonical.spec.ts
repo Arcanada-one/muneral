@@ -9,9 +9,9 @@ import {
   computeAssemblyDigest,
   computeCardDigest,
   validateCanonicalValue,
-} from '../../src/assembly/assembly.canonical';
-import { MAX_NESTING_DEPTH } from '../../src/assembly/assembly.types';
-import type { AssemblyRequestV0 } from '../../src/assembly/assembly.types';
+} from '../../src/assembly/assembly.canonical.js';
+import { MAX_NESTING_DEPTH } from '../../src/assembly/assembly.types.js';
+import type { AssemblyRequestV0 } from '../../src/assembly/assembly.types.js';
 
 function makeRequest(overrides: Partial<AssemblyRequestV0> = {}): AssemblyRequestV0 {
   return {

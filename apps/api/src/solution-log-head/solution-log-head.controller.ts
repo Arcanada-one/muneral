@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import type { Agent } from '@prisma/client';
 import type { Request } from 'express';
-import { ApiKeyGuard } from '../auth/guards/api-key.guard';
-import { SolutionLogHeadService } from './solution-log-head.service';
+import { ApiKeyGuard } from '../auth/guards/api-key.guard.js';
+import { SolutionLogHeadService } from './solution-log-head.service.js';
 
 type ApiKeyRequest = Request & { apiKeyAgent: Agent };
 

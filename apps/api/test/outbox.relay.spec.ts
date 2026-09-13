@@ -3,19 +3,19 @@
 // poison quarantine, stop/resume, reconciliation, wrong-plane rejection,
 // and negative controls. All tests use in-memory mock Prisma — no database.
 
-import { OutboxRelay } from '../src/outbox/outbox.relay';
+import { OutboxRelay } from '../src/outbox/outbox.relay.js';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { TransactionalClient } from '../src/outbox/outbox.relay';
+import type { TransactionalClient } from '../src/outbox/outbox.relay.js';
 import {
   normaliseConfig,
   sanitiseErrorDetail,
   validateOutboxEvent,
   validatePayloadPlane,
-} from '../src/outbox/outbox.types';
+} from '../src/outbox/outbox.types.js';
 import {
   MalformedOutboxEventError,
   WrongPlanePayloadError,
-} from '../src/outbox/outbox.errors';
+} from '../src/outbox/outbox.errors.js';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type {
   OutboxEvent,
@@ -25,7 +25,15 @@ import type {
   LeaseFence,
   Clock,
   IdSource,
-} from '../src/outbox/outbox.types';
+} from '../src/outbox/outbox.types.js';
+// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
+// Its type, though, comes from @types/jest (already in tsconfig `types`),
+// which is what the 339 existing jest.fn() call sites are written against —
+// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
+// and would red 416 lines that are not otherwise wrong. Value from one,
+// type from the other.
+import { jest as _jestRuntime } from '@jest/globals';
+const jest = _jestRuntime as unknown as typeof globalThis.jest;
 
 // ---------------------------------------------------------------------------
 // Test fixtures

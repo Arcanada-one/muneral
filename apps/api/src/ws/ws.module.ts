@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { KanbanGateway } from './kanban.gateway';
-import { KanbanService } from './kanban.service';
+import { KanbanGateway } from './kanban.gateway.js';
+import { KanbanService } from './kanban.service.js';
 
 @Module({
   imports: [

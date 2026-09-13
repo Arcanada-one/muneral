@@ -3,8 +3,8 @@
 // wiring. Consumers instantiate OutboxRelay directly with a Prisma
 // transaction client. Disabled by default.
 
-export { OutboxRelay } from './outbox.relay';
-export type { TransactionalClient } from './outbox.relay';
+export { OutboxRelay } from './outbox.relay.js';
+export type { TransactionalClient } from './outbox.relay.js';
 
 export {
   MalformedOutboxEventError,
@@ -15,7 +15,7 @@ export {
   ConsumerExecutionError,
   LeaseExpiredError,
   InboxIntegrityError,
-} from './outbox.errors';
+} from './outbox.errors.js';
 
 export type {
   OutboxEventType,
@@ -34,7 +34,7 @@ export type {
   ReconciliationSnapshot,
   Clock,
   IdSource,
-} from './outbox.types';
+} from './outbox.types.js';
 
 export {
   deriveOutboxEventType,
@@ -47,4 +47,4 @@ export {
   DEFAULT_LEASE_TTL_MS,
   DEFAULT_MAX_RETRIES,
   DEFAULT_BATCH_SIZE,
-} from './outbox.types';
+} from './outbox.types.js';

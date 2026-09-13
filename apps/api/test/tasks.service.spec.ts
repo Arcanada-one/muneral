@@ -1,12 +1,20 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
-import { TasksService } from '../src/tasks/tasks.service';
-import { PrismaService } from '../src/prisma/prisma.service';
-import { ActivityService } from '../src/activity/activity.service';
-import { KanbanService } from '../src/ws/kanban.service';
-import { TaskFieldStateService } from '../src/tasks/field-state/task-field-state.service';
-import { TaskExecutionRecorderService } from '../src/execution-authority/task-execution-recorder.service';
+import { TasksService } from '../src/tasks/tasks.service.js';
+import { PrismaService } from '../src/prisma/prisma.service.js';
+import { ActivityService } from '../src/activity/activity.service.js';
+import { KanbanService } from '../src/ws/kanban.service.js';
+import { TaskFieldStateService } from '../src/tasks/field-state/task-field-state.service.js';
+import { TaskExecutionRecorderService } from '../src/execution-authority/task-execution-recorder.service.js';
 import { Actor } from '@muneral/types';
+// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
+// Its type, though, comes from @types/jest (already in tsconfig `types`),
+// which is what the 339 existing jest.fn() call sites are written against —
+// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
+// and would red 416 lines that are not otherwise wrong. Value from one,
+// type from the other.
+import { jest as _jestRuntime } from '@jest/globals';
+const jest = _jestRuntime as unknown as typeof globalThis.jest;
 
 const humanActor: Actor = { type: 'human', id: 'user-1', name: 'Pavel' };
 

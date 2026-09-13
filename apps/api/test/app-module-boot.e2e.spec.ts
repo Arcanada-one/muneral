@@ -18,19 +18,27 @@ import { Module } from '@nestjs/common';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { Test } from '@nestjs/testing';
 
-import { PrismaModule } from '../src/prisma/prisma.module';
-import { AuthModule } from '../src/auth/auth.module';
-import { WorkspacesModule } from '../src/workspaces/workspaces.module';
-import { ProjectsModule } from '../src/projects/projects.module';
-import { MilestonesModule } from '../src/milestones/milestones.module';
-import { TasksModule } from '../src/tasks/tasks.module';
-import { AgentsModule } from '../src/agents/agents.module';
-import { ActivityModule } from '../src/activity/activity.module';
-import { SyncModule } from '../src/sync/sync.module';
-import { WsModule } from '../src/ws/ws.module';
-import { HealthController } from '../src/health.controller';
-import { WebhooksService } from '../src/webhooks/webhooks.service';
-import { MigrationModule } from '../src/migration/migration.module';
+import { PrismaModule } from '../src/prisma/prisma.module.js';
+import { AuthModule } from '../src/auth/auth.module.js';
+import { WorkspacesModule } from '../src/workspaces/workspaces.module.js';
+import { ProjectsModule } from '../src/projects/projects.module.js';
+import { MilestonesModule } from '../src/milestones/milestones.module.js';
+import { TasksModule } from '../src/tasks/tasks.module.js';
+import { AgentsModule } from '../src/agents/agents.module.js';
+import { ActivityModule } from '../src/activity/activity.module.js';
+import { SyncModule } from '../src/sync/sync.module.js';
+import { WsModule } from '../src/ws/ws.module.js';
+import { HealthController } from '../src/health.controller.js';
+import { WebhooksService } from '../src/webhooks/webhooks.service.js';
+import { MigrationModule } from '../src/migration/migration.module.js';
+// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
+// Its type, though, comes from @types/jest (already in tsconfig `types`),
+// which is what the 339 existing jest.fn() call sites are written against —
+// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
+// and would red 416 lines that are not otherwise wrong. Value from one,
+// type from the other.
+import { jest as _jestRuntime } from '@jest/globals';
+const jest = _jestRuntime as unknown as typeof globalThis.jest;
 
 /**
  * Stub that satisfies any consumer of WebhooksService without registering a
@@ -91,14 +99,14 @@ describe('AppModule boot (DI regression)', () => {
 
     // Confirm SyncController is in the graph — proves ApiKeyGuard resolved
     // through the SyncModule → AuthModule → ApiKeyGuard chain.
-    const { SyncController } = await import('../src/sync/sync.controller');
+    const { SyncController } = await import('../src/sync/sync.controller.js');
     const syncController = moduleRef.get(SyncController, { strict: false });
     expect(syncController).toBeDefined();
 
     // Same proof for MUN-0040: MigrationModule pulls ApiKeyGuard and
     // JwtOrApiKeyGuard from AuthModule and ActivityService from ActivityModule,
     // so a missing import here fails at .compile() rather than at first request.
-    const { MigrationController } = await import('../src/migration/migration.controller');
+    const { MigrationController } = await import('../src/migration/migration.controller.js');
     expect(moduleRef.get(MigrationController, { strict: false })).toBeDefined();
 
     await moduleRef.close();

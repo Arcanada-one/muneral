@@ -5,26 +5,26 @@
 import { createHash } from 'node:crypto';
 import {
   createAssemblyDecision,
-} from '../../src/assembly/assembly.canonical';
-import { compileAssembly } from '../../src/assembly/assembly.compiler';
+} from '../../src/assembly/assembly.canonical.js';
+import { compileAssembly } from '../../src/assembly/assembly.compiler.js';
 import type {
   AssemblyArtifactV0,
   AssemblyRequestV0,
-} from '../../src/assembly/assembly.types';
-import { canonicalJsonV1 } from '../../src/execution-authority/canonical-json-v1';
-import { commandDigest } from '../../src/execution-authority/canonical-json';
-import { reduce } from '../../src/execution-authority/execution-authority.reducer';
-import { replayJournal } from '../../src/execution-authority/execution-authority.replay';
+} from '../../src/assembly/assembly.types.js';
+import { canonicalJsonV1 } from '../../src/execution-authority/canonical-json-v1.js';
+import { commandDigest } from '../../src/execution-authority/canonical-json.js';
+import { reduce } from '../../src/execution-authority/execution-authority.reducer.js';
+import { replayJournal } from '../../src/execution-authority/execution-authority.replay.js';
 import {
   EVENT_TO_ATTEMPT_STATUS,
-} from '../../src/execution-authority/execution-authority.types';
+} from '../../src/execution-authority/execution-authority.types.js';
 import type {
   ExecutionAuthorityCommand,
   ReducerResult,
   TaskExecutionAttempt,
   TaskExecutionState,
   TaskExecutionTransition,
-} from '../../src/execution-authority/execution-authority.types';
+} from '../../src/execution-authority/execution-authority.types.js';
 
 const NOW = new Date('2026-07-30T00:00:00.000Z');
 const EVALUATED_AT = NOW.toISOString();

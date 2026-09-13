@@ -4,24 +4,24 @@ import { BullModule } from '@nestjs/bullmq';
 import { APP_GUARD } from '@nestjs/core';
 
 // Prisma
-import { PrismaModule } from './prisma/prisma.module';
+import { PrismaModule } from './prisma/prisma.module.js';
 
 // Health
-import { HealthController } from './health.controller';
+import { HealthController } from './health.controller.js';
 
 // Feature modules
-import { AuthModule } from './auth/auth.module';
-import { WorkspacesModule } from './workspaces/workspaces.module';
-import { ProjectsModule } from './projects/projects.module';
-import { MilestonesModule } from './milestones/milestones.module';
-import { TasksModule } from './tasks/tasks.module';
-import { AgentsModule } from './agents/agents.module';
-import { ActivityModule } from './activity/activity.module';
-import { SyncModule } from './sync/sync.module';
-import { WebhooksModule } from './webhooks/webhooks.module';
-import { WsModule } from './ws/ws.module';
-import { SolutionLogHeadModule } from './solution-log-head/solution-log-head.module';
-import { MigrationModule } from './migration/migration.module';
+import { AuthModule } from './auth/auth.module.js';
+import { WorkspacesModule } from './workspaces/workspaces.module.js';
+import { ProjectsModule } from './projects/projects.module.js';
+import { MilestonesModule } from './milestones/milestones.module.js';
+import { TasksModule } from './tasks/tasks.module.js';
+import { AgentsModule } from './agents/agents.module.js';
+import { ActivityModule } from './activity/activity.module.js';
+import { SyncModule } from './sync/sync.module.js';
+import { WebhooksModule } from './webhooks/webhooks.module.js';
+import { WsModule } from './ws/ws.module.js';
+import { SolutionLogHeadModule } from './solution-log-head/solution-log-head.module.js';
+import { MigrationModule } from './migration/migration.module.js';
 
 @Module({
   controllers: [HealthController],

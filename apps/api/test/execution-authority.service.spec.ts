@@ -3,22 +3,36 @@
 // post-mutation rollback + reconcile, attempt lifecycle updates, retry
 // validation, and typed error mapping.
 
-import { ExecutionAuthorityService } from '../src/execution-authority/execution-authority.service';
+import { ExecutionAuthorityService } from '../src/execution-authority/execution-authority.service.js';
 import type {
   TransactionalClient,
-} from '../src/execution-authority/execution-authority.service';
+} from '../src/execution-authority/execution-authority.service.js';
 import type {
   Clock,
   IdSource,
-} from '../src/execution-authority/execution-authority.types';
+} from '../src/execution-authority/execution-authority.types.js';
 import {
   StaleVersionError,
   InvalidTransitionError,
   IdempotencyCollisionError,
   UnexpectedUniqueViolationError,
-} from '../src/execution-authority/execution-authority.errors';
-import { commandDigest } from '../src/execution-authority/canonical-json';
-import { EvidenceRefValidationError } from '../src/execution-authority/evidence-ref.validator';
+} from '../src/execution-authority/execution-authority.errors.js';
+import { commandDigest } from '../src/execution-authority/canonical-json.js';
+import { EvidenceRefValidationError } from '../src/execution-authority/evidence-ref.validator.js';
+// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
+// Its type, though, comes from @types/jest (already in tsconfig `types`),
+// which is what the 339 existing jest.fn() call sites are written against —
+// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
+// and would red 416 lines that are not otherwise wrong. Value from one,
+// type from the other.
+import { jest as _jestRuntime } from '@jest/globals';
+const jest = _jestRuntime as unknown as typeof globalThis.jest;
+import { createRequire } from 'node:module';
+
+// ESM has no `require`; these call sites load lazily inside test bodies
+// (mostly behind a postgres-availability check), so the bridge is kept
+// rather than hoisting them to static imports that would always execute.
+const nodeRequire = createRequire(import.meta.url);
 
 // ---------------------------------------------------------------------------
 // Test fixtures
@@ -1040,7 +1054,8 @@ describe('ExecutionAuthorityService', () => {
         idempotencyKey: 'idem-bad', causationId: 'c', correlationId: 'c',
         retryBudget: 3, retryBackoffMs: 1000, evidenceRefs: [],
       };
-      const { commandDigest } = require('../src/execution-authority/canonical-json');
+      // `commandDigest` is already imported at the top of this file; the local
+      // nodeRequire() was a redundant second binding and cannot resolve under ESM.
       const digest = commandDigest(cmd);
 
       const existingTransition = {

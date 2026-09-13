@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { AuthModule } from '../auth/auth.module';
-import { SolutionLogHeadController } from './solution-log-head.controller';
-import { SolutionLogHeadService } from './solution-log-head.service';
+import { AuthModule } from '../auth/auth.module.js';
+import { SolutionLogHeadController } from './solution-log-head.controller.js';
+import { SolutionLogHeadService } from './solution-log-head.service.js';
 
 @Module({
   imports: [AuthModule],

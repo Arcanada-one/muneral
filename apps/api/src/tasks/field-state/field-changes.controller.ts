@@ -10,10 +10,10 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { ApiKeyGuard } from '../../auth/guards/api-key.guard';
-import { AgentTaskScopeGuard } from '../../auth/guards/agent-task-scope.guard';
-import { AgentScope } from '../../auth/agent-scope.decorator';
-import { FieldChangesService, AckBody } from './field-changes.service';
+import { ApiKeyGuard } from '../../auth/guards/api-key.guard.js';
+import { AgentTaskScopeGuard } from '../../auth/guards/agent-task-scope.guard.js';
+import { AgentScope } from '../../auth/agent-scope.decorator.js';
+import { FieldChangesService, AckBody } from './field-changes.service.js';
 import { Agent } from '@prisma/client';
 
 type ApiKeyRequest = Request & { apiKeyAgent: Agent };

@@ -16,12 +16,17 @@
 // This contradicts the task contract directly: "Unknown execution-affecting data
 // must never be silently ignored."
 
-import { validateAssemblyRequest } from '../../src/assembly/assembly.validator';
-import { computeCardDigest } from '../../src/assembly/assembly.canonical';
+import { validateAssemblyRequest } from '../../src/assembly/assembly.validator.js';
+import { computeCardDigest } from '../../src/assembly/assembly.canonical.js';
 import * as fs from 'node:fs';
+import * as path from 'node:path';
+import * as url from 'node:url';
+
+// ESM has no __dirname, and declaring that NAME would mark the module CommonJS.
+const thisDir = path.dirname(url.fileURLToPath(import.meta.url));
 
 const base = JSON.parse(
-  fs.readFileSync(__dirname + '/fixtures/positive/full-request.json', 'utf8'),
+  fs.readFileSync(thisDir + '/fixtures/positive/full-request.json', 'utf8'),
 ).input as Record<string, unknown>;
 
 function clone(): Record<string, unknown> {

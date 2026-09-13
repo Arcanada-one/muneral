@@ -2,7 +2,7 @@ import {
   computeSolutionLogHeadReceiptId,
   validateSolutionLogHeadProposalV0,
   validateSolutionLogHeadReceiptV0,
-} from '../src/solution-log-head';
+} from '../src/solution-log-head/index.js';
 
 const SHA_A = 'a'.repeat(64);
 const SHA_B = 'b'.repeat(64);

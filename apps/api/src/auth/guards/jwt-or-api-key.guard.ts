@@ -2,7 +2,7 @@ import { Injectable, ExecutionContext } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { Observable } from 'rxjs';
-import { ApiKeyGuard } from './api-key.guard';
+import { ApiKeyGuard } from './api-key.guard.js';
 
 /**
  * JwtOrApiKeyGuard — accepts either a long-lived `mun_sk_*` API key or a

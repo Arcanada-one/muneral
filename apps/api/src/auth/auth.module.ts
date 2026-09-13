@@ -1,14 +1,14 @@
 import { Module, Provider, Logger } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { GithubStrategy } from './strategies/github.strategy';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { ApiKeyGuard } from './guards/api-key.guard';
-import { JwtOrApiKeyGuard } from './guards/jwt-or-api-key.guard';
-import { AgentTaskScopeGuard } from './guards/agent-task-scope.guard';
+import { AuthService } from './auth.service.js';
+import { AuthController } from './auth.controller.js';
+import { JwtStrategy } from './strategies/jwt.strategy.js';
+import { GithubStrategy } from './strategies/github.strategy.js';
+import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
+import { ApiKeyGuard } from './guards/api-key.guard.js';
+import { JwtOrApiKeyGuard } from './guards/jwt-or-api-key.guard.js';
+import { AgentTaskScopeGuard } from './guards/agent-task-scope.guard.js';
 
 const optionalProviders: Provider[] = [];
 

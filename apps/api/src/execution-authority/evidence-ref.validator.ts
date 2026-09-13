@@ -1,7 +1,7 @@
 // MUN-0020: EvidenceRef runtime validation — fail-closed bounds and digest checks.
 // Every EvidenceRef must pass this validator before a command is accepted.
 
-import type { EvidenceRef } from './execution-authority.types';
+import type { EvidenceRef } from './execution-authority.types.js';
 
 const URI_MAX = 512;
 const LABEL_MAX = 128;

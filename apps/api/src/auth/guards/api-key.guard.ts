@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { AuthService } from '../auth.service';
+import { AuthService } from '../auth.service.js';
 
 /**
  * ApiKeyGuard — validates mun_sk_ prefixed Bearer tokens against api_keys table.

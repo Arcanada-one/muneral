@@ -10,10 +10,16 @@
 // compares the generator's exported canonicalizer against the TypeScript source
 // of truth, which jest compiles in-process.
 
-import { assemblyCanonicalJson } from '../../src/assembly/assembly.canonical';
+import { assemblyCanonicalJson } from '../../src/assembly/assembly.canonical.js';
+import { createRequire } from 'node:module';
+
+// ESM has no `require`; these call sites load lazily inside test bodies
+// (mostly behind a postgres-availability check), so the bridge is kept
+// rather than hoisting them to static imports that would always execute.
+const nodeRequire = createRequire(import.meta.url);
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const generator = require('./generate-fixtures.js') as {
+const generator = nodeRequire('./generate-fixtures.cjs') as {
   canonicalJson: (value: unknown) => string;
 };
 

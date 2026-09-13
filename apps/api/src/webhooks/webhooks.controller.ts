@@ -11,10 +11,10 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { WebhooksService } from './webhooks.service';
-import { CreateWebhookDto } from './dto/create-webhook.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { ActorInterceptor } from '../common/interceptors/actor.interceptor';
+import { WebhooksService } from './webhooks.service.js';
+import { CreateWebhookDto } from './dto/create-webhook.dto.js';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
+import { ActorInterceptor } from '../common/interceptors/actor.interceptor.js';
 
 /**
  * Webhook configuration CRUD.

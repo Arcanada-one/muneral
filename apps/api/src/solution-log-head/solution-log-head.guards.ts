@@ -1,11 +1,11 @@
-import { computeSolutionLogHeadReceiptId, isSha256Hex } from './solution-log-head.canonical';
-import { SolutionLogHeadContractError } from './solution-log-head.errors';
+import { computeSolutionLogHeadReceiptId, isSha256Hex } from './solution-log-head.canonical.js';
+import { SolutionLogHeadContractError } from './solution-log-head.errors.js';
 import {
   SOLUTION_LOG_HEAD_PROPOSAL_FIELDS,
   SOLUTION_LOG_HEAD_RECEIPT_FIELDS,
   SolutionLogHeadProposalV0,
   SolutionLogHeadReceiptV0,
-} from './solution-log-head.types';
+} from './solution-log-head.types.js';
 
 function isPlainRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value) &&

@@ -1,16 +1,16 @@
 import { Module } from '@nestjs/common';
-import { TasksService } from './tasks.service';
-import { TasksController } from './tasks.controller';
-import { FieldChangesController } from './field-state/field-changes.controller';
-import { ActivityModule } from '../activity/activity.module';
-import { WsModule } from '../ws/ws.module';
-import { TaskFieldStateService } from './field-state/task-field-state.service';
-import { FieldChangesService } from './field-state/field-changes.service';
-import { AuthModule } from '../auth/auth.module';
-import { ExecutionAuthorityModule } from '../execution-authority/execution-authority.module';
-import { TaskExecutionRecorderService } from '../execution-authority/task-execution-recorder.service';
-import { TaskStalenessService } from '../execution-authority/task-staleness.service';
-import { TaskRedactionService } from './redactions/task-redaction.service';
+import { TasksService } from './tasks.service.js';
+import { TasksController } from './tasks.controller.js';
+import { FieldChangesController } from './field-state/field-changes.controller.js';
+import { ActivityModule } from '../activity/activity.module.js';
+import { WsModule } from '../ws/ws.module.js';
+import { TaskFieldStateService } from './field-state/task-field-state.service.js';
+import { FieldChangesService } from './field-state/field-changes.service.js';
+import { AuthModule } from '../auth/auth.module.js';
+import { ExecutionAuthorityModule } from '../execution-authority/execution-authority.module.js';
+import { TaskExecutionRecorderService } from '../execution-authority/task-execution-recorder.service.js';
+import { TaskStalenessService } from '../execution-authority/task-staleness.service.js';
+import { TaskRedactionService } from './redactions/task-redaction.service.js';
 
 @Module({
   imports: [ActivityModule, WsModule, AuthModule, ExecutionAuthorityModule],

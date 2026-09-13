@@ -3,13 +3,13 @@
 // no runtime adapter, process capability, mutable state, persistence, or
 // invocation-owner decision.
 
-import type { EvidenceRef } from '../execution-authority/execution-authority.types';
+import type { EvidenceRef } from '../execution-authority/execution-authority.types.js';
 export {
   CANONICAL_JSON_V1_MAX_DEPTH as MAX_NESTING_DEPTH,
   CANONICAL_JSON_V1_MAX_CONTAINER_ENTRIES as MAX_CONTAINER_ENTRIES,
   CANONICAL_JSON_V1_MAX_ENTRIES as MAX_CANONICAL_ENTRIES,
   CANONICAL_JSON_V1_MAX_BYTES as MAX_CANONICAL_BYTES,
-} from '../execution-authority/canonical-json-v1';
+} from '../execution-authority/canonical-json-v1.js';
 
 export const MAX_FIELD_BYTES = 256;
 export const MAX_CANDIDATES = 64;

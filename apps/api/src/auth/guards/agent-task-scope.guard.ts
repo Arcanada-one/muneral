@@ -8,8 +8,8 @@ import {
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { Agent } from '@prisma/client';
-import { PrismaService } from '../../prisma/prisma.service';
-import { AGENT_SCOPE_KEY, AgentScopeKind } from '../agent-scope.decorator';
+import { PrismaService } from '../../prisma/prisma.service.js';
+import { AGENT_SCOPE_KEY, AgentScopeKind } from '../agent-scope.decorator.js';
 
 /** What an authorised agent request carries downstream: the id the handler must
  *  narrow its answer to. Absent on JWT requests, which are not narrowed. */

@@ -2,8 +2,13 @@
 // the unique index the route's idempotency rests on.
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import * as url from 'node:url';
+import * as path from 'node:path';
 
-const apiRoot = join(__dirname, '..');
+// ESM has no __dirname, and declaring that NAME would mark the module CommonJS.
+const thisDir = path.dirname(url.fileURLToPath(import.meta.url));
+
+const apiRoot = join(thisDir, '..');
 const dir = 'prisma/migrations/20260913180000_add_task_redactions';
 const migration = readFileSync(join(apiRoot, dir, 'migration.sql'), 'utf8');
 const rollback = readFileSync(join(apiRoot, dir, 'rollback.sql'), 'utf8');

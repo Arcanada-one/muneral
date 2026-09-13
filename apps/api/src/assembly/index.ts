@@ -1,7 +1,7 @@
 // MUN-0022: frozen public value surface. Assembly describes what should be
 // invoked; it never invokes, persists, schedules, observes, or commits work.
 
-export { compileAssembly } from './assembly.compiler';
+export { compileAssembly } from './assembly.compiler.js';
 
 export type {
   AssemblyRequestV0,
@@ -22,4 +22,4 @@ export type {
   CanonicalJsonObject,
   CanonicalJsonValue,
   AssemblyCompileResultV0,
-} from './assembly.types';
+} from './assembly.types.js';
