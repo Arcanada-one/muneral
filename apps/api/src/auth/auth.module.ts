@@ -41,6 +41,19 @@ if (process.env.GITHUB_CLIENT_ID) {
     AgentTaskScopeGuard,
   ],
   exports: [
+    // Re-exported so AuthModuleOptions reaches the modules that USE the guards.
+    // `@UseGuards(JwtAuthGuard)` instantiates the guard in the consuming module's
+    // container (AgentsModule, TasksModule, …), not in AuthModule, and Nest reads
+    // the guard's dependency asymmetrically: PARAMTYPES through the prototype
+    // chain (injector.js:221, getMetadata) but OPTIONAL_DEPS own-only
+    // (injector.js:228, getOwnMetadata). `class JwtAuthGuard extends
+    // AuthGuard('jwt') {}` declares no constructor, so it inherits the TYPE
+    // AuthModuleOptions while the `Optional()` mark stays on the mixin —
+    // measured: own OPTIONAL undefined, inherited [0]. Nest therefore treats a
+    // deliberately optional dependency as required and reports
+    // `Nest can't resolve dependencies of the JwtAuthGuard (?) … in the
+    // AgentsModule module`. Exporting the provider satisfies it for real.
+    PassportModule,
     AuthService,
     JwtAuthGuard,
     ApiKeyGuard,
