@@ -1,4 +1,4 @@
-FROM node:24.20.0-alpine AS builder
+FROM node:26.8-alpine AS builder
 WORKDIR /app
 
 # Enable corepack so pnpm is available (version comes from packageManager in package.json)
@@ -27,7 +27,7 @@ RUN pnpm --filter @muneral/api exec prisma generate
 RUN pnpm --filter @muneral/api build
 
 # ---- production image ----
-FROM node:24.20.0-alpine AS production
+FROM node:26.8-alpine AS production
 WORKDIR /app
 ENV NODE_ENV=production
 
