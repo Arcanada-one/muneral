@@ -47,6 +47,19 @@ import { SetMetadata } from '@nestjs/common';
  *                      allowlist entry that can be narrowed or revoked on its
  *                      own is worth one more enum value. The route never takes
  *                      the new value as free text: see TaskRedactionService.
+ *   'task-status'    — MUN-0050. The route names a task (`:taskId`) and moves
+ *                      its status. The key's agent must be in the workspace
+ *                      that owns the task AND either have CREATED it
+ *                      (`tasks.created_by_id` = the agent, `actor_type` =
+ *                      'agent' — authorship `POST /tasks` records from the
+ *                      credential, MUN-0045) or be assigned to it with role
+ *                      `executor` (`task_agents`). Narrower than 'task' on
+ *                      the role (a lead or reviewer assignment does not move
+ *                      a card) and wider on authorship (a creator needs no
+ *                      assignment row — the row it never got is why every
+ *                      work item the fleet registered stayed `todo`). The
+ *                      state machine is not part of the scope: the service
+ *                      holds every caller, key or JWT, to TASK_TRANSITIONS.
  */
 export const AGENT_SCOPE_KEY = 'mun0043:agentScope';
 
@@ -55,7 +68,8 @@ export type AgentScopeKind =
   | 'project'
   | 'task-workspace'
   | 'project-write'
-  | 'task-redaction';
+  | 'task-redaction'
+  | 'task-status';
 
 export const AgentScope = (kind: AgentScopeKind) =>
   SetMetadata(AGENT_SCOPE_KEY, kind);

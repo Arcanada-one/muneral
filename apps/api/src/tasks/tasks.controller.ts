@@ -83,6 +83,9 @@ type AuthRequest = Request & { actor: Actor; agentScope?: AgentScopeContext };
  * carries no actor field, and `req.actor` (via `ActorInterceptor`) is resolved
  * from the credential, never the body.
  *
+ * MUN-0050 — `PATCH /tasks/:taskId/status` moves from `'task'` to its own
+ * scope `'task-status'` (creator or executor assignment): see the handler.
+ *
  * MUN-0049 — `POST /tasks/:taskId/redactions` is the third write. It is marked
  * with its OWN scope, `'task-redaction'`, rather than reusing `'task'`: the
  * assignment check is the same, but a route that rewrites a title is a
@@ -176,12 +179,24 @@ export class TasksController {
     );
   }
 
-  /** Transitionable by the assigned agent's API key (MUN-0043) or by a JWT.
-   *  The state machine, the activity log and the actor recorded on it are
-   *  unchanged — `ActorInterceptor` already resolves an API key to an `agent`
-   *  actor, so the move is attributed to the agent, not to a human. */
+  /** Transitionable by an agent's API key or by a JWT.
+   *
+   *  MUN-0050 — scoped `'task-status'`, no longer `'task'`. Under `'task'`
+   *  (MUN-0043) the key needed a `task_agents` row, and a task the agent
+   *  itself CREATED through `POST /tasks` (MUN-0045) never gets one: measured
+   *  live, every work item the fleet registered on 2026-09-13 answered 403
+   *  "not assigned" to the key that created it and stayed `todo` after its
+   *  work was merged and deployed. `'task-status'` admits the creator
+   *  (`created_by_id` + `actor_type = 'agent'`, both recorded server-side from
+   *  the credential) or an `executor` assignment, inside the agent's own
+   *  workspace, and nothing else — a lead/reviewer assignment no longer moves
+   *  a card. The state machine, the activity log and the actor recorded on it
+   *  are unchanged: `ActorInterceptor` resolves the key to an `agent` actor,
+   *  the service holds every caller to `TASK_TRANSITIONS` (no `done` without
+   *  `review`), and a same-status repeat answers 200 `idempotent: true`
+   *  without writing — see `TasksService.updateStatus`. */
   @Patch(':taskId/status')
-  @AgentScope('task')
+  @AgentScope('task-status')
   updateStatus(
     @Param('taskId') taskId: string,
     @Req() req: AuthRequest,
