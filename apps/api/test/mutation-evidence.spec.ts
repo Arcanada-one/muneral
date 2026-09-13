@@ -17,12 +17,12 @@ import * as url from 'node:url';
 // type from the other.
 import { jest as _jestRuntime } from '@jest/globals';
 const jest = _jestRuntime as unknown as typeof globalThis.jest;
-import { createRequire } from 'node:module';
+// The harness is ESM now, so it is imported once here rather than require()d
+// in six separate test bodies: a CommonJS bridge cannot load an ES module
+// synchronously. The namespace import also drops six hand-written local
+// shapes in favour of the harness's own exported signatures.
+import * as harness from './assembly/mutation-harness.js';
 
-// ESM has no `require`; these call sites load lazily inside test bodies
-// (mostly behind a postgres-availability check), so the bridge is kept
-// rather than hoisting them to static imports that would always execute.
-const nodeRequire = createRequire(import.meta.url);
 
 // ESM has no __dirname, and declaring that NAME would mark the module CommonJS.
 const thisDir = path.dirname(url.fileURLToPath(import.meta.url));
@@ -30,7 +30,7 @@ const thisDir = path.dirname(url.fileURLToPath(import.meta.url));
 jest.setTimeout(30_000);
 
 const API_ROOT = path.resolve(thisDir, '..');
-const HARNESS = path.join(API_ROOT, 'test', 'assembly', 'mutation-harness.cjs');
+const HARNESS = path.join(API_ROOT, 'test', 'assembly', 'mutation-harness.js');
 const EVIDENCE = path.join(API_ROOT, 'test', 'assembly', 'mutation-results.json');
 const SITE_MAP = path.join(API_ROOT, 'test', 'assembly', 'mutation-sites.json');
 
@@ -114,9 +114,6 @@ describe('Assembly mutation evidence verification', () => {
   });
 
   it('uses a non-self-referential Git snapshot supplement', () => {
-    const harness = nodeRequire('./assembly/mutation-harness.cjs') as {
-      gitSupplement(repoRoot?: string, evidencePath?: string): Record<string, unknown>;
-    };
     const supplement = harness.gitSupplement();
     expect(supplement).toEqual(original.supplementalGit);
     expect(Object.keys(supplement).sort()).toEqual([
@@ -132,7 +129,7 @@ describe('Assembly mutation evidence verification', () => {
       cwd: '.',
       argv: [
         'node',
-        'apps/api/test/assembly/mutation-harness.cjs',
+        'apps/api/test/assembly/mutation-harness.js',
         '--json',
         'apps/api/test/assembly/mutation-results.json',
       ],
@@ -140,9 +137,6 @@ describe('Assembly mutation evidence verification', () => {
   });
 
   it('represents tracked deletions while excluding untracked rename destinations', () => {
-    const harness = nodeRequire('./assembly/mutation-harness.cjs') as {
-      gitSupplement(repoRoot?: string, evidencePath?: string): Record<string, string>;
-    };
     const repo = path.join(directory, 'git-snapshot-deletions');
     fs.mkdirSync(repo);
     git(repo, ['init', '--quiet']);
@@ -212,9 +206,6 @@ describe('Assembly mutation evidence verification', () => {
   });
 
   it('requires a fresh run to match allowed killed-label substitutions exactly', () => {
-    const harness = nodeRequire('./assembly/mutation-harness.cjs') as {
-      recordedOutcomeMatches(recorded: Evidence, actual: Evidence): boolean;
-    };
     const recorded = original.sites[0] as Evidence;
     const actual = { outcome: recorded.outcome, detail: recorded.detail };
     const substituted = {
@@ -225,9 +216,6 @@ describe('Assembly mutation evidence verification', () => {
   });
 
   it('requires a fresh run to match a replaced detail even when its self-hash is updated', () => {
-    const harness = nodeRequire('./assembly/mutation-harness.cjs') as {
-      recordedOutcomeMatches(recorded: Evidence, actual: Evidence): boolean;
-    };
     const recorded = original.sites[0] as Evidence;
     const actual = { outcome: recorded.outcome, detail: recorded.detail };
     const detail = 'different but internally self-consistent detail';
@@ -240,9 +228,6 @@ describe('Assembly mutation evidence verification', () => {
   });
 
   it('canonicalizes all failing test identities independently of Jest output order', () => {
-    const harness = nodeRequire('./assembly/mutation-harness.cjs') as {
-      canonicalFailureDetail(out: string, outcome: string): string;
-    };
     const first = [
       '  [31m● suite z › rejects z[0m',
       '  ● suite a › rejects a',
@@ -258,9 +243,6 @@ describe('Assembly mutation evidence verification', () => {
   });
 
   it('canonicalizes unique compiler diagnostics independently of repetition and order', () => {
-    const harness = nodeRequire('./assembly/mutation-harness.cjs') as {
-      canonicalFailureDetail(out: string, outcome: string): string;
-    };
     const output = [
       'error TS2366: Function lacks ending return statement.',
       'error TS18047: value is possibly null.',

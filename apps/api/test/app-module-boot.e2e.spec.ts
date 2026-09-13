@@ -38,6 +38,12 @@ import { MigrationModule } from '../src/migration/migration.module.js';
 // and would red 416 lines that are not otherwise wrong. Value from one,
 // type from the other.
 import { jest as _jestRuntime } from '@jest/globals';
+// Imported statically. Under ESM a dynamic import inside the test body can
+// still be resolving when jest tears the environment down, which surfaces as
+// `import after the Jest environment has been torn down` — 137 of them from
+// this one suite, and the noise lands on whichever suites run alongside it.
+import { SyncController } from '../src/sync/sync.controller.js';
+import { MigrationController } from '../src/migration/migration.controller.js';
 const jest = _jestRuntime as unknown as typeof globalThis.jest;
 
 /**
@@ -99,14 +105,12 @@ describe('AppModule boot (DI regression)', () => {
 
     // Confirm SyncController is in the graph — proves ApiKeyGuard resolved
     // through the SyncModule → AuthModule → ApiKeyGuard chain.
-    const { SyncController } = await import('../src/sync/sync.controller.js');
     const syncController = moduleRef.get(SyncController, { strict: false });
     expect(syncController).toBeDefined();
 
     // Same proof for MUN-0040: MigrationModule pulls ApiKeyGuard and
     // JwtOrApiKeyGuard from AuthModule and ActivityService from ActivityModule,
     // so a missing import here fails at .compile() rather than at first request.
-    const { MigrationController } = await import('../src/migration/migration.controller.js');
     expect(moduleRef.get(MigrationController, { strict: false })).toBeDefined();
 
     await moduleRef.close();

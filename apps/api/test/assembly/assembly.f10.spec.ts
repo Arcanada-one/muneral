@@ -13,12 +13,10 @@ import { createAssemblyError } from '../../src/assembly/assembly.errors.js';
 import { validateAssemblyRequest } from '../../src/assembly/assembly.validator.js';
 import type { AssemblyRequestV0 } from '../../src/assembly/assembly.types.js';
 import * as url from 'node:url';
-import { createRequire } from 'node:module';
+// The harness is ESM now and cannot be require()d: `Must use import to load
+// ES Module`. Imported once here instead of twice inside test bodies.
+import * as harness from './mutation-harness.js';
 
-// ESM has no `require`; these call sites load lazily inside test bodies
-// (mostly behind a postgres-availability check), so the bridge is kept
-// rather than hoisting them to static imports that would always execute.
-const nodeRequire = createRequire(import.meta.url);
 
 // ESM has no __dirname, and declaring that NAME would mark the module CommonJS.
 const thisDir = path.dirname(url.fileURLToPath(import.meta.url));
@@ -195,7 +193,6 @@ describe('F10 independent Python boundary', () => {
 
 describe('F10 evidence tooling cannot flatter the result', () => {
   it('classifies spawn errors, signals and null statuses as harness failures', () => {
-    const harness = nodeRequire('./mutation-harness.cjs') as any;
     expect(harness.classify({ code: null, signal: 'SIGKILL', error: null, out: '' })).toBe('HARNESS_ERROR');
     expect(harness.classify({ code: null, signal: null, error: new Error('spawn'), out: '' })).toBe('HARNESS_ERROR');
     expect(harness.classify({ code: 1, signal: null, error: null, out: 'unrelated failure' }))
@@ -203,12 +200,11 @@ describe('F10 evidence tooling cannot flatter the result', () => {
   });
 
   it('fixture regeneration passes the shared pinned evaluation instant', () => {
-    const generator = fs.readFileSync(path.join(thisDir, 'generate-fixtures.cjs'), 'utf8');
+    const generator = fs.readFileSync(path.join(thisDir, 'generate-fixtures.js'), 'utf8');
     expect(generator).toContain('compile(input)');
   });
 
   it('disables an unbraced refusal without deleting condition side effects', () => {
-    const harness = nodeRequire('./mutation-harness.cjs') as any;
     const source = "if (raw[index++] !== ':') throw new ParserError('BAD');\naccept();";
     const [site] = harness.enumerateSites(source, 'parser.ts');
     const mutant = harness.applyMutant(source, site);

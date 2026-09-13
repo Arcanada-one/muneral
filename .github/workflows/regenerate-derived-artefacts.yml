@@ -209,13 +209,13 @@ jobs:
           pnpm install --frozen-lockfile --ignore-scripts
           DATABASE_URL='postgresql://unused:unused@localhost:5432/unused' pnpm exec prisma generate
           pnpm build
-          node apps/api/test/assembly/mutation-harness.cjs --json apps/api/test/assembly/mutation-results.json
+          node apps/api/test/assembly/mutation-harness.js --json apps/api/test/assembly/mutation-results.json
 
       - name: Verify what was produced
         if: steps.pr.outputs.skip == 'false'
         run: |
           set -euo pipefail
-          node apps/api/test/assembly/mutation-harness.cjs \
+          node apps/api/test/assembly/mutation-harness.js \
             --verify-structure apps/api/test/assembly/mutation-results.json
 
       - name: Commit only the declared paths

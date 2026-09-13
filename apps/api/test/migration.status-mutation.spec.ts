@@ -7,7 +7,7 @@
 // them must make that suite fail. A green suite over a mapper that ignores the
 // map is worth nothing, and 1,309 archive cards are riding on the difference.
 //
-// Mechanics follow `test/assembly/mutation-harness.cjs`: the source is copied
+// Mechanics follow `test/assembly/mutation-harness.js`: the source is copied
 // aside, mutated in place, the target suite is run in a child process, and the
 // original is restored — including from an `afterAll` and a process-exit hook,
 // so an interrupted run cannot leave a mutant on disk. `pnpm test` runs

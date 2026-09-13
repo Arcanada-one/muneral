@@ -14,7 +14,6 @@ import { Controller, Get } from '@nestjs/common';
  */
 function resolveVersion(): string {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     // ESM has no `require`. Reading the manifest from disk rather than importing
     // it keeps the compiled layout out of the type graph: an `import ... with
     // {type:'json'}` would resolve relative to dist/ and change what this reports.

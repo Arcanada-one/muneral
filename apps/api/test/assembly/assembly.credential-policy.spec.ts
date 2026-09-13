@@ -10,7 +10,7 @@ import * as url from 'node:url';
 const thisDir = path.dirname(url.fileURLToPath(import.meta.url));
 
 const manifest = path.join(thisDir, 'credential-policy-v0.json');
-const generator = path.join(thisDir, 'generate-credential-policy.cjs');
+const generator = path.join(thisDir, 'generate-credential-policy.js');
 const validator = path.join(thisDir, 'validate_assembly_fixtures.py');
 
 function pythonRuleId(value: string): string | null {
