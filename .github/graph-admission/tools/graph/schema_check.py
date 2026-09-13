@@ -241,13 +241,40 @@ def check_receipt(doc: dict, schema: dict, disabled=frozenset()) -> list[dict]:
     gf = imp.get("global_fallback") if isinstance(imp.get("global_fallback"), dict) else {}
     if gf.get("triggered") is True and not gf.get("reason"):
         c.add("GLOBAL_FALLBACK_WITHOUT_REASON", "")
+    # A triggered global fallback (lockfile / global config) makes the impact the WHOLE
+    # REPOSITORY as ONE entity - the Bazel/Nx rule of DEC-AUP-0008 - verified by the
+    # repository's own test job. impact.py still lists every node so a reader can see the
+    # blast radius, and the receipt keeps that listing; but those rows ARE the radius, not
+    # N separate measurements. Demanding a verdict per row is the same disagreement that
+    # `selected()`, `mandatory_by_entity()` and `collect_entities()` were each taught to
+    # avoid; this is its fourth site. Measured on muneral #108: 458 rows against 8
+    # verdicts, ENTITY_WITHOUT_VERDICT, receipt refused. The archived receipts show what
+    # the unfixed rule cost - deps-floors carries 149 exemptions, one per row, each with
+    # an expiry, where the fixed rule demands two.
+    #
+    # Only the VERDICT DEMAND narrows. Every per-row check below - provenance, placement,
+    # boundary - still runs on all rows: those measure the quality of the radius listing
+    # itself, they do not ask for a verdict, and silently switching them off while fixing
+    # something else would be the worse defect.
+    fallback_selection = None
+    if gf.get("triggered") is True:
+        seeds = imp.get("seeds")
+        if isinstance(seeds, list) and seeds:
+            fallback_selection = set(seeds)
+        else:
+            # No seeds recorded: hold the receipt to what it actually judged, so a correct
+            # receipt is not refused over a field impact.py did not emit. On a NON-fallback
+            # change this stays None and the rule is unchanged.
+            fallback_selection = {v["entity"] for v in (doc.get("verdicts") or [])
+                                  if isinstance(v, dict) and "entity" in v}
     entities = []
     boundary_inferred = []
     for section, entries in (("deterministic_core", core), ("inferred_tail", tail)):
         for e in entries:
             if not isinstance(e, dict) or "entity" not in e:
                 c.add("IMPACT_ENTRY_WITHOUT_PROVENANCE", f"{section}: entry without entity"); continue
-            entities.append(e["entity"])
+            if fallback_selection is None or e["entity"] in fallback_selection:
+                entities.append(e["entity"])
             path = e.get("path") if isinstance(e.get("path"), list) else []
             if not path:
                 c.add("IMPACT_ENTRY_WITHOUT_PROVENANCE", f"{e['entity']}: empty path"); continue
