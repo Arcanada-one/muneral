@@ -17,8 +17,12 @@
 // Getters give both: real named bindings for the ESM side, resolved at access
 // time rather than at module evaluation. moduleNameMapper points only the TEST
 // resolver here; application code imports the real package.
+// The specifier must NOT be '@nestjs/throttler': moduleNameMapper sends that name
+// to THIS file, so the require would re-enter the shim. CI measured the result —
+// `RangeError: Maximum call stack size exceeded`. Naming the package entry file
+// directly resolves past the mapping.
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const throttler = require('@nestjs/throttler');
+const throttler = require('@nestjs/throttler/dist/index.js');
 
 export const ThrottlerModule = throttler.ThrottlerModule;
 export const ThrottlerGuard = throttler.ThrottlerGuard;
