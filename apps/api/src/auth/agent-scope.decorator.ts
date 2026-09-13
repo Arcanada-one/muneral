@@ -38,10 +38,24 @@ import { SetMetadata } from '@nestjs/common';
  *                      `ActorInterceptor` from the credential itself, so a key
  *                      cannot claim a principal it is not (see
  *                      CreateTaskDto — it carries no owner/actor field at all).
+ *   'task-redaction' — MUN-0049. The route names a task (`:taskId`) and
+ *                      rewrites one span of its title or description. The
+ *                      assignment check is exactly 'task' — the agent must be
+ *                      assigned to that task inside its own workspace — but
+ *                      the scope has its own name because rewriting a field is
+ *                      a different act from reading or commenting, and an
+ *                      allowlist entry that can be narrowed or revoked on its
+ *                      own is worth one more enum value. The route never takes
+ *                      the new value as free text: see TaskRedactionService.
  */
 export const AGENT_SCOPE_KEY = 'mun0043:agentScope';
 
-export type AgentScopeKind = 'task' | 'project' | 'task-workspace' | 'project-write';
+export type AgentScopeKind =
+  | 'task'
+  | 'project'
+  | 'task-workspace'
+  | 'project-write'
+  | 'task-redaction';
 
 export const AgentScope = (kind: AgentScopeKind) =>
   SetMetadata(AGENT_SCOPE_KEY, kind);

@@ -227,6 +227,28 @@ describe('AgentTaskScopeGuard', () => {
     expect(prisma.project.findFirst).not.toHaveBeenCalled();
   });
 
+  // --- MUN-0049: 'task-redaction' — POST /tasks/:taskId/redactions, bound like 'task'
+  it('admits a redaction by the agent assigned to the task, under its own scope name', async () => {
+    reflector.getAllAndOverride.mockReturnValue('task-redaction');
+    prisma.taskAgent.findFirst.mockResolvedValue({ taskId: 't-1' });
+    const { ctx, req } = makeContext({ apiKeyAgent: AGENT, params: { taskId: 't-1' } });
+
+    await expect(guard.canActivate(ctx)).resolves.toBe(true);
+    expect(prisma.taskAgent.findFirst).toHaveBeenCalledWith({
+      where: { agentId: 'agent-1', taskId: 't-1', task: { project: { workspaceId: 'ws-1' } } },
+      select: { taskId: true },
+    });
+    expect(req.agentScope).toEqual({ agentId: 'agent-1', kind: 'task-redaction' });
+  });
+
+  it('refuses a redaction by an agent not assigned to the task', async () => {
+    reflector.getAllAndOverride.mockReturnValue('task-redaction');
+    prisma.taskAgent.findFirst.mockResolvedValue(null);
+    const { ctx } = makeContext({ apiKeyAgent: AGENT, params: { taskId: 't-1' } });
+
+    await expect(guard.canActivate(ctx)).rejects.toThrow(ForbiddenException);
+  });
+
   it('ignores a non-string projectId in the body rather than passing it to Prisma', async () => {
     reflector.getAllAndOverride.mockReturnValue('project-write');
     const { ctx } = makeContext({
