@@ -9,7 +9,13 @@ import { PrismaService } from '../src/prisma/prisma.service.js';
 // and would red 416 lines that are not otherwise wrong. Value from one,
 // type from the other.
 import { jest as _jestRuntime } from '@jest/globals';
-const jest = _jestRuntime as unknown as typeof globalThis.jest;
+// Intersection, not a plain cast to globalThis.jest: `unstable_mockModule` exists
+// only on the @jest/globals object, while the 339 existing `jest.fn()` call sites
+// are written against @types/jest (whose bare fn() infers a usable type where the
+// @jest/globals generic infers `never`). Value from one, each half of the type
+// from the one that declares it.
+const jest = _jestRuntime as unknown as typeof globalThis.jest &
+  Pick<typeof _jestRuntime, 'unstable_mockModule'>;
 
 // Mock bcrypt to speed up tests (no real hashing).
 //

@@ -425,7 +425,7 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
 
     expect(initResult).toHaveProperty('committedResult');
     expect(initResult).toHaveProperty('state');
-    const state = (initResult as Record<string, unknown>).state as Record<string, unknown>;
+    const state = (initResult as unknown as Record<string, unknown>).state as Record<string, unknown>;
     expect(state).not.toBeNull();
     const currentAttemptId = state.currentAttemptId as string | null;
     expect(currentAttemptId).toBeDefined();
@@ -463,7 +463,7 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
 
     // Verify outbox event was created
     expect(txnResult).toHaveProperty('outboxEvent');
-    const execResult = txnResult as Record<string, unknown>;
+    const execResult = txnResult as unknown as Record<string, unknown>;
     expect(execResult.outboxEvent).toBeDefined();
 
     const outboxEvent = execResult.outboxEvent as Record<string, unknown>;
@@ -1305,7 +1305,7 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
       evidenceRefs: [],
     });
     expect(initResult).toHaveProperty('committedResult');
-    const state = (initResult as Record<string, unknown>).state as Record<string, unknown>;
+    const state = (initResult as unknown as Record<string, unknown>).state as Record<string, unknown>;
     const currentAttemptId = state.currentAttemptId as string;
 
     // Step 2a: transition_attempt → started (issued → running). Required
@@ -1381,7 +1381,7 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
       retryBackoffMs: 0,
       evidenceRefs: [],
     });
-    const state = (initResult as Record<string, unknown>).state as Record<string, unknown>;
+    const state = (initResult as unknown as Record<string, unknown>).state as Record<string, unknown>;
     const currentAttemptId = state.currentAttemptId as string;
 
     // Step 2a: transition_attempt → started
