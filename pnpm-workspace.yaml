@@ -81,3 +81,14 @@ overrides:
   # GHSA-x5fp-wj9c-mxmx / GHSA-4mjr-xmp4-gh2g: bracket-key comma-parsing array-limit
   # bypass and isBuffer-controlled DoS.
   qs: ">=6.16.0"
+  # One compiler for the whole workspace. @nestjs/schematics@12.0.1 declares a
+  # typescript peer that resolves to 6.0.3, and pnpm linked THAT into the root
+  # node_modules/.bin — measured: root tsc 6.0.3, apps/api and packages/types
+  # 5.9.3. Every package asks for ^5 so nothing is built against 6, but any tool
+  # that discovers the compiler through the root .bin gets it, and TypeScript 6
+  # makes `baseUrl` an ERROR (TS5101) where 5.9 only deprecates it. That reached
+  # the graph-admission gate as `1 error(s) in other files (apps/api/tsconfig.json)`
+  # and left all 87 affected entities not_measured. main carries no typescript@6
+  # at all (@nestjs/schematics@11.1.0 resolved 5.9.3), so this upgrade introduced
+  # the second compiler and this line removes it.
+  typescript: 5.9.3
