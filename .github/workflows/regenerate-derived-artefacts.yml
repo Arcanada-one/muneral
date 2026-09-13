@@ -263,9 +263,34 @@ jobs:
           verifier, and nothing outside .arcana/derived-artefacts.v1.json.
           MSG
           sed -i 's/^          //' "${RUNNER_TEMP}/derived-commit-msg.txt"
+          # The commit this job MEASURED — the head it checked out, before the evidence
+          # commit is written on top of it. This is what the remote must still be for the
+          # push below to be safe; read it before committing, so it names the measured tree
+          # and not the new one.
+          BASE_SHA=$(git rev-parse HEAD)
           git commit -F "${RUNNER_TEMP}/derived-commit-msg.txt"
-          git push origin HEAD:"${{ steps.pr.outputs.ref }}"
-          echo "pushed=true" >> "$GITHUB_OUTPUT"
+          # The mutation battery takes ~15 minutes on this repository, and the branch can
+          # move under it — a rebase onto a new main, another writer rebinding the same
+          # evidence. A plain push then dies on `! [rejected] (fetch first)` and the run is
+          # recorded as a FAILURE, which is the wrong verdict twice over: nothing is broken,
+          # and evidence measured on a tree that no longer exists must not land anyway.
+          # Measured 2026-09-13: four runs failed exactly this way (34746445438, 34746478082,
+          # 34746479292, 34746482085) while the branches were being merged forward onto the
+          # refreshed gate bundle of #98.
+          #
+          # --force-with-lease=<ref>:<sha> is the whole fix: it pushes only if the remote is
+          # still the commit this job measured, and refuses otherwise — never --force, which
+          # would overwrite the other writer's work. Losing the race is a normal outcome, not
+          # a failure: the head that won carries its own evidence, and the freshly triggered
+          # CI measures it. The run exits 0 and says so.
+          if git push --force-with-lease="${{ steps.pr.outputs.ref }}:${BASE_SHA}" \
+                origin HEAD:"${{ steps.pr.outputs.ref }}"; then
+            echo "pushed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "the branch moved while the battery was running (remote is no longer ${BASE_SHA})."
+            echo "evidence measured on a tree that no longer exists is not pushed; the newer head carries its own."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+          fi
 
       # A push made with GITHUB_TOKEN raises no workflow event — GitHub's guard against a
       # workflow triggering itself. The consequence here is not a saved run but a STUCK
