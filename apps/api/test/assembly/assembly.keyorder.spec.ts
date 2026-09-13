@@ -12,7 +12,7 @@
 // exactly what this package must NOT adopt: it would force the Python side to
 // reimplement UTF-16 ordering, reintroducing the divergence class).
 
-import { assemblyCanonicalJson } from '../../src/assembly/assembly.canonical';
+import { assemblyCanonicalJson } from '../../src/assembly/assembly.canonical.js';
 
 describe('A3: object keys order by code point, matching the Python validator', () => {
   it('orders an astral key AFTER U+FFFF', () => {

@@ -1,5 +1,5 @@
 import { IsUUID, IsIn } from 'class-validator';
-import { TaskDependencyType } from '@muneral/types';
+import type { TaskDependencyType } from '@muneral/types';
 
 export class AddDependencyDto {
   @IsUUID()

@@ -1,9 +1,7 @@
 import { createHash } from 'node:crypto';
-import { canonicalJsonV1 } from '../execution-authority/canonical-json-v1';
-import {
-  DOMAIN_SOLUTION_LOG_HEAD_RECEIPT,
-  SolutionLogHeadReceiptV0,
-} from './solution-log-head.types';
+import { canonicalJsonV1 } from '../execution-authority/canonical-json-v1.js';
+import { DOMAIN_SOLUTION_LOG_HEAD_RECEIPT } from './solution-log-head.types.js';
+import type { SolutionLogHeadReceiptV0 } from './solution-log-head.types.js';
 
 export function computeSolutionLogHeadReceiptId(
   receipt: Omit<SolutionLogHeadReceiptV0, 'receiptId'>,

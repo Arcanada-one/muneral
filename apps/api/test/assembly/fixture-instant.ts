@@ -15,8 +15,12 @@
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import * as url from 'node:url';
 
-const VALIDATOR = path.join(__dirname, 'validate_assembly_fixtures.py');
+// ESM has no __dirname, and declaring that NAME would mark the module CommonJS.
+const thisDir = path.dirname(url.fileURLToPath(import.meta.url));
+
+const VALIDATOR = path.join(thisDir, 'validate_assembly_fixtures.py');
 
 function readPinnedInstant(): string {
   const src = fs.readFileSync(VALIDATOR, 'utf8');

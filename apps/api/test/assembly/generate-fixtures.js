@@ -1,28 +1,31 @@
 #!/usr/bin/env node
-/* global require, module, __dirname, console */
+/* global console, process */
 // Golden corpus generator. It consumes the built compiler/canonicalizer; it
 // deliberately contains no private protocol or canonicalization implementation.
 
-const fs = require('node:fs');
-const path = require('node:path');
 
-const COMPILED_CANONICAL = '../../dist/execution-authority/canonical-json-v1.js';
-const COMPILED_COMPILER = '../../dist/assembly/assembly.compiler.js';
+
+
+import path from 'node:path';
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
+// ESM has no __dirname, and declaring that NAME would mark the module CommonJS.
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+// The built modules are ESM now, so they cannot be require()d synchronously.
+// They are imported statically instead: the generator already required the API
+// build to exist, and a missing build now fails at load with Node's own
+// resolution error rather than the wrapped message below.
+import { canonicalJsonV1 } from '../../dist/execution-authority/canonical-json-v1.js';
+import { compileAssembly } from '../../dist/assembly/assembly.compiler.js';
 const FIXTURE_EVALUATED_AT = '2026-08-01T12:00:00.000Z';
 
-function load(modulePath, exportName) {
-  try { return require(modulePath)[exportName]; }
-  catch (error) {
-    throw new Error(`generate-fixtures: run the API build first; cannot load ${modulePath}: ${error.message}`);
-  }
-}
-
 function canonicalJson(value) {
-  return load(COMPILED_CANONICAL, 'canonicalJsonV1')(value);
+  return canonicalJsonV1(value);
 }
 
 function compile(input) {
-  return load(COMPILED_COMPILER, 'compileAssembly')(input);
+  return compileAssembly(input);
 }
 
 function authority(scope = 'read') {
@@ -97,7 +100,7 @@ const negativeFixtures = [
 
 function writeFixture(subdir, tuple) {
   const [filename, description, input, expectedErrorCode] = tuple;
-  const directory = path.join(__dirname, 'fixtures', subdir);
+  const directory = path.join(scriptDir, 'fixtures', subdir);
   fs.mkdirSync(directory, { recursive: true });
   const output = { description, input };
   if (subdir === 'positive') {
@@ -121,6 +124,6 @@ function main() {
   console.log(`Generated ${positiveFixtures.length} positive and ${negativeFixtures.length} negative Assembly fixtures.`);
 }
 
-if (require.main === module) main();
+if (process.argv[1] && fileURLToPath(import.meta.url) === fs.realpathSync(process.argv[1])) main();
 
-module.exports = { canonicalJson, main };
+export { canonicalJson, main };

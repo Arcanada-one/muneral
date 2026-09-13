@@ -10,9 +10,9 @@
 // P2002 on a constraint that cannot express a version race is rethrown as
 // UnexpectedUniqueViolationError. Any retry policy belongs to the caller.
 
-import { commandDigest, CanonicalJsonError } from './canonical-json';
-import { reduce } from './execution-authority.reducer';
-import { replayJournal } from './execution-authority.replay';
+import { commandDigest, CanonicalJsonError } from './canonical-json.js';
+import { reduce } from './execution-authority.reducer.js';
+import { replayJournal } from './execution-authority.replay.js';
 // InvalidTransitionError, UnissuedAttemptError, RetryBackoffError and
 // RetryBudgetExhaustedError are intentionally NOT imported here: the pure
 // reducer is the single source of truth for those validations and the service
@@ -22,10 +22,10 @@ import {
   IdempotencyCollisionError,
   StaleVersionError,
   UnexpectedUniqueViolationError,
-} from './execution-authority.errors';
-import type { ExecutionAuthorityError } from './execution-authority.errors';
-import { validateEvidenceRefs } from './evidence-ref.validator';
-import { EvidenceRefValidationError } from './evidence-ref.validator';
+} from './execution-authority.errors.js';
+import type { ExecutionAuthorityError } from './execution-authority.errors.js';
+import { validateEvidenceRefs } from './evidence-ref.validator.js';
+import { EvidenceRefValidationError } from './evidence-ref.validator.js';
 import type {
   Clock,
   ExecutionAuthorityCommand,
@@ -34,11 +34,11 @@ import type {
   TaskExecutionState,
   TaskExecutionTransition,
   TransitionAttemptCommand,
-} from './execution-authority.types';
-import { EVENT_TO_ATTEMPT_STATUS } from './execution-authority.types';
-import { deriveOutboxEventType, validatePayloadPlane } from '../outbox/outbox.types';
-import type { OutboxEvent } from '../outbox/outbox.types';
-import { WrongPlanePayloadError } from '../outbox/outbox.errors';
+} from './execution-authority.types.js';
+import { EVENT_TO_ATTEMPT_STATUS } from './execution-authority.types.js';
+import { deriveOutboxEventType, validatePayloadPlane } from '../outbox/outbox.types.js';
+import type { OutboxEvent } from '../outbox/outbox.types.js';
+import { WrongPlanePayloadError } from '../outbox/outbox.errors.js';
 
 // ---------------------------------------------------------------------------
 // Public types

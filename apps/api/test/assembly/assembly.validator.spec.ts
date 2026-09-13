@@ -2,9 +2,9 @@
 // type validation, and all 12 error codes. Fail-closed: every invalid input
 // produces a typed error.
 
-import { validateAssemblyRequest } from '../../src/assembly/assembly.validator';
-import type { AssemblyRequestV0, AssemblyErrorV0 } from '../../src/assembly/assembly.types';
-import { FIXTURE_EVALUATED_AT } from './fixture-instant';
+import { validateAssemblyRequest } from '../../src/assembly/assembly.validator.js';
+import type { AssemblyRequestV0, AssemblyErrorV0 } from '../../src/assembly/assembly.types.js';
+import { FIXTURE_EVALUATED_AT } from './fixture-instant.js';
 
 function validRequest(): AssemblyRequestV0 {
   return {

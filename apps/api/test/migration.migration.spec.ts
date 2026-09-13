@@ -4,8 +4,13 @@
 
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import * as url from 'node:url';
+import * as path from 'node:path';
 
-const apiRoot = join(__dirname, '..');
+// ESM has no __dirname, and declaring that NAME would mark the module CommonJS.
+const thisDir = path.dirname(url.fileURLToPath(import.meta.url));
+
+const apiRoot = join(thisDir, '..');
 const dir = 'prisma/migrations/20260905120000_add_migration_import_surface';
 const migration = readFileSync(join(apiRoot, dir, 'migration.sql'), 'utf8');
 /** The SQL with `--` comments stripped, for assertions about what the schema

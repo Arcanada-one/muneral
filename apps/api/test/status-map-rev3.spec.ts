@@ -22,7 +22,7 @@ import {
   mapHistoricalStatus,
   NOT_REVALIDATED,
   UnknownStatusMapRevisionError,
-} from '../src/migration/migration.status';
+} from '../src/migration/migration.status.js';
 import {
   STATUS_MAP,
   STATUS_MAP_REVISION,
@@ -32,9 +32,14 @@ import {
   buildStatusMapRegistry,
   loadStatusMap,
   statusMapForRevision,
-} from '../src/migration/status-map/status-map';
+} from '../src/migration/status-map/status-map.js';
+import * as url from 'node:url';
+import * as path from 'node:path';
 
-const DIR = join(__dirname, '../src/migration/status-map');
+// ESM has no __dirname, and declaring that NAME would mark the module CommonJS.
+const thisDir = path.dirname(url.fileURLToPath(import.meta.url));
+
+const DIR = join(thisDir, '../src/migration/status-map');
 const REV2_FILE = join(DIR, 'status-map-v1-rev2.json');
 const REV3_FILE = join(DIR, 'status-map-v1-rev3.json');
 

@@ -1,12 +1,34 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "types": ["jest", "node"],
-    "typeRoots": ["./node_modules/@types", "../../node_modules/@types"],
+    "types": [
+      "jest",
+      "node"
+    ],
+    "typeRoots": [
+      "./node_modules/@types",
+      "../../node_modules/@types"
+    ],
     "paths": {
-      "@muneral/types": ["../../packages/types/dist/index"]
+      "@muneral/types": [
+        "../../packages/types/dist/index"
+      ]
     },
-    "outDir": "./dist-test"
+    "outDir": "./dist-test",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    // The mutation harness and the fixture generator are plain .js and stay that
+    // way — they run as scripts under node, not through the test transform. They
+    // used to be require()d, which needed no declarations; the ESM move made them
+    // `import`s, and without allowJs each one is TS7016 "could not find a
+    // declaration file … implicitly has an 'any' type". Inferring from the source
+    // beats hand-written .d.ts files that would silently drift from it. checkJs
+    // stays off: these two files are not being type-checked, only read for their
+    // shapes.
+    "allowJs": true
   },
-  "include": ["src", "test"]
+  "include": [
+    "src",
+    "test"
+  ]
 }

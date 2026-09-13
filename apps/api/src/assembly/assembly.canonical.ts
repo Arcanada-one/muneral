@@ -1,7 +1,7 @@
 // MUN-0022 Assembly projections over the neutral strict canonical JSON v1.
 
 import { createHash } from 'node:crypto';
-import type { EvidenceRef } from '../execution-authority/execution-authority.types';
+import type { EvidenceRef } from '../execution-authority/execution-authority.types.js';
 import {
   CanonicalJsonV1Error,
   assertCanonicalJsonV1RawBounds,
@@ -10,7 +10,7 @@ import {
   parseCanonicalJsonV1,
   type CanonicalJsonV1Object,
   type CanonicalJsonV1Value,
-} from '../execution-authority/canonical-json-v1';
+} from '../execution-authority/canonical-json-v1.js';
 import type {
   AssemblyAuthority,
   AssemblyErrorV0,
@@ -20,8 +20,8 @@ import type {
   PolicyProvenance,
   PreparedInvocationV0,
   RolePolicyIdentity,
-} from './assembly.types';
-import { createAssemblyError } from './assembly.errors';
+} from './assembly.types.js';
+import { createAssemblyError } from './assembly.errors.js';
 
 export { CanonicalJsonV1Error as AssemblyCanonicalJsonError };
 export const assemblyCanonicalJson = canonicalJsonV1;

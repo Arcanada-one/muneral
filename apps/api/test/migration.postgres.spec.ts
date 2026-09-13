@@ -7,11 +7,17 @@
 
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { createHash, randomUUID } from 'node:crypto';
-import { ActivityService } from '../src/activity/activity.service';
-import { MIGRATION_ERROR_CODES } from '../src/migration/migration.errors';
-import { MigrationService } from '../src/migration/migration.service';
-import type { CreateWorkItemDto } from '../src/migration/dto/create-work-item.dto';
-import { createDisposablePostgres } from './support/disposable-postgres';
+import { ActivityService } from '../src/activity/activity.service.js';
+import { MIGRATION_ERROR_CODES } from '../src/migration/migration.errors.js';
+import { MigrationService } from '../src/migration/migration.service.js';
+import type { CreateWorkItemDto } from '../src/migration/dto/create-work-item.dto.js';
+import { createDisposablePostgres } from './support/disposable-postgres.js';
+import { createRequire } from 'node:module';
+
+// ESM has no `require`; these call sites load lazily inside test bodies
+// (mostly behind a postgres-availability check), so the bridge is kept
+// rather than hoisting them to static imports that would always execute.
+const nodeRequire = createRequire(import.meta.url);
 
 const pg = createDisposablePostgres('migration-import');
 
@@ -37,9 +43,9 @@ describe('Migration import surface — PostgreSQL proofs', () => {
 
   beforeAll(async () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { PrismaClient } = require('@prisma/client');
+    const { PrismaClient } = nodeRequire('@prisma/client');
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { PrismaPg } = require('@prisma/adapter-pg');
+    const { PrismaPg } = nodeRequire('@prisma/adapter-pg');
     prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: pg.url() }) });
     service = new MigrationService(prisma, new ActivityService(prisma));
 

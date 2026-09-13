@@ -8,8 +8,13 @@
 
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import * as url from 'node:url';
+import * as path from 'node:path';
 
-const apiRoot = join(__dirname, '..');
+// ESM has no __dirname, and declaring that NAME would mark the module CommonJS.
+const thisDir = path.dirname(url.fileURLToPath(import.meta.url));
+
+const apiRoot = join(thisDir, '..');
 const MIGRATION_DIR =
   'prisma/migrations/20260731010000_add_committed_result_refs';
 const HARDENING_DIR =

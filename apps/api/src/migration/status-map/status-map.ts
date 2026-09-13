@@ -25,8 +25,17 @@
 // reintroduce exactly that.
 
 import type { TaskStatus } from '@muneral/types';
-import rawStatusMapRev2 from './status-map-v1-rev2.json';
-import rawStatusMapRev3 from './status-map-v1-rev3.json';
+
+// The vendored maps are IMPORTED, not read from disk. Reading them was tried
+// while the test transpile was still CommonJS (where the `with` attribute does
+// not compile) and it broke production: `tsc` copies no JSON, so the built
+// module looked next to itself in dist/ and found nothing —
+// `ENOENT … dist/migration/status-map/status-map-v1-rev2.json` at boot.
+// Importing puts the data in the emitted JavaScript, which is what the previous
+// CommonJS build did too. The test transpile is ESM now, so the attribute is
+// legal on both paths.
+import rawStatusMapRev2 from './status-map-v1-rev2.json' with { type: 'json' };
+import rawStatusMapRev3 from './status-map-v1-rev3.json' with { type: 'json' };
 
 /** The schema this loader is written against. A different schema is refused. */
 export const STATUS_MAP_SCHEMA = 'HistoricalStatusMap/v1';

@@ -1,34 +1,34 @@
 // MUN-0022 fail-closed validator. It captures one inert detached snapshot before
 // reading schema fields, so caller mutation cannot create validation/compile TOCTOU.
 
-import type { EvidenceRef } from '../execution-authority/execution-authority.types';
+import type { EvidenceRef } from '../execution-authority/execution-authority.types.js';
 import { types as utilTypes } from 'node:util';
-import { validateEvidenceRef } from '../execution-authority/evidence-ref.validator';
+import { validateEvidenceRef } from '../execution-authority/evidence-ref.validator.js';
 import {
   CanonicalJsonV1Error,
   canonicalJsonV1,
   captureCanonicalJsonV1,
   type CanonicalJsonV1Object,
   type CanonicalJsonV1Value,
-} from '../execution-authority/canonical-json-v1';
+} from '../execution-authority/canonical-json-v1.js';
 import type {
   AssemblyAuthority,
   AssemblyErrorCode,
   AssemblyErrorV0,
   AssemblyRequestV0,
   CanonicalJsonObject,
-} from './assembly.types';
+} from './assembly.types.js';
 import {
   MAX_ATTEMPT_BUDGET,
   MAX_CANDIDATES,
   MAX_FIELD_BYTES,
   MAX_NESTING_DEPTH,
-} from './assembly.types';
+} from './assembly.types.js';
 import {
   createAssemblyError,
   createAssemblyErrorOpaqueIdentity,
   credentialRuleId,
-} from './assembly.errors';
+} from './assembly.errors.js';
 
 const REQUEST_FIELDS = new Set([
   'schemaVersion', 'taskId', 'causationId', 'correlationId', 'evaluatedAt',

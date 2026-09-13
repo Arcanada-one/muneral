@@ -4,18 +4,18 @@
 // canonicalizer's before any regeneration happens; otherwise regeneration bakes
 // a second implementation's bugs into the committed corpus.
 //
-// The generator is a build-time CJS script and cannot import TypeScript
+// The generator is a build-time ESM script and cannot import TypeScript
 // directly (ts-node is not installed). It therefore consumes the compiled
 // module under dist/, produced by the existing `build` script. This spec
 // compares the generator's exported canonicalizer against the TypeScript source
 // of truth, which jest compiles in-process.
 
-import { assemblyCanonicalJson } from '../../src/assembly/assembly.canonical';
+import { assemblyCanonicalJson } from '../../src/assembly/assembly.canonical.js';
+// The generator is ESM now, so it is imported rather than require()d: a
+// CommonJS bridge cannot load an ES module synchronously.
+import * as generator from './generate-fixtures.js';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const generator = require('./generate-fixtures.js') as {
-  canonicalJson: (value: unknown) => string;
-};
+
 
 describe('A1: the fixture generator uses the shipped canonicalizer', () => {
   it('exposes its canonicalizer so parity can be asserted', () => {

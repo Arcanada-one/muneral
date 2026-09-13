@@ -6,15 +6,23 @@ import supertest from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe, Module } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-import { PrismaModule } from '../src/prisma/prisma.module';
-import { TasksModule } from '../src/tasks/tasks.module';
-import { AgentsModule } from '../src/agents/agents.module';
-import { AuthModule } from '../src/auth/auth.module';
-import { ActivityModule } from '../src/activity/activity.module';
-import { PrismaService } from '../src/prisma/prisma.service';
-import { AuthService } from '../src/auth/auth.service';
-import { KanbanService } from '../src/ws/kanban.service';
-import { TaskFieldStateService } from '../src/tasks/field-state/task-field-state.service';
+import { PrismaModule } from '../src/prisma/prisma.module.js';
+import { TasksModule } from '../src/tasks/tasks.module.js';
+import { AgentsModule } from '../src/agents/agents.module.js';
+import { AuthModule } from '../src/auth/auth.module.js';
+import { ActivityModule } from '../src/activity/activity.module.js';
+import { PrismaService } from '../src/prisma/prisma.service.js';
+import { AuthService } from '../src/auth/auth.service.js';
+import { KanbanService } from '../src/ws/kanban.service.js';
+import { TaskFieldStateService } from '../src/tasks/field-state/task-field-state.service.js';
+// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
+// Its type, though, comes from @types/jest (already in tsconfig `types`),
+// which is what the 339 existing jest.fn() call sites are written against —
+// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
+// and would red 416 lines that are not otherwise wrong. Value from one,
+// type from the other.
+import { jest as _jestRuntime } from '@jest/globals';
+const jest = _jestRuntime as unknown as typeof globalThis.jest;
 
 // ---------------------------------------------------------------------------
 // Minimal test AppModule: no BullMQ, no WebhooksModule, no WsGateway
@@ -33,7 +41,7 @@ class TestAppModule {}
 describe('Field-change tracking (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
-  let disconnectSpy: jest.SpyInstance;
+  let disconnectSpy: jest.Spied<() => unknown>;
   let authSvc: AuthService;
   let fsSvc: TaskFieldStateService;
 

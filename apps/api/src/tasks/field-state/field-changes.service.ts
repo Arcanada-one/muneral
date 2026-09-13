@@ -5,11 +5,11 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { createHash } from 'node:crypto';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service.js';
 import {
   TRACKED_FIELDS,
   ACTIVITY_SENTINEL,
-} from './task-field-state.service';
+} from './task-field-state.service.js';
 
 export interface FieldChangesQuery {
   taskId: string;

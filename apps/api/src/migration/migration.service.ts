@@ -27,18 +27,18 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { isValidTransition, type Actor, type TaskStatus } from '@muneral/types';
-import { ActivityService } from '../activity/activity.service';
+import { ActivityService } from '../activity/activity.service.js';
 import {
   canonicalJson,
   CanonicalJsonError,
   jsonDigest,
   type JsonValue,
-} from '../execution-authority/canonical-json';
-import { PrismaService } from '../prisma/prisma.service';
-import type { CreateBatchDto } from './dto/create-batch.dto';
-import type { CreateDecisionDto } from './dto/create-decision.dto';
-import type { CreateTransitionDto } from './dto/create-transition.dto';
-import type { CreateWorkItemDto } from './dto/create-work-item.dto';
+} from '../execution-authority/canonical-json.js';
+import { PrismaService } from '../prisma/prisma.service.js';
+import type { CreateBatchDto } from './dto/create-batch.dto.js';
+import type { CreateDecisionDto } from './dto/create-decision.dto.js';
+import type { CreateTransitionDto } from './dto/create-transition.dto.js';
+import type { CreateWorkItemDto } from './dto/create-work-item.dto.js';
 import {
   batchKeyConflict,
   batchNotFound,
@@ -55,16 +55,16 @@ import {
   staleRevision,
   unknownStatusMapRevision,
   workItemNotFound,
-} from './migration.errors';
+} from './migration.errors.js';
 import {
   mapHistoricalStatus,
   NOT_REVALIDATED,
   UnknownStatusMapRevisionError,
-} from './migration.status';
+} from './migration.status.js';
 import {
   STATUS_MAP_REVISION,
   SUPPORTED_STATUS_MAP_REVISIONS,
-} from './status-map/status-map';
+} from './status-map/status-map.js';
 
 /** PostgreSQL unique-violation code as surfaced by Prisma. */
 const UNIQUE_VIOLATION = 'P2002';

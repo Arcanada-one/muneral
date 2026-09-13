@@ -6,8 +6,8 @@
 // constructing it by hand, the way every existing test does.
 import { Module } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { ExecutionAuthorityService } from './execution-authority.service';
-import type { Clock, IdSource } from './execution-authority.types';
+import { ExecutionAuthorityService } from './execution-authority.service.js';
+import type { Clock, IdSource } from './execution-authority.types.js';
 
 export const SYSTEM_CLOCK: Clock = { now: () => new Date() };
 export const UUID_ID_SOURCE: IdSource = { generate: () => randomUUID() };

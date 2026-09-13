@@ -8,7 +8,7 @@ import {
   clearsCurrentAttempt,
   isValidAttemptTransition,
   EVENT_TO_ATTEMPT_STATUS,
-} from '../src/execution-authority/execution-authority.types';
+} from '../src/execution-authority/execution-authority.types.js';
 
 describe('Execution authority types', () => {
   describe('ATTEMPT_TRANSITIONS (attempt status machine)', () => {

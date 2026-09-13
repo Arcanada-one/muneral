@@ -3,20 +3,28 @@
 import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import * as assembly from '../../src/assembly';
+import * as assembly from '../../src/assembly/index.js';
 import {
   AssemblyCanonicalJsonError,
   assemblyCanonicalJson,
   assemblyParseCanonicalJson,
-} from '../../src/assembly/assembly.canonical';
-import { createAssemblyError } from '../../src/assembly/assembly.errors';
-import { validateAssemblyRequest } from '../../src/assembly/assembly.validator';
-import type { AssemblyRequestV0 } from '../../src/assembly/assembly.types';
+} from '../../src/assembly/assembly.canonical.js';
+import { createAssemblyError } from '../../src/assembly/assembly.errors.js';
+import { validateAssemblyRequest } from '../../src/assembly/assembly.validator.js';
+import type { AssemblyRequestV0 } from '../../src/assembly/assembly.types.js';
+import * as url from 'node:url';
+// The harness is ESM now and cannot be require()d: `Must use import to load
+// ES Module`. Imported once here instead of twice inside test bodies.
+import * as harness from './mutation-harness.js';
+
+
+// ESM has no __dirname, and declaring that NAME would mark the module CommonJS.
+const thisDir = path.dirname(url.fileURLToPath(import.meta.url));
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 const fixture = JSON.parse(
-  fs.readFileSync(path.join(__dirname, 'fixtures', 'positive', 'minimal-request.json'), 'utf8'),
+  fs.readFileSync(path.join(thisDir, 'fixtures', 'positive', 'minimal-request.json'), 'utf8'),
 ) as { input: AssemblyRequestV0; expectedArtifactId: string; expectedDigest: string };
 
 describe('F10 frozen pure public contract', () => {
@@ -160,7 +168,7 @@ describe('F10 hostile public input', () => {
 
 describe('F10 independent Python boundary', () => {
   it('rejects negative zero and excessive raw nesting before json.loads', () => {
-    const validator = path.join(__dirname, 'validate_assembly_fixtures.py');
+    const validator = path.join(thisDir, 'validate_assembly_fixtures.py');
     const script = [
       'import runpy, sys',
       'm = runpy.run_path(sys.argv[1])',
@@ -185,7 +193,6 @@ describe('F10 independent Python boundary', () => {
 
 describe('F10 evidence tooling cannot flatter the result', () => {
   it('classifies spawn errors, signals and null statuses as harness failures', () => {
-    const harness = require('./mutation-harness.js') as any;
     expect(harness.classify({ code: null, signal: 'SIGKILL', error: null, out: '' })).toBe('HARNESS_ERROR');
     expect(harness.classify({ code: null, signal: null, error: new Error('spawn'), out: '' })).toBe('HARNESS_ERROR');
     expect(harness.classify({ code: 1, signal: null, error: null, out: 'unrelated failure' }))
@@ -193,12 +200,11 @@ describe('F10 evidence tooling cannot flatter the result', () => {
   });
 
   it('fixture regeneration passes the shared pinned evaluation instant', () => {
-    const generator = fs.readFileSync(path.join(__dirname, 'generate-fixtures.js'), 'utf8');
+    const generator = fs.readFileSync(path.join(thisDir, 'generate-fixtures.js'), 'utf8');
     expect(generator).toContain('compile(input)');
   });
 
   it('disables an unbraced refusal without deleting condition side effects', () => {
-    const harness = require('./mutation-harness.js') as any;
     const source = "if (raw[index++] !== ':') throw new ParserError('BAD');\naccept();";
     const [site] = harness.enumerateSites(source, 'parser.ts');
     const mutant = harness.applyMutant(source, site);

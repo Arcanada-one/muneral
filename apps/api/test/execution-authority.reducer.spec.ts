@@ -1,21 +1,21 @@
 // MUN-0020: Pure reducer unit tests — exhaustive coverage of allowed and
 // disallowed transitions, version gating, retry logic, and error typing.
 
-import { reduce } from '../src/execution-authority/execution-authority.reducer';
+import { reduce } from '../src/execution-authority/execution-authority.reducer.js';
 import {
   ExecutionStateAlreadyExistsError,
   InvalidTransitionError,
   RetryBackoffError,
   RetryBudgetExhaustedError,
   StaleVersionError,
-} from '../src/execution-authority/execution-authority.errors';
+} from '../src/execution-authority/execution-authority.errors.js';
 import type {
   IssueInitialAttemptCommand,
   IssueRetryAttemptCommand,
   TaskExecutionAttempt,
   TaskExecutionState,
   TransitionAttemptCommand,
-} from '../src/execution-authority/execution-authority.types';
+} from '../src/execution-authority/execution-authority.types.js';
 
 const DEPS = {
   attemptId: 'attempt-uuid-1',

@@ -1,5 +1,5 @@
 import { IsString, IsNotEmpty, IsOptional, IsIn, IsUUID } from 'class-validator';
-import { GitRefType } from '@muneral/types';
+import type { GitRefType } from '@muneral/types';
 
 export class AddGitRefDto {
   @IsUUID()

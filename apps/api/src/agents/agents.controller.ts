@@ -11,14 +11,14 @@ import {
   HttpStatus,
   Req,
 } from '@nestjs/common';
-import { Request } from 'express';
-import { AgentsService } from './agents.service';
-import { CreateAgentDto } from './dto/create-agent.dto';
-import { AssignAgentDto } from './dto/assign-agent.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { ApiKeyGuard } from '../auth/guards/api-key.guard';
-import { JwtOrApiKeyGuard } from '../auth/guards/jwt-or-api-key.guard';
-import { ActorInterceptor } from '../common/interceptors/actor.interceptor';
+import type { Request } from 'express';
+import { AgentsService } from './agents.service.js';
+import { CreateAgentDto } from './dto/create-agent.dto.js';
+import { AssignAgentDto } from './dto/assign-agent.dto.js';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
+import { ApiKeyGuard } from '../auth/guards/api-key.guard.js';
+import { JwtOrApiKeyGuard } from '../auth/guards/jwt-or-api-key.guard.js';
+import { ActorInterceptor } from '../common/interceptors/actor.interceptor.js';
 import { Agent } from '@prisma/client';
 
 /**

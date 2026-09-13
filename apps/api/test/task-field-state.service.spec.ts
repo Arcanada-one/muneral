@@ -5,8 +5,16 @@ import {
   TRACKED_FIELDS,
   ACTIVITY_SENTINEL,
   type TaskLike,
-} from '../src/tasks/field-state/task-field-state.service';
-import { PrismaService } from '../src/prisma/prisma.service';
+} from '../src/tasks/field-state/task-field-state.service.js';
+import { PrismaService } from '../src/prisma/prisma.service.js';
+// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
+// Its type, though, comes from @types/jest (already in tsconfig `types`),
+// which is what the 339 existing jest.fn() call sites are written against —
+// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
+// and would red 416 lines that are not otherwise wrong. Value from one,
+// type from the other.
+import { jest as _jestRuntime } from '@jest/globals';
+const jest = _jestRuntime as unknown as typeof globalThis.jest;
 
 // ---------------------------------------------------------------------------
 // Minimal mock PrismaService — only methods used by TaskFieldStateService

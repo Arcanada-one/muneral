@@ -12,7 +12,7 @@
 // from that attempt's `startedAt` (falling back to `issuedAt` for the
 // vanishingly short window between issue and start).
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service.js';
 
 export type StalenessVerdict = 'healthy' | 'stalled' | 'not_measured';
 

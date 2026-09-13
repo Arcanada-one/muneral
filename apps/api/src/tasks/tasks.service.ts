@@ -5,17 +5,18 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateTaskDto } from './dto/create-task.dto';
-import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
-import { AddDependencyDto } from './dto/add-dependency.dto';
-import { CreateChecklistItemDto } from './dto/create-checklist-item.dto';
-import { ActivityService } from '../activity/activity.service';
-import { KanbanService } from '../ws/kanban.service';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { CreateTaskDto } from './dto/create-task.dto.js';
+import { UpdateTaskStatusDto } from './dto/update-task-status.dto.js';
+import { AddDependencyDto } from './dto/add-dependency.dto.js';
+import { CreateChecklistItemDto } from './dto/create-checklist-item.dto.js';
+import { ActivityService } from '../activity/activity.service.js';
+import { KanbanService } from '../ws/kanban.service.js';
 import { randomUUID } from 'node:crypto';
-import { Actor, isValidTransition, TaskStatus } from '@muneral/types';
-import { TaskFieldStateService } from './field-state/task-field-state.service';
-import { TaskExecutionRecorderService } from '../execution-authority/task-execution-recorder.service';
+import { isValidTransition } from '@muneral/types';
+import type { Actor, TaskStatus } from '@muneral/types';
+import { TaskFieldStateService } from './field-state/task-field-state.service.js';
+import { TaskExecutionRecorderService } from '../execution-authority/task-execution-recorder.service.js';
 
 @Injectable()
 export class TasksService {

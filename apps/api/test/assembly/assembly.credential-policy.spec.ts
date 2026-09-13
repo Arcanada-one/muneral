@@ -2,12 +2,16 @@ import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { credentialRuleId } from '../../src/assembly/assembly.errors';
-import { CREDENTIAL_POLICY_MANIFEST_SHA256 } from '../../src/assembly/credential-policy-v0.generated';
+import { credentialRuleId } from '../../src/assembly/assembly.errors.js';
+import { CREDENTIAL_POLICY_MANIFEST_SHA256 } from '../../src/assembly/credential-policy-v0.generated.js';
+import * as url from 'node:url';
 
-const manifest = path.join(__dirname, 'credential-policy-v0.json');
-const generator = path.join(__dirname, 'generate-credential-policy.js');
-const validator = path.join(__dirname, 'validate_assembly_fixtures.py');
+// ESM has no __dirname, and declaring that NAME would mark the module CommonJS.
+const thisDir = path.dirname(url.fileURLToPath(import.meta.url));
+
+const manifest = path.join(thisDir, 'credential-policy-v0.json');
+const generator = path.join(thisDir, 'generate-credential-policy.js');
+const validator = path.join(thisDir, 'validate_assembly_fixtures.py');
 
 function pythonRuleId(value: string): string | null {
   const script = [

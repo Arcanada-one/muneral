@@ -4,14 +4,20 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { ExecutionAuthorityService } from '../src/execution-authority/execution-authority.service';
-import type { Clock, IdSource } from '../src/execution-authority/execution-authority.types';
+import { ExecutionAuthorityService } from '../src/execution-authority/execution-authority.service.js';
+import type { Clock, IdSource } from '../src/execution-authority/execution-authority.types.js';
 import {
   computeSolutionLogHeadReceiptId,
   SolutionLogHeadService,
   validateSolutionLogHeadReceiptV0,
-} from '../src/solution-log-head';
-import { createDisposablePostgres } from './support/disposable-postgres';
+} from '../src/solution-log-head/index.js';
+import { createDisposablePostgres } from './support/disposable-postgres.js';
+import { createRequire } from 'node:module';
+
+// ESM has no `require`; these call sites load lazily inside test bodies
+// (mostly behind a postgres-availability check), so the bridge is kept
+// rather than hoisting them to static imports that would always execute.
+const nodeRequire = createRequire(import.meta.url);
 
 const pg = createDisposablePostgres('solution-log-head');
 const SHA_A = 'a'.repeat(64);
@@ -48,8 +54,8 @@ describe('SolutionLog head authority — PostgreSQL proofs', () => {
   const idSource: IdSource = { generate: () => randomUUID() };
 
   beforeAll(async () => {
-    const { PrismaClient } = require('@prisma/client');
-    const { PrismaPg } = require('@prisma/adapter-pg');
+    const { PrismaClient } = nodeRequire('@prisma/client');
+    const { PrismaPg } = nodeRequire('@prisma/adapter-pg');
     prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: pg.url() }) });
     service = new SolutionLogHeadService(prisma);
     authority = new ExecutionAuthorityService(clock, idSource);
@@ -277,7 +283,7 @@ describe('SolutionLog head authority — PostgreSQL proofs', () => {
     );
 
     await assignmentRead.promise;
-    const { Client } = require('pg');
+    const { Client } = nodeRequire('pg');
     const updateClient = new Client({ connectionString: pg.url() });
     let updateTransactionOpen = false;
     let roleUpdate: Promise<unknown> | undefined;

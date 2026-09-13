@@ -6,25 +6,25 @@
 // service instead of constructing it by hand, plus TaskExecutionRecorderService,
 // which is the thing that actually calls it from the real task lifecycle.
 
-export { ExecutionAuthorityService } from './execution-authority.service';
-export { ExecutionAuthorityModule } from './execution-authority.module';
+export { ExecutionAuthorityService } from './execution-authority.service.js';
+export { ExecutionAuthorityModule } from './execution-authority.module.js';
 export {
   TaskExecutionRecorderService,
-} from './task-execution-recorder.service';
-export type { RecordOutcome, RecordVerdict } from './task-execution-recorder.service';
-export { TaskStalenessService } from './task-staleness.service';
-export type { TaskStalenessEntry, StalenessVerdict } from './task-staleness.service';
+} from './task-execution-recorder.service.js';
+export type { RecordOutcome, RecordVerdict } from './task-execution-recorder.service.js';
+export { TaskStalenessService } from './task-staleness.service.js';
+export type { TaskStalenessEntry, StalenessVerdict } from './task-staleness.service.js';
 export type {
   ExecutionResult,
   ExecutionOutcome,
   TransactionalClient,
-} from './execution-authority.service';
+} from './execution-authority.service.js';
 
-export { reduce } from './execution-authority.reducer';
+export { reduce } from './execution-authority.reducer.js';
 
-export { canonicalJson, commandDigest, jsonDigest } from './canonical-json';
+export { canonicalJson, commandDigest, jsonDigest } from './canonical-json.js';
 
-export { replayJournal, decisionHash } from './execution-authority.replay';
+export { replayJournal, decisionHash } from './execution-authority.replay.js';
 
 export {
   StaleVersionError,
@@ -34,8 +34,8 @@ export {
   RetryBudgetExhaustedError,
   RetryBackoffError,
   ExecutionStateAlreadyExistsError,
-} from './execution-authority.errors';
-export type { ExecutionAuthorityError } from './execution-authority.errors';
+} from './execution-authority.errors.js';
+export type { ExecutionAuthorityError } from './execution-authority.errors.js';
 
 export type {
   AttemptStatus,
@@ -51,7 +51,7 @@ export type {
   ReducerResult,
   Clock,
   IdSource,
-} from './execution-authority.types';
+} from './execution-authority.types.js';
 
 export {
   ATTEMPT_TRANSITIONS,
@@ -61,10 +61,10 @@ export {
   clearsCurrentAttempt,
   MAX_RETRY_BUDGET,
   MAX_RETRY_BACKOFF_MS,
-} from './execution-authority.types';
+} from './execution-authority.types.js';
 
 export {
   validateEvidenceRef,
   validateEvidenceRefs,
   EvidenceRefValidationError,
-} from './evidence-ref.validator';
+} from './evidence-ref.validator.js';

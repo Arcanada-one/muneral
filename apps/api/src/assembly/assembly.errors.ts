@@ -4,14 +4,14 @@
 
 import { createHash } from 'node:crypto';
 import { types as utilTypes } from 'node:util';
-import { canonicalJsonV1 } from '../execution-authority/canonical-json-v1';
-import { CREDENTIAL_RULES } from './credential-policy-v0.generated';
-import { MAX_FIELD_BYTES } from './assembly.types';
+import { canonicalJsonV1 } from '../execution-authority/canonical-json-v1.js';
+import { CREDENTIAL_RULES } from './credential-policy-v0.generated.js';
+import { MAX_FIELD_BYTES } from './assembly.types.js';
 import type {
   AssemblyErrorCode,
   AssemblyErrorV0,
   ErrorDetails,
-} from './assembly.types';
+} from './assembly.types.js';
 
 // ---------------------------------------------------------------------------
 // Default messages per error code

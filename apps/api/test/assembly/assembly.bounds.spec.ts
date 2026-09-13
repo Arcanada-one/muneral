@@ -17,12 +17,17 @@
 // UTF-8 bytes is the convergent measure: the same 130-emoji string measures 260
 // in TS, 130 in Python, and 520 bytes in both.
 
-import { validateAssemblyRequest } from '../../src/assembly/assembly.validator';
-import { MAX_FIELD_BYTES } from '../../src/assembly/assembly.types';
+import { validateAssemblyRequest } from '../../src/assembly/assembly.validator.js';
+import { MAX_FIELD_BYTES } from '../../src/assembly/assembly.types.js';
 import * as fs from 'node:fs';
+import * as path from 'node:path';
+import * as url from 'node:url';
+
+// ESM has no __dirname, and declaring that NAME would mark the module CommonJS.
+const thisDir = path.dirname(url.fileURLToPath(import.meta.url));
 
 const base = JSON.parse(
-  fs.readFileSync(__dirname + '/fixtures/positive/minimal-request.json', 'utf8'),
+  fs.readFileSync(thisDir + '/fixtures/positive/minimal-request.json', 'utf8'),
 ).input as Record<string, unknown>;
 
 function withTaskId(taskId: string): Record<string, unknown> {

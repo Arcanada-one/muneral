@@ -1,9 +1,14 @@
 import * as fs from 'node:fs';
-import { compileAssembly } from '../../src/assembly';
-import { validateAssemblyRequest } from '../../src/assembly/assembly.validator';
+import { compileAssembly } from '../../src/assembly/index.js';
+import { validateAssemblyRequest } from '../../src/assembly/assembly.validator.js';
+import * as path from 'node:path';
+import * as url from 'node:url';
+
+// ESM has no __dirname, and declaring that NAME would mark the module CommonJS.
+const thisDir = path.dirname(url.fileURLToPath(import.meta.url));
 
 const base = JSON.parse(
-  fs.readFileSync(__dirname + '/fixtures/positive/full-request.json', 'utf8'),
+  fs.readFileSync(thisDir + '/fixtures/positive/full-request.json', 'utf8'),
 ).input as Record<string, unknown>;
 
 function withTrace(trace: unknown): Record<string, unknown> {

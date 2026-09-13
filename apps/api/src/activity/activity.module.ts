@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ActivityService } from './activity.service';
+import { ActivityService } from './activity.service.js';
 
 @Module({
   providers: [ActivityService],

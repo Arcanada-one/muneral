@@ -4,9 +4,17 @@
 
 import { GUARDS_METADATA, PATH_METADATA, METHOD_METADATA } from '@nestjs/common/constants';
 import { BadRequestException, RequestMethod } from '@nestjs/common';
-import { ApiKeyGuard } from '../src/auth/guards/api-key.guard';
-import { JwtOrApiKeyGuard } from '../src/auth/guards/jwt-or-api-key.guard';
-import { MigrationController } from '../src/migration/migration.controller';
+import { ApiKeyGuard } from '../src/auth/guards/api-key.guard.js';
+import { JwtOrApiKeyGuard } from '../src/auth/guards/jwt-or-api-key.guard.js';
+import { MigrationController } from '../src/migration/migration.controller.js';
+// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
+// Its type, though, comes from @types/jest (already in tsconfig `types`),
+// which is what the 339 existing jest.fn() call sites are written against —
+// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
+// and would red 416 lines that are not otherwise wrong. Value from one,
+// type from the other.
+import { jest as _jestRuntime } from '@jest/globals';
+const jest = _jestRuntime as unknown as typeof globalThis.jest;
 
 type Handler = (...args: never[]) => unknown;
 

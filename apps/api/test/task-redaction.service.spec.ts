@@ -3,13 +3,21 @@
 // invariant that no cleartext reaches the activity payload or the response.
 // The e2e suite proves the same over HTTP against a real database.
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
-import { Actor } from '@muneral/types';
-import { TaskRedactionService, REDACTION_ACTION } from '../src/tasks/redactions/task-redaction.service';
-import { sha256Hex } from '../src/tasks/redactions/secret-rules';
-import { PrismaService } from '../src/prisma/prisma.service';
-import { ActivityService } from '../src/activity/activity.service';
-import { KanbanService } from '../src/ws/kanban.service';
-import { TaskFieldStateService } from '../src/tasks/field-state/task-field-state.service';
+import type { Actor } from '@muneral/types';
+import { TaskRedactionService, REDACTION_ACTION } from '../src/tasks/redactions/task-redaction.service.js';
+import { sha256Hex } from '../src/tasks/redactions/secret-rules.js';
+import { PrismaService } from '../src/prisma/prisma.service.js';
+import { ActivityService } from '../src/activity/activity.service.js';
+import { KanbanService } from '../src/ws/kanban.service.js';
+import { TaskFieldStateService } from '../src/tasks/field-state/task-field-state.service.js';
+// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
+// Its type, though, comes from @types/jest (already in tsconfig `types`),
+// which is what the 339 existing jest.fn() call sites are written against —
+// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
+// and would red 416 lines that are not otherwise wrong. Value from one,
+// type from the other.
+import { jest as _jestRuntime } from '@jest/globals';
+const jest = _jestRuntime as unknown as typeof globalThis.jest;
 
 const HVS = 'hvs.' + 'SyntheticTestToken' + '0'.repeat(10);
 const ACTOR: Actor = { type: 'agent', id: 'a1b2c3d4-0000-4000-8000-000000000001', name: 'aup' };

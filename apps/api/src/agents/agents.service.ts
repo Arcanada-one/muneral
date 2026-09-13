@@ -1,9 +1,9 @@
 import { Prisma } from '@prisma/client';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateAgentDto } from './dto/create-agent.dto';
-import { AssignAgentDto } from './dto/assign-agent.dto';
-import { AuthService } from '../auth/auth.service';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { CreateAgentDto } from './dto/create-agent.dto.js';
+import { AssignAgentDto } from './dto/assign-agent.dto.js';
+import { AuthService } from '../auth/auth.service.js';
 
 @Injectable()
 export class AgentsService {

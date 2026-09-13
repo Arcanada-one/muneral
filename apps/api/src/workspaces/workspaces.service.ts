@@ -4,9 +4,9 @@ import {
   ConflictException,
   ForbiddenException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateWorkspaceDto } from './dto/create-workspace.dto';
-import { WorkspaceMemberRole } from '@muneral/types';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { CreateWorkspaceDto } from './dto/create-workspace.dto.js';
+import type { WorkspaceMemberRole } from '@muneral/types';
 
 @Injectable()
 export class WorkspacesService {

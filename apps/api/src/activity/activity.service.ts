@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { Actor } from '@muneral/types';
+import { PrismaService } from '../prisma/prisma.service.js';
+import type { Actor } from '@muneral/types';
 
 /**
  * Either the root Prisma client or an interactive-transaction client. Callers

@@ -2,10 +2,10 @@ import { createHash } from 'node:crypto';
 import {
   CANONICAL_JSON_V1_MAX_BYTES,
   canonicalJsonV1,
-} from '../../src/execution-authority/canonical-json-v1';
-import { createAssemblyError } from '../../src/assembly/assembly.errors';
-import type { AssemblyRequestV0 } from '../../src/assembly/assembly.types';
-import { compileAssembly } from '../../src/assembly';
+} from '../../src/execution-authority/canonical-json-v1.js';
+import { createAssemblyError } from '../../src/assembly/assembly.errors.js';
+import type { AssemblyRequestV0 } from '../../src/assembly/assembly.types.js';
+import { compileAssembly } from '../../src/assembly/index.js';
 
 function request(overrides: Record<string, unknown> = {}): AssemblyRequestV0 {
   return {

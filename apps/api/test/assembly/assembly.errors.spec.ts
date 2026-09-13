@@ -2,13 +2,13 @@
 // code exhaustiveness, deterministic timestamps, and factory correctness.
 
 import { createHash } from 'node:crypto';
-import { ASSEMBLY_ERROR_CODES } from '../../src/assembly/assembly.types';
-import type { AssemblyErrorCode, AssemblyErrorV0 } from '../../src/assembly/assembly.types';
-import { canonicalJsonV1 } from '../../src/execution-authority/canonical-json-v1';
+import { ASSEMBLY_ERROR_CODES } from '../../src/assembly/assembly.types.js';
+import type { AssemblyErrorCode, AssemblyErrorV0 } from '../../src/assembly/assembly.types.js';
+import { canonicalJsonV1 } from '../../src/execution-authority/canonical-json-v1.js';
 import {
   createAssemblyError,
   createAssemblyErrorOpaqueIdentity,
-} from '../../src/assembly/assembly.errors';
+} from '../../src/assembly/assembly.errors.js';
 
 function expectedTaskIdentityErrorId(taskIdentity: unknown): string {
   const preimage = canonicalJsonV1({

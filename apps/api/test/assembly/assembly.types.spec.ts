@@ -7,7 +7,7 @@ import {
   MAX_CONTAINER_ENTRIES,
   MAX_FIELD_BYTES,
   MAX_NESTING_DEPTH,
-} from '../../src/assembly/assembly.types';
+} from '../../src/assembly/assembly.types.js';
 import type {
   AssemblyArtifactV0,
   AssemblyErrorCode,
@@ -15,7 +15,7 @@ import type {
   CanonicalJsonObject,
   InvocationObservationV0,
   PreparedInvocationV0,
-} from '../../src/assembly/assembly.types';
+} from '../../src/assembly/assembly.types.js';
 
 describe('frozen Assembly v0 types', () => {
   it('pins the bounded constants', () => {

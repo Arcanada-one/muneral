@@ -9,7 +9,7 @@ import {
   shannonEntropy,
   sha256Hex,
   spansOfRule,
-} from '../src/tasks/redactions/secret-rules';
+} from '../src/tasks/redactions/secret-rules.js';
 
 const HVS = 'hvs.' + 'SyntheticTestToken' + '0'.repeat(10);
 const PGP = 'PGPASSWORD=' + 'synthetic' + 'a'.repeat(12);

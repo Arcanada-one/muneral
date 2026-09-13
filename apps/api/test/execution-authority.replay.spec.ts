@@ -1,7 +1,7 @@
 // MUN-0020: Deterministic replay tests — rebuild from transition facts.
 
-import { replayJournal, decisionHash } from '../src/execution-authority/execution-authority.replay';
-import type { TaskExecutionTransition } from '../src/execution-authority/execution-authority.types';
+import { replayJournal, decisionHash } from '../src/execution-authority/execution-authority.replay.js';
+import type { TaskExecutionTransition } from '../src/execution-authority/execution-authority.types.js';
 
 const BASE_TIME = new Date('2026-07-30T12:00:00Z');
 

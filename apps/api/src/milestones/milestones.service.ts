@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateMilestoneDto } from './dto/create-milestone.dto';
-import { CreateSprintDto } from './dto/create-sprint.dto';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { CreateMilestoneDto } from './dto/create-milestone.dto.js';
+import { CreateSprintDto } from './dto/create-sprint.dto.js';
 
 @Injectable()
 export class MilestonesService {

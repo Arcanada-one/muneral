@@ -3,7 +3,7 @@
 // stack — thread-safe, no module-level mutable state.
 
 import { createHash } from 'node:crypto';
-import type { ExecutionAuthorityCommand } from './execution-authority.types';
+import type { ExecutionAuthorityCommand } from './execution-authority.types.js';
 
 export class CanonicalJsonError extends Error {
   public readonly code = 'CANONICAL_JSON_ERROR' as const;

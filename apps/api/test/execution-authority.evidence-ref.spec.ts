@@ -4,7 +4,7 @@
 import {
   validateEvidenceRef,
   validateEvidenceRefs,
-} from '../src/execution-authority/evidence-ref.validator';
+} from '../src/execution-authority/evidence-ref.validator.js';
 
 const validRef = {
   uri: 'tasks/task-1/evidence/log.txt',

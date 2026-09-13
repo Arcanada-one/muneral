@@ -14,27 +14,33 @@
 
 import { randomUUID } from 'node:crypto';
 
-import { ExecutionAuthorityService } from '../src/execution-authority/execution-authority.service';
-import type { TransactionalClient } from '../src/execution-authority/execution-authority.service';
+import { ExecutionAuthorityService } from '../src/execution-authority/execution-authority.service.js';
+import type { TransactionalClient } from '../src/execution-authority/execution-authority.service.js';
 import type {
   Clock,
   IdSource,
-} from '../src/execution-authority/execution-authority.types';
-import { ResultAuthorityService } from '../src/result-authority/result-authority.service';
-import type { CommittedResultOutcome } from '../src/result-authority/result-authority.service';
+} from '../src/execution-authority/execution-authority.types.js';
+import { ResultAuthorityService } from '../src/result-authority/result-authority.service.js';
+import type { CommittedResultOutcome } from '../src/result-authority/result-authority.service.js';
 import {
   cardDigest,
   computeReceiptId,
   computeResultRefId,
   projectionDigest,
   resultNodeDigest,
-} from '../src/result-authority/result-authority.canonical';
+} from '../src/result-authority/result-authority.canonical.js';
 import {
   validateCommittedResultRefV0,
   validateCompletionReceiptV0,
-} from '../src/result-authority/result-authority.guards';
-import { ResultBindingError } from '../src/result-authority/result-authority.errors';
-import { createDisposablePostgres } from './support/disposable-postgres';
+} from '../src/result-authority/result-authority.guards.js';
+import { ResultBindingError } from '../src/result-authority/result-authority.errors.js';
+import { createDisposablePostgres } from './support/disposable-postgres.js';
+import { createRequire } from 'node:module';
+
+// ESM has no `require`; these call sites load lazily inside test bodies
+// (mostly behind a postgres-availability check), so the bridge is kept
+// rather than hoisting them to static imports that would always execute.
+const nodeRequire = createRequire(import.meta.url);
 
 const pg = createDisposablePostgres('result-authority');
 
@@ -72,8 +78,8 @@ describe('Committed-result authority — PostgreSQL proofs', () => {
   const service = new ResultAuthorityService(clock, idSource, authority);
 
   beforeAll(async () => {
-    const { PrismaClient } = require('@prisma/client');
-    const { PrismaPg } = require('@prisma/adapter-pg');
+    const { PrismaClient } = nodeRequire('@prisma/client');
+    const { PrismaPg } = nodeRequire('@prisma/adapter-pg');
     const adapter = new PrismaPg({ connectionString: pg.url() });
     prisma = new PrismaClient({ adapter });
   });

@@ -1,5 +1,5 @@
 import { IsUUID, IsIn } from 'class-validator';
-import { TaskAgentRole } from '@muneral/types';
+import type { TaskAgentRole } from '@muneral/types';
 
 export class AssignAgentDto {
   @IsUUID()

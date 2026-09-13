@@ -1,15 +1,22 @@
 #!/usr/bin/env node
-/* global require, __dirname, process, console */
+/* global require, scriptDir, process, console */
 // Deterministic credential-policy generator for the TypeScript and Python
 // consumers. --check is read-only and fails on stale or tampered output.
 
-const crypto = require('node:crypto');
-const fs = require('node:fs');
-const path = require('node:path');
 
-const manifestPath = path.join(__dirname, 'credential-policy-v0.json');
-const tsPath = path.join(__dirname, '..', '..', 'src', 'assembly', 'credential-policy-v0.generated.ts');
-const pyPath = path.join(__dirname, 'credential_policy_v0_generated.py');
+
+
+
+import path from 'node:path';
+import fs from 'node:fs';
+import crypto from 'node:crypto';
+import { fileURLToPath } from 'node:url';
+
+// ESM has no __dirname, and declaring that NAME would mark the module CommonJS.
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+const manifestPath = path.join(scriptDir, 'credential-policy-v0.json');
+const tsPath = path.join(scriptDir, '..', '..', 'src', 'assembly', 'credential-policy-v0.generated.ts');
+const pyPath = path.join(scriptDir, 'credential_policy_v0_generated.py');
 
 function render() {
   const raw = fs.readFileSync(manifestPath);
@@ -48,7 +55,7 @@ function main() {
   for (const [target, expected] of render()) {
     if (check) {
       if (!fs.existsSync(target) || fs.readFileSync(target, 'utf8') !== expected) {
-        console.error(`STALE ${path.relative(__dirname, target)}`);
+        console.error(`STALE ${path.relative(scriptDir, target)}`);
         stale = true;
       }
     } else {

@@ -4,20 +4,20 @@
 // invalid lifecycle edges.
 
 import { createHash } from 'node:crypto';
-import { canonicalJson } from './canonical-json';
+import { canonicalJson } from './canonical-json.js';
 import type {
   AttemptStatus,
   TaskExecutionAttempt,
   TaskExecutionState,
   TaskExecutionTransition,
-} from './execution-authority.types';
+} from './execution-authority.types.js';
 import {
   clearsCurrentAttempt,
   EVENT_TO_ATTEMPT_STATUS,
   isValidAttemptTransition,
   MAX_RETRY_BACKOFF_MS,
   MAX_RETRY_BUDGET,
-} from './execution-authority.types';
+} from './execution-authority.types.js';
 
 /**
  * Rebuild the execution aggregate state and attempt list from an ordered set

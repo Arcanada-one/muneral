@@ -11,8 +11,12 @@
 
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import * as url from 'node:url';
 
-const apiRoot = join(__dirname, '..');
+// ESM has no __dirname, and declaring that NAME would mark the module CommonJS.
+const thisDir = url.fileURLToPath(new URL(".", import.meta.url));
+
+const apiRoot = join(thisDir, '..');
 const dir = 'prisma/migrations/20260905210000_add_archived_task_status';
 const migration = readFileSync(join(apiRoot, dir, 'migration.sql'), 'utf8');
 const rollback = readFileSync(join(apiRoot, dir, 'rollback.sql'), 'utf8');

@@ -83,16 +83,28 @@
  * SIGINT — a crashed harness must never leave a mutant on disk.
  */
 
+import path from 'node:path';
+import fs from 'node:fs';
+import crypto from 'node:crypto';
+import os from 'node:os';
+import ts from 'typescript';
+import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
+
+// ESM has no __dirname, and declaring that NAME would mark the module CommonJS.
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+const scriptFile = fileURLToPath(import.meta.url);
 'use strict';
 
-const fs = require('node:fs');
-const path = require('node:path');
-const os = require('node:os');
-const crypto = require('node:crypto');
-const { spawnSync } = require('node:child_process');
-const ts = require('typescript');
 
-const API_ROOT = path.resolve(__dirname, '..', '..');
+
+
+
+
+
+
+const API_ROOT = path.resolve(scriptDir, '..', '..');
 const REPO_ROOT = path.resolve(API_ROOT, '..', '..');
 // Every shipped compiler-only source file that can construct or propagate a
 // refusal. Contract-only types and the root barrel have no executable sites.
@@ -497,7 +509,7 @@ function currentTools() {
   const pnpmVersion = spawnSync('pnpm', ['--version'], { encoding: 'utf8' });
   return {
     node: process.version,
-    jest: require('jest/package.json').version,
+    jest: JSON.parse(fs.readFileSync(createRequire(import.meta.url).resolve('jest/package.json'), 'utf8')).version,
     typescript: ts.version,
     pnpm: pnpmVersion.status === 0 ? pnpmVersion.stdout.trim() : null,
   };
@@ -526,7 +538,7 @@ function canonicalInvocation(jsonPath) {
     cwd: '.',
     argv: [
       'node',
-      path.relative(REPO_ROOT, fs.realpathSync(__filename)),
+      path.relative(REPO_ROOT, fs.realpathSync(scriptFile)),
       '--json',
       path.relative(REPO_ROOT, path.resolve(jsonPath)),
     ],
@@ -538,7 +550,7 @@ function observedInvocation(jsonPath) {
     cwd: path.relative(REPO_ROOT, fs.realpathSync(process.cwd())) || '.',
     argv: [
       path.basename(fs.realpathSync(process.execPath)),
-      path.relative(REPO_ROOT, fs.realpathSync(__filename)),
+      path.relative(REPO_ROOT, fs.realpathSync(scriptFile)),
       '--json',
       path.relative(REPO_ROOT, path.resolve(jsonPath)),
     ],
@@ -689,7 +701,7 @@ function verifyResults(jsonPath, replayOutcomes = true) {
   if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(evidence.generatedAt || '')) {
     failures.push('generatedAt');
   }
-  const canonicalEvidencePath = path.join(__dirname, 'mutation-results.json');
+  const canonicalEvidencePath = path.join(scriptDir, 'mutation-results.json');
   if (JSON.stringify(evidence.invocation) !== JSON.stringify(canonicalInvocation(canonicalEvidencePath))) {
     failures.push('invocation');
   }
@@ -722,7 +734,7 @@ function verifyResults(jsonPath, replayOutcomes = true) {
   if (evidence.siteMapSha256 !== siteMapDigest(sites)) failures.push('site map digest');
   if (!Array.isArray(evidence.sites) || evidence.sites.length !== sites.length) failures.push('site count');
   try {
-    const mapPath = path.join(__dirname, 'mutation-sites.json');
+    const mapPath = path.join(scriptDir, 'mutation-sites.json');
     const actualMap = JSON.parse(fs.readFileSync(mapPath, 'utf8'));
     if (JSON.stringify(actualMap) !== JSON.stringify(standaloneSiteMap(sites))) {
       failures.push('standalone site map');
@@ -817,7 +829,7 @@ function verifyResults(jsonPath, replayOutcomes = true) {
     }
     if (failures.length === 0) failures.push(...verifyRecordedOutcomes(evidence, sites));
   }
-  const freshness = spawnSync('node', [path.join(__dirname, 'generate-credential-policy.js'), '--check'], {
+  const freshness = spawnSync('node', [path.join(scriptDir, 'generate-credential-policy.js'), '--check'], {
     cwd: REPO_ROOT, encoding: 'utf8',
   });
   if (freshness.status !== 0) failures.push('credential generated freshness');
@@ -1014,9 +1026,18 @@ async function main() {
   return 0;
 }
 
-module.exports = {
+export {
   applyMutant,
   canonicalFailureDetail,
+  // Exported so the structural fields of mutation-results.json can be
+  // recomputed without a full 85-mutant run: verifyStructure derives
+  // pristineSha256/mutantSha256 by READING the sources, so a source-only change
+  // (the ESM migration) invalidates them without invalidating the recorded
+  // outcomes. The site enumeration is the one piece a caller cannot rebuild
+  // without duplicating TARGETS, which would be a second copy of the truth.
+  enumerateCurrentSites,
+  sha256Bytes,
+  buildBinding,
   classify,
   currentTools,
   enumerateSites,
@@ -1025,6 +1046,6 @@ module.exports = {
   toolchainCompatibility,
 };
 
-if (require.main === module) {
+if (process.argv[1] && fileURLToPath(import.meta.url) === fs.realpathSync(process.argv[1])) {
   main().then((c) => { process.exitCode = c; });
 }

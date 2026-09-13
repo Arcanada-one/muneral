@@ -8,10 +8,10 @@ import {
   UseInterceptors,
   Header,
 } from '@nestjs/common';
-import { SyncService } from './sync.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { ApiKeyGuard } from '../auth/guards/api-key.guard';
-import { ActorInterceptor } from '../common/interceptors/actor.interceptor';
+import { SyncService } from './sync.service.js';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
+import { ApiKeyGuard } from '../auth/guards/api-key.guard.js';
+import { ActorInterceptor } from '../common/interceptors/actor.interceptor.js';
 
 /**
  * Sync controller — Datarim tasks.md import/export.

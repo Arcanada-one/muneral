@@ -20,16 +20,19 @@
 
 import { execFileSync } from 'node:child_process';
 import * as path from 'node:path';
-import { validateAssemblyRequest } from '../../src/assembly/assembly.validator';
+import { validateAssemblyRequest } from '../../src/assembly/assembly.validator.js';
 import {
   assemblyCanonicalJson,
   assemblyParseCanonicalJson,
-} from '../../src/assembly/assembly.canonical';
+} from '../../src/assembly/assembly.canonical.js';
 import * as fs from 'node:fs';
+import * as url from 'node:url';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-const VALIDATOR = path.join(__dirname, 'validate_assembly_fixtures.py');
+// ESM has no __dirname, and declaring that NAME would mark the module CommonJS.
+const thisDir = path.dirname(url.fileURLToPath(import.meta.url));
+const VALIDATOR = path.join(thisDir, 'validate_assembly_fixtures.py');
 /**
  * Ask the real Python validator for its verdict on one request.
  * Returns the error code, or null when Python considers the input valid.
@@ -63,6 +66,7 @@ sys.stdout.write(mod.canonical_json(json.load(sys.stdin)))
 function pythonFixtureLoaderVerdict(raw: string): string {
   const script = `
 import sys, importlib.util, tempfile
+
 from pathlib import Path
 spec = importlib.util.spec_from_file_location("v", ${JSON.stringify(VALIDATOR)})
 mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
@@ -83,7 +87,7 @@ function tsCode(input: unknown): string | null {
 }
 
 const base = JSON.parse(
-  fs.readFileSync(`${__dirname}/fixtures/positive/minimal-request.json`, 'utf8'),
+  fs.readFileSync(`${thisDir}/fixtures/positive/minimal-request.json`, 'utf8'),
 ).input as Record<string, unknown>;
 
 const withField = (over: Record<string, unknown>) => ({

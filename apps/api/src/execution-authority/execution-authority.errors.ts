@@ -171,7 +171,7 @@ export class UnexpectedUniqueViolationError extends Error {
   }
 }
 
-export type { EvidenceRefValidationError } from './evidence-ref.validator';
+export type { EvidenceRefValidationError } from './evidence-ref.validator.js';
 
 /**
  * The command specifies a retry budget or backoff outside the allowed bounds.

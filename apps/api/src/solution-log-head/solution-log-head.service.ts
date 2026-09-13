@@ -6,13 +6,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
-import { computeSolutionLogHeadReceiptId } from './solution-log-head.canonical';
-import { validateSolutionLogHeadProposalV0 } from './solution-log-head.guards';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { computeSolutionLogHeadReceiptId } from './solution-log-head.canonical.js';
+import { validateSolutionLogHeadProposalV0 } from './solution-log-head.guards.js';
 import type {
   SolutionLogHeadProposalV0,
   SolutionLogHeadReceiptV0,
-} from './solution-log-head.types';
+} from './solution-log-head.types.js';
 
 type Tx = Prisma.TransactionClient;
 

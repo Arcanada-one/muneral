@@ -6,26 +6,26 @@
 // rejected. Every validator returns a typed error rather than throwing, so a
 // rejected message is refused from a pre-mutation position with zero writes.
 
-import { validatePayloadPlane } from '../outbox/outbox.types';
-import { computeReceiptId, computeResultRefId, isSha256Hex } from './result-authority.canonical';
+import { validatePayloadPlane } from '../outbox/outbox.types.js';
+import { computeReceiptId, computeResultRefId, isSha256Hex } from './result-authority.canonical.js';
 import {
   AdapterAuthorityError,
   ResultContractError,
   ResultPlaneError,
-} from './result-authority.errors';
+} from './result-authority.errors.js';
 import {
   ADAPTER_FORBIDDEN_FIELDS,
   COMMITTED_RESULT_REF_FIELDS,
   COMPLETION_RECEIPT_FIELDS,
   LEGACY_NONE,
   OWNED_RESULT_MUTATION_FIELDS,
-} from './result-authority.types';
+} from './result-authority.types.js';
 import type {
   CommittedResultRefV0,
   CompletionReceiptV0,
   LegacyNone,
   OwnedResultMutationV0,
-} from './result-authority.types';
+} from './result-authority.types.js';
 
 // ---------------------------------------------------------------------------
 // Shared helpers

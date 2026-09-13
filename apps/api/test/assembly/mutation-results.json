@@ -22,31 +22,31 @@
   },
   "binding": {
     "algorithm": "sha256",
-    "aggregateSha256": "43a81a5412c413055de5695a1417d7e6e488b9c562149a1a7712f38d65a841e9",
+    "aggregateSha256": "d3c66080268fc16f0257150b1b60bbd9cb737879ce57361ba3ad05bae35bc14c",
     "files": [
       {
         "path": "apps/api/package.json",
-        "sha256": "9fa63bc223ff379fd9f312b8520a6090c0574baff117e76b7b22df228b52cb4a"
+        "sha256": "60713f9cfc50d25ea4e6926054920fd13ea4edbb588d5fcd1e543d533ba2fe92"
       },
       {
         "path": "apps/api/src/assembly/assembly.canonical.ts",
-        "sha256": "dcaf0cf387696a8984419a447aa289c8aefc1aff5f9eecdf8644364a24e92b3a"
+        "sha256": "4e52a503637d583bc1292b3d9cd3c9a9dad25148790547ba15d91eff9ff0c28d"
       },
       {
         "path": "apps/api/src/assembly/assembly.compiler.ts",
-        "sha256": "74a17a457823faa96a821344e77ac4ee1f8799430094dff1c961899c4b23702d"
+        "sha256": "9a37682a5558d2215caddc453e2edacab44eeb07c740054e7493e89a60abee99"
       },
       {
         "path": "apps/api/src/assembly/assembly.errors.ts",
-        "sha256": "5f77edb975fe39515be2ebc27caddb5f89a24a287d6131d8f53f54f6bddb1c25"
+        "sha256": "a1bf3c097c639034cae219cc4b8bb11fd60bc414409d15b980b85975874968df"
       },
       {
         "path": "apps/api/src/assembly/assembly.types.ts",
-        "sha256": "ae31847d7673a4a379317e192c48a9ba1738ad70a268f3789179076b912aa580"
+        "sha256": "ff222a96051614348e38702a175578f812abdff05980ce40e9f392e8fb831d1a"
       },
       {
         "path": "apps/api/src/assembly/assembly.validator.ts",
-        "sha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e"
+        "sha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452"
       },
       {
         "path": "apps/api/src/assembly/credential-policy-v0.generated.ts",
@@ -54,7 +54,7 @@
       },
       {
         "path": "apps/api/src/assembly/index.ts",
-        "sha256": "2babe97b24d23c09405c06ed8f442786140249a67d5a1cc7b771ee229d7f4566"
+        "sha256": "c9a0d891fa1cee47e3004ff05030106983ec09baf92606d43666c2b3d2535a0b"
       },
       {
         "path": "apps/api/src/execution-authority/canonical-json-v1.ts",
@@ -62,87 +62,87 @@
       },
       {
         "path": "apps/api/src/execution-authority/canonical-json.ts",
-        "sha256": "b5b8c0237fe9ed7bbd78378c632eb5b0e60c6ed1539e7f895b0e572174cad31d"
+        "sha256": "eaea71d2b543175dd5210f7b9edf7d25451ae95b295dc9007cd75cd7aee1f4ce"
       },
       {
         "path": "apps/api/test/assembly/assembly.boundary.spec.ts",
-        "sha256": "f2b204e329042e2516a99dc41c696f90becfe68ce629ecd597c52d9c3dcdef77"
+        "sha256": "d964818efa2fc7ebfa421005d845b26515ca08114fe0682e81dc434a16c8962c"
       },
       {
         "path": "apps/api/test/assembly/assembly.bounds.spec.ts",
-        "sha256": "6965750418b2b4d1d6fc0e2fe6995c758368cedbb9acdf24a4bd96b89afa7149"
+        "sha256": "cd05ce1e4b5bbd9868c2a1e2fafd67f3cb604e256fcc9ce118e8fa75c2fb634a"
       },
       {
         "path": "apps/api/test/assembly/assembly.canonical.spec.ts",
-        "sha256": "d0fc47ecc935053514d915a4dca770c756b4928d05101fc5fb0f05a765014b14"
+        "sha256": "38ed526a384c07fa757a6a819048e80c98980a2c0c34ee57795ef01aba7be994"
       },
       {
         "path": "apps/api/test/assembly/assembly.closedschema.spec.ts",
-        "sha256": "814bc84ee708619aba9c25f24ad47ff635976b8e48e41eb265499eda5f672557"
+        "sha256": "1cf290bd03f84b65a4fd6e160b3ae3cdca78279000cba323eb4abaf62cf956cc"
       },
       {
         "path": "apps/api/test/assembly/assembly.compiler.spec.ts",
-        "sha256": "2eda2288707a5a2917fd981838e0d79f7041266d3184cf64427fcb4414499084"
+        "sha256": "16ec60023cb426c9e80c6356ce96a950208ea3083106f1e6760eed02d9079e64"
       },
       {
         "path": "apps/api/test/assembly/assembly.credential-policy.spec.ts",
-        "sha256": "c36e414703bcca883e6dfbafee1dbaaf13d8c437df14822f88c6533edbc4f7c9"
+        "sha256": "d7b18183dda4205ae864d34cbb774abf85f6b166968018973d295a7128930312"
       },
       {
         "path": "apps/api/test/assembly/assembly.errors.spec.ts",
-        "sha256": "76865add346f03f047c6146b2a0506ab7f22518e2654837e26fb1e175a5f7827"
+        "sha256": "a7dec95776e47f8e60ef7838708605ec8adb4fe7de60ddf95a83f9f5a968c340"
       },
       {
         "path": "apps/api/test/assembly/assembly.f10.spec.ts",
-        "sha256": "55f6f46aa9e9cd86bd350042f58ceac1e712f3c24081e6f9a2b85de2cf852014"
+        "sha256": "d1978ee6ad4e087671461e2910060f8dd1d8fa6f5e6cd48d74b62d54afdc1fc9"
       },
       {
         "path": "apps/api/test/assembly/assembly.falsification.spec.ts",
-        "sha256": "a5d1a266ee577f2aeec17e9d454e9f7963639e8efbb56b1178c5b11347816d95"
+        "sha256": "52dc9b5b13ca51bd76fc34cc0da0eda67af00b6b69f945d3596c1547ed5438f7"
       },
       {
         "path": "apps/api/test/assembly/assembly.generator.spec.ts",
-        "sha256": "7a16f2158b73bbf548005e774a224fb42c14b1f80d1beadff4a086540a48d2bb"
+        "sha256": "f1a208734d22f5b23acf0d1c51f2090d7575bab0c3be63c1e9b5babd7d09454f"
       },
       {
         "path": "apps/api/test/assembly/assembly.instant.spec.ts",
-        "sha256": "2adda1180527f3d2b40bafa6d2635f0d64e86c5481266de565631f37391a706e"
+        "sha256": "1dbe8fa8ea48ac0ca9d09816d650ba92209d4829831f8c2046c5b775b6d9578b"
       },
       {
         "path": "apps/api/test/assembly/assembly.keyorder.spec.ts",
-        "sha256": "cf9729ea5187f0143bcf7cb2829172fb32c270d1fb0718ed0f65de96cdf5d5b9"
+        "sha256": "f47868ae2c3d11d3a9d76958b6c4df74348b1c2597db02effdf3af333147235a"
       },
       {
         "path": "apps/api/test/assembly/assembly.lexical.spec.ts",
-        "sha256": "ad1866333592e7cba04e254a8bb5206f407697bb8d855df0c302ed33ccb3543d"
+        "sha256": "0aabaa0d41732e4d62c0be4ed524d67cd1160de60d5212545cc14c1246569586"
       },
       {
         "path": "apps/api/test/assembly/assembly.parity.spec.ts",
-        "sha256": "ebe64d5f3f8f1a4741ef3f2b305a80e8db73342ad6c3ed11856a71bd82a5a0f2"
+        "sha256": "3a67e997074fa2b3979d651be07becea601c39e6235b0eca408a6b01b2e168d3"
       },
       {
         "path": "apps/api/test/assembly/assembly.purity.spec.ts",
-        "sha256": "5dd6ef5458ee06552be4cc7a7a1e2c1026ee6035af0710b8adf41526d66c7ce1"
+        "sha256": "eb4bffa41b70f689975fd585303d9700c3005c95682c149a28ea59c40abc012f"
       },
       {
         "path": "apps/api/test/assembly/assembly.rejectionsites.spec.ts",
-        "sha256": "49f813e8269f0dd34251da2850709c649234db8d4cf04909a4939c0bb03eff7f"
+        "sha256": "a08b2ab335421dcd666e540ef26fe8ddd0eba7d876a15fe5c3c48061189d0790"
       },
       {
         "path": "apps/api/test/assembly/assembly.rereview-regressions.spec.ts",
-        "sha256": "ed32f2718337c62b25c683f2f47779f94027ad37c55f0b44deb722e998be334d"
+        "sha256": "966e8494cef29a16094b77f2896f96f8438fcdc8715bc33c5a7b2e4f44f84d8f"
       },
       {
         "path": "apps/api/test/assembly/assembly.types.spec.ts",
-        "sha256": "a5f6a4d8605d4b9ebb1f493b5ee6d5df7dd287adb5014e97e67ff5fae032e3d7"
+        "sha256": "1050f45017f73fbcb3428d92a49c673070c9731861fc3ae6cc322d92a4e99716"
       },
       {
         "path": "apps/api/test/assembly/assembly.validator.spec.ts",
-        "sha256": "bf8fdefe4552177f59a338d8fccd7edb7d902ee5f8cf72e214238164374b5864"
+        "sha256": "11d15b18650e8a051f44d537c39ee6bd54d38c27228fc2eb716e3cda6dd34173"
       },
       {
         "path": "apps/api/test/assembly/assembly.validatorcli.spec.ts",
-        "sha256": "8452c7e0dd5bda3b8799b521f4bd03ef94376ef10bb04614511b93ef3b354241"
+        "sha256": "7ba6d622df769004a16aecf35545e1f03166076ed0f7ef2d6f52b495bc99cca7"
       },
       {
         "path": "apps/api/test/assembly/credential-policy-v0.json",
@@ -154,7 +154,7 @@
       },
       {
         "path": "apps/api/test/assembly/fixture-instant.ts",
-        "sha256": "f33774d0225ef5503d43277a40fcd8cb9b39c98eb084b9b62f9afe51e4488b2e"
+        "sha256": "e8a3302fde96d465921f8bb280a951cffec00c389d0bd398a0e3593bc1843849"
       },
       {
         "path": "apps/api/test/assembly/fixtures/negative/ambiguous-canonical-value.json",
@@ -230,15 +230,15 @@
       },
       {
         "path": "apps/api/test/assembly/generate-credential-policy.js",
-        "sha256": "589d6e1e60cbbbcb682883d3e75a328ab784b2425d1d7f3479969c88b01ca5bd"
+        "sha256": "70fec0b6e321a4abc3624dc1ef59db6a1b3dba44beae78aa481a2913ad99f38c"
       },
       {
         "path": "apps/api/test/assembly/generate-fixtures.js",
-        "sha256": "1b8a409908ca3b740d0b869c2ede017c8917540cdd003250420475d8aea5fcad"
+        "sha256": "1701aae769ba1b6a30a519acfeb68df00e14956903a1601ee28d69e948cd116e"
       },
       {
         "path": "apps/api/test/assembly/mutation-harness.js",
-        "sha256": "27f0a45469441ad006f20d0fd3b00432db0b25886ff803190b8bf89f2573daf4"
+        "sha256": "08db6d0862fe2fe2b8be1d4ecf37087487274497e1a93251d99a17c902e14513"
       },
       {
         "path": "apps/api/test/assembly/mutation-sites.json",
@@ -250,15 +250,15 @@
       },
       {
         "path": "apps/api/test/mutation-evidence.spec.ts",
-        "sha256": "74ec9b61ecfa5e1b8dd70a47f7a43298bb08c6ad0618b6b386d6aae410417ab6"
+        "sha256": "1350c994887b72bb410e32ed81a1bad9aa87f8be6517d112ce436abbd0479902"
       },
       {
         "path": "apps/api/tsconfig.json",
-        "sha256": "3802bd2fedf4c79cb5dba46a5d8893056cf305d0a6df8150a18c2401f50cb777"
+        "sha256": "e9d48a8d90da20846c7725067dd944d1f1f7c6d21faff18022360aa8759740bf"
       },
       {
         "path": "apps/api/tsconfig.test.json",
-        "sha256": "d4fdd3318a71f79d53c871f547a13a62b76db5b4d333668419c6dd773fb648f3"
+        "sha256": "b45b51f10e6897b5fa212f421842c1334c9e1f7942e446dcf278bb08b9c55d1d"
       },
       {
         "path": "package.json",
@@ -266,13 +266,13 @@
       },
       {
         "path": "pnpm-lock.yaml",
-        "sha256": "0246bea3a9d3135831e5da055715aa93f1eeabf745f7d48bb6f1205c11da469e"
+        "sha256": "c41f316877e20c73df05f7080dd49a50466099e7de841bea22e2fe136a71b160"
       }
     ]
   },
   "supplementalGit": {
-    "trackedTreeWithoutEvidence": "b20f4423e0041ede7fb3c40a380dfdad91268d39",
-    "trackedSnapshotDiffSha256": "209af2159ffdd6d82cf27e77c125446afd4b5ef1376ae4528782558828e08379"
+    "trackedTreeWithoutEvidence": "e8e6d607f102bf65053f2b262555c679a119e04f",
+    "trackedSnapshotDiffSha256": "c3b96e8de7889aec53aa4066a9264c5719f8deef669c50ac5f4d5d7abf41661b"
   },
   "baseline": {
     "outcome": "SURVIVED",
@@ -297,8 +297,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "13c9e55bea2efc0506fe62788f39a2095d053926d5cab764a6b8d6a59c0af74c",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "5a0e6be632cab17b39e4dc3701680fa88eda037750b6847381fca56ea9ed3d81",
       "outcome": "KILLED_BY_TEST",
       "detail": "● UNSUPPORTED_SCHEMA_VERSION › rejects null",
       "detailSha256": "c1235a111b3870197cb086de8272f4ff3fe1590f4e105548602a4254f3824dbb"
@@ -315,8 +315,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "708426f86b81319b0b71cca9c4bb8dee53b26c9a111f457e8c085df94cc4fa61",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "1a5a2a1a2bdf377d49b09f7137c7398988867d0d7003212be1e7161e71a28709",
       "outcome": "KILLED_BY_TEST",
       "detail": "● Claim 7 (all categories): execution mutations move or refuse identity › covers value/add/remove/schema mutations and catches an omitted decision field | ● UNSUPPORTED_SCHEMA_VERSION › rejects schemaVersion \"v1\" | ● compileAssembly pure artifact compiler › returns a typed error for unsupported schema | ● validator rejection sites identify their rule and path › schema",
       "detailSha256": "9dbfaf95aed0b9cfcb4f19c7e363a5521f92cdb66a96bffc86b7d48a09a161dd"
@@ -333,8 +333,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "83e0a9c8b26cfd4cbf5173dc35f34052ab5298a0fbd690f431f3c7a2630861d1",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "4f82e1d91bb55279912c795631faf49bc1532c053022f1e886d1e5338c064b00",
       "outcome": "KILLED_BY_TEST",
       "detail": "● DEADLINE_EXCEEDED › rejects past deadline | ● authority-supplied evaluatedAt › accepts deadline and expiry equality, then rejects one millisecond later | ● validateAssemblyRequest — controlling fail-fast order › checks deadline and budget before provenance, candidate, unknown, credential, and authority | ● validateAssemblyRequest — controlling fail-fast order › checks instants, deadline, budget, and provenance before candidate cardinality | ● validator rejection sites identify their rule and path › deadline",
       "detailSha256": "848965ebc0c8c11811190a221265aa9d168ab996ba33c5515bb1a060e8ea65cd"
@@ -351,8 +351,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "86d58f91391c6f5a4002a1eff57d67cacf5ac9983bed68e9617a621b825d4177",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "79a3e18dee59e38af3eaa55f19d0491c61fee3ba49dd0054d13d640837fb47ca",
       "outcome": "KILLED_BY_TEST",
       "detail": "● ATTEMPT_BUDGET_EXCEEDED › rejects budget > 1000 | ● authority-supplied evaluatedAt › uses validated evaluatedAt as the deterministic timestamp of later refusals | ● compileAssembly pure artifact compiler › returns a typed error for bad attempt budget | ● frozen-rereview regressions › recursively freezes refusal results too | ● validateAssemblyRequest — controlling fail-fast order › checks deadline and budget before provenance, candidate, unknown, credential, and authority | ● validateAssemblyRequest — controlling fail-fast order › checks instants, deadline, budget, and provenance before candidate cardinality | ● validator rejection sites identify their rule and path › budget",
       "detailSha256": "61870c61fa2f493a41603edb0ecb4760cc258cb548a1beafd0268f2e33a7ca63"
@@ -369,8 +369,8 @@
         }
       ],
       "mutationKind": "empty-if-body",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "1232be1e3bb852d7d2a6bdec8f1f64b7d3ad9ae31bf154185b30649ba88a1afc",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "4a9494ecd716bf46859bbd512f15abc237424974a06e501916c4ad949d8519db",
       "outcome": "KILLED_BY_TEST",
       "detail": "● UNKNOWN_EXECUTION_FIELD › rejects extra key providerConfig | ● compileAssembly pure artifact compiler › returns a typed error for unknown field | ● frozen-rereview regressions › preserves own __proto__ keys in canonical bytes and refuses them at closed schemas | ● frozen-rereview regressions › returns a typed refusal when an admitted unknown key expands during error identity encoding | ● validateAssemblyRequest — controlling fail-fast order › checks provenance then candidate then unknown then credentials then authority then evidence | ● validator rejection sites identify their rule and path › unknown",
       "detailSha256": "27930f22a954d1f713f3b003ae7399e3f7063885287a86b0224364d3d28dcee0"
@@ -387,8 +387,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "0d247b754420137b68ff539cc21bf75486c15d40da7200837d97b857f3ddc983",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "c6a8319e050e07e6e9a3c6e25c0f9260da837dcfe7356b25239d34a015cb9a22",
       "outcome": "KILLED_BY_TYPECHECK",
       "detail": "error TS2769: No overload matches this call.",
       "detailSha256": "742e1fe5b2297f0b19edaa9fe2914df5df5a0fce345a16465e4b1baa71876409"
@@ -405,8 +405,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "504258f4c6d12a0180b548fbb4e3ac630893dbf40ddf256f5c1a5fd982f63bbc",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "4220733a1182e0c04cdf290686627f085e3d77cebf1d6605ea5b8eebbf0bfed9",
       "outcome": "KILLED_BY_TEST",
       "detail": "● parity: the two validators agree on inputs the corpus does not contain › agree on: a trace key named credentials | ● parity: the two validators agree on inputs the corpus does not contain › agree on: a trace key named token | ● parity: the two validators agree on inputs the corpus does not contain › agree on: a trace key shadowing a decision field | ● parity: the two validators agree on inputs the corpus does not contain › agree on: a trace key shadowing schemaVersion | ● traceFields strict type › rejects traceFields key shadowing schemaVersion | ● validator rejection sites identify their rule and path › trace shadow",
       "detailSha256": "03ace809261e1d9983c3c5cf1e052a575add0c4daf9330beaeb11d003d4c9463"
@@ -423,8 +423,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "604c7b6593e2b5afa4575d0aa99145e3e47f32cc73b2515ee8d7cec047d2f5c0",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "44fcf29b331bf52afb0078156611087a3404e9b00022a3aa363b23469702fa48",
       "outcome": "KILLED_BY_TEST",
       "detail": "● frozen-rereview regressions › enforces the emitted-byte budget on non-authoritative traceFields",
       "detailSha256": "f44484108c85f4b299b3bd11fd35091315c09c86a8f013799ebdb237c6b34956"
@@ -441,8 +441,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "0aff74569e54dee0c35676ba618e31ce9644c1f186b00823abc33b14b824ff45",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "3e7ba092dd23950637bff5fc730cb9bed784a459c4d1827ca03b3630d61c6bad",
       "outcome": "KILLED_BY_TEST",
       "detail": "● request boundary depth hardening › binds canonical identity containers by value rather than insertion order | ● request boundary depth hardening › source-binds malformed primitive causationId values before returning UNSAFE_SIZE | ● request boundary depth hardening › source-binds malformed primitive correlationId values before returning UNSAFE_SIZE | ● request boundary depth hardening › source-binds malformed primitive taskId values before returning UNSAFE_SIZE | ● validateAssemblyRequest — controlling fail-fast order › checks required field types before unknown fields",
       "detailSha256": "b7f72a5a00746f93a3ee21ba49d3f15dc97574c4fa88ad3e082ebc22d7a873be"
@@ -459,8 +459,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "b35ad396837693c332bc750ddf715f9c81ad568abaed40fe30ebe1e66e06c3bb",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "23a8011200d79fb77fb63c0d0bac49349c9e07894f26afc98f4e8a926ff69049",
       "outcome": "KILLED_BY_TEST",
       "detail": "● parity: the two validators agree on inputs the corpus does not contain › agrees on exact required type precedence for evaluatedAt | ● validateAssemblyRequest — controlling fail-fast order › checks required evaluatedAt type before an earlier bounded-field failure | ● validateAssemblyRequest — controlling fail-fast order › rejects a non-string required evaluated instant without throwing",
       "detailSha256": "06434defda4155beb63f2e43bf34487b0a8c6199b34f78b5de6e9a171d266624"
@@ -477,8 +477,8 @@
         }
       ],
       "mutationKind": "empty-if-body",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "223cebec8970483721784971ffc1f20337ab2d72665330efd273927824c9f184",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "9e336f60e488ac0a76156c153503cfb7ab12d11c6c6c6761f5d884f97ed0a5d7",
       "outcome": "KILLED_BY_TYPECHECK",
       "detail": "error TS18047: 'value' is possibly 'null'. | error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'string | number | boolean | CanonicalJsonV1Array | CanonicalJsonV1Object'.",
       "detailSha256": "86397fe5d480c684ebaf0518a0d124e0aafb8a67d53c3b4156466c0a84b78fc8"
@@ -495,8 +495,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "d45134153f791f6fce433580e16342ca8e6ff96030f3e420f8d519dfdb71f9dc",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "4fb1b5bf1bbf4a337caa2ba34f9cc4c2e4af004bc8d64800f38d39396df59a52",
       "outcome": "KILLED_BY_TEST",
       "detail": "● validator rejection sites identify their rule and path › authority missing field has an independently observed refusal",
       "detailSha256": "3107e895a55147f953527a8a66407317375a6c2873bdcabc02847e04fc4874a5"
@@ -513,8 +513,8 @@
         }
       ],
       "mutationKind": "empty-if-body",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "1eaa3f951217dc871549d732c88b4fc8206f1201a35bc49182824195ad44222b",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "ee6a4f490e4670d5573c9b38e985a2ca3e4873d4ec780ef7073cc9287f582ded",
       "outcome": "KILLED_BY_TYPECHECK",
       "detail": "error TS18047: 'req.rolePolicy' is possibly 'null'. | error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'string | number | boolean | CanonicalJsonV1Array | CanonicalJsonV1Object'.",
       "detailSha256": "a7ad66b83451cc21b9f3682f7863efead632605b75d81145b5ebad2c41476a37"
@@ -531,8 +531,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "751e390fc247d8b9fdaed6402f802b358005f907df354f17c80a1e94b92b7d01",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "1ecec3b69703ce5afce6c523bba7f467d1a9e63aa04cde218febd6345cf16029",
       "outcome": "KILLED_BY_TEST",
       "detail": "● validateAssemblyRequest — controlling fail-fast order › rejects a non-string required role policy field without throwing",
       "detailSha256": "acfb37e7c15b611f16d0b3752b752366a5e0e4aadc3a62983c6b27d7da5d5a18"
@@ -549,8 +549,8 @@
         }
       ],
       "mutationKind": "empty-if-body",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "321b265dca16b9f127e04c8909ca32a1556653a574556585fe7aab89601c6156",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "8f1be3f1c357d38859c97a1c9555628abcb8e95b77d2d037afba85f3e83be4a1",
       "outcome": "KILLED_BY_TYPECHECK",
       "detail": "error TS18047: 'req.candidateSet' is possibly 'null'. | error TS2339: Property 'candidates' does not exist on type 'string | number | boolean | CanonicalJsonV1Array | CanonicalJsonV1Object'. | error TS2339: Property 'capturedAt' does not exist on type 'string | number | boolean | CanonicalJsonV1Array | CanonicalJsonV1Object'. | error TS2339: Property 'sourceDigest' does not exist on type 'string | number | boolean | CanonicalJsonV1Array | CanonicalJsonV1Object'. | error TS7006: Parameter 'candidate' implicitly has an 'any' type.",
       "detailSha256": "60b52c560169c857c76ab0203d084807aaa912058ff79c1bfa5b2a15fefe5f7f"
@@ -567,8 +567,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "93b3c4d4b9ea229ddfb2c2251f1fce903e20c14745391ecc4264adcc1f53e0aa",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "86b3e5525fa79263a253b1d416f8979ad69571508b2e3c7058b90c0ff703a893",
       "outcome": "KILLED_BY_TYPECHECK",
       "detail": "error TS18047: 'req.candidateSet.candidates' is possibly 'null'. | error TS2339: Property 'some' does not exist on type 'string | number | boolean | CanonicalJsonV1Array | CanonicalJsonV1Object'. | error TS7006: Parameter 'candidate' implicitly has an 'any' type.",
       "detailSha256": "354e3dc18fa59407bb15624feeddb2e870c9e65dc637355825d3e0db379a6edd"
@@ -585,8 +585,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "3fa988e3f22d8cc456d0be23770c18e1d38e82f756dcf5b1d63e68bc902bd423",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "145436fee88855b829c5e6be466bfd70c78bf34492123370496a1bf45118903f",
       "outcome": "KILLED_BY_TEST",
       "detail": "● validator rejection sites identify their rule and path › candidate invalid entry has an independently observed refusal",
       "detailSha256": "8411025124c7343874288ef4b8490ce216c61a096ed7a2b431526fd9b1db7fae"
@@ -603,8 +603,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "5ecccadf4c2d086aa8f316426ad66e93df6fbe1e46776223bb22346153e5f887",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "8901b500fee51c81c8172f6e601f4735b0258946e207e0676d076b39a7c20bc2",
       "outcome": "KILLED_BY_TEST",
       "detail": "● parity: the two validators agree on inputs the corpus does not contain › agrees on exact required type precedence for candidateSet.sourceDigest | ● validateAssemblyRequest — controlling fail-fast order › checks required candidateSet.sourceDigest type before an earlier bounded-field failure | ● validateAssemblyRequest — controlling fail-fast order › rejects a non-string required candidate source digest without throwing",
       "detailSha256": "5cc56860e099f043cdf7cead34fbfe1c54eccc209a570ff68456d9dc61c24873"
@@ -621,8 +621,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "62204fba404ba77ee41e60f57d55f12073edad28bd2a34a99265f21d82ba4004",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "6b4635f46ce4ef09262c0a1ca75ed05dfda928d9dfdb8f8bf60e49351cce9e88",
       "outcome": "KILLED_BY_TEST",
       "detail": "● parity: the two validators agree on inputs the corpus does not contain › agrees on exact required type precedence for candidateSet.capturedAt | ● validateAssemblyRequest — controlling fail-fast order › checks required candidateSet.capturedAt type before an earlier bounded-field failure | ● validateAssemblyRequest — controlling fail-fast order › rejects a non-string required candidate capture instant without throwing",
       "detailSha256": "473ef0020d5efd3f9c43d6b86a7ba64a1807a4850e4d6ee0de3916d0d42aaf44"
@@ -639,8 +639,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "7875996907dec43b9c19793431f06d9850314d62ec1c6c76fa729368c7a0963d",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "5c6fe69f1bf8998703f137b330f3e868b558ccfc84827a6a3b26656db142e787",
       "outcome": "KILLED_BY_TEST",
       "detail": "● validateAssemblyRequest — controlling fail-fast order › checks provenance then candidate then unknown then credentials then authority then evidence | ● validator rejection sites identify their rule and path › evidence type",
       "detailSha256": "8ef5a2b37796d2fe1224d7bf9ebd259f742c267db70820155d4339bede870951"
@@ -657,8 +657,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "126e687a5f22067246f632ab99943e29ecd1fcca41d7319a8bcfc304b0816f2b",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "77523e08bd3a6206b931061026fcc1778447b692a98722fefc676dc344b4de16",
       "outcome": "KILLED_BY_TYPECHECK",
       "detail": "error TS18047: 'req.provenance' is possibly 'null'. | error TS7053: Element implicitly has an 'any' type because expression of type '\"policyUri\" | \"policyDigest\" | \"issuedAt\"' can't be used to index type 'string | number | boolean | CanonicalJsonV1Array | CanonicalJsonV1Object'.",
       "detailSha256": "f98f148ea542bd037c042168beb62b8a1f9b697fd93750db463d26a3cdadf885"
@@ -675,8 +675,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "0a30915cadec2ef6b6538be63070648516779dca7ac8bc97c7c1a0f14176c2d6",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "8b25f6a229c1a7d095feefa6eb6123e4af3ccef426e481d07033eee3c8975bbc",
       "outcome": "KILLED_BY_TEST",
       "detail": "● validateAssemblyRequest — controlling fail-fast order › rejects a non-string required provenance field without throwing",
       "detailSha256": "a0a7153426e03532a0f9a249efe42a37cf5e41457646da5d059254788fb2fd3f"
@@ -693,8 +693,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "a39b24a1c31dd90ac7647da34de118c1c7e4d13b40133aa73d04e124cda33d03",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "59f898ec8dcaa45199c664ecfcf6bdb8f0f17ffc062a600e55f855f174627c65",
       "outcome": "KILLED_BY_TEST",
       "detail": "● A4: string bounds are measured in UTF-8 bytes › rejects 65 emoji (260 bytes) — accepted by both runtimes before A4 | ● A4: string bounds are measured in UTF-8 bytes › rejects a 2-byte-per-char value that overflows in bytes only | ● A4: string bounds are measured in UTF-8 bytes › reports UNSAFE_SIZE for a byte-overflowing value | ● A4: string bounds are measured in UTF-8 bytes › still rejects a plain ASCII value over the limit | ● UNSAFE_SIZE › rejects empty taskId | ● UNSAFE_SIZE › rejects taskId > 256 chars | ● validator rejection sites identify their rule and path › identity size",
       "detailSha256": "6bcf5c378cbc65d48dffaf6d7c3e5f4b2320bf8bd14a783515d5b0719978a868"
@@ -711,8 +711,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "a1b81f231026e8f4351d48f459de9f807217fe83b4583420ba5590f48810240c",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "17143628678a4022e1bf9dfd076ee9bd53cf37edb49c3c038ced3070135aee35",
       "outcome": "KILLED_BY_TEST",
       "detail": "● validateAssemblyRequest — controlling fail-fast order › enforces the byte bound for every bounded authority field family",
       "detailSha256": "c44e1332ec728a5bf72a8e2e02eccbbe06fbb6b3c848a677926f5306bb1f0dd0"
@@ -729,8 +729,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "b19e71f2f290546771391be396e853c151a7714673ba0d0451f4f174bc0bf3cb",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "1276ec594893396ee9ff2a654b367311b3a4d94aba8aa1f707c590f62818f60d",
       "outcome": "KILLED_BY_TEST",
       "detail": "● validator rejection sites identify their rule and path › role empty field has an independently observed refusal",
       "detailSha256": "897197eeb03d1442adfe2ffa03be7719375f70bb1daa681a382ee4f8118a46f9"
@@ -747,8 +747,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "b6b2d2d9486ad62138b3312c4c1a34f7ed53282de362ddcbb15908370eb39948",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "190ef52177725a9165cca0aef0d45b1b8f6cef75f7e4c3c1ba4ca34432ce895b",
       "outcome": "KILLED_BY_TEST",
       "detail": "● validateAssemblyRequest — controlling fail-fast order › enforces the byte bound for every bounded candidate identifier family",
       "detailSha256": "a285f82d1b570870fae2b990aadc1036ce0190e6ecbfeec6ec121d096601f017"
@@ -765,8 +765,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "1b1b30ab615050d338662ae0121a27b5b74f7d8211f178a09083b336b2e23fc6",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "3e44425dc62a523b6dd64beabe470c34148d1487c52eae4b702c0cdd3170d00e",
       "outcome": "KILLED_BY_TEST",
       "detail": "● validator rejection sites identify their rule and path › policy URI",
       "detailSha256": "83f00d65ffd69fb6af1b66c2b0e6849b74e0e4e0185113445648c932657635d4"
@@ -783,8 +783,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "44081b4d4f2f67421af314ef18cda7e6d2380722f6162c671f9fa5a97b5de504",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "c6a6a90f0e318f55423c85ed0b778acbdfdbdd16472a75d925f94ef9560541c6",
       "outcome": "KILLED_BY_TEST",
       "detail": "● authority-supplied evaluatedAt › rejects a missing or noncanonical evaluatedAt value 3 | ● authority-supplied evaluatedAt › rejects a missing or noncanonical evaluatedAt value 4 | ● authority-supplied evaluatedAt › rejects a missing or noncanonical evaluatedAt value 5 | ● authority-supplied evaluatedAt › rejects year 0000 rather than extending the specified instant range | ● frozen-rereview regressions › rejects impossible calendar dates instead of normalizing them | ● frozen-rereview regressions › rejects year zero at the public compiler boundary | ● parity: the two validators agree on inputs the corpus does not contain › agrees on instant semantics before candidate cardinality | ● parity: the two validators agree on inputs the corpus does not contain › agrees that the exact-instant range starts at year 0001 | ● validateAssemblyRequest — controlling fail-fast order › checks instants, deadline, budget, and provenance before candidate cardinality | ● validator rejection sites identify their rule and path › instant",
       "detailSha256": "ebac1e5154d2e02388ba6ec2298bc140a6472f03916509c5184f5e150928cf6b"
@@ -801,8 +801,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "1d7bed63882f1670c8f03569650a08f1a8b66d2d321740b7698cfc85606cb733",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "5e9672de62f2cf47f8112be73f234415d84353725c34e44e97a175a462111548",
       "outcome": "KILLED_BY_TEST",
       "detail": "● frozen-rereview regressions › rejects an impossible candidate capture instant | ● validator rejection sites identify their rule and path › candidate instant",
       "detailSha256": "18f15f7bde835963957760018c927f53cfe39cc2a821e3a9fa67305f4655f0c6"
@@ -819,8 +819,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "5071fb0199bca2c3dd4b02e5d4f9833e50eaf7f0dfa860657b06e77bd3c10744",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "2dbf5995d25578ff41aa7b27eb4fe164955f8964bc7ad9225fea7cc4d9dae085",
       "outcome": "KILLED_BY_TEST",
       "detail": "● frozen-rereview regressions › rejects an impossible policy issue instant",
       "detailSha256": "ba4677c19a8078085359e04c1faf7606a77483117d779bf990222b0b7d0209f4"
@@ -837,8 +837,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "09b1cba80282fd9a8f457629cbe6afd5558c96ed9347bb9e39d7a26e1a322305",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "22f2228b0ae8f90b99302228b2d843513a7bc5afb49dc653d9deee3f00d94e51",
       "outcome": "KILLED_BY_TEST",
       "detail": "● validateAssemblyRequest — controlling fail-fast order › rejects a non-string optional expiry instant at the instant phase",
       "detailSha256": "d73ebdc9ed9f038309d69adc3552e3fc832fafbf1e02f2a63141a478ed067eff"
@@ -855,8 +855,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "5ed91b015199e745343b6b639bb946244559e5138a59800ee8f3201a7f86328a",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "c094186a3fb09cd650d917ca2a7fe3882e2c63b3fa5cf02834f85fb3762bad9d",
       "outcome": "KILLED_BY_TEST",
       "detail": "● validateAssemblyRequest — controlling fail-fast order › rejects a non-string optional deadline instant at the instant phase",
       "detailSha256": "5a8e81d26dd52724ee3ac0aa6b9c49f778956f178cd430fd27e2b6b824d5a81c"
@@ -873,8 +873,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "7257859bef68fab33ecd5a63f596f123f506e90be4611254959f2645ba3361af",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "c5333425472683ad0ef52ce6051251f2d05cba29f7d47926e6536c3cd5e78587",
       "outcome": "KILLED_BY_TEST",
       "detail": "● A5: candidateSet and provenance reject unknown keys › names the offending field in the error | ● A5: candidateSet and provenance reject unknown keys › no longer permits a digest collision via an injected provenance key | ● A5: candidateSet and provenance reject unknown keys › rejects an unknown key on candidateSet | ● A5: candidateSet and provenance reject unknown keys › rejects an unknown key on provenance | ● parity: the two validators agree on inputs the corpus does not contain › agree on: rolePolicy carrying a wrong-plane key (Python had no closed-schema check at all) | ● validator rejection sites identify their rule and path › provenance unknown | ● validator rejection sites identify their rule and path › role unknown",
       "detailSha256": "8f885b83788dc86f07142c8cb13a5c3516fe1b39f2981a55e09220dc4ad01b85"
@@ -891,8 +891,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "3caa8fcb926fb64b4bb837f09d214ba5188bb13a3a129090aaacfa9c77cba3af",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "3a04884de421c878590ffdb1f044dbfd4737dab8c340597452e53ebb784a22a2",
       "outcome": "KILLED_BY_TEST",
       "detail": "● validator rejection sites identify their rule and path › evidence count",
       "detailSha256": "2aaaf8af1caf7eeda57823793f5d8ba615c45f51a815a6560b18632958fa74ed"
@@ -909,8 +909,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "1e72dd1497894054a51a69847a8176be5447b40729e850fac97ec0739677bb87",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "c02523e37295618fb73f6793f85fe318cc4b57dc44004ca85071eb03c0ccb873",
       "outcome": "KILLED_BY_TEST",
       "detail": "● parity: the two validators agree on inputs the corpus does not contain › agree on rejecting an EvidenceRef label exceeding the MUN-0020 UTF-16 limit | ● parity: the two validators agree on inputs the corpus does not contain › agree on rejecting an explicitly null EvidenceRef label | ● parity: the two validators agree on inputs the corpus does not contain › agrees on the MUN-0020 UTF-16 URI bound for astral characters | ● validator rejection sites identify their rule and path › evidence invalid",
       "detailSha256": "0bac031066da328a870e4e4defc420f4aa583c7de038e6825808af5bc691f762"
@@ -927,8 +927,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "5069ae084a2933a6c15a3bb7a6c178fb5731c1a58cf3b190c6b25040064b15fc",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "3cb93d5aa2a2f26a4b9b73df37e342c17c4e95213afe47f3bab2657dd9dd112e",
       "outcome": "KILLED_BY_TEST",
       "detail": "● validator rejection sites identify their rule and path › distinguishes duplicate evidence identity from byte ordering",
       "detailSha256": "3891f0040d6acbf67e84c863b1da469f8c4a15f5936ef4e0d35906332766eb43"
@@ -945,8 +945,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "370fa65bac3fefee75412e5dea91f9d21463df0e42b6dfa1cd393f7a7f75dfc6",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "362989e68b9a1060b059742d6378ea9e9592cb3a6d587d15b11e153a862f6dbe",
       "outcome": "KILLED_BY_TEST",
       "detail": "● frozen-rereview regressions › rejects duplicate and unsorted evidence without silently sorting",
       "detailSha256": "88f546b2dbb57cc09c3992d6b79d66e5cacd39ef04524f16d35d29e1a367cf55"
@@ -963,8 +963,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "5d86ae9b9863fd32403fd81f8dc3405ef911d91e9d06c18ac6f7d294c42dab16",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "f081d55855f763c63d4b6f787c85ccfa016e9bc74cf55dc0f63c74c59060b53f",
       "outcome": "KILLED_BY_TEST",
       "detail": "● validator rejection sites identify their rule and path › authority unknown has an independently observed refusal",
       "detailSha256": "3643fa7edd0c3a691ffa7ccd2f96595ee090ba933b87d56f85c56c9b6eebf50f"
@@ -981,8 +981,8 @@
         }
       ],
       "mutationKind": "empty-if-body",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "e8016fd02778493a403111a9190a4bb9108450c5abbbd792b3efab49a2ad5027",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "ea53d37109f5cda28eaca410f9e67b5fb760efc5a000dd6b826145a42112fb32",
       "outcome": "KILLED_BY_TEST",
       "detail": "● frozen-rereview regressions › rejects malformed or noncanonical scope read,read as AUTHORITY_WIDENING | ● frozen-rereview regressions › rejects malformed or noncanonical scope write,read as AUTHORITY_WIDENING | ● validator rejection sites identify their rule and path › ceiling shape",
       "detailSha256": "a7772d27751dc1781f813acc10c56bc45db6c02dc37ba4293b40ea7372551368"
@@ -999,8 +999,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "1e5bc8c2be4b3ae9c7019844a4e9f9ab79bd42c846d293fa231c00ce213fa3ff",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "24350970dcca046b5bf262ae4b18686e1ae696accea64acd2f669b78114f7795",
       "outcome": "KILLED_BY_TEST",
       "detail": "● validateAssemblyRequest — controlling fail-fast order › checks provenance then candidate then unknown then credentials then authority then evidence | ● validator rejection sites identify their rule and path › identity mismatch",
       "detailSha256": "75a01fc15a5821742fde18b19138577092bf14a839db612647c3566faad8fae3"
@@ -1017,8 +1017,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "cd135997d7ef01412c8908bbecdbef60ead8984a3f5d828cf6a686a593699e65",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "35233e1ccb7f8e240c1f33fe11aaec5d00558eee8b5c718622b8f7ea695de9fd",
       "outcome": "KILLED_BY_TEST",
       "detail": "● frozen-rereview regressions › makes AUTHORITY_WIDENING reachable through the public unary compiler | ● validator rejection sites identify their rule and path › scope widening",
       "detailSha256": "a5435b8622900a127141af23a86655f63779a48440d8437cd19e7d5c836f9cb4"
@@ -1035,8 +1035,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "4788103f28fd30e68ca5e7a9acc09bf299ed98cfef920aa9a221f85555c846a5",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "c5fefda96b18991c0223f7cb0da3187d4f4d65f5b9dc42ede63e5c5bca49d214",
       "outcome": "KILLED_BY_TEST",
       "detail": "● validateAssemblyRequest — controlling fail-fast order › checks instants, deadline, budget, and provenance before candidate cardinality | ● validator rejection sites identify their rule and path › candidate count",
       "detailSha256": "dbe198d164483fcbf2aa296816ccc5e706bd27f2c04d171a2549888d08f964b0"
@@ -1053,8 +1053,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "a0086caf00b2625004d0b0e37188e3cc121fa5e8359ba90ad21cde7bd42da130",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "bfde53529d720fae5fb08a98c20538f4b4d2e47291fbc257e36c9c94b365910e",
       "outcome": "KILLED_BY_TEST",
       "detail": "● INVALID_DIGEST › rejects non-sha256 sourceDigest | ● parity: the two validators agree on inputs the corpus does not contain › agree on: candidateSet violating TWO rules at once (bad digest + unknown key) — the order case | ● validateAssemblyRequest — controlling fail-fast order › checks provenance then candidate then unknown then credentials then authority then evidence | ● validator rejection sites identify their rule and path › candidate digest",
       "detailSha256": "482b29dc2edba598c39739986d084cfb9082054fcfef39272b5d2fc9426cfe68"
@@ -1071,8 +1071,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "4d257fbcec782467706bcf94379eed85528e3754b1b25e008c43edfbfeb3e997",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "b5ec47346d9666e9db0e37d3ae4c9ec30709fc462db55caa0183c3d9a53afdb1",
       "outcome": "KILLED_BY_TEST",
       "detail": "● INVALID_PROVENANCE › rejects short policyDigest | ● compileAssembly pure artifact compiler › returns a typed error for invalid provenance | ● parity: the two validators agree on inputs the corpus does not contain › agree on: provenance violating TWO rules at once (bad digest + unknown key) | ● parity: the two validators agree on inputs the corpus does not contain › agrees on provenance semantics before candidate cardinality | ● validateAssemblyRequest — controlling fail-fast order › checks instants, deadline, budget, and provenance before candidate cardinality | ● validateAssemblyRequest — controlling fail-fast order › checks provenance then candidate then unknown then credentials then authority then evidence | ● validator rejection sites identify their rule and path › policy digest",
       "detailSha256": "360fc2166b0f50085b94ea25b1faca40ad9dca95cf4a334ba0bc1d512bda120c"
@@ -1089,8 +1089,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "003940da2d3ae2bbb4bacaf5f2e404f2ac4271927cae4dbf8e3700d68b16e138",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "2911ad40315baa2cccef09b1f71e06bb463899efd84cbcdbddc95dd1cccb428e",
       "outcome": "KILLED_BY_TEST",
       "detail": "● authority-supplied evaluatedAt › rejects policy issuance later than evaluatedAt | ● validator rejection sites identify their rule and path › policy future",
       "detailSha256": "42ee984b6a00e61c56e1623193e45cc50966048bb7382f055b961ebaff9cfb22"
@@ -1107,8 +1107,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "68cc5faaf39c313b26b246374dcd3da670b77ae954943e10d1e34b516ae39566",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "e058cbef511d09eec6da9b4fd4cf160bd98f7f45af8a57a93f6986875915dcdc",
       "outcome": "KILLED_BY_TEST",
       "detail": "● EXPIRED_POLICY › rejects past expiresAt | ● validator rejection sites identify their rule and path › policy expiry",
       "detailSha256": "ee1f59263e4d78fb1b8ff4b47a4528ef44d9ecb35a0f08c3d530be01215cfe07"
@@ -1125,8 +1125,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "ed5d7df0ec470dbb892700214d7f06c9677cccda16fe6fc54f153e96a10c2855",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "810e6f2a2eac5fbb349299447ad2fd2fb0cf515582a819fa3cdfdb94f4f610a4",
       "outcome": "KILLED_BY_TEST",
       "detail": "● CREDENTIAL_IN_PROHIBITED_POSITION — recursive › DOES treat a boundary-anchored api_key assignment as a credential | ● CREDENTIAL_IN_PROHIBITED_POSITION — recursive › RED: an embedded sk- key inside a URL is still detected | ● CREDENTIAL_IN_PROHIBITED_POSITION — recursive › RED: credential in candidateSet.candidates[] entry is detected | ● CREDENTIAL_IN_PROHIBITED_POSITION — recursive › RED: credential in provenance.policyUri is detected | ● CREDENTIAL_IN_PROHIBITED_POSITION — recursive › RED: credential in rolePolicy.policyId is detected | ● CREDENTIAL_IN_PROHIBITED_POSITION — recursive › rejects bearer token in authority purpose | ● F10 deterministic and secret-safe errors › never echoes rejected aws-shaped identities | ● F10 deterministic and secret-safe errors › never echoes rejected bearer-shaped identities | ● F10 deterministic and secret-safe errors › never echoes rejected generic-base64-shaped identities | ● F10 deterministic and secret-safe errors › never echoes rejected github-shaped identities | ● F10 deterministic and secret-safe errors › never echoes rejected gitlab-shaped identities | ● F10 deterministic and secret-safe errors › never echoes rejected jwt-shaped identities | ● F10 deterministic and secret-safe errors › never echoes rejected openai-style-shaped identities | ● F10 deterministic and secret-safe errors › never echoes rejected slack-shaped identities | ● credential scan has no unconditional exemption › rejects GitHub PAT in a free-form position | ● credential scan has no unconditional exemption › rejects JWT in a free-form position | ● credential scan has no unconditional exemption › rejects Slack token in a free-form position | ● credential scan has no unconditional exemption › rejects embedded bearer in a free-form position | ● credential scan has no unconditional exemption › rejects hex-shaped secret in a free-form position | ● parity: the two validators agree on inputs the corpus does not contain › agree on: a 64-hex secret in a field that does not carry digests (exemption was blanket in Python) | ● parity: the two validators agree on inputs the corpus does not contain › agree on: a 64-hex secret under an attacker-named key in traceFields | ● parity: the two validators agree on inputs the corpus does not contain › agree on: a GitHub token (one of the seven patterns Python did not carry) | ● parity: the two validators agree on inputs the corpus does not contain › agree on: a JWT | ● parity: the two validators agree on inputs the corpus does not contain › agree on: a Slack token | ● parity: the two validators agree on inputs the corpus does not contain › agree on: an AWS access key id | ● parity: the two validators agree on inputs the corpus does not contain › agree on: an embedded Bearer token | ● validateAssemblyRequest — controlling fail-fast order › checks provenance then candidate then unknown then credentials then authority then evidence | ● validator rejection sites identify their rule and path › credential",
       "detailSha256": "1dfbf575f6f3b0d13acb0f3051f6defea220a0cb7fe4c84f83b276405907fee6"
@@ -1143,8 +1143,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "221c75dee27e9a33b3818557666d89d5d7d3c7626ed653d1e0defa60923f37f5",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "c8af51321bb6f6a4290f3454264da9bac38c23a901e127d49ffe4e12cffcc171",
       "outcome": "KILLED_BY_TEST",
       "detail": "● F10 deterministic and secret-safe errors › never echoes rejected aws-shaped object keys | ● F10 deterministic and secret-safe errors › never echoes rejected bearer-shaped object keys | ● F10 deterministic and secret-safe errors › never echoes rejected generic-base64-shaped object keys | ● F10 deterministic and secret-safe errors › never echoes rejected github-shaped object keys | ● F10 deterministic and secret-safe errors › never echoes rejected gitlab-shaped object keys | ● F10 deterministic and secret-safe errors › never echoes rejected jwt-shaped object keys | ● F10 deterministic and secret-safe errors › never echoes rejected openai-style-shaped object keys | ● F10 deterministic and secret-safe errors › never echoes rejected slack-shaped object keys",
       "detailSha256": "7e35bf9bb5a8f0c4136ecbf4eb60044b42db74e0f57d4ee2e77b0468da8b492a"
@@ -1161,8 +1161,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "34b1cf6f0d2887375823f803c5eacc86abc39e6a29b027336657d29be6ca6c2b",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "d18c345b3f19b33c653d4e32c78201b1a52e222539c8de6f53ea4eb515972b00",
       "outcome": "KILLED_BY_TEST",
       "detail": "● UNSAFE_NESTING › rejects deeply nested traceFields | ● request boundary depth hardening › returns UNSAFE_NESTING rather than throwing at depth 20,000 | ● request boundary depth hardening › returns a typed error when captured causationId nearly fills the raw byte budget | ● request boundary depth hardening › returns a typed error when captured correlationId nearly fills the raw byte budget | ● request boundary depth hardening › returns a typed error when captured taskId nearly fills the raw byte budget",
       "detailSha256": "80aa5789567565d1cd534d8ab007e03707a654bc231de98bab651d2eeb8d7d59"
@@ -1179,8 +1179,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "mutantSha256": "ed8c6468aee1a863927214f6bc1f4830fa57344a09c11b206007b1ea061d9296",
+      "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
+      "mutantSha256": "f56239b34629ba2e5575fa2428530ba16772ebb7e48a1cf1f0efd7ab195dc97d",
       "outcome": "KILLED_BY_TYPECHECK",
       "detail": "error TS2366: Function lacks ending return statement and return type does not include 'undefined'.",
       "detailSha256": "f00d8e2df89e771cf5d71d4c57812ed024e36fd00d08c959d147a81854ce18fa"
@@ -1197,8 +1197,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "dcaf0cf387696a8984419a447aa289c8aefc1aff5f9eecdf8644364a24e92b3a",
-      "mutantSha256": "e74e53fd8e909a80a8d8bbd909a25c6e2256b76e7efee1de770c6f6bad175b28",
+      "pristineSha256": "4e52a503637d583bc1292b3d9cd3c9a9dad25148790547ba15d91eff9ff0c28d",
+      "mutantSha256": "aa5ea4bb753780b444c97665409882e7821f38c0804f6b3ab64f8b17346035a5",
       "outcome": "KILLED_BY_TEST",
       "detail": "● shared canonical v1 rejection sites › overlong string | ● shared canonical v1 rejection sites › oversized array",
       "detailSha256": "670f567ed44a91efad547145a228af1ebf337d160c76f62d942a9aefe9f576d5"
@@ -1215,8 +1215,8 @@
         }
       ],
       "mutationKind": "delete-statement",
-      "pristineSha256": "dcaf0cf387696a8984419a447aa289c8aefc1aff5f9eecdf8644364a24e92b3a",
-      "mutantSha256": "c36a2ab0da51f5c53c85ecff369796d4822018540495bc57d25440774277a2db",
+      "pristineSha256": "4e52a503637d583bc1292b3d9cd3c9a9dad25148790547ba15d91eff9ff0c28d",
+      "mutantSha256": "b298d28f9b6c60a5f5dba7e2b01f50d13d84d3a376a433887547b0c5dd7e4445",
       "outcome": "KILLED_BY_TYPECHECK",
       "detail": "error TS2366: Function lacks ending return statement and return type does not include 'undefined'.",
       "detailSha256": "f00d8e2df89e771cf5d71d4c57812ed024e36fd00d08c959d147a81854ce18fa"
@@ -1825,10 +1825,10 @@
   "restoration": {
     "verified": true,
     "files": {
-      "apps/api/src/assembly/assembly.errors.ts": "5f77edb975fe39515be2ebc27caddb5f89a24a287d6131d8f53f54f6bddb1c25",
-      "apps/api/src/assembly/assembly.validator.ts": "36a5410aae93aca0efa46b1534515eed7acb0f32c4f65cf534507d8767e4ee1e",
-      "apps/api/src/assembly/assembly.canonical.ts": "dcaf0cf387696a8984419a447aa289c8aefc1aff5f9eecdf8644364a24e92b3a",
-      "apps/api/src/assembly/assembly.compiler.ts": "74a17a457823faa96a821344e77ac4ee1f8799430094dff1c961899c4b23702d",
+      "apps/api/src/assembly/assembly.canonical.ts": "4e52a503637d583bc1292b3d9cd3c9a9dad25148790547ba15d91eff9ff0c28d",
+      "apps/api/src/assembly/assembly.compiler.ts": "9a37682a5558d2215caddc453e2edacab44eeb07c740054e7493e89a60abee99",
+      "apps/api/src/assembly/assembly.errors.ts": "a1bf3c097c639034cae219cc4b8bb11fd60bc414409d15b980b85975874968df",
+      "apps/api/src/assembly/assembly.validator.ts": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "apps/api/src/execution-authority/canonical-json-v1.ts": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e"
     }
   }

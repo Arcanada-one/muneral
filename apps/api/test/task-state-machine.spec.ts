@@ -1,4 +1,5 @@
-import { isValidTransition, TASK_TRANSITIONS, TaskStatus } from '@muneral/types';
+import { isValidTransition, TASK_TRANSITIONS } from '@muneral/types';
+import type { TaskStatus } from '@muneral/types';
 
 describe('Task State Machine', () => {
   describe('isValidTransition', () => {

@@ -1,5 +1,5 @@
 import { IsIn, IsString, Length, Matches } from 'class-validator';
-import { SECRET_RULE_IDS } from './secret-rules';
+import { SECRET_RULE_IDS } from './secret-rules.js';
 
 export const REDACTABLE_FIELDS = ['title', 'description'] as const;
 export type RedactableField = (typeof REDACTABLE_FIELDS)[number];

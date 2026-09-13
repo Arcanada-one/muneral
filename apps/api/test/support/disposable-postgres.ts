@@ -24,9 +24,20 @@ import { randomUUID } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { join } from 'node:path';
+import * as url from 'node:url';
+import * as path from 'node:path';
+import { createRequire } from 'node:module';
+
+// ESM has no `require`; these call sites load lazily inside test bodies
+// (mostly behind a postgres-availability check), so the bridge is kept
+// rather than hoisting them to static imports that would always execute.
+const nodeRequire = createRequire(import.meta.url);
+
+// ESM has no __dirname, and declaring that NAME would mark the module CommonJS.
+const thisDir = path.dirname(url.fileURLToPath(import.meta.url));
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
-const { Client } = require('pg');
+const { Client } = nodeRequire('pg');
 
 const PG_IMAGE = 'postgres:16-alpine';
 const PG_USER = 'muneral_test';
@@ -82,7 +93,7 @@ function resolveDockerCommand(): string[] | null {
 }
 
 function migrationSqlFiles(): string[] {
-  const migrationsDir = join(__dirname, '..', '..', 'prisma', 'migrations');
+  const migrationsDir = join(thisDir, '..', '..', 'prisma', 'migrations');
   return readdirSync(migrationsDir)
     .filter((d: string) => d.startsWith('202'))
     .sort()
