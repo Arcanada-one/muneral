@@ -3,7 +3,7 @@
   "rule": "admitted requires every verdict = verified; failed without exemption ⇒ refused; not_measured without exemption ⇒ paused_safe; exemptions (owner + expiry) are attached by the admitting agent, never by the verifier (DEC-AUP-0008, matrix P1/P4)",
   "verdict": "admitted_with_exemptions"
  },
- "captured_at_utc": "2026-09-13T17:18:29Z",
+ "captured_at_utc": "2026-09-13T17:35:13Z",
  "change_set": {
   "base": "aeecdb16b194a14e9b250c4becb49c465959c269",
   "files": [
@@ -107,9 +107,18 @@
     "kind": "lockfile",
     "path": "pnpm-lock.yaml",
     "status": "M"
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/change-admission-integration-batch1.json",
+    "node_ids": [
+     "receipt:receipts/graph/change-admission-integration-batch1.json"
+    ],
+    "path": "receipts/graph/change-admission-integration-batch1.json",
+    "status": "A"
    }
   ],
-  "head": "7ec4a17841f1d52492d248a0f5055303396d00df",
+  "head": "040996afea3635777725b652a2c8319cb3998cd2",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -127,24 +136,31 @@
    "expires_at_utc": "2026-09-27T00:00:00Z",
    "owner": "Arcanada (Mac control session, this PR's author; the change set is the sixteen-bump integration branch plus its evidence rebind)",
    "reason": "v-canary reports INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity, and there is no live contour in this repository's CI to produce one. The same verdict, on the same rule, was exempted on every receipt already merged here (MUN-0040, deps-floors, arca0209-deepmerge) — this is the standing shape of that verifier in a repository with no deployed canary, not a new gap. Note also that the rule cites contracts/graph-verified-change/observed-edges-and-deploy-gate.v1, which the vendored bundle does not ship: verifier-matrix.v1.json names it at verifiers.canary.contract_ref and the file is absent from contracts/. What changed is scoped and readable: lucide-react 1.x removed brand icons, so the `Github` import is gone and the mark is inlined as an SVG component in the same file. The sign-in path is byte-identical — the same signIn('github', {callbackUrl: '/workspaces'}) behind the same Button. Type-checked: `npx tsc --noEmit` in apps/web returns rc 0 on this head. reverse_if: void the moment a canary contour exists for apps/web (then this entity must carry a real canary result), or the moment this file's change stops being presentational — any edit to signIn, its provider, its callbackUrl, or the auth flow around it."
+  },
+  {
+   "code": "HISTORICAL_RECEIPT_ASSERTED",
+   "entity": "receipt:receipts/graph/change-admission-integration-batch1.json",
+   "expires_at_utc": "2026-09-27T00:00:00Z",
+   "owner": "Arcanada (Mac control session, this PR's author; bundle refresh to program_ref fa9774fc8998)",
+   "reason": "I14: a receipt that lands in the tree becomes an entity in its own impact set and is scored not_measured — «historical receipt: asserted, never re-verified». There is no measurement that closes this, because it is self-reference: the receipt would have to carry a verdict on itself, and any receipt issued to supply that verdict becomes a new entity with the same gap. The merged ci-node-pin receipt closed the identical case the same way on 2026-09-09. What this receipt actually asserts is measured and stands on its own: 3 verified verdicts over the bundle refresh, global fallback not triggered, gate verdict admit before this file existed. reverse_if: void if this file is edited after admission rather than superseded and archived, or if the gate gains a way to verify a receipt in the same change that introduces it."
   }
  ],
  "graph": {
   "builder_version": "1.0.1",
   "built_at_utc": "2026-09-05T00:00:00Z",
   "graph_digest": "sha256:2dc79e0d431d9fc57d3b144f5e5da63673387feb8e9474bbf482e796b8132e86",
-  "path": "/tmp/authored-108b.d/graph-aeecdb16b194.json",
+  "path": "/tmp/receipt-108f.d/graph-aeecdb16b194.json",
   "source_commit": "aeecdb16b194a14e9b250c4becb49c465959c269"
  },
  "head_graph": {
   "builder_version": "1.0.1",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:9ca212beabd8f9a453f4111d9a4fd5fba2ec66e3bb442447f3e53c7ca17e33da",
-  "path": "/tmp/authored-108b.d/graph-head-7ec4a17841f1.json",
-  "source_commit": "7ec4a17841f1d52492d248a0f5055303396d00df",
+  "graph_digest": "sha256:da499cda0d582b73e3b7443b2265e21b394dc724d7e797caf49ae6f7a8072d46",
+  "path": "/tmp/receipt-108f.d/graph-head-040996afea36.json",
+  "source_commit": "040996afea3635777725b652a2c8319cb3998cd2",
   "staleness": {
-   "checked_at_utc": "2026-09-13T17:18:31Z",
-   "checked_nodes": 282,
+   "checked_at_utc": "2026-09-13T17:35:16Z",
+   "checked_nodes": 283,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -24907,7 +24923,7 @@
   "tool": "tools/graph/verify.py",
   "version": "1.0.1"
  },
- "receipt_id": "car-verify-20260913T171829Z-7ec4a178",
+ "receipt_id": "car-verify-20260913T173513Z-040996af",
  "repo": {
   "name": "Arcanada-one/muneral",
   "path": "/home/dev/integration"
@@ -24929,20 +24945,21 @@
    "code_unit:apps/web/eslint.config.mjs",
    "code_unit:apps/web/types/next-auth.d.ts",
    "deployable_unit:apps/api",
-   "deployable_unit:apps/web"
+   "deployable_unit:apps/web",
+   "receipt:receipts/graph/change-admission-integration-batch1.json"
   ],
   "schema": "RevisionImpactSelection/v1",
   "unmeasured_head_files": []
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-09-13T17:18:31Z",
+  "checked_at_utc": "2026-09-13T17:35:16Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
  },
  "tree": {
-  "commit": "7ec4a17841f1d52492d248a0f5055303396d00df",
+  "commit": "040996afea3635777725b652a2c8319cb3998cd2",
   "dirty": false
  },
  "verdicts": [
@@ -25019,25 +25036,30 @@
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
    ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-integration-batch1.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "verdict": "not_measured"
   }
  ],
  "verifiers": [
   {
    "command": "/home/dev/integration/apps/api/node_modules/.bin/tsc -p /home/dev/integration/apps/api/tsconfig.json --noEmit --incremental false --listFiles",
-   "duration_s": 2.32,
+   "duration_s": 2.35,
    "entities": [
     "deployable_unit:apps/api"
    ],
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "/tmp/authored-108b.d/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-09-13T17:18:33Z",
+   "output_ref": "/tmp/receipt-108f.d/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-09-13T17:35:18Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1405 files listed"
   },
   {
    "command": "/home/dev/integration/apps/web/node_modules/.bin/tsc -p /home/dev/integration/apps/web/tsconfig.json --noEmit --incremental false --listFiles",
-   "duration_s": 2.89,
+   "duration_s": 3.28,
    "entities": [
     "code_unit:apps/web/__tests__/api-client.test.ts",
     "code_unit:apps/web/app/(auth)/login/LoginForm.tsx",
@@ -25048,8 +25070,8 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/tmp/authored-108b.d/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-09-13T17:18:36Z",
+   "output_ref": "/tmp/receipt-108f.d/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-09-13T17:35:21Z",
    "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1116 files listed"
   },
   {
@@ -25061,8 +25083,8 @@
    "exit_code": 1,
    "id": "v-workflow-config-dc49cc771602c92b",
    "kind": "config_schema",
-   "output_ref": "/tmp/authored-108b.d/v-workflow-config-dc49cc771602c92b.txt",
-   "started_at_utc": "2026-09-13T17:18:39Z",
+   "output_ref": "/tmp/receipt-108f.d/v-workflow-config-dc49cc771602c92b.txt",
+   "started_at_utc": "2026-09-13T17:35:24Z",
    "summary": "workflow configuration not measured: trigger outside this bounded checker: workflow_call"
   },
   {
@@ -25074,21 +25096,21 @@
    "exit_code": 0,
    "id": "v-workflow-config-f2afde09eeffcba0",
    "kind": "config_schema",
-   "output_ref": "/tmp/authored-108b.d/v-workflow-config-f2afde09eeffcba0.txt",
-   "started_at_utc": "2026-09-13T17:18:39Z",
+   "output_ref": "/tmp/receipt-108f.d/v-workflow-config-f2afde09eeffcba0.txt",
+   "started_at_utc": "2026-09-13T17:35:24Z",
    "summary": "bounded workflow configuration shape valid; expressions, shell, actions and hosted execution NOT_MEASURED"
   },
   {
    "command": "verify.py config_schema: keys read at head ⊆ declared keys",
-   "duration_s": 0.14,
+   "duration_s": 0.15,
    "entities": [
     "code_unit:apps/web/app/(auth)/login/LoginForm.tsx"
    ],
    "exit_code": 0,
    "id": "v-config-schema",
    "kind": "config_schema",
-   "output_ref": "/tmp/authored-108b.d/v-config-schema.json",
-   "started_at_utc": "2026-09-13T17:18:39Z",
+   "output_ref": "/tmp/receipt-108f.d/v-config-schema.json",
+   "started_at_utc": "2026-09-13T17:35:24Z",
    "summary": "2 source(s), 0 new / 3 frozen undeclared reads, 0 failed; 4 vendored file(s) not attributed to this repository (Arcanada-one/arcanada-universal-program)"
   },
   {
@@ -25107,8 +25129,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/tmp/authored-108b.d/v-fitness.json",
-   "started_at_utc": "2026-09-13T17:18:39Z",
+   "output_ref": "/tmp/receipt-108f.d/v-fitness.json",
+   "started_at_utc": "2026-09-13T17:35:24Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -25120,8 +25142,8 @@
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/tmp/authored-108b.d/v-canary.json",
-   "started_at_utc": "2026-09-13T17:18:39Z",
+   "output_ref": "/tmp/receipt-108f.d/v-canary.json",
+   "started_at_utc": "2026-09-13T17:35:25Z",
    "summary": "0 canary result(s); 0 verified / 0 failed / 1 not_measured of 1 entities"
   }
  ],
@@ -25161,12 +25183,13 @@
    "deployable_unit:apps/web": [
     "fitness_rules",
     "type_check"
-   ]
+   ],
+   "receipt:receipts/graph/change-admission-integration-batch1.json": []
   },
   "seconds": {
-   "prepare": 1.77,
-   "total": 10.71,
-   "verifiers": 5.41
+   "prepare": 1.85,
+   "total": 11.31,
+   "verifiers": 5.84
   }
  }
 }
