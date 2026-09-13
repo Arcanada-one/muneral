@@ -194,6 +194,7 @@ model Task {
   resultRefs     TaskCommittedResultRef[]
   solutionLogHeadReceipts SolutionLogHeadReceipt[]
   legacyIdentities        LegacyIdentity[]
+  redactions              TaskRedaction[]
 
   @@index([projectId], name: "idx_tasks_project_id")
   @@index([sprintId], name: "idx_tasks_sprint_id")
@@ -315,6 +316,33 @@ model TaskAgent {
 // actorId is polymorphic (references either users.id or agents.id, discriminated
 // by actorType). Prisma does not support polymorphic FKs — stored as plain String.
 // The DB-level FK in the original schema does not exist either (actor_id has no FK).
+/// MUN-0049 — one removed secret-shaped span of a task's title or description.
+/// Hashes only: the span by sha256, the field value before and after by sha256.
+/// The cleartext is in no column and in no activity payload. Unique on
+/// (task, field, span) is what makes the route idempotent.
+model TaskRedaction {
+  id                  String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  taskId              String   @map("task_id") @db.Uuid
+  // field CHECK (field IN ('title','description')) in migration
+  field               String   @db.VarChar(32)
+  rule                String   @db.VarChar(64)
+  spanSha256          String   @map("span_sha256") @db.VarChar(64)
+  replacement         String   @db.VarChar(512)
+  previousValueSha256 String   @map("previous_value_sha256") @db.VarChar(64)
+  newValueSha256      String   @map("new_value_sha256") @db.VarChar(64)
+  occurrences         Int
+  // actor_type CHECK (actor_type IN ('human','agent')) in migration
+  actorType           String   @map("actor_type") @db.VarChar
+  actorId             String   @map("actor_id") @db.Uuid
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, field, spanSha256], map: "task_redactions_task_field_span_unique")
+  @@index([taskId], map: "idx_task_redactions_task_id")
+  @@map("task_redactions")
+}
+
 model ActivityLog {
   id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   taskId      String?  @map("task_id") @db.Uuid

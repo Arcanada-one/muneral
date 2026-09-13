@@ -87,7 +87,11 @@ export class AgentTaskScopeGuard implements CanActivate {
     }
 
     switch (kind) {
-      case 'task': {
+      // MUN-0049: 'task-redaction' is bound exactly like 'task' — the agent
+      // must be assigned to the task — and is listed separately so the write
+      // can be revoked without touching the read/comment/status routes.
+      case 'task':
+      case 'task-redaction': {
         const taskId = this.paramOf(req, 'taskId');
         if (!taskId) throw new ForbiddenException('No task in scope for this key.');
         await this.assertAssignedToTask(agent, taskId);

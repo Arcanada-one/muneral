@@ -32,6 +32,8 @@ import { ActorInterceptor } from '../common/interceptors/actor.interceptor';
 import { Actor } from '@muneral/types';
 import { FieldChangesService } from './field-state/field-changes.service';
 import { TaskStalenessService } from '../execution-authority/task-staleness.service';
+import { TaskRedactionService } from './redactions/task-redaction.service';
+import { RedactFieldDto } from './redactions/redact-field.dto';
 
 type AuthRequest = Request & { actor: Actor; agentScope?: AgentScopeContext };
 
@@ -82,6 +84,13 @@ type AuthRequest = Request & { actor: Actor; agentScope?: AgentScopeContext };
  * narrowest existing scope that fits. Authorship is unaffected — `AddCommentDto`
  * carries no actor field, and `req.actor` (via `ActorInterceptor`) is resolved
  * from the credential, never the body.
+ *
+ * MUN-0049 — `POST /tasks/:taskId/redactions` is the third write. It is marked
+ * with its OWN scope, `'task-redaction'`, rather than reusing `'task'`: the
+ * assignment check is the same, but a route that rewrites a title is a
+ * different kind of act from a comment or a status move, and naming it in the
+ * allowlist keeps it revocable on its own. The body never carries the secret —
+ * see `TaskRedactionService`.
  */
 @Controller('tasks')
 @UseGuards(JwtOrApiKeyGuard, AgentTaskScopeGuard)
@@ -91,6 +100,7 @@ export class TasksController {
     private readonly tasksService: TasksService,
     private readonly fieldChangesService: FieldChangesService,
     private readonly stalenessService: TaskStalenessService,
+    private readonly redactionService: TaskRedactionService,
   ) {}
 
   /** Creatable by an agent's API key inside its own workspace (MUN-0045) or by
@@ -180,6 +190,24 @@ export class TasksController {
     @Body() dto: UpdateTaskStatusDto,
   ) {
     return this.tasksService.updateStatus(taskId, req.actor, dto);
+  }
+
+  /** MUN-0049. Removes one secret-shaped span, named by scanner rule and
+   *  sha256, from the title or description. 201 with the record on the first
+   *  call, 200 `idempotent: true` on a repeat, 409 `SPAN_NOT_FOUND` when the
+   *  hash is not in the current value. Reachable by the assigned agent's API
+   *  key (`'task-redaction'` scope) or by a JWT; attributed to `req.actor`. */
+  @Post(':taskId/redactions')
+  @AgentScope('task-redaction')
+  async redact(
+    @Param('taskId') taskId: string,
+    @Req() req: AuthRequest,
+    @Body() dto: RedactFieldDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { statusCode, body } = await this.redactionService.redact(taskId, req.actor, dto);
+    res.status(statusCode);
+    return body;
   }
 
   @Delete(':taskId')

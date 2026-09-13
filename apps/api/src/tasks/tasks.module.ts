@@ -10,6 +10,7 @@ import { AuthModule } from '../auth/auth.module';
 import { ExecutionAuthorityModule } from '../execution-authority/execution-authority.module';
 import { TaskExecutionRecorderService } from '../execution-authority/task-execution-recorder.service';
 import { TaskStalenessService } from '../execution-authority/task-staleness.service';
+import { TaskRedactionService } from './redactions/task-redaction.service';
 
 @Module({
   imports: [ActivityModule, WsModule, AuthModule, ExecutionAuthorityModule],
@@ -20,6 +21,7 @@ import { TaskStalenessService } from '../execution-authority/task-staleness.serv
     FieldChangesService,
     TaskExecutionRecorderService,
     TaskStalenessService,
+    TaskRedactionService,
   ],
   exports: [TasksService, TaskFieldStateService, FieldChangesService],
 })
