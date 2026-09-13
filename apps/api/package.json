@@ -68,8 +68,7 @@
     "moduleFileExtensions": [
       "js",
       "json",
-      "ts",
-      "cts"
+      "ts"
     ],
     "rootDir": ".",
     "testRegex": ".*\\.spec\\.ts$",
@@ -79,13 +78,6 @@
         {
           "tsconfig": "<rootDir>/tsconfig.test.json",
           "useESM": true,
-          "isolatedModules": true
-        }
-      ],
-      "^.+\\.cts$": [
-        "ts-jest",
-        {
-          "tsconfig": "<rootDir>/tsconfig.shim.json",
           "isolatedModules": true
         }
       ]
@@ -100,7 +92,7 @@
     "moduleNameMapper": {
       "^@muneral/types$": "<rootDir>/../../packages/types/dist/index.js",
       "^(\\.{1,2}/.*)\\.js$": "$1",
-      "^@nestjs/throttler$": "<rootDir>/test/support/throttler-esm-shim.cts"
+      "^@nestjs/throttler$": "<rootDir>/test/support/throttler-test-double.ts"
     },
     "setupFiles": [
       "<rootDir>/test/setup-env.ts"
