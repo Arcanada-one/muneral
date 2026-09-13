@@ -6,10 +6,8 @@ import { ExecutionContext, ForbiddenException, NotFoundException } from '@nestjs
 import { Reflector } from '@nestjs/core';
 import { Agent } from '@prisma/client';
 import { AGENT_SCOPE_KEY } from '../src/auth/agent-scope.decorator.js';
-import {
-  AgentScopedRequest,
-  AgentTaskScopeGuard,
-} from '../src/auth/guards/agent-task-scope.guard.js';
+import { AgentTaskScopeGuard } from '../src/auth/guards/agent-task-scope.guard.js';
+import type { AgentScopedRequest } from '../src/auth/guards/agent-task-scope.guard.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
 // ESM has no injected globals, so `jest` must be imported for the RUNTIME.
 // Its type, though, comes from @types/jest (already in tsconfig `types`),

@@ -3,7 +3,7 @@
 // invariant that no cleartext reaches the activity payload or the response.
 // The e2e suite proves the same over HTTP against a real database.
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
-import { Actor } from '@muneral/types';
+import type { Actor } from '@muneral/types';
 import { TaskRedactionService, REDACTION_ACTION } from '../src/tasks/redactions/task-redaction.service.js';
 import { sha256Hex } from '../src/tasks/redactions/secret-rules.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';

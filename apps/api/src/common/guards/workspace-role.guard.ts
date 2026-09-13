@@ -6,9 +6,10 @@ import {
   SetMetadata,
   mixin,
 } from '@nestjs/common';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { WorkspaceMember } from '@prisma/client';
-import { WorkspaceMemberRole, hasRole } from '@muneral/types';
+import { hasRole } from '@muneral/types';
+import type { WorkspaceMemberRole } from '@muneral/types';
 
 /**
  * WorkspaceRoleGuard factory — creates a guard that verifies the caller

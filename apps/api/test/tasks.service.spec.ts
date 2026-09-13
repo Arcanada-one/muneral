@@ -6,7 +6,7 @@ import { ActivityService } from '../src/activity/activity.service.js';
 import { KanbanService } from '../src/ws/kanban.service.js';
 import { TaskFieldStateService } from '../src/tasks/field-state/task-field-state.service.js';
 import { TaskExecutionRecorderService } from '../src/execution-authority/task-execution-recorder.service.js';
-import { Actor } from '@muneral/types';
+import type { Actor } from '@muneral/types';
 // ESM has no injected globals, so `jest` must be imported for the RUNTIME.
 // Its type, though, comes from @types/jest (already in tsconfig `types`),
 // which is what the 339 existing jest.fn() call sites are written against —

@@ -15,7 +15,7 @@ import {
   Headers,
   Res,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { TasksService } from './tasks.service.js';
 import { CreateTaskDto } from './dto/create-task.dto.js';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto.js';
@@ -23,13 +23,11 @@ import { AddDependencyDto } from './dto/add-dependency.dto.js';
 import { CreateChecklistItemDto } from './dto/create-checklist-item.dto.js';
 import { AddCommentDto } from './dto/add-comment.dto.js';
 import { JwtOrApiKeyGuard } from '../auth/guards/jwt-or-api-key.guard.js';
-import {
-  AgentScopeContext,
-  AgentTaskScopeGuard,
-} from '../auth/guards/agent-task-scope.guard.js';
+import { AgentTaskScopeGuard } from '../auth/guards/agent-task-scope.guard.js';
+import type { AgentScopeContext } from '../auth/guards/agent-task-scope.guard.js';
 import { AgentScope } from '../auth/agent-scope.decorator.js';
 import { ActorInterceptor } from '../common/interceptors/actor.interceptor.js';
-import { Actor } from '@muneral/types';
+import type { Actor } from '@muneral/types';
 import { FieldChangesService } from './field-state/field-changes.service.js';
 import { TaskStalenessService } from '../execution-authority/task-staleness.service.js';
 import { TaskRedactionService } from './redactions/task-redaction.service.js';

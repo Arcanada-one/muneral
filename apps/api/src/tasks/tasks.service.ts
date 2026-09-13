@@ -13,7 +13,8 @@ import { CreateChecklistItemDto } from './dto/create-checklist-item.dto.js';
 import { ActivityService } from '../activity/activity.service.js';
 import { KanbanService } from '../ws/kanban.service.js';
 import { randomUUID } from 'node:crypto';
-import { Actor, isValidTransition, TaskStatus } from '@muneral/types';
+import { isValidTransition } from '@muneral/types';
+import type { Actor, TaskStatus } from '@muneral/types';
 import { TaskFieldStateService } from './field-state/task-field-state.service.js';
 import { TaskExecutionRecorderService } from '../execution-authority/task-execution-recorder.service.js';
 

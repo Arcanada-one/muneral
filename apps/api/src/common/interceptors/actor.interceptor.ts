@@ -5,8 +5,8 @@ import {
   CallHandler,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { Request } from 'express';
-import { Actor } from '@muneral/types';
+import type { Request } from 'express';
+import type { Actor } from '@muneral/types';
 import { User, Agent } from '@prisma/client';
 
 /**

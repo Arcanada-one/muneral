@@ -8,7 +8,7 @@ import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { GithubProfile } from './dto/github-profile.dto.js';
+import type { GithubProfile } from './dto/github-profile.dto.js';
 import { TelegramLoginDto } from './dto/telegram-login.dto.js';
 
 const API_KEY_PREFIX = 'mun_sk_';

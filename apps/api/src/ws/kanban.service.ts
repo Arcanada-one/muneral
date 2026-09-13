@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { KanbanGateway, KanbanEvent } from './kanban.gateway.js';
+import { KanbanGateway } from './kanban.gateway.js';
+import type { KanbanEvent } from './kanban.gateway.js';
 
 /**
  * KanbanService — thin wrapper around KanbanGateway.

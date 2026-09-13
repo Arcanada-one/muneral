@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto.js';
-import { WorkspaceMemberRole } from '@muneral/types';
+import type { WorkspaceMemberRole } from '@muneral/types';
 
 @Injectable()
 export class WorkspacesService {

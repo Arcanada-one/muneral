@@ -5,9 +5,9 @@ import {
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { PrismaService } from '../../prisma/prisma.service.js';
-import { Actor } from '@muneral/types';
+import type { Actor } from '@muneral/types';
 
 /**
  * WorkspaceMemberGuard — verifies the caller is a member of the workspace

@@ -11,7 +11,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { WorkspacesService } from './workspaces.service.js';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto.js';
 import { UpdateMemberRoleDto } from './dto/update-member-role.dto.js';
@@ -20,7 +20,7 @@ import { WorkspaceMemberGuard } from '../common/guards/workspace-member.guard.js
 import { WorkspaceRoleGuard } from '../common/guards/workspace-role.guard.js';
 import { ActorInterceptor } from '../common/interceptors/actor.interceptor.js';
 import { UseInterceptors } from '@nestjs/common';
-import { Actor } from '@muneral/types';
+import type { Actor } from '@muneral/types';
 import { User } from '@prisma/client';
 
 type AuthRequest = Request & { user: User; actor?: Actor };

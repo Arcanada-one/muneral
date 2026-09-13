@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma, TaskRedaction } from '@prisma/client';
-import { Actor } from '@muneral/types';
+import type { Actor } from '@muneral/types';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { ActivityService } from '../../activity/activity.service.js';
 import { KanbanService } from '../../ws/kanban.service.js';

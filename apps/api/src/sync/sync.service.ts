@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { TASK_STATUSES, TaskStatus, TaskPriority } from '@muneral/types';
+import { TASK_STATUSES } from '@muneral/types';
+import type { TaskStatus, TaskPriority } from '@muneral/types';
 
 /**
  * SyncService — bidirectional sync with Datarim tasks.md format.

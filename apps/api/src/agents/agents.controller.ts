@@ -11,7 +11,7 @@ import {
   HttpStatus,
   Req,
 } from '@nestjs/common';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { AgentsService } from './agents.service.js';
 import { CreateAgentDto } from './dto/create-agent.dto.js';
 import { AssignAgentDto } from './dto/assign-agent.dto.js';

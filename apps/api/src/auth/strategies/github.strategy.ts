@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-github2';
 import { AuthService } from '../auth.service.js';
-import { GithubProfile } from '../dto/github-profile.dto.js';
+import type { GithubProfile } from '../dto/github-profile.dto.js';
 import type { User } from '@prisma/client';
 
 @Injectable()

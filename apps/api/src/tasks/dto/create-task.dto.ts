@@ -9,7 +9,8 @@ import {
   MaxLength,
   IsArray,
 } from 'class-validator';
-import { TASK_STATUSES, TaskStatus, TaskPriority } from '@muneral/types';
+import { TASK_STATUSES } from '@muneral/types';
+import type { TaskStatus, TaskPriority } from '@muneral/types';
 
 export class CreateTaskDto {
   @IsUUID()
