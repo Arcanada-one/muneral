@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { createHash } from 'crypto';
 import { PrismaService } from '../src/prisma/prisma.service.js';
 // ESM has no injected globals, so `jest` must be imported for the RUNTIME.
 // Its type, though, comes from @types/jest (already in tsconfig `types`),
@@ -147,6 +148,13 @@ describe('AuthService', () => {
       const createCall = (prisma.apiKey.create as jest.Mock).mock.calls[0][0];
       expect(createCall.data.keyHash).toMatch(/^hashed:/);
     });
+
+    it('MUN-0051: stores the sha256 lookup id of the raw key, never the key itself', async () => {
+      const { key } = await service.createApiKey('agent-1');
+      const createCall = (prisma.apiKey.create as jest.Mock).mock.calls[0][0];
+      expect(createCall.data.lookupHash).toBe(createHash('sha256').update(key).digest('hex'));
+      expect(createCall.data.lookupHash).not.toContain(key.slice('mun_sk_'.length));
+    });
   });
 
   describe('rotateApiKey', () => {
@@ -217,10 +225,27 @@ describe('AuthService', () => {
   });
 
   describe('validateApiKey', () => {
+    const RAW = 'mun_sk_validkey';
+    const LOOKUP = createHash('sha256').update(RAW).digest('hex');
+    const row = (over: Record<string, unknown> = {}) => ({
+      id: 'key-1',
+      keyHash: `hashed:${RAW}`,
+      lookupHash: LOOKUP,
+      revokedAt: null,
+      expiresAt: null,
+      agent: { id: 'agent-1', name: 'TestAgent' },
+      ...over,
+    });
+
+    beforeEach(() => {
+      bcrypt.compare.mockClear();
+    });
+
     it('returns null for keys without mun_sk_ prefix', async () => {
       const result = await service.validateApiKey('sk-wrong-prefix');
       expect(result).toBeNull();
       expect(prisma.apiKey.findMany).not.toHaveBeenCalled();
+      expect(prisma.apiKey.findUnique).not.toHaveBeenCalled();
     });
 
     it('returns null when no candidates match', async () => {
@@ -228,16 +253,55 @@ describe('AuthService', () => {
       expect(result).toBeNull();
     });
 
-    it('returns matched key on valid comparison', async () => {
-      const candidate = {
-        id: 'key-1',
-        keyHash: 'hashed:mun_sk_validkey',
-        agent: { id: 'agent-1', name: 'TestAgent' },
-      };
-      prisma.apiKey.findMany.mockResolvedValue([candidate]);
+    it('MUN-0051: finds the key by its lookup id and runs exactly ONE bcrypt comparison', async () => {
+      const candidate = row();
+      prisma.apiKey.findUnique.mockResolvedValue(candidate);
 
-      const result = await service.validateApiKey('mun_sk_validkey');
+      const result = await service.validateApiKey(RAW);
+
       expect(result).toBe(candidate);
+      expect(prisma.apiKey.findUnique).toHaveBeenCalledWith({
+        where: { lookupHash: LOOKUP },
+        include: { agent: true },
+      });
+      expect(bcrypt.compare).toHaveBeenCalledTimes(1);
+      expect(bcrypt.compare).toHaveBeenCalledWith(RAW, candidate.keyHash);
+      // The indexed hit never loads the other keys.
+      expect(prisma.apiKey.findMany).not.toHaveBeenCalled();
+    });
+
+    it('MUN-0051: refuses a revoked or expired key found by lookup id, after the same one comparison', async () => {
+      for (const over of [{ revokedAt: new Date() }, { expiresAt: new Date(Date.now() - 1000) }]) {
+        bcrypt.compare.mockClear();
+        prisma.apiKey.findUnique.mockResolvedValue(row(over));
+        await expect(service.validateApiKey(RAW)).resolves.toBeNull();
+        expect(bcrypt.compare).toHaveBeenCalledTimes(1);
+        expect(prisma.apiKey.findMany).not.toHaveBeenCalled();
+      }
+    });
+
+    it('MUN-0051: an unknown key still pays one bcrypt comparison (dummy hash) and scans only legacy rows', async () => {
+      prisma.apiKey.findUnique.mockResolvedValue(null);
+
+      await expect(service.validateApiKey('mun_sk_unknown')).resolves.toBeNull();
+
+      expect(bcrypt.compare).toHaveBeenCalledTimes(1);
+      const where = (prisma.apiKey.findMany as jest.Mock).mock.calls[0][0].where;
+      expect(where).toEqual(expect.objectContaining({ lookupHash: null, revokedAt: null }));
+    });
+
+    it('MUN-0051: a legacy key (no lookup id) still validates and back-fills its lookup id', async () => {
+      prisma.apiKey.findUnique.mockResolvedValue(null);
+      const legacy = row({ lookupHash: null });
+      prisma.apiKey.findMany.mockResolvedValue([legacy]);
+
+      const result = await service.validateApiKey(RAW);
+
+      expect(result).toBe(legacy);
+      expect(prisma.apiKey.update).toHaveBeenCalledWith({
+        where: { id: 'key-1' },
+        data: expect.objectContaining({ lookupHash: LOOKUP, lastUsedAt: expect.any(Date) }),
+      });
     });
   });
 });

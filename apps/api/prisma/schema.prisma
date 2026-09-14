@@ -278,6 +278,10 @@ model ApiKey {
   id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   agentId    String    @map("agent_id") @db.Uuid
   keyHash    String    @map("key_hash") @db.VarChar
+  // MUN-0051: sha256 hex of the raw key — an indexed, non-secret lookup id so a
+  // request costs one bcrypt comparison instead of one per stored key. NULL for
+  // keys created before the migration until their first successful use.
+  lookupHash String?   @unique(map: "uq_api_keys_lookup_hash") @map("lookup_hash") @db.VarChar(64)
   label      String?   @db.VarChar
   lastUsedAt DateTime? @map("last_used_at") @db.Timestamptz()
   expiresAt  DateTime? @map("expires_at") @db.Timestamptz()

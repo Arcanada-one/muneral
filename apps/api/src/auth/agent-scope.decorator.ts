@@ -10,7 +10,11 @@ import { SetMetadata } from '@nestjs/common';
  * remembers to close: an agent key would reach it the day it merges, silently.
  *
  *   'task'           — the route names a task (`:taskId`). The key's agent must
- *                      be assigned to that task (`task_agents`).
+ *                      be assigned to that task (`task_agents`) or, since
+ *                      MUN-0051, have created it (`tasks.created_by_id` = the
+ *                      agent, `actor_type` = 'agent'). Before MUN-0051 a creator
+ *                      without an assignment row could not read or comment on
+ *                      the task it had just created.
  *   'project'        — the route names a project (`:projectId`) and returns a
  *                      collection. The key's agent sees only the tasks it is
  *                      assigned to inside that project; an agent with no
@@ -60,6 +64,20 @@ import { SetMetadata } from '@nestjs/common';
  *                      work item the fleet registered stayed `todo`). The
  *                      state machine is not part of the scope: the service
  *                      holds every caller, key or JWT, to TASK_TRANSITIONS.
+ *   'task-assign'    — MUN-0051. The route names a task (`:taskId`) and writes
+ *                      a `task_agents` row for the agent and role named in the
+ *                      body. Before MUN-0051 the route had no scope at all: any
+ *                      valid key could assign any agent, in any workspace, to
+ *                      any task, with any role — and since MUN-0050 an executor
+ *                      row moves status, so "assign yourself, then move the
+ *                      card" was open to every key. The key's agent must be in
+ *                      the workspace that owns the task and must either have
+ *                      CREATED the task (it may then grant any role) or be its
+ *                      EXECUTOR (it may grant executor or reviewer, never
+ *                      lead); the assignee must be an agent of the same
+ *                      workspace. A lead or reviewer assignment grants nothing.
+ *                      See AgentTaskScopeGuard.assertMayAssign and the dated
+ *                      compatibility window in assign-compat-window.ts.
  */
 export const AGENT_SCOPE_KEY = 'mun0043:agentScope';
 
@@ -69,7 +87,8 @@ export type AgentScopeKind =
   | 'task-workspace'
   | 'project-write'
   | 'task-redaction'
-  | 'task-status';
+  | 'task-status'
+  | 'task-assign';
 
 export const AgentScope = (kind: AgentScopeKind) =>
   SetMetadata(AGENT_SCOPE_KEY, kind);

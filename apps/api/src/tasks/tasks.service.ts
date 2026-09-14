@@ -17,6 +17,7 @@ import { isValidTransition } from '@muneral/types';
 import type { Actor, TaskStatus } from '@muneral/types';
 import { TaskFieldStateService } from './field-state/task-field-state.service.js';
 import { TaskExecutionRecorderService } from '../execution-authority/task-execution-recorder.service.js';
+import { agentOwnTaskWhere } from '../auth/agent-task-visibility.js';
 
 @Injectable()
 export class TasksService {
@@ -112,7 +113,8 @@ export class TasksService {
    * Tasks in a project.
    *
    * MUN-0043: when `scopedToAgentId` is given the answer is narrowed to the
-   * tasks that agent is assigned to. The parameter is the agent resolved from
+   * tasks that agent is assigned to — or, since MUN-0051, created (see
+   * agentOwnTaskWhere). The parameter is the agent resolved from
    * an API key by `AgentTaskScopeGuard`; a JWT caller passes nothing and the
    * behaviour is unchanged. Narrowing lives here rather than in the controller
    * so the database, not a post-filter, is what never returns the other rows.
@@ -121,9 +123,7 @@ export class TasksService {
     return this.prisma.task.findMany({
       where: {
         projectId,
-        ...(scopedToAgentId
-          ? { agents: { some: { agentId: scopedToAgentId } } }
-          : {}),
+        ...(scopedToAgentId ? agentOwnTaskWhere(scopedToAgentId) : {}),
       },
       orderBy: { createdAt: 'desc' },
     });

@@ -165,7 +165,7 @@ describe('TaskStalenessService', () => {
       expect(result.every((r) => r.verdict === 'not_measured')).toBe(true);
     });
 
-    it('narrows to the scoped agent, same as findByProject', async () => {
+    it('narrows to the scoped agent, same as findByProject — assigned or (MUN-0051) created', async () => {
       prisma.task.findMany.mockResolvedValue([]);
 
       await service.reportForProject('proj-1', 24 * HOUR, 'agent-1', NOW);
@@ -174,7 +174,10 @@ describe('TaskStalenessService', () => {
         where: {
           projectId: 'proj-1',
           status: 'in_progress',
-          agents: { some: { agentId: 'agent-1' } },
+          OR: [
+            { agents: { some: { agentId: 'agent-1' } } },
+            { createdById: 'agent-1', actorType: 'agent' },
+          ],
         },
         select: { id: true, priority: true },
       });
