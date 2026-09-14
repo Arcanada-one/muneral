@@ -5,6 +5,21 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
+    ignore:
+      # eslint 10 in apps/web is not a version bump, it is impossible: measured on
+      # 2026-09-14, eslint-plugin-react@7.37.5 (which arrives through
+      # eslint-config-next) calls two APIs eslint 10 removed --
+      # `context.getFilename()` from resolveBasedir, and `scopeManager.addGlobals`
+      # -- so pinning past the first only reveals the second. Its peer range stops
+      # at ^9.7, and its only newer dist-tag is 7.8.0-rc.0, published 2014-12-16.
+      # PR #56 sat open 18 days as a signal nobody could act on.
+      #
+      # Scoped to the major deliberately: 9.x patches and minors still come through.
+      # REVERSE WHEN eslint-plugin-react ships an eslint-10 release, or apps/web
+      # stops taking its plugins from eslint-config-next. apps/api is unaffected --
+      # it is already on eslint v10.10.0 and green.
+      - dependency-name: eslint
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
     schedule:
