@@ -100,7 +100,7 @@
    "code": "CHANGE_SET_INCOMPLETE",
    "verdict": "refuse",
    "order": 6,
-   "rule": "Every file changed in the gated range must appear in the union of the change_set of the bound receipts. Uncovered paths are listed in the gate receipt — a receipt that describes a subset of the change is not a receipt for the change."
+   "rule": "Every file changed in the gated range must appear in the union of the change_set of the bound receipts. Uncovered paths are listed in the gate receipt — a receipt that describes a subset of the change is not a receipt for the change. GATEORDER-0 (contracts/graph-verified-change/trailing-record-commits.v1.md): a commit after every bound receipt's head may carry only RECORD paths — (a) a bound receipt file whose bytes at head are the bytes the gate bound, (b) an exact path of .arcana/derived-artefacts.v1.json READ AT BASE whose own verifier accepts it at head and refuses it with one byte corrupted. Such a path, touched by no receipt's own range, is not counted as uncovered; it adds nothing to what any receipt must verify. Any other path changed after the receipt head refuses here, even when the change_set lists it, and a derived verifier that cannot run is not_measured, never a pass."
   },
   {
    "id": "C07",
