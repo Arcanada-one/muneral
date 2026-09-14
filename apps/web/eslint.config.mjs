@@ -8,9 +8,24 @@
 // format migration, not a policy change — apps/api was already on a flat config.
 import nextCoreWebVitals from 'eslint-config-next/core-web-vitals';
 
-export default [
+// Named, then exported: the flat config is itself linted, and a bare array default
+// export trips import/no-anonymous-default-export from the preset it is loading.
+const config = [
   {
     ignores: ['.next/**', 'node_modules/**', 'next-env.d.ts'],
   },
   ...nextCoreWebVitals,
+  {
+    // Pin the React version instead of letting the plugin detect it. eslint 10
+    // removed `context.getFilename()` in favour of `context.filename`, and
+    // eslint-plugin-react@7.37.5 still calls the old one from resolveBasedir
+    // (lib/util/version.js:31) — measured: `contextOrFilename.getFilename is not a
+    // function`, exit 2, the linter unable to load its own rules. Detection is the
+    // only path into that function, so declaring the version skips it. 19.1 is what
+    // apps/web actually depends on (react ^19.1.0), so this states a fact rather
+    // than working around one.
+    settings: { react: { version: '19.1' } },
+  },
 ];
+
+export default config;

@@ -6,7 +6,7 @@
     "dev": "next dev -p 3501",
     "build": "next build",
     "start": "next start -p 3501",
-    "lint": "next lint",
+    "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
     "clean": "rm -rf .next"
