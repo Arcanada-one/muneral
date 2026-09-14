@@ -77,8 +77,7 @@
         "ts-jest",
         {
           "tsconfig": "<rootDir>/tsconfig.test.json",
-          "useESM": true,
-          "isolatedModules": true
+          "useESM": true
         }
       ]
     },
