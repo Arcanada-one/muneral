@@ -104,6 +104,14 @@ export class AgentTaskScopeGuard implements CanActivate {
         await this.assertTaskInWorkspace(agent, taskId);
         break;
       }
+      // MUN-0050: the status route. Creator OR executor assignment, inside the
+      // agent's own workspace — see assertCreatorOrExecutorOfTask.
+      case 'task-status': {
+        const taskId = this.paramOf(req, 'taskId');
+        if (!taskId) throw new ForbiddenException('No task in scope for this key.');
+        await this.assertCreatorOrExecutorOfTask(agent, taskId);
+        break;
+      }
       case 'project-write': {
         const projectId = this.bodyFieldOf(req, 'projectId');
         if (!projectId) throw new ForbiddenException('No project in scope for this key.');
@@ -165,6 +173,42 @@ export class AgentTaskScopeGuard implements CanActivate {
     if (!assignment) {
       throw new ForbiddenException(
         `Agent "${agent.name}" is not assigned to task ${taskId}.`,
+      );
+    }
+  }
+
+  /**
+   * MUN-0050 — the status route's rule, in one query so the database and not
+   * a sequence of checks is what answers it: the task must be in the agent's
+   * workspace, and the agent must either be its creator (`created_by_id` is
+   * this agent AND `actor_type` is 'agent' — a human's user id can never
+   * satisfy the pair, and a creator row that names an agent id under a human
+   * actor type is a forgery, not a grant) or hold a `task_agents` row for it
+   * with role `executor`. A lead or reviewer assignment is not enough: those
+   * roles read and comment (`'task'`), they do not move the card.
+   *
+   * 403 for "no such task", "not yours" and a malformed id alike, as on
+   * `assertAssignedToTask`, so the status route cannot be used to enumerate
+   * task ids either.
+   */
+  private async assertCreatorOrExecutorOfTask(agent: Agent, taskId: string): Promise<void> {
+    const task = await this.prisma.task
+      .findFirst({
+        where: {
+          id: taskId,
+          project: { workspaceId: agent.workspaceId },
+          OR: [
+            { createdById: agent.id, actorType: 'agent' },
+            { agents: { some: { agentId: agent.id, role: 'executor' } } },
+          ],
+        },
+        select: { id: true },
+      })
+      .catch(() => null);
+
+    if (!task) {
+      throw new ForbiddenException(
+        `Agent "${agent.name}" neither created task ${taskId} nor is assigned to it as executor.`,
       );
     }
   }

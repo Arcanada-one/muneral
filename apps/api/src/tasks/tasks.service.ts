@@ -142,6 +142,19 @@ export class TasksService {
       throw new NotFoundException('Project not found');
     }
 
+    // MUN-0050: a repeat of a move already made is not a transition and not a
+    // fault. The map has no self-edges (`todo → todo` is "invalid"), which
+    // answered 400 to an unattended caller retrying after a lost response —
+    // and a 400 it could not distinguish from a real refusal. Answer 200 with
+    // the task as it is and `idempotent: true`, and write NOTHING: no task
+    // update, no field-state recompute (the ETag must not move), no activity
+    // row (the log would claim a move that did not happen), no kanban event,
+    // and no execution-authority recording (a second `in_progress` would open
+    // or misattribute an attempt — see TaskExecutionRecorderService).
+    if (task.status === dto.status) {
+      return { ...task, idempotent: true };
+    }
+
     if (!isValidTransition(task.status as TaskStatus, dto.status)) {
       throw new BadRequestException(
         `Invalid status transition: ${task.status} → ${dto.status}`,

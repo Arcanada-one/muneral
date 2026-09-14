@@ -255,6 +255,57 @@ describe('AgentTaskScopeGuard', () => {
     await expect(guard.canActivate(ctx)).rejects.toThrow(ForbiddenException);
   });
 
+  // --- MUN-0050: 'task-status' — PATCH /tasks/:taskId/status, creator OR executor
+  it('admits the status route by ONE query: workspace, then creator-or-executor', async () => {
+    reflector.getAllAndOverride.mockReturnValue('task-status');
+    prisma.task.findFirst.mockResolvedValue({ id: 't-1' });
+    const { ctx, req } = makeContext({ apiKeyAgent: AGENT, params: { taskId: 't-1' } });
+
+    await expect(guard.canActivate(ctx)).resolves.toBe(true);
+    // The rule is the query: the workspace boundary is unconditional, the
+    // creator pair (id AND actor type) and the executor-role assignment are
+    // the only two ways in. A lead or reviewer row does not match this.
+    expect(prisma.task.findFirst).toHaveBeenCalledWith({
+      where: {
+        id: 't-1',
+        project: { workspaceId: 'ws-1' },
+        OR: [
+          { createdById: 'agent-1', actorType: 'agent' },
+          { agents: { some: { agentId: 'agent-1', role: 'executor' } } },
+        ],
+      },
+      select: { id: true },
+    });
+    // No separate assignment lookup: 'task' semantics are not consulted.
+    expect(prisma.taskAgent.findFirst).not.toHaveBeenCalled();
+    expect(req.agentScope).toEqual({ agentId: 'agent-1', kind: 'task-status' });
+  });
+
+  it('refuses the status route when the agent neither created the task nor executes it', async () => {
+    reflector.getAllAndOverride.mockReturnValue('task-status');
+    prisma.task.findFirst.mockResolvedValue(null);
+    const { ctx, req } = makeContext({ apiKeyAgent: AGENT, params: { taskId: 't-1' } });
+
+    await expect(guard.canActivate(ctx)).rejects.toThrow(ForbiddenException);
+    expect(req.agentScope).toBeUndefined();
+  });
+
+  it('answers a malformed task id on the status route with 403, not 500', async () => {
+    reflector.getAllAndOverride.mockReturnValue('task-status');
+    prisma.task.findFirst.mockRejectedValue(new Error('invalid input syntax for uuid'));
+    const { ctx } = makeContext({ apiKeyAgent: AGENT, params: { taskId: 'not-a-uuid' } });
+
+    await expect(guard.canActivate(ctx)).rejects.toThrow(ForbiddenException);
+  });
+
+  it('refuses a status route that carries no task id, without querying', async () => {
+    reflector.getAllAndOverride.mockReturnValue('task-status');
+    const { ctx } = makeContext({ apiKeyAgent: AGENT, params: {} });
+
+    await expect(guard.canActivate(ctx)).rejects.toThrow(ForbiddenException);
+    expect(prisma.task.findFirst).not.toHaveBeenCalled();
+  });
+
   it('ignores a non-string projectId in the body rather than passing it to Prisma', async () => {
     reflector.getAllAndOverride.mockReturnValue('project-write');
     const { ctx } = makeContext({
