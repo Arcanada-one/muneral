@@ -9,6 +9,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
 import { ApiKeyGuard } from './guards/api-key.guard.js';
 import { JwtOrApiKeyGuard } from './guards/jwt-or-api-key.guard.js';
 import { AgentTaskScopeGuard } from './guards/agent-task-scope.guard.js';
+import { PROJECT_READ_GRANTS, PROJECT_READ_GRANT_LIST } from './project-read-grants.js';
 
 const optionalProviders: Provider[] = [];
 
@@ -39,6 +40,9 @@ if (process.env.GITHUB_CLIENT_ID) {
     ApiKeyGuard,
     JwtOrApiKeyGuard,
     AgentTaskScopeGuard,
+    // MUN-0052: the task-index grant list, as a provider so the guard reads it
+    // through DI (a test module overrides it) — see project-read-grants.ts.
+    { provide: PROJECT_READ_GRANTS, useValue: PROJECT_READ_GRANT_LIST },
   ],
   exports: [
     // Re-exported so AuthModuleOptions reaches the modules that USE the guards.
@@ -59,6 +63,7 @@ if (process.env.GITHUB_CLIENT_ID) {
     ApiKeyGuard,
     JwtOrApiKeyGuard,
     AgentTaskScopeGuard,
+    PROJECT_READ_GRANTS,
   ],
 })
 export class AuthModule {}

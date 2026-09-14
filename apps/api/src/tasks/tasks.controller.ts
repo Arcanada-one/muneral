@@ -14,6 +14,7 @@ import {
   HttpStatus,
   Headers,
   Res,
+  ForbiddenException,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { TasksService } from './tasks.service.js';
@@ -153,6 +154,30 @@ export class TasksController {
     @Req() req: AuthRequest,
   ) {
     return this.tasksService.findByProject(projectId, req.agentScope?.agentId);
+  }
+
+  /**
+   * MUN-0052 (DEC-AUP-0029) — a project's task index for an agent key named in
+   * `project-read-grants.ts`: every task's id, parent, status, priority, actor
+   * type, timestamps and title hash, plus `total`, what it counts, and the id of
+   * the activity row this read wrote. The guard answers 404 to a key without a
+   * live grant, exactly as to a project outside its workspace.
+   *
+   * A JWT is refused here: a user already has the full list on the route above,
+   * and an index that a missing scope would silently serve unnarrowed is the
+   * failure mode the allowlist exists to prevent.
+   */
+  @Get('project/:projectId/index')
+  @AgentScope('project-index')
+  indexForProject(
+    @Param('projectId') projectId: string,
+    @Req() req: AuthRequest,
+  ) {
+    const scope = req.agentScope;
+    if (!scope || scope.kind !== 'project-index' || !scope.projectReadGrant) {
+      throw new ForbiddenException('The task index is available only to an agent API key holding a read grant (MUN-0052).');
+    }
+    return this.tasksService.indexForProject(projectId, scope.agentId, scope.projectReadGrant);
   }
 
   /**

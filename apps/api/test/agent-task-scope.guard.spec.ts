@@ -460,6 +460,62 @@ describe('AgentTaskScopeGuard', () => {
     expect(prisma.task.findFirst).not.toHaveBeenCalled();
   });
 
+  // MUN-0052 — 'project-index': workspace, then a live grant for (agent, project).
+  describe("'project-index'", () => {
+    const GRANT = {
+      agentId: 'agent-1',
+      agentName: 'aup-executor',
+      projectId: 'p-1',
+      until: '2999-01-01T00:00:00Z',
+      decision: 'DEC-TEST',
+      evidence: 'unit',
+    };
+    const indexGuard = (grants: (typeof GRANT)[]) =>
+      new AgentTaskScopeGuard(
+        reflector as unknown as Reflector,
+        prisma as unknown as PrismaService,
+        grants,
+      );
+
+    it('admits a key with a live grant for the project and hands the grant downstream', async () => {
+      reflector.getAllAndOverride.mockReturnValue('project-index');
+      prisma.project.findFirst.mockResolvedValue({ id: 'p-1' });
+      const { ctx, req } = makeContext({ apiKeyAgent: AGENT, params: { projectId: 'p-1' } });
+
+      await expect(indexGuard([GRANT]).canActivate(ctx)).resolves.toBe(true);
+      expect(prisma.project.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { id: 'p-1', workspaceId: 'ws-1' } }),
+      );
+      expect(req.agentScope).toEqual({ agentId: 'agent-1', kind: 'project-index', projectReadGrant: GRANT });
+    });
+
+    it('answers 404 without a grant, with an expired grant, and with a grant for another project', async () => {
+      reflector.getAllAndOverride.mockReturnValue('project-index');
+      prisma.project.findFirst.mockResolvedValue({ id: 'p-1' });
+      for (const grants of [[], [{ ...GRANT, until: '2000-01-01T00:00:00Z' }], [{ ...GRANT, projectId: 'p-2' }], [{ ...GRANT, agentId: 'agent-2' }]]) {
+        const { ctx, req } = makeContext({ apiKeyAgent: AGENT, params: { projectId: 'p-1' } });
+        await expect(indexGuard(grants).canActivate(ctx)).rejects.toThrow(NotFoundException);
+        expect(req.agentScope).toBeUndefined();
+      }
+    });
+
+    it('answers 404 for a project outside the workspace even when a grant names it', async () => {
+      reflector.getAllAndOverride.mockReturnValue('project-index');
+      prisma.project.findFirst.mockResolvedValue(null);
+      const { ctx } = makeContext({ apiKeyAgent: AGENT, params: { projectId: 'p-1' } });
+
+      await expect(indexGuard([GRANT]).canActivate(ctx)).rejects.toThrow(NotFoundException);
+    });
+
+    it('the default grant list is consulted by no other scope kind', async () => {
+      reflector.getAllAndOverride.mockReturnValue('task');
+      prisma.task.findFirst.mockResolvedValue(null);
+      const { ctx } = makeContext({ apiKeyAgent: { ...AGENT, id: GRANT.agentId } as unknown as Agent, params: { taskId: 't-1' } });
+
+      await expect(indexGuard([GRANT]).canActivate(ctx)).rejects.toThrow(ForbiddenException);
+    });
+  });
+
   it('reads the scope from the handler first, then the controller', async () => {
     reflector.getAllAndOverride.mockReturnValue('task');
     prisma.task.findFirst.mockResolvedValue({ id: 't-1' });

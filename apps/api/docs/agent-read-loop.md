@@ -164,6 +164,34 @@ Because reading and posting share one scope check, there is no separate
 agent (same workspace) and an agent from another workspace both get the same
 `403` an unassigned agent already gets on `POST .../comments`.
 
+## Reading a project's task index with a read grant (MUN-0052)
+
+Inside its workspace an agent key sees its own slice of a project — the tasks it
+is assigned to or created. A board registered by a human is therefore invisible
+to the agent that has to reconcile it: measured on 2026-09-14, the program
+fleet's key listed 416 rows of project `aup` and 471 of its 477 registered tasks
+were not among them.
+
+The own slice is **not** widened for every key of the workspace (program decision
+DEC-AUP-0029). A key named for a project in `src/auth/project-read-grants.ts`,
+with `until` still ahead, may read that project's task **index**:
+
+| route | an agent key gets |
+|---|---|
+| `GET /tasks/project/:projectId/index` | with a live grant for that project: `{projectId, counted, total, generatedAt, auditEventId, auditReadCount, grant, tasks}`, one row per task of the project (all statuses) with `id, parentId, status, priority, actorType, createdAt, updatedAt, titleSha256`; without one — no grant, expired, another project, another workspace, unknown or malformed id — `404`, the answer an unknown project gets. A JWT gets `403`. |
+
+- No free text: the title leaves as a sha256, the description, bootstrap stamp,
+  creator id and revision do not leave at all.
+- Every read writes one `activity_log` row (`project:index_read`, payload
+  `{projectId, decision, rowCount}`) and returns its id as `auditEventId`, with
+  `auditReadCount` — this agent's index reads on record in the workspace, this
+  one included — read back from the same table.
+- The grant opens this one route. `GET /tasks/:taskId`, activity, comments,
+  status, redactions, assign, checklists, dependencies and the project list and
+  staleness routes answer a granted key exactly as they answer any other key.
+- A grant is a reviewed code change naming its decision, and it lapses at `until`
+  by itself.
+
 The rest of `/tasks` stays JWT-only. It is an **allowlist**: a route with
 no `@AgentScope(...)` marker refuses an API key by default, so a route added
 later is closed the day it merges rather than open until somebody remembers to

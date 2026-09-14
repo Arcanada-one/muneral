@@ -1,6 +1,6 @@
 {
   "formatVersion": "assembly-mutation-evidence-v4",
-  "generatedAt": "2026-09-14T09:41:05.180Z",
+  "generatedAt": "2026-09-14T11:01:03.802Z",
   "invocation": {
     "cwd": ".",
     "argv": [
@@ -22,11 +22,11 @@
   },
   "binding": {
     "algorithm": "sha256",
-    "aggregateSha256": "08c14fcd25f2118b1ee27f3ff42a6f44b70ce20c2786fb8c599411944a2ec36a",
+    "aggregateSha256": "cb0ef56c57d0b3579b0847a5a75e55c496003b9e6937995a1b5f390fa530af07",
     "files": [
       {
         "path": "apps/api/package.json",
-        "sha256": "6ce19267bcd30763a4028f19841b9632f18c89721f747a21d4cf1da2a4949fc3"
+        "sha256": "4cf0ab643a37cbde2bd58b7c28b958d301fb7807d0bbea9b73b9e8f9a55b8aa3"
       },
       {
         "path": "apps/api/src/assembly/assembly.canonical.ts",
@@ -271,8 +271,8 @@
     ]
   },
   "supplementalGit": {
-    "trackedTreeWithoutEvidence": "3cbbaf1cbadc981276c1ab0256fae3d48c2f8187",
-    "trackedSnapshotDiffSha256": "6a72d1daada12e44638ae2647ee2b4e2b3b06f01a1adb36427d7d80b849b6ebe"
+    "trackedTreeWithoutEvidence": "1d0e56a49e36ff19a6031c99391fd8f9bea666d0",
+    "trackedSnapshotDiffSha256": "a69a0b00258d320a21d4c1e773d56cb27cfc7c586f8e41a22d177b887e849c5c"
   },
   "baseline": {
     "outcome": "SURVIVED",
