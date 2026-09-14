@@ -11,7 +11,7 @@
     "clean": "turbo run clean"
   },
   "devDependencies": {
-    "prisma": "^7.8.0",
+    "prisma": "^7.10.0",
     "turbo": "^2.3.3"
   },
   "engines": {
