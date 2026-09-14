@@ -13,6 +13,7 @@
 // vanishingly short window between issue and start).
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { agentOwnTaskWhere } from '../auth/agent-task-visibility.js';
 
 export type StalenessVerdict = 'healthy' | 'stalled' | 'not_measured';
 
@@ -32,7 +33,8 @@ export class TaskStalenessService {
 
   /**
    * All `in_progress` tasks in a project. When `scopedToAgentId` is given the
-   * result is narrowed to that agent's assigned tasks — same narrowing, same
+   * result is narrowed to that agent's own tasks (assigned or, MUN-0051,
+   * created — agentOwnTaskWhere) — same narrowing, same
    * reason, as `TasksService.findByProject` (MUN-0043): the database, not a
    * post-filter, is what keeps an agent key from seeing the rest of the board.
    */
@@ -46,9 +48,7 @@ export class TaskStalenessService {
       where: {
         projectId,
         status: 'in_progress',
-        ...(scopedToAgentId
-          ? { agents: { some: { agentId: scopedToAgentId } } }
-          : {}),
+        ...(scopedToAgentId ? agentOwnTaskWhere(scopedToAgentId) : {}),
       },
       select: { id: true, priority: true },
     });

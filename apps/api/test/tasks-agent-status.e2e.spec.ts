@@ -383,19 +383,24 @@ describe('PATCH /tasks/:taskId/status with an agent key — creator or executor 
   });
 
   // -------------------------------------------------------------------------
-  // The other 'task' routes are not widened by this scope
+  // MUN-0051: the read/comment routes ('task') now admit the creator too
   // -------------------------------------------------------------------------
 
-  it('the creator still cannot READ or comment on its task without an assignment (the read routes keep the task scope)', async () => {
+  it('MUN-0051: the creator reads and comments on its task without an assignment (was 403 under MUN-0050)', async () => {
     const task = await createTask();
     await supertest(app.getHttpServer())
       .get(`/tasks/${task.id}`)
       .set('Authorization', `Bearer ${creatorKey}`)
-      .expect(403);
+      .expect(200);
     await supertest(app.getHttpServer())
       .post(`/tasks/${task.id}/comments`)
       .set('Authorization', `Bearer ${creatorKey}`)
-      .send({ body: 'not reachable without an assignment' })
+      .send({ body: 'reachable by the creator since MUN-0051' })
+      .expect(201);
+    // and the widening is the creator's, not everyone's
+    await supertest(app.getHttpServer())
+      .get(`/tasks/${task.id}`)
+      .set('Authorization', `Bearer ${strangerKey}`)
       .expect(403);
   });
 });

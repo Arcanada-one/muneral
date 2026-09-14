@@ -11,13 +11,28 @@ import { Agent } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { AGENT_SCOPE_KEY } from '../agent-scope.decorator.js';
 import type { AgentScopeKind } from '../agent-scope.decorator.js';
+import { agentOwnTaskWhere } from '../agent-task-visibility.js';
+import { assignCompatWindowAdmits } from '../assign-compat-window.js';
 
 /** What an authorised agent request carries downstream: the id the handler must
  *  narrow its answer to. Absent on JWT requests, which are not narrowed. */
 export interface AgentScopeContext {
   agentId: string;
   kind: AgentScopeKind;
+  /** MUN-0051, 'task-assign' only: what entitled the key to assign — recorded
+   *  in the activity row the assignment writes. */
+  assignBasis?: AssignBasis;
 }
+
+export type AssignBasis = 'creator' | 'executor' | 'compat-window';
+
+/** MUN-0051: the order in which an assignment may be handed on. A creator may
+ *  grant any role; an executor may grant executor or reviewer, never lead. */
+const ROLE_RANK: Readonly<Record<string, number>> = {
+  reviewer: 1,
+  executor: 2,
+  lead: 3,
+};
 
 export type AgentScopedRequest = Request & {
   apiKeyAgent?: Agent;
@@ -39,7 +54,8 @@ export type AgentScopedRequest = Request & {
  *      route touches, so a valid key from workspace A can never read a task in
  *      workspace B even if some assignment row got there by accident;
  *   3. the assignment exists — for a task route, `task_agents` must hold a row
- *      for (this task, this agent).
+ *      for (this task, this agent); each scope kind below says which rows and
+ *      which authorship count (MUN-0050, MUN-0051).
  *
  * One route family is scoped more weakly on purpose. `GET /tasks/:id/field-changes`
  * and `POST /tasks/:id/field-ack` were ALREADY reachable by any valid API key
@@ -88,15 +104,37 @@ export class AgentTaskScopeGuard implements CanActivate {
     }
 
     switch (kind) {
-      // MUN-0049: 'task-redaction' is bound exactly like 'task' — the agent
+      // MUN-0051: 'task' (read, activity, comment) admits the creator as well
+      // as an assignee — see agentOwnTaskWhere.
+      case 'task': {
+        const taskId = this.paramOf(req, 'taskId');
+        if (!taskId) throw new ForbiddenException('No task in scope for this key.');
+        await this.assertOwnTask(agent, taskId);
+        break;
+      }
+      // MUN-0049: 'task-redaction' is bound to the assignment — the agent
       // must be assigned to the task — and is listed separately so the write
       // can be revoked without touching the read/comment/status routes.
-      case 'task':
+      // MUN-0051 deliberately did not widen it to the creator.
       case 'task-redaction': {
         const taskId = this.paramOf(req, 'taskId');
         if (!taskId) throw new ForbiddenException('No task in scope for this key.');
         await this.assertAssignedToTask(agent, taskId);
         break;
+      }
+      // MUN-0051: the assign route — see assertMayAssign.
+      case 'task-assign': {
+        const taskId = this.paramOf(req, 'taskId');
+        if (!taskId) throw new ForbiddenException('No task in scope for this key.');
+        const assignBasis = await this.assertMayAssign(
+          agent,
+          taskId,
+          this.bodyFieldOf(req, 'agentId'),
+          this.bodyFieldOf(req, 'role'),
+          new Date(),
+        );
+        req.agentScope = { agentId: agent.id, kind, assignBasis };
+        return true;
       }
       case 'task-workspace': {
         const taskId = this.paramOf(req, 'taskId');
@@ -175,6 +213,114 @@ export class AgentTaskScopeGuard implements CanActivate {
         `Agent "${agent.name}" is not assigned to task ${taskId}.`,
       );
     }
+  }
+
+  /** MUN-0051 — 'task': assigned to the task OR its creator, inside the
+   *  agent's workspace. 403 for every other case, as assertAssignedToTask. */
+  private async assertOwnTask(agent: Agent, taskId: string): Promise<void> {
+    const task = await this.prisma.task
+      .findFirst({
+        where: {
+          id: taskId,
+          project: { workspaceId: agent.workspaceId },
+          ...agentOwnTaskWhere(agent.id),
+        },
+        select: { id: true },
+      })
+      .catch(() => null);
+
+    if (!task) {
+      throw new ForbiddenException(
+        `Agent "${agent.name}" neither created task ${taskId} nor is assigned to it.`,
+      );
+    }
+  }
+
+  /**
+   * MUN-0051 — who may write a `task_agents` row with a key.
+   *
+   * The caller's authority on the task comes first: the task must be in the
+   * agent's workspace, and the agent must have created it (rank of lead: any
+   * role may be granted) or hold an executor assignment (executor or reviewer
+   * may be granted, never lead). A lead or reviewer assignment carries no
+   * authority to assign — before MUN-0050 it did not move status either, and
+   * handing on an assignment is the step that turns into a status move. Without
+   * authority the one remaining door is the dated compatibility window (self,
+   * executor/reviewer, listed agents only).
+   *
+   * Then the grant: the role must be a known role no higher than the caller's
+   * own, and the assignee must be an agent of the caller's workspace — an id
+   * from another workspace, an unknown id and a malformed id answer the same
+   * 403, so the route cannot be used to discover agents elsewhere.
+   *
+   * Refusals about the task all use one message, so the route does not tell a
+   * key which task ids exist.
+   */
+  private async assertMayAssign(
+    agent: Agent,
+    taskId: string,
+    assigneeAgentId: string | undefined,
+    role: string | undefined,
+    now: Date,
+  ): Promise<AssignBasis> {
+    const task = await this.prisma.task
+      .findFirst({
+        where: { id: taskId, project: { workspaceId: agent.workspaceId } },
+        select: {
+          createdById: true,
+          actorType: true,
+          agents: { where: { agentId: agent.id }, select: { role: true } },
+        },
+      })
+      .catch(() => null);
+
+    const refuseTask = () =>
+      new ForbiddenException(
+        `Agent "${agent.name}" may not assign on task ${taskId}: only its creator or its executor may (MUN-0051).`,
+      );
+    if (!task) throw refuseTask();
+
+    const isCreator = task.createdById === agent.id && task.actorType === 'agent';
+    const isExecutor = task.agents.some((a) => a.role === 'executor');
+
+    let basis: AssignBasis;
+    let callerRank: number;
+    if (isCreator) {
+      basis = 'creator';
+      callerRank = ROLE_RANK.lead;
+    } else if (isExecutor) {
+      basis = 'executor';
+      callerRank = ROLE_RANK.executor;
+    } else if (assignCompatWindowAdmits(agent.id, assigneeAgentId, role, now)) {
+      basis = 'compat-window';
+      callerRank = ROLE_RANK.executor;
+    } else {
+      throw refuseTask();
+    }
+
+    const requestedRank = role !== undefined ? ROLE_RANK[role] : undefined;
+    if (requestedRank === undefined || requestedRank > callerRank) {
+      throw new ForbiddenException(
+        `Agent "${agent.name}" may not grant role "${String(role)}" on task ${taskId}: ` +
+          `a ${basis} may grant ${basis === 'creator' ? 'lead, executor or reviewer' : 'executor or reviewer'} (MUN-0051).`,
+      );
+    }
+
+    const assignee = assigneeAgentId
+      ? await this.prisma.agent
+          .findFirst({
+            where: { id: assigneeAgentId, workspaceId: agent.workspaceId },
+            select: { id: true },
+          })
+          .catch(() => null)
+      : null;
+    if (!assignee) {
+      throw new ForbiddenException(
+        `The assignee is not an agent of this key's workspace (MUN-0051).`,
+      );
+    }
+
+    return basis;
   }
 
   /**

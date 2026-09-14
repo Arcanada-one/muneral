@@ -43,6 +43,7 @@ describe('AgentTaskScopeGuard', () => {
     taskAgent: { findFirst: jest.Mock };
     project: { findFirst: jest.Mock };
     task: { findFirst: jest.Mock };
+    agent: { findFirst: jest.Mock };
   };
   let guard: AgentTaskScopeGuard;
 
@@ -52,6 +53,7 @@ describe('AgentTaskScopeGuard', () => {
       taskAgent: { findFirst: jest.fn() },
       project: { findFirst: jest.fn() },
       task: { findFirst: jest.fn() },
+      agent: { findFirst: jest.fn() },
     };
     guard = new AgentTaskScopeGuard(
       reflector as unknown as Reflector,
@@ -81,35 +83,40 @@ describe('AgentTaskScopeGuard', () => {
 
   it('admits an assigned agent to its own task and records the scope', async () => {
     reflector.getAllAndOverride.mockReturnValue('task');
-    prisma.taskAgent.findFirst.mockResolvedValue({ taskId: 't-1' });
+    prisma.task.findFirst.mockResolvedValue({ id: 't-1' });
     const { ctx, req } = makeContext({ apiKeyAgent: AGENT, params: { taskId: 't-1' } });
 
     await expect(guard.canActivate(ctx)).resolves.toBe(true);
     expect(req.agentScope).toEqual({ agentId: 'agent-1', kind: 'task' });
   });
 
-  it('constrains the assignment lookup by workspace as well as by agent', async () => {
+  it('MUN-0051: asks ONE question for task — workspace, then assigned OR agent-created', async () => {
     reflector.getAllAndOverride.mockReturnValue('task');
-    prisma.taskAgent.findFirst.mockResolvedValue({ taskId: 't-1' });
+    prisma.task.findFirst.mockResolvedValue({ id: 't-1' });
     const { ctx } = makeContext({ apiKeyAgent: AGENT, params: { taskId: 't-1' } });
 
     await guard.canActivate(ctx);
 
     // A stray assignment row pointing across a workspace boundary must not be
-    // enough on its own — the query itself refuses to cross it.
-    expect(prisma.taskAgent.findFirst).toHaveBeenCalledWith({
+    // enough on its own — the query itself refuses to cross it. The creator
+    // half needs actor_type 'agent' as well as the id.
+    expect(prisma.task.findFirst).toHaveBeenCalledWith({
       where: {
-        agentId: 'agent-1',
-        taskId: 't-1',
-        task: { project: { workspaceId: 'ws-1' } },
+        id: 't-1',
+        project: { workspaceId: 'ws-1' },
+        OR: [
+          { agents: { some: { agentId: 'agent-1' } } },
+          { createdById: 'agent-1', actorType: 'agent' },
+        ],
       },
-      select: { taskId: true },
+      select: { id: true },
     });
+    expect(prisma.taskAgent.findFirst).not.toHaveBeenCalled();
   });
 
-  it('refuses an agent that is not assigned to the task', async () => {
+  it('refuses an agent that neither is assigned to nor created the task', async () => {
     reflector.getAllAndOverride.mockReturnValue('task');
-    prisma.taskAgent.findFirst.mockResolvedValue(null);
+    prisma.task.findFirst.mockResolvedValue(null);
     const { ctx } = makeContext({ apiKeyAgent: AGENT, params: { taskId: 't-9' } });
 
     await expect(guard.canActivate(ctx)).rejects.toThrow(ForbiddenException);
@@ -117,7 +124,7 @@ describe('AgentTaskScopeGuard', () => {
 
   it('answers a malformed task id the same way as an unassigned one', async () => {
     reflector.getAllAndOverride.mockReturnValue('task');
-    prisma.taskAgent.findFirst.mockRejectedValue(new Error('invalid input syntax for uuid'));
+    prisma.task.findFirst.mockRejectedValue(new Error('invalid input syntax for uuid'));
     const { ctx } = makeContext({ apiKeyAgent: AGENT, params: { taskId: 'not-a-uuid' } });
 
     // 403, not a 500 that tells the caller its id was at least well-formed.
@@ -318,9 +325,144 @@ describe('AgentTaskScopeGuard', () => {
     expect(prisma.project.findFirst).not.toHaveBeenCalled();
   });
 
+  // --- MUN-0051: 'task-assign' — POST /agents/tasks/:taskId/assign
+  const OTHER_AGENT = '00000000-0000-4000-8000-0000000000b2';
+  const assignCtx = (body: Record<string, unknown>, agent: Agent = AGENT) =>
+    makeContext({ apiKeyAgent: agent, params: { taskId: 't-1' }, body });
+  const taskRow = (over: { createdById?: string | null; actorType?: string; roles?: string[] } = {}) => ({
+    createdById: over.createdById === undefined ? 'someone-else' : over.createdById,
+    actorType: over.actorType ?? 'human',
+    agents: (over.roles ?? []).map((role) => ({ role })),
+  });
+
+  it('admits the creator to grant any role, and records the basis', async () => {
+    reflector.getAllAndOverride.mockReturnValue('task-assign');
+    prisma.task.findFirst.mockResolvedValue(taskRow({ createdById: 'agent-1', actorType: 'agent' }));
+    prisma.agent.findFirst.mockResolvedValue({ id: OTHER_AGENT });
+    const { ctx, req } = assignCtx({ agentId: OTHER_AGENT, role: 'lead' });
+
+    await expect(guard.canActivate(ctx)).resolves.toBe(true);
+    expect(req.agentScope).toEqual({ agentId: 'agent-1', kind: 'task-assign', assignBasis: 'creator' });
+    // The task question is bounded by the workspace; the assignee question too.
+    expect(prisma.task.findFirst).toHaveBeenCalledWith({
+      where: { id: 't-1', project: { workspaceId: 'ws-1' } },
+      select: {
+        createdById: true,
+        actorType: true,
+        agents: { where: { agentId: 'agent-1' }, select: { role: true } },
+      },
+    });
+    expect(prisma.agent.findFirst).toHaveBeenCalledWith({
+      where: { id: OTHER_AGENT, workspaceId: 'ws-1' },
+      select: { id: true },
+    });
+  });
+
+  it('admits an executor to grant executor or reviewer', async () => {
+    reflector.getAllAndOverride.mockReturnValue('task-assign');
+    prisma.task.findFirst.mockResolvedValue(taskRow({ roles: ['executor'] }));
+    prisma.agent.findFirst.mockResolvedValue({ id: OTHER_AGENT });
+    for (const role of ['executor', 'reviewer']) {
+      const { ctx, req } = assignCtx({ agentId: OTHER_AGENT, role });
+      await expect(guard.canActivate(ctx)).resolves.toBe(true);
+      expect(req.agentScope?.assignBasis).toBe('executor');
+    }
+  });
+
+  it('refuses an executor granting lead — never above its own role', async () => {
+    reflector.getAllAndOverride.mockReturnValue('task-assign');
+    prisma.task.findFirst.mockResolvedValue(taskRow({ roles: ['executor'] }));
+    prisma.agent.findFirst.mockResolvedValue({ id: OTHER_AGENT });
+    const { ctx } = assignCtx({ agentId: OTHER_AGENT, role: 'lead' });
+
+    await expect(guard.canActivate(ctx)).rejects.toThrow(ForbiddenException);
+  });
+
+  it('refuses a lead or reviewer assignee, a stranger and a human-created task', async () => {
+    reflector.getAllAndOverride.mockReturnValue('task-assign');
+    prisma.agent.findFirst.mockResolvedValue({ id: OTHER_AGENT });
+    for (const row of [
+      taskRow({ roles: ['lead'] }),
+      taskRow({ roles: ['reviewer'] }),
+      taskRow(),
+      // an agent id stored under a HUMAN actor type is not authorship
+      taskRow({ createdById: 'agent-1', actorType: 'human' }),
+    ]) {
+      prisma.task.findFirst.mockResolvedValue(row);
+      const { ctx } = assignCtx({ agentId: OTHER_AGENT, role: 'reviewer' });
+      await expect(guard.canActivate(ctx)).rejects.toThrow(ForbiddenException);
+    }
+  });
+
+  it('refuses a task outside the workspace, an unknown and a malformed id alike (403)', async () => {
+    reflector.getAllAndOverride.mockReturnValue('task-assign');
+    prisma.task.findFirst.mockResolvedValueOnce(null);
+    await expect(guard.canActivate(assignCtx({ agentId: OTHER_AGENT, role: 'executor' }).ctx)).rejects.toThrow(
+      ForbiddenException,
+    );
+    prisma.task.findFirst.mockRejectedValueOnce(new Error('invalid input syntax for uuid'));
+    await expect(guard.canActivate(assignCtx({ agentId: OTHER_AGENT, role: 'executor' }).ctx)).rejects.toThrow(
+      ForbiddenException,
+    );
+  });
+
+  it('refuses an assignee that is not an agent of the key workspace', async () => {
+    reflector.getAllAndOverride.mockReturnValue('task-assign');
+    prisma.task.findFirst.mockResolvedValue(taskRow({ createdById: 'agent-1', actorType: 'agent' }));
+    prisma.agent.findFirst.mockResolvedValue(null);
+    const { ctx } = assignCtx({ agentId: OTHER_AGENT, role: 'executor' });
+
+    await expect(guard.canActivate(ctx)).rejects.toThrow(ForbiddenException);
+  });
+
+  it('refuses an unknown role or a missing assignee even for the creator', async () => {
+    reflector.getAllAndOverride.mockReturnValue('task-assign');
+    prisma.task.findFirst.mockResolvedValue(taskRow({ createdById: 'agent-1', actorType: 'agent' }));
+    prisma.agent.findFirst.mockResolvedValue({ id: OTHER_AGENT });
+    await expect(guard.canActivate(assignCtx({ agentId: OTHER_AGENT, role: 'owner' }).ctx)).rejects.toThrow(
+      ForbiddenException,
+    );
+    await expect(guard.canActivate(assignCtx({ role: 'executor' }).ctx)).rejects.toThrow(ForbiddenException);
+  });
+
+  it('the compatibility window: a listed agent may still give ITSELF executor, until the expiry', async () => {
+    const listed = { ...AGENT, id: '9437639a-5f7c-4fe4-be04-18112ba0bada' } as unknown as Agent;
+    reflector.getAllAndOverride.mockReturnValue('task-assign');
+    prisma.task.findFirst.mockResolvedValue(taskRow());
+    prisma.agent.findFirst.mockResolvedValue({ id: listed.id });
+    jest.useFakeTimers({ now: new Date('2026-09-20T00:00:00Z'), doNotFake: ['nextTick', 'setImmediate'] });
+    try {
+      const self = assignCtx({ agentId: listed.id, role: 'executor' }, listed);
+      await expect(guard.canActivate(self.ctx)).resolves.toBe(true);
+      expect(self.req.agentScope?.assignBasis).toBe('compat-window');
+      // not somebody else, not lead — even inside the window
+      await expect(
+        guard.canActivate(assignCtx({ agentId: OTHER_AGENT, role: 'executor' }, listed).ctx),
+      ).rejects.toThrow(ForbiddenException);
+      await expect(
+        guard.canActivate(assignCtx({ agentId: listed.id, role: 'lead' }, listed).ctx),
+      ).rejects.toThrow(ForbiddenException);
+
+      jest.setSystemTime(new Date('2026-09-28T00:00:00Z'));
+      await expect(
+        guard.canActivate(assignCtx({ agentId: listed.id, role: 'executor' }, listed).ctx),
+      ).rejects.toThrow(ForbiddenException);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('refuses an assign route without a task id, without querying', async () => {
+    reflector.getAllAndOverride.mockReturnValue('task-assign');
+    const { ctx } = makeContext({ apiKeyAgent: AGENT, params: {}, body: { agentId: OTHER_AGENT, role: 'executor' } });
+
+    await expect(guard.canActivate(ctx)).rejects.toThrow(ForbiddenException);
+    expect(prisma.task.findFirst).not.toHaveBeenCalled();
+  });
+
   it('reads the scope from the handler first, then the controller', async () => {
     reflector.getAllAndOverride.mockReturnValue('task');
-    prisma.taskAgent.findFirst.mockResolvedValue({ taskId: 't-1' });
+    prisma.task.findFirst.mockResolvedValue({ id: 't-1' });
     const { ctx } = makeContext({ apiKeyAgent: AGENT, params: { taskId: 't-1' } });
 
     await guard.canActivate(ctx);

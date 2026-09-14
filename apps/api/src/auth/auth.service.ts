@@ -16,8 +16,23 @@ const BCRYPT_ROUNDS = 12;
 /** Grace period for rotated keys: 24 hours in milliseconds */
 const ROTATION_GRACE_MS = 24 * 60 * 60 * 1000;
 
+/**
+ * MUN-0051: the indexed, non-secret lookup id of a raw key — sha256 hex of the
+ * whole key. It only chooses which stored bcrypt hash to compare against; it
+ * never authenticates on its own. The key format carries no id part
+ * (`mun_sk_` + 32 hex of a UUIDv4), so the id is derived rather than parsed.
+ */
+export function apiKeyLookupHash(rawKey: string): string {
+  return crypto.createHash('sha256').update(rawKey, 'utf8').digest('hex');
+}
+
 @Injectable()
 export class AuthService {
+  /** MUN-0051: a bcrypt hash of random bytes at the production cost, created
+   *  once. An unknown key is compared against it so that "no such key" costs
+   *  the same one bcrypt comparison as "wrong key" and "right key". */
+  private dummyHash?: Promise<string>;
+
   constructor(
     private readonly jwtService: NestJwtService,
     private readonly prisma: PrismaService,
@@ -115,6 +130,7 @@ export class AuthService {
       data: {
         agentId,
         keyHash,
+        lookupHash: apiKeyLookupHash(rawKey),
         label: label ?? null,
       },
     });
@@ -163,37 +179,83 @@ export class AuthService {
   /**
    * Validate an incoming raw API key against stored hashes.
    * Returns the matching ApiKey entity or null.
+   *
+   * MUN-0051: one indexed lookup by `lookup_hash`, then ONE bcrypt comparison.
+   * Before, every non-revoked key was loaded and compared in turn — O(keys)
+   * bcrypt per request (a test database with leaked keys went from 2 s to 30 s
+   * per test). A miss, an expired key and a revoked key all still pay one
+   * bcrypt comparison (against a dummy hash when no row was found), so timing
+   * does not separate "unknown key" from "wrong key".
+   *
+   * Keys created before the migration have no lookup_hash. Only those rows are
+   * still scanned, and only after the indexed lookup missed; the first
+   * successful use writes the key's lookup_hash, after which it takes the
+   * indexed path. The legacy scan therefore shrinks to the keys never used
+   * since the deploy.
    */
   async validateApiKey(rawKey: string) {
     if (!rawKey.startsWith(API_KEY_PREFIX)) {
       return null;
     }
 
-    const candidates = await this.prisma.apiKey.findMany({
+    const now = new Date();
+    const lookupHash = apiKeyLookupHash(rawKey);
+    const active = (row: { revokedAt: Date | null; expiresAt: Date | null }) =>
+      row.revokedAt === null && (row.expiresAt === null || row.expiresAt > now);
+
+    const keyed = await this.prisma.apiKey.findUnique({
+      where: { lookupHash },
+      include: { agent: true },
+    });
+
+    if (keyed) {
+      const match = await bcrypt.compare(rawKey, keyed.keyHash);
+      if (!match || !active(keyed)) return null;
+      this.touchLastUsed(keyed.id, {});
+      return keyed;
+    }
+
+    // Always exactly one comparison on the miss path before the legacy scan.
+    await bcrypt.compare(rawKey, await this.getDummyHash());
+
+    const legacy = await this.prisma.apiKey.findMany({
       where: {
+        lookupHash: null,
         revokedAt: null,
         OR: [
           { expiresAt: null },
-          { expiresAt: { gt: new Date() } },
+          { expiresAt: { gt: now } },
         ],
       },
       include: { agent: true },
     });
 
-    for (const candidate of candidates) {
+    for (const candidate of legacy) {
       const match = await bcrypt.compare(rawKey, candidate.keyHash);
       if (match) {
-        // Update last_used_at without blocking the request
-        void this.prisma.apiKey.update({
-          where: { id: candidate.id },
-          data: { lastUsedAt: new Date() },
-        }).catch(() => {
-          // Non-critical
-        });
+        this.touchLastUsed(candidate.id, { lookupHash });
         return candidate;
       }
     }
     return null;
+  }
+
+  /** Update last_used_at (and back-fill lookup_hash for a legacy key) without
+   *  blocking the request. Non-critical: a failure leaves the key usable. */
+  private touchLastUsed(id: string, extra: { lookupHash?: string }): void {
+    void this.prisma.apiKey
+      .update({
+        where: { id },
+        data: { lastUsedAt: new Date(), ...extra },
+      })
+      .catch(() => {
+        // Non-critical
+      });
+  }
+
+  private getDummyHash(): Promise<string> {
+    this.dummyHash ??= bcrypt.hash(crypto.randomBytes(32).toString('hex'), BCRYPT_ROUNDS);
+    return this.dummyHash;
   }
 
   /** Validate JWT payload and return user */
