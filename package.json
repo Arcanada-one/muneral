@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "prisma": "^7.8.0",
-    "turbo": "^2.3.3"
+    "turbo": "^2.10.12"
   },
   "engines": {
     "node": "24.21.0"
