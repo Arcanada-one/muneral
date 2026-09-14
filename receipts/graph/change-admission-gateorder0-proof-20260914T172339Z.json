@@ -1,0 +1,129 @@
+{
+ "admission": {
+  "rule": "admitted requires every verdict = verified; failed without exemption ⇒ refused; not_measured without exemption ⇒ paused_safe; exemptions (owner + expiry) are attached by the admitting agent, never by the verifier (DEC-AUP-0008, matrix P1/P4)",
+  "verdict": "admitted"
+ },
+ "captured_at_utc": "2026-09-14T17:23:39Z",
+ "change_set": {
+  "base": "42ac302d0d5b921ee087c13d3e9b4ea635ad9057",
+  "files": [
+   {
+    "kind": "doc",
+    "node_id": "document:docs/graph-admission.md",
+    "node_ids": [
+     "document:docs/graph-admission.md"
+    ],
+    "path": "docs/graph-admission.md",
+    "status": "A"
+   }
+  ],
+  "head": "45e2e658318912fa04813cd529d5996513ccc077",
+  "mode": "diff"
+ },
+ "decision_ref": "DEC-AUP-0008",
+ "exemptions": [],
+ "graph": {
+  "builder_version": "1.0.1",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:c71a8870f2bfd556a745b41f89e867b01b729a6db64b79e791b0fa6dcdfa6aab",
+  "path": "/tmp/claude-1002/-home-dev-aup-program/9999deb8-bc7e-43c4-aaef-fcbbcb551ebd/scratchpad/pcar-vout/graph-42ac302d0d5b.json",
+  "source_commit": "42ac302d0d5b921ee087c13d3e9b4ea635ad9057"
+ },
+ "head_graph": {
+  "builder_version": "1.0.1",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:c2f11131f16e9d30e2f9d760efd1ec30b1b14b59d9ed05e1e4f2ae7072b6201d",
+  "path": "/tmp/claude-1002/-home-dev-aup-program/9999deb8-bc7e-43c4-aaef-fcbbcb551ebd/scratchpad/pcar-vout/graph-head-45e2e6583189.json",
+  "source_commit": "45e2e658318912fa04813cd529d5996513ccc077",
+  "staleness": {
+   "checked_at_utc": "2026-09-14T17:23:46Z",
+   "checked_nodes": 320,
+   "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+   "mismatched_nodes": [],
+   "verdict": "fresh"
+  }
+ },
+ "host": "arcana-devs",
+ "impact_set": {
+  "deterministic_core": [],
+  "edge_types": "all",
+  "global_fallback": {
+   "triggered": false
+  },
+  "inferred_tail": [],
+  "max_depth": 3,
+  "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
+  "total": 0
+ },
+ "notes": [
+  "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.0.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
+  "profile: (auto-detected); baseline: contracts/graph-verified-change/fitness-baseline/Arcanada-one__muneral.v1.json (valid); selected: none; disabled: none"
+ ],
+ "producer": {
+  "tool": "tools/graph/verify.py",
+  "version": "1.0.1"
+ },
+ "receipt_id": "car-verify-20260914T172339Z-45e2e658",
+ "repo": {
+  "name": "Arcanada-one/muneral",
+  "path": "/home/dev/aup/muneral-gateorder0"
+ },
+ "revision_selection": {
+  "base": [],
+  "head": [
+   "document:docs/graph-admission.md"
+  ],
+  "schema": "RevisionImpactSelection/v1",
+  "unmeasured_head_files": []
+ },
+ "schema": "ChangeAdmissionReceipt/v1",
+ "staleness": {
+  "checked_at_utc": "2026-09-14T17:23:46Z",
+  "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+  "mismatched_nodes": [],
+  "verdict": "fresh"
+ },
+ "tree": {
+  "commit": "45e2e658318912fa04813cd529d5996513ccc077",
+  "dirty": false
+ },
+ "verdicts": [
+  {
+   "entity": "document:docs/graph-admission.md",
+   "reason": "v-doc-reference: 2 reference(s) resolve at head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-doc-reference"
+   ]
+  }
+ ],
+ "verifiers": [
+  {
+   "command": "verify.py doc_reference: path / route / model references of affected documents resolve at head",
+   "duration_s": 0.0,
+   "entities": [
+    "document:docs/graph-admission.md"
+   ],
+   "exit_code": 0,
+   "id": "v-doc-reference",
+   "kind": "doc_reference",
+   "output_ref": "/tmp/claude-1002/-home-dev-aup-program/9999deb8-bc7e-43c4-aaef-fcbbcb551ebd/scratchpad/pcar-vout/v-doc-reference.txt",
+   "started_at_utc": "2026-09-14T17:23:50Z",
+   "summary": "1 document(s), 0 failed"
+  }
+ ],
+ "verify": {
+  "events": [],
+  "required_by_entity": {
+   "document:docs/graph-admission.md": [
+    "doc_reference"
+   ]
+  },
+  "seconds": {
+   "prepare": 3.82,
+   "total": 10.32,
+   "verifiers": 0.0
+  }
+ },
+ "work_item": "GATEORDER-0"
+}
