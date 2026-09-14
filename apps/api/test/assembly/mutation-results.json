@@ -271,8 +271,8 @@
     ]
   },
   "supplementalGit": {
-    "trackedTreeWithoutEvidence": "62215648ef077f9b96fcbc0e3c93802e369d1fc2",
-    "trackedSnapshotDiffSha256": "0fdf19ccc1a2472d0e5d879ac38468fb7c65f28e5d3a4ed639cdd1ac1a4fc8f3"
+    "trackedTreeWithoutEvidence": "be112f8c3c2a13096ad9c8bffbf43cf17590a318",
+    "trackedSnapshotDiffSha256": "42ec41c7356132d8e6fad371b9d0785083b3a4807f133813ff035d914d7ad24e"
   },
   "baseline": {
     "outcome": "SURVIVED",
