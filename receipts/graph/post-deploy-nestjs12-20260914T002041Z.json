@@ -1,0 +1,44 @@
+{
+  "schema": "ReadinessReceipt/v1",
+  "portion_id": "muneral-59-102 / muneral-103 post-deploy probe",
+  "captured_at_utc": "2026-09-14T00:20:41.895Z",
+  "merges": [
+    {
+      "pr": 113,
+      "commit": "c5347690",
+      "subject": "NestJS 12 — apps/api becomes ESM"
+    },
+    {
+      "pr": 114,
+      "commit": "4fcac088",
+      "subject": "Node LTS pin 24.21.0 + mutation defence restored"
+    }
+  ],
+  "gate": "notes[boundary-canary-exemption] of receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+  "probes": [
+    {
+      "target": "https://api.muneral.com/health",
+      "http": 200,
+      "body": {
+        "status": "ok",
+        "version": "0.4.1"
+      },
+      "verdict": "verified"
+    },
+    {
+      "target": "/api/v1/workspaces",
+      "http": 401,
+      "note": "controller registered and the guard runs — this is the DI path that failed 80 times in CI",
+      "verdict": "verified"
+    },
+    {
+      "target": "/api/v1/tasks, /api/v1/projects, /api/v1/agents, /api/v1/milestones, /api/v1/webhooks",
+      "http": 404,
+      "note": "no 5xx on any probed route",
+      "verdict": "verified"
+    }
+  ],
+  "reverse_if": "/health not 200, any probed route answering 5xx where it previously answered 2xx/4xx, or a Nest DI resolution error in the service log at boot",
+  "verdict": "verified",
+  "summary": "Zero 5xx across six probed routes; /health reports 0.4.1; the JwtAuthGuard that could not resolve AuthModuleOptions in CI resolves in production."
+}
