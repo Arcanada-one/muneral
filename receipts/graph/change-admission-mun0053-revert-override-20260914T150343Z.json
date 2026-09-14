@@ -1,0 +1,823 @@
+{
+ "admission": {
+  "verdict": "admitted_with_exemptions",
+  "counts": {
+   "verified": 1,
+   "not_measured": 9,
+   "failed": 0,
+   "exemptions": 9
+  },
+  "rule": "admitted requires every verdict = verified; failed without exemption \u21d2 refused; not_measured without exemption \u21d2 paused_safe; exemptions (owner + expiry) are attached by the admitting agent, never by the verifier (DEC-AUP-0008, matrix P1/P4)"
+ },
+ "captured_at_utc": "2026-09-14T15:03:05Z",
+ "change_set": {
+  "base": "efba85bddeab3f72f01bb8d621943bc2c61e8987",
+  "files": [
+   {
+    "kind": "config",
+    "node_id": "code_unit:.github/workflows/ci.yml",
+    "node_ids": [
+     "code_unit:.github/workflows/ci.yml"
+    ],
+    "path": ".github/workflows/ci.yml",
+    "status": "M"
+   }
+  ],
+  "head": "9aa456b7c22aa7cc7169ab2832f223ef040648c8",
+  "mode": "diff"
+ },
+ "decision_ref": "DEC-AUP-0008",
+ "exemptions": [
+  {
+   "entity": "code_unit:.github/workflows/ci.yml",
+   "owner": "aup-mun0053 executor (card MUN-0053, model claude-opus-5)",
+   "expires_at_utc": "2026-09-21T00:00:00Z",
+   "reason": "deploy-boundary: the restored defaults act only on the arcana-prod-host runner; the file equals 7afc9e9 (V-revert-identity). Evidence gate: DEC-AUP-0030 G4 \u2014 merged revert, ci.yml grep for the override returns 0; the revert's own deploy runs under defaults and may fail on disk (DEC-AUP-0030 R5, finding F1) \u2014 production stays on 0.4.5. Verifier reason: required verifier targeted_test produced no verdict for this entity",
+   "ref": "DEC-AUP-0030"
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+   "owner": "aup-mun0053 executor (card MUN-0053, model claude-opus-5)",
+   "expires_at_utc": "2026-09-21T00:00:00Z",
+   "reason": "historical receipt entity: done is asserted, never verified (I14); this change does not alter it. Verifier reason: historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "ref": "DEC-AUP-0030"
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-integration-batch1.json",
+   "owner": "aup-mun0053 executor (card MUN-0053, model claude-opus-5)",
+   "expires_at_utc": "2026-09-21T00:00:00Z",
+   "reason": "historical receipt entity: done is asserted, never verified (I14); this change does not alter it. Verifier reason: historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "ref": "DEC-AUP-0030"
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json",
+   "owner": "aup-mun0053 executor (card MUN-0053, model claude-opus-5)",
+   "expires_at_utc": "2026-09-21T00:00:00Z",
+   "reason": "historical receipt entity: done is asserted, never verified (I14); this change does not alter it. Verifier reason: historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "ref": "DEC-AUP-0030"
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+   "owner": "aup-mun0053 executor (card MUN-0053, model claude-opus-5)",
+   "expires_at_utc": "2026-09-21T00:00:00Z",
+   "reason": "historical receipt entity: done is asserted, never verified (I14); this change does not alter it. Verifier reason: historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "ref": "DEC-AUP-0030"
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+   "owner": "aup-mun0053 executor (card MUN-0053, model claude-opus-5)",
+   "expires_at_utc": "2026-09-21T00:00:00Z",
+   "reason": "historical receipt entity: done is asserted, never verified (I14); this change does not alter it. Verifier reason: historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "ref": "DEC-AUP-0030"
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+   "owner": "aup-mun0053 executor (card MUN-0053, model claude-opus-5)",
+   "expires_at_utc": "2026-09-21T00:00:00Z",
+   "reason": "historical receipt entity: done is asserted, never verified (I14); this change does not alter it. Verifier reason: historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "ref": "DEC-AUP-0030"
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+   "owner": "aup-mun0053 executor (card MUN-0053, model claude-opus-5)",
+   "expires_at_utc": "2026-09-21T00:00:00Z",
+   "reason": "historical receipt entity: done is asserted, never verified (I14); this change does not alter it. Verifier reason: historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "ref": "DEC-AUP-0030"
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+   "owner": "aup-mun0053 executor (card MUN-0053, model claude-opus-5)",
+   "expires_at_utc": "2026-09-21T00:00:00Z",
+   "reason": "historical receipt entity: done is asserted, never verified (I14); this change does not alter it. Verifier reason: historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "ref": "DEC-AUP-0030"
+  }
+ ],
+ "graph": {
+  "builder_version": "1.0.1",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:2cb371c24f1e219c2a50ca815dd97bfe550ac58c25213f1b405cdecf3b71902e",
+  "path": "/tmp/claude-1002/-home-dev-aup-program/fae90256-da0e-4a59-9653-7e8493de3ad6/scratchpad/car/verifier-out/graph-efba85bddeab.json",
+  "source_commit": "efba85bddeab3f72f01bb8d621943bc2c61e8987"
+ },
+ "head_graph": {
+  "builder_version": "1.0.1",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:c166ae44fa93bb56ac3919157f5d48410a0334257f182d24a5fd4c621db0e379",
+  "path": "/tmp/claude-1002/-home-dev-aup-program/fae90256-da0e-4a59-9653-7e8493de3ad6/scratchpad/car/verifier-out/graph-head-9aa456b7c22a.json",
+  "source_commit": "9aa456b7c22aa7cc7169ab2832f223ef040648c8",
+  "staleness": {
+   "checked_at_utc": "2026-09-14T15:03:12Z",
+   "checked_nodes": 318,
+   "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+   "mismatched_nodes": [],
+   "verdict": "fresh"
+  }
+ },
+ "host": "arcana-devs",
+ "impact_set": {
+  "deterministic_core": [
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "document:SECURITY.md",
+    "node_type": "document",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "document:SECURITY.md",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "document:SECURITY.md",
+      "node_type": "document",
+      "path": [
+       {
+        "edge_type": "documents",
+        "from": "document:SECURITY.md",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "doc reference check (path/id still resolves)"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "document:SECURITY.md",
+      "node_type": "document",
+      "path": [
+       {
+        "edge_type": "documents",
+        "from": "document:SECURITY.md",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "doc reference check (path/id still resolves)"
+     }
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-integration-batch1.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-integration-batch1.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-integration-batch1.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-integration-batch1.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-integration-batch1.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-integration-batch1.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   }
+  ],
+  "edge_types": "all",
+  "global_fallback": {
+   "triggered": false
+  },
+  "inferred_tail": [],
+  "max_depth": 3,
+  "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
+  "total": 9
+ },
+ "notes": [
+  "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.0.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = \u22c3 edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i\u2026",
+  "profile: (auto-detected); baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: ['targeted_test']; disabled: none",
+  "targeted_test selected: no spec with a verifies edge reaches an affected entity",
+  "[finalize] Draft by the bundle's verify.py (diff mode efba85b..9aa456b). Amended only by attached verifiers and dated exemptions; no verdict raised."
+ ],
+ "producer": {
+  "tool": "tools/graph/verify.py",
+  "version": "1.0.1"
+ },
+ "receipt_id": "car-verify-20260914T150305Z-9aa456b7",
+ "repo": {
+  "name": "Arcanada-one/muneral",
+  "path": "/tmp/claude-1002/-home-dev-aup-program/fae90256-da0e-4a59-9653-7e8493de3ad6/scratchpad/car/wt"
+ },
+ "revision_selection": {
+  "base": [
+   "code_unit:.github/workflows/ci.yml",
+   "document:SECURITY.md",
+   "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+   "receipt:receipts/graph/change-admission-integration-batch1.json",
+   "receipt:receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json",
+   "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+   "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+   "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+   "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+   "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json"
+  ],
+  "head": [
+   "code_unit:.github/workflows/ci.yml",
+   "document:SECURITY.md",
+   "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+   "receipt:receipts/graph/change-admission-integration-batch1.json",
+   "receipt:receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json",
+   "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+   "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+   "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+   "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+   "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json"
+  ],
+  "schema": "RevisionImpactSelection/v1",
+  "unmeasured_head_files": []
+ },
+ "schema": "ChangeAdmissionReceipt/v1",
+ "staleness": {
+  "checked_at_utc": "2026-09-14T15:03:11Z",
+  "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+  "mismatched_nodes": [],
+  "verdict": "fresh"
+ },
+ "tree": {
+  "commit": "9aa456b7c22aa7cc7169ab2832f223ef040648c8",
+  "dirty": false
+ },
+ "verdicts": [
+  {
+   "entity": "code_unit:.github/workflows/ci.yml",
+   "reason": "required verifier targeted_test produced no verdict for this entity",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-fitness",
+    "v-workflow-config-b803fcb7f17ed923"
+   ]
+  },
+  {
+   "entity": "document:SECURITY.md",
+   "reason": "v-doc-reference: 0 reference(s) resolve at head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-doc-reference"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "verdict": "not_measured"
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-integration-batch1.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "verdict": "not_measured"
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "verdict": "not_measured"
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "verdict": "not_measured"
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "verdict": "not_measured"
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "verdict": "not_measured"
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "verdict": "not_measured"
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "verdict": "not_measured"
+  }
+ ],
+ "verifiers": [
+  {
+   "command": "workflow_config.validate exact head bytes",
+   "duration_s": 0.0,
+   "entities": [
+    "code_unit:.github/workflows/ci.yml"
+   ],
+   "exit_code": 0,
+   "id": "v-workflow-config-b803fcb7f17ed923",
+   "kind": "config_schema",
+   "output_ref": "/tmp/claude-1002/-home-dev-aup-program/fae90256-da0e-4a59-9653-7e8493de3ad6/scratchpad/car/verifier-out/v-workflow-config-b803fcb7f17ed923.txt",
+   "started_at_utc": "2026-09-14T15:03:16Z",
+   "summary": "bounded workflow configuration shape valid; expressions, shell, actions and hosted execution NOT_MEASURED"
+  },
+  {
+   "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
+   "duration_s": 0.08,
+   "entities": [
+    "code_unit:.github/workflows/ci.yml"
+   ],
+   "exit_code": 0,
+   "id": "v-fitness",
+   "kind": "fitness_rules",
+   "output_ref": "/tmp/claude-1002/-home-dev-aup-program/fae90256-da0e-4a59-9653-7e8493de3ad6/scratchpad/car/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-09-14T15:03:16Z",
+   "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
+  },
+  {
+   "command": "verify.py doc_reference: path / route / model references of affected documents resolve at head",
+   "duration_s": 0.0,
+   "entities": [
+    "document:SECURITY.md"
+   ],
+   "exit_code": 0,
+   "id": "v-doc-reference",
+   "kind": "doc_reference",
+   "output_ref": "/tmp/claude-1002/-home-dev-aup-program/fae90256-da0e-4a59-9653-7e8493de3ad6/scratchpad/car/verifier-out/v-doc-reference.txt",
+   "started_at_utc": "2026-09-14T15:03:16Z",
+   "summary": "1 document(s), 0 failed"
+  },
+  {
+   "id": "V-revert-identity",
+   "kind": "config_schema",
+   "command": "git diff --quiet 7afc9e9 9aa456b -- .github/workflows/ci.yml",
+   "exit_code": 0,
+   "entities": [
+    "code_unit:.github/workflows/ci.yml"
+   ],
+   "output_ref": "verifier-out/v-revert-identity.txt",
+   "started_at_utc": "2026-09-14T15:03:43Z",
+   "duration_s": 0,
+   "summary": "ci.yml byte-identical to 7afc9e9, whose deploy job ran on main before the override (preflight ran to its disk verdict; lint-and-test success)"
+  },
+  {
+   "id": "V-actionlint-diff",
+   "kind": "config_schema",
+   "command": "actionlint 1.7.10 ci.yml at 9aa456b vs the recorded base",
+   "exit_code": 0,
+   "entities": [
+    "code_unit:.github/workflows/ci.yml"
+   ],
+   "output_ref": "verifier-out/v-actionlint-head.txt (+ v-actionlint-base.txt)",
+   "started_at_utc": "2026-09-14T15:03:43Z",
+   "duration_s": 0,
+   "summary": "identical findings to the base (same file)"
+  }
+ ],
+ "verify": {
+  "events": [],
+  "required_by_entity": {
+   "code_unit:.github/workflows/ci.yml": [
+    "config_schema",
+    "fitness_rules",
+    "targeted_test"
+   ],
+   "document:SECURITY.md": [
+    "doc_reference"
+   ],
+   "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json": [],
+   "receipt:receipts/graph/change-admission-integration-batch1.json": [],
+   "receipt:receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json": [],
+   "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json": [],
+   "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json": [],
+   "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json": [],
+   "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json": [],
+   "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json": []
+  },
+  "seconds": {
+   "prepare": 3.86,
+   "total": 11.06,
+   "verifiers": 0.08
+  }
+ },
+ "work_item": "MUN-0053",
+ "model": "claude-opus-5"
+}
