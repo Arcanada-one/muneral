@@ -182,6 +182,10 @@ jobs:
         with:
           target-host: arcana-prod
           service-name: muneral
+          # DEC-AUP-0030: 92 (default 90) and a 3 GB floor (default 2), until
+          # 2026-09-16T00:00Z; see the guard step below.
+          disk-fail-percent: "92"
+          min-free-disk-gb: "3"
           # `docker-pressure` is deliberately absent: it shells out to
           # `docker system df`, which this runner is losing access to on
           # purpose, and the check degrades to a permanent warning rather than
@@ -195,6 +199,32 @@ jobs:
           ops-bot-agent: muneral
           ops-bot-key: ${{ secrets.OPSBOT_API_KEY }}
           ops-bot-url: https://ops.arcanada.ai/events
+
+
+      # DEC-AUP-0030 (program repo): a dated, narrow disk override so the MUN-0053
+      # security fix can deploy while the host reads 91 % used. The two steps
+      # below and the two preflight inputs marked DEC-AUP-0030 go together, and
+      # a revert PR removes them after the first successful deploy. The guard
+      # makes the override fail every deploy from its expiry on.
+      #
+      # They sit AFTER the preflight because the caller contract requires the
+      # preflight to be step 0 of this job (`steps.order: preflight must be
+      # first`) — nothing may run ahead of the host-readiness check. That costs
+      # the guard nothing: the preflight only reads host state, so an expired
+      # override still fails the job before anything is delivered.
+      - name: DEC-AUP-0030 override expiry guard
+        run: |
+          expiry=2026-09-16T00:00:00Z
+          if [[ "$(date -u +%s)" -ge "$(date -u -d "$expiry" +%s)" ]]; then
+            echo "::error title=DEC-AUP-0030::the disk override expired at $expiry; merge the revert PR"
+            exit 1
+          fi
+          echo "DEC-AUP-0030 override active until $expiry"
+
+      - name: DEC-AUP-0030 record disk as the preflight saw it
+        run: |
+          df -P -k / || true
+          if [[ -d /var/lib/docker ]]; then df -P -k /var/lib/docker || true; fi
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
