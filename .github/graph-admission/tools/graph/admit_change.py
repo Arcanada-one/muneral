@@ -108,15 +108,15 @@ def write_json(path: Path, doc: dict) -> None:
 
 # ------------------------------------------------------------------ range + receipt discovery
 def range_files(repo: Path, base: str, head: str) -> list[dict]:
-    out = git(repo, "diff", "--name-status", "-M", f"{base}..{head}")
-    files = []
-    for line in out.splitlines():
-        if not line.strip():
-            continue
-        parts = line.split("\t")
-        status = parts[0][0]
-        path = parts[-1]
+    # -z: git C-quotes a non-ASCII or special path in line output, and a quoted name matches no receipt path
+    fields = git(repo, "diff", "--name-status", "-M", "-z", f"{base}..{head}").split("\0")
+    files, i = [], 0
+    while i < len(fields) and fields[i]:
+        status = fields[i][0]
+        n = 2 if status in "RC" else 1
+        path = fields[i + n]
         files.append({"path": path, "status": status})
+        i += n + 1
     return sorted(files, key=lambda f: f["path"])
 
 
@@ -1852,6 +1852,90 @@ def recheck_structural(repo: Path, base: str, head: str, files: list[dict], poli
     return problems, ev
 
 
+def _receipt_head(doc: dict) -> str | None:
+    cs = doc.get("change_set") or {}
+    h = cs.get("head") if cs.get("mode") == "diff" else (doc.get("tree") or {}).get("commit")
+    return h if isinstance(h, str) and h else None
+
+
+def _names(repo: Path, *args: str) -> set[str]:
+    """NUL-separated path names: never git's C-quoted form, which a filesystem path would not match."""
+    return {p for p in git(repo, *args, "-z", check=False).split("\0") if p}
+
+
+def trailing_record_commits(repo: Path, base: str, head: str, bound: list[dict], changed: set[str],
+                            workdir: Path) -> dict:
+    """GATEORDER-0 — the commits after every bound receipt's head, and which of their paths are record paths.
+
+    The rule and its residuals: contracts/graph-verified-change/trailing-record-commits.v1.md. Everything here
+    is read from git at base/head; the receipt contributes only its head and its own bound bytes. The result
+    never widens what a receipt verifies — it only says which paths a trailing commit may carry."""
+    heads = sorted({h for h in (_receipt_head(r["_doc"]) for r in bound)
+                    if h and git_ok(repo, "cat-file", "-e", f"{h}^{{commit}}")})
+    out = {"rule": "contracts/graph-verified-change/trailing-record-commits.v1.md", "receipt_heads": heads,
+           "trailing_commits": [], "admitted_paths": {"receipts": [], "derived": []},
+           "edited_after_receipt_head": [], "derived_verification": {"verdict": None, "why": "no declared path"}}
+    if not heads:
+        return out
+    trailing = [c for c in git(repo, "rev-list", head, f"^{base}", *[f"^{h}" for h in heads]).split() if c]
+    out["trailing_commits"] = trailing
+    if not trailing:
+        return out
+    # Each trailing commit's OWN paths, with renames split into their delete and add sides: a rename
+    # pairing would otherwise hide the deletion of its source behind an admissible destination. A merge
+    # contributes only the paths it changes against EVERY parent (-c) — what the merge itself wrote —
+    # so joining two receipted branches is not an edit, while a conflict resolution is.
+    touched: set[str] = set()
+    for c in trailing:
+        parents = git(repo, "rev-list", "--parents", "-n", "1", c).split()[1:]
+        if len(parents) > 1:
+            touched |= _names(repo, "diff-tree", "-r", "-c", "--no-commit-id", "--name-only", c)
+        elif parents:
+            touched |= _names(repo, "diff", "--name-only", "--no-renames", parents[0], c)
+    # A path a trailing commit touches and a later one restores has no net change over the range.
+    range_paths = _names(repo, "diff", "--name-only", "--no-renames", base, head)
+    trailing_paths = sorted(touched & range_paths)
+    in_receipt_ranges = set()
+    for h in heads:
+        in_receipt_ranges |= _names(repo, "diff", "--name-only", "--no-renames", base, h)
+
+    # (a) the receipt itself — the bytes at head:path are the bytes the gate bound
+    receipt_paths = set()
+    root = repo.resolve()
+    for r in bound:
+        try:
+            rel = Path(r["path"]).resolve().relative_to(root).as_posix()
+        except ValueError:
+            continue  # a receipt from the pull-request body or a workdir is not a file of this change
+        blob = subprocess.run(["git", "-C", str(repo), "show", f"{head}:{rel}"], capture_output=True)
+        if blob.returncode == 0 and r.get("digest") == sha256_bytes(blob.stdout):
+            receipt_paths.add(rel)
+
+    # (b) a derived artefact declared AT BASE (no bootstrap), measured by its own verifier at head
+    decl, why_decl = read_declaration(repo, base)
+    declared, _bad = declared_artefacts(decl)
+    # a declared artefact DELETED after the receipt head is not a record path: there are no bytes to verify
+    derived = [p for p in trailing_paths if p in declared and p not in receipt_paths
+               and git_ok(repo, "cat-file", "-e", f"{head}:{p}")]
+    derived_ok: set[str] = set()
+    if derived:
+        workdir.mkdir(parents=True, exist_ok=True)
+        ok, why = _verify_declared_artefacts(repo, head, declared, derived, workdir)
+        out["derived_verification"] = {"verdict": ok, "why": why, "paths": derived, "declaration": why_decl}
+        if ok is True:
+            derived_ok = set(derived)
+    elif decl is None:
+        out["derived_verification"]["why"] = why_decl
+
+    record = receipt_paths | derived_ok
+    out["edited_after_receipt_head"] = [p for p in trailing_paths if p not in record]
+    out["admitted_paths"] = {"receipts": sorted(p for p in trailing_paths if p in receipt_paths
+                                                and p not in in_receipt_ranges),
+                             "derived": sorted(p for p in trailing_paths if p in derived_ok
+                                               and p not in in_receipt_ranges)}
+    return out
+
+
 def gate(repo: Path, base: str, head: str, receipt_paths: list[Path], policy: dict, *,
          description: str = "", bypass_flag: bool = False, disabled: frozenset[str] = frozenset(),
          work_item_enforcement: str | None = None, ledger_dir: Path = LEDGER_DIR,
@@ -2101,12 +2185,27 @@ def gate(repo: Path, base: str, head: str, receipt_paths: list[Path], policy: di
             add("C12", f"{Path(rec['path']).name}: {len(boundary)} boundary entity(ies) reached over an "
                        f"inferred/observed edge with no canary", sorted(set(boundary)))
 
-    # C06 — the receipts must cover every changed file
+    # C06 — the receipts must cover every changed file, and nothing but a record commit may follow a
+    # receipt's head (GATEORDER-0: contracts/graph-verified-change/trailing-record-commits.v1.md)
+    record = None
     if bound:
-        uncovered = sorted(changed - covered)
-        if uncovered:
-            add("C06", f"{len(uncovered)}/{len(changed)} changed file(s) are absent from the receipt change_set",
-                uncovered)
+        wd_rc = Path(automated_workdir) if automated_workdir else Path(tempfile.mkdtemp(prefix="gateorder0-"))
+        record = trailing_record_commits(repo, base, head, bound, changed, wd_rc)
+        uncovered = sorted(changed - covered - set(record["admitted_paths"]["receipts"])
+                           - set(record["admitted_paths"]["derived"]))
+        after = record["edited_after_receipt_head"]
+        if uncovered or after:
+            parts = []
+            if uncovered:
+                parts.append(f"{len(uncovered)}/{len(changed)} changed file(s) are absent from the receipt change_set")
+            if after:
+                parts.append(f"{len(after)} path(s) changed AFTER the receipt head by a commit no receipt has seen "
+                             f"({', '.join(after[:4])}) — only the receipt file itself and a declared derived "
+                             f"artefact that its own verifier accepts are record commits; re-issue the receipt on "
+                             f"the full range")
+            if record["derived_verification"].get("verdict") not in (None, True):
+                parts.append("declared derived artefact(s) not admitted: " + str(record["derived_verification"]["why"]))
+            add("C06", "; ".join(parts), sorted(set(uncovered) | set(after)))
 
     # C13 — work-item evidence attachment
     evidence = {"enforcement": enforcement, "entries": [], "status": "not_measured"}
@@ -2152,6 +2251,7 @@ def gate(repo: Path, base: str, head: str, receipt_paths: list[Path], policy: di
         "checks": checks,
         "work_item_evidence": evidence,
         "automated_author": automated,
+        "record_commits": record,
         "verdict": verdict,
         "reason_codes": sorted({c["code"] for c in checks}),
         "exit_code": EXIT_OF[verdict],
