@@ -2,8 +2,10 @@ import {
   CanActivate,
   ExecutionContext,
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
@@ -13,6 +15,12 @@ import { AGENT_SCOPE_KEY } from '../agent-scope.decorator.js';
 import type { AgentScopeKind } from '../agent-scope.decorator.js';
 import { agentOwnTaskWhere } from '../agent-task-visibility.js';
 import { assignCompatWindowAdmits } from '../assign-compat-window.js';
+import {
+  PROJECT_READ_GRANTS,
+  PROJECT_READ_GRANT_LIST,
+  projectReadGrantFor,
+} from '../project-read-grants.js';
+import type { ProjectReadGrantEntry } from '../project-read-grants.js';
 
 /** What an authorised agent request carries downstream: the id the handler must
  *  narrow its answer to. Absent on JWT requests, which are not narrowed. */
@@ -22,6 +30,8 @@ export interface AgentScopeContext {
   /** MUN-0051, 'task-assign' only: what entitled the key to assign — recorded
    *  in the activity row the assignment writes. */
   assignBasis?: AssignBasis;
+  /** MUN-0052, 'project-index' only: the grant that admitted the read. */
+  projectReadGrant?: ProjectReadGrantEntry;
 }
 
 export type AssignBasis = 'creator' | 'executor' | 'compat-window';
@@ -76,13 +86,27 @@ export type AgentScopedRequest = Request & {
  * existed gets; inside the workspace the agent receives its own slice, which is
  * an empty list when it has no assignments there rather than a refusal that
  * would confirm the project has tasks in it.
+ *
+ * MUN-0052 (DEC-AUP-0029) — the one exception to the own slice is
+ * 'project-index': a key named in `project-read-grants.ts` for a project reads
+ * that project's task index (ids, status, title hashes; no free text). Without a
+ * live grant the route answers the same 404 as a project outside the workspace,
+ * so it does not confirm that a project exists. No other scope kind consults
+ * the grant list — in particular no write does.
  */
 @Injectable()
 export class AgentTaskScopeGuard implements CanActivate {
+  private readonly projectReadGrants: readonly ProjectReadGrantEntry[];
+
   constructor(
     private readonly reflector: Reflector,
     private readonly prisma: PrismaService,
-  ) {}
+    @Optional()
+    @Inject(PROJECT_READ_GRANTS)
+    projectReadGrants?: readonly ProjectReadGrantEntry[],
+  ) {
+    this.projectReadGrants = projectReadGrants ?? PROJECT_READ_GRANT_LIST;
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<AgentScopedRequest>();
@@ -161,6 +185,17 @@ export class AgentTaskScopeGuard implements CanActivate {
         if (!projectId) throw new ForbiddenException('No project in scope for this key.');
         await this.assertProjectInWorkspace(agent, projectId);
         break;
+      }
+      // MUN-0052: the task index. Workspace first, then a live grant for this
+      // agent and this project; both refusals are the same 404.
+      case 'project-index': {
+        const projectId = this.paramOf(req, 'projectId');
+        if (!projectId) throw new ForbiddenException('No project in scope for this key.');
+        await this.assertProjectInWorkspace(agent, projectId);
+        const grant = projectReadGrantFor(agent.id, projectId, new Date(), this.projectReadGrants);
+        if (!grant) throw new NotFoundException(`Project ${projectId} not found.`);
+        req.agentScope = { agentId: agent.id, kind, projectReadGrant: grant };
+        return true;
       }
       // MUN-0045 (contract_diff ENUM_VALUE_ADDED): a future AgentScopeKind that
       // reaches here without its own case is a COMPILE ERROR, not a route that

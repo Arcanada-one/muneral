@@ -78,6 +78,16 @@ import { SetMetadata } from '@nestjs/common';
  *                      workspace. A lead or reviewer assignment grants nothing.
  *                      See AgentTaskScopeGuard.assertMayAssign and the dated
  *                      compatibility window in assign-compat-window.ts.
+ *   'project-index'  — MUN-0052 (DEC-AUP-0029). The route names a project
+ *                      (`:projectId`) and returns its task INDEX — id, parent,
+ *                      status, priority, actor type, timestamps and a sha256 of
+ *                      the title, for every task of the project. The key's
+ *                      agent must be in the workspace that owns the project AND
+ *                      be named for that project, with `until` still ahead, in
+ *                      `project-read-grants.ts`; otherwise 404, the answer an
+ *                      unknown project gets. It is the only kind that reads
+ *                      past the own slice, it returns no free text, and no
+ *                      other kind — no write — consults the grant list.
  */
 export const AGENT_SCOPE_KEY = 'mun0043:agentScope';
 
@@ -88,7 +98,8 @@ export type AgentScopeKind =
   | 'project-write'
   | 'task-redaction'
   | 'task-status'
-  | 'task-assign';
+  | 'task-assign'
+  | 'project-index';
 
 export const AgentScope = (kind: AgentScopeKind) =>
   SetMetadata(AGENT_SCOPE_KEY, kind);

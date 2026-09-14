@@ -12,12 +12,34 @@ import { AddDependencyDto } from './dto/add-dependency.dto.js';
 import { CreateChecklistItemDto } from './dto/create-checklist-item.dto.js';
 import { ActivityService } from '../activity/activity.service.js';
 import { KanbanService } from '../ws/kanban.service.js';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { isValidTransition } from '@muneral/types';
 import type { Actor, TaskStatus } from '@muneral/types';
 import { TaskFieldStateService } from './field-state/task-field-state.service.js';
 import { TaskExecutionRecorderService } from '../execution-authority/task-execution-recorder.service.js';
 import { agentOwnTaskWhere } from '../auth/agent-task-visibility.js';
+import type { ProjectReadGrantEntry } from '../auth/project-read-grants.js';
+
+/** MUN-0052: the activity action one task-index read records. */
+export const PROJECT_INDEX_READ_ACTION = 'project:index_read';
+
+/** MUN-0052: what the index's `total` counts, stated in the answer (I4). */
+export const PROJECT_INDEX_COUNTED =
+  'every task of the project, all statuses including cancelled and archived';
+
+/** MUN-0052: the only task columns the index returns (DEC-AUP-0029 R3). The
+ *  title leaves as a hash; description, bootstrap stamp, creator id, import
+ *  provenance and revision never leave at all. */
+const PROJECT_INDEX_SELECT = {
+  id: true,
+  parentId: true,
+  status: true,
+  priority: true,
+  actorType: true,
+  createdAt: true,
+  updatedAt: true,
+  title: true,
+} satisfies Prisma.TaskSelect;
 
 @Injectable()
 export class TasksService {
@@ -127,6 +149,77 @@ export class TasksService {
       },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  /**
+   * MUN-0052 — the task index of a project, for an agent key holding a read
+   * grant (`@AgentScope('project-index')`, DEC-AUP-0029).
+   *
+   * Every task of the project, every status (cancelled and archived included),
+   * as ids, status and a sha256 of the title — enough to count and reconcile a
+   * board, not enough to read it. The query selects the title only to hash it;
+   * the plain title is never put in the answer.
+   *
+   * Each read writes one activity row naming the agent, the project, the
+   * decision and the row count BEFORE it answers, and the answer carries that
+   * row's id: a caller's receipt can prove one logged event per read without a
+   * database read path. A read whose row cannot be written fails.
+   */
+  async indexForProject(
+    projectId: string,
+    agentId: string,
+    grant: ProjectReadGrantEntry,
+  ) {
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      select: { workspaceId: true },
+    });
+    if (!project) {
+      throw new NotFoundException(`Project ${projectId} not found.`);
+    }
+
+    const rows = await this.prisma.task.findMany({
+      where: { projectId },
+      select: PROJECT_INDEX_SELECT,
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+    });
+    const tasks = rows.map(({ title, ...rest }) => ({
+      ...rest,
+      titleSha256: createHash('sha256').update(title, 'utf8').digest('hex'),
+    }));
+
+    const audit = await this.prisma.activityLog.create({
+      data: {
+        workspaceId: project.workspaceId,
+        taskId: null,
+        actorType: 'agent',
+        actorId: agentId,
+        action: PROJECT_INDEX_READ_ACTION,
+        payload: {
+          projectId,
+          decision: grant.decision,
+          rowCount: tasks.length,
+        } as Prisma.InputJsonValue,
+      },
+      select: { id: true, createdAt: true },
+    });
+    // Read back from the same table: how many index reads this agent has on
+    // record in the workspace, this one included. A caller comparing two
+    // answers sees the rows persist without any other route to the log.
+    const auditReadCount = await this.prisma.activityLog.count({
+      where: { workspaceId: project.workspaceId, actorId: agentId, action: PROJECT_INDEX_READ_ACTION },
+    });
+
+    return {
+      projectId,
+      counted: PROJECT_INDEX_COUNTED,
+      total: tasks.length,
+      generatedAt: audit.createdAt.toISOString(),
+      auditEventId: audit.id,
+      auditReadCount,
+      grant: { decision: grant.decision, until: grant.until },
+      tasks,
+    };
   }
 
   async updateStatus(
