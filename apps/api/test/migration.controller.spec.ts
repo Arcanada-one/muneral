@@ -101,11 +101,11 @@ describe('MigrationController', () => {
   it('answers 201 on a created batch and 200 on a replayed one', async () => {
     const res = { status: jest.fn() };
     service.createBatch.mockResolvedValueOnce({ created: true, batch: { id: 'b' } });
-    await expect(controller.createBatch({} as never, res as never)).resolves.toEqual({ id: 'b' });
+    await expect(controller.createBatch({} as never, req, res as never)).resolves.toEqual({ id: 'b' });
     expect(res.status).toHaveBeenCalledWith(201);
 
     service.createBatch.mockResolvedValueOnce({ created: false, batch: { id: 'b' } });
-    await controller.createBatch({} as never, res as never);
+    await controller.createBatch({} as never, req, res as never);
     expect(res.status).toHaveBeenLastCalledWith(200);
   });
 
@@ -137,8 +137,8 @@ describe('MigrationController', () => {
 
   it('passes an absent legacyId query through as an empty search, not undefined', async () => {
     service.searchByLegacyId.mockResolvedValue({ total: 0 });
-    await controller.search(undefined as never);
-    expect(service.searchByLegacyId).toHaveBeenCalledWith('');
+    await controller.search(req, undefined as never);
+    expect(service.searchByLegacyId).toHaveBeenCalledWith('', actor);
   });
 
   it('does not re-decode route params Express already decoded', async () => {
@@ -146,17 +146,17 @@ describe('MigrationController', () => {
     // untyped 500) and 'foo%2520bar' into the wrong namespace (a spurious
     // 404) — on the readback path, where a wrong answer costs the most.
     service.getWorkItemByLegacy.mockResolvedValue({});
-    await controller.getByLegacy('datarim/nested', 'DISCOUNT-50%');
-    expect(service.getWorkItemByLegacy).toHaveBeenCalledWith('datarim/nested', 'DISCOUNT-50%');
+    await controller.getByLegacy('datarim/nested', 'DISCOUNT-50%', req);
+    expect(service.getWorkItemByLegacy).toHaveBeenCalledWith('datarim/nested', 'DISCOUNT-50%', actor);
 
-    await controller.getByLegacy('foo%20bar', 'ARAS-0001');
-    expect(service.getWorkItemByLegacy).toHaveBeenLastCalledWith('foo%20bar', 'ARAS-0001');
+    await controller.getByLegacy('foo%20bar', 'ARAS-0001', req);
+    expect(service.getWorkItemByLegacy).toHaveBeenLastCalledWith('foo%20bar', 'ARAS-0001', actor);
   });
 
   it('rejects a non-string legacyId query instead of handing it to Prisma', () => {
     // The query parser is `extended`, so `?legacyId[]=a&legacyId[]=b` arrives
     // as an array and would otherwise surface as an untyped 500.
-    expect(() => controller.search(['a', 'b'])).toThrow(BadRequestException);
-    expect(() => controller.search({ x: '1' })).toThrow(BadRequestException);
+    expect(() => controller.search(req, ['a', 'b'])).toThrow(BadRequestException);
+    expect(() => controller.search(req, { x: '1' })).toThrow(BadRequestException);
   });
 });

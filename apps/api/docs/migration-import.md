@@ -167,6 +167,36 @@ not create a new task and does not merge one.
 Writes are agent-only on purpose: the acting principal is taken from the API key
 and recorded on the activity entry, so an importer cannot name its own actor.
 
+### Workspace scope (MUN-0053)
+
+Every route answers only about the **caller's workspaces**: the agent's own
+workspace for a key, the workspaces the user is a member of for a JWT. Outside
+them a resource is not found — the same `404` body an id that never existed gets:
+
+| Route | Outside the caller's workspaces |
+|---|---|
+| `POST /migration/batches` | `404 PROJECT_NOT_FOUND`, nothing written |
+| `GET /migration/batches/:id`, `POST …/commit` | `404 BATCH_NOT_FOUND`, the batch is untouched |
+| `POST /migration/work-items` | `404 BATCH_NOT_FOUND` for a foreign batch; `409 LEGACY_IDENTITY_OUTSIDE_WORKSPACE` when the (namespace, legacy id) is already bound to another workspace's work item |
+| `GET …/by-legacy/:ns/:id` | `404 WORK_ITEM_NOT_FOUND`; occurrences recorded by other workspaces' batches are left out |
+| `GET …/search` | those identities are not listed; `occurrenceCount` counts the caller's occurrences only |
+| `POST …/:taskId/transitions` | `404 WORK_ITEM_NOT_FOUND`, decided before the idempotency key is looked up |
+| `POST /migration/identities/:id/decisions`, `GET …/mappings` | `404 IDENTITY_NOT_FOUND`; mapping edges to identities outside the scope are left out |
+
+An identity belongs to a workspace through the task it is bound to, or — while
+unbound — through the batches its occurrences were recorded in.
+
+**Who may transition.** Inside the workspace the transition follows the rule of
+`PATCH /tasks/:id/status` (MUN-0050): the key must be the task's creator or hold
+an `executor` assignment on it. Any other key — a stranger of the same workspace
+included — gets the same `404`. A work item imported with a key records that
+agent as its creator, so an importer moves what it imported. Work items imported
+before MUN-0053 carry no creator and need an executor assignment.
+
+**Residual.** Identities, batch keys and idempotency keys are unique across all
+workspaces, so a refusal (`409`) still tells a caller that a key or a
+(namespace, legacy id) is taken elsewhere. It carries no foreign id.
+
 ---
 
 ## Endpoints
@@ -415,6 +445,7 @@ Every failure carries a machine-readable `code` in the response body:
 | `IDENTITY_NOT_FOUND` | 404 | No such legacy identity (subject or target). |
 | `INVALID_IDENTITY_DECISION` | 400 | The decision names its own subject as a target. |
 | `INVALID_STATUS_TRANSITION` | 400 | The shared task state machine forbids the move. |
+| `LEGACY_IDENTITY_OUTSIDE_WORKSPACE` | 409 | The (namespace, legacy id) is bound to a work item of another workspace; import under your own namespace. |
 | `MAPPING_REVISION_STALE` | 409 | Identity moved on; re-read and retry. |
 | `PROJECT_NOT_FOUND` | 404 | No such project. |
 | `RAW_EXCERPT_TOO_LARGE` | 400 | The excerpt exceeds 16 KiB of UTF-8. |

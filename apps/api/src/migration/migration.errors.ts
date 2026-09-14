@@ -21,6 +21,7 @@ export const MIGRATION_ERROR_CODES = [
   'INVALID_IDENTITY_DECISION',
   'IDENTITY_NOT_FOUND',
   'INVALID_STATUS_TRANSITION',
+  'LEGACY_IDENTITY_OUTSIDE_WORKSPACE',
   'MAPPING_REVISION_STALE',
   'PROJECT_NOT_FOUND',
   'RAW_EXCERPT_TOO_LARGE',
@@ -156,6 +157,28 @@ export function unknownStatusMapRevision(
       `Available revisions: ${supported.join(', ')}.`,
     requestedRevision: requested,
     supportedRevisions: [...supported],
+  });
+}
+
+/**
+ * MUN-0053: the (namespace, legacy id) pair is already bound to a work item
+ * that is not in the caller's workspace. Identities are global, so the import
+ * cannot attach a receipt to that task without writing across the tenant wall.
+ * The body names only what the caller sent — no foreign task id, project or
+ * workspace. The refusal itself does say the pair is taken; that follows from
+ * the global uniqueness of identities and is recorded as a residual.
+ */
+export function legacyIdentityOutsideWorkspace(
+  sourceNamespace: string,
+  legacyId: string,
+): ConflictException {
+  return new ConflictException({
+    code: 'LEGACY_IDENTITY_OUTSIDE_WORKSPACE' satisfies MigrationErrorCode,
+    message:
+      `("${sourceNamespace}", "${legacyId}") is bound to a work item outside this ` +
+      `caller's workspace; import it under a namespace of your own.`,
+    sourceNamespace,
+    legacyId,
   });
 }
 

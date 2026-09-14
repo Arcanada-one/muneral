@@ -20,3 +20,20 @@ export function agentOwnTaskWhere(agentId: string): Prisma.TaskWhereInput {
     ],
   };
 }
+
+/**
+ * MUN-0050 / MUN-0053 — the tasks an agent key may MOVE: the ones it created
+ * (the same authorship pair as above) or holds an `executor` assignment for. A
+ * lead or reviewer assignment reads and comments, it does not move the card.
+ * Shared by the status route's scope check and the migration transition, so the
+ * two doors that change a task's status cannot drift apart. Callers add the
+ * workspace clause.
+ */
+export function agentStatusAuthorityWhere(agentId: string): Prisma.TaskWhereInput {
+  return {
+    OR: [
+      { createdById: agentId, actorType: 'agent' },
+      { agents: { some: { agentId, role: 'executor' } } },
+    ],
+  };
+}

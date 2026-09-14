@@ -13,7 +13,7 @@ import { Agent } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { AGENT_SCOPE_KEY } from '../agent-scope.decorator.js';
 import type { AgentScopeKind } from '../agent-scope.decorator.js';
-import { agentOwnTaskWhere } from '../agent-task-visibility.js';
+import { agentOwnTaskWhere, agentStatusAuthorityWhere } from '../agent-task-visibility.js';
 import { assignCompatWindowAdmits } from '../assign-compat-window.js';
 import {
   PROJECT_READ_GRANTS,
@@ -378,10 +378,7 @@ export class AgentTaskScopeGuard implements CanActivate {
         where: {
           id: taskId,
           project: { workspaceId: agent.workspaceId },
-          OR: [
-            { createdById: agent.id, actorType: 'agent' },
-            { agents: { some: { agentId: agent.id, role: 'executor' } } },
-          ],
+          ...agentStatusAuthorityWhere(agent.id),
         },
         select: { id: true },
       })

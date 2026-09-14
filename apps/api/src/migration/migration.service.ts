@@ -28,6 +28,7 @@ import { Injectable } from '@nestjs/common';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { isValidTransition, type Actor, type TaskStatus } from '@muneral/types';
 import { ActivityService } from '../activity/activity.service.js';
+import { agentStatusAuthorityWhere } from '../auth/agent-task-visibility.js';
 import {
   canonicalJson,
   CanonicalJsonError,
@@ -40,6 +41,11 @@ import type { CreateDecisionDto } from './dto/create-decision.dto.js';
 import type { CreateTransitionDto } from './dto/create-transition.dto.js';
 import type { CreateWorkItemDto } from './dto/create-work-item.dto.js';
 import {
+  batchInWorkspacesWhere,
+  identityInWorkspacesWhere,
+  occurrenceInWorkspacesWhere,
+} from './migration-scope.js';
+import {
   batchKeyConflict,
   batchNotFound,
   batchNotOpen,
@@ -49,6 +55,7 @@ import {
   identityNotFound,
   invalidIdentityDecision,
   invalidStatusTransition,
+  legacyIdentityOutsideWorkspace,
   mappingRevisionStale,
   projectNotFound,
   rawExcerptTooLarge,
@@ -134,9 +141,12 @@ export class MigrationService {
    */
   async createBatch(
     dto: CreateBatchDto,
+    actor: Actor,
   ): Promise<{ created: boolean; batch: Record<string, unknown> }> {
-    const project = await this.prisma.project.findUnique({
-      where: { id: dto.projectId },
+    // MUN-0053: a project outside the caller's workspace is not found.
+    const workspaceIds = await this.callerWorkspaceIds(actor);
+    const project = await this.prisma.project.findFirst({
+      where: { id: dto.projectId, workspaceId: { in: workspaceIds } },
       select: { id: true },
     });
     if (!project) throw projectNotFound(dto.projectId);
@@ -181,8 +191,11 @@ export class MigrationService {
     }
   }
 
-  async getBatch(batchId: string): Promise<Record<string, unknown>> {
-    const batch = await this.prisma.migrationBatch.findUnique({ where: { id: batchId } });
+  async getBatch(batchId: string, actor: Actor): Promise<Record<string, unknown>> {
+    const workspaceIds = await this.callerWorkspaceIds(actor);
+    const batch = await this.prisma.migrationBatch.findFirst({
+      where: { id: batchId, ...batchInWorkspacesWhere(workspaceIds) },
+    });
     if (!batch) throw batchNotFound(batchId);
     return presentBatch(batch);
   }
@@ -196,7 +209,16 @@ export class MigrationService {
    * already-committed batch returns the stored receipt verbatim rather than
    * minting a second one — the receipt is write-once, at the database too.
    */
-  async commitBatch(batchId: string): Promise<Record<string, unknown>> {
+  async commitBatch(batchId: string, actor: Actor): Promise<Record<string, unknown>> {
+    // MUN-0053: scope first — a batch outside the caller's workspace is not
+    // found. A batch never changes project, so checking before the lock holds.
+    const workspaceIds = await this.callerWorkspaceIds(actor);
+    const inScope = await this.prisma.migrationBatch.findFirst({
+      where: { id: batchId, ...batchInWorkspacesWhere(workspaceIds) },
+      select: { id: true },
+    });
+    if (!inScope) throw batchNotFound(batchId);
+
     return this.prisma.$transaction(async (tx) => {
       // Lock the batch row first. Two concurrent commits would otherwise both
       // read `open`, compute receipts over different occurrence sets if one
@@ -290,8 +312,10 @@ export class MigrationService {
   ): Promise<{ replayed: boolean; body: Record<string, unknown> }> {
     const requestDigest = jsonDigest(workItemRequestShape(dto));
 
-    const batch = await this.prisma.migrationBatch.findUnique({
-      where: { id: dto.batchId },
+    // MUN-0053: a batch outside the caller's workspace is not found.
+    const workspaceIds = await this.callerWorkspaceIds(actor);
+    const batch = await this.prisma.migrationBatch.findFirst({
+      where: { id: dto.batchId, ...batchInWorkspacesWhere(workspaceIds) },
       select: { id: true, projectId: true, status: true },
     });
     if (!batch) throw batchNotFound(dto.batchId);
@@ -368,7 +392,10 @@ export class MigrationService {
             status: mapped.taskStatus,
             priority: dto.priority ?? 'medium',
             actorType: actor.type,
-            createdById: actor.type === 'human' ? actor.id : null,
+            // MUN-0053: the importing agent is the task's creator, exactly as
+            // `POST /tasks` with a key records it (MUN-0045) — so the key that
+            // imported a work item may move it along the status map.
+            createdById: actor.id,
             // The import time. The HISTORICAL time stays on the occurrence.
             importedAt: new Date(),
             ...(dto.bootstrapStamp
@@ -381,6 +408,15 @@ export class MigrationService {
           where: { id: identityId },
           data: { taskId, updatedAt: new Date() },
         });
+      } else if (
+        (await tx.task.count({
+          where: { id: taskId, project: { workspaceId: { in: workspaceIds } } },
+        })) === 0
+      ) {
+        // MUN-0053: the identity is global, and it is already bound to a task
+        // of another workspace. Recording a receipt on that task would be a
+        // write across the tenant wall; the whole transaction rolls back.
+        throw legacyIdentityOutsideWorkspace(dto.sourceNamespace, dto.legacyId);
       } else if (dto.bootstrapStamp) {
         // MIG-003: the stamp belongs to the FIRST revision of the work item.
         // Offering one to an already-bootstrapped item is rejected rather
@@ -450,10 +486,19 @@ export class MigrationService {
   async getWorkItemByLegacy(
     sourceNamespace: string,
     legacyId: string,
+    actor: Actor,
   ): Promise<Record<string, unknown>> {
-    const identity = await this.prisma.legacyIdentity.findUnique({
-      where: { sourceNamespace_legacyId: { sourceNamespace, legacyId } },
-      include: { occurrences: { orderBy: [{ recordedAt: 'asc' }, { id: 'asc' }] } },
+    // MUN-0053: only an identity of the caller's workspaces, and only the
+    // occurrences recorded by batches of those workspaces.
+    const workspaceIds = await this.callerWorkspaceIds(actor);
+    const identity = await this.prisma.legacyIdentity.findFirst({
+      where: { sourceNamespace, legacyId, ...identityInWorkspacesWhere(workspaceIds) },
+      include: {
+        occurrences: {
+          where: occurrenceInWorkspacesWhere(workspaceIds),
+          orderBy: [{ recordedAt: 'asc' }, { id: 'asc' }],
+        },
+      },
     });
     if (!identity) throw workItemNotFound({ sourceNamespace, legacyId });
 
@@ -476,11 +521,17 @@ export class MigrationService {
    * `ARAS-0001` from a nested tracker and `ARAS-0001` of the root workspace
    * are two answers here, never one merged answer.
    */
-  async searchByLegacyId(legacyId: string): Promise<Record<string, unknown>> {
+  async searchByLegacyId(legacyId: string, actor: Actor): Promise<Record<string, unknown>> {
+    // MUN-0053: every namespace — of the caller's workspaces only.
+    const workspaceIds = await this.callerWorkspaceIds(actor);
     const identities = await this.prisma.legacyIdentity.findMany({
-      where: { legacyId },
+      where: { legacyId, ...identityInWorkspacesWhere(workspaceIds) },
       orderBy: [{ sourceNamespace: 'asc' }],
-      include: { _count: { select: { occurrences: true } } },
+      include: {
+        _count: {
+          select: { occurrences: { where: occurrenceInWorkspacesWhere(workspaceIds) } },
+        },
+      },
     });
     return {
       legacyId,
@@ -519,7 +570,18 @@ export class MigrationService {
       evidenceRefs: [...(dto.evidenceRefs ?? [])].sort(),
     });
 
+    // MUN-0053: who may move this task, decided BEFORE the idempotency key is
+    // consulted — otherwise a replayed key would hand back a stored response
+    // about a task the caller cannot see. An agent key moves only a task of its
+    // own workspace that it created or executes (the MUN-0050 rule of
+    // `PATCH /tasks/:id/status`); a human only a task of a workspace they are a
+    // member of. Anything else is the same 404 as a task that does not exist.
+    const authority = await this.transitionAuthorityWhere(actor);
+
     return this.prisma.$transaction(async (tx) => {
+      const allowed = await tx.task.count({ where: { id: taskId, ...authority } });
+      if (allowed === 0) throw workItemNotFound({ taskId });
+
       const claimed = await this.claimIdempotencyKey(
         tx,
         'transition',
@@ -618,7 +680,12 @@ export class MigrationService {
     dto: CreateDecisionDto,
     actor: Actor,
   ): Promise<Record<string, unknown>> {
-    const subject = await this.prisma.legacyIdentity.findUnique({ where: { id: identityId } });
+    // MUN-0053: the subject and every target must be identities of the
+    // caller's workspace; any other id is not found.
+    const inScope = identityInWorkspacesWhere(await this.callerWorkspaceIds(actor));
+    const subject = await this.prisma.legacyIdentity.findFirst({
+      where: { id: identityId, ...inScope },
+    });
     if (!subject) throw identityNotFound(identityId);
     if (subject.mappingRevision !== dto.expectedMappingRevision) {
       throw mappingRevisionStale(identityId, subject.mappingRevision);
@@ -628,7 +695,7 @@ export class MigrationService {
     }
 
     const targets = await this.prisma.legacyIdentity.findMany({
-      where: { id: { in: dto.targets } },
+      where: { id: { in: dto.targets }, ...inScope },
       select: { id: true },
     });
     const found = new Set(targets.map((t) => t.id));
@@ -671,21 +738,26 @@ export class MigrationService {
       });
     }, TX_OPTS);
 
-    return this.getReverseMapping(identityId);
+    return this.getReverseMapping(identityId, actor);
   }
 
-  async getReverseMapping(identityId: string): Promise<Record<string, unknown>> {
-    const identity = await this.prisma.legacyIdentity.findUnique({ where: { id: identityId } });
+  async getReverseMapping(identityId: string, actor: Actor): Promise<Record<string, unknown>> {
+    // MUN-0053: the identity and the far end of every edge must be in the
+    // caller's workspaces.
+    const inScope = identityInWorkspacesWhere(await this.callerWorkspaceIds(actor));
+    const identity = await this.prisma.legacyIdentity.findFirst({
+      where: { id: identityId, ...inScope },
+    });
     if (!identity) throw identityNotFound(identityId);
 
     const [outgoing, incoming] = await Promise.all([
       this.prisma.identityMapping.findMany({
-        where: { fromIdentityId: identityId },
+        where: { fromIdentityId: identityId, toIdentity: inScope },
         orderBy: [{ mappingRevision: 'asc' }, { toIdentityId: 'asc' }],
         include: { toIdentity: true },
       }),
       this.prisma.identityMapping.findMany({
-        where: { toIdentityId: identityId },
+        where: { toIdentityId: identityId, fromIdentity: inScope },
         orderBy: [{ mappingRevision: 'asc' }, { fromIdentityId: 'asc' }],
         include: { fromIdentity: true },
       }),
@@ -704,6 +776,38 @@ export class MigrationService {
         })),
       },
     };
+  }
+
+  // -------------------------------------------------------------------------
+  // MUN-0053 — caller scope
+  // -------------------------------------------------------------------------
+
+  /** The workspaces a caller acts in: an agent's own workspace, or every
+   *  workspace a user is a member of. Empty when neither resolves, which makes
+   *  every scoped query match nothing. */
+  private async callerWorkspaceIds(actor: Actor): Promise<string[]> {
+    if (actor.type === 'agent') {
+      const agent = await this.prisma.agent.findUnique({
+        where: { id: actor.id },
+        select: { workspaceId: true },
+      });
+      return agent ? [agent.workspaceId] : [];
+    }
+    const memberships = await this.prisma.workspaceMember.findMany({
+      where: { userId: actor.id },
+      select: { workspaceId: true },
+    });
+    return memberships.map((m) => m.workspaceId);
+  }
+
+  private async transitionAuthorityWhere(actor: Actor): Promise<Prisma.TaskWhereInput> {
+    const workspaceIds = await this.callerWorkspaceIds(actor);
+    const inWorkspace: Prisma.TaskWhereInput = {
+      project: { workspaceId: { in: workspaceIds } },
+    };
+    return actor.type === 'agent'
+      ? { ...inWorkspace, ...agentStatusAuthorityWhere(actor.id) }
+      : inWorkspace;
   }
 
   // -------------------------------------------------------------------------

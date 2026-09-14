@@ -78,7 +78,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
       sourceSetEpoch: '2026-09-05T00:00:00Z',
       producer: 'producer0',
       projectId,
-    });
+    }, AGENT);
     return batch.id as string;
   }
 
@@ -119,8 +119,8 @@ describe('Migration import surface — PostgreSQL proofs', () => {
         producer: 'producer0',
         projectId,
       };
-      const first = await service.createBatch(payload);
-      const second = await service.createBatch(payload);
+      const first = await service.createBatch(payload, AGENT);
+      const second = await service.createBatch(payload, AGENT);
 
       expect(first.created).toBe(true);
       expect(second.created).toBe(false);
@@ -135,14 +135,14 @@ describe('Migration import surface — PostgreSQL proofs', () => {
         sourceSetEpoch: 'epoch-1',
         producer: 'producer0',
         projectId,
-      });
+      }, AGENT);
       await expect(
         service.createBatch({
           batchKey,
           sourceSetEpoch: 'epoch-2',
           producer: 'producer0',
           projectId,
-        }),
+        }, AGENT),
       ).rejects.toMatchObject({
         response: { code: 'BATCH_KEY_CONFLICT' },
       });
@@ -155,7 +155,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
           sourceSetEpoch: 'epoch-1',
           producer: 'producer0',
           projectId: randomUUID(),
-        }),
+        }, AGENT),
       ).rejects.toBeInstanceOf(NotFoundException);
     });
 
@@ -164,8 +164,8 @@ describe('Migration import surface — PostgreSQL proofs', () => {
       await service.createWorkItem(importRequest(batchId), AGENT);
       await service.createWorkItem(importRequest(batchId), AGENT);
 
-      const first = await service.commitBatch(batchId);
-      const second = await service.commitBatch(batchId);
+      const first = await service.commitBatch(batchId, AGENT);
+      const second = await service.commitBatch(batchId, AGENT);
 
       expect(first.status).toBe('committed');
       expect(second).toEqual(first);
@@ -173,7 +173,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
       expect(receipt.counts).toEqual({ occurrences: 2, identities: 2, workItems: 2 });
       expect(receipt.occurrenceDigest).toMatch(/^[0-9a-f]{64}$/);
       // Readback is byte-identical to what commit returned.
-      await expect(service.getBatch(batchId)).resolves.toEqual(first);
+      await expect(service.getBatch(batchId, AGENT)).resolves.toEqual(first);
     });
 
     // MUN-0041 (AUP-DAT-006): the receipt is what an orchestrator quotes to
@@ -184,7 +184,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
       await service.createWorkItem(importRequest(batchId, { historicalStatus: 'archived' }), AGENT);
       await service.createWorkItem(importRequest(batchId, { historicalStatus: 'pending' }), AGENT);
 
-      const receipt = (await service.commitBatch(batchId)).receipt as Record<string, unknown>;
+      const receipt = (await service.commitBatch(batchId, AGENT)).receipt as Record<string, unknown>;
       expect(receipt.statusMapRevision).toBe(3);
       expect(receipt.statusMapRevisions).toEqual([3]);
       expect(receipt.unmappedCount).toBe(0);
@@ -203,7 +203,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
         AGENT,
       );
 
-      const receipt = (await service.commitBatch(batchId)).receipt as Record<string, unknown>;
+      const receipt = (await service.commitBatch(batchId, AGENT)).receipt as Record<string, unknown>;
       expect(receipt.unmappedCount).toBe(2);
       expect(receipt.statusMapRevision).toBe(3);
     });
@@ -232,7 +232,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
         digestOf('legacy-row'),
       );
 
-      const receipt = (await service.commitBatch(batchId)).receipt as Record<string, unknown>;
+      const receipt = (await service.commitBatch(batchId, AGENT)).receipt as Record<string, unknown>;
       // 0 = "projected before this column existed", never backfilled.
       expect(receipt.statusMapRevisions).toEqual([0, 3]);
       expect(receipt.statusMapRevision).toBe(3);
@@ -259,7 +259,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
             AGENT,
           );
         }
-        const committed = await service.commitBatch(batchId);
+        const committed = await service.commitBatch(batchId, AGENT);
         digests.push((committed.receipt as { occurrenceDigest: string }).occurrenceDigest);
       }
       expect(digests[0]).toBe(digests[1]);
@@ -324,7 +324,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
       expect(rootIdentity.id).not.toBe(nestedIdentity.id);
       expect(rootIdentity.taskId).not.toBe(nestedIdentity.taskId);
 
-      const search = await service.searchByLegacyId(legacyId);
+      const search = await service.searchByLegacyId(legacyId, AGENT);
       expect(search.total).toBe(2);
       expect(
         (search.identities as Array<{ sourceNamespace: string }>).map((i) => i.sourceNamespace),
@@ -396,7 +396,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
 
       // The reverse direction resolves from either end.
       for (const target of targets) {
-        const reverse = (await service.getReverseMapping(target)) as {
+        const reverse = (await service.getReverseMapping(target, AGENT)) as {
           mappings: { incoming: Array<{ fromIdentityId: string }> };
         };
         expect(reverse.mappings.incoming.map((m) => m.fromIdentityId)).toContain(subject.id);
@@ -568,7 +568,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
       );
       const legacyId = (created.body.identity as { legacyId: string }).legacyId;
 
-      const readback = await service.getWorkItemByLegacy('datarim/root', legacyId);
+      const readback = await service.getWorkItemByLegacy('datarim/root', legacyId, AGENT);
       expect((readback.workItem as { status: string }).status).toBe('archived');
       expect((readback.workItem as { status: string }).status).not.toBe('done');
       const occurrences = readback.occurrences as Array<Record<string, unknown>>;
@@ -626,7 +626,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
       ).rejects.toThrow(BadRequestException);
 
       // Nothing was written under a revision the build cannot name.
-      const receipt = (await service.commitBatch(batchId)).receipt as Record<string, unknown>;
+      const receipt = (await service.commitBatch(batchId, AGENT)).receipt as Record<string, unknown>;
       expect(receipt.counts).toEqual({ occurrences: 0, identities: 0, workItems: 0 });
     });
 
@@ -845,6 +845,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
       const readback = await service.getWorkItemByLegacy(
         request.sourceNamespace,
         request.legacyId,
+        AGENT,
       );
 
       expect(readback.workItem).toEqual(lost.workItem);
@@ -855,7 +856,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
 
     it('reports a typed 404 for an unknown legacy id', async () => {
       await expect(
-        service.getWorkItemByLegacy('datarim/root', `MISSING-${randomUUID()}`),
+        service.getWorkItemByLegacy('datarim/root', `MISSING-${randomUUID()}`, AGENT),
       ).rejects.toMatchObject({ response: { code: 'WORK_ITEM_NOT_FOUND' } });
     });
 
@@ -1255,7 +1256,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
       // permanently understating the batch it describes.
       const batchId = await openBatch();
       await service.createWorkItem(importRequest(batchId), AGENT);
-      const receipt = (await service.commitBatch(batchId)).receipt as {
+      const receipt = (await service.commitBatch(batchId, AGENT)).receipt as {
         counts: { occurrences: number };
       };
       expect(receipt.counts.occurrences).toBe(1);
@@ -1314,6 +1315,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
       const readback = await service.getWorkItemByLegacy(
         request.sourceNamespace,
         request.legacyId,
+        AGENT,
       );
       expect(readback.occurrences).toEqual([created.body.occurrence]);
       expect(readback.workItem).toEqual(created.body.workItem);
@@ -1346,16 +1348,16 @@ describe('Migration import surface — PostgreSQL proofs', () => {
 
     // BATCH_KEY_CONFLICT
     const batchKey = `batch-${randomUUID()}`;
-    await service.createBatch({ batchKey, sourceSetEpoch: 'e1', producer: 'p', projectId });
+    await service.createBatch({ batchKey, sourceSetEpoch: 'e1', producer: 'p', projectId }, AGENT);
     await collect(() =>
-      service.createBatch({ batchKey, sourceSetEpoch: 'e2', producer: 'p', projectId }),
+      service.createBatch({ batchKey, sourceSetEpoch: 'e2', producer: 'p', projectId }, AGENT),
     );
     // BATCH_NOT_FOUND
-    await collect(() => service.getBatch(randomUUID()));
+    await collect(() => service.getBatch(randomUUID(), AGENT));
     // BATCH_NOT_OPEN
     const sealed = await openBatch();
     await service.createWorkItem(importRequest(sealed), AGENT);
-    await service.commitBatch(sealed);
+    await service.commitBatch(sealed, AGENT);
     await collect(() => service.createWorkItem(importRequest(sealed), AGENT));
     // BOOTSTRAP_STAMP_IMMUTABLE
     await collect(() =>
@@ -1379,7 +1381,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
     // IDEMPOTENCY_KEY_CONFLICT
     await collect(() => service.createWorkItem({ ...todoItem, title: 'changed' }, AGENT));
     // IDENTITY_NOT_FOUND
-    await collect(() => service.getReverseMapping(randomUUID()));
+    await collect(() => service.getReverseMapping(randomUUID(), AGENT));
     // INVALID_IDENTITY_DECISION
     await collect(() =>
       service.decide(
@@ -1409,6 +1411,37 @@ describe('Migration import surface — PostgreSQL proofs', () => {
         AGENT,
       ),
     );
+    // LEGACY_IDENTITY_OUTSIDE_WORKSPACE (MUN-0053): another workspace's
+    // importer offers a receipt for an identity bound to a task of this one.
+    {
+      const foreignOwner = randomUUID();
+      const foreignWs = randomUUID();
+      const foreignProject = randomUUID();
+      const foreign = { type: 'agent' as const, id: randomUUID(), name: 'foreign-producer' };
+      await prisma.user.create({ data: { id: foreignOwner, name: 'foreign-owner' } });
+      await prisma.workspace.create({
+        data: { id: foreignWs, slug: `mig-f-${randomUUID()}`, name: 'foreign-ws', ownerId: foreignOwner },
+      });
+      await prisma.project.create({
+        data: { id: foreignProject, workspaceId: foreignWs, slug: `mig-f-${randomUUID()}`, name: 'fp' },
+      });
+      await prisma.agent.create({ data: { id: foreign.id, workspaceId: foreignWs, name: foreign.name } });
+      const { batch: foreignBatch } = await service.createBatch(
+        { batchKey: `b-${randomUUID()}`, sourceSetEpoch: 'e', producer: 'p', projectId: foreignProject },
+        foreign,
+      );
+      await collect(() =>
+        service.createWorkItem(
+          {
+            ...todoItem,
+            batchId: foreignBatch.id as string,
+            idempotencyKey: `idem-${randomUUID()}`,
+            occurrence: { ...todoItem.occurrence, contentDigest: digestOf('foreign') },
+          },
+          foreign,
+        ),
+      );
+    }
     // PROJECT_NOT_FOUND
     await collect(() =>
       service.createBatch({
@@ -1416,7 +1449,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
         sourceSetEpoch: 'e',
         producer: 'p',
         projectId: randomUUID(),
-      }),
+      }, AGENT),
     );
     // RAW_EXCERPT_TOO_LARGE
     await collect(() =>
@@ -1446,7 +1479,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
       ),
     );
     // WORK_ITEM_NOT_FOUND
-    await collect(() => service.getWorkItemByLegacy('nowhere', 'NOPE-1'));
+    await collect(() => service.getWorkItemByLegacy('nowhere', 'NOPE-1', AGENT));
 
     expect([...seen].sort()).toEqual([...MIGRATION_ERROR_CODES].sort());
   });

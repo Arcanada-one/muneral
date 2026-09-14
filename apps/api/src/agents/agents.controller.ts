@@ -100,6 +100,18 @@ export class AgentsController {
     return this.agentsService.rotateApiKey(keyId);
   }
 
+  /**
+   * MUN-0053 — the fleet's emergency path: a key revokes itself. Agent key only;
+   * no id in the path or body, so it cannot name any other key. After the 200
+   * the same key answers 401 everywhere, this route included.
+   */
+  @Post('keys/self/revoke')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(ApiKeyGuard)
+  revokeOwnApiKey(@Req() req: Request & { apiKeyAgent: Agent; apiKeyId: string }) {
+    return this.agentsService.revokeOwnApiKey(req.apiKeyId, req.apiKeyAgent);
+  }
+
   @Delete('keys/:keyId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
