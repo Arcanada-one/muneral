@@ -177,6 +177,40 @@ export class AuthService {
   }
 
   /**
+   * MUN-0053 — emergency self-revocation. A key revokes ITSELF and nothing
+   * else: the id comes from the key that authenticated the request, never from
+   * the caller, and the update is bound to that agent and to a key not yet
+   * revoked. One `agent:api_key_self_revoked` activity row is written in the
+   * same transaction, so the revocation cannot happen without its audit row.
+   */
+  async revokeOwnApiKey(
+    keyId: string,
+    agent: { id: string; workspaceId: string },
+  ): Promise<{ keyId: string; agentId: string; revokedAt: string }> {
+    const revokedAt = new Date();
+    return this.prisma.$transaction(async (tx) => {
+      const updated = await tx.apiKey.updateMany({
+        where: { id: keyId, agentId: agent.id, revokedAt: null },
+        data: { revokedAt },
+      });
+      if (updated.count !== 1) {
+        throw new UnauthorizedException('Invalid or expired API key');
+      }
+      await tx.activityLog.create({
+        data: {
+          workspaceId: agent.workspaceId,
+          taskId: null,
+          actorType: 'agent',
+          actorId: agent.id,
+          action: 'agent:api_key_self_revoked',
+          payload: { keyId },
+        },
+      });
+      return { keyId, agentId: agent.id, revokedAt: revokedAt.toISOString() };
+    });
+  }
+
+  /**
    * Validate an incoming raw API key against stored hashes.
    * Returns the matching ApiKey entity or null.
    *

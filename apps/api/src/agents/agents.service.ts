@@ -125,6 +125,10 @@ export class AgentsService {
     return this.authService.rotateApiKey(keyId);
   }
 
+  async revokeOwnApiKey(keyId: string, agent: { id: string; workspaceId: string }) {
+    return this.authService.revokeOwnApiKey(keyId, agent);
+  }
+
   async revokeApiKey(keyId: string) {
     return this.authService.revokeApiKey(keyId);
   }

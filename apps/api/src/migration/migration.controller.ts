@@ -4,6 +4,11 @@
 // client, and the activity entries it leaves must carry actor_type 'agent'.
 // Reads accept either a human JWT or an agent key (JwtOrApiKeyGuard), because
 // readback after a lost response is exactly what an operator does by hand.
+//
+// MUN-0053: every route answers only about the caller's workspaces — the
+// agent's own workspace for a key, the user's memberships for a JWT — and a
+// resource outside them is the route's not-found (see migration-scope.ts). The
+// transition moves only a task the key created or executes (MUN-0050's rule).
 
 import {
   BadRequestException,
@@ -46,24 +51,25 @@ export class MigrationController {
   @UseGuards(ApiKeyGuard)
   async createBatch(
     @Body() dto: CreateBatchDto,
+    @Req() req: ActorRequest,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { created, batch } = await this.migration.createBatch(dto);
+    const { created, batch } = await this.migration.createBatch(dto, req.actor);
     res.status(created ? HttpStatus.CREATED : HttpStatus.OK);
     return batch;
   }
 
   @Get('batches/:batchId')
   @UseGuards(JwtOrApiKeyGuard)
-  getBatch(@Param('batchId', ParseUUIDPipe) batchId: string) {
-    return this.migration.getBatch(batchId);
+  getBatch(@Param('batchId', ParseUUIDPipe) batchId: string, @Req() req: ActorRequest) {
+    return this.migration.getBatch(batchId, req.actor);
   }
 
   @Post('batches/:batchId/commit')
   @UseGuards(ApiKeyGuard)
   @HttpCode(HttpStatus.OK)
-  commitBatch(@Param('batchId', ParseUUIDPipe) batchId: string) {
-    return this.migration.commitBatch(batchId);
+  commitBatch(@Param('batchId', ParseUUIDPipe) batchId: string, @Req() req: ActorRequest) {
+    return this.migration.commitBatch(batchId, req.actor);
   }
 
   // --- work items ---------------------------------------------------------
@@ -88,7 +94,7 @@ export class MigrationController {
    */
   @Get('work-items/search')
   @UseGuards(JwtOrApiKeyGuard)
-  search(@Query('legacyId') legacyId?: unknown) {
+  search(@Req() req: ActorRequest, @Query('legacyId') legacyId?: unknown) {
     // The query parser is `extended`, so `?legacyId[]=a&legacyId[]=b` arrives
     // as an array and `?legacyId[x]=1` as an object. Handing either to Prisma
     // is an untyped 500 on an endpoint anyone with a key can call.
@@ -99,7 +105,7 @@ export class MigrationController {
         parameter: 'legacyId',
       });
     }
-    return this.migration.searchByLegacyId(legacyId ?? '');
+    return this.migration.searchByLegacyId(legacyId ?? '', req.actor);
   }
 
   /**
@@ -114,8 +120,9 @@ export class MigrationController {
   getByLegacy(
     @Param('sourceNamespace') sourceNamespace: string,
     @Param('legacyId') legacyId: string,
+    @Req() req: ActorRequest,
   ) {
-    return this.migration.getWorkItemByLegacy(sourceNamespace, legacyId);
+    return this.migration.getWorkItemByLegacy(sourceNamespace, legacyId, req.actor);
   }
 
   @Post('work-items/:taskId/transitions')
@@ -144,7 +151,7 @@ export class MigrationController {
 
   @Get('identities/:identityId/mappings')
   @UseGuards(JwtOrApiKeyGuard)
-  mappings(@Param('identityId', ParseUUIDPipe) identityId: string) {
-    return this.migration.getReverseMapping(identityId);
+  mappings(@Param('identityId', ParseUUIDPipe) identityId: string, @Req() req: ActorRequest) {
+    return this.migration.getReverseMapping(identityId, req.actor);
   }
 }

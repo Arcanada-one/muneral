@@ -209,3 +209,15 @@ The state machine, the activity log and the actor are unchanged. A move made
 with an agent key is recorded with `actor_type = 'agent'` and the agent's id — it
 is attributed to the agent, not to a human, and it obeys the same transitions
 everyone else does.
+
+## Revoking the key you hold (MUN-0053)
+
+`POST /agents/keys/self/revoke` with `Authorization: Bearer mun_sk_…` revokes
+**the key that authenticates the request** and nothing else — the route takes no
+id. It answers `200 {keyId, agentId, revokedAt}` and writes one activity row
+`agent:api_key_self_revoked` (payload `{keyId}`) in the same transaction. From
+then on that key answers `401` everywhere, this route included; the agent's other
+keys are untouched. A JWT gets `401`: users revoke keys with
+`DELETE /agents/keys/:keyId`.
+
+Use it when a key may have leaked and nobody holding a user credential is at hand.

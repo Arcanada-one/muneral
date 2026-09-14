@@ -32,6 +32,9 @@ export class ApiKeyGuard implements CanActivate {
 
     // Attach agent to request for downstream use
     (req as Request & { apiKeyAgent: typeof apiKey.agent }).apiKeyAgent = apiKey.agent;
+    // MUN-0053: the id of the key that authenticated this request — the only
+    // key `POST /agents/keys/self/revoke` may revoke.
+    (req as Request & { apiKeyId: string }).apiKeyId = apiKey.id;
     return true;
   }
 }
