@@ -8,6 +8,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateTaskDto } from './dto/create-task.dto.js';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto.js';
+import { QueryTasksDto } from './dto/query-tasks.dto.js';
 import { AddDependencyDto } from './dto/add-dependency.dto.js';
 import { CreateChecklistItemDto } from './dto/create-checklist-item.dto.js';
 import { ActivityService } from '../activity/activity.service.js';
@@ -220,6 +221,53 @@ export class TasksService {
       grant: { decision: grant.decision, until: grant.until },
       tasks,
     };
+  }
+
+  /**
+   * Filtered task query across projects.
+   *
+   * Until this existed the only listing was findByProject, so a consumer that
+   * wanted "everything that reached done today" had to enumerate projects and
+   * merge the results — correct only for as long as it remembered to add the
+   * next project. The assistant's digest took the other way out and read a
+   * Markdown snapshot from disk instead; when that file feed was switched off
+   * on 2026-08-14 the digest kept publishing the stale snapshot for 25 days.
+   * A consumer should not have to choose between a scan and a stale file.
+   *
+   * Access is deliberately no wider than findByProject already is: the auth
+   * guard on this controller authenticates but does not scope by workspace,
+   * and widening that is a separate change with its own review — not something
+   * to slip in under a new query parameter.
+   *
+   * Returns `total` alongside the page so a caller can tell "nothing matched"
+   * apart from "the first page happened to be empty" — an empty list with no
+   * count is exactly the shape that reads as a clean bill of health.
+   */
+  async query(dto: QueryTasksDto) {
+    const limit = dto.limit ?? 50;
+    const offset = dto.offset ?? 0;
+
+    const where: Prisma.TaskWhereInput = {};
+    if (dto.status) where.status = dto.status;
+    if (dto.projectId) where.projectId = dto.projectId;
+    if (dto.updatedSince || dto.updatedBefore) {
+      where.updatedAt = {
+        ...(dto.updatedSince ? { gte: new Date(dto.updatedSince) } : {}),
+        ...(dto.updatedBefore ? { lt: new Date(dto.updatedBefore) } : {}),
+      };
+    }
+
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.task.findMany({
+        where,
+        orderBy: { updatedAt: 'desc' },
+        take: limit,
+        skip: offset,
+      }),
+      this.prisma.task.count({ where }),
+    ]);
+
+    return { items, total, limit, offset };
   }
 
   async updateStatus(
