@@ -124,3 +124,36 @@ describe('TasksService.query', () => {
     expect(res).toEqual({ items: [], total: 137, limit: 50, offset: 1000 });
   });
 });
+
+/**
+ * Status validation must come from the shared list, not a local copy.
+ *
+ * The first draft of QueryTasksDto hard-coded six statuses and omitted
+ * `archived`, so a query for archived work would have been rejected as
+ * invalid — the exact half-applied-addition failure TASK_STATUSES was
+ * introduced to end (MUN-0043 found the list copied into three DTOs).
+ */
+describe('QueryTasksDto status validation', () => {
+  it('accepts every status the shared list declares — including archived', async () => {
+    const { validate } = await import('class-validator');
+    const { plainToInstance } = await import('class-transformer');
+    const { QueryTasksDto } = await import('../src/tasks/dto/query-tasks.dto.js');
+    const { TASK_STATUSES } = await import('@muneral/types');
+
+    expect(TASK_STATUSES).toContain('archived');
+
+    for (const status of TASK_STATUSES) {
+      const errors = await validate(plainToInstance(QueryTasksDto, { status }));
+      expect(errors).toHaveLength(0);
+    }
+  });
+
+  it('still rejects a status the shared list does not declare', async () => {
+    const { validate } = await import('class-validator');
+    const { plainToInstance } = await import('class-transformer');
+    const { QueryTasksDto } = await import('../src/tasks/dto/query-tasks.dto.js');
+
+    const errors = await validate(plainToInstance(QueryTasksDto, { status: 'almost_done' }));
+    expect(errors).toHaveLength(1);
+  });
+});

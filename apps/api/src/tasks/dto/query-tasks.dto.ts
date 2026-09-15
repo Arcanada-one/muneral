@@ -1,6 +1,6 @@
 import { IsIn, IsOptional, IsISO8601, IsUUID, IsInt, Min, Max } from 'class-validator';
 import { Type } from 'class-transformer';
-import { TaskStatus } from '@muneral/types';
+import { TASK_STATUSES, TaskStatus } from '@muneral/types';
 
 /**
  * Query filter for GET /tasks.
@@ -15,8 +15,12 @@ import { TaskStatus } from '@muneral/types';
  * ask for what moved, not for everything and then filter in the caller.
  */
 export class QueryTasksDto {
+  // Imported, never restated. My first draft hard-coded the six statuses I
+  // happened to know and silently omitted `archived` — so a query for archived
+  // work would have been rejected as an invalid status. TASK_STATUSES exists
+  // precisely because MUN-0043 found the same list hard-coded in three DTOs.
   @IsOptional()
-  @IsIn(['todo', 'in_progress', 'review', 'blocked', 'done', 'cancelled'])
+  @IsIn(TASK_STATUSES)
   status?: TaskStatus;
 
   @IsOptional()
