@@ -162,14 +162,20 @@ jobs:
   deploy:
     needs: [lint-and-test, secrets-gate, network-exposure, preflight-caller-contract]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    # SEC-0063: `arcana-prod-host`, not `arcana-prod`. That label is not
-    # unique -- `arcana-prod-replacement` carries it too and physically
-    # lives on arcana-agents, a DIFFERENT machine, where this service has
-    # no containers and the root deploy broker has no row for it. Landing
-    # there fails inside the deploy at best, and builds a second empty
-    # stack that reports success at worst. Addition, not a swap: the
-    # `arcana-prod` label stays on both runners for other consumers.
-    runs-on: [self-hosted, linux, arcana-prod-host]
+    # SEC-0063: a HOST-UNIQUE label, not the shared `arcana-prod`. The shared
+    # label sits on several runners, including ones on a DIFFERENT machine
+    # where this service has no containers and the root deploy broker has no
+    # row for it. Landing there fails inside the deploy at best, and builds a
+    # second empty stack that reports success at worst.
+    #
+    # INFRA-0417 (2026-09-16) consolidated three machines onto arcana-prd, so
+    # the host-unique label this deploy targets moved from `arcana-prod-host`
+    # (-> the old arcana-prod, being decommissioned) to `arcana-prd-host`
+    # (-> arcana-prd). Both are single-holder by construction: switching the
+    # label is how a service moves between hosts, one service at a time.
+    # muneral's Postgres and Redis are external (arcana-dbs over the mesh),
+    # so the move carries no local state.
+    runs-on: [self-hosted, linux, arcana-prd-host]
     concurrency:
       group: deploy-muneral
       cancel-in-progress: false
@@ -180,7 +186,7 @@ jobs:
         id: preflight
         uses: Arcanada-one/datarim/.github/actions/preflight-check@dcba69e8811be8680fc1096b5ad572b73c65023b
         with:
-          target-host: arcana-prod
+          target-host: arcana-prd
           service-name: muneral
           # `docker-pressure` is deliberately absent: it shells out to
           # `docker system df`, which this runner is losing access to on
