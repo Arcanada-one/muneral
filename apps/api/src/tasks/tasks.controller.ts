@@ -85,7 +85,7 @@ type AuthRequest = Request & { actor: Actor; agentScope?: AgentScopeContext };
  * carries no actor field, and `req.actor` (via `ActorInterceptor`) is resolved
  * from the credential, never the body.
  *
- * MUN-0050 — `PATCH /tasks/:taskId/status` moves from `'task'` to its own
+ * MUN-0054 — `PATCH /tasks/:taskId/status` moves from `'task'` to its own
  * scope `'task-status'` (creator or executor assignment): see the handler.
  *
  * MUN-0049 — `POST /tasks/:taskId/redactions` is the third write. It is marked
@@ -125,7 +125,27 @@ export class TasksController {
     return this.tasksService.query(dto);
   }
 
-  /** Readable by the assigned agent's API key (MUN-0043) or by a JWT. */
+  /**
+   * Readable by the assigned agent's API key (MUN-0043) or by a JWT.
+   *
+   * MUN-0054 — this route returns the task ROW and has never carried the task's
+   * dependencies; they live in `task_dependencies`, a separate table reached
+   * through the routes below. That was not written down anywhere, and the
+   * shape of the answer does not reveal it: an executor read this response,
+   * found no dependency key, applied the ordinary `.get('dependencies') or []`,
+   * and reported 254 `todo` tasks ready — including tasks it had itself
+   * measured as blocked an hour before. Absence read as emptiness, which is
+   * the "not measured read as pass" failure the program forbids outright.
+   *
+   * The response therefore carries `X-Muneral-Dependencies`, naming the route
+   * that does answer the question. A consumer that ignores it is no worse off
+   * than before; a consumer that checks it cannot mistake this route's silence
+   * for "no dependencies", because the silence now says where to look. A
+   * header rather than a body field on purpose: the body is the persisted task
+   * row, byte-compared against the ETag computed from field versions, and
+   * adding a non-column key to it would put a value in the document that no
+   * field version covers.
+   */
   @Get(':taskId')
   @AgentScope('task')
   async findOne(
@@ -135,6 +155,14 @@ export class TasksController {
   ) {
     const task = await this.tasksService.findOne(taskId);
 
+    // MUN-0054: set before the 304 branch, so a conditional request that gets
+    // no body is told this too — a poller on the ETag loop is exactly the
+    // consumer most likely to never see a 200 again.
+    res.setHeader(
+      'X-Muneral-Dependencies',
+      `not-in-body; see /tasks/${taskId}/readiness`,
+    );
+
     // Strong ETag: SHA-256 of sorted field:version pairs
     const etag = await this.fieldChangesService.computeTaskEtag(taskId);
     if (etag) {
@@ -142,7 +170,15 @@ export class TasksController {
       res.setHeader('ETag', etagValue);
 
       if (ifNoneMatch && ifNoneMatch === etagValue) {
-        res.status(304).end();
+        // `res.status(304)` and RETURN, rather than `.status(304).end()`.
+        // `@Res({ passthrough: true })` leaves Nest in charge of finishing the
+        // response, so ending it here by hand means the interceptor chain runs
+        // against a socket that is already closed and throws `Cannot remove
+        // headers after they are sent to the client` into ExceptionsHandler.
+        // The 304 still reached the client, so the suite stayed green and the
+        // throw only ever showed up as a logged ERROR — which is why this
+        // survived from MUN-0018 until a test finally exercised the branch.
+        res.status(304);
         return;
       }
     }
@@ -215,7 +251,7 @@ export class TasksController {
 
   /** Transitionable by an agent's API key or by a JWT.
    *
-   *  MUN-0050 — scoped `'task-status'`, no longer `'task'`. Under `'task'`
+   *  MUN-0054 — scoped `'task-status'`, no longer `'task'`. Under `'task'`
    *  (MUN-0043) the key needed a `task_agents` row, and a task the agent
    *  itself CREATED through `POST /tasks` (MUN-0045) never gets one: measured
    *  live, every work item the fleet registered on 2026-09-13 answered 403
@@ -298,9 +334,37 @@ export class TasksController {
 
   // --- Dependencies ---
 
+  /** Readable by the assigned agent's API key (MUN-0054) or by a JWT.
+   *  Scoped `'task'` — the same assignment `findOne` and `updateStatus` already
+   *  require; reading which tasks block the one you are assigned to is part of
+   *  reading that task, not a wider grant. Unchanged for JWT callers. */
   @Get(':taskId/dependencies')
+  @AgentScope('task')
   getDependencies(@Param('taskId') taskId: string) {
     return this.tasksService.getDependencies(taskId);
+  }
+
+  /** MUN-0054 — both directions plus the counterpart's status. See
+   *  `getDependencyGraph`: filtering on `fromTaskId` alone returns an empty
+   *  list for precisely the tasks that are blocked. */
+  @Get(':taskId/dependency-graph')
+  @AgentScope('task')
+  getDependencyGraph(@Param('taskId') taskId: string) {
+    return this.tasksService.getDependencyGraph(taskId);
+  }
+
+  /** MUN-0054 — the readiness verdict, computed server-side.
+   *
+   *  This route exists because the failure it closes was not a missing datum
+   *  but a missing ANSWER: an executor read `GET /tasks/:id`, found no
+   *  dependency key, applied `.get('dependencies') or []`, and called 254
+   *  `todo` tasks ready — including ones it had itself measured blocked an hour
+   *  earlier. `ready` here is a value the server computed, so an executor never
+   *  has to infer readiness from the absence of a field. */
+  @Get(':taskId/readiness')
+  @AgentScope('task')
+  getReadiness(@Param('taskId') taskId: string) {
+    return this.tasksService.getReadiness(taskId);
   }
 
   @Post(':taskId/dependencies')

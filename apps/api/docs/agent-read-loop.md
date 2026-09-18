@@ -77,7 +77,18 @@ If-None-Match: "a3f2d8c..."
 ```
 
 If the field state is unchanged: `304 Not Modified` (no body).
-If changed: `200 OK` with full task object and new `ETag` header.
+If changed: `200 OK` with the task **row** and a new `ETag` header.
+
+> **MUN-0054 — "full task object" used to be written here, and it misled a
+> reader into exactly the wrong inference.** This route returns the task's own
+> columns and nothing else: no `dependencies`, no `blockedBy`, no `checklist`,
+> no `comments`. An executor read the absent dependency key as an empty one
+> (`.get("dependencies") or []`) and declared 254 blocked-or-not tasks ready.
+> Both the `200` and the `304` now carry
+> `X-Muneral-Dependencies: not-in-body; see /tasks/<id>/readiness` — the `304`
+> especially, because a poller on this loop may never see a `200` again.
+> The full field list and the readiness routes are in
+> [`agent-task-contract.md`](agent-task-contract.md).
 
 The ETag is a SHA-256 hex digest of sorted `field:version` pairs.
 

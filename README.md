@@ -64,7 +64,20 @@ curl https://api.muneral.com/api/v1/tasks/$TASK_ID \
 curl -X PATCH https://api.muneral.com/api/v1/tasks/$TASK_ID/status \
   -H "Authorization: Bearer $API_KEY" \
   -d '{"status": "in_progress"}'
+
+# Dependencies are NOT in the task body. Ask the question directly:
+curl https://api.muneral.com/api/v1/tasks/$TASK_ID/readiness \
+  -H "Authorization: Bearer $API_KEY"
+# -> {"taskId":"…","dependencyCount":2,"ready":false,"blockedBy":[…]}
 ```
+
+> **Before writing a consumer, read
+> [`apps/api/docs/agent-task-contract.md`](apps/api/docs/agent-task-contract.md).**
+> `GET /tasks/:id` returns the task row only — it carries no `dependencies`
+> key, and reading that absence as an empty list (`.get("dependencies") or []`)
+> once turned 254 possibly-blocked tasks into "ready". The contract lists every
+> field the route does return, every field it does not, and which route answers
+> the question instead.
 
 ## Datarim Sync
 
