@@ -322,7 +322,11 @@ describe('Agent-key scope on /tasks (e2e)', () => {
     // 403, not 401: the key is valid, the route is simply not scoped for keys.
     // POST /tasks is no longer in this set — see MUN-0045 below. Neither is
     // POST /tasks/:taskId/comments — see MUN-0046 below. Neither is
-    // GET /tasks/:taskId/activity — see MUN-0047 below.
+    // GET /tasks/:taskId/activity — see MUN-0047 below. Neither is
+    // GET /tasks/:taskId/dependencies — see MUN-0054 below. The dependency
+    // WRITE routes (POST/DELETE) do stay JWT-only: MUN-0054 opened the read
+    // that an executor needs to know it is blocked, not the ability to
+    // rewrite the graph it is judged against.
     await supertest(app.getHttpServer())
       .delete(`/tasks/${task.id}`)
       .set('Authorization', `Bearer ${assignedKey}`)
@@ -635,5 +639,186 @@ describe('Agent-key scope on /tasks (e2e)', () => {
       .expect(200);
 
     expect(res.body.status).toBe('todo');
+  });
+
+  // -------------------------------------------------------------------------
+  // MUN-0054: an executor must be able to tell "no dependencies" from
+  // "dependencies not served here"
+  // -------------------------------------------------------------------------
+
+  /** Record a dependency edge directly — the write routes stay JWT-only. */
+  async function dependency(fromTaskId: string, toTaskId: string, type: string) {
+    return prisma.taskDependency.create({ data: { fromTaskId, toTaskId, type } });
+  }
+
+  it('reproduces the trap: GET /tasks/:id carries no dependency key even when the task is blocked', async () => {
+    const blocker = await createTask();
+    const blocked = await createTask();
+    await assign(blocked.id);
+    await dependency(blocked.id, blocker.id, 'depends_on');
+
+    const res = await supertest(app.getHttpServer())
+      .get(`/tasks/${blocked.id}`)
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .expect(200);
+
+    // This is the shape that misled the executor, and it is deliberately NOT
+    // changed: the body is the task row, ETag-covered field by field.
+    expect(res.body).not.toHaveProperty('dependencies');
+    // `.get('dependencies') or []` would read this task as ready. It is not.
+
+    // What IS new: the answer names where the question is answered, so the
+    // absence can no longer be read as emptiness in silence.
+    expect(res.headers['x-muneral-dependencies']).toBe(
+      `not-in-body; see /tasks/${blocked.id}/readiness`,
+    );
+  });
+
+  it('sets the dependency pointer on a 304 too — the ETag poller never sees a 200 again', async () => {
+    const task = await createTask();
+    await assign(task.id);
+
+    const first = await supertest(app.getHttpServer())
+      .get(`/tasks/${task.id}`)
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .expect(200);
+
+    const res = await supertest(app.getHttpServer())
+      .get(`/tasks/${task.id}`)
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .set('If-None-Match', first.headers.etag)
+      .expect(304);
+
+    expect(res.headers['x-muneral-dependencies']).toBe(
+      `not-in-body; see /tasks/${task.id}/readiness`,
+    );
+    // A 304 carries no body, and the ETag must still be the one that matched.
+    expect(res.text).toBeFalsy();
+    expect(res.headers.etag).toBe(first.headers.etag);
+  });
+
+  it('lets an assigned agent read the dependencies route that used to answer 403', async () => {
+    const blocker = await createTask();
+    const blocked = await createTask();
+    await assign(blocked.id);
+    await dependency(blocked.id, blocker.id, 'depends_on');
+
+    const res = await supertest(app.getHttpServer())
+      .get(`/tasks/${blocked.id}/dependencies`)
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .expect(200);
+
+    expect(res.body).toHaveLength(1);
+    expect(res.body[0].toTaskId).toBe(blocker.id);
+  });
+
+  it('reports a task blocked by an incoming `blocks` edge — the direction a fromTaskId filter misses', async () => {
+    const blocker = await createTask();
+    const blocked = await createTask();
+    await assign(blocked.id);
+    // Recorded ON THE BLOCKER: "blocker blocks blocked". Nothing is recorded
+    // with fromTaskId = blocked, so the legacy route answers an empty list for
+    // a task that is genuinely blocked.
+    await dependency(blocker.id, blocked.id, 'blocks');
+
+    const legacy = await supertest(app.getHttpServer())
+      .get(`/tasks/${blocked.id}/dependencies`)
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .expect(200);
+    expect(legacy.body).toHaveLength(0); // the second silent-empty trap
+
+    const res = await supertest(app.getHttpServer())
+      .get(`/tasks/${blocked.id}/readiness`)
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .expect(200);
+
+    expect(res.body.ready).toBe(false);
+    expect(res.body.blockedBy).toHaveLength(1);
+    expect(res.body.blockedBy[0].otherTaskId).toBe(blocker.id);
+    expect(res.body.blockedBy[0].direction).toBe('incoming');
+  });
+
+  it('treats a dependency on a finished task as satisfied', async () => {
+    const blocker = await createTask({ status: 'done' });
+    const blocked = await createTask();
+    await assign(blocked.id);
+    await dependency(blocked.id, blocker.id, 'depends_on');
+
+    const res = await supertest(app.getHttpServer())
+      .get(`/tasks/${blocked.id}/readiness`)
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .expect(200);
+
+    // An edge still exists, so `ready` is not merely "the list is empty".
+    expect(res.body.dependencyCount).toBe(1);
+    expect(res.body.ready).toBe(true);
+    expect(res.body.blockedBy).toHaveLength(0);
+  });
+
+  it('does not treat `related_to` as blocking', async () => {
+    const other = await createTask();
+    const task = await createTask();
+    await assign(task.id);
+    await dependency(task.id, other.id, 'related_to');
+
+    const res = await supertest(app.getHttpServer())
+      .get(`/tasks/${task.id}/readiness`)
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .expect(200);
+
+    expect(res.body.dependencyCount).toBe(1);
+    expect(res.body.ready).toBe(true);
+  });
+
+  it('answers a genuinely unblocked task with ready:true and a zero count', async () => {
+    const task = await createTask();
+    await assign(task.id);
+
+    const res = await supertest(app.getHttpServer())
+      .get(`/tasks/${task.id}/readiness`)
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .expect(200);
+
+    expect(res.body.dependencyCount).toBe(0);
+    expect(res.body.ready).toBe(true);
+  });
+
+  it('404s an unknown task id rather than calling it ready with an empty graph', async () => {
+    // The whole point: an id nobody can resolve must not come back as "no
+    // dependencies, go ahead".
+    await supertest(app.getHttpServer())
+      .get(`/tasks/${uuidv4()}/readiness`)
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .expect(403); // unassigned/unknown are indistinguishable by design
+  });
+
+  it('keeps the new reads inside the assignment boundary', async () => {
+    const task = await createTask();
+    await assign(task.id);
+
+    for (const route of ['dependencies', 'dependency-graph', 'readiness']) {
+      await supertest(app.getHttpServer())
+        .get(`/tasks/${task.id}/${route}`)
+        .set('Authorization', `Bearer ${strangerKey}`)
+        .expect(403);
+      await supertest(app.getHttpServer())
+        .get(`/tasks/${task.id}/${route}`)
+        .set('Authorization', `Bearer ${foreignKey}`)
+        .expect(403);
+    }
+  });
+
+  it('leaves the dependency WRITE routes JWT-only', async () => {
+    const a = await createTask();
+    const b = await createTask();
+    await assign(a.id);
+
+    await supertest(app.getHttpServer())
+      .post(`/tasks/${a.id}/dependencies`)
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .send({ toTaskId: b.id, type: 'depends_on' })
+      .expect(403);
+
+    expect(await prisma.taskDependency.count({ where: { fromTaskId: a.id } })).toBe(0);
   });
 });

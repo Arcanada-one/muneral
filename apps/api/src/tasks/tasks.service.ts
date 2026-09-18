@@ -283,7 +283,7 @@ export class TasksService {
       throw new NotFoundException('Project not found');
     }
 
-    // MUN-0050: a repeat of a move already made is not a transition and not a
+    // MUN-0054: a repeat of a move already made is not a transition and not a
     // fault. The map has no self-edges (`todo → todo` is "invalid"), which
     // answered 400 to an unattended caller retrying after a lost response —
     // and a 400 it could not distinguish from a real refusal. Answer 200 with
@@ -513,6 +513,80 @@ export class TasksService {
     return this.prisma.taskDependency.findMany({
       where: { fromTaskId: taskId },
     });
+  }
+
+  /**
+   * MUN-0054 — every dependency edge touching this task, in BOTH directions,
+   * with the counterpart task's status resolved.
+   *
+   * `getDependencies` above answers only `fromTaskId`, which is the right
+   * answer to "what did someone record ON this task" and the wrong answer to
+   * "is this task blocked": a `blocks` edge recorded on the blocker names the
+   * blocked task in `toTaskId`, so a reader filtering on `fromTaskId` alone
+   * sees an empty list for exactly the task that is blocked. That is the same
+   * absent-reads-as-empty failure this task exists to close, one layer down —
+   * so the readiness answer is computed here, over both columns, rather than
+   * left to each caller to reassemble and get wrong in its own way.
+   *
+   * `status` of the counterpart is included because a dependency edge alone
+   * does not say whether it still blocks: `depends_on` a task that is already
+   * `done` is satisfied. A caller that receives only ids has to issue N more
+   * requests, and an agent key would be refused on most of them.
+   */
+  async getDependencyGraph(taskId: string) {
+    await this.findOne(taskId); // 404 on an unknown id, not an empty graph
+
+    const edges = await this.prisma.taskDependency.findMany({
+      where: { OR: [{ fromTaskId: taskId }, { toTaskId: taskId }] },
+      include: {
+        fromTask: { select: { id: true, title: true, status: true } },
+        toTask: { select: { id: true, title: true, status: true } },
+      },
+    });
+
+    return edges.map((e) => {
+      const outgoing = e.fromTaskId === taskId;
+      const other = outgoing ? e.toTask : e.fromTask;
+      return {
+        id: e.id,
+        type: e.type,
+        direction: outgoing ? ('outgoing' as const) : ('incoming' as const),
+        fromTaskId: e.fromTaskId,
+        toTaskId: e.toTaskId,
+        otherTaskId: other.id,
+        otherTaskTitle: other.title,
+        otherTaskStatus: other.status,
+      };
+    });
+  }
+
+  /**
+   * MUN-0054 — the readiness question an executor actually asks, answered
+   * server-side so it cannot be answered wrongly by omission client-side.
+   *
+   * An edge blocks this task when it is unsatisfied and points the blocking
+   * way: `depends_on` recorded ON this task (outgoing), or `blocks` recorded on
+   * another task and pointing AT this one (incoming). `related_to` and
+   * `duplicates` are not blocking relations. An edge is satisfied once the
+   * counterpart reaches a terminal status.
+   */
+  async getReadiness(taskId: string) {
+    const edges = await this.getDependencyGraph(taskId);
+    const SATISFIED = new Set(['done', 'cancelled', 'archived']);
+
+    const blockedBy = edges.filter(
+      (e) =>
+        ((e.type === 'depends_on' && e.direction === 'outgoing') ||
+          (e.type === 'blocks' && e.direction === 'incoming')) &&
+        !SATISFIED.has(e.otherTaskStatus),
+    );
+
+    return {
+      taskId,
+      dependencyCount: edges.length,
+      blockedBy,
+      ready: blockedBy.length === 0,
+    };
   }
 
   // --- Comments (via ActivityLog) ---
