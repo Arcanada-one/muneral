@@ -20,6 +20,7 @@ import { TaskFieldStateService } from './field-state/task-field-state.service.js
 import { TaskExecutionRecorderService } from '../execution-authority/task-execution-recorder.service.js';
 import { agentOwnTaskWhere } from '../auth/agent-task-visibility.js';
 import type { ProjectReadGrantEntry } from '../auth/project-read-grants.js';
+import { renewalDueAt } from '../auth/project-read-grants.js';
 
 /** MUN-0052: the activity action one task-index read records. */
 export const PROJECT_INDEX_READ_ACTION = 'project:index_read';
@@ -218,7 +219,16 @@ export class TasksService {
       generatedAt: audit.createdAt.toISOString(),
       auditEventId: audit.id,
       auditReadCount,
-      grant: { decision: grant.decision, until: grant.until },
+      // MUN-0055 (DEC-AUP-0033 R3): `renewalDueAt` is how a lapse becomes
+      // visible BEFORE it happens. The first grant went quiet at its `until`
+      // and nothing noticed for two days; every caller already writes this
+      // envelope into a receipt, so the warning rides the read it already does
+      // rather than needing a watcher nobody would run.
+      grant: {
+        decision: grant.decision,
+        until: grant.until,
+        renewalDueAt: renewalDueAt(grant),
+      },
       tasks,
     };
   }

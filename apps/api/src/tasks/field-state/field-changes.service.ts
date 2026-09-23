@@ -14,6 +14,15 @@ import {
 export interface FieldChangesQuery {
   taskId: string;
   agentId: string;
+  /**
+   * MUN-0055 (DEC-AUP-0033 R4): answer the free-text fields without their
+   * VALUE. Set by AgentTaskScopeGuard for a key that holds a live project-read
+   * index grant on this task's project and does not own the task — the pair of
+   * reads DEC-AUP-0029 R7 accepted as a one-week residual. `version`, `hash`
+   * and `changed` are unaffected, so the change SIGNAL this route exists for
+   * (MUN-0018) still works; only the plaintext goes.
+   */
+  withholdFreeTextValues?: boolean;
 }
 
 export interface FieldChangeEntry {
@@ -22,6 +31,12 @@ export interface FieldChangeEntry {
   hash: string;
   value: string | null;
   changed: boolean;
+  /**
+   * MUN-0055: present and `true` only when `value` was suppressed by the rule
+   * above. Without it a withheld field is indistinguishable from a genuinely
+   * empty one, and a poller would ack an emptiness that is not there.
+   */
+  valueWithheld?: boolean;
 }
 
 export interface ActivityEntry {
@@ -48,6 +63,11 @@ export interface AckBody {
   fields: AckField[];
 }
 
+/** The free-text fields the index deliberately never returns (it answers a
+ *  sha256 of the title instead). These are the ones withheld from a granted key
+ *  on a task it does not own. */
+export const FREE_TEXT_FIELDS: readonly string[] = ['title', 'description'];
+
 @Injectable()
 export class FieldChangesService {
   constructor(private readonly prisma: PrismaService) {}
@@ -58,7 +78,7 @@ export class FieldChangesService {
    * changed=true when version > agent's lastSeenVersion, or field never acked.
    */
   async getFieldChanges(query: FieldChangesQuery): Promise<FieldChangesResponse> {
-    const { taskId, agentId } = query;
+    const { taskId, agentId, withholdFreeTextValues = false } = query;
 
     // Verify task exists
     const task = await this.prisma.task.findUnique({ where: { id: taskId } });
@@ -95,6 +115,9 @@ export class FieldChangesService {
       const lastSeen = agentRead ? Number(agentRead.lastSeenVersion) : -1;
       const changed = version > lastSeen;
 
+      if (withholdFreeTextValues && FREE_TEXT_FIELDS.includes(fieldName)) {
+        return { field: fieldName, version, hash, value: null, changed, valueWithheld: true };
+      }
       return { field: fieldName, version, hash, value, changed };
     });
 

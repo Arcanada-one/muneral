@@ -23,7 +23,7 @@ import { ActivityModule } from '../src/activity/activity.module.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
 import { AuthService } from '../src/auth/auth.service.js';
 import { KanbanService } from '../src/ws/kanban.service.js';
-import { PROJECT_READ_GRANTS } from '../src/auth/project-read-grants.js';
+import { PROJECT_READ_GRANTS, GRANT_RENEWAL_LEAD_DAYS } from '../src/auth/project-read-grants.js';
 import type { ProjectReadGrantEntry } from '../src/auth/project-read-grants.js';
 import { PROJECT_INDEX_COUNTED, PROJECT_INDEX_READ_ACTION } from '../src/tasks/tasks.service.js';
 
@@ -174,7 +174,13 @@ describe('MUN-0052 — project task index for granted agent keys (e2e)', () => {
     expect(res.body.tasks).toHaveLength(res.body.total);
     expect(res.body.counted).toBe(PROJECT_INDEX_COUNTED);
     expect(PROJECT_INDEX_COUNTED).toBe('every task of the project, all statuses including cancelled and archived');
-    expect(res.body.grant).toEqual({ decision: 'DEC-TEST', until: FUTURE });
+    // MUN-0055: `renewalDueAt` rides the read so a lapse is visible before it
+    // happens — GRANT_RENEWAL_LEAD_DAYS before `until`.
+    expect(res.body.grant).toEqual({
+      decision: 'DEC-TEST',
+      until: FUTURE,
+      renewalDueAt: new Date(Date.parse(FUTURE) - GRANT_RENEWAL_LEAD_DAYS * 86_400_000).toISOString(),
+    });
     expect(res.body.tasks.map((t: { id: string }) => t.id).sort()).toEqual([a.id, b.id].sort());
     for (const row of res.body.tasks) {
       expect(Object.keys(row).sort()).toEqual(ROW_KEYS);
@@ -246,9 +252,10 @@ describe('MUN-0052 — project task index for granted agent keys (e2e)', () => {
 
     // no grant at all
     expect(shapeOf(await index(projectId, keys.stranger), projectId)).toEqual(reference);
-    // an expired grant
-    grant('stranger', projectId, PAST);
+    // an expired grant for ANOTHER project tells this one nothing
+    grant('stranger', siblingProjectId, PAST);
     expect(shapeOf(await index(projectId, keys.stranger), projectId)).toEqual(reference);
+    grants.length = 0;
     // a grant for a sibling project of the same workspace
     grant('reader', siblingProjectId);
     expect(shapeOf(await index(projectId, keys.reader), projectId)).toEqual(reference);
@@ -265,6 +272,46 @@ describe('MUN-0052 — project task index for granted agent keys (e2e)', () => {
     expect(
       await prisma.activityLog.count({ where: { action: PROJECT_INDEX_READ_ACTION, workspaceId: { in: [workspaceId, otherWorkspaceId] } } }),
     ).toBe(0);
+  });
+
+  // MUN-0055 (DEC-AUP-0033 R1) — the one refusal that is NOT the blanket 404.
+  it('an expired grant for THIS project answers 403 GRANT_EXPIRED, never 404, and logs no read', async () => {
+    await othersTask();
+    grant('reader', projectId, PAST);
+
+    const res = await index(projectId, keys.reader).expect(403);
+
+    expect(res.body.code).toBe('GRANT_EXPIRED');
+    expect(res.body.until).toBe(PAST);
+    expect(res.body.decision).toBe('DEC-TEST');
+    expect(res.body.projectId).toBe(projectId);
+    // the refusal names no task and no free text
+    const raw = JSON.stringify(res.body);
+    expect(raw).not.toContain('secret-bearing title');
+    expect(raw).not.toContain('must never reach the index');
+    // a refused read is not an index read
+    expect(
+      await prisma.activityLog.count({ where: { action: PROJECT_INDEX_READ_ACTION, workspaceId } }),
+    ).toBe(0);
+  });
+
+  it('a foreign-workspace key whose grant on this project expired still gets the blanket 404', async () => {
+    grant('foreign', projectId, PAST);
+    const res = await index(projectId, keys.foreign).expect(404);
+    expect(res.body.code).toBeUndefined();
+  });
+
+  // The third leg of the card's acceptance: the grant opens the INDEX, and
+  // nothing else. `GET /tasks` carries no @AgentScope at all, so it stays the
+  // MUN-0043 default refusal — for the granted key exactly as for any other.
+  it('GET /tasks stays 403 MUN-0043 for an agent key, granted or not', async () => {
+    for (const setup of [() => void 0, () => grant('reader', projectId)]) {
+      grants.length = 0;
+      setup();
+      const res = await http().get('/tasks').set(bearer(keys.reader)).expect(403);
+      expect(JSON.stringify(res.body)).toContain('MUN-0043');
+      expect(res.body.code).toBeUndefined();
+    }
   });
 
   it('a JWT is refused on the index (users have the full list on the project route)', async () => {
@@ -384,9 +431,62 @@ describe('MUN-0052 — project task index for granted agent keys (e2e)', () => {
       );
     });
 
-    it('GET /tasks/:taskId/field-changes in the own workspace answers as before (the recorded residual, unchanged)', async () => {
+    // MUN-0055 (DEC-AUP-0033 R4). This is the ONE route the grant now changes,
+    // and it changes it by taking something away. DEC-AUP-0029 R7 accepted, for
+    // one week, that a granted key could pair the index (which ids) with this
+    // read (which values) and rebuild every title and description of the
+    // project. The renewal removes that pairing instead of extending the
+    // residual: with the grant present the free-text VALUES are withheld from a
+    // task the key does not own; the change signal — version, hash, changed —
+    // and every other field are byte-for-byte what they were.
+    it('GET /tasks/:taskId/field-changes: the grant now WITHHOLDS title/description values (the R7 residual, closed)', async () => {
       const answers = await differential(() => http().get(`/tasks/${taskId}/field-changes`).set(k()), 200);
-      expect(answers[0].body.fields).toEqual(answers[1].body.fields);
+      const [granted, ungranted] = answers.map((a) => a.body.fields as Array<Record<string, unknown>>);
+
+      const freeText = (fields: Array<Record<string, unknown>>) =>
+        fields.filter((f) => f.field === 'title' || f.field === 'description');
+      const rest = (fields: Array<Record<string, unknown>>) =>
+        fields.filter((f) => f.field !== 'title' && f.field !== 'description');
+
+      // ungranted: exactly the old answer, values present
+      expect(freeText(ungranted).map((f) => f.value)).toEqual([
+        expect.stringContaining('secret-bearing title'),
+        'must never reach the index',
+      ]);
+      expect(freeText(ungranted).every((f) => f.valueWithheld === undefined)).toBe(true);
+
+      // granted: the same fields, the same change signal, no plaintext
+      expect(freeText(granted).map((f) => f.value)).toEqual([null, null]);
+      expect(freeText(granted).every((f) => f.valueWithheld === true)).toBe(true);
+      expect(freeText(granted).map((f) => [f.field, f.version, f.hash, f.changed])).toEqual(
+        freeText(ungranted).map((f) => [f.field, f.version, f.hash, f.changed]),
+      );
+      expect(JSON.stringify(granted)).not.toContain('secret-bearing title');
+      expect(JSON.stringify(granted)).not.toContain('must never reach the index');
+
+      // every other tracked field is untouched by the grant
+      expect(rest(granted)).toEqual(rest(ungranted));
+    });
+
+    it('GET /tasks/:taskId/field-changes: a granted key still reads the values of a task it OWNS', async () => {
+      const own = await prisma.task.create({
+        data: {
+          projectId,
+          title: 'the reader\'s own task',
+          description: 'its own description',
+          status: 'todo',
+          priority: 'low',
+          createdById: ids.reader,
+          actorType: 'agent',
+        },
+      });
+      grants.length = 0;
+      grant('reader', projectId);
+
+      const res = await http().get(`/tasks/${own.id}/field-changes`).set(k()).expect(200);
+      const title = res.body.fields.find((f: { field: string }) => f.field === 'title');
+      expect(title.value).toBe("the reader's own task");
+      expect(title.valueWithheld).toBeUndefined();
     });
 
     it("GET /tasks/:taskId/field-changes on another workspace's task → 404", async () => {

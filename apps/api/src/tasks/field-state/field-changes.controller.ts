@@ -12,12 +12,13 @@ import {
 import type { Request } from 'express';
 import { ApiKeyGuard } from '../../auth/guards/api-key.guard.js';
 import { AgentTaskScopeGuard } from '../../auth/guards/agent-task-scope.guard.js';
+import type { AgentScopeContext } from '../../auth/guards/agent-task-scope.guard.js';
 import { AgentScope } from '../../auth/agent-scope.decorator.js';
 import { FieldChangesService } from './field-changes.service.js';
 import type { AckBody } from './field-changes.service.js';
 import { Agent } from '@prisma/client';
 
-type ApiKeyRequest = Request & { apiKeyAgent: Agent };
+type ApiKeyRequest = Request & { apiKeyAgent: Agent; agentScope?: AgentScopeContext };
 
 /**
  * FieldChangesController — per-agent field-change tracking endpoints.
@@ -50,6 +51,9 @@ export class FieldChangesController {
     return this.fieldChangesService.getFieldChanges({
       taskId,
       agentId: req.apiKeyAgent.id,
+      // MUN-0055 (DEC-AUP-0033 R4): the guard decided this, not the handler —
+      // the same place every other scope decision is made.
+      withholdFreeTextValues: req.agentScope?.withholdFreeTextValues === true,
     });
   }
 

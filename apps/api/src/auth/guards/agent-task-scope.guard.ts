@@ -18,7 +18,9 @@ import { assignCompatWindowAdmits } from '../assign-compat-window.js';
 import {
   PROJECT_READ_GRANTS,
   PROJECT_READ_GRANT_LIST,
-  projectReadGrantFor,
+  agentHoldsAnyLiveProjectReadGrant,
+  projectHasLiveGrantForAgent,
+  projectReadGrantState,
 } from '../project-read-grants.js';
 import type { ProjectReadGrantEntry } from '../project-read-grants.js';
 
@@ -32,6 +34,11 @@ export interface AgentScopeContext {
   assignBasis?: AssignBasis;
   /** MUN-0052, 'project-index' only: the grant that admitted the read. */
   projectReadGrant?: ProjectReadGrantEntry;
+  /** MUN-0055, 'task-workspace' only: this key holds an index grant on the
+   *  task's project and does not own the task, so the free-text field VALUES
+   *  (title, description) are withheld from the field-change read. The change
+   *  signal — version, hash, changed — is not. See DEC-AUP-0033 R4. */
+  withholdFreeTextValues?: boolean;
 }
 
 export type AssignBasis = 'creator' | 'executor' | 'compat-window';
@@ -160,11 +167,20 @@ export class AgentTaskScopeGuard implements CanActivate {
         req.agentScope = { agentId: agent.id, kind, assignBasis };
         return true;
       }
+      // MUN-0055 (DEC-AUP-0033 R4). The workspace check is unchanged. What is
+      // new is that a key holding a LIVE index grant on this task's project
+      // does not get the free-text VALUES of a task it does not own — see
+      // assertTaskInWorkspace. DEC-AUP-0029 R7 accepted, for one week, that the
+      // index (which ids) plus this route (which values) let the granted key
+      // rebuild every title and description of project aup. Renewing the grant
+      // without removing that combination would have made a one-week residual
+      // permanent, so the renewal removes it instead.
       case 'task-workspace': {
         const taskId = this.paramOf(req, 'taskId');
         if (!taskId) throw new ForbiddenException('No task in scope for this key.');
-        await this.assertTaskInWorkspace(agent, taskId);
-        break;
+        const withhold = await this.assertTaskInWorkspace(agent, taskId);
+        req.agentScope = { agentId: agent.id, kind, withholdFreeTextValues: withhold };
+        return true;
       }
       // MUN-0050: the status route. Creator OR executor assignment, inside the
       // agent's own workspace — see assertCreatorOrExecutorOfTask.
@@ -186,15 +202,44 @@ export class AgentTaskScopeGuard implements CanActivate {
         await this.assertProjectInWorkspace(agent, projectId);
         break;
       }
-      // MUN-0052: the task index. Workspace first, then a live grant for this
-      // agent and this project; both refusals are the same 404.
+      // MUN-0052: the task index. Workspace first, then the grant list.
+      //
+      // MUN-0055 (DEC-AUP-0033 R1) splits one of the refusals out of the
+      // blanket 404. A key whose own entry has simply run out of time is told
+      // so, with a machine-readable `GRANT_EXPIRED`; every other refusal keeps
+      // the identical 404 `Project <id> not found.` that DEC-AUP-0029 R2 chose
+      // so the route cannot be used to enumerate projects.
+      //
+      // That is not a hole, because the 403 is reachable only by a key that a
+      // merged decision already named for this project: it learns that its own
+      // grant lapsed, which is a fact about itself. And the secrecy it would
+      // otherwise protect is not there to protect — measured 2026-09-23, an
+      // agent key holding NO grant already tells an existing in-workspace
+      // project (200, own slice, possibly empty) from an unknown or foreign one
+      // (404) through the sibling route `GET /tasks/project/:projectId`, which
+      // consults no grant list. The uniform 404 cost a legitimate holder its
+      // diagnosis — two days of a silently dead board read — and bought no
+      // secrecy against the one caller who could reach it.
       case 'project-index': {
         const projectId = this.paramOf(req, 'projectId');
         if (!projectId) throw new ForbiddenException('No project in scope for this key.');
         await this.assertProjectInWorkspace(agent, projectId);
-        const grant = projectReadGrantFor(agent.id, projectId, new Date(), this.projectReadGrants);
-        if (!grant) throw new NotFoundException(`Project ${projectId} not found.`);
-        req.agentScope = { agentId: agent.id, kind, projectReadGrant: grant };
+        const state = projectReadGrantState(agent.id, projectId, new Date(), this.projectReadGrants);
+        if (state.kind === 'expired') {
+          // The body is an object, so NestJS serialises it verbatim: a caller
+          // reads `code`, not prose. Same convention as migration.errors.ts.
+          throw new ForbiddenException({
+            code: 'GRANT_EXPIRED',
+            message:
+              `The project read grant for this key expired at ${state.entry.until}. ` +
+              'It is renewed by a pull request citing a program decision, not by an environment edit (MUN-0055).',
+            projectId,
+            until: state.entry.until,
+            decision: state.entry.decision,
+          });
+        }
+        if (state.kind === 'none') throw new NotFoundException(`Project ${projectId} not found.`);
+        req.agentScope = { agentId: agent.id, kind, projectReadGrant: state.entry };
         return true;
       }
       // MUN-0045 (contract_diff ENUM_VALUE_ADDED): a future AgentScopeKind that
@@ -399,17 +444,42 @@ export class AgentTaskScopeGuard implements CanActivate {
    * id that does not exist — so closing the cross-tenant read adds no new signal
    * a caller could use to probe another workspace's ids.
    */
-  private async assertTaskInWorkspace(agent: Agent, taskId: string): Promise<void> {
+  /**
+   * The task must be in the agent's workspace. Returns whether the free-text
+   * field VALUES must be withheld from this key (MUN-0055, DEC-AUP-0033 R4):
+   * true only when the key holds a live index grant on THIS task's project and
+   * does not own the task. Every key that holds no grant — which is every key
+   * but the ones the grant list names — takes the early return and issues
+   * exactly the queries it issued before.
+   */
+  private async assertTaskInWorkspace(agent: Agent, taskId: string): Promise<boolean> {
     const task = await this.prisma.task
       .findFirst({
         where: { id: taskId, project: { workspaceId: agent.workspaceId } },
-        select: { id: true },
+        select: { id: true, projectId: true },
       })
       .catch(() => null);
 
     if (!task) {
       throw new NotFoundException('Task not found');
     }
+
+    const now = new Date();
+    if (!agentHoldsAnyLiveProjectReadGrant(agent.id, now, this.projectReadGrants)) {
+      return false;
+    }
+    if (!projectHasLiveGrantForAgent(agent.id, task.projectId, now, this.projectReadGrants)) {
+      return false;
+    }
+
+    const own = await this.prisma.task
+      .findFirst({
+        where: { id: taskId, ...agentOwnTaskWhere(agent.id) },
+        select: { id: true },
+      })
+      .catch(() => null);
+
+    return own === null;
   }
 
   /** The project must at least belong to the agent's workspace. Which tasks
