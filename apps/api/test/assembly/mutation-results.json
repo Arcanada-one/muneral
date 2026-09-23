@@ -22,11 +22,11 @@
   },
   "binding": {
     "algorithm": "sha256",
-    "aggregateSha256": "14efa4ab644b9761708c25d60d7ca6a6046f92e9574e4d360d7848c5be00452e",
+    "aggregateSha256": "b241da3c8bd88a0118141dfa0a91e4bd75a86497c8c8278b2bce98f522d00e18",
     "files": [
       {
         "path": "apps/api/package.json",
-        "sha256": "39ed7c778db1fc10ec15412b9569517e4cd8a066528c68b575fe6a4077d5b8bd"
+        "sha256": "10a3ed98001568e5271cb9bee7b02b0a0f245cf4590768c2e16dfbccf1bd5797"
       },
       {
         "path": "apps/api/src/assembly/assembly.canonical.ts",
@@ -271,8 +271,8 @@
     ]
   },
   "supplementalGit": {
-    "trackedTreeWithoutEvidence": "dcce8a9f0d12b2736da3403d127095a9bfd9a503",
-    "trackedSnapshotDiffSha256": "549b20fd93d618e7015e29a7422bb7b1f2cc68ef6de44ccdadab16cccda5e3ae"
+    "trackedTreeWithoutEvidence": "09962556d9e9384527cd86013d5973aaace8e489",
+    "trackedSnapshotDiffSha256": "2748e1298898233613a3045fae46e60a6381052b5c1e896f3e54f75eff7dc0c3"
   },
   "baseline": {
     "outcome": "SURVIVED",
