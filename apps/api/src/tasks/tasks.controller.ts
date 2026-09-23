@@ -349,8 +349,10 @@ export class TasksController {
    *  list for precisely the tasks that are blocked. */
   @Get(':taskId/dependency-graph')
   @AgentScope('task')
-  getDependencyGraph(@Param('taskId') taskId: string) {
-    return this.tasksService.getDependencyGraph(taskId);
+  getDependencyGraph(@Param('taskId') taskId: string, @Req() req: AuthRequest) {
+    // MUN-0055: the agent id narrows the COUNTERPART's free text, not the edge
+    // list. Absent for a JWT, which is not narrowed.
+    return this.tasksService.getDependencyGraph(taskId, req.agentScope?.agentId);
   }
 
   /** MUN-0054 — the readiness verdict, computed server-side.
@@ -363,8 +365,8 @@ export class TasksController {
    *  has to infer readiness from the absence of a field. */
   @Get(':taskId/readiness')
   @AgentScope('task')
-  getReadiness(@Param('taskId') taskId: string) {
-    return this.tasksService.getReadiness(taskId);
+  getReadiness(@Param('taskId') taskId: string, @Req() req: AuthRequest) {
+    return this.tasksService.getReadiness(taskId, req.agentScope?.agentId);
   }
 
   @Post(':taskId/dependencies')

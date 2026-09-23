@@ -468,6 +468,70 @@ describe('MUN-0052 — project task index for granted agent keys (e2e)', () => {
       expect(rest(granted)).toEqual(rest(ungranted));
     });
 
+    // MUN-0055 (DEC-AUP-0033 R4a) — the second door onto the same plaintext,
+    // found by the blind review of this decision. `@AgentScope('task')` checks
+    // the PATH task only; the counterpart at the other end of a dependency edge
+    // had its title returned in clear, so a key that owned one task could read
+    // the titles of tasks it did not own, one edge at a time.
+    it('GET /tasks/:taskId/dependency-graph withholds the title of a counterpart the key does NOT own', async () => {
+      const own = await prisma.task.create({
+        data: { projectId, title: 'the reader owns this', status: 'todo', priority: 'low', createdById: ids.reader, actorType: 'agent' },
+      });
+      const other = await othersTask(projectId, 'todo');
+      await prisma.taskDependency.create({
+        data: { fromTaskId: own.id, toTaskId: other.id, type: 'depends_on' },
+      });
+      grants.length = 0;
+      grant('reader', projectId);
+
+      const res = await http().get(`/tasks/${own.id}/dependency-graph`).set(k()).expect(200);
+
+      expect(res.body).toHaveLength(1);
+      const edge = res.body[0];
+      expect(edge.otherTaskId).toBe(other.id);
+      expect(edge.otherTaskTitle).toBeNull();
+      expect(edge.otherTaskTitleWithheld).toBe(true);
+      // the status stays: it is not free text, and readiness is computed from it
+      expect(edge.otherTaskStatus).toBe('todo');
+      expect(JSON.stringify(res.body)).not.toContain('secret-bearing title');
+
+      // readiness is built on the same edges and must not reintroduce it
+      const ready = await http().get(`/tasks/${own.id}/readiness`).set(k()).expect(200);
+      expect(ready.body.ready).toBe(false);
+      expect(ready.body.blockedBy).toHaveLength(1);
+      expect(ready.body.blockedBy[0].otherTaskTitle).toBeNull();
+      expect(JSON.stringify(ready.body)).not.toContain('secret-bearing title');
+    });
+
+    it('GET /tasks/:taskId/dependency-graph keeps the title of a counterpart the key DOES own', async () => {
+      const a = await prisma.task.create({
+        data: { projectId, title: 'reader task A', status: 'todo', priority: 'low', createdById: ids.reader, actorType: 'agent' },
+      });
+      const b = await prisma.task.create({
+        data: { projectId, title: 'reader task B', status: 'done', priority: 'low', createdById: ids.reader, actorType: 'agent' },
+      });
+      await prisma.taskDependency.create({ data: { fromTaskId: a.id, toTaskId: b.id, type: 'depends_on' } });
+
+      const res = await http().get(`/tasks/${a.id}/dependency-graph`).set(k()).expect(200);
+      expect(res.body[0].otherTaskTitle).toBe('reader task B');
+      expect(res.body[0].otherTaskTitleWithheld).toBeUndefined();
+    });
+
+    it('a JWT still sees counterpart titles — this narrows an agent key, not a user', async () => {
+      const own = await prisma.task.create({
+        data: { projectId, title: 'path task', status: 'todo', priority: 'low', createdById: ids.reader, actorType: 'agent' },
+      });
+      const other = await othersTask(projectId, 'todo');
+      await prisma.taskDependency.create({ data: { fromTaskId: own.id, toTaskId: other.id, type: 'depends_on' } });
+
+      const res = await http()
+        .get(`/tasks/${own.id}/dependency-graph`)
+        .set({ Authorization: `Bearer ${authSvc.signAccess(userId)}` })
+        .expect(200);
+      expect(res.body[0].otherTaskTitle).toBe(other.title);
+      expect(res.body[0].otherTaskTitleWithheld).toBeUndefined();
+    });
+
     it('GET /tasks/:taskId/field-changes: a granted key still reads the values of a task it OWNS', async () => {
       const own = await prisma.task.create({
         data: {
