@@ -151,9 +151,19 @@ describe('AgentTaskScopeGuard', () => {
     expect(prisma.taskAgent.findFirst).not.toHaveBeenCalled();
     expect(prisma.task.findFirst).toHaveBeenCalledWith({
       where: { id: 't-1', project: { workspaceId: 'ws-1' } },
-      select: { id: true },
+      // MUN-0055: `projectId` joined the select so the guard can ask whether
+      // this key holds an index grant on THIS project. The where clause — the
+      // workspace boundary itself — is byte-for-byte what it was.
+      select: { id: true, projectId: true },
     });
-    expect(req.agentScope).toEqual({ agentId: 'agent-1', kind: 'task-workspace' });
+    // The default grant list does not name this agent, so nothing is withheld
+    // and no ownership query was issued: one task.findFirst, as before.
+    expect(prisma.task.findFirst).toHaveBeenCalledTimes(1);
+    expect(req.agentScope).toEqual({
+      agentId: 'agent-1',
+      kind: 'task-workspace',
+      withholdFreeTextValues: false,
+    });
   });
 
   it('refuses a task in another workspace with the same 404 a missing task gets', async () => {
@@ -489,14 +499,86 @@ describe('AgentTaskScopeGuard', () => {
       expect(req.agentScope).toEqual({ agentId: 'agent-1', kind: 'project-index', projectReadGrant: GRANT });
     });
 
-    it('answers 404 without a grant, with an expired grant, and with a grant for another project', async () => {
+    // MUN-0055 (DEC-AUP-0033 R1) splits ONE case out of this equivalence
+    // class: an entry that names this key and this project and has simply run
+    // out of time. Everything else still answers the identical 404.
+    it('answers 404 without a grant, with a grant for another project, and with a grant for another agent', async () => {
       reflector.getAllAndOverride.mockReturnValue('project-index');
       prisma.project.findFirst.mockResolvedValue({ id: 'p-1' });
-      for (const grants of [[], [{ ...GRANT, until: '2000-01-01T00:00:00Z' }], [{ ...GRANT, projectId: 'p-2' }], [{ ...GRANT, agentId: 'agent-2' }]]) {
+      for (const grants of [[], [{ ...GRANT, projectId: 'p-2' }], [{ ...GRANT, agentId: 'agent-2' }]]) {
         const { ctx, req } = makeContext({ apiKeyAgent: AGENT, params: { projectId: 'p-1' } });
         await expect(indexGuard(grants).canActivate(ctx)).rejects.toThrow(NotFoundException);
         expect(req.agentScope).toBeUndefined();
       }
+    });
+
+    it('answers 403 GRANT_EXPIRED — not 404 — when THIS key had a grant on THIS project and it lapsed', async () => {
+      reflector.getAllAndOverride.mockReturnValue('project-index');
+      prisma.project.findFirst.mockResolvedValue({ id: 'p-1' });
+      const expired = { ...GRANT, until: '2000-01-01T00:00:00Z', decision: 'DEC-TEST-OLD' };
+      const { ctx, req } = makeContext({ apiKeyAgent: AGENT, params: { projectId: 'p-1' } });
+
+      const err = await indexGuard([expired]).canActivate(ctx).catch((e: unknown) => e);
+      expect(err).toBeInstanceOf(ForbiddenException);
+      expect((err as ForbiddenException).getStatus()).toBe(403);
+      expect((err as ForbiddenException).getResponse()).toEqual({
+        code: 'GRANT_EXPIRED',
+        message: expect.stringContaining('2000-01-01T00:00:00Z'),
+        projectId: 'p-1',
+        until: '2000-01-01T00:00:00Z',
+        decision: 'DEC-TEST-OLD',
+      });
+      // A refusal narrows nothing downstream: no scope is handed on.
+      expect(req.agentScope).toBeUndefined();
+    });
+
+    it('an expired grant for ANOTHER project still answers the blanket 404, revealing no entry', async () => {
+      reflector.getAllAndOverride.mockReturnValue('project-index');
+      prisma.project.findFirst.mockResolvedValue({ id: 'p-1' });
+      const expiredElsewhere = { ...GRANT, projectId: 'p-2', until: '2000-01-01T00:00:00Z' };
+      const { ctx } = makeContext({ apiKeyAgent: AGENT, params: { projectId: 'p-1' } });
+
+      await expect(indexGuard([expiredElsewhere]).canActivate(ctx)).rejects.toThrow(NotFoundException);
+    });
+
+    it('a project outside the workspace answers 404 even when the key holds an EXPIRED grant naming it', async () => {
+      reflector.getAllAndOverride.mockReturnValue('project-index');
+      prisma.project.findFirst.mockResolvedValue(null);
+      const expired = { ...GRANT, until: '2000-01-01T00:00:00Z' };
+      const { ctx } = makeContext({ apiKeyAgent: AGENT, params: { projectId: 'p-1' } });
+
+      // The workspace wall runs FIRST and must stay indistinguishable from an
+      // unknown project: otherwise `grant_expired` would confirm, to a foreign
+      // workspace's key, that a project it was once named for exists.
+      await expect(indexGuard([expired]).canActivate(ctx)).rejects.toThrow(NotFoundException);
+    });
+
+    it('with two entries for the same pair the LATEST window decides, and the refusal cites it', async () => {
+      reflector.getAllAndOverride.mockReturnValue('project-index');
+      prisma.project.findFirst.mockResolvedValue({ id: 'p-1' });
+      const older = { ...GRANT, until: '2000-01-01T00:00:00Z', decision: 'DEC-TEST-OLD' };
+      const newer = { ...GRANT, until: '2020-01-01T00:00:00Z', decision: 'DEC-TEST-NEW' };
+      const { ctx } = makeContext({ apiKeyAgent: AGENT, params: { projectId: 'p-1' } });
+
+      // Declared oldest-first on purpose: a plain `.find()` would cite the
+      // superseded decision in the refusal a caller records as evidence.
+      const err = await indexGuard([older, newer]).canActivate(ctx).catch((e: unknown) => e);
+      expect((err as ForbiddenException).getResponse()).toMatchObject({
+        code: 'GRANT_EXPIRED',
+        decision: 'DEC-TEST-NEW',
+        until: '2020-01-01T00:00:00Z',
+      });
+    });
+
+    it('matches the project id case-insensitively, as the uuid column does', async () => {
+      reflector.getAllAndOverride.mockReturnValue('project-index');
+      const upper = 'A3CA0FB1-2B67-430B-A7D9-5849785A4543';
+      prisma.project.findFirst.mockResolvedValue({ id: upper });
+      const grant = { ...GRANT, projectId: upper.toLowerCase() };
+      const { ctx, req } = makeContext({ apiKeyAgent: AGENT, params: { projectId: upper } });
+
+      await expect(indexGuard([grant]).canActivate(ctx)).resolves.toBe(true);
+      expect(req.agentScope?.projectReadGrant).toEqual(grant);
     });
 
     it('answers 404 for a project outside the workspace even when a grant names it', async () => {
@@ -505,6 +587,67 @@ describe('AgentTaskScopeGuard', () => {
       const { ctx } = makeContext({ apiKeyAgent: AGENT, params: { projectId: 'p-1' } });
 
       await expect(indexGuard([GRANT]).canActivate(ctx)).rejects.toThrow(NotFoundException);
+    });
+
+    // MUN-0055 (DEC-AUP-0033 R4) — the residual DEC-AUP-0029 R7 accepted for a
+    // week: index (which ids) + field-changes (which values) = every title and
+    // description of the project. The renewal removes the second half for the
+    // granted key, on tasks it does not own.
+    describe("'task-workspace' withholding for a granted key", () => {
+      const twGuard = (grants: (typeof GRANT)[]) =>
+        new AgentTaskScopeGuard(
+          reflector as unknown as Reflector,
+          prisma as unknown as PrismaService,
+          grants,
+        );
+
+      it('withholds free text from a granted key on a task it does NOT own', async () => {
+        reflector.getAllAndOverride.mockReturnValue('task-workspace');
+        prisma.task.findFirst
+          .mockResolvedValueOnce({ id: 't-1', projectId: 'p-1' }) // in workspace
+          .mockResolvedValueOnce(null); // not owned
+        const { ctx, req } = makeContext({ apiKeyAgent: AGENT, params: { taskId: 't-1' } });
+
+        await expect(twGuard([GRANT]).canActivate(ctx)).resolves.toBe(true);
+        expect(req.agentScope).toEqual({
+          agentId: 'agent-1',
+          kind: 'task-workspace',
+          withholdFreeTextValues: true,
+        });
+      });
+
+      it('does NOT withhold on a task the granted key owns', async () => {
+        reflector.getAllAndOverride.mockReturnValue('task-workspace');
+        prisma.task.findFirst
+          .mockResolvedValueOnce({ id: 't-1', projectId: 'p-1' })
+          .mockResolvedValueOnce({ id: 't-1' }); // owned
+        const { ctx, req } = makeContext({ apiKeyAgent: AGENT, params: { taskId: 't-1' } });
+
+        await expect(twGuard([GRANT]).canActivate(ctx)).resolves.toBe(true);
+        expect(req.agentScope?.withholdFreeTextValues).toBe(false);
+      });
+
+      it('does NOT withhold when the task is in a project the grant does not name', async () => {
+        reflector.getAllAndOverride.mockReturnValue('task-workspace');
+        prisma.task.findFirst.mockResolvedValueOnce({ id: 't-9', projectId: 'p-OTHER' });
+        const { ctx, req } = makeContext({ apiKeyAgent: AGENT, params: { taskId: 't-9' } });
+
+        await expect(twGuard([GRANT]).canActivate(ctx)).resolves.toBe(true);
+        expect(req.agentScope?.withholdFreeTextValues).toBe(false);
+        // The grant is per project: no ownership query was needed to say so.
+        expect(prisma.task.findFirst).toHaveBeenCalledTimes(1);
+      });
+
+      it('does NOT withhold once the grant has expired — the index is closed too', async () => {
+        reflector.getAllAndOverride.mockReturnValue('task-workspace');
+        prisma.task.findFirst.mockResolvedValueOnce({ id: 't-1', projectId: 'p-1' });
+        const { ctx, req } = makeContext({ apiKeyAgent: AGENT, params: { taskId: 't-1' } });
+
+        await expect(
+          twGuard([{ ...GRANT, until: '2000-01-01T00:00:00Z' }]).canActivate(ctx),
+        ).resolves.toBe(true);
+        expect(req.agentScope?.withholdFreeTextValues).toBe(false);
+      });
     });
 
     it('the default grant list is consulted by no other scope kind', async () => {

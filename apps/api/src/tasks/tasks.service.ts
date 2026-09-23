@@ -20,6 +20,7 @@ import { TaskFieldStateService } from './field-state/task-field-state.service.js
 import { TaskExecutionRecorderService } from '../execution-authority/task-execution-recorder.service.js';
 import { agentOwnTaskWhere } from '../auth/agent-task-visibility.js';
 import type { ProjectReadGrantEntry } from '../auth/project-read-grants.js';
+import { renewalDueAt } from '../auth/project-read-grants.js';
 
 /** MUN-0052: the activity action one task-index read records. */
 export const PROJECT_INDEX_READ_ACTION = 'project:index_read';
@@ -218,7 +219,16 @@ export class TasksService {
       generatedAt: audit.createdAt.toISOString(),
       auditEventId: audit.id,
       auditReadCount,
-      grant: { decision: grant.decision, until: grant.until },
+      // MUN-0055 (DEC-AUP-0033 R3): `renewalDueAt` is how a lapse becomes
+      // visible BEFORE it happens. The first grant went quiet at its `until`
+      // and nothing noticed for two days; every caller already writes this
+      // envelope into a receipt, so the warning rides the read it already does
+      // rather than needing a watcher nobody would run.
+      grant: {
+        decision: grant.decision,
+        until: grant.until,
+        renewalDueAt: renewalDueAt(grant),
+      },
       tasks,
     };
   }
@@ -533,7 +543,7 @@ export class TasksService {
    * `done` is satisfied. A caller that receives only ids has to issue N more
    * requests, and an agent key would be refused on most of them.
    */
-  async getDependencyGraph(taskId: string) {
+  async getDependencyGraph(taskId: string, agentId?: string) {
     await this.findOne(taskId); // 404 on an unknown id, not an empty graph
 
     const edges = await this.prisma.taskDependency.findMany({
@@ -544,9 +554,26 @@ export class TasksService {
       },
     });
 
+    // MUN-0055 (DEC-AUP-0033 R4a). `@AgentScope('task')` checks that the key
+    // owns the task in the PATH; it says nothing about the counterpart at the
+    // other end of an edge, whose title was returned in clear. So a key that
+    // owned one task read the titles of tasks it did not own, one edge at a
+    // time — the same plaintext the field-change read above stopped handing
+    // out, through a different door. The counterpart's STATUS stays: it is not
+    // free text and `getReadiness` below is computed from it. A JWT is
+    // unaffected — this narrows an agent key, and a user already has the whole
+    // project.
+    const ownedCounterparts = agentId
+      ? await this.ownedAmong(
+          agentId,
+          edges.map((e) => (e.fromTaskId === taskId ? e.toTaskId : e.fromTaskId)),
+        )
+      : null;
+
     return edges.map((e) => {
       const outgoing = e.fromTaskId === taskId;
       const other = outgoing ? e.toTask : e.fromTask;
+      const withheld = ownedCounterparts !== null && !ownedCounterparts.has(other.id);
       return {
         id: e.id,
         type: e.type,
@@ -554,10 +581,22 @@ export class TasksService {
         fromTaskId: e.fromTaskId,
         toTaskId: e.toTaskId,
         otherTaskId: other.id,
-        otherTaskTitle: other.title,
+        otherTaskTitle: withheld ? null : other.title,
+        ...(withheld ? { otherTaskTitleWithheld: true as const } : {}),
         otherTaskStatus: other.status,
       };
     });
+  }
+
+  /** MUN-0055: which of `ids` the agent owns — assigned or creator, the same
+   *  filter every other agent-key read narrows by (agentOwnTaskWhere). */
+  private async ownedAmong(agentId: string, ids: string[]): Promise<Set<string>> {
+    if (ids.length === 0) return new Set();
+    const rows = await this.prisma.task.findMany({
+      where: { id: { in: [...new Set(ids)] }, ...agentOwnTaskWhere(agentId) },
+      select: { id: true },
+    });
+    return new Set(rows.map((r) => r.id));
   }
 
   /**
@@ -570,8 +609,8 @@ export class TasksService {
    * `duplicates` are not blocking relations. An edge is satisfied once the
    * counterpart reaches a terminal status.
    */
-  async getReadiness(taskId: string) {
-    const edges = await this.getDependencyGraph(taskId);
+  async getReadiness(taskId: string, agentId?: string) {
+    const edges = await this.getDependencyGraph(taskId, agentId);
     const SATISFIED = new Set(['done', 'cancelled', 'archived']);
 
     const blockedBy = edges.filter(
