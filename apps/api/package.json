@@ -9,7 +9,6 @@
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --passWithNoTests --runInBand",
     "test:cov": "jest --coverage --passWithNoTests",
     "lint": "eslint src --ext .ts",
-    "migration:run": "ts-node -r tsconfig-paths/register src/migration-runner.ts",
     "clean": "rm -rf dist"
   },
   "dependencies": {

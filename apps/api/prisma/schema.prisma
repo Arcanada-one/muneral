@@ -1,5 +1,6 @@
 // Muneral Arcana — Prisma schema
-// Hand-authored from apps/api/migrations/1713100000000-InitialSchema.ts
+// Hand-authored from the original TypeORM InitialSchema migration, deleted as dead code in
+// MUN-0063: apps/api/migrations/1713100000000-InitialSchema.ts at commit d20eb5a (git history).
 // Enums stored as String + @db.VarChar with CHECK constraints in migration SQL.
 // Do NOT use `db pull` — hand-authoring is the source of truth.
 //
