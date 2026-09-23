@@ -67,7 +67,12 @@ jobs:
           echo "${COREPACK_HOME}" >> "${GITHUB_PATH}"
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
         with:
-          node-version: 22
+          # Read from .nvmrc rather than restated here. A major pinned in this
+          # file is a second copy of the same fact: the fleet ran four Node
+          # versions across five machines while every one of them satisfied
+          # engines' ">=22", and the mismatch surfaced only as mutation
+          # evidence that could not be regenerated off the recording host.
+          node-version-file: .nvmrc
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

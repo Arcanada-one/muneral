@@ -11,13 +11,13 @@
     ]
   },
   "tools": {
-    "node": "v22.23.1",
+    "node": "v24.11.1",
     "jest": "29.7.0",
     "typescript": "5.9.3",
     "pnpm": "11.5.2"
   },
   "toolchainCompatibility": {
-    "nodeMajorMinor": "22.23",
+    "nodeMajorMinor": "24.11",
     "pnpmMajor": 11
   },
   "binding": {
@@ -271,8 +271,8 @@
     ]
   },
   "supplementalGit": {
-    "trackedTreeWithoutEvidence": "047f478bca57d8c032620d70e6b5d0af25feac1c",
-    "trackedSnapshotDiffSha256": "8fafb191860c7ce15ce88b2186e17bd1075a9a3b073bea2002883c7f0fcd404c"
+    "trackedTreeWithoutEvidence": "b0719ed75decd3556da0b9fb6b9511f2972d07aa",
+    "trackedSnapshotDiffSha256": "a7d9d04e16cbf68d7cb29bcf64e2d6f01b19a9e2ad43a34ec7780674ff6be7d5"
   },
   "baseline": {
     "outcome": "SURVIVED",
