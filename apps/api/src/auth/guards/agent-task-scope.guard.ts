@@ -23,6 +23,12 @@ import {
   projectReadGrantState,
 } from '../project-read-grants.js';
 import type { ProjectReadGrantEntry } from '../project-read-grants.js';
+import {
+  WORKSPACE_DIGEST_GRANTS,
+  WORKSPACE_DIGEST_GRANT_LIST,
+  workspaceDigestGrantState,
+} from '../workspace-digest-grants.js';
+import type { WorkspaceDigestGrantEntry } from '../workspace-digest-grants.js';
 
 /** What an authorised agent request carries downstream: the id the handler must
  *  narrow its answer to. Absent on JWT requests, which are not narrowed. */
@@ -34,6 +40,13 @@ export interface AgentScopeContext {
   assignBasis?: AssignBasis;
   /** MUN-0052, 'project-index' only: the grant that admitted the read. */
   projectReadGrant?: ProjectReadGrantEntry;
+  /** A2-284, 'workspace-digest' only: the grant that admitted the read. */
+  workspaceDigestGrant?: WorkspaceDigestGrantEntry;
+  /** A2-284, 'workspace-digest' only: the workspace the answer must be
+   *  narrowed to. Carried here rather than re-read from the agent row in the
+   *  handler, so the id the guard checked the grant against is the same id the
+   *  query filters on — one value, decided once. */
+  workspaceId?: string;
   /** MUN-0055, 'task-workspace' only: this key holds an index grant on the
    *  task's project and does not own the task, so the free-text field VALUES
    *  (title, description) are withheld from the field-change read. The change
@@ -104,6 +117,7 @@ export type AgentScopedRequest = Request & {
 @Injectable()
 export class AgentTaskScopeGuard implements CanActivate {
   private readonly projectReadGrants: readonly ProjectReadGrantEntry[];
+  private readonly workspaceDigestGrants: readonly WorkspaceDigestGrantEntry[];
 
   constructor(
     private readonly reflector: Reflector,
@@ -111,8 +125,12 @@ export class AgentTaskScopeGuard implements CanActivate {
     @Optional()
     @Inject(PROJECT_READ_GRANTS)
     projectReadGrants?: readonly ProjectReadGrantEntry[],
+    @Optional()
+    @Inject(WORKSPACE_DIGEST_GRANTS)
+    workspaceDigestGrants?: readonly WorkspaceDigestGrantEntry[],
   ) {
     this.projectReadGrants = projectReadGrants ?? PROJECT_READ_GRANT_LIST;
+    this.workspaceDigestGrants = workspaceDigestGrants ?? WORKSPACE_DIGEST_GRANT_LIST;
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -252,6 +270,57 @@ export class AgentTaskScopeGuard implements CanActivate {
         }
         if (state.kind === 'none') throw new NotFoundException(`Project ${projectId} not found.`);
         req.agentScope = { agentId: agent.id, kind, projectReadGrant: state.entry };
+        return true;
+      }
+      // A2-284: the workspace digest. The only kind with NO route param and no
+      // task or project of its own — the scope IS the key's own workspace, and
+      // the grant list decides whether this key may read it past its own slice.
+      //
+      // Both refusals are 403, not the 404 'project-index' uses, because there
+      // is nothing here a caller could enumerate: the workspace in question is
+      // the one its own credential names, and it learns only facts about
+      // itself — that it holds no grant, or that its grant ran out. An expired
+      // entry is told apart from no entry at all for the MUN-0055 reason: the
+      // first grant of DEC-AUP-0029 lapsed and the read simply went quiet for
+      // two days.
+      case 'workspace-digest': {
+        const state = workspaceDigestGrantState(
+          agent.id,
+          agent.workspaceId,
+          new Date(),
+          this.workspaceDigestGrants,
+        );
+        if (state.kind === 'expired') {
+          // An object body, so NestJS serialises it verbatim and a caller reads
+          // `code` rather than prose — same convention as 'project-index'.
+          throw new ForbiddenException({
+            code: 'GRANT_EXPIRED',
+            scope: 'workspace-digest',
+            message:
+              `The workspace digest grant for this key expired at ${state.entry.until}. ` +
+              'It is renewed by a pull request citing a program decision, not by an environment edit (A2-284).',
+            workspaceId: agent.workspaceId,
+            until: state.entry.until,
+            decision: state.entry.decision,
+          });
+        }
+        if (state.kind === 'none') {
+          throw new ForbiddenException({
+            code: 'DIGEST_GRANT_REQUIRED',
+            scope: 'workspace-digest',
+            message:
+              'The workspace task digest is available only to an agent API key named in ' +
+              "Muneral's workspace digest grant list (A2-284). Scoping the route grants nothing " +
+              'by itself: the grant is per agent and merges as its own pull request.',
+            workspaceId: agent.workspaceId,
+          });
+        }
+        req.agentScope = {
+          agentId: agent.id,
+          kind,
+          workspaceDigestGrant: state.entry,
+          workspaceId: agent.workspaceId,
+        };
         return true;
       }
       // MUN-0045 (contract_diff ENUM_VALUE_ADDED): a future AgentScopeKind that

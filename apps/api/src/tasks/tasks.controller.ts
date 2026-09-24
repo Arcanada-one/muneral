@@ -21,6 +21,7 @@ import { TasksService } from './tasks.service.js';
 import { CreateTaskDto } from './dto/create-task.dto.js';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto.js';
 import { QueryTasksDto } from './dto/query-tasks.dto.js';
+import { QueryWorkspaceDigestDto } from './dto/query-workspace-digest.dto.js';
 import { AddDependencyDto } from './dto/add-dependency.dto.js';
 import { CreateChecklistItemDto } from './dto/create-checklist-item.dto.js';
 import { AddCommentDto } from './dto/add-comment.dto.js';
@@ -131,6 +132,42 @@ export class TasksController {
   @Get()
   query(@Query() dto: QueryTasksDto) {
     return this.tasksService.query(dto);
+  }
+
+  /**
+   * A2-284 — the workspace task digest, for an agent key holding a grant.
+   *
+   * Declared with the other literal path BEFORE `@Get(':taskId')`, for the
+   * reason stated there: Nest matches in declaration order and the
+   * parameterised route would otherwise swallow `digest` as a task id.
+   *
+   * Agent keys only, by the same shape `indexForProject` uses: a JWT passes the
+   * scope guard untouched (it is not what that guard bounds) and therefore
+   * arrives here with no `agentScope`, which is refused. A human has
+   * `GET /tasks`, which is cross-workspace and unnarrowed; serving both
+   * credentials from one handler would mean one route with two answers, and the
+   * narrow one would be the one easiest to lose in a later edit.
+   */
+  @Get('digest')
+  @AgentScope('workspace-digest')
+  digest(@Req() req: AuthRequest, @Query() dto: QueryWorkspaceDigestDto) {
+    const scope = req.agentScope;
+    if (
+      !scope ||
+      scope.kind !== 'workspace-digest' ||
+      !scope.workspaceDigestGrant ||
+      !scope.workspaceId
+    ) {
+      throw new ForbiddenException(
+        'The workspace task digest is available only to an agent API key holding a digest grant (A2-284).',
+      );
+    }
+    return this.tasksService.digestForWorkspace(
+      scope.workspaceId,
+      scope.agentId,
+      scope.workspaceDigestGrant,
+      dto,
+    );
   }
 
   /**
