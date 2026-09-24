@@ -75,8 +75,5 @@ export class CreateTaskDto {
    */
   @IsOptional()
   @IsString()
-  @Matches(CONTRACT_DIGEST_PATTERN, {
-    message: 'contractDigest must be sha256: followed by 64 lowercase hex digits',
-  })
   contractDigest?: string | null;
 }
