@@ -51,6 +51,20 @@ import { SetMetadata } from '@nestjs/common';
  *                      allowlist entry that can be narrowed or revoked on its
  *                      own is worth one more enum value. The route never takes
  *                      the new value as free text: see TaskRedactionService.
+ *   'task-evidence'  — A2-274. The route names a task (`:taskId`) and attaches
+ *                      an artefact to it (uri + sha256 + content type), or
+ *                      reads the list back. The ownership check is exactly
+ *                      'task' — created it OR assigned to it, inside the
+ *                      agent's own workspace — and the creator half is not
+ *                      optional here: the executor that registered its own work
+ *                      item through `POST /tasks` (MUN-0045) never gets a
+ *                      `task_agents` row, and under an assignment-only rule it
+ *                      would be refused on the one task whose receipt it holds
+ *                      (the MUN-0054 measurement). It has its own name, as
+ *                      'task-redaction' does, because attaching evidence is a
+ *                      different act from commenting and worth being able to
+ *                      revoke on its own. Attribution is never taken from the
+ *                      body: `created_by_agent_id` is `req.actor`.
  *   'task-status'    — MUN-0050. The route names a task (`:taskId`) and moves
  *                      its status. The key's agent must be in the workspace
  *                      that owns the task AND either have CREATED it
@@ -97,6 +111,7 @@ export type AgentScopeKind =
   | 'task-workspace'
   | 'project-write'
   | 'task-redaction'
+  | 'task-evidence'
   | 'task-status'
   | 'task-assign'
   | 'project-index';

@@ -153,6 +153,18 @@ export class AgentTaskScopeGuard implements CanActivate {
         await this.assertAssignedToTask(agent, taskId);
         break;
       }
+      // A2-274: 'task-evidence' — attaching a ReadinessReceipt to a work item
+      // and reading the list back. Creator OR assignee (assertOwnTask), NOT
+      // assertAssignedToTask: an executor that registered its own work item
+      // holds no `task_agents` row for it, and the assignment-only rule would
+      // refuse it on exactly the task whose evidence it has (MUN-0054). Its own
+      // scope name so the write can be revoked without touching the reads.
+      case 'task-evidence': {
+        const taskId = this.paramOf(req, 'taskId');
+        if (!taskId) throw new ForbiddenException('No task in scope for this key.');
+        await this.assertOwnTask(agent, taskId);
+        break;
+      }
       // MUN-0051: the assign route — see assertMayAssign.
       case 'task-assign': {
         const taskId = this.paramOf(req, 'taskId');

@@ -34,6 +34,8 @@ import { FieldChangesService } from './field-state/field-changes.service.js';
 import { TaskStalenessService } from '../execution-authority/task-staleness.service.js';
 import { TaskRedactionService } from './redactions/task-redaction.service.js';
 import { RedactFieldDto } from './redactions/redact-field.dto.js';
+import { TaskEvidenceService } from './evidence/task-evidence.service.js';
+import { AttachEvidenceDto } from './evidence/attach-evidence.dto.js';
 
 type AuthRequest = Request & { actor: Actor; agentScope?: AgentScopeContext };
 
@@ -88,6 +90,11 @@ type AuthRequest = Request & { actor: Actor; agentScope?: AgentScopeContext };
  * MUN-0054 — `PATCH /tasks/:taskId/status` moves from `'task'` to its own
  * scope `'task-status'` (creator or executor assignment): see the handler.
  *
+ * A2-274 — `POST /tasks/:taskId/evidence` is the fourth, with the matching
+ * read `GET /tasks/:taskId/evidence`. Both are marked `'task-evidence'`; the
+ * write additionally refuses a JWT, because the record names the AGENT that
+ * attached it and a human has no agent id (see `agentKeyRequired`).
+ *
  * MUN-0049 — `POST /tasks/:taskId/redactions` is the third write. It is marked
  * with its OWN scope, `'task-redaction'`, rather than reusing `'task'`: the
  * assignment check is the same, but a route that rewrites a title is a
@@ -104,6 +111,7 @@ export class TasksController {
     private readonly fieldChangesService: FieldChangesService,
     private readonly stalenessService: TaskStalenessService,
     private readonly redactionService: TaskRedactionService,
+    private readonly evidenceService: TaskEvidenceService,
   ) {}
 
   /** Creatable by an agent's API key inside its own workspace (MUN-0045) or by
@@ -291,6 +299,40 @@ export class TasksController {
     const { statusCode, body } = await this.redactionService.redact(taskId, req.actor, dto);
     res.status(statusCode);
     return body;
+  }
+
+  /** A2-274 (MUN-EVIDENCE). Attaches one artefact — `{uri, sha256, contentType}`
+   *  — to the work item: WorkItemEvidenceAttachment/v1. 201 with the record the
+   *  first time a digest is attached, 200 `idempotent: true` when the same
+   *  claim is repeated (the retry of an unattended executor is the normal case,
+   *  not an error), 409 `EVIDENCE_DIGEST_CONFLICT` when the same digest is
+   *  re-attached under a different uri or media type, 400 with a `code` for a
+   *  malformed value. Reachable by the agent that created the task or is
+   *  assigned to it (`'task-evidence'`); a JWT is refused here and only here
+   *  (403 `EVIDENCE_AGENT_KEY_REQUIRED`) — it reads the list below.
+   *
+   *  The server records a CLAIM: it never fetches the uri and never checks that
+   *  the bytes there hash to `sha256`. */
+  @Post(':taskId/evidence')
+  @AgentScope('task-evidence')
+  async attachEvidence(
+    @Param('taskId') taskId: string,
+    @Req() req: AuthRequest,
+    @Body() dto: AttachEvidenceDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { statusCode, body } = await this.evidenceService.attach(taskId, req.actor, dto);
+    res.status(statusCode);
+    return body;
+  }
+
+  /** A2-274. The evidence attached to this work item, oldest first, each record
+   *  carrying its `sha256`. Readable by the same agent key that may attach
+   *  (`'task-evidence'`) and by a JWT, which is what the dashboard uses. */
+  @Get(':taskId/evidence')
+  @AgentScope('task-evidence')
+  listEvidence(@Param('taskId') taskId: string) {
+    return this.evidenceService.list(taskId);
   }
 
   @Delete(':taskId')

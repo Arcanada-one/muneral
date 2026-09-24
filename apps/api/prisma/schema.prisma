@@ -202,6 +202,7 @@ model Task {
   solutionLogHeadReceipts SolutionLogHeadReceipt[]
   legacyIdentities        LegacyIdentity[]
   redactions              TaskRedaction[]
+  evidence                TaskEvidenceAttachment[]
 
   @@index([projectId], name: "idx_tasks_project_id")
   @@index([sprintId], name: "idx_tasks_sprint_id")
@@ -274,6 +275,7 @@ model Agent {
   apiKeys    ApiKey[]
   taskAgents TaskAgent[]
   solutionLogHeadReceipts SolutionLogHeadReceipt[]
+  evidenceAttachments     TaskEvidenceAttachment[]
 
   @@map("agents")
 }
@@ -352,6 +354,29 @@ model TaskRedaction {
   @@unique([taskId, field, spanSha256], map: "task_redactions_task_field_span_unique")
   @@index([taskId], map: "idx_task_redactions_task_id")
   @@map("task_redactions")
+}
+
+/// A2-274 (MUN-EVIDENCE) — WorkItemEvidenceAttachment/v1. An artefact an
+/// executing agent attached to a work item: where it is, what it is, and which
+/// bytes were meant. The digest is the identity — @@unique([taskId, sha256]) is
+/// what makes POST /tasks/:taskId/evidence idempotent for a retrying executor.
+/// sha256 is 64 lowercase hex, held by the DTO AND by the CHECK in the
+/// migration for writers that bypass it.
+model TaskEvidenceAttachment {
+  id               String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  taskId           String   @map("task_id") @db.Uuid
+  uri              String   @db.VarChar(2048)
+  sha256           String   @db.VarChar(64)
+  contentType      String   @map("content_type") @db.VarChar(128)
+  createdByAgentId String   @map("created_by_agent_id") @db.Uuid
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  task           Task  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  createdByAgent Agent @relation(fields: [createdByAgentId], references: [id], onDelete: Restrict)
+
+  @@unique([taskId, sha256], map: "task_evidence_attachments_task_sha256_unique")
+  @@index([taskId], map: "idx_task_evidence_attachments_task_id")
+  @@map("task_evidence_attachments")
 }
 
 model ActivityLog {
