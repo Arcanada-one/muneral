@@ -79,6 +79,7 @@ export class TasksService {
               dto.estimateHours != null
                 ? new Prisma.Decimal(dto.estimateHours)
                 : null,
+            contractDigest: dto.contractDigest ?? null,
             createdById: actor.id,
             actorType: actor.type,
           },
@@ -260,6 +261,7 @@ export class TasksService {
     const where: Prisma.TaskWhereInput = {};
     if (dto.status) where.status = dto.status;
     if (dto.projectId) where.projectId = dto.projectId;
+    if (dto.contractDigest) where.contractDigest = dto.contractDigest;
     if (dto.updatedSince || dto.updatedBefore) {
       where.updatedAt = {
         ...(dto.updatedSince ? { gte: new Date(dto.updatedSince) } : {}),

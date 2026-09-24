@@ -1,6 +1,7 @@
-import { IsIn, IsOptional, IsISO8601, IsUUID, IsInt, Min, Max } from 'class-validator';
+import { IsIn, IsOptional, IsISO8601, IsUUID, IsInt, Min, Max, Matches } from 'class-validator';
 import { Type } from 'class-transformer';
 import { TASK_STATUSES, TaskStatus } from '@muneral/types';
+import { CONTRACT_DIGEST_PATTERN } from './create-task.dto.js';
 
 /**
  * Query filter for GET /tasks.
@@ -26,6 +27,17 @@ export class QueryTasksDto {
   @IsOptional()
   @IsUUID()
   projectId?: string;
+
+  /**
+   * A2-267 — the work items admitted under one KC2 contract. Exact match on the
+   * stored spelling; a malformed digest is a 400, not an empty page, so a typo
+   * cannot read as "no work item carries this contract".
+   */
+  @IsOptional()
+  @Matches(CONTRACT_DIGEST_PATTERN, {
+    message: 'contractDigest must be sha256: followed by 64 lowercase hex digits',
+  })
+  contractDigest?: string;
 
   /** ISO-8601. Returns tasks whose updatedAt is >= this instant. */
   @IsOptional()
