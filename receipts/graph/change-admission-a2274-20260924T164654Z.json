@@ -200,7 +200,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/api/src/agents/agents.controller.ts",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -208,7 +208,7 @@
    "code": "BOUNDED_CHECKER_OUT_OF_SCOPE",
    "entity": "code_unit:apps/api/src/auth/agent-scope.decorator.ts",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "The ENUM_VALUE_ADDED closure of notes[a2274-scope-closure]: the compiler refuses a scope kind without its own case (V-exhaustiveness-switch, mutant killed, TS2322) and the new kind's behaviour is measured over real HTTP with its negative controls (V-scope-tests, 90 tests). Residue: v-contract-diff exited 1 for this finding, so its verdict is lowered rather than raised, and no consumer OUTSIDE this repository is measured — there is none in the graph. Verifier reason: v-contract-diff: contract:apps/api/src/auth/agent-scope.decorator.ts#AgentScopeKind: provider side: changed, 1 breaking | contract_diff flags ENUM_VALUE_ADDED on this bidirectional contract as breaking by default; the one consumer (agent-task-scope.guard.ts) is exhaustive BY CONSTRUCTION and the compiler proves it — V-exhaustiveness-switch deleted the new case and tsc refused the tree (TS2322 '\"ta",
    "ref": "notes[a2274-scope-closure]"
   },
@@ -216,7 +216,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/api/src/auth/auth.controller.ts",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -224,7 +224,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-contract-diff: contract:apps/api/src/auth/agent-scope.decorator.ts#AgentScopeKind: ENUM_VALUE_ADDED on a bidirectional contract: consumer exhaustiveness/handling unknown",
    "ref": "notes[a2274-live-read]"
   },
@@ -232,7 +232,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/api/src/migration/migration.controller.ts",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -240,7 +240,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/api/src/milestones/milestones.controller.ts",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -248,7 +248,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/api/src/projects/projects.controller.ts",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -256,7 +256,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/api/src/solution-log-head/solution-log-head.controller.ts",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -264,7 +264,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/api/src/sync/sync.controller.ts",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -272,7 +272,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -280,7 +280,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/api/src/tasks/tasks.controller.ts",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -288,7 +288,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/api/src/webhooks/webhooks.controller.ts",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -296,7 +296,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -304,7 +304,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/web/__tests__/kanban-board.test.ts",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -312,7 +312,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -320,7 +320,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -328,7 +328,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -336,7 +336,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/web/components/dashboard/BlockersList.tsx",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -344,7 +344,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -352,7 +352,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/web/components/kanban/KanbanCard.tsx",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -360,7 +360,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -368,7 +368,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/web/components/task/AuditLog.tsx",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -376,7 +376,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/web/components/task/TaskChecklist.tsx",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -384,7 +384,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/web/components/task/TaskDependencies.tsx",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -392,7 +392,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/web/components/task/TaskDetail.tsx",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -400,7 +400,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/web/lib/api/tasks.ts",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -408,7 +408,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/web/lib/api/workspaces.ts",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -416,7 +416,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/web/lib/auth/nextauth.ts",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -424,7 +424,7 @@
    "code": "BOUNDED_CHECKER_OUT_OF_SCOPE",
    "entity": "contract:apps/api/src/auth/agent-scope.decorator.ts#AgentScopeKind",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "The ENUM_VALUE_ADDED closure of notes[a2274-scope-closure]: the compiler refuses a scope kind without its own case (V-exhaustiveness-switch, mutant killed, TS2322) and the new kind's behaviour is measured over real HTTP with its negative controls (V-scope-tests, 90 tests). Residue: v-contract-diff exited 1 for this finding, so its verdict is lowered rather than raised, and no consumer OUTSIDE this repository is measured — there is none in the graph. Verifier reason: v-contract-diff: ENUM_VALUE_ADDED values added: \"task-evidence\" | contract_diff flags ENUM_VALUE_ADDED on this bidirectional contract as breaking by default; the one consumer (agent-task-scope.guard.ts) is exhaustive BY CONSTRUCTION and the compiler proves it — V-exhaustiveness-switch deleted the new case and tsc refused the tree (TS2322 '\"task-evidence\" is not assignable to type never'), rc 0 aga",
    "ref": "notes[a2274-scope-closure]"
   },
@@ -432,7 +432,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "deployable_unit:apps/web",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -440,7 +440,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:DELETE /agents/keys/:keyId",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -448,7 +448,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:DELETE /agents/tasks/:taskId/assign/:agentId",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -456,7 +456,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:DELETE /milestones/:milestoneId",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -464,7 +464,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:DELETE /projects/:projectId",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -472,7 +472,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:DELETE /projects/git-refs/:refId",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -480,7 +480,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:DELETE /sprints/:sprintId",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -488,7 +488,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:DELETE /tasks/:taskId",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -496,7 +496,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:DELETE /tasks/:taskId/checklist/:itemId",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -504,7 +504,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:DELETE /tasks/:taskId/dependencies/:depId",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -512,7 +512,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:DELETE /webhooks/:webhookId",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -520,7 +520,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:DELETE /workspaces/:workspaceId/members/:userId",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -528,7 +528,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /agents/tasks",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -536,7 +536,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /agents/workspace/:workspaceId",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -544,7 +544,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /auth/github",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -552,7 +552,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /auth/github/callback",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -560,7 +560,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /migration/batches/:batchId",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -568,7 +568,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /migration/identities/:identityId/mappings",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -576,7 +576,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /migration/work-items/by-legacy/:sourceNamespace/:legacyId",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -584,7 +584,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /migration/work-items/search",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -592,7 +592,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /projects/:projectId",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -600,7 +600,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /projects/:projectId/milestones",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -608,7 +608,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /projects/:projectId/sprints",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -616,7 +616,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /projects/tasks/:taskId/git-refs",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -624,7 +624,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /projects/workspace/:workspaceId",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -632,7 +632,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /sync/datarim/:projectId",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -640,7 +640,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /tasks",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -648,7 +648,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /tasks/:taskId",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -656,7 +656,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /tasks/:taskId/activity",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -664,7 +664,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /tasks/:taskId/attempts/:attemptId/solution-log-head",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -672,7 +672,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /tasks/:taskId/checklist",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -680,7 +680,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /tasks/:taskId/dependencies",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -688,7 +688,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /tasks/:taskId/dependency-graph",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -696,7 +696,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /tasks/:taskId/evidence",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -704,7 +704,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /tasks/:taskId/field-changes",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -712,7 +712,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /tasks/:taskId/readiness",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -720,7 +720,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /tasks/project/:projectId",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -728,7 +728,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /tasks/project/:projectId/index",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -736,7 +736,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /tasks/project/:projectId/staleness",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -744,7 +744,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /webhooks/workspace/:workspaceId",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -752,7 +752,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /workspaces",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -760,7 +760,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /workspaces/:workspaceId",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -768,7 +768,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:GET /workspaces/:workspaceId/members",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -776,7 +776,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:PATCH /tasks/:taskId/checklist/:itemId",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -784,7 +784,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:PATCH /tasks/:taskId/status",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -792,7 +792,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:PATCH /webhooks/:webhookId/activate",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -800,7 +800,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:PATCH /webhooks/:webhookId/deactivate",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -808,7 +808,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:PATCH /workspaces/:workspaceId/members/:userId/role",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -816,7 +816,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /agents",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -824,7 +824,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /agents/:agentId/keys",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -832,7 +832,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /agents/keys/:keyId/rotate",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -840,7 +840,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /agents/keys/self/revoke",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -848,7 +848,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /agents/tasks/:taskId/assign",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -856,7 +856,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /auth/telegram",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -864,7 +864,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /migration/batches",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -872,7 +872,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /migration/batches/:batchId/commit",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -880,7 +880,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /migration/identities/:identityId/decisions",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -888,7 +888,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /migration/work-items",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -896,7 +896,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /migration/work-items/:taskId/transitions",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -904,7 +904,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /milestones",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -912,7 +912,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /projects",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -920,7 +920,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /projects/git-refs",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -928,7 +928,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /sprints",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -936,7 +936,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /sync/datarim/:projectId/import",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -944,7 +944,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /tasks",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -952,7 +952,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /tasks/:taskId/attempts/:attemptId/solution-log-heads",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -960,7 +960,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /tasks/:taskId/checklist",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -968,7 +968,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /tasks/:taskId/comments",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -976,7 +976,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /tasks/:taskId/dependencies",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -984,7 +984,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /tasks/:taskId/evidence",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -992,7 +992,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /tasks/:taskId/field-ack",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -1000,7 +1000,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /tasks/:taskId/redactions",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -1008,7 +1008,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /webhooks",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -1016,7 +1016,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /workspaces",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -1024,7 +1024,7 @@
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "route:POST /workspaces/:workspaceId/members/:userId",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "Boundary entity reached over an inferred/observed hop. Covered at head by the static verifiers of this run (tsc rc 0 on all three tsconfigs, v-route-config 0 failed, v-schema-diff 0 failed, v-fitness 0 new findings) and, for the entities this change touches, by V-scope-tests (90 tests) and the full suite in notes[a2274-suite]. Residue: no canary result exists because no process built from this head has been run against the production API — a canary cannot precede the deploy. Closed by the post-deploy read named in notes[a2274-live-read], with its reverse_if. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "ref": "notes[a2274-live-read]"
   },
@@ -1032,7 +1032,7 @@
    "code": "WORK_ITEM_NO_LOCAL_VERIFIER",
    "entity": "work_item:MUN-0018",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "work_item nodes have no local verifier by design (GRAPH-006): a work item lives in Muneral, not in this tree. The link that exists is this receipt, attached to A2-274. Residue: delivery into Muneral is not_measured. Verifier reason: no local verifier for a work item; GRAPH-006 links the admission receipt to the work item in Muneral",
    "ref": "notes[a2274-suite]"
   },
@@ -1040,7 +1040,7 @@
    "code": "WORK_ITEM_NO_LOCAL_VERIFIER",
    "entity": "work_item:MUN-0020",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "work_item nodes have no local verifier by design (GRAPH-006): a work item lives in Muneral, not in this tree. The link that exists is this receipt, attached to A2-274. Residue: delivery into Muneral is not_measured. Verifier reason: no local verifier for a work item; GRAPH-006 links the admission receipt to the work item in Muneral",
    "ref": "notes[a2274-suite]"
   },
@@ -1048,7 +1048,7 @@
    "code": "WORK_ITEM_NO_LOCAL_VERIFIER",
    "entity": "work_item:MUN-0021",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "work_item nodes have no local verifier by design (GRAPH-006): a work item lives in Muneral, not in this tree. The link that exists is this receipt, attached to A2-274. Residue: delivery into Muneral is not_measured. Verifier reason: no local verifier for a work item; GRAPH-006 links the admission receipt to the work item in Muneral",
    "ref": "notes[a2274-suite]"
   },
@@ -1056,7 +1056,7 @@
    "code": "WORK_ITEM_NO_LOCAL_VERIFIER",
    "entity": "work_item:MUN-0022",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "work_item nodes have no local verifier by design (GRAPH-006): a work item lives in Muneral, not in this tree. The link that exists is this receipt, attached to A2-274. Residue: delivery into Muneral is not_measured. Verifier reason: no local verifier for a work item; GRAPH-006 links the admission receipt to the work item in Muneral",
    "ref": "notes[a2274-suite]"
   },
@@ -1064,7 +1064,7 @@
    "code": "WORK_ITEM_NO_LOCAL_VERIFIER",
    "entity": "work_item:MUN-0040",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "work_item nodes have no local verifier by design (GRAPH-006): a work item lives in Muneral, not in this tree. The link that exists is this receipt, attached to A2-274. Residue: delivery into Muneral is not_measured. Verifier reason: no local verifier for a work item; GRAPH-006 links the admission receipt to the work item in Muneral",
    "ref": "notes[a2274-suite]"
   },
@@ -1072,7 +1072,7 @@
    "code": "WORK_ITEM_NO_LOCAL_VERIFIER",
    "entity": "work_item:MUN-0041",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "work_item nodes have no local verifier by design (GRAPH-006): a work item lives in Muneral, not in this tree. The link that exists is this receipt, attached to A2-274. Residue: delivery into Muneral is not_measured. Verifier reason: no local verifier for a work item; GRAPH-006 links the admission receipt to the work item in Muneral",
    "ref": "notes[a2274-suite]"
   },
@@ -1080,7 +1080,7 @@
    "code": "WORK_ITEM_NO_LOCAL_VERIFIER",
    "entity": "work_item:MUN-0043",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "work_item nodes have no local verifier by design (GRAPH-006): a work item lives in Muneral, not in this tree. The link that exists is this receipt, attached to A2-274. Residue: delivery into Muneral is not_measured. Verifier reason: no local verifier for a work item; GRAPH-006 links the admission receipt to the work item in Muneral",
    "ref": "notes[a2274-suite]"
   },
@@ -1088,7 +1088,7 @@
    "code": "WORK_ITEM_NO_LOCAL_VERIFIER",
    "entity": "work_item:MUN-0045",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "work_item nodes have no local verifier by design (GRAPH-006): a work item lives in Muneral, not in this tree. The link that exists is this receipt, attached to A2-274. Residue: delivery into Muneral is not_measured. Verifier reason: no local verifier for a work item; GRAPH-006 links the admission receipt to the work item in Muneral",
    "ref": "notes[a2274-suite]"
   },
@@ -1096,7 +1096,7 @@
    "code": "WORK_ITEM_NO_LOCAL_VERIFIER",
    "entity": "work_item:MUN-0046",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "work_item nodes have no local verifier by design (GRAPH-006): a work item lives in Muneral, not in this tree. The link that exists is this receipt, attached to A2-274. Residue: delivery into Muneral is not_measured. Verifier reason: no local verifier for a work item; GRAPH-006 links the admission receipt to the work item in Muneral",
    "ref": "notes[a2274-suite]"
   },
@@ -1104,7 +1104,7 @@
    "code": "WORK_ITEM_NO_LOCAL_VERIFIER",
    "entity": "work_item:MUN-0047",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "work_item nodes have no local verifier by design (GRAPH-006): a work item lives in Muneral, not in this tree. The link that exists is this receipt, attached to A2-274. Residue: delivery into Muneral is not_measured. Verifier reason: no local verifier for a work item; GRAPH-006 links the admission receipt to the work item in Muneral",
    "ref": "notes[a2274-suite]"
   },
@@ -1112,7 +1112,7 @@
    "code": "WORK_ITEM_NO_LOCAL_VERIFIER",
    "entity": "work_item:MUN-0049",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "work_item nodes have no local verifier by design (GRAPH-006): a work item lives in Muneral, not in this tree. The link that exists is this receipt, attached to A2-274. Residue: delivery into Muneral is not_measured. Verifier reason: no local verifier for a work item; GRAPH-006 links the admission receipt to the work item in Muneral",
    "ref": "notes[a2274-suite]"
   },
@@ -1120,7 +1120,7 @@
    "code": "WORK_ITEM_NO_LOCAL_VERIFIER",
    "entity": "work_item:MUN-0050",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "work_item nodes have no local verifier by design (GRAPH-006): a work item lives in Muneral, not in this tree. The link that exists is this receipt, attached to A2-274. Residue: delivery into Muneral is not_measured. Verifier reason: no local verifier for a work item; GRAPH-006 links the admission receipt to the work item in Muneral",
    "ref": "notes[a2274-suite]"
   },
@@ -1128,7 +1128,7 @@
    "code": "WORK_ITEM_NO_LOCAL_VERIFIER",
    "entity": "work_item:MUN-0051",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "work_item nodes have no local verifier by design (GRAPH-006): a work item lives in Muneral, not in this tree. The link that exists is this receipt, attached to A2-274. Residue: delivery into Muneral is not_measured. Verifier reason: no local verifier for a work item; GRAPH-006 links the admission receipt to the work item in Muneral",
    "ref": "notes[a2274-suite]"
   },
@@ -1136,7 +1136,7 @@
    "code": "WORK_ITEM_NO_LOCAL_VERIFIER",
    "entity": "work_item:MUN-0052",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "work_item nodes have no local verifier by design (GRAPH-006): a work item lives in Muneral, not in this tree. The link that exists is this receipt, attached to A2-274. Residue: delivery into Muneral is not_measured. Verifier reason: no local verifier for a work item; GRAPH-006 links the admission receipt to the work item in Muneral",
    "ref": "notes[a2274-suite]"
   },
@@ -1144,7 +1144,7 @@
    "code": "WORK_ITEM_NO_LOCAL_VERIFIER",
    "entity": "work_item:MUN-0053",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "work_item nodes have no local verifier by design (GRAPH-006): a work item lives in Muneral, not in this tree. The link that exists is this receipt, attached to A2-274. Residue: delivery into Muneral is not_measured. Verifier reason: no local verifier for a work item; GRAPH-006 links the admission receipt to the work item in Muneral",
    "ref": "notes[a2274-suite]"
   },
@@ -1152,7 +1152,7 @@
    "code": "WORK_ITEM_NO_LOCAL_VERIFIER",
    "entity": "work_item:MUN-0054",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "work_item nodes have no local verifier by design (GRAPH-006): a work item lives in Muneral, not in this tree. The link that exists is this receipt, attached to A2-274. Residue: delivery into Muneral is not_measured. Verifier reason: no local verifier for a work item; GRAPH-006 links the admission receipt to the work item in Muneral",
    "ref": "notes[a2274-suite]"
   },
@@ -1160,7 +1160,7 @@
    "code": "WORK_ITEM_NO_LOCAL_VERIFIER",
    "entity": "work_item:MUN-0055",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "work_item nodes have no local verifier by design (GRAPH-006): a work item lives in Muneral, not in this tree. The link that exists is this receipt, attached to A2-274. Residue: delivery into Muneral is not_measured. Verifier reason: no local verifier for a work item; GRAPH-006 links the admission receipt to the work item in Muneral",
    "ref": "notes[a2274-suite]"
   },
@@ -1168,7 +1168,7 @@
    "code": "BOUNDED_CHECKER_OUT_OF_SCOPE",
    "entity": "code_unit:apps/api/src/execution-authority/index.ts",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "The mandatory verifier for this entity is contract_diff, and the run that covers it (v-contract-diff) exited 1. It exited 1 for exactly ONE finding — ENUM_VALUE_ADDED \"task-evidence\" on AgentScopeKind, which carries its own closure in notes[a2274-scope-closure] — and its per-contract result for THIS entity is clean. But the gate's coverage rule reads the process exit code, not the per-contract line (impact_pair.py:188-198), so no `verified` verdict can honestly be attributed here and the verdict is LOWERED, never raised. What did run: The file is untouched by this change set (`git show --name-only e78f78b` lists no path under execution-authority/) and was compiled at head by v-type-check-apps-api-tsconfig (rc 0) and read by v-fitness (rc 0, 0 new findings). Residue: a contract_diff process that exits 0 over this entity. Measured attempt, recorded rather than hidden (notes[a2274-contract-diff-scoped]): the same tool restricted with --only to the other 44 contracts reports breaking 0 — but still exits 1, because the two AgentScopeKind EDGES remain in the graph and become not_measured once their contract is out of scope. The residue therefore closes only when the enum finding itself is retired, not by re-running this tool.",
    "ref": "notes[a2274-contract-diff-scoped]"
   },
@@ -1176,7 +1176,7 @@
    "code": "BOUNDED_CHECKER_OUT_OF_SCOPE",
    "entity": "code_unit:apps/api/src/execution-authority/task-staleness.service.ts",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "The mandatory verifier for this entity is contract_diff, and the run that covers it (v-contract-diff) exited 1. It exited 1 for exactly ONE finding — ENUM_VALUE_ADDED \"task-evidence\" on AgentScopeKind, which carries its own closure in notes[a2274-scope-closure] — and its per-contract result for THIS entity is clean. But the gate's coverage rule reads the process exit code, not the per-contract line (impact_pair.py:188-198), so no `verified` verdict can honestly be attributed here and the verdict is LOWERED, never raised. What did run: The file is untouched by this change set and was compiled at head by v-type-check-apps-api-tsconfig (rc 0) and read by v-fitness (rc 0, 0 new findings). Residue: a contract_diff process that exits 0 over this entity. Measured attempt, recorded rather than hidden (notes[a2274-contract-diff-scoped]): the same tool restricted with --only to the other 44 contracts reports breaking 0 — but still exits 1, because the two AgentScopeKind EDGES remain in the graph and become not_measured once their contract is out of scope. The residue therefore closes only when the enum finding itself is retired, not by re-running this tool.",
    "ref": "notes[a2274-contract-diff-scoped]"
   },
@@ -1184,7 +1184,7 @@
    "code": "BOUNDED_CHECKER_OUT_OF_SCOPE",
    "entity": "code_unit:apps/api/src/tasks/evidence/task-evidence.service.ts",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "The mandatory verifier for this entity is contract_diff, and the run that covers it (v-contract-diff) exited 1. It exited 1 for exactly ONE finding — ENUM_VALUE_ADDED \"task-evidence\" on AgentScopeKind, which carries its own closure in notes[a2274-scope-closure] — and its per-contract result for THIS entity is clean. But the gate's coverage rule reads the process exit code, not the per-contract line (impact_pair.py:188-198), so no `verified` verdict can honestly be attributed here and the verdict is LOWERED, never raised. What did run: The new service of this change. Compiled at head by v-type-check-apps-api-tsconfig (rc 0), read by v-fitness (rc 0) and executed end to end over real HTTP + PostgreSQL by V-scope-tests (90 tests, negative controls included). The only contract it introduces, AttachEvidenceDto, is CONTRACT_ADDED — additive, not breaking — in both contract_diff runs. Residue: a contract_diff process that exits 0 over this entity. Measured attempt, recorded rather than hidden (notes[a2274-contract-diff-scoped]): the same tool restricted with --only to the other 44 contracts reports breaking 0 — but still exits 1, because the two AgentScopeKind EDGES remain in the graph and become not_measured once their contract is out of scope. The residue therefore closes only when the enum finding itself is retired, not by re-running this tool.",
    "ref": "notes[a2274-contract-diff-scoped]"
   },
@@ -1192,7 +1192,7 @@
    "code": "BOUNDED_CHECKER_OUT_OF_SCOPE",
    "entity": "contract:apps/api/src/execution-authority/task-execution-recorder.service.ts#RecordVerdict",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "The mandatory verifier for this entity is contract_diff, and the run that covers it (v-contract-diff) exited 1. It exited 1 for exactly ONE finding — ENUM_VALUE_ADDED \"task-evidence\" on AgentScopeKind, which carries its own closure in notes[a2274-scope-closure] — and its per-contract result for THIS entity is clean. But the gate's coverage rule reads the process exit code, not the per-contract line (impact_pair.py:188-198), so no `verified` verdict can honestly be attributed here and the verdict is LOWERED, never raised. What did run: Its declaration text is BYTE-IDENTICAL at base and head (decl hash sha256:b5b9e4f2… at both revisions in both contract_diff runs) and its status is `unchanged`; the change set does not contain the file. Residue: a contract_diff process that exits 0 over this entity. Measured attempt, recorded rather than hidden (notes[a2274-contract-diff-scoped]): the same tool restricted with --only to the other 44 contracts reports breaking 0 — but still exits 1, because the two AgentScopeKind EDGES remain in the graph and become not_measured once their contract is out of scope. The residue therefore closes only when the enum finding itself is retired, not by re-running this tool.",
    "ref": "notes[a2274-contract-diff-scoped]"
   },
@@ -1200,7 +1200,7 @@
    "code": "BOUNDED_CHECKER_OUT_OF_SCOPE",
    "entity": "contract:apps/api/src/auth/guards/agent-task-scope.guard.ts#AssignBasis",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "The mandatory verifier for this entity is contract_diff, and the run that covers it (v-contract-diff) exited 1. It exited 1 for exactly ONE finding — ENUM_VALUE_ADDED \"task-evidence\" on AgentScopeKind, which carries its own closure in notes[a2274-scope-closure] — and its per-contract result for THIS entity is clean. The gate's coverage rule reads the PROCESS exit code, not the per-contract line (impact_pair.py:188-198), so no `verified` verdict can honestly be attributed here and the verdict is LOWERED, never raised. What did run: contract_diff itself reports this contract `unchanged` with a byte-identical declaration at base and head (sha256:79a5aeef2aa7ff…); codes none; in this change set; covered at head by no rc-0 verifier of this run. Residue: a contract_diff process that exits 0 over this entity. Measured attempt, recorded rather than hidden (notes[a2274-contract-diff-scoped]): the same tool restricted with --only to the other 44 contracts reports breaking 0 and STILL exits 1, because the two AgentScopeKind edges become not_measured once their contract leaves the scope. The residue therefore closes when the enum finding is retired, not by re-running this tool.",
    "ref": "notes[a2274-contract-diff-scoped]"
   },
@@ -1208,7 +1208,7 @@
    "code": "BOUNDED_CHECKER_OUT_OF_SCOPE",
    "entity": "code_unit:apps/api/src/agents/agents.service.ts",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "The mandatory verifier for this entity is contract_diff, and the run that covers it (v-contract-diff) exited 1. It exited 1 for exactly ONE finding — ENUM_VALUE_ADDED \"task-evidence\" on AgentScopeKind, which carries its own closure in notes[a2274-scope-closure] — and its per-contract result for THIS entity is clean. The gate's coverage rule reads the PROCESS exit code, not the per-contract line (impact_pair.py:188-198), so no `verified` verdict can honestly be attributed here and the verdict is LOWERED, never raised. What did run: untouched by this change set (not among its 13 files); covered at head by v-fitness (fitness_rules, rc 0), v-type-check-apps-api-tsconfig (type_check, rc 0). Residue: a contract_diff process that exits 0 over this entity. Measured attempt, recorded rather than hidden (notes[a2274-contract-diff-scoped]): the same tool restricted with --only to the other 44 contracts reports breaking 0 and STILL exits 1, because the two AgentScopeKind edges become not_measured once their contract leaves the scope. The residue therefore closes when the enum finding is retired, not by re-running this tool.",
    "ref": "notes[a2274-contract-diff-scoped]"
   },
@@ -1216,7 +1216,7 @@
    "code": "BOUNDED_CHECKER_OUT_OF_SCOPE",
    "entity": "code_unit:apps/api/src/tasks/evidence/attach-evidence.dto.ts",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "The mandatory verifier for this entity is contract_diff, and the run that covers it (v-contract-diff) exited 1. It exited 1 for exactly ONE finding — ENUM_VALUE_ADDED \"task-evidence\" on AgentScopeKind, which carries its own closure in notes[a2274-scope-closure] — and its per-contract result for THIS entity is clean. The gate's coverage rule reads the PROCESS exit code, not the per-contract line (impact_pair.py:188-198), so no `verified` verdict can honestly be attributed here and the verdict is LOWERED, never raised. What did run: in this change set; covered at head by v-fitness (fitness_rules, rc 0), v-type-check-apps-api-tsconfig (type_check, rc 0). Residue: a contract_diff process that exits 0 over this entity. Measured attempt, recorded rather than hidden (notes[a2274-contract-diff-scoped]): the same tool restricted with --only to the other 44 contracts reports breaking 0 and STILL exits 1, because the two AgentScopeKind edges become not_measured once their contract leaves the scope. The residue therefore closes when the enum finding is retired, not by re-running this tool.",
    "ref": "notes[a2274-contract-diff-scoped]"
   },
@@ -1224,7 +1224,7 @@
    "code": "BOUNDED_CHECKER_OUT_OF_SCOPE",
    "entity": "contract:apps/api/src/tasks/evidence/attach-evidence.dto.ts#AttachEvidenceDto",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "The mandatory verifier for this entity is contract_diff, and the run that covers it (v-contract-diff) exited 1. It exited 1 for exactly ONE finding — ENUM_VALUE_ADDED \"task-evidence\" on AgentScopeKind, which carries its own closure in notes[a2274-scope-closure] — and its per-contract result for THIS entity is clean. The gate's coverage rule reads the PROCESS exit code, not the per-contract line (impact_pair.py:188-198), so no `verified` verdict can honestly be attributed here and the verdict is LOWERED, never raised. What did run: contract_diff itself reports this contract `added` with the changes listed in the run output; codes ['CONTRACT_ADDED']; in this change set; covered at head by no rc-0 verifier of this run. Residue: a contract_diff process that exits 0 over this entity. Measured attempt, recorded rather than hidden (notes[a2274-contract-diff-scoped]): the same tool restricted with --only to the other 44 contracts reports breaking 0 and STILL exits 1, because the two AgentScopeKind edges become not_measured once their contract leaves the scope. The residue therefore closes when the enum finding is retired, not by re-running this tool.",
    "ref": "notes[a2274-contract-diff-scoped]"
   },
@@ -1232,7 +1232,7 @@
    "code": "BOUNDED_CHECKER_OUT_OF_SCOPE",
    "entity": "contract:apps/api/src/execution-authority/task-staleness.service.ts#StalenessVerdict",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "The mandatory verifier for this entity is contract_diff, and the run that covers it (v-contract-diff) exited 1. It exited 1 for exactly ONE finding — ENUM_VALUE_ADDED \"task-evidence\" on AgentScopeKind, which carries its own closure in notes[a2274-scope-closure] — and its per-contract result for THIS entity is clean. The gate's coverage rule reads the PROCESS exit code, not the per-contract line (impact_pair.py:188-198), so no `verified` verdict can honestly be attributed here and the verdict is LOWERED, never raised. What did run: contract_diff itself reports this contract `unchanged` with a byte-identical declaration at base and head (sha256:c1317b1eeccc0d…); codes none; untouched by this change set (not among its 13 files); covered at head by no rc-0 verifier of this run. Residue: a contract_diff process that exits 0 over this entity. Measured attempt, recorded rather than hidden (notes[a2274-contract-diff-scoped]): the same tool restricted with --only to the other 44 contracts reports breaking 0 and STILL exits 1, because the two AgentScopeKind edges become not_measured once their contract leaves the scope. The residue therefore closes when the enum finding is retired, not by re-running this tool.",
    "ref": "notes[a2274-contract-diff-scoped]"
   },
@@ -1240,7 +1240,7 @@
    "code": "BOUNDED_CHECKER_OUT_OF_SCOPE",
    "entity": "code_unit:apps/api/src/execution-authority/task-execution-recorder.service.ts",
    "expires_at_utc": "2026-10-08T00:00:00Z",
-   "owner": "card A2-274 (arc2 worker on arcana-devs, model claude-opus-5) — admitting agent",
+   "owner": "control (Mac control session, admitting agent per DEC-AUP-0037; re-owned from card A2-274 after independent verification 2026-09-24: own mutants guard-without-ownership 3 red, unchecked-sha256 7 red, restored 34/34)",
    "reason": "The mandatory verifier for this entity is contract_diff, and the run that covers it (v-contract-diff) exited 1. It exited 1 for exactly ONE finding — ENUM_VALUE_ADDED \"task-evidence\" on AgentScopeKind, which carries its own closure in notes[a2274-scope-closure] — and its per-contract result for THIS entity is clean. The gate's coverage rule reads the PROCESS exit code, not the per-contract line (impact_pair.py:188-198), so no `verified` verdict can honestly be attributed here and the verdict is LOWERED, never raised. What did run: untouched by this change set (not among its 13 files); covered at head by v-fitness (fitness_rules, rc 0), v-type-check-apps-api-tsconfig (type_check, rc 0). Residue: a contract_diff process that exits 0 over this entity. Measured attempt, recorded rather than hidden (notes[a2274-contract-diff-scoped]): the same tool restricted with --only to the other 44 contracts reports breaking 0 and STILL exits 1, because the two AgentScopeKind edges become not_measured once their contract leaves the scope. The residue therefore closes when the enum finding is retired, not by re-running this tool.",
    "ref": "notes[a2274-contract-diff-scoped]"
   }
