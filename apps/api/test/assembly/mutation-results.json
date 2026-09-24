@@ -271,13 +271,8 @@
   ]
  },
  "supplementalGit": {
-<<<<<<< HEAD
-  "trackedTreeWithoutEvidence": "769e6d4c492cdeabdebaedec1136339e29aef8a6",
-  "trackedSnapshotDiffSha256": "a9a905957c6cbde920d18cc78b429b9ff13317fc11bf92dd171decb2c85576b7"
-=======
-  "trackedTreeWithoutEvidence": "ad02bba51b2aabcdb64ba268f9299b0b149bf9d1",
-  "trackedSnapshotDiffSha256": "ecf230094c504d1a1e2857d6665316b07f2ab57bf5ba408881a1859c1d05c86b"
->>>>>>> origin/main
+  "trackedTreeWithoutEvidence": "b8d9034dfeb0ced20bf10f19e1ea47b741d0fef6",
+  "trackedSnapshotDiffSha256": "6d9ab068e857f8cb3a4e68410ea213cadd5131efd2ddd435bdb5e0ce97581930"
  },
  "baseline": {
   "outcome": "SURVIVED",
