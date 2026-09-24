@@ -5,6 +5,14 @@ services:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
+      args:
+        # A2-255: the commit the image is built from, so /health can name it (apps/api/src/build-info.ts).
+        # BUILD_SHA is exported by the root deploy broker from its own checkout HEAD — a caller cannot
+        # label an image with a commit it is not built from. It is EMPTY until muneral is listed in that
+        # broker's BUILDSHA table (Arcanada-one/model-connector deploy/arcanada-compose-broker.sh:234,
+        # which lists transcribator-api only as of 2026-09-24), and an empty value reports
+        # build.sha: null with a reason rather than inventing one.
+        MUNERAL_BUILD_SHA: ${BUILD_SHA:-}
     ports:
       - "127.0.0.1:3500:3500"
     env_file: .env
