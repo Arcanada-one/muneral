@@ -312,3 +312,5 @@ jobs:
             exit 1
           fi
           echo "graph-admission: admitted"
+
+# A2-256 THROWAWAY: one comment line, to prove B8 refuses an unattested edit of the job that judges it. This branch is closed unmerged and deleted.
