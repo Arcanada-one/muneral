@@ -227,16 +227,19 @@ fi
 # --- 4. the agent surface answers (MUN-0045) ---------------------------------
 if [ -z "$AGENT_KEY" ]; then
   record "agent.tasks" not_measured "no agent key supplied — absence of a credential is not evidence about the service" ""
+  record "agent.tasks.contract_digest" not_measured "depends on agent.tasks" ""
   record "agent.status.archived" not_measured "depends on agent.tasks" ""
   record "agent.status.rejects_unknown" not_measured "depends on agent.tasks" ""
 else
   request GET /api/v1/agents/tasks agent
   if [ "$HTTP" = "000" ]; then
     record "agent.tasks" not_measured "service unreachable" ""
+    record "agent.tasks.contract_digest" not_measured "depends on agent.tasks" ""
     record "agent.status.archived" not_measured "depends on agent.tasks" ""
     record "agent.status.rejects_unknown" not_measured "depends on agent.tasks" ""
   elif [ "$HTTP" != "200" ]; then
     record "agent.tasks" failed "expected 200 with an agent key, got $HTTP" "$HTTP"
+    record "agent.tasks.contract_digest" not_measured "depends on agent.tasks" ""
     record "agent.status.archived" not_measured "depends on agent.tasks" ""
     record "agent.status.rejects_unknown" not_measured "depends on agent.tasks" ""
   else
@@ -250,8 +253,42 @@ print("list" if isinstance(d,list) else type(d).__name__)
 ' "$TMP/body")"
     if [ "$SHAPE" != "list" ]; then
       record "agent.tasks" failed "expected a JSON array, got $SHAPE" "$HTTP"
+      record "agent.tasks.contract_digest" not_measured "depends on agent.tasks" ""
     else
       record "agent.tasks" verified "200, JSON array" "$HTTP"
+
+      # A2-267: every task this list returns carries `contractDigest` as a KEY —
+      # null for a task not born from a KC2 contract, `sha256:<64 lowercase
+      # hex>` for one that was. A build that predates the column omits the key,
+      # and an executing agent reading `.get("contractDigest")` would take that
+      # absence for "no contract": so an absent key is `failed`, never a gap.
+      # An empty list shows nothing about the field and is the third verdict.
+      DIGEST_ROW="$(python3 -c '
+import json, re, sys
+
+DIGEST = re.compile(r"sha256:[0-9a-f]{64}")   # CreateTaskDto CONTRACT_DIGEST_PATTERN, used with fullmatch
+rows = json.load(open(sys.argv[1], encoding="utf-8"))
+tasks = [r.get("task") for r in rows if isinstance(r, dict)]
+if not tasks:
+    print("not_measured")
+    print("this agent is assigned no task, so no task row was observed to carry the field")
+    raise SystemExit
+missing = sum(1 for t in tasks if not isinstance(t, dict) or "contractDigest" not in t)
+bad = [t["contractDigest"] for t in tasks if isinstance(t, dict) and t.get("contractDigest") is not None
+       and not (isinstance(t["contractDigest"], str) and DIGEST.fullmatch(t["contractDigest"]))]
+bound = sum(1 for t in tasks if isinstance(t, dict) and isinstance(t.get("contractDigest"), str))
+if missing:
+    print("failed")
+    print("%d of %d task rows carry no contractDigest key — this build predates A2-267, and a "
+          "reader would take the absence for a task with no contract" % (missing, len(tasks)))
+elif bad:
+    print("failed")
+    print("%d contractDigest value(s) are not sha256:<64 lowercase hex>, first %r" % (len(bad), bad[0]))
+else:
+    print("verified")
+    print("%d task rows carry the key; %d bound to a contract, %d null" % (len(tasks), bound, len(tasks) - bound))
+' "$TMP/body")"
+      record "agent.tasks.contract_digest" "$(verdict_of "$DIGEST_ROW")" "$(detail_of "$DIGEST_ROW")" "$HTTP"
     fi
 
     # MUN archived-status fix: the DTO imports TASK_STATUSES rather than

@@ -173,9 +173,15 @@ model Task {
   /// Optimistic revision for the migration CAS transition path. Only that path
   /// bumps it; every pre-existing writer leaves it at 0.
   revision       Int       @default(0)
+  /// A2-267 — the KC2 contract this work item was admitted under, as
+  /// `sha256:<64 lowercase hex>` (Argana /v1/intake). NULL for every task not
+  /// born from a contract. Set on create only: a different contract is a
+  /// different work item. Format enforced by CreateTaskDto AND by the CHECK
+  /// `tasks_contract_digest_format` in the migration.
+  contractDigest String?   @map("contract_digest") @db.VarChar(71)
 
   // Relations
-  project        Project                   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project        Project                  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   sprint         Sprint?                   @relation(fields: [sprintId], references: [id], onDelete: SetNull)
   parent         Task?                     @relation("TaskChildren", fields: [parentId], references: [id], onDelete: SetNull)
   children       Task[]                    @relation("TaskChildren")

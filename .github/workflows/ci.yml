@@ -65,6 +65,10 @@ jobs:
       - name: Test /health identity probes go red on a build that cannot name itself
         run: bash scripts/ci/probe-health-identity.test.sh
           bash scripts/ci/semantic-readback-caller-contract.sh
+      # A2-267: the agent-task list must carry `contractDigest` on every row. This serves rows with
+      # the key missing or malformed from a loopback stub and asserts the probe goes RED on each.
+      - name: Test the contract-digest probe goes red on a build without the field
+        run: bash scripts/ci/probe-contract-digest.test.sh
       - name: Enable corepack (pnpm@11.5.2 from packageManager field)
         run: |
           COREPACK_HOME="${RUNNER_TEMP}/corepack-bin"
