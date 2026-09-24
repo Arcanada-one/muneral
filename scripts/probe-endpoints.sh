@@ -21,6 +21,7 @@
 #
 # Usage:
 #   scripts/probe-endpoints.sh [--base URL] [--agent-key KEY] [--json OUT]
+#                              [--expect-commit SHA]
 #
 #   --base       default http://127.0.0.1:3500
 #   --agent-key  a `mun_sk_` key; without it every agent-scoped probe is
@@ -29,6 +30,13 @@
 #                MUNERAL_AGENT_KEY, which is how CI should pass it: the key is
 #                never echoed, never written to the JSON, and never logged.
 #   --json       write the observed section here (default: stdout only)
+#   --expect-commit  the 40-hex commit this instance is supposed to be built
+#                from (a deploy passes $GITHUB_SHA). With it, `health.commit`
+#                is a GATE: a different commit, or a service that cannot name
+#                its commit at all, is `failed`. Without it the probe asserts
+#                only the SHAPE of the field, and a service reporting
+#                `build.sha: null` WITH a reason is not_measured — a
+#                hand-started development instance is expected to land there.
 #
 # Exit: 0 when no probe failed, 1 when any did. `not_measured` does not fail the
 # run — it is reported, and a receipt carrying one is a receipt that says so.
@@ -37,6 +45,7 @@ set -uo pipefail
 BASE="http://127.0.0.1:3500"
 AGENT_KEY="${MUNERAL_AGENT_KEY:-}"
 JSON_OUT=""
+EXPECT_COMMIT=""
 UA="aup-orchestrator/1.0"
 
 while [ $# -gt 0 ]; do
@@ -44,7 +53,8 @@ while [ $# -gt 0 ]; do
     --base) BASE="$2"; shift 2 ;;
     --agent-key) AGENT_KEY="$2"; shift 2 ;;
     --json) JSON_OUT="$2"; shift 2 ;;
-    -h|--help) sed -n '2,33p' "$0"; exit 0 ;;
+    --expect-commit) EXPECT_COMMIT="$2"; shift 2 ;;
+    -h|--help) sed -n '2,41p' "$0"; exit 0 ;;
     *) echo "unknown argument: $1" >&2; exit 2 ;;
   esac
 done
@@ -88,32 +98,108 @@ request() {
   HTTP="$(curl "${args[@]}" "$BASE$path" 2>/dev/null)" || HTTP="000"
 }
 
-# --- 1. /health serves, and reports a version -------------------------------
+# --- 1. /health serves, names a release, and names a commit ------------------
 # The route exists precisely to answer "which build is this", so a health probe
-# that only checks for 200 would pass against a build reporting "unknown".
+# that only checks for 200 would pass against a build that cannot say. Both
+# halves of that identity are asserted here, and each is judged on its own:
+#
+#   health.version  the RELEASE, read from apps/api/package.json. The check
+#                   refuses the controller's own sentinel `0.0.0-unknown`
+#                   (apps/api/src/health.controller.ts) and anything not shaped
+#                   like a release. A2-251 measured the earlier check comparing
+#                   against the string "unknown" instead, so the sentinel passed
+#                   as a valid version: a probe that cannot go red where it is
+#                   supposed to is worse than no probe, because it is counted.
+#   health.commit   the COMMIT, read from build.sha (apps/api/src/build-info.ts).
+#                   A version cannot answer this — the manifest has said 0.4.6
+#                   since 6c9b48e, the same string for every commit after it.
+#
+# Each verdict comes back from python as two lines (verdict, then detail) so the
+# rules live in one place and the shell only records what was decided.
+verdict_of() { printf '%s' "$1" | head -1; }
+detail_of() { printf '%s' "$1" | tail -n +2 | tr '\n' ' '; }
+
 request GET /health
 if [ "$HTTP" = "000" ]; then
   record "health.serves" not_measured "no answer from $BASE — service unreachable" ""
   record "health.version" not_measured "depends on health.serves" ""
+  record "health.commit" not_measured "depends on health.serves" ""
 elif [ "$HTTP" != "200" ]; then
   record "health.serves" failed "expected 200, got $HTTP" "$HTTP"
   record "health.version" not_measured "depends on health.serves" ""
+  record "health.commit" not_measured "depends on health.serves" ""
 else
   record "health.serves" verified "200 from /health (outside the api/v1 prefix)" "$HTTP"
-  VERSION="$(python3 -c '
-import json,sys
+
+  VERSION_ROW="$(python3 -c '
+import json, re, sys
+
+SENTINEL = "0.0.0-unknown"   # apps/api/src/health.controller.ts, unresolvable manifest
+RELEASE = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+([-+].*)?$")
+
 try:
-    d=json.load(open(sys.argv[1]))
+    body = json.load(open(sys.argv[1], encoding="utf-8"))
 except Exception:
-    print(""); raise SystemExit
-v=d.get("version")
-print(v if isinstance(v,str) else "")
+    print("failed"); print("/health did not return JSON, so it named no version"); raise SystemExit
+v = body.get("version") if isinstance(body, dict) else None
+if not isinstance(v, str) or v.strip() == "":
+    print("failed"); print("no usable version in the body (got %r)" % (v,))
+elif v == SENTINEL:
+    print("failed")
+    print("version is the controller sentinel " + SENTINEL + " — this build cannot resolve its "
+          "own manifest, so it reported no release; that is not a release number")
+elif not RELEASE.match(v):
+    print("failed"); print("version %r is not shaped like a release (major.minor.patch)" % (v,))
+else:
+    print("verified"); print("version " + v)
 ' "$TMP/body")"
-  if [ -z "$VERSION" ] || [ "$VERSION" = "unknown" ]; then
-    record "health.version" failed "no usable version in the body (got '${VERSION:-<absent>}')" "$HTTP"
-  else
-    record "health.version" verified "version $VERSION" "$HTTP"
-  fi
+  record "health.version" "$(verdict_of "$VERSION_ROW")" "$(detail_of "$VERSION_ROW")" "$HTTP"
+
+  COMMIT_ROW="$(python3 -c '
+import json, re, sys
+
+SHA40 = re.compile(r"^[0-9a-f]{40}$", re.I)
+expect = sys.argv[2].strip().lower()
+
+try:
+    body = json.load(open(sys.argv[1], encoding="utf-8"))
+except Exception:
+    print("failed"); print("/health did not return JSON, so it named no commit"); raise SystemExit
+build = body.get("build") if isinstance(body, dict) else None
+if not isinstance(build, dict):
+    print("failed")
+    print("/health carries no `build` object, so this process cannot name the commit it was "
+          "built from and no measurement taken through it can be attributed to one")
+    raise SystemExit
+sha = build.get("sha")
+problem = build.get("problem")
+if isinstance(sha, str) and SHA40.match(sha):
+    got = sha.lower()
+    if expect and got != expect:
+        print("failed")
+        print("build.sha is " + got + ", expected " + expect + " — the process answering is not "
+              "built from the commit this run deployed")
+    elif expect:
+        print("verified"); print("build.sha " + got + " is the expected commit")
+    else:
+        print("verified"); print("build.sha " + got + " is a full 40-hex commit id")
+elif isinstance(sha, str):
+    print("failed")
+    print("build.sha %r is not a full 40-hex commit id (%d chars)" % (sha, len(sha)))
+elif sha is None:
+    detail = problem if isinstance(problem, str) and problem else "and gives no reason"
+    if expect:
+        print("failed")
+        print("build.sha is null while commit " + expect + " was expected — the deploy claimed a "
+              "commit the running service cannot confirm: " + detail)
+    else:
+        # The third verdict on purpose: a service that says it cannot name its build is
+        # not a service answering wrongly. It is never a pass either.
+        print("not_measured"); print("build.sha is null and says why: " + detail)
+else:
+    print("failed"); print("build.sha is %s, expected a string or null" % type(sha).__name__)
+' "$TMP/body" "$EXPECT_COMMIT")"
+  record "health.commit" "$(verdict_of "$COMMIT_ROW")" "$(detail_of "$COMMIT_ROW")" "$HTTP"
 fi
 
 # --- 2. the api/v1 prefix is in force ---------------------------------------

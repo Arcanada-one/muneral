@@ -58,6 +58,12 @@ jobs:
         run: |
           node --test apps/api/scripts/semantic-aggregate-readback.test.mjs
           bash scripts/ci/semantic-readback-caller-contract.test.sh
+      # A2-255: the endpoint probes are a verifier, so they need a verifier of their own. This runs
+      # scripts/probe-endpoints.sh against a loopback stub that serves deliberately broken /health
+      # bodies and asserts each one goes RED — including the exact hole A2-251 measured, where the
+      # controller's `0.0.0-unknown` sentinel was recorded as a valid version.
+      - name: Test /health identity probes go red on a build that cannot name itself
+        run: bash scripts/ci/probe-health-identity.test.sh
           bash scripts/ci/semantic-readback-caller-contract.sh
       - name: Enable corepack (pnpm@11.5.2 from packageManager field)
         run: |
@@ -239,6 +245,12 @@ jobs:
           for i in $(seq 1 20); do
             if curl -fsS http://localhost:3500/health > /dev/null 2>&1; then
               echo "muneral healthy on attempt $i"
+              # A2-255: print WHICH build answered. `build.sha` is baked into the image from
+              # ${BUILD_SHA:-} (apps/api/src/build-info.ts); when the deploy broker does not export
+              # BUILD_SHA for muneral it is null WITH a reason, and this log line is where that gap
+              # is visible instead of invisible. Informational on purpose — it is not yet a gate,
+              # because a gate that cannot pass would be a red that teaches people to ignore reds.
+              echo "muneral /health says: $(curl -fsS http://localhost:3500/health)"
               exit 0
             fi
             sleep 5

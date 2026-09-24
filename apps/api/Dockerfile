@@ -31,6 +31,19 @@ FROM node:24.21.0-alpine AS production
 WORKDIR /app
 ENV NODE_ENV=production
 
+# A2-255: the commit this image was built from, so /health can name it. Fed by
+# docker-compose.prod.yml as `${BUILD_SHA:-}` (the variable the root deploy broker exports from the
+# checkout it controls). Unset -> /health reports build.sha: null WITH a problem string, which is
+# not_measured, never a pass — see apps/api/src/build-info.ts.
+ARG MUNERAL_BUILD_SHA=
+ENV MUNERAL_BUILD_SHA=$MUNERAL_BUILD_SHA
+
+# A2-255: inside a container, binding loopback only would serve nobody through the published port
+# while still answering the in-container healthcheck below — healthy and unreachable at once. The
+# code defaults to 127.0.0.1 (apps/api/src/bind-host.ts); the image, which is exactly the place
+# where every interface is the right answer, says so here.
+ENV HOST=0.0.0.0
+
 # Carry over the FULL builder workspace. With pnpm's non-hoisting layout the
 # generated Prisma client + query-engine binaries live inside the per-workspace
 # .pnpm virtual store (node_modules/.pnpm/@prisma+client@.../...), NOT in a root
