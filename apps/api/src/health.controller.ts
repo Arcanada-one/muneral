@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { Controller, Get } from '@nestjs/common';
+import { buildInfo, type BuildInfo } from './build-info.js';
 
 /**
  * The reported version is read from apps/api/package.json rather than repeated
@@ -31,11 +32,22 @@ function resolveVersion(): string {
 
 const VERSION = resolveVersion();
 
-/** Simple health check endpoint for Docker/load balancer probes. */
+/**
+ * Simple health check endpoint for Docker/load balancer probes.
+ *
+ * `version` answers "which release is this" and `build` answers "which commit is this". They are
+ * two different questions and the first cannot stand in for the second: the manifest version has
+ * been 0.4.6 since 6c9b48e, so it is the same string for every commit after it (A2-251 §5.5). See
+ * build-info.ts for why `build.sha: null` is not_measured rather than a failure of the service.
+ *
+ * `status` deliberately stays 'ok' when the commit is unknown: an unidentifiable build is a gap in
+ * what the deploy proved, not a sick service, and teaching one alarm to mean two things makes both
+ * unreadable.
+ */
 @Controller('health')
 export class HealthController {
   @Get()
-  check(): { status: string; version: string } {
-    return { status: 'ok', version: VERSION };
+  check(): { status: string; version: string; build: BuildInfo } {
+    return { status: 'ok', version: VERSION, build: buildInfo() };
   }
 }
