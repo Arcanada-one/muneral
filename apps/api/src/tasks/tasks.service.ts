@@ -21,6 +21,9 @@ import { TaskExecutionRecorderService } from '../execution-authority/task-execut
 import { agentOwnTaskWhere } from '../auth/agent-task-visibility.js';
 import type { ProjectReadGrantEntry } from '../auth/project-read-grants.js';
 import { renewalDueAt } from '../auth/project-read-grants.js';
+import type { WorkspaceDigestGrantEntry } from '../auth/workspace-digest-grants.js';
+import { digestRenewalDueAt } from '../auth/workspace-digest-grants.js';
+import { QueryWorkspaceDigestDto } from './dto/query-workspace-digest.dto.js';
 
 /** MUN-0052: the activity action one task-index read records. */
 export const PROJECT_INDEX_READ_ACTION = 'project:index_read';
@@ -28,6 +31,46 @@ export const PROJECT_INDEX_READ_ACTION = 'project:index_read';
 /** MUN-0052: what the index's `total` counts, stated in the answer (I4). */
 export const PROJECT_INDEX_COUNTED =
   'every task of the project, all statuses including cancelled and archived';
+
+/** A2-284: the activity action one workspace-digest read records. */
+export const WORKSPACE_DIGEST_READ_ACTION = 'workspace:digest_read';
+
+/** A2-284: what the digest's `total` counts, stated in the answer — the count
+ *  is BEFORE paging, so an empty page and an empty workspace are different
+ *  answers rather than the same one. */
+export const WORKSPACE_DIGEST_COUNTED =
+  "every task of the key's own workspace matching the filters, before paging";
+
+/**
+ * A2-284: the only task columns `GET /tasks/digest` returns.
+ *
+ * An allowlist in the SELECT, not a strip after the read: a column added to
+ * `tasks` later does not reach an agent key by default, which is the same
+ * direction `@AgentScope` takes for routes. These seven are what the measured
+ * consumer renders (`arcanada-assistant#76` — `MuneraTaskSchema` requires id,
+ * projectId, title, status, createdAt, updatedAt and reads priority).
+ *
+ * What is NOT here and why: `description` (free text the digest never prints),
+ * `createdById` / `actorType` (who did what is the activity log's question),
+ * `bootstrapStamp`, `importedAt`, `revision`, `contractDigest`, `sprintId`,
+ * `parentId`, `dueDate`, `estimateHours` — none is rendered, and every one of
+ * them would be a fact about the board this key did not need.
+ *
+ * There is no `completedAt` to return: measured on this schema (2026-09-24),
+ * `tasks` carries `createdAt` and `updatedAt` only. "Completed today" is
+ * therefore `status=done` AND `updatedAt` inside the day — which is what the
+ * consumer already asks for, and what its own comment records as
+ * over-reporting exactly the case of a done task edited later the same day.
+ */
+const WORKSPACE_DIGEST_SELECT = {
+  id: true,
+  projectId: true,
+  title: true,
+  status: true,
+  priority: true,
+  createdAt: true,
+  updatedAt: true,
+} satisfies Prisma.TaskSelect;
 
 /** MUN-0052: the only task columns the index returns (DEC-AUP-0029 R3). The
  *  title leaves as a hash; description, bootstrap stamp, creator id, import
@@ -231,6 +274,113 @@ export class TasksService {
         renewalDueAt: renewalDueAt(grant),
       },
       tasks,
+    };
+  }
+
+  /**
+   * A2-284 — the workspace task digest for an agent key holding a grant
+   * (`@AgentScope('workspace-digest')`).
+   *
+   * Why this route exists at all: `GET /tasks` answers a `mun_sk_` key 403
+   * (unmarked route, MUN-0043) while its own DTO names the assistant's digest
+   * as the consumer it was built for, and the one route a key COULD reach —
+   * `GET /tasks/project/:id` — answered `[]` on a board of 880+ rows because
+   * the key owns none of them. Measured live 2026-09-24, A2-281. An authorised,
+   * well-formed, completely empty answer is worse than the 403: nothing about
+   * it looks wrong.
+   *
+   * Why a route of its own rather than `@AgentScope` on `GET /tasks`:
+   * `query()` above has no workspace narrowing at all, by design, so scoping it
+   * would mean a conditional narrowing whose DEFAULT is every workspace — one
+   * forgotten branch away from a cross-tenant list. Here the workspace is a
+   * required parameter of the only method the route calls, ANDed into the where
+   * clause below; there is no argument list that answers unscoped. The cost is
+   * named in `docs/agent-workspace-digest.md`: the consumer changes one path.
+   *
+   * Each read writes one activity row naming the agent, the decision and the
+   * row count before it answers, and the answer carries that row's id — the
+   * same receipt discipline as the project index (MUN-0052). A read whose row
+   * cannot be written fails.
+   */
+  async digestForWorkspace(
+    workspaceId: string,
+    agentId: string,
+    grant: WorkspaceDigestGrantEntry,
+    dto: QueryWorkspaceDigestDto,
+  ) {
+    const limit = dto.limit ?? 50;
+    const offset = dto.offset ?? 0;
+
+    // The workspace filter is written FIRST and never from the dto: the caller
+    // supplies filters, not scope. `projectId` below can only narrow inside it
+    // — a project of another workspace yields an empty page, not a refusal and
+    // not somebody else's board.
+    const where: Prisma.TaskWhereInput = { project: { workspaceId } };
+    if (dto.status) where.status = dto.status;
+    if (dto.projectId) where.projectId = dto.projectId;
+    if (dto.updatedSince || dto.updatedBefore) {
+      where.updatedAt = {
+        ...(dto.updatedSince ? { gte: new Date(dto.updatedSince) } : {}),
+        ...(dto.updatedBefore ? { lt: new Date(dto.updatedBefore) } : {}),
+      };
+    }
+
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.task.findMany({
+        where,
+        select: WORKSPACE_DIGEST_SELECT,
+        orderBy: [{ updatedAt: 'desc' }, { id: 'asc' }],
+        take: limit,
+        skip: offset,
+      }),
+      this.prisma.task.count({ where }),
+    ]);
+
+    const audit = await this.prisma.activityLog.create({
+      data: {
+        workspaceId,
+        taskId: null,
+        actorType: 'agent',
+        actorId: agentId,
+        action: WORKSPACE_DIGEST_READ_ACTION,
+        payload: {
+          decision: grant.decision,
+          rowCount: items.length,
+          total,
+          // The filters, not the rows: what was asked is the part an auditor
+          // cannot reconstruct afterwards. Free text never enters the log
+          // because no filter here carries any.
+          filters: {
+            status: dto.status ?? null,
+            projectId: dto.projectId ?? null,
+            updatedSince: dto.updatedSince ?? null,
+            updatedBefore: dto.updatedBefore ?? null,
+            limit,
+            offset,
+          },
+        } as Prisma.InputJsonValue,
+      },
+      select: { id: true, createdAt: true },
+    });
+
+    return {
+      // The first four keys, in this order, are the envelope `GET /tasks`
+      // already answers, so a consumer moving to this route changes its path
+      // and nothing else.
+      items,
+      total,
+      limit,
+      offset,
+      counted: WORKSPACE_DIGEST_COUNTED,
+      generatedAt: audit.createdAt.toISOString(),
+      auditEventId: audit.id,
+      // The lapse warning rides the read the consumer already does — see
+      // workspace-digest-grants.ts on the two days of silence that cost.
+      grant: {
+        decision: grant.decision,
+        until: grant.until,
+        renewalDueAt: digestRenewalDueAt(grant),
+      },
     };
   }
 

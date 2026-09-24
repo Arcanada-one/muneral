@@ -102,6 +102,22 @@ import { SetMetadata } from '@nestjs/common';
  *                      unknown project gets. It is the only kind that reads
  *                      past the own slice, it returns no free text, and no
  *                      other kind — no write — consults the grant list.
+ *   'workspace-digest' — A2-284. The route names NOTHING: no `:taskId`, no
+ *                      `:projectId`. Its scope is the key's OWN workspace, and
+ *                      it answers that workspace's tasks — id, projectId,
+ *                      title, status, priority, createdAt, updatedAt, filtered
+ *                      by status and an `updatedAt` window — to a key named for
+ *                      that workspace in `workspace-digest-grants.ts`. Without
+ *                      an entry there the answer is 403 `DIGEST_GRANT_REQUIRED`,
+ *                      so merging the marker grants nothing to any existing
+ *                      key; with an expired entry, 403 `GRANT_EXPIRED` naming
+ *                      the date, because a grant that lapses silently is how
+ *                      DEC-AUP-0029's first one was lost for two days. It is
+ *                      the second kind that reads past the own slice, and the
+ *                      only one that returns titles as free text — see the
+ *                      grant file for why that widening is the point of the
+ *                      route and what bounds it. Read-only: no write consults
+ *                      the list, and the route has no write sibling.
  */
 export const AGENT_SCOPE_KEY = 'mun0043:agentScope';
 
@@ -114,7 +130,8 @@ export type AgentScopeKind =
   | 'task-evidence'
   | 'task-status'
   | 'task-assign'
-  | 'project-index';
+  | 'project-index'
+  | 'workspace-digest';
 
 export const AgentScope = (kind: AgentScopeKind) =>
   SetMetadata(AGENT_SCOPE_KEY, kind);
