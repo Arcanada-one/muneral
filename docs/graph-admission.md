@@ -19,17 +19,93 @@ hash by hand from a failing diff.
 
 ## The order
 
-1. **Commit the content change.**
+1. **Commit the content change — with the mutation evidence already rebound into it.** `lint-and-test` runs
+   `--verify-structure` on whatever head it is given, and every commit moves the tracked-tree hash, so a content
+   head that does not carry a rebind is red before anything else is judged. Measured on this very pull request
+   (A2-275, 2026-09-24): a documentation-only commit turned `test/mutation-evidence.spec.ts` red on three
+   expectations, `uses a non-self-referential Git snapshot supplement` among them. The rebind of step 4 is a
+   *second* one, made after the receipt lands; it is not a substitute for this first one.
+
+   **1b. Push the content head and read the conclusion of `lint-and-test` on it — before writing the receipt.**
+   This repository declares a derived artefact (`.arcana/derived-artefacts.v1.json`), so the exemption that carries
+   the receipt is issued by `admit_change.py exempt`, and its B6.6 arm asks whether *the job the declaration names
+   is green on this head*. That answer comes from the caller's workflow inputs, not from the tree: with no
+   `--verifier-job` / `--verifier-conclusion` the arm is `not_measured` — «not_measured is not a pass: no exemption,
+   the change pauses» (`.github/graph-admission/tools/graph/admit_change.py:1703-1718`) — and the whole B6 set, and
+   with it eligibility, falls to `NOT ELIGIBLE (gate_self_update): the change stays paused_safe`. Measured on
+   A2-273, 2026-09-24. So the real order is: push the content head, wait for `lint-and-test` to conclude, read its
+   conclusion from the check-runs API, and pass it:
+
+   ```bash
+   gh api repos/Arcanada-one/muneral/commits/<content head>/check-runs \
+     --jq '.check_runs[] | select(.name=="lint-and-test") | .conclusion'
+   python3 <program tools>/admit_change.py exempt --repo . --range <base>..<content head> \
+     --receipt receipts/graph/<receipt>.json \
+     --verifier-job lint-and-test --verifier-conclusion success
+   ```
+
+   A conclusion read before the job finishes is `null`, which is not `success` and pauses exactly as it should;
+   poll the API rather than guessing. This step is also why the receipt cannot be written on an unpushed branch.
 2. **Issue the ChangeAdmissionReceipt/v1 on that range.** Run `verify.py --diff <base>..<content head> --graph auto
    --work-item <ID>` from the pinned program tools. Put the output under `receipts/graph/`, or in the pull-request body
    as a ```json block.
 3. **Commit the receipt.**
-4. **Rebind the mutation evidence and commit it.** Only `supplementalGit` has to change when no mutation site moved.
+4. **Rebind the mutation evidence again — into the receipt commit, with `git commit --amend`.** The receipt file
+   feeds the tracked-tree hash, so the rebind of step 1 is stale the moment the receipt lands, and a *new* commit
+   after the receipt would refuse as `CHANGE_SET_INCOMPLETE`. Amending is what the gate allows: the receipt itself
+   and a declared derived artefact are the only paths that may move in a record commit
+   (`.arcana/derived-artefacts.v1.json` → `ordering`). Only `supplementalGit` has to change when no mutation site moved.
    Check it with `node apps/api/test/assembly/mutation-harness.js --verify-structure
-   apps/api/test/assembly/mutation-results.json` on the Node version the evidence records.
+   apps/api/test/assembly/mutation-results.json` on the Node version the evidence records — which is pinned, and
+   which arcana-devs does not carry by default (§ Installing the tree before a local `verify.py` run).
 5. **If the receipt comes out `paused_safe`, attach the exemptions — then commit it (step 3).** This is the
    ordinary case, not an incident: see below. Touching the receipt file after it is committed is a new change set
    (`CHANGE_SET_INCOMPLETE`), so the exemptions go in before step 3, and step 4 is redone afterwards.
+
+## Installing the tree before a local `verify.py` run
+
+The install recipe in `.arcana/derived-artefacts.v1.json:13` — `pnpm install --frozen-lockfile --ignore-scripts` —
+is written for the **mutation harness**, and `--ignore-scripts` is deliberate there: the gate runs this repository's
+verifier, not its postinstall hooks.
+
+It is the wrong recipe for a local `verify.py` run, and it fails in a way that looks like a real defect rather than
+like a missing step. `postinstall` is what generates the Prisma client; without it `@prisma/client` exports no
+`Prisma` namespace, and `v-type-check` reports **335 errors across 32 files** on a change that touches no `.ts` file
+at all — `deployable_unit:.` `failed`, admission **REFUSED**. Measured on auth-arcana in A2-273 (2026-09-24), whose
+`postinstall` is `prisma generate` (`auth-arcana/package.json:11`); the same recipe and the same trap apply here.
+After `pnpm prisma generate` the same check exits 0 with no errors.
+
+So, before `verify.py`:
+
+```bash
+pnpm install --frozen-lockfile      # scripts ON, or:
+pnpm install --frozen-lockfile --ignore-scripts && pnpm prisma generate
+python3 <program tools>/verify.py --repo . --diff <base>..<head> --graph auto \
+  --tsc node_modules/.bin/tsc --work-item <ID>
+```
+
+Note the `--tsc`: a `tsc unavailable on this host` verdict is the *other* face of the same cause — dependencies not
+installed — and unlike the 335 errors it announces itself honestly (A2-236).
+
+### The Node version
+
+`package.json:18` and `.github/workflows/ci.yml:80` pin Node **24.21.0**, and `--verify-structure` refuses before it
+checks anything when the running version differs: `TOOLCHAIN_MISMATCH recorded={"node":"v24.21.0"…}
+actual={"node":"v24.20.0"…}`. That refusal is correct — the evidence records the toolchain that produced it — but
+arcana-devs carries 24.20.0 and has neither nvm nor fnm. Fetch the pinned version **into the run directory** and put
+it first on `PATH` for that run; never change the system Node on a shared host:
+
+```bash
+curl -fsSL https://nodejs.org/dist/v24.21.0/node-v24.21.0-linux-x64.tar.xz -o runs/<ID>/node.tar.xz
+tar -xJf runs/<ID>/node.tar.xz -C runs/<ID>/
+export PATH="$PWD/runs/<ID>/node-v24.21.0-linux-x64/bin:$PATH"   # this shell only
+```
+
+`admit_change.py gate` needs the same `PATH`: it re-runs the declared artefact's own verifier on the head tree, as
+`node`, from wherever `node` resolves. Measured on A2-275: with the host's 24.20.0 first on `PATH` the gate answered
+`REFUSE / CHANGE_SET_INCOMPLETE … the declared verifier exits 1 on the honest head tree: TOOLCHAIN_MISMATCH`, and
+with the pinned 24.21.0 first the same range answered `ADMIT`. The refusal is correct and it is about the toolchain,
+not about the change — read the tail of the message, not the code.
 
 ## `not_measured`, and the exemption that carries it
 
