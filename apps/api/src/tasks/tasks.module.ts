@@ -11,6 +11,7 @@ import { ExecutionAuthorityModule } from '../execution-authority/execution-autho
 import { TaskExecutionRecorderService } from '../execution-authority/task-execution-recorder.service.js';
 import { TaskStalenessService } from '../execution-authority/task-staleness.service.js';
 import { TaskRedactionService } from './redactions/task-redaction.service.js';
+import { TaskEvidenceService } from './evidence/task-evidence.service.js';
 
 @Module({
   imports: [ActivityModule, WsModule, AuthModule, ExecutionAuthorityModule],
@@ -22,6 +23,7 @@ import { TaskRedactionService } from './redactions/task-redaction.service.js';
     TaskExecutionRecorderService,
     TaskStalenessService,
     TaskRedactionService,
+    TaskEvidenceService,
   ],
   exports: [TasksService, TaskFieldStateService, FieldChangesService],
 })
