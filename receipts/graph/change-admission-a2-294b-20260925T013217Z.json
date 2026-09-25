@@ -5,10 +5,16 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "paused_safe"
  },
- "captured_at_utc": "2026-09-25T03:16:54Z",
+ "captured_at_utc": "2026-09-25T03:31:25Z",
  "change_set": {
   "base": "ba09137e59bde9adc8159714b895b14b058d854b",
   "files": [
+   {
+    "kind": "other",
+    "path": ".gitignore",
+    "status": "M",
+    "uncovered": true
+   },
    {
     "kind": "contract",
     "node_id": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
@@ -53,7 +59,7 @@
     "status": "A"
    }
   ],
-  "head": "228cfdab018bf584ce8246533f9105a4231c476f",
+  "head": "c2a21cfe9059709b713348cf2257ca39791a2aa5",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -68,11 +74,11 @@
  "head_graph": {
   "builder_version": "1.0.1",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:8334d2a69e367002242addab2a0982bd993e9dd82fb253745649939ba90683b7",
-  "path": "receipts/graph/verifier-out/a2-294b/graph-head-228cfdab018b.json",
-  "source_commit": "228cfdab018bf584ce8246533f9105a4231c476f",
+  "graph_digest": "sha256:2ec95f14a13e8f7b66711bac83601a6526905979644ed8e492f295014545ca2e",
+  "path": "receipts/graph/verifier-out/a2-294b/graph-head-c2a21cfe9059.json",
+  "source_commit": "c2a21cfe9059709b713348cf2257ca39791a2aa5",
   "staleness": {
-   "checked_at_utc": "2026-09-25T03:17:03Z",
+   "checked_at_utc": "2026-09-25T03:31:35Z",
    "checked_nodes": 360,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
@@ -8012,14 +8018,13 @@
  },
  "notes": [
   "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.0.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
-  "profile: (auto-detected); baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none",
-  "head tree 228cfdab018b exported with git archive into /home/dev/aup/arc2/runs/A2-294c/wd/export-228cfdab018b (node_modules linked from the repository for ['.', 'apps/api', 'apps/web', 'packages/types']; workspace packages built: none); the repository was not written"
+  "profile: (auto-detected); baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none"
  ],
  "producer": {
   "tool": "tools/graph/verify.py",
   "version": "1.0.1"
  },
- "receipt_id": "car-verify-20260925T031654Z-228cfdab",
+ "receipt_id": "car-verify-20260925T033125Z-c2a21cfe",
  "receipt_path": "receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -8274,7 +8279,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-09-25T03:17:03Z",
+  "checked_at_utc": "2026-09-25T03:31:34Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -8283,7 +8288,7 @@
   {
    "content_hash": {
     "base": null,
-    "head": "sha256:a3a670b4044c4ec1ceadd0791d1a02a795a30add44dce976f7d4c53ad9f89742"
+    "head": "sha256:360145efca8b3c8d57776f52fdfe9df47f56e21d006fbd8d183483c829398677"
    },
    "entity": "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
    "node_type": "receipt",
@@ -8605,7 +8610,7 @@
   }
  ],
  "tree": {
-  "commit": "228cfdab018bf584ce8246533f9105a4231c476f",
+  "commit": "c2a21cfe9059709b713348cf2257ca39791a2aa5",
   "dirty": false
  },
  "verdicts": [
@@ -9443,8 +9448,8 @@
  ],
  "verifiers": [
   {
-   "command": "/home/dev/aup/arc2/runs/A2-294c/wd/export-228cfdab018b/apps/api/node_modules/.bin/tsc -p /home/dev/aup/arc2/runs/A2-294c/wd/export-228cfdab018b/apps/api/tsconfig.json --noEmit --incremental false --listFiles",
-   "duration_s": 2.71,
+   "command": "/home/dev/aup/arc2/runs/A2-294c/work/muneral/apps/api/node_modules/.bin/tsc -p /home/dev/aup/arc2/runs/A2-294c/work/muneral/apps/api/tsconfig.json --noEmit --incremental false --listFiles",
+   "duration_s": 2.64,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -9559,12 +9564,12 @@
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
    "output_ref": "receipts/graph/verifier-out/a2-294b/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-09-25T03:17:10Z",
+   "started_at_utc": "2026-09-25T03:31:41Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1441 files listed"
   },
   {
-   "command": "/home/dev/aup/arc2/runs/A2-294c/wd/export-228cfdab018b/apps/api/node_modules/.bin/tsc -p /home/dev/aup/arc2/runs/A2-294c/wd/export-228cfdab018b/apps/api/tsconfig.test.json --noEmit --incremental false --listFiles",
-   "duration_s": 4.56,
+   "command": "/home/dev/aup/arc2/runs/A2-294c/work/muneral/apps/api/node_modules/.bin/tsc -p /home/dev/aup/arc2/runs/A2-294c/work/muneral/apps/api/tsconfig.test.json --noEmit --incremental false --listFiles",
+   "duration_s": 3.8,
    "entities": [
     "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts",
     "code_unit:apps/api/test/agent-project-index.e2e.spec.ts",
@@ -9599,12 +9604,12 @@
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
    "output_ref": "receipts/graph/verifier-out/a2-294b/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-09-25T03:17:13Z",
-   "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1589 files listed"
+   "started_at_utc": "2026-09-25T03:31:44Z",
+   "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1593 files listed"
   },
   {
-   "command": "/home/dev/aup/arc2/runs/A2-294c/wd/export-228cfdab018b/apps/web/node_modules/.bin/tsc -p /home/dev/aup/arc2/runs/A2-294c/wd/export-228cfdab018b/apps/web/tsconfig.json --noEmit --incremental false --listFiles",
-   "duration_s": 3.19,
+   "command": "/home/dev/aup/arc2/runs/A2-294c/work/muneral/apps/web/node_modules/.bin/tsc -p /home/dev/aup/arc2/runs/A2-294c/work/muneral/apps/web/tsconfig.json --noEmit --incremental false --listFiles",
+   "duration_s": 2.94,
    "entities": [
     "code_unit:apps/web/lib/api/tasks.ts"
    ],
@@ -9615,12 +9620,12 @@
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
    "output_ref": "receipts/graph/verifier-out/a2-294b/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-09-25T03:17:17Z",
-   "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1143 files listed"
+   "started_at_utc": "2026-09-25T03:31:48Z",
+   "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1147 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=ba09137e59bd, head=228cfdab018b, graph=head graph)",
-   "duration_s": 2.8,
+   "command": "tools/graph/contract_diff.py.run_diff(base=ba09137e59bd, head=c2a21cfe9059, graph=head graph)",
+   "duration_s": 2.6,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.service.ts",
@@ -9711,7 +9716,7 @@
    "id": "v-contract-diff",
    "kind": "contract_diff",
    "output_ref": "receipts/graph/verifier-out/a2-294b/v-contract-diff.json",
-   "started_at_utc": "2026-09-25T03:17:21Z",
+   "started_at_utc": "2026-09-25T03:31:51Z",
    "summary": "46→46 contracts, breaking 0, edges {'verified': 148}"
   },
   {
@@ -9793,12 +9798,12 @@
    "id": "v-route-config",
    "kind": "config_schema",
    "output_ref": "receipts/graph/verifier-out/a2-294b/v-route-config.txt",
-   "started_at_utc": "2026-09-25T03:17:24Z",
+   "started_at_utc": "2026-09-25T03:31:54Z",
    "summary": "34 route(s), 0 failed"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.1,
+   "duration_s": 0.08,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -9873,7 +9878,7 @@
    "id": "v-fitness",
    "kind": "fitness_rules",
    "output_ref": "receipts/graph/verifier-out/a2-294b/v-fitness.json",
-   "started_at_utc": "2026-09-25T03:17:24Z",
+   "started_at_utc": "2026-09-25T03:31:54Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -9905,7 +9910,7 @@
    "id": "v-doc-reference",
    "kind": "doc_reference",
    "output_ref": "receipts/graph/verifier-out/a2-294b/v-doc-reference.txt",
-   "started_at_utc": "2026-09-25T03:17:24Z",
+   "started_at_utc": "2026-09-25T03:31:54Z",
    "summary": "9 document(s), 0 failed"
   },
   {
@@ -9995,7 +10000,7 @@
    "id": "v-canary",
    "kind": "canary",
    "output_ref": "receipts/graph/verifier-out/a2-294b/v-canary.json",
-   "started_at_utc": "2026-09-25T03:17:24Z",
+   "started_at_utc": "2026-09-25T03:31:54Z",
    "summary": "0 canary result(s); 0 verified / 0 failed / 38 not_measured of 38 entities"
   }
  ],
@@ -10435,9 +10440,9 @@
    "work_item:MUN-0055": []
   },
   "seconds": {
-   "prepare": 5.41,
-   "total": 29.79,
-   "verifiers": 13.37
+   "prepare": 5.53,
+   "total": 28.86,
+   "verifiers": 12.07
   }
  },
  "work_item": "A2-294b"
