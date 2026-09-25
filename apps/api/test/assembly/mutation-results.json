@@ -22,11 +22,11 @@
   },
   "binding": {
     "algorithm": "sha256",
-    "aggregateSha256": "650a6f6decd6dfe9da85fbac65fe09e0167d34886fcf8b05ec4442df8d1597bc",
+    "aggregateSha256": "d5e4a2fbf9d7da08d1dca3cad926f30d3d4e96fcc08396c48a9e6e9325b28554",
     "files": [
       {
         "path": "apps/api/package.json",
-        "sha256": "10a3ed98001568e5271cb9bee7b02b0a0f245cf4590768c2e16dfbccf1bd5797"
+        "sha256": "dac65df23eee2a8f093127256f4500fb9bd5707951942b7e27430e2095859088"
       },
       {
         "path": "apps/api/src/assembly/assembly.canonical.ts",
@@ -250,7 +250,7 @@
       },
       {
         "path": "apps/api/test/mutation-evidence.spec.ts",
-        "sha256": "0621c127b42a4b5b32be9c16e2d49ccdd7e4c83fb77a5c5fb824244089f961aa"
+        "sha256": "23cb6f77d33e3d308f3cea0c5701124406fbea4a6f597d8176f724c494c6e963"
       },
       {
         "path": "apps/api/tsconfig.json",
@@ -258,7 +258,7 @@
       },
       {
         "path": "apps/api/tsconfig.test.json",
-        "sha256": "b45b51f10e6897b5fa212f421842c1334c9e1f7942e446dcf278bb08b9c55d1d"
+        "sha256": "a0601bab5138760d64c960a4256e845acdd2624c55da1ddc876b7f5b9093ad05"
       },
       {
         "path": "package.json",
@@ -266,7 +266,7 @@
       },
       {
         "path": "pnpm-lock.yaml",
-        "sha256": "0da3d99dfe01d06d9eb88131eb47a12d90159230526159c56e01d207045fb2e9"
+        "sha256": "6cbe851fb5e5780723c5b64abea2c6aeb187e3986759c72eebad8192797de63b"
       }
     ]
   },
@@ -276,8 +276,8 @@
       "apps/web/",
       "receipts/"
     ],
-    "trackedTreeWithoutEvidence": "058e3448351f0fe19253f21f368feabf0f21f697",
-    "trackedSnapshotDiffSha256": "b03c11fe30c1219dfd656280c5f05fbdf667b3ffd6717c281addcfb07092d937"
+    "trackedTreeWithoutEvidence": "e94c216f97af74036d91fe589f0236274223b1d0",
+    "trackedSnapshotDiffSha256": "f087ed214e335835c87eae05d370f9e80d784da27a56937b7829d3cdee4e99fe"
   },
   "baseline": {
     "outcome": "SURVIVED",
