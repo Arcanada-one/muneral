@@ -1,6 +1,6 @@
 {
  "base_url": "http://127.0.0.1:35582",
- "captured_at_utc": "2026-09-25T23:03:37Z",
+ "captured_at_utc": "2026-09-25T23:07:15Z",
  "card": "A2-382",
  "counters": {
   "failed": 0,
@@ -45,7 +45,7 @@
  "model": "none: deterministic HTTP producer",
  "phase": "pre",
  "plan": {
-  "digest": "sha256:af61d8a185acfd2beb09d794c00f937eb32e0157901c0a7281fa2e1afcf782c5",
+  "digest": "sha256:bf780e26c3ba0a4bea488db8a95e82d82a3a3f61b7280c1aa120c46e59c2fd27",
   "id": "a2-382-relay-probe-candidate",
   "path": "canary-plan.json"
  },
@@ -102,13 +102,13 @@
  ],
  "schema": "CanaryResult/v1",
  "subject": {
-  "commit": "76ad9813e8b79250d4e7bf95dfc155079173a726",
+  "commit": "52a81044d0014e60b52081d8cf20861cf12bc211",
   "evidence": {
-   "path": "A2-382-relay-probe-candidate-76ad981.source-evidence.json",
-   "sha256": "14f4234776e72665ff84b3558cff0e5f6db555ae2c9d32b39b657d109e7c81ae",
+   "path": "A2-382-relay-probe-candidate-52a8104.source-evidence.json",
+   "sha256": "e0fcc543d7df113e08a59753f5c791cbcc2106be8cd8a63e2fb9f0aa0b9b3d0e",
    "source_field": "commit"
   },
   "schema": "GitCanarySubject/v1",
-  "tree": "1e97f0db4822244e0e6770aed0c4c2812ac89e4f"
+  "tree": "aa37839125acc92a4e2c3da0fe648a0e7e2c9d4b"
  }
 }
