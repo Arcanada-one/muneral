@@ -22,7 +22,7 @@
   },
   "binding": {
     "algorithm": "sha256",
-    "aggregateSha256": "b241da3c8bd88a0118141dfa0a91e4bd75a86497c8c8278b2bce98f522d00e18",
+    "aggregateSha256": "41aa95f405eafa3af08c778e265c1fe27000d2e451abfd1e90fbb1ed8500fe45",
     "files": [
       {
         "path": "apps/api/package.json",
@@ -123,6 +123,10 @@
       {
         "path": "apps/api/test/assembly/assembly.purity.spec.ts",
         "sha256": "eb4bffa41b70f689975fd585303d9700c3005c95682c149a28ea59c40abc012f"
+      },
+      {
+        "path": "apps/api/test/assembly/assembly.rebind.spec.ts",
+        "sha256": "4ef34b8228ae4b8404ddc2c0444621f0b5d2419b4e94b3f0b5549c3f776a1eef"
       },
       {
         "path": "apps/api/test/assembly/assembly.rejectionsites.spec.ts",
@@ -238,7 +242,7 @@
       },
       {
         "path": "apps/api/test/assembly/mutation-harness.js",
-        "sha256": "36496beb1daad480f1bf17c9d894bb9328ceef91717cf69fcb5bccafcbf72c60"
+        "sha256": "c3bc68ba8a973a49e369c04dac0df713be4ebda00939a19836f9c8fdf2845196"
       },
       {
         "path": "apps/api/test/assembly/mutation-sites.json",
@@ -271,8 +275,8 @@
     ]
   },
   "supplementalGit": {
-    "trackedTreeWithoutEvidence": "e26ef1afb4a268450a5b7c322da3632db5a2fc12",
-    "trackedSnapshotDiffSha256": "5120b21c81fe78c6b8001f1fcbd12b5ba6c5253bbe7535ef2b523970d5782285"
+    "trackedTreeWithoutEvidence": "e5530dd6e997a9b861378c8fc60691a804873e01",
+    "trackedSnapshotDiffSha256": "2b75cca62e13194a83a759644790e06e6198b27c1e745c96a94954a2af5edff8"
   },
   "baseline": {
     "outcome": "SURVIVED",

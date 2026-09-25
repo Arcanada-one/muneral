@@ -713,6 +713,85 @@ function verifyRecordedOutcomes(evidence, sites) {
   return failures;
 }
 
+// A2-298 (defect 5 of A2-291) — rebind the TREE-DERIVED fields, and only those.
+//
+// Two fields of this evidence file are functions of the repository tree rather than of the mutation
+// run: `binding` (a per-file sha256 list plus an aggregate) and `supplementalGit`
+// (`trackedTreeWithoutEvidence`, a hash of the whole tracked tree). Any commit that touches a tracked
+// file therefore invalidates them — including the commit that FILES a ChangeAdmissionReceipt, which is
+// how this came up: the graph gate wants the receipt committed, committing it moves the tree, and the
+// evidence then fails `--verify-structure` for a reason that has nothing to do with the mutants.
+//
+// A2-291 rebound them with a hand-written ESM script over `buildBinding`/`gitSupplement`
+// (runs/A2-291/rebind.mjs), and wrote the absence of this command down as a defect: the one operation
+// that must NEVER be done by transcribing a digest out of a failing diff was the one operation with no
+// command. A copied hash agrees with whatever produced the failure.
+//
+// WHY THIS CANNOT LAUNDER A BAD RUN, which is the only question worth asking about a command that
+// rewrites evidence. The fields it recomputes are tree hashes. Everything that records what the
+// mutation run OBSERVED is untouched and is re-checked immediately afterwards by the same
+// `verifyResults` the CI job runs: per-site `pristineSha256`/`mutantSha256` are derived by READING the
+// mutated sources, `siteMapSha256` and the standalone site map from enumerating them, `outcome` /
+// `detailSha256` / `baseline.summarySha256` from the recorded run itself, and `tools` /
+// `toolchainCompatibility` from the installed toolchain. Edit a mutated source and `--rebind` cannot
+// help you: the source-derived digests move and verification fails. That is the boundary, and the
+// assertion below enforces it mechanically — every key except the two named ones must be
+// byte-identical after the rewrite, or nothing is written at all.
+function rebindDerivedFields(jsonPath) {
+  const raw = fs.readFileSync(jsonPath, 'utf8');
+  const evidence = JSON.parse(raw);
+  const original = JSON.parse(raw);
+  if (!Array.isArray(evidence.sites) || evidence.sites.length === 0) {
+    console.error(`REBIND_REFUSED ${jsonPath} records no sites — there is no evidence here to rebind`);
+    return 1;
+  }
+  const before = {
+    binding: JSON.stringify(evidence.binding),
+    supplementalGit: JSON.stringify(evidence.supplementalGit),
+  };
+  evidence.binding = buildBinding();
+  evidence.supplementalGit = gitSupplement();
+  const after = {
+    binding: JSON.stringify(evidence.binding),
+    supplementalGit: JSON.stringify(evidence.supplementalGit),
+  };
+
+  // The mechanical boundary: swap the two fields back and the document must be the one we read.
+  const probe = { ...evidence, binding: original.binding, supplementalGit: original.supplementalGit };
+  if (JSON.stringify(probe) !== JSON.stringify(original)) {
+    console.error('REBIND_REFUSED: the rewrite would move a field other than binding/supplementalGit; '
+      + 'nothing was written');
+    return 1;
+  }
+
+  const movedFiles = [];
+  const oldByPath = new Map((JSON.parse(before.binding)?.files || []).map((f) => [f.path, f.sha256]));
+  for (const f of evidence.binding.files) {
+    if (oldByPath.get(f.path) !== f.sha256) movedFiles.push(f.path);
+  }
+  for (const p of oldByPath.keys()) {
+    if (!evidence.binding.files.some((f) => f.path === p)) movedFiles.push(`${p} (gone)`);
+  }
+
+  const changed = before.binding !== after.binding || before.supplementalGit !== after.supplementalGit;
+  if (changed) {
+    fs.writeFileSync(jsonPath, `${JSON.stringify(evidence, null, 2)}\n`);
+  }
+  console.log(`rebind ${changed ? 'REWROTE' : 'left unchanged (already bound to this tree)'} ${jsonPath}`);
+  console.log(`  binding.aggregateSha256  ${JSON.parse(before.binding)?.aggregateSha256} -> ${evidence.binding.aggregateSha256}`);
+  console.log(`  trackedTreeWithoutEvidence ${JSON.parse(before.supplementalGit)?.trackedTreeWithoutEvidence} -> ${evidence.supplementalGit.trackedTreeWithoutEvidence}`);
+  if (movedFiles.length) {
+    console.log(`  ${movedFiles.length} bound file(s) moved: ${movedFiles.slice(0, 8).join(', ')}`
+      + `${movedFiles.length > 8 ? ' …' : ''}`);
+  }
+  // The rebind is not the claim. The claim is what the structural verification says about the file
+  // afterwards, so this command's exit code IS that verification's — a rebind that leaves the evidence
+  // unverifiable exits non-zero and says why.
+  console.log('  re-verifying the rebound file with the same check CI runs:');
+  return verifyResults(jsonPath, false);
+}
+
+
 function verifyResults(jsonPath, replayOutcomes = true) {
   const evidence = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
   const binding = buildBinding();
@@ -892,6 +971,14 @@ async function main() {
     const jsonPath = argv[argv.indexOf('--verify-structure') + 1];
     return verifyResults(path.resolve(jsonPath), false);
   }
+  if (argv.includes('--rebind')) {
+    const jsonPath = argv[argv.indexOf('--rebind') + 1];
+    if (!jsonPath || jsonPath.startsWith('--')) {
+      console.error('usage: mutation-harness.js --rebind <mutation-results.json>');
+      return 2;
+    }
+    return rebindDerivedFields(path.resolve(jsonPath));
+  }
 
   // One flat list across every target, so ids are stable within a run and the
   // map records which file each site lives in.
@@ -1049,6 +1136,7 @@ async function main() {
 
 export {
   applyMutant,
+  rebindDerivedFields,
   canonicalFailureDetail,
   // Exported so the structural fields of mutation-results.json can be
   // recomputed without a full 85-mutant run: verifyStructure derives
