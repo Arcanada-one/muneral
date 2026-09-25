@@ -9,14 +9,9 @@ import { AGENT_SCOPE_KEY } from '../src/auth/agent-scope.decorator.js';
 import { AgentTaskScopeGuard } from '../src/auth/guards/agent-task-scope.guard.js';
 import type { AgentScopedRequest } from '../src/auth/guards/agent-task-scope.guard.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
-// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
-// Its type, though, comes from @types/jest (already in tsconfig `types`),
-// which is what the 339 existing jest.fn() call sites are written against —
-// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
-// and would red 416 lines that are not otherwise wrong. Value from one,
-// type from the other.
-import { jest as _jestRuntime } from '@jest/globals';
-const jest = _jestRuntime as unknown as typeof globalThis.jest;
+// vitest exposes describe/it/expect as globals (vitest.config.ts `globals: true`);
+// `vi` is the one name that must be imported, exactly as `jest` had to be.
+import { vi, type Mock } from 'vitest';
 
 const AGENT = {
   id: 'agent-1',
@@ -38,22 +33,22 @@ function makeContext(req: Partial<AgentScopedRequest>): {
 }
 
 describe('AgentTaskScopeGuard', () => {
-  let reflector: { getAllAndOverride: jest.Mock };
+  let reflector: { getAllAndOverride: Mock };
   let prisma: {
-    taskAgent: { findFirst: jest.Mock };
-    project: { findFirst: jest.Mock };
-    task: { findFirst: jest.Mock };
-    agent: { findFirst: jest.Mock };
+    taskAgent: { findFirst: Mock };
+    project: { findFirst: Mock };
+    task: { findFirst: Mock };
+    agent: { findFirst: Mock };
   };
   let guard: AgentTaskScopeGuard;
 
   beforeEach(() => {
-    reflector = { getAllAndOverride: jest.fn() };
+    reflector = { getAllAndOverride: vi.fn() };
     prisma = {
-      taskAgent: { findFirst: jest.fn() },
-      project: { findFirst: jest.fn() },
-      task: { findFirst: jest.fn() },
-      agent: { findFirst: jest.fn() },
+      taskAgent: { findFirst: vi.fn() },
+      project: { findFirst: vi.fn() },
+      task: { findFirst: vi.fn() },
+      agent: { findFirst: vi.fn() },
     };
     guard = new AgentTaskScopeGuard(
       reflector as unknown as Reflector,
@@ -459,7 +454,13 @@ describe('AgentTaskScopeGuard', () => {
     reflector.getAllAndOverride.mockReturnValue('task-assign');
     prisma.task.findFirst.mockResolvedValue(taskRow());
     prisma.agent.findFirst.mockResolvedValue({ id: listed.id });
-    jest.useFakeTimers({ now: new Date('2026-09-20T00:00:00Z'), doNotFake: ['nextTick', 'setImmediate'] });
+    // A2-304c: jest took `doNotFake` (a deny-list); vitest takes `toFake` (an
+    // allow-list), and silently IGNORED the unknown key — the test stayed green
+    // while faking more than it meant to. Only the clock is under test here
+    // (`vi.setSystemTime` below is the whole point), and nextTick/setImmediate must
+    // stay real or the awaits in this block never settle. `toFake: ['Date']` says
+    // exactly that. Caught by `pnpm run test:types`, not by the suite.
+    vi.useFakeTimers({ now: new Date('2026-09-20T00:00:00Z'), toFake: ['Date'] });
     try {
       const self = assignCtx({ agentId: listed.id, role: 'executor' }, listed);
       await expect(guard.canActivate(self.ctx)).resolves.toBe(true);
@@ -472,12 +473,12 @@ describe('AgentTaskScopeGuard', () => {
         guard.canActivate(assignCtx({ agentId: listed.id, role: 'lead' }, listed).ctx),
       ).rejects.toThrow(ForbiddenException);
 
-      jest.setSystemTime(new Date('2026-09-28T00:00:00Z'));
+      vi.setSystemTime(new Date('2026-09-28T00:00:00Z'));
       await expect(
         guard.canActivate(assignCtx({ agentId: listed.id, role: 'executor' }, listed).ctx),
       ).rejects.toThrow(ForbiddenException);
     } finally {
-      jest.useRealTimers();
+      vi.useRealTimers();
     }
   });
 
@@ -689,7 +690,7 @@ describe('AgentTaskScopeGuard', () => {
         for (const owned of [false, true]) {
           const answers: (boolean | undefined)[] = [];
           for (const list of lists) {
-            jest.clearAllMocks();
+            vi.clearAllMocks();
             reflector.getAllAndOverride.mockReturnValue('task-workspace');
             prisma.task.findFirst
               .mockResolvedValueOnce({ id: 't-1', projectId: 'p-1' })

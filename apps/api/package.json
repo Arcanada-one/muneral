@@ -6,8 +6,13 @@
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
     "start": "node dist/main.js",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest --passWithNoTests --runInBand",
-    "test:cov": "jest --coverage --passWithNoTests",
+    "test": "pnpm run test:types && pnpm run test:unit && pnpm run test:battery-suite",
+    "//test:types": "ts-jest typechecked every spec on every run; vitest transforms with swc, which strips types without checking them. Without this script the 65 vitest suites would be the first code in this repo that CI never typechecks. It runs FIRST because that is the order ts-jest enforced.",
+    "test:types": "tsc --noEmit -p tsconfig.test.json",
+    "test:unit": "vitest run --passWithNoTests",
+    "//test:battery-suite": "test/assembly stays on jest — see vitest.config.ts `exclude`. NODE_OPTIONS is set HERE and not inherited: the suite is ESM and jest needs the flag to load it.",
+    "test:battery-suite": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --passWithNoTests",
+    "test:cov": "vitest run --coverage --passWithNoTests",
     "lint": "eslint src --ext .ts",
     "clean": "rm -rf dist"
   },
@@ -44,6 +49,7 @@
     "@jest/globals": "29.7.0",
     "@nestjs/cli": "^12.0.0",
     "@nestjs/testing": "^12.0.1",
+    "@swc/core": "1.16.2",
     "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
@@ -61,44 +67,9 @@
     "supertest": "^7.0.0",
     "ts-jest": "^29.4.12",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.8.3"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": ".",
-    "testRegex": ".*\\.spec\\.ts$",
-    "transform": {
-      "^.+\\.ts$": [
-        "ts-jest",
-        {
-          "tsconfig": "<rootDir>/tsconfig.test.json",
-          "useESM": true
-        }
-      ]
-    },
-    "collectCoverageFrom": [
-      "src/**/*.ts",
-      "!src/**/*.module.ts",
-      "!src/main.ts"
-    ],
-    "coverageDirectory": "coverage",
-    "testEnvironment": "node",
-    "moduleNameMapper": {
-      "^@muneral/types$": "<rootDir>/../../packages/types/dist/index.js",
-      "^(\\.{1,2}/.*)\\.js$": "$1",
-      "^@nestjs/throttler$": "<rootDir>/test/support/throttler-test-double.ts"
-    },
-    "setupFiles": [
-      "<rootDir>/test/setup-env.ts"
-    ],
-    "preset": "ts-jest/presets/default-esm",
-    "extensionsToTreatAsEsm": [
-      ".ts"
-    ]
+    "typescript": "^5.8.3",
+    "unplugin-swc": "2.0.0",
+    "vitest": "5.0.1"
   },
   "type": "module"
 }

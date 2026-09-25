@@ -26,14 +26,9 @@ import type {
   Clock,
   IdSource,
 } from '../src/outbox/outbox.types.js';
-// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
-// Its type, though, comes from @types/jest (already in tsconfig `types`),
-// which is what the 339 existing jest.fn() call sites are written against —
-// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
-// and would red 416 lines that are not otherwise wrong. Value from one,
-// type from the other.
-import { jest as _jestRuntime } from '@jest/globals';
-const jest = _jestRuntime as unknown as typeof globalThis.jest;
+// vitest exposes describe/it/expect as globals (vitest.config.ts `globals: true`);
+// `vi` is the one name that must be imported, exactly as `jest` had to be.
+import { vi } from 'vitest';
 
 // ---------------------------------------------------------------------------
 // Test fixtures
@@ -112,7 +107,7 @@ function makeConsumer(
 ): OutboxConsumer {
   return {
     consumerId: 'consumer-01',
-    consume: jest.fn().mockResolvedValue({
+    consume: vi.fn().mockResolvedValue({
       digest: 'sha256:abc123',
       result: { saved: true },
     } as ConsumerResult),
@@ -128,26 +123,26 @@ function makeConsumer(
 function makeTx(overrides: Record<string, any> = {}): any {
   return {
     taskOutboxEvent: {
-      findMany: jest.fn().mockResolvedValue([]),
+      findMany: vi.fn().mockResolvedValue([]),
     },
     outboxLease: {
-      findUnique: jest.fn().mockResolvedValue(null),
-      findMany: jest.fn().mockResolvedValue([]),
-      updateMany: jest.fn().mockResolvedValue({ count: 1 }),
-      create: jest.fn().mockResolvedValue({}),
+      findUnique: vi.fn().mockResolvedValue(null),
+      findMany: vi.fn().mockResolvedValue([]),
+      updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+      create: vi.fn().mockResolvedValue({}),
     },
     consumerInbox: {
-      findUnique: jest.fn().mockResolvedValue(null),
-      create: jest.fn().mockResolvedValue({}),
-      findMany: jest.fn().mockResolvedValue([]),
+      findUnique: vi.fn().mockResolvedValue(null),
+      create: vi.fn().mockResolvedValue({}),
+      findMany: vi.fn().mockResolvedValue([]),
     },
     deliveryAttemptEvidence: {
-      create: jest.fn().mockResolvedValue({}),
-      findMany: jest.fn().mockResolvedValue([]),
+      create: vi.fn().mockResolvedValue({}),
+      findMany: vi.fn().mockResolvedValue([]),
     },
     quarantineEvidence: {
-      create: jest.fn().mockResolvedValue({}),
-      findMany: jest.fn().mockResolvedValue([]),
+      create: vi.fn().mockResolvedValue({}),
+      findMany: vi.fn().mockResolvedValue([]),
     },
     $queryRawUnsafe: undefined,
     ...overrides,
@@ -167,7 +162,7 @@ function makePrisma(
   const txs = Array.isArray(txOrTxs) ? txOrTxs : [txOrTxs];
   let callIdx = 0;
   return {
-    $transaction: jest
+    $transaction: vi
       .fn()
       .mockImplementation(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -299,7 +294,7 @@ describe('OutboxRelay', () => {
       const row = makeOutboxRow();
       const tx = makeTx({
         taskOutboxEvent: {
-          findMany: jest.fn().mockResolvedValue([row]),
+          findMany: vi.fn().mockResolvedValue([row]),
         },
       });
       const prisma = makePrisma(tx);
@@ -324,7 +319,7 @@ describe('OutboxRelay', () => {
       });
       const tx = makeTx({
         taskOutboxEvent: {
-          findMany: jest.fn().mockResolvedValue([row]),
+          findMany: vi.fn().mockResolvedValue([row]),
         },
       });
       const prisma = makePrisma(tx);
@@ -337,7 +332,7 @@ describe('OutboxRelay', () => {
     it('returns empty array when no events match', async () => {
       const tx = makeTx({
         taskOutboxEvent: {
-          findMany: jest.fn().mockResolvedValue([]),
+          findMany: vi.fn().mockResolvedValue([]),
         },
       });
       const prisma = makePrisma(tx);
@@ -348,7 +343,7 @@ describe('OutboxRelay', () => {
     });
 
     it('respects batchSize from config', async () => {
-      const findMany = jest.fn().mockResolvedValue([]);
+      const findMany = vi.fn().mockResolvedValue([]);
       const tx = makeTx({ taskOutboxEvent: { findMany } });
       const prisma = makePrisma(tx);
       const pollRelay = new OutboxRelay(prisma, clock, idSource, config);
@@ -373,8 +368,8 @@ describe('OutboxRelay', () => {
 
       const tx = makeTx({
         outboxLease: {
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
-          findUnique: jest.fn().mockResolvedValue({
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+          findUnique: vi.fn().mockResolvedValue({
             ...leaseRow,
             leaseHolder: `${config.relayId}-id-0001`,
             deliveryOrdinal: 1,
@@ -397,8 +392,8 @@ describe('OutboxRelay', () => {
       const events = [makeOutboxEvent()];
       const tx = makeTx({
         outboxLease: {
-          updateMany: jest.fn().mockResolvedValue({ count: 0 }),
-          findUnique: jest.fn().mockResolvedValue(null),
+          updateMany: vi.fn().mockResolvedValue({ count: 0 }),
+          findUnique: vi.fn().mockResolvedValue(null),
         },
       });
       const prisma = makePrisma(tx);
@@ -412,8 +407,8 @@ describe('OutboxRelay', () => {
       const events = [makeOutboxEvent()];
       const tx = makeTx({
         outboxLease: {
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
-          findUnique: jest.fn().mockResolvedValue({
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+          findUnique: vi.fn().mockResolvedValue({
             outboxEventId: 'evt-0001',
             leaseHolder: `${config.relayId}-id-0001`,
             deliveryOrdinal: 2,
@@ -436,8 +431,8 @@ describe('OutboxRelay', () => {
       const events = [makeOutboxEvent()];
       const tx = makeTx({
         outboxLease: {
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
-          findUnique: jest.fn().mockResolvedValue({
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+          findUnique: vi.fn().mockResolvedValue({
             outboxEventId: 'evt-0001',
             leaseHolder: `${config.relayId}-id-0001`,
             deliveryOrdinal: 3,
@@ -493,7 +488,7 @@ describe('OutboxRelay', () => {
       });
       const tx = makeTx({
         outboxLease: {
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         },
       });
       const dispatchRelay = new OutboxRelay(
@@ -557,8 +552,8 @@ describe('OutboxRelay', () => {
       // recordWrongPlaneQuarantine opens its own tx.
       const tx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue(leaseRow),
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          findUnique: vi.fn().mockResolvedValue(leaseRow),
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         },
       });
       const prisma = makePrisma(tx);
@@ -606,8 +601,8 @@ describe('OutboxRelay', () => {
 
       const tx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue(leaseRow),
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          findUnique: vi.fn().mockResolvedValue(leaseRow),
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         },
       });
       const prisma = makePrisma(tx);
@@ -645,8 +640,8 @@ describe('OutboxRelay', () => {
 
       const tx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue(leaseRow),
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          findUnique: vi.fn().mockResolvedValue(leaseRow),
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         },
       });
       const prisma = makePrisma(tx);
@@ -707,8 +702,8 @@ describe('OutboxRelay', () => {
       let updateManyCalled = false;
       const tx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue(leaseRow),
-          updateMany: jest.fn().mockImplementation((args: { where?: { leaseHolder?: string; deliveryOrdinal?: number } }) => {
+          findUnique: vi.fn().mockResolvedValue(leaseRow),
+          updateMany: vi.fn().mockImplementation((args: { where?: { leaseHolder?: string; deliveryOrdinal?: number } }) => {
             updateManyCalled = true;
             // Atomic fence check: if WHERE holder/ordinal don't match the
             // actual lease row, return 0 → stale worker, zero evidence.
@@ -746,7 +741,7 @@ describe('OutboxRelay', () => {
           host_id: 'forbidden-host',
         } as unknown as OutboxEvent['eventPayload'],
       });
-      const updateMany = jest.fn().mockResolvedValue({ count: 0 });
+      const updateMany = vi.fn().mockResolvedValue({ count: 0 });
       const tx = makeTx({
         outboxLease: { updateMany },
       });
@@ -770,12 +765,12 @@ describe('OutboxRelay', () => {
     it('does not quarantine when the lease expires during invalid-event validation', async () => {
       const lateNow = new Date(FIXED_NOW_PLUS_30S.getTime() + 1);
       const advancingClock: Clock = {
-        now: jest
+        now: vi
           .fn()
           .mockReturnValueOnce(FIXED_NOW)
           .mockReturnValueOnce(lateNow),
       };
-      const updateMany = jest.fn().mockImplementation(
+      const updateMany = vi.fn().mockImplementation(
         (args: { where: { leaseExpiresAt: { gt: Date } } }) =>
           Promise.resolve({
             count: args.where.leaseExpiresAt.gt < FIXED_NOW_PLUS_30S ? 1 : 0,
@@ -876,7 +871,7 @@ describe('OutboxRelay', () => {
 
       const tx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue(leaseRow),
+          findUnique: vi.fn().mockResolvedValue(leaseRow),
         },
       });
       const prisma = makePrisma(tx);
@@ -902,7 +897,7 @@ describe('OutboxRelay', () => {
       });
       const tx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue(leaseRow),
+          findUnique: vi.fn().mockResolvedValue(leaseRow),
         },
       });
       const dispatchRelay = new OutboxRelay(
@@ -926,7 +921,7 @@ describe('OutboxRelay', () => {
       });
       const tx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue(leaseRow),
+          findUnique: vi.fn().mockResolvedValue(leaseRow),
         },
       });
       const dispatchRelay = new OutboxRelay(
@@ -951,7 +946,7 @@ describe('OutboxRelay', () => {
 
       const tx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue(leaseRow),
+          findUnique: vi.fn().mockResolvedValue(leaseRow),
         },
       });
       const prisma = makePrisma(tx);
@@ -971,7 +966,7 @@ describe('OutboxRelay', () => {
       const event = makeFencedEvent();
       const tx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue(null),
+          findUnique: vi.fn().mockResolvedValue(null),
         },
       });
       const prisma = makePrisma(tx);
@@ -1000,11 +995,11 @@ describe('OutboxRelay', () => {
 
       const tx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue(leaseRow),
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          findUnique: vi.fn().mockResolvedValue(leaseRow),
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         },
         consumerInbox: {
-          findUnique: jest.fn().mockResolvedValue({
+          findUnique: vi.fn().mockResolvedValue({
             consumerId: 'consumer-01',
             outboxEventId: 'evt-0001',
             side_effect_digest: 'sha256:abc123',
@@ -1037,11 +1032,11 @@ describe('OutboxRelay', () => {
 
       const tx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue(leaseRow),
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          findUnique: vi.fn().mockResolvedValue(leaseRow),
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         },
         consumerInbox: {
-          findUnique: jest
+          findUnique: vi
             .fn()
             .mockResolvedValueOnce(null) // first dispatch
             .mockResolvedValueOnce({
@@ -1050,10 +1045,10 @@ describe('OutboxRelay', () => {
               outboxEventId: 'evt-0001',
               side_effect_digest: 'sha256:abc123',
             }),
-          create: jest.fn().mockResolvedValue({}),
+          create: vi.fn().mockResolvedValue({}),
         },
         deliveryAttemptEvidence: {
-          create: jest.fn().mockResolvedValue({}),
+          create: vi.fn().mockResolvedValue({}),
         },
       });
       const prisma = makePrisma(tx);
@@ -1092,8 +1087,8 @@ describe('OutboxRelay', () => {
 
       const tx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue(leaseRow),
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          findUnique: vi.fn().mockResolvedValue(leaseRow),
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         },
       });
       const prisma = makePrisma(tx);
@@ -1138,8 +1133,8 @@ describe('OutboxRelay', () => {
       // fenced status update.
       const tx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue(leaseRow),
-          updateMany: jest.fn().mockResolvedValue({ count: 0 }), // ← reclaimed!
+          findUnique: vi.fn().mockResolvedValue(leaseRow),
+          updateMany: vi.fn().mockResolvedValue({ count: 0 }), // ← reclaimed!
         },
       });
       const prisma = makePrisma(tx);
@@ -1187,7 +1182,7 @@ describe('OutboxRelay', () => {
 
       const consumerTx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue(consumerTxLeaseRow),
+          findUnique: vi.fn().mockResolvedValue(consumerTxLeaseRow),
         },
       });
 
@@ -1203,15 +1198,15 @@ describe('OutboxRelay', () => {
 
       const evidenceTx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue(evidenceTxLeaseRow),
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          findUnique: vi.fn().mockResolvedValue(evidenceTxLeaseRow),
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         },
       });
 
       const prisma = makePrisma([consumerTx, evidenceTx]);
       const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
       const failingConsumer = makeConsumer({
-        consume: jest.fn().mockRejectedValue(new Error('side-effect failed')),
+        consume: vi.fn().mockRejectedValue(new Error('side-effect failed')),
       });
 
       const disposition = await dispatchRelay.dispatch(
@@ -1245,14 +1240,14 @@ describe('OutboxRelay', () => {
 
       const consumerTx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue(consumerTxLeaseRow),
+          findUnique: vi.fn().mockResolvedValue(consumerTxLeaseRow),
         },
       });
 
       // Evidence tx: fence was reclaimed while consumer ran
       const evidenceTx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue({
+          findUnique: vi.fn().mockResolvedValue({
             deliveryStatus: 'leased',
             leaseHolder: 'other-holder', // reclaimed!
             deliveryOrdinal: 3, // different ordinal!
@@ -1264,7 +1259,7 @@ describe('OutboxRelay', () => {
       const prisma = makePrisma([consumerTx, evidenceTx]);
       const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
       const failingConsumer = makeConsumer({
-        consume: jest.fn().mockRejectedValue(new Error('late failure')),
+        consume: vi.fn().mockRejectedValue(new Error('late failure')),
       });
 
       const disposition = await dispatchRelay.dispatch(
@@ -1291,7 +1286,7 @@ describe('OutboxRelay', () => {
 
       const consumerTx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue(consumerTxLeaseRow),
+          findUnique: vi.fn().mockResolvedValue(consumerTxLeaseRow),
         },
       });
 
@@ -1300,7 +1295,7 @@ describe('OutboxRelay', () => {
       // bumpFailureCountFenced re-read (post-bump, returns incremented value).
       const evidenceTx = makeTx({
         outboxLease: {
-          findUnique: jest
+          findUnique: vi
             .fn()
             .mockResolvedValueOnce({
               deliveryStatus: 'leased',
@@ -1316,14 +1311,14 @@ describe('OutboxRelay', () => {
               leaseExpiresAt: FIXED_NOW_PLUS_30S,
               failureCount: 3,
             }),
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         },
       });
 
       const prisma = makePrisma([consumerTx, evidenceTx]);
       const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
       const failingConsumer = makeConsumer({
-        consume: jest.fn().mockRejectedValue(new Error('persistent failure')),
+        consume: vi.fn().mockRejectedValue(new Error('persistent failure')),
       });
 
       const disposition = await dispatchRelay.dispatch(
@@ -1360,27 +1355,27 @@ describe('OutboxRelay', () => {
 
       const consumerTx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue(consumerTxLeaseRow),
+          findUnique: vi.fn().mockResolvedValue(consumerTxLeaseRow),
         },
       });
 
       const evidenceTx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue({
+          findUnique: vi.fn().mockResolvedValue({
             deliveryStatus: 'leased',
             leaseHolder: 'holder-1',
             deliveryOrdinal: 1,
             leaseExpiresAt: FIXED_NOW_PLUS_30S,
             failureCount: 0,
           }),
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         },
       });
 
       const prisma = makePrisma([consumerTx, evidenceTx]);
       const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
       const failingConsumer = makeConsumer({
-        consume: jest.fn().mockRejectedValue(new Error('transient error')),
+        consume: vi.fn().mockRejectedValue(new Error('transient error')),
       });
 
       const disposition = await dispatchRelay.dispatch(
@@ -1416,11 +1411,11 @@ describe('OutboxRelay', () => {
 
       const tx = makeTx({
         taskOutboxEvent: {
-          findMany: jest.fn().mockResolvedValue([row]),
+          findMany: vi.fn().mockResolvedValue([row]),
         },
         outboxLease: {
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
-          findUnique: jest
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+          findUnique: vi
             .fn()
             // lease acquisition re-read
             .mockResolvedValueOnce({
@@ -1434,11 +1429,11 @@ describe('OutboxRelay', () => {
             .mockResolvedValueOnce(leaseRow),
         },
         consumerInbox: {
-          findUnique: jest.fn().mockResolvedValue(null),
-          create: jest.fn().mockResolvedValue({}),
+          findUnique: vi.fn().mockResolvedValue(null),
+          create: vi.fn().mockResolvedValue({}),
         },
         deliveryAttemptEvidence: {
-          create: jest.fn().mockResolvedValue({}),
+          create: vi.fn().mockResolvedValue({}),
         },
       });
       const prisma = makePrisma(tx);
@@ -1460,7 +1455,7 @@ describe('OutboxRelay', () => {
     it('returns early when poll returns no events', async () => {
       const tx = makeTx({
         taskOutboxEvent: {
-          findMany: jest.fn().mockResolvedValue([]),
+          findMany: vi.fn().mockResolvedValue([]),
         },
       });
       const prisma = makePrisma(tx);
@@ -1482,9 +1477,9 @@ describe('OutboxRelay', () => {
       const cycleRelay = new OutboxRelay(prisma, clock, idSource, config);
       await cycleRelay.resume();
 
-      jest.spyOn(cycleRelay, 'poll').mockResolvedValue([event]);
-      jest.spyOn(cycleRelay, 'lease').mockResolvedValue([event]);
-      jest.spyOn(cycleRelay, 'dispatch').mockRejectedValue(
+      vi.spyOn(cycleRelay, 'poll').mockResolvedValue([event]);
+      vi.spyOn(cycleRelay, 'lease').mockResolvedValue([event]);
+      vi.spyOn(cycleRelay, 'dispatch').mockRejectedValue(
         new WrongPlanePayloadError(event.id, 'host_id'),
       );
 
@@ -1508,18 +1503,18 @@ describe('OutboxRelay', () => {
       const cycleRelay = new OutboxRelay(prisma, clock, idSource, config);
       await cycleRelay.resume();
 
-      jest.spyOn(cycleRelay, 'poll').mockResolvedValue([evt1, evt2, evt3]);
+      vi.spyOn(cycleRelay, 'poll').mockResolvedValue([evt1, evt2, evt3]);
       // lease() returns all three with fences
       const leased = [
         { ...evt1, _fence: { leaseHolder: 'h', deliveryOrdinal: 1 } },
         { ...evt2, _fence: { leaseHolder: 'h', deliveryOrdinal: 2 } },
         { ...evt3, _fence: { leaseHolder: 'h', deliveryOrdinal: 3 } },
       ];
-      jest.spyOn(cycleRelay, 'lease').mockResolvedValue(leased as any);
+      vi.spyOn(cycleRelay, 'lease').mockResolvedValue(leased as any);
 
       // dispatch: first succeeds, then we stop, remainder skipped
       let callCount = 0;
-      jest.spyOn(cycleRelay, 'dispatch').mockImplementation(async () => {
+      vi.spyOn(cycleRelay, 'dispatch').mockImplementation(async () => {
         callCount++;
         if (callCount === 1) {
           return 'delivered';
@@ -1573,11 +1568,11 @@ describe('OutboxRelay', () => {
 
       const tx = makeTx({
         taskOutboxEvent: {
-          findMany: jest.fn().mockResolvedValue([row]),
+          findMany: vi.fn().mockResolvedValue([row]),
         },
         outboxLease: {
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
-          findUnique: jest
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+          findUnique: vi
             .fn()
             .mockResolvedValueOnce({
               outboxEventId: 'evt-0001',
@@ -1589,11 +1584,11 @@ describe('OutboxRelay', () => {
             .mockResolvedValueOnce(leaseRow),
         },
         consumerInbox: {
-          findUnique: jest.fn().mockResolvedValue(null),
-          create: jest.fn().mockResolvedValue({}),
+          findUnique: vi.fn().mockResolvedValue(null),
+          create: vi.fn().mockResolvedValue({}),
         },
         deliveryAttemptEvidence: {
-          create: jest.fn().mockResolvedValue({}),
+          create: vi.fn().mockResolvedValue({}),
         },
       });
       const prisma = makePrisma(tx);
@@ -1615,7 +1610,7 @@ describe('OutboxRelay', () => {
     it('returns full reconciliation snapshot', async () => {
       const tx = makeTx({
         outboxLease: {
-          findMany: jest
+          findMany: vi
             .fn()
             .mockResolvedValueOnce([
               { deliveryStatus: 'pending' },
@@ -1632,7 +1627,7 @@ describe('OutboxRelay', () => {
             .mockResolvedValueOnce([]),
         },
         quarantineEvidence: {
-          findMany: jest.fn().mockResolvedValue([
+          findMany: vi.fn().mockResolvedValue([
             {
               id: 'q-1',
               outbox_event_id: 'e4',
@@ -1645,21 +1640,21 @@ describe('OutboxRelay', () => {
           ]),
         },
         deliveryAttemptEvidence: {
-          findMany: jest.fn().mockResolvedValue([
+          findMany: vi.fn().mockResolvedValue([
             { outboxEventId: 'e1' },
             { outboxEventId: 'e1' },
             { outboxEventId: 'e3' },
           ]),
         },
         consumerInbox: {
-          findMany: jest.fn().mockResolvedValue([
+          findMany: vi.fn().mockResolvedValue([
             { consumerId: 'c1' },
             { consumerId: 'c1' },
             { consumerId: 'c2' },
           ]),
         },
         taskOutboxEvent: {
-          findMany: jest.fn().mockResolvedValue([
+          findMany: vi.fn().mockResolvedValue([
             { id: 'e1' }, { id: 'e2' }, { id: 'e3' }, { id: 'e4' },
           ]),
         },
@@ -1699,17 +1694,17 @@ describe('OutboxRelay', () => {
     it('detects orphan events (outbox rows with no lease)', async () => {
       const tx = makeTx({
         outboxLease: {
-          findMany: jest
+          findMany: vi
             .fn()
             .mockResolvedValueOnce([{ deliveryStatus: 'pending' }])
             .mockResolvedValueOnce([{ outboxEventId: 'e1' }])
             .mockResolvedValueOnce([]),
         },
-        quarantineEvidence: { findMany: jest.fn().mockResolvedValue([]) },
-        deliveryAttemptEvidence: { findMany: jest.fn().mockResolvedValue([]) },
-        consumerInbox: { findMany: jest.fn().mockResolvedValue([]) },
+        quarantineEvidence: { findMany: vi.fn().mockResolvedValue([]) },
+        deliveryAttemptEvidence: { findMany: vi.fn().mockResolvedValue([]) },
+        consumerInbox: { findMany: vi.fn().mockResolvedValue([]) },
         taskOutboxEvent: {
-          findMany: jest.fn().mockResolvedValue([
+          findMany: vi.fn().mockResolvedValue([
             { id: 'e1' }, { id: 'e2' },
           ]),
         },
@@ -1726,7 +1721,7 @@ describe('OutboxRelay', () => {
       const staleTime = FIXED_NOW_MINUS_90S;
       const tx = makeTx({
         outboxLease: {
-          findMany: jest
+          findMany: vi
             .fn()
             .mockResolvedValueOnce([{ deliveryStatus: 'leased' }])
             .mockResolvedValueOnce([{ outboxEventId: 'e1' }])
@@ -1734,11 +1729,11 @@ describe('OutboxRelay', () => {
               { outboxEventId: 'e1', leaseExpiresAt: staleTime.toISOString() },
             ]),
         },
-        quarantineEvidence: { findMany: jest.fn().mockResolvedValue([]) },
-        deliveryAttemptEvidence: { findMany: jest.fn().mockResolvedValue([]) },
-        consumerInbox: { findMany: jest.fn().mockResolvedValue([]) },
+        quarantineEvidence: { findMany: vi.fn().mockResolvedValue([]) },
+        deliveryAttemptEvidence: { findMany: vi.fn().mockResolvedValue([]) },
+        consumerInbox: { findMany: vi.fn().mockResolvedValue([]) },
         taskOutboxEvent: {
-          findMany: jest.fn().mockResolvedValue([{ id: 'e1' }]),
+          findMany: vi.fn().mockResolvedValue([{ id: 'e1' }]),
         },
       });
       const prisma = makePrisma(tx);
@@ -1758,7 +1753,7 @@ describe('OutboxRelay', () => {
       const row1 = makeOutboxRow({ id: 'evt-0001', recorded_at: '2026-07-30T10:00:00Z' });
       const row2 = makeOutboxRow({ id: 'evt-0002', recorded_at: '2026-07-30T11:00:00Z' });
 
-      const findMany = jest.fn().mockResolvedValue([row1, row2]);
+      const findMany = vi.fn().mockResolvedValue([row1, row2]);
       const tx = makeTx({ taskOutboxEvent: { findMany } });
       const prisma = makePrisma(tx);
       const pollRelay = new OutboxRelay(prisma, clock, idSource, config);
@@ -1780,11 +1775,11 @@ describe('OutboxRelay', () => {
 
       const tx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue(leaseRow),
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          findUnique: vi.fn().mockResolvedValue(leaseRow),
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         },
         consumerInbox: {
-          findUnique: jest
+          findUnique: vi
             .fn()
             .mockResolvedValueOnce(null)
             .mockResolvedValueOnce({
@@ -1792,10 +1787,10 @@ describe('OutboxRelay', () => {
               outboxEventId: 'evt-0001',
               side_effect_digest: 'sha256:abc123',
             }),
-          create: jest.fn().mockResolvedValue({}),
+          create: vi.fn().mockResolvedValue({}),
         },
         deliveryAttemptEvidence: {
-          create: jest.fn().mockResolvedValue({}),
+          create: vi.fn().mockResolvedValue({}),
         },
       });
       const prisma = makePrisma(tx);
@@ -1836,27 +1831,27 @@ describe('OutboxRelay', () => {
 
       const consumerTx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue(consumerTxLeaseRow),
+          findUnique: vi.fn().mockResolvedValue(consumerTxLeaseRow),
         },
       });
 
       const evidenceTx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue({
+          findUnique: vi.fn().mockResolvedValue({
             deliveryStatus: 'leased',
             leaseHolder: 'holder-1',
             deliveryOrdinal: 1,
             leaseExpiresAt: FIXED_NOW_PLUS_30S,
             failureCount: 0,
           }),
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         },
       });
 
       const prisma = makePrisma([consumerTx, evidenceTx]);
       const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
       const failingConsumer = makeConsumer({
-        consume: jest.fn().mockRejectedValue(new Error('transient side-effect failure')),
+        consume: vi.fn().mockRejectedValue(new Error('transient side-effect failure')),
       });
 
       const disposition = await dispatchRelay.dispatch(
@@ -1890,8 +1885,8 @@ describe('OutboxRelay', () => {
       const events = [makeOutboxEvent()];
       const tx = makeTx({
         outboxLease: {
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
-          findUnique: jest.fn().mockResolvedValue({
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+          findUnique: vi.fn().mockResolvedValue({
             outboxEventId: 'evt-0001',
             leaseHolder: `${config.relayId}-id-0001`,
             deliveryOrdinal: 2,
@@ -1921,21 +1916,21 @@ describe('OutboxRelay', () => {
         failureCount: 0,
       });
       const c1Tx = makeTx({
-        outboxLease: { findUnique: jest.fn().mockResolvedValue(c1LeaseRow) },
+        outboxLease: { findUnique: vi.fn().mockResolvedValue(c1LeaseRow) },
       });
       const e1Tx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue({
+          findUnique: vi.fn().mockResolvedValue({
             ...c1LeaseRow, failureCount: 1,
             leaseHolder: 'holder-1', deliveryOrdinal: 1,
           }),
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         },
       });
       const prisma1 = makePrisma([c1Tx, e1Tx]);
       const relay1 = new OutboxRelay(prisma1, clock, idSource, config);
       const failing1 = makeConsumer({
-        consume: jest.fn().mockRejectedValue(new Error('failure 1')),
+        consume: vi.fn().mockRejectedValue(new Error('failure 1')),
       });
 
       const r1 = await relay1.dispatch(event1 as unknown as OutboxEvent, failing1);
@@ -1952,21 +1947,21 @@ describe('OutboxRelay', () => {
         failureCount: 1,
       });
       const c2Tx = makeTx({
-        outboxLease: { findUnique: jest.fn().mockResolvedValue(c2LeaseRow) },
+        outboxLease: { findUnique: vi.fn().mockResolvedValue(c2LeaseRow) },
       });
       const e2Tx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue({
+          findUnique: vi.fn().mockResolvedValue({
             ...c2LeaseRow, failureCount: 2,
             leaseHolder: 'holder-2', deliveryOrdinal: 2,
           }),
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         },
       });
       const prisma2 = makePrisma([c2Tx, e2Tx]);
       const relay2 = new OutboxRelay(prisma2, clock, idSource, config);
       const failing2 = makeConsumer({
-        consume: jest.fn().mockRejectedValue(new Error('failure 2')),
+        consume: vi.fn().mockRejectedValue(new Error('failure 2')),
       });
 
       const r2 = await relay2.dispatch(event2 as unknown as OutboxEvent, failing2);
@@ -1983,21 +1978,21 @@ describe('OutboxRelay', () => {
         failureCount: 2,
       });
       const c3Tx = makeTx({
-        outboxLease: { findUnique: jest.fn().mockResolvedValue(c3LeaseRow) },
+        outboxLease: { findUnique: vi.fn().mockResolvedValue(c3LeaseRow) },
       });
       const e3Tx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue({
+          findUnique: vi.fn().mockResolvedValue({
             ...c3LeaseRow, failureCount: 3,
             leaseHolder: 'holder-3', deliveryOrdinal: 3,
           }),
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         },
       });
       const prisma3 = makePrisma([c3Tx, e3Tx]);
       const relay3 = new OutboxRelay(prisma3, clock, idSource, config);
       const failing3 = makeConsumer({
-        consume: jest.fn().mockRejectedValue(new Error('failure 3')),
+        consume: vi.fn().mockRejectedValue(new Error('failure 3')),
       });
 
       const r3 = await relay3.dispatch(event3 as unknown as OutboxEvent, failing3);
@@ -2066,18 +2061,18 @@ describe('OutboxRelay', () => {
         leaseExpiresAt: FIXED_NOW_PLUS_30S,
       });
       const consumerTx = makeTx({
-        outboxLease: { findUnique: jest.fn().mockResolvedValue(consumerTxLeaseRow) },
+        outboxLease: { findUnique: vi.fn().mockResolvedValue(consumerTxLeaseRow) },
       });
       const evidenceTx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue({
+          findUnique: vi.fn().mockResolvedValue({
             deliveryStatus: 'leased',
             leaseHolder: 'holder-1',
             deliveryOrdinal: 1,
             leaseExpiresAt: FIXED_NOW_PLUS_30S,
             failureCount: 0,
           }),
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         },
       });
       const prisma = makePrisma([consumerTx, evidenceTx]);
@@ -2085,7 +2080,7 @@ describe('OutboxRelay', () => {
 
       const longMessage = 'x'.repeat(5000);
       const failingConsumer = makeConsumer({
-        consume: jest.fn().mockRejectedValue(new Error(longMessage)),
+        consume: vi.fn().mockRejectedValue(new Error(longMessage)),
       });
 
       await dispatchRelay.dispatch(event as unknown as OutboxEvent, failingConsumer);
@@ -2109,25 +2104,25 @@ describe('OutboxRelay', () => {
         leaseExpiresAt: FIXED_NOW_PLUS_30S,
       });
       const consumerTx = makeTx({
-        outboxLease: { findUnique: jest.fn().mockResolvedValue(consumerTxLeaseRow) },
+        outboxLease: { findUnique: vi.fn().mockResolvedValue(consumerTxLeaseRow) },
       });
       const evidenceTx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue({
+          findUnique: vi.fn().mockResolvedValue({
             deliveryStatus: 'leased',
             leaseHolder: 'holder-1',
             deliveryOrdinal: 1,
             leaseExpiresAt: FIXED_NOW_PLUS_30S,
             failureCount: 0,
           }),
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         },
       });
       const prisma = makePrisma([consumerTx, evidenceTx]);
       const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
 
       const failingConsumer = makeConsumer({
-        consume: jest.fn().mockRejectedValue(
+        consume: vi.fn().mockRejectedValue(
           new Error(`auth failed with ${GITHUB_PAT_FULL}`),
         ),
       });
@@ -2151,25 +2146,25 @@ describe('OutboxRelay', () => {
         leaseExpiresAt: FIXED_NOW_PLUS_30S,
       });
       const consumerTx = makeTx({
-        outboxLease: { findUnique: jest.fn().mockResolvedValue(consumerTxLeaseRow) },
+        outboxLease: { findUnique: vi.fn().mockResolvedValue(consumerTxLeaseRow) },
       });
       const evidenceTx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue({
+          findUnique: vi.fn().mockResolvedValue({
             deliveryStatus: 'leased',
             leaseHolder: 'holder-1',
             deliveryOrdinal: 1,
             leaseExpiresAt: FIXED_NOW_PLUS_30S,
             failureCount: 0,
           }),
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         },
       });
       const prisma = makePrisma([consumerTx, evidenceTx]);
       const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
 
       const failingConsumer = makeConsumer({
-        consume: jest.fn().mockRejectedValue(
+        consume: vi.fn().mockRejectedValue(
           new Error(`slack error: ${SLACK_BOT_FULL}`),
         ),
       });
@@ -2194,25 +2189,25 @@ describe('OutboxRelay', () => {
         leaseExpiresAt: FIXED_NOW_PLUS_30S,
       });
       const consumerTx = makeTx({
-        outboxLease: { findUnique: jest.fn().mockResolvedValue(consumerTxLeaseRow) },
+        outboxLease: { findUnique: vi.fn().mockResolvedValue(consumerTxLeaseRow) },
       });
       const evidenceTx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue({
+          findUnique: vi.fn().mockResolvedValue({
             deliveryStatus: 'leased',
             leaseHolder: 'holder-1',
             deliveryOrdinal: 1,
             leaseExpiresAt: FIXED_NOW_PLUS_30S,
             failureCount: 0,
           }),
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         },
       });
       const prisma = makePrisma([consumerTx, evidenceTx]);
       const dispatchRelay = new OutboxRelay(prisma, clock, idSource, config);
 
       const failingConsumer = makeConsumer({
-        consume: jest.fn().mockRejectedValue(
+        consume: vi.fn().mockRejectedValue(
           new Error(`stripe: ${STRIPE_LIVE_FULL}`),
         ),
       });
@@ -2236,7 +2231,7 @@ describe('OutboxRelay', () => {
       // relay poll finds nothing — the consumer is never notified.
       const tx = makeTx({
         taskOutboxEvent: {
-          findMany: jest.fn().mockResolvedValue([]), // ← outbox row skipped
+          findMany: vi.fn().mockResolvedValue([]), // ← outbox row skipped
         },
       });
       const prisma = makePrisma(tx);
@@ -2266,11 +2261,11 @@ describe('OutboxRelay', () => {
 
       const tx = makeTx({
         taskOutboxEvent: {
-          findMany: jest.fn().mockResolvedValue([row]),
+          findMany: vi.fn().mockResolvedValue([row]),
         },
         outboxLease: {
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
-          findUnique: jest
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+          findUnique: vi
             .fn()
             .mockResolvedValueOnce({
               outboxEventId: 'evt-0001',
@@ -2282,11 +2277,11 @@ describe('OutboxRelay', () => {
             .mockResolvedValueOnce(leaseRow),
         },
         consumerInbox: {
-          findUnique: jest.fn().mockResolvedValue(null),
-          create: jest.fn().mockResolvedValue({}),
+          findUnique: vi.fn().mockResolvedValue(null),
+          create: vi.fn().mockResolvedValue({}),
         },
         deliveryAttemptEvidence: {
-          create: jest.fn().mockResolvedValue({}),
+          create: vi.fn().mockResolvedValue({}),
         },
       });
       const prisma = makePrisma(tx);
@@ -2324,15 +2319,15 @@ describe('OutboxRelay', () => {
       // table read was deleted or bypassed.
       const tx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue(leaseRow),
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          findUnique: vi.fn().mockResolvedValue(leaseRow),
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         },
         consumerInbox: {
-          findUnique: jest.fn().mockResolvedValue(null), // ← ALWAYS null: no dedup
-          create: jest.fn().mockResolvedValue({}),
+          findUnique: vi.fn().mockResolvedValue(null), // ← ALWAYS null: no dedup
+          create: vi.fn().mockResolvedValue({}),
         },
         deliveryAttemptEvidence: {
-          create: jest.fn().mockResolvedValue({}),
+          create: vi.fn().mockResolvedValue({}),
         },
       });
       const prisma = makePrisma(tx);
@@ -2370,11 +2365,11 @@ describe('OutboxRelay', () => {
 
       const tx = makeTx({
         outboxLease: {
-          findUnique: jest.fn().mockResolvedValue(leaseRow),
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          findUnique: vi.fn().mockResolvedValue(leaseRow),
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         },
         consumerInbox: {
-          findUnique: jest
+          findUnique: vi
             .fn()
             .mockResolvedValueOnce(null)      // first dispatch: no entry
             .mockResolvedValueOnce({           // second dispatch: entry exists
@@ -2382,10 +2377,10 @@ describe('OutboxRelay', () => {
               outboxEventId: 'evt-0001',
               side_effect_digest: 'sha256:abc123',
             }),
-          create: jest.fn().mockResolvedValue({}),
+          create: vi.fn().mockResolvedValue({}),
         },
         deliveryAttemptEvidence: {
-          create: jest.fn().mockResolvedValue({}),
+          create: vi.fn().mockResolvedValue({}),
         },
       });
       const prisma = makePrisma(tx);

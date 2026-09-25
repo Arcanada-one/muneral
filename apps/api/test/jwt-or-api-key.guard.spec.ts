@@ -1,14 +1,9 @@
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { JwtOrApiKeyGuard } from '../src/auth/guards/jwt-or-api-key.guard.js';
 import { ApiKeyGuard } from '../src/auth/guards/api-key.guard.js';
-// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
-// Its type, though, comes from @types/jest (already in tsconfig `types`),
-// which is what the 339 existing jest.fn() call sites are written against —
-// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
-// and would red 416 lines that are not otherwise wrong. Value from one,
-// type from the other.
-import { jest as _jestRuntime } from '@jest/globals';
-const jest = _jestRuntime as unknown as typeof globalThis.jest;
+// vitest exposes describe/it/expect as globals (vitest.config.ts `globals: true`);
+// `vi` is the one name that must be imported, exactly as `jest` had to be.
+import { vi, type Mock } from 'vitest';
 
 function makeContext(authHeader?: string): ExecutionContext {
   return {
@@ -21,11 +16,11 @@ function makeContext(authHeader?: string): ExecutionContext {
 }
 
 describe('JwtOrApiKeyGuard', () => {
-  let apiKeyGuard: { canActivate: jest.Mock };
+  let apiKeyGuard: { canActivate: Mock };
   let guard: JwtOrApiKeyGuard;
 
   beforeEach(() => {
-    apiKeyGuard = { canActivate: jest.fn() };
+    apiKeyGuard = { canActivate: vi.fn() };
     guard = new JwtOrApiKeyGuard(apiKeyGuard as unknown as ApiKeyGuard);
   });
 
@@ -48,7 +43,7 @@ describe('JwtOrApiKeyGuard', () => {
 
   it('falls back to JWT passport strategy when no mun_sk_ bearer is present', () => {
     const ctx = makeContext('Bearer some.jwt.token');
-    const superCanActivate = jest
+    const superCanActivate = vi
       .spyOn(Object.getPrototypeOf(Object.getPrototypeOf(guard)), 'canActivate')
       .mockReturnValue(true);
 
@@ -62,7 +57,7 @@ describe('JwtOrApiKeyGuard', () => {
 
   it('falls back to JWT passport strategy when Authorization header is absent', () => {
     const ctx = makeContext(undefined);
-    const superCanActivate = jest
+    const superCanActivate = vi
       .spyOn(Object.getPrototypeOf(Object.getPrototypeOf(guard)), 'canActivate')
       .mockReturnValue(true);
 

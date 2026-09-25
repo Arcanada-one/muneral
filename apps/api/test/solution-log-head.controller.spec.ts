@@ -1,24 +1,19 @@
 import { GUARDS_METADATA } from '@nestjs/common/constants';
 import { ApiKeyGuard } from '../src/auth/guards/api-key.guard.js';
 import { SolutionLogHeadController } from '../src/solution-log-head/solution-log-head.controller.js';
-// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
-// Its type, though, comes from @types/jest (already in tsconfig `types`),
-// which is what the 339 existing jest.fn() call sites are written against —
-// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
-// and would red 416 lines that are not otherwise wrong. Value from one,
-// type from the other.
-import { jest as _jestRuntime } from '@jest/globals';
-const jest = _jestRuntime as unknown as typeof globalThis.jest;
+// vitest exposes describe/it/expect as globals (vitest.config.ts `globals: true`);
+// `vi` is the one name that must be imported, exactly as `jest` had to be.
+import { vi } from 'vitest';
 
 describe('SolutionLogHeadController', () => {
   const service = {
-    commitHead: jest.fn(),
-    getCurrentHead: jest.fn(),
+    commitHead: vi.fn(),
+    getCurrentHead: vi.fn(),
   };
   const controller = new SolutionLogHeadController(service as never);
   const req = { apiKeyAgent: { id: 'agent-from-api-key' } } as never;
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('is guarded by API-key authentication', () => {
     expect(Reflect.getMetadata(GUARDS_METADATA, SolutionLogHeadController)).toContain(

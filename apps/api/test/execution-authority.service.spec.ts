@@ -19,14 +19,9 @@ import {
 } from '../src/execution-authority/execution-authority.errors.js';
 import { commandDigest } from '../src/execution-authority/canonical-json.js';
 import { EvidenceRefValidationError } from '../src/execution-authority/evidence-ref.validator.js';
-// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
-// Its type, though, comes from @types/jest (already in tsconfig `types`),
-// which is what the 339 existing jest.fn() call sites are written against —
-// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
-// and would red 416 lines that are not otherwise wrong. Value from one,
-// type from the other.
-import { jest as _jestRuntime } from '@jest/globals';
-const jest = _jestRuntime as unknown as typeof globalThis.jest;
+// vitest exposes describe/it/expect as globals (vitest.config.ts `globals: true`);
+// `vi` is the one name that must be imported, exactly as `jest` had to be.
+import { vi } from 'vitest';
 import { createRequire } from 'node:module';
 
 // ESM has no `require`; these call sites load lazily inside test bodies
@@ -95,28 +90,28 @@ const JOURNAL_VERSION_RACE = () =>
 function makeTx(overrides: Record<string, any> = {}): any {
   return {
     taskExecutionState: {
-      findUnique: jest.fn().mockResolvedValue(null),
-      create: jest.fn().mockResolvedValue({}),
-      updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+      findUnique: vi.fn().mockResolvedValue(null),
+      create: vi.fn().mockResolvedValue({}),
+      updateMany: vi.fn().mockResolvedValue({ count: 1 }),
     },
     taskExecutionAttempt: {
-      findUnique: jest.fn().mockResolvedValue(null),
-      create: jest.fn().mockResolvedValue({}),
-      update: jest.fn().mockResolvedValue({}),
+      findUnique: vi.fn().mockResolvedValue(null),
+      create: vi.fn().mockResolvedValue({}),
+      update: vi.fn().mockResolvedValue({}),
     },
     taskExecutionTransition: {
-      findFirst: jest.fn().mockResolvedValue(null),
-      findMany: jest.fn().mockResolvedValue([]),
-      create: jest.fn().mockResolvedValue({}),
+      findFirst: vi.fn().mockResolvedValue(null),
+      findMany: vi.fn().mockResolvedValue([]),
+      create: vi.fn().mockResolvedValue({}),
     },
     // MUN-0021: Outbox tables added to execution-authority transaction
     taskOutboxEvent: {
-      create: jest.fn().mockResolvedValue({}),
-      findFirst: jest.fn().mockResolvedValue(null),
-      findUnique: jest.fn().mockResolvedValue(null),
+      create: vi.fn().mockResolvedValue({}),
+      findFirst: vi.fn().mockResolvedValue(null),
+      findUnique: vi.fn().mockResolvedValue(null),
     },
     outboxLease: {
-      create: jest.fn().mockResolvedValue({}),
+      create: vi.fn().mockResolvedValue({}),
     },
     ...overrides,
   };
@@ -129,7 +124,7 @@ function makeTx(overrides: Record<string, any> = {}): any {
  */
 function makePrisma(tx: ReturnType<typeof makeTx>): TransactionalClient {
   return {
-    $transaction: jest
+    $transaction: vi
       .fn()
       .mockImplementation(
         async (fn: (t: unknown) => Promise<unknown>) => fn(tx),
@@ -197,7 +192,7 @@ describe('ExecutionAuthorityService', () => {
       // the updateMany count=0 path that throws StaleVersionError.
       const tx = makeTx({
         taskExecutionState: {
-          findUnique: jest.fn().mockResolvedValue({
+          findUnique: vi.fn().mockResolvedValue({
             taskId: 'task-1',
             aggregate_version: 2,
             current_attempt_id: 'att-1',
@@ -206,11 +201,11 @@ describe('ExecutionAuthorityService', () => {
             retry_backoff_ms: 1000,
             retry_eligible_at: null,
           }),
-          updateMany: jest.fn().mockResolvedValue({ count: 0 }),
-          create: jest.fn(),
+          updateMany: vi.fn().mockResolvedValue({ count: 0 }),
+          create: vi.fn(),
         },
         taskExecutionAttempt: {
-          findUnique: jest.fn().mockResolvedValue({
+          findUnique: vi.fn().mockResolvedValue({
             attempt_id: 'att-1',
             task_id: 'task-1',
             ordinal: 1,
@@ -219,15 +214,15 @@ describe('ExecutionAuthorityService', () => {
             started_at: FIXED_NOW,
             completed_at: null,
           }),
-          create: jest.fn(),
-          update: jest.fn(),
+          create: vi.fn(),
+          update: vi.fn(),
         },
         taskExecutionTransition: {
-          findFirst: jest
+          findFirst: vi
             .fn()
             .mockResolvedValueOnce(null)
             .mockResolvedValueOnce(null),
-          create: jest.fn(),
+          create: vi.fn(),
         },
       });
 
@@ -258,10 +253,10 @@ describe('ExecutionAuthorityService', () => {
       // Simulate P2002 from a concurrent identical command
       const tx = makeTx({
         taskExecutionTransition: {
-          findFirst: jest
+          findFirst: vi
             .fn()
             .mockResolvedValueOnce(null), // first attempt: no existing
-          create: jest.fn().mockRejectedValue(JOURNAL_VERSION_RACE()),
+          create: vi.fn().mockRejectedValue(JOURNAL_VERSION_RACE()),
         },
       });
 
@@ -271,7 +266,7 @@ describe('ExecutionAuthorityService', () => {
       // We test this by having the reconcile's findFirst return the committed value
       const reconcileTx = makeTx({
         taskExecutionTransition: {
-          findFirst: jest.fn().mockResolvedValue({
+          findFirst: vi.fn().mockResolvedValue({
             id: 'tx-existing',
             taskId: 'task-1',
             attemptId: 'att-1',
@@ -284,7 +279,7 @@ describe('ExecutionAuthorityService', () => {
           }),
         },
         taskExecutionState: {
-          findUnique: jest.fn().mockResolvedValue({
+          findUnique: vi.fn().mockResolvedValue({
             taskId: 'task-1',
             aggregate_version: 1,
             current_attempt_id: 'att-1',
@@ -299,7 +294,7 @@ describe('ExecutionAuthorityService', () => {
       // Set up $transaction to use tx for first call, reconcileTx for second
       let callCount = 0;
       const prisma2: TransactionalClient = {
-        $transaction: jest.fn().mockImplementation(
+        $transaction: vi.fn().mockImplementation(
           async (fn: (t: unknown) => Promise<unknown>) => {
             callCount++;
             if (callCount === 1) return fn(tx);
@@ -334,7 +329,7 @@ describe('ExecutionAuthorityService', () => {
     it('updates attempt status and startedAt on issued→started', async () => {
       const tx = makeTx({
         taskExecutionState: {
-          findUnique: jest.fn().mockResolvedValue({
+          findUnique: vi.fn().mockResolvedValue({
             taskId: 'task-1',
             aggregate_version: 2,
             current_attempt_id: 'att-1',
@@ -343,10 +338,10 @@ describe('ExecutionAuthorityService', () => {
             retry_backoff_ms: 1000,
             retry_eligible_at: null,
           }),
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         },
         taskExecutionAttempt: {
-          findUnique: jest.fn().mockResolvedValue({
+          findUnique: vi.fn().mockResolvedValue({
             attempt_id: 'att-1',
             task_id: 'task-1',
             ordinal: 1,
@@ -355,7 +350,7 @@ describe('ExecutionAuthorityService', () => {
             started_at: null,
             completed_at: null,
           }),
-          update: jest.fn().mockResolvedValue({}),
+          update: vi.fn().mockResolvedValue({}),
         },
       });
       const prisma = makePrisma(tx);
@@ -395,7 +390,7 @@ describe('ExecutionAuthorityService', () => {
         idCounter = 0;
         const tx = makeTx({
           taskExecutionState: {
-            findUnique: jest.fn().mockResolvedValue({
+            findUnique: vi.fn().mockResolvedValue({
               taskId: 'task-1',
               aggregate_version: 3,
               current_attempt_id: 'att-1',
@@ -404,10 +399,10 @@ describe('ExecutionAuthorityService', () => {
               retry_backoff_ms: 1000,
               retry_eligible_at: null,
             }),
-            updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+            updateMany: vi.fn().mockResolvedValue({ count: 1 }),
           },
           taskExecutionAttempt: {
-            findUnique: jest.fn().mockResolvedValue({
+            findUnique: vi.fn().mockResolvedValue({
               attempt_id: 'att-1',
               task_id: 'task-1',
               ordinal: 1,
@@ -416,7 +411,7 @@ describe('ExecutionAuthorityService', () => {
               started_at: FIXED_NOW,
               completed_at: null,
             }),
-            update: jest.fn().mockResolvedValue({}),
+            update: vi.fn().mockResolvedValue({}),
           },
         });
         const prisma = makePrisma(tx);
@@ -554,6 +549,14 @@ describe('ExecutionAuthorityService', () => {
         ]),
       );
 
+      // A2-304c: the subject call stays inside the polluted window; the ASSERTIONS
+      // moved out of it. Object.prototype gains a non-writable `uri` here (no
+      // `writable` in the descriptor), and vitest's expect writes through the
+      // prototype while building its diff — "Cannot assign to read only property
+      // 'uri'" came from the assertion library, never from the subject. jest's
+      // expect happened not to. What is under test is unchanged: the call below is
+      // still made with every field inherited and nothing own.
+      let outcome: Awaited<ReturnType<typeof executeWithEvidenceRef>>;
       try {
         Object.defineProperties(Object.prototype, {
           uri: {
@@ -574,14 +577,7 @@ describe('ExecutionAuthorityService', () => {
           },
         });
 
-        const { result, tx } = await executeWithEvidenceRef(
-          {},
-          'idem-prototype-pollution',
-        );
-        const err = expectStructuralRejection(result, tx);
-        expect(err.reason).toBe(
-          'evidence reference fields must be own enumerable data properties',
-        );
+        outcome = await executeWithEvidenceRef({}, 'idem-prototype-pollution');
       } finally {
         for (const field of fieldNames) {
           const descriptor = previous.get(field);
@@ -592,6 +588,11 @@ describe('ExecutionAuthorityService', () => {
           }
         }
       }
+
+      const err = expectStructuralRejection(outcome.result, outcome.tx);
+      expect(err.reason).toBe(
+        'evidence reference fields must be own enumerable data properties',
+      );
     });
 
     it('bounds diagnostics for an attacker-sized unknown key', async () => {
@@ -616,7 +617,7 @@ describe('ExecutionAuthorityService', () => {
     it('NEGATIVE-CONTROL: updateMany WHERE clause includes aggregateVersion', async () => {
       const tx = makeTx({
         taskExecutionState: {
-          findUnique: jest.fn().mockResolvedValue({
+          findUnique: vi.fn().mockResolvedValue({
             taskId: 'task-1',
             aggregate_version: 2,
             current_attempt_id: 'att-1',
@@ -625,11 +626,11 @@ describe('ExecutionAuthorityService', () => {
             retry_backoff_ms: 1000,
             retry_eligible_at: null,
           }),
-          create: jest.fn(),
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          create: vi.fn(),
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         },
         taskExecutionAttempt: {
-          findUnique: jest.fn().mockResolvedValue({
+          findUnique: vi.fn().mockResolvedValue({
             attempt_id: 'att-1',
             task_id: 'task-1',
             ordinal: 1,
@@ -638,12 +639,12 @@ describe('ExecutionAuthorityService', () => {
             started_at: null,
             completed_at: null,
           }),
-          create: jest.fn(),
-          update: jest.fn(),
+          create: vi.fn(),
+          update: vi.fn(),
         },
         taskExecutionTransition: {
-          findFirst: jest.fn().mockResolvedValue(null),
-          create: jest.fn().mockResolvedValue({}),
+          findFirst: vi.fn().mockResolvedValue(null),
+          create: vi.fn().mockResolvedValue({}),
         },
       });
       const prisma = makePrisma(tx);
@@ -687,7 +688,7 @@ describe('ExecutionAuthorityService', () => {
     it('rejects stale expectedVersion before any writes', async () => {
       const tx = makeTx({
         taskExecutionState: {
-          findUnique: jest.fn().mockResolvedValue({
+          findUnique: vi.fn().mockResolvedValue({
             taskId: 'task-1',
             aggregate_version: 2,
             current_attempt_id: 'att-1',
@@ -696,11 +697,11 @@ describe('ExecutionAuthorityService', () => {
             retry_backoff_ms: 1000,
             retry_eligible_at: null,
           }),
-          create: jest.fn(),
-          updateMany: jest.fn(),
+          create: vi.fn(),
+          updateMany: vi.fn(),
         },
         taskExecutionAttempt: {
-          findUnique: jest.fn().mockResolvedValue({
+          findUnique: vi.fn().mockResolvedValue({
             attempt_id: 'att-1',
             task_id: 'task-1',
             ordinal: 1,
@@ -709,12 +710,12 @@ describe('ExecutionAuthorityService', () => {
             started_at: null,
             completed_at: null,
           }),
-          create: jest.fn(),
-          update: jest.fn(),
+          create: vi.fn(),
+          update: vi.fn(),
         },
         taskExecutionTransition: {
-          findFirst: jest.fn().mockResolvedValue(null),
-          create: jest.fn(),
+          findFirst: vi.fn().mockResolvedValue(null),
+          create: vi.fn(),
         },
       });
       const prisma = makePrisma(tx);
@@ -743,7 +744,7 @@ describe('ExecutionAuthorityService', () => {
     it('rejects retry when current attempt is not failed', async () => {
       const tx = makeTx({
         taskExecutionState: {
-          findUnique: jest.fn().mockResolvedValue({
+          findUnique: vi.fn().mockResolvedValue({
             taskId: 'task-1',
             aggregate_version: 3,
             current_attempt_id: 'att-1',
@@ -752,11 +753,11 @@ describe('ExecutionAuthorityService', () => {
             retry_backoff_ms: 1000,
             retry_eligible_at: null,
           }),
-          create: jest.fn(),
-          updateMany: jest.fn(),
+          create: vi.fn(),
+          updateMany: vi.fn(),
         },
         taskExecutionAttempt: {
-          findUnique: jest.fn().mockResolvedValue({
+          findUnique: vi.fn().mockResolvedValue({
             attempt_id: 'att-1',
             task_id: 'task-1',
             ordinal: 1,
@@ -765,12 +766,12 @@ describe('ExecutionAuthorityService', () => {
             started_at: null,
             completed_at: null,
           }),
-          create: jest.fn(),
-          update: jest.fn(),
+          create: vi.fn(),
+          update: vi.fn(),
         },
         taskExecutionTransition: {
-          findFirst: jest.fn().mockResolvedValue(null),
-          create: jest.fn(),
+          findFirst: vi.fn().mockResolvedValue(null),
+          create: vi.fn(),
         },
       });
       const prisma = makePrisma(tx);
@@ -813,14 +814,14 @@ describe('ExecutionAuthorityService', () => {
     async function executeWithFailure(err: unknown) {
       const tx = makeTx({
         taskExecutionTransition: {
-          findFirst: jest.fn().mockResolvedValue(null),
-          create: jest.fn().mockRejectedValue(err),
+          findFirst: vi.fn().mockResolvedValue(null),
+          create: vi.fn().mockRejectedValue(err),
         },
       });
       // The reconcile pass finds nothing, so a version race surfaces as
       // StaleVersionError; anything else must never reach this point.
       const prisma: TransactionalClient = {
-        $transaction: jest.fn().mockImplementation(
+        $transaction: vi.fn().mockImplementation(
           async (fn: (t: unknown) => Promise<unknown>) => fn(tx),
         ),
       };
@@ -973,17 +974,17 @@ describe('ExecutionAuthorityService', () => {
       let callCount = 0;
       const tx = makeTx();
       // First attempt: idempotency miss, then conflict on transition create.
-      tx.taskExecutionTransition.findFirst = jest.fn().mockResolvedValue(null);
-      tx.taskExecutionTransition.create = jest.fn().mockRejectedValue(
+      tx.taskExecutionTransition.findFirst = vi.fn().mockResolvedValue(null);
+      tx.taskExecutionTransition.create = vi.fn().mockRejectedValue(
         errorCode === 'P2002' ? JOURNAL_VERSION_RACE() : { code: errorCode },
       );
 
       // Reconcile: findFirst returns existing transition
       const reconcileTx = makeTx({
         taskExecutionTransition: {
-          findFirst: jest.fn().mockResolvedValue(existingTransition),
+          findFirst: vi.fn().mockResolvedValue(existingTransition),
           // findMany for reconstructHistoricalResult: return journal up to version 2
-          findMany: jest.fn().mockResolvedValue([
+          findMany: vi.fn().mockResolvedValue([
             {
               id: 'tx-1', taskId: 'task-1', attemptId: 'att-1',
               aggregateVersion: 1n, eventType: 'attempt:issued',
@@ -1001,21 +1002,21 @@ describe('ExecutionAuthorityService', () => {
               recordedAt: FIXED_NOW,
             },
           ]),
-          create: jest.fn(),
+          create: vi.fn(),
         },
         taskExecutionState: {
-          findUnique: jest.fn().mockResolvedValue({
+          findUnique: vi.fn().mockResolvedValue({
             taskId: 'task-1', aggregateVersion: 1n,
             currentAttemptId: 'att-1', retryBudget: 3, retryCount: 0,
             retryBackoffMs: 1000n, retryEligibleAt: null,
           }),
-          create: jest.fn(),
-          updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+          create: vi.fn(),
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
         },
       });
 
       const prisma2 = {
-        $transaction: jest.fn().mockImplementation(
+        $transaction: vi.fn().mockImplementation(
           async (fn: (t: unknown) => Promise<unknown>, _opts?: any) => {
             callCount++;
             if (callCount === 1) return fn(tx);
@@ -1043,8 +1044,8 @@ describe('ExecutionAuthorityService', () => {
     it('reconcile fails closed when journal is malformed (missing initial issuance)', async () => {
       let callCount = 0;
       const tx = makeTx();
-      tx.taskExecutionTransition.findFirst = jest.fn().mockResolvedValue(null);
-      tx.taskExecutionTransition.create = jest.fn().mockRejectedValue(JOURNAL_VERSION_RACE());
+      tx.taskExecutionTransition.findFirst = vi.fn().mockResolvedValue(null);
+      tx.taskExecutionTransition.create = vi.fn().mockRejectedValue(JOURNAL_VERSION_RACE());
 
       // Pre-compute the digest so reconcile's digest match passes and we reach
       // reconstructHistoricalResult (which should then fail on the malformed journal).
@@ -1069,9 +1070,9 @@ describe('ExecutionAuthorityService', () => {
 
       const reconcileTx = makeTx({
         taskExecutionTransition: {
-          findFirst: jest.fn().mockResolvedValue(existingTransition),
+          findFirst: vi.fn().mockResolvedValue(existingTransition),
           // Malformed: single transition at version 5, no initial issuance
-          findMany: jest.fn().mockResolvedValue([
+          findMany: vi.fn().mockResolvedValue([
             {
               id: 'tx-bad', taskId: 'task-1', attemptId: 'att-1',
               aggregateVersion: 5n, eventType: 'attempt:failed',
@@ -1081,12 +1082,12 @@ describe('ExecutionAuthorityService', () => {
               recordedAt: FIXED_NOW,
             },
           ]),
-          create: jest.fn(),
+          create: vi.fn(),
         },
       });
 
       const prisma2 = {
-        $transaction: jest.fn().mockImplementation(
+        $transaction: vi.fn().mockImplementation(
           async (fn: (t: unknown) => Promise<unknown>, _opts?: any) => {
             callCount++;
             if (callCount === 1) return fn(tx);
