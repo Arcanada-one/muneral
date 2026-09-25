@@ -1,0 +1,9 @@
+README.md: verified — 3 reference(s) resolve at head
+apps/api/docs/agent-read-loop.md: verified — 11 reference(s) resolve at head
+apps/api/docs/agent-status-transitions.md: verified — 6 reference(s) resolve at head
+apps/api/docs/agent-task-contract.md: verified — 6 reference(s) resolve at head
+apps/api/docs/agent-workspace-digest.md: verified — 4 reference(s) resolve at head
+apps/api/docs/migration-import.md: verified — 10 reference(s) resolve at head
+apps/api/docs/task-evidence.md: verified — 4 reference(s) resolve at head
+apps/api/docs/task-redactions.md: verified — 2 reference(s) resolve at head
+docs/graph-admission.md: verified — 4 reference(s) resolve at head

@@ -1,0 +1,197 @@
+{
+ "sources": [],
+ "verdicts": {
+  "code_unit:apps/api/src/agents/agents.controller.ts": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "code_unit:apps/api/src/tasks/tasks.controller.ts": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "code_unit:apps/web/lib/api/tasks.ts": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:DELETE /agents/keys/:keyId": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:DELETE /agents/tasks/:taskId/assign/:agentId": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:DELETE /tasks/:taskId": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:DELETE /tasks/:taskId/checklist/:itemId": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:DELETE /tasks/:taskId/dependencies/:depId": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:GET /agents/tasks": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:GET /agents/workspace/:workspaceId": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:GET /tasks": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:GET /tasks/:taskId": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:GET /tasks/:taskId/activity": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:GET /tasks/:taskId/checklist": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:GET /tasks/:taskId/dependencies": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:GET /tasks/:taskId/dependency-graph": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:GET /tasks/:taskId/evidence": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:GET /tasks/:taskId/field-changes": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:GET /tasks/:taskId/readiness": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:GET /tasks/digest": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:GET /tasks/project/:projectId": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:GET /tasks/project/:projectId/index": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:GET /tasks/project/:projectId/staleness": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:PATCH /tasks/:taskId/checklist/:itemId": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:PATCH /tasks/:taskId/status": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:POST /agents": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:POST /agents/:agentId/keys": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:POST /agents/keys/:keyId/rotate": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:POST /agents/keys/self/revoke": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:POST /agents/tasks/:taskId/assign": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:POST /tasks": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:POST /tasks/:taskId/checklist": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:POST /tasks/:taskId/comments": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:POST /tasks/:taskId/dependencies": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:POST /tasks/:taskId/evidence": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:POST /tasks/:taskId/field-ack": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:POST /tasks/:taskId/redactions": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ]
+ },
+ "log": [
+  "not_measured code_unit:apps/api/src/agents/agents.controller.ts  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured code_unit:apps/api/src/tasks/tasks.controller.ts  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured code_unit:apps/web/lib/api/tasks.ts  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:DELETE /agents/keys/:keyId  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:DELETE /agents/tasks/:taskId/assign/:agentId  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:DELETE /tasks/:taskId  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:DELETE /tasks/:taskId/checklist/:itemId  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:DELETE /tasks/:taskId/dependencies/:depId  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:GET /agents/tasks  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:GET /agents/workspace/:workspaceId  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:GET /tasks  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:GET /tasks/:taskId  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:GET /tasks/:taskId/activity  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:GET /tasks/:taskId/checklist  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:GET /tasks/:taskId/dependencies  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:GET /tasks/:taskId/dependency-graph  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:GET /tasks/:taskId/evidence  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:GET /tasks/:taskId/field-changes  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:GET /tasks/:taskId/readiness  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:GET /tasks/digest  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:GET /tasks/project/:projectId  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:GET /tasks/project/:projectId/index  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:GET /tasks/project/:projectId/staleness  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:PATCH /tasks/:taskId/checklist/:itemId  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:PATCH /tasks/:taskId/status  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:POST /agents  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:POST /agents/:agentId/keys  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:POST /agents/keys/:keyId/rotate  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:POST /agents/keys/self/revoke  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:POST /agents/tasks/:taskId/assign  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:POST /tasks  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:POST /tasks/:taskId/checklist  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:POST /tasks/:taskId/comments  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:POST /tasks/:taskId/dependencies  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:POST /tasks/:taskId/evidence  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:POST /tasks/:taskId/field-ack  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured route:POST /tasks/:taskId/redactions  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+ ]
+}

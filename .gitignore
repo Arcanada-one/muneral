@@ -47,3 +47,10 @@ pids/
 # Python bytecode from the cross-language fixture validator
 __pycache__/
 *.pyc
+
+# Graph-admission verifier scratch (A2-294c). The ChangeAdmissionReceipt's verifier outputs under
+# receipts/graph/verifier-out/ ARE committed evidence -- DEC-AUP-0037 R1 requires the gate to be able
+# to open them at head. The two RelationshipGraph dumps verify.py drops in the same directory are not:
+# they are ~2 MB of scratch each, nothing in the gate opens receipt.graph.path (it rebuilds the graph
+# itself and compares graph_digest), and this is the program repository's own convention.
+receipts/graph/verifier-out/**/graph-*.json
