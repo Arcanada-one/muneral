@@ -5,9 +5,9 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "admitted"
  },
- "captured_at_utc": "2026-09-25T16:08:39Z",
+ "captured_at_utc": "2026-09-25T17:09:15Z",
  "change_set": {
-  "base": "ca694f674904a782d75ea3aa137e41bef3a1a882",
+  "base": "92a77936897f431702b27fef7696c5662fbe405c",
   "files": [
    {
     "kind": "config",
@@ -97,6 +97,18 @@
    {
     "kind": "receipt",
     "new": true,
+    "path": "receipts/canary/A2-355-r182-candidate-5554956.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/A2-355-r182-candidate-5554956.source-evidence.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
     "path": "receipts/canary/muneral-route-presence.plan.json",
     "status": "A"
    },
@@ -137,7 +149,7 @@
     "status": "A"
    }
   ],
-  "head": "7c087818c289e79abc844973c71118049149545d",
+  "head": "49fc6cc36ac33bcff72e93bcc7bbec0b0bd55794",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -145,19 +157,19 @@
  "graph": {
   "builder_version": "1.0.1",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:0440ac2786fdb5f5cdba610e243201e70826cbdba3ca4ce599902c02b8789010",
-  "path": "/tmp/arcana-verify/verifier-out/graph-ca694f674904.json",
-  "source_commit": "ca694f674904a782d75ea3aa137e41bef3a1a882"
+  "graph_digest": "sha256:4f215a3307b47a74b514f69e5333491e17ce441511a198e137773826d811ab68",
+  "path": "/home/dev/aup/arc2/runs/A2-355/vw187/verifier-out/graph-92a77936897f.json",
+  "source_commit": "92a77936897f431702b27fef7696c5662fbe405c"
  },
  "head_graph": {
   "builder_version": "1.0.1",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:e189afb1c20105fb0201e694b0c07a98ed8df1dbf06bc9281d94ac30c0ce1a7b",
-  "path": "/tmp/arcana-verify/verifier-out/graph-head-7c087818c289.json",
-  "source_commit": "7c087818c289e79abc844973c71118049149545d",
+  "graph_digest": "sha256:8e422baa182c7157efc22d10bce53bd4948592e813b9776a89e2c121b494f2fd",
+  "path": "/home/dev/aup/arc2/runs/A2-355/vw187/verifier-out/graph-head-49fc6cc36ac3.json",
+  "source_commit": "49fc6cc36ac33bcff72e93bcc7bbec0b0bd55794",
   "staleness": {
-   "checked_at_utc": "2026-09-25T16:08:49Z",
-   "checked_nodes": 369,
+   "checked_at_utc": "2026-09-25T17:09:26Z",
+   "checked_nodes": 370,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -2280,6 +2292,60 @@
      }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/ctl-bundle-refresh-20260925.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/ctl-bundle-refresh-20260925.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/ctl-bundle-refresh-20260925.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/ctl-bundle-refresh-20260925.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/ctl-bundle-refresh-20260925.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/ctl-bundle-refresh-20260925.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    }
   ],
   "edge_types": "all",
@@ -2289,21 +2355,21 @@
   "inferred_tail": [],
   "max_depth": 3,
   "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
-  "total": 38
+  "total": 39
  },
  "notes": [
   "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.0.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
-  "profile: (auto-detected); baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none"
+  "profile: (auto-detected); baseline: contracts/graph-verified-change/fitness-baseline/Arcanada-one__muneral.v1.json (valid); selected: none; disabled: none"
  ],
  "producer": {
   "tool": "tools/graph/verify.py",
   "version": "1.0.1"
  },
- "receipt_id": "car-verify-20260925T160839Z-7c087818",
+ "receipt_id": "car-verify-20260925T170915Z-49fc6cc3",
  "receipt_path": "receipts/graph/A2-330-muneral-canary.json",
  "repo": {
   "name": "Arcanada-one/muneral",
-  "path": "/home/dev/aup/arc2/runs/A2-351/work/r182"
+  "path": "/home/dev/aup/arc2/runs/A2-355/work/mun"
  },
  "revision_selection": {
   "base": [
@@ -2347,7 +2413,8 @@
    "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
    "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
    "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
-   "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json"
+   "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+   "receipt:receipts/graph/ctl-bundle-refresh-20260925.json"
   ],
   "head": [
    "code_unit:.github/workflows/ci.yml",
@@ -2396,6 +2463,7 @@
    "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
    "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
    "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+   "receipt:receipts/graph/ctl-bundle-refresh-20260925.json",
    "route:GET /health/routes"
   ],
   "schema": "RevisionImpactSelection/v1",
@@ -2403,7 +2471,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-09-25T16:08:49Z",
+  "checked_at_utc": "2026-09-25T17:09:26Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -2412,7 +2480,7 @@
   {
    "content_hash": {
     "base": null,
-    "head": "sha256:3e3d5bf0c902aef82d6854436b405899600bd7f9d4dcfbab8cc7cb924a4ac089"
+    "head": "sha256:e04f4b4a6e148976e9e489a7b0a639b18794f80fd97b8bb734951cdeb980081e"
    },
    "entity": "receipt:receipts/graph/A2-330-muneral-canary.json",
    "node_type": "receipt",
@@ -2808,10 +2876,21 @@
    "path": "receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
    "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
    "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:4906e0dd4306bc264b49e9f9bd8d9120a53ca81e47f6ab758e80bfd0ea4b8d0d",
+    "head": "sha256:4906e0dd4306bc264b49e9f9bd8d9120a53ca81e47f6ab758e80bfd0ea4b8d0d"
+   },
+   "entity": "receipt:receipts/graph/ctl-bundle-refresh-20260925.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/ctl-bundle-refresh-20260925.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
   }
  ],
  "tree": {
-  "commit": "7c087818c289e79abc844973c71118049149545d",
+  "commit": "49fc6cc36ac33bcff72e93bcc7bbec0b0bd55794",
   "dirty": false
  },
  "verdicts": [
@@ -2826,7 +2905,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/app.module.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-config-schema: every key read is declared; v-fitness: no new fitness violation; v-canary-1: canary muneral-route-presence (pre) on a2-351-candidate-local: health-version: status 200, status ok, resident version 0.4.6",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-config-schema: every key read is declared; v-fitness: no new fitness violation; v-canary-1: canary muneral-route-presence (pre) on a2-355-candidate-local: health-version: status 200, status ok, resident version 0.4.6",
    "verdict": "verified",
    "verifier_ids": [
     "v-canary-1",
@@ -2837,7 +2916,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/main.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-config-schema: every key read is declared; v-fitness: no new fitness violation; v-canary-1: canary muneral-route-presence (pre) on a2-351-candidate-local: health-version: status 200, status ok, resident version 0.4.6",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-config-schema: every key read is declared; v-fitness: no new fitness violation; v-canary-1: canary muneral-route-presence (pre) on a2-355-candidate-local: health-version: status 200, status ok, resident version 0.4.6",
    "verdict": "verified",
    "verifier_ids": [
     "v-canary-1",
@@ -2848,7 +2927,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/route-table.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation; v-canary-1: canary muneral-route-presence (pre) on a2-351-candidate-local: route-get-health-routes: status 200 (not 404/405/5xx) and GET /health/routes is in the resident route table",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation; v-canary-1: canary muneral-route-presence (pre) on a2-355-candidate-local: route-get-health-routes: status 200 (not 404/405/5xx) and GET /health/routes is in the resident route table",
    "verdict": "verified",
    "verifier_ids": [
     "v-canary-1",
@@ -2908,7 +2987,7 @@
   },
   {
    "entity": "route:GET /health/routes",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent (route excluded from the prefix), controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-351-candidate-local: route-get-health-routes: status 200 (not 404/405/5xx) and GET /health/routes is in the resident route table",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent (route excluded from the prefix), controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-355-candidate-local: route-get-health-routes: status 200 (not 404/405/5xx) and GET /health/routes is in the resident route table",
    "verdict": "verified",
    "verifier_ids": [
     "v-canary-1",
@@ -2920,8 +2999,8 @@
  ],
  "verifiers": [
   {
-   "command": "/home/dev/aup/arc2/runs/A2-351/work/r182/apps/api/node_modules/.bin/tsc -p /home/dev/aup/arc2/runs/A2-351/work/r182/apps/api/tsconfig.json --noEmit --incremental false --listFiles",
-   "duration_s": 2.66,
+   "command": "/home/dev/aup/arc2/runs/A2-355/work/mun/apps/api/node_modules/.bin/tsc -p /home/dev/aup/arc2/runs/A2-355/work/mun/apps/api/tsconfig.json --noEmit --incremental false --listFiles",
+   "duration_s": 2.97,
    "entities": [
     "code_unit:apps/api/src/app.module.ts",
     "code_unit:apps/api/src/main.ts",
@@ -2939,13 +3018,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "/tmp/arcana-verify/verifier-out/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-09-25T16:08:56Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-355/vw187/verifier-out/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-09-25T17:09:33Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1442 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=ca694f674904, head=7c087818c289, graph=head graph)",
-   "duration_s": 2.83,
+   "command": "tools/graph/contract_diff.py.run_diff(base=92a77936897f, head=49fc6cc36ac3, graph=head graph)",
+   "duration_s": 2.85,
    "entities": [
     "code_unit:apps/api/src/route-table.controller.ts",
     "route:GET /health/routes"
@@ -2957,8 +3036,8 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "/tmp/arcana-verify/verifier-out/v-contract-diff.json",
-   "started_at_utc": "2026-09-25T16:08:59Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-355/vw187/verifier-out/v-contract-diff.json",
+   "started_at_utc": "2026-09-25T17:09:36Z",
    "summary": "46→46 contracts, breaking 0, edges {'verified': 148}"
   },
   {
@@ -2973,8 +3052,8 @@
    "exit_code": 0,
    "id": "v-route-config",
    "kind": "config_schema",
-   "output_ref": "/tmp/arcana-verify/verifier-out/v-route-config.txt",
-   "started_at_utc": "2026-09-25T16:09:02Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-355/vw187/verifier-out/v-route-config.txt",
+   "started_at_utc": "2026-09-25T17:09:39Z",
    "summary": "1 route(s), 0 failed"
   },
   {
@@ -2989,13 +3068,13 @@
    "exit_code": 0,
    "id": "v-workflow-config-b803fcb7f17ed923",
    "kind": "config_schema",
-   "output_ref": "/tmp/arcana-verify/verifier-out/v-workflow-config-b803fcb7f17ed923.txt",
-   "started_at_utc": "2026-09-25T16:09:02Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-355/vw187/verifier-out/v-workflow-config-b803fcb7f17ed923.txt",
+   "started_at_utc": "2026-09-25T17:09:39Z",
    "summary": "bounded workflow configuration shape valid; expressions, shell, actions and hosted execution NOT_MEASURED"
   },
   {
    "command": "verify.py config_schema: keys read at head ⊆ declared keys",
-   "duration_s": 0.25,
+   "duration_s": 0.24,
    "entities": [
     "code_unit:apps/api/src/app.module.ts",
     "code_unit:apps/api/src/main.ts"
@@ -3007,8 +3086,8 @@
    "exit_code": 0,
    "id": "v-config-schema",
    "kind": "config_schema",
-   "output_ref": "/tmp/arcana-verify/verifier-out/v-config-schema.json",
-   "started_at_utc": "2026-09-25T16:09:02Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-355/vw187/verifier-out/v-config-schema.json",
+   "started_at_utc": "2026-09-25T17:09:39Z",
    "summary": "2 source(s), 0 new / 3 frozen undeclared reads, 0 failed; 4 vendored file(s) not attributed to this repository (Arcanada-one/arcanada-universal-program)"
   },
   {
@@ -3037,8 +3116,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/tmp/arcana-verify/verifier-out/v-fitness.json",
-   "started_at_utc": "2026-09-25T16:09:02Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-355/vw187/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-09-25T17:09:39Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -3055,13 +3134,13 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/tmp/arcana-verify/verifier-out/v-doc-reference.txt",
-   "started_at_utc": "2026-09-25T16:09:02Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-355/vw187/verifier-out/v-doc-reference.txt",
+   "started_at_utc": "2026-09-25T17:09:39Z",
    "summary": "2 document(s), 0 failed"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.02,
+   "duration_s": 0.01,
    "entities": [
     "code_unit:apps/api/src/app.module.ts",
     "code_unit:apps/api/src/main.ts",
@@ -3077,19 +3156,19 @@
    "exit_code": 0,
    "id": "v-canary-1",
    "kind": "canary",
-   "output_ref": "receipts/canary/A2-351-r182-candidate-ad10b2a.json",
-   "started_at_utc": "2026-09-25T16:09:02Z",
-   "summary": "receipts/canary/A2-351-r182-candidate-ad10b2a.json: 4 verified / 0 failed / 0 not_measured"
+   "output_ref": "receipts/canary/A2-355-r182-candidate-5554956.json",
+   "started_at_utc": "2026-09-25T17:09:39Z",
+   "summary": "receipts/canary/A2-355-r182-candidate-5554956.json: 4 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.02,
+   "duration_s": 0.01,
    "entities": [],
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/tmp/arcana-verify/verifier-out/v-canary.json",
-   "started_at_utc": "2026-09-25T16:09:02Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-355/vw187/verifier-out/v-canary.json",
+   "started_at_utc": "2026-09-25T17:09:39Z",
    "summary": "1 canary result(s), 1 committed at head; 4 verified / 0 failed / 0 not_measured of 4 entities"
   }
  ],
@@ -3104,7 +3183,7 @@
    {
     "code": "STRUCTURAL_EXCLUSION",
     "rule": "DEC-AUP-0034",
-    "text": "36 affected entity(ies) owe no verdict (receipt: 36): unchanged at both revisions and given no verifier by the matrix"
+    "text": "37 affected entity(ies) owe no verdict (receipt: 37): unchanged at both revisions and given no verifier by the matrix"
    }
   ],
   "required_by_entity": {
@@ -3185,6 +3264,7 @@
    "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json": [],
    "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json": [],
    "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json": [],
+   "receipt:receipts/graph/ctl-bundle-refresh-20260925.json": [],
    "route:GET /health/routes": [
     "canary",
     "contract_diff",
@@ -3193,9 +3273,9 @@
    ]
   },
   "seconds": {
-   "prepare": 5.65,
-   "total": 23.76,
-   "verifiers": 5.87
+   "prepare": 6.89,
+   "total": 24.09,
+   "verifiers": 6.17
   }
  },
  "work_item": "A2-330"
