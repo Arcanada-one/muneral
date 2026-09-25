@@ -18,7 +18,10 @@ jobs:
     # (empty Bearer token -> 401) and the incident would only surface when
     # someone noticed the missing alert. Pattern per TRANS-0027 (transcribator-api).
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: [self-hosted, linux, ci-general]
+    # A2-315: pre-deploy gates run on the dedicated `deploy-gate` lane, not on `ci-general`, where
+    # KC2 batteries held all five slots for hours (argana 95 min, muneral 150 min in the queue on
+    # 2026-09-24/25). The lane's runners carry ONLY that label (--no-default-labels): nothing else lands there.
+    runs-on: [deploy-gate]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - name: Assert OPSBOT_API_KEY is set
@@ -27,7 +30,11 @@ jobs:
         run: bash scripts/ci/opsbot-secret-gate.sh
 
   lint-and-test:
-    runs-on: [self-hosted, linux, ci-general]
+    # A2-315: pre-deploy gates run on the dedicated `deploy-gate` lane, not on `ci-general`, where
+    # KC2 batteries held all five slots for hours (argana 95 min, muneral 150 min in the queue on
+    # 2026-09-24/25). The lane's runners carry ONLY that label (--no-default-labels): nothing else lands there.
+    # Pull requests keep the shared pool; only the push that deploys takes the lane.
+    runs-on: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && fromJSON('["deploy-gate"]') || fromJSON('["self-hosted","linux","ci-general"]') }}
     services:
       postgres:
         image: postgres:16
@@ -158,6 +165,8 @@ jobs:
     with:
       compose_paths: docker-compose.prod.yml
       datarim_ref: '57afdfcd6a2d71aa8e0b577de6e43846e93b60dd'
+      # A2-315: on the deploying push this gate takes the `deploy-gate` lane too (default is ci-general).
+      runner_labels: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && '["deploy-gate"]' || '["self-hosted","linux","ci-general"]' }}
 
   preflight-caller-contract:
     permissions:
@@ -320,6 +329,11 @@ jobs:
   notify-deploy-failure:
     needs: deploy
     if: always() && needs.deploy.result == 'failure'
+    # A2-384: NOT on the `deploy-gate` lane. This job gates nothing and deploys nothing, and the lane
+    # runs on arcana-prd, the same host as `deploy` (`arcana-prd-host`): the one failure it most has to
+    # report (arcana-prd gone, taking the deploy runner with it) would take the lane down with it and
+    # the alert would queue forever. `ci-general` spans two hosts (arcana-devs and arcana-prd), so it
+    # still fires; the cost is that it can wait behind a KC2 battery. A late alert beats a lost one.
     runs-on: [self-hosted, linux, ci-general]
     steps:
       - name: Notify Ops Bot on deploy failure
