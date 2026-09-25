@@ -16,6 +16,8 @@ export const EVIDENCE_ERROR_CODES = [
   'EVIDENCE_CONTENT_TYPE_MALFORMED',
   'EVIDENCE_DIGEST_CONFLICT',
   'EVIDENCE_AGENT_KEY_REQUIRED',
+  // A2-336: raised by done-evidence-guard.ts, not by this route.
+  'EVIDENCE_REQUIRED_FOR_DONE',
 ] as const;
 
 export type EvidenceErrorCode = (typeof EVIDENCE_ERROR_CODES)[number];

@@ -27,6 +27,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { isValidTransition, type Actor, type TaskStatus } from '@muneral/types';
+import { assertEvidenceForDone } from '../tasks/evidence/done-evidence-guard.js';
 import { ActivityService } from '../activity/activity.service.js';
 import { agentStatusAuthorityWhere } from '../auth/agent-task-visibility.js';
 import {
@@ -601,6 +602,9 @@ export class MigrationService {
       if (!isValidTransition(task.status as TaskStatus, dto.toStatus)) {
         throw invalidStatusTransition(task.status, dto.toStatus);
       }
+      // A2-336: the same rule as `PATCH /tasks/:id/status`. `evidenceRefs` are
+      // opaque strings the caller asserts; they are not attachments.
+      await assertEvidenceForDone(tx, taskId, dto.toStatus);
 
       const project = await tx.project.findUniqueOrThrow({
         where: { id: task.projectId },
