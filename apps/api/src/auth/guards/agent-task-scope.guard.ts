@@ -18,8 +18,6 @@ import { assignCompatWindowAdmits } from '../assign-compat-window.js';
 import {
   PROJECT_READ_GRANTS,
   PROJECT_READ_GRANT_LIST,
-  agentHoldsAnyLiveProjectReadGrant,
-  projectHasLiveGrantForAgent,
   projectReadGrantState,
 } from '../project-read-grants.js';
 import type { ProjectReadGrantEntry } from '../project-read-grants.js';
@@ -47,10 +45,11 @@ export interface AgentScopeContext {
    *  handler, so the id the guard checked the grant against is the same id the
    *  query filters on — one value, decided once. */
   workspaceId?: string;
-  /** MUN-0055, 'task-workspace' only: this key holds an index grant on the
-   *  task's project and does not own the task, so the free-text field VALUES
-   *  (title, description) are withheld from the field-change read. The change
-   *  signal — version, hash, changed — is not. See DEC-AUP-0033 R4. */
+  /** 'task-workspace' only: this key does not own the task, so the free-text
+   *  field VALUES (title, description) are withheld from the field-change read.
+   *  The change signal — version, hash, changed — is not. See DEC-AUP-0033 R4.
+   *  A2-294: no longer conditional on holding a project-read grant — as shipped
+   *  by MUN-0055 it was, which withheld from the granted key only. */
   withholdFreeTextValues?: boolean;
 }
 
@@ -96,8 +95,10 @@ export type AgentScopedRequest = Request & {
  * change because unattended pollers already depend on reading tasks inside their
  * own workspace, and silently narrowing a live route to assignments only would
  * break them without evidence of who calls it. The residual — an agent reading an
- * unassigned task's field state inside its OWN workspace — is recorded as a
- * finding with the measurement that would justify closing it.
+ * unassigned task's field state inside its OWN workspace — was recorded as a
+ * finding; A2-294 closed the half that matters by withholding the free-text
+ * VALUES from every key that does not own the task. The route stays reachable and
+ * the change signal stays intact, so the pollers that depend on it keep working.
  *
  * Two deliberate choices about what the refusals reveal. A task that does not
  * exist and a task the agent is not assigned to both answer 403, so a key
@@ -527,17 +528,15 @@ export class AgentTaskScopeGuard implements CanActivate {
    */
   /**
    * The task must be in the agent's workspace. Returns whether the free-text
-   * field VALUES must be withheld from this key (MUN-0055, DEC-AUP-0033 R4):
-   * true only when the key holds a live index grant on THIS task's project and
-   * does not own the task. Every key that holds no grant — which is every key
-   * but the ones the grant list names — takes the early return and issues
-   * exactly the queries it issued before.
+   * field VALUES must be withheld from this key (DEC-AUP-0033 R4): true unless
+   * the key OWNS the task — creator or assignee. It does not matter whether the
+   * key holds a project-read grant, and it did until A2-294; see below.
    */
   private async assertTaskInWorkspace(agent: Agent, taskId: string): Promise<boolean> {
     const task = await this.prisma.task
       .findFirst({
         where: { id: taskId, project: { workspaceId: agent.workspaceId } },
-        select: { id: true, projectId: true },
+        select: { id: true },
       })
       .catch(() => null);
 
@@ -545,14 +544,32 @@ export class AgentTaskScopeGuard implements CanActivate {
       throw new NotFoundException('Task not found');
     }
 
-    const now = new Date();
-    if (!agentHoldsAnyLiveProjectReadGrant(agent.id, now, this.projectReadGrants)) {
-      return false;
-    }
-    if (!projectHasLiveGrantForAgent(agent.id, task.projectId, now, this.projectReadGrants)) {
-      return false;
-    }
-
+    // A2-294 — the withholding is UNCONDITIONAL on the grant list.
+    //
+    // As shipped by MUN-0055 this method returned `false` — do NOT withhold —
+    // for any key holding no live project-read grant, and again for any task
+    // whose project that key's grant did not name. So the withholding protected
+    // the workspace from the MORE privileged key while the less privileged one
+    // read plaintext `title` and `description` of every task in its workspace
+    // by id. Measured live 2026-09-25 with a valid in-workspace key holding no
+    // grant at all: 926 tasks answered 200 with both values in clear and
+    // `valueWithheld` on none (`runs/A2-294/out/title-scan-20260925T000214Z.json`).
+    // DEC-AUP-0033 recorded the DEC-AUP-0029 R7 residual as REMOVED; it had been
+    // removed for grant holders only.
+    //
+    // The rule now reads the way R4 meant it: a key reads the free-text VALUES
+    // of a task it OWNS and of no other. `version`, `hash` and `changed` are
+    // untouched for every task, so the MUN-0018 change signal an unattended
+    // poller depends on still works on a task it does not own — it learns THAT
+    // a title changed, not what to.
+    //
+    // This narrows a live route, which is why it is a reviewed pull request and
+    // not a quiet fix: a caller that was reading an unassigned task's title
+    // VALUE inside its own workspace stops being able to. That capability is the
+    // defect. Nothing here reads `task.projectId` any more, so the select above
+    // drops it and is byte-for-byte the pre-MUN-0055 query again; the workspace
+    // boundary in the where clause never changed. `project-index` keeps its own
+    // use of the grant list — this method is not on that path.
     const own = await this.prisma.task
       .findFirst({
         where: { id: taskId, ...agentOwnTaskWhere(agent.id) },

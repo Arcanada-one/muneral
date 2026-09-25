@@ -140,30 +140,49 @@ describe('AgentTaskScopeGuard', () => {
   });
 
   // --- the weaker 'task-workspace' scope, used only where a route was already open
-  it('admits an UNASSIGNED agent to a task in its own workspace under task-workspace', async () => {
+  //
+  // A2-294. The route stays OPEN to an unassigned key in its own workspace — the
+  // pollers that depend on it are why it was not narrowed to assignments — but
+  // the free-text VALUES are withheld from it. Until A2-294 they were not: the
+  // guard took an early return on "holds no project-read grant" and answered
+  // plaintext `title` and `description`, which is the opposite of DEC-AUP-0033 R4.
+  it('admits an UNASSIGNED agent to a task in its own workspace under task-workspace, and WITHHOLDS its free text', async () => {
     reflector.getAllAndOverride.mockReturnValue('task-workspace');
-    prisma.task.findFirst.mockResolvedValue({ id: 't-1' });
+    prisma.task.findFirst
+      .mockResolvedValueOnce({ id: 't-1' }) // in the workspace
+      .mockResolvedValueOnce(null); // not owned by this key
     const { ctx, req } = makeContext({ apiKeyAgent: AGENT, params: { taskId: 't-1' } });
 
     await expect(guard.canActivate(ctx)).resolves.toBe(true);
     // No assignment lookup at all: this scope is the workspace boundary, and
-    // narrowing a live route to assignments is a separate, evidenced change.
+    // narrowing the ROUTE to assignments is still a separate, evidenced change.
     expect(prisma.taskAgent.findFirst).not.toHaveBeenCalled();
-    expect(prisma.task.findFirst).toHaveBeenCalledWith({
+    expect(prisma.task.findFirst).toHaveBeenNthCalledWith(1, {
       where: { id: 't-1', project: { workspaceId: 'ws-1' } },
-      // MUN-0055: `projectId` joined the select so the guard can ask whether
-      // this key holds an index grant on THIS project. The where clause — the
-      // workspace boundary itself — is byte-for-byte what it was.
-      select: { id: true, projectId: true },
+      // A2-294: `projectId` left the select again — nothing reads it now that the
+      // withholding does not depend on which project holds a grant. The where
+      // clause, the workspace boundary itself, is what it has always been.
+      select: { id: true },
     });
-    // The default grant list does not name this agent, so nothing is withheld
-    // and no ownership query was issued: one task.findFirst, as before.
-    expect(prisma.task.findFirst).toHaveBeenCalledTimes(1);
+    // The ownership query is the only thing the decision rests on, so it is
+    // always issued: the default (empty) grant list no longer short-circuits it.
+    expect(prisma.task.findFirst).toHaveBeenCalledTimes(2);
     expect(req.agentScope).toEqual({
       agentId: 'agent-1',
       kind: 'task-workspace',
-      withholdFreeTextValues: false,
+      withholdFreeTextValues: true,
     });
+  });
+
+  it('does NOT withhold from a key that OWNS the task, with no grant list at all', async () => {
+    reflector.getAllAndOverride.mockReturnValue('task-workspace');
+    prisma.task.findFirst
+      .mockResolvedValueOnce({ id: 't-1' })
+      .mockResolvedValueOnce({ id: 't-1' }); // owned: creator or assignee
+    const { ctx, req } = makeContext({ apiKeyAgent: AGENT, params: { taskId: 't-1' } });
+
+    await expect(guard.canActivate(ctx)).resolves.toBe(true);
+    expect(req.agentScope?.withholdFreeTextValues).toBe(false);
   });
 
   it('refuses a task in another workspace with the same 404 a missing task gets', async () => {
@@ -591,9 +610,11 @@ describe('AgentTaskScopeGuard', () => {
 
     // MUN-0055 (DEC-AUP-0033 R4) — the residual DEC-AUP-0029 R7 accepted for a
     // week: index (which ids) + field-changes (which values) = every title and
-    // description of the project. The renewal removes the second half for the
-    // granted key, on tasks it does not own.
-    describe("'task-workspace' withholding for a granted key", () => {
+    // description of the project. MUN-0055 removed the second half for the
+    // granted key ONLY, which left every other key reading plaintext; A2-294
+    // removed it for every key that does not own the task. These tests keep the
+    // granted key in the picture because it is the case MUN-0055 got right.
+    describe("'task-workspace' withholding, with a grant list present", () => {
       const twGuard = (grants: (typeof GRANT)[]) =>
         new AgentTaskScopeGuard(
           reflector as unknown as Reflector,
@@ -627,26 +648,59 @@ describe('AgentTaskScopeGuard', () => {
         expect(req.agentScope?.withholdFreeTextValues).toBe(false);
       });
 
-      it('does NOT withhold when the task is in a project the grant does not name', async () => {
+      // A2-294 — the three cases below are the ones MUN-0055 got backwards. Each
+      // one is a key with LESS entitlement than the grant holder the withholding
+      // was written for, and each one used to read plaintext.
+      it('withholds when the task is in a project the grant does not name', async () => {
         reflector.getAllAndOverride.mockReturnValue('task-workspace');
-        prisma.task.findFirst.mockResolvedValueOnce({ id: 't-9', projectId: 'p-OTHER' });
+        prisma.task.findFirst
+          .mockResolvedValueOnce({ id: 't-9', projectId: 'p-OTHER' })
+          .mockResolvedValueOnce(null); // not owned
         const { ctx, req } = makeContext({ apiKeyAgent: AGENT, params: { taskId: 't-9' } });
 
         await expect(twGuard([GRANT]).canActivate(ctx)).resolves.toBe(true);
-        expect(req.agentScope?.withholdFreeTextValues).toBe(false);
-        // The grant is per project: no ownership query was needed to say so.
-        expect(prisma.task.findFirst).toHaveBeenCalledTimes(1);
+        expect(req.agentScope?.withholdFreeTextValues).toBe(true);
       });
 
-      it('does NOT withhold once the grant has expired — the index is closed too', async () => {
+      it('withholds once the grant has expired — an expired grant entitles nothing', async () => {
         reflector.getAllAndOverride.mockReturnValue('task-workspace');
-        prisma.task.findFirst.mockResolvedValueOnce({ id: 't-1', projectId: 'p-1' });
+        prisma.task.findFirst
+          .mockResolvedValueOnce({ id: 't-1', projectId: 'p-1' })
+          .mockResolvedValueOnce(null); // not owned
         const { ctx, req } = makeContext({ apiKeyAgent: AGENT, params: { taskId: 't-1' } });
 
         await expect(
           twGuard([{ ...GRANT, until: '2000-01-01T00:00:00Z' }]).canActivate(ctx),
         ).resolves.toBe(true);
-        expect(req.agentScope?.withholdFreeTextValues).toBe(false);
+        expect(req.agentScope?.withholdFreeTextValues).toBe(true);
+      });
+
+      // The invariant behind all of it, stated once so a future change to the
+      // grant list cannot quietly reopen the route: for 'task-workspace' the
+      // grant list is not an input. Ownership is the whole rule.
+      it('answers identically whatever the grant list holds — it is not an input to this scope', async () => {
+        const lists = [
+          [] as (typeof GRANT)[],
+          [GRANT],
+          [{ ...GRANT, projectId: 'p-OTHER' }],
+          [{ ...GRANT, until: '2000-01-01T00:00:00Z' }],
+          [{ ...GRANT, agentId: 'someone-else' }],
+        ];
+        for (const owned of [false, true]) {
+          const answers: (boolean | undefined)[] = [];
+          for (const list of lists) {
+            jest.clearAllMocks();
+            reflector.getAllAndOverride.mockReturnValue('task-workspace');
+            prisma.task.findFirst
+              .mockResolvedValueOnce({ id: 't-1', projectId: 'p-1' })
+              .mockResolvedValueOnce(owned ? { id: 't-1' } : null);
+            const { ctx, req } = makeContext({ apiKeyAgent: AGENT, params: { taskId: 't-1' } });
+            await expect(twGuard(list).canActivate(ctx)).resolves.toBe(true);
+            answers.push(req.agentScope?.withholdFreeTextValues);
+          }
+          // one distinct answer across every grant shape, and it is ownership
+          expect([...new Set(answers)]).toEqual([!owned]);
+        }
       });
     });
 
