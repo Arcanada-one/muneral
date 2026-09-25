@@ -279,23 +279,35 @@ jobs:
         run: |
           set -uo pipefail
           mkdir -p "${RUNNER_TEMP}/canary"
+          rc=0
           python3 -I scripts/canary/canary_probe.py \
             --plan deploy/canary/muneral-route-presence.plan.json \
             --phase post --base-url http://127.0.0.1:3500 --repo . \
-            --out "${RUNNER_TEMP}/canary/muneral-route-presence-post.json"
-          rc=$?
-          # 0 = every entity verified, 3 = some not_measured (absence of measurement, rule C3: not a
-          # regression, never a pass), 1 = a measured failure, 2 = the plan was refused.
-          if [ "$rc" = 3 ]; then echo "::warning title=canary::some entities not_measured"; exit 0; fi
-          exit "$rc"
+            --out "${RUNNER_TEMP}/canary/muneral-route-presence-post.json" || rc=$?
+          # Recorded, not raised here, so the result is uploaded before the verdict fails the run
+          # (every deploy step carries the same preflight `if:`; see preflight-caller-contract).
+          echo "rc=${rc}" >> "$GITHUB_OUTPUT"
 
       - name: Keep the canary result
-        if: always() && steps.canary.outcome != 'skipped'
+        if: steps.preflight.outputs.status != 'fail'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         with:
           name: canary-post-${{ github.sha }}
           path: ${{ runner.temp }}/canary/
           if-no-files-found: error
+
+      # 0 = every entity verified; 3 = some not_measured (absence of measurement, rule C3: not a
+      # regression, never a pass); 1 = a measured failure; 2 = the plan was refused.
+      - name: Canary verdict
+        if: steps.preflight.outputs.status != 'fail'
+        env:
+          CANARY_RC: ${{ steps.canary.outputs.rc }}
+        run: |
+          case "${CANARY_RC}" in
+            0) echo "canary: every entity verified" ;;
+            3) echo "::warning title=canary::some entities not_measured (rule C3)" ;;
+            *) echo "::error title=canary::canary rc=${CANARY_RC:-missing}: a failed entity or a refused plan"; exit 1 ;;
+          esac
 
       - name: Semantic aggregate readback
         if: steps.preflight.outputs.status != 'fail'
