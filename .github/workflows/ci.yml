@@ -283,8 +283,12 @@ jobs:
   notify-deploy-failure:
     needs: deploy
     if: always() && needs.deploy.result == 'failure'
-    # A2-315: the failure alert must not wait behind a battery either.
-    runs-on: [deploy-gate]
+    # A2-384: NOT on the `deploy-gate` lane. This job gates nothing and deploys nothing, and the lane
+    # runs on arcana-prd, the same host as `deploy` (`arcana-prd-host`): the one failure it most has to
+    # report (arcana-prd gone, taking the deploy runner with it) would take the lane down with it and
+    # the alert would queue forever. `ci-general` spans two hosts (arcana-devs and arcana-prd), so it
+    # still fires; the cost is that it can wait behind a KC2 battery. A late alert beats a lost one.
+    runs-on: [self-hosted, linux, ci-general]
     steps:
       - name: Notify Ops Bot on deploy failure
         run: |
