@@ -59,7 +59,7 @@
 import {
   GRANT_RENEWAL_LEAD_DAYS,
   MAX_GRANT_WINDOW_DAYS,
-} from './project-read-grants.js';
+} from "./project-read-grants.js";
 
 export interface WorkspaceDigestGrantEntry {
   agentId: string;
@@ -76,7 +76,7 @@ export interface WorkspaceDigestGrantEntry {
 }
 
 /** Injection token, so a test module can supply its own list. */
-export const WORKSPACE_DIGEST_GRANTS = 'a2284:workspaceDigestGrants';
+export const WORKSPACE_DIGEST_GRANTS = "a2284:workspaceDigestGrants";
 
 /**
  * The ceiling on an entry's window, in days from the day it merges. Imported,
@@ -86,10 +86,43 @@ export const WORKSPACE_DIGEST_GRANTS = 'a2284:workspaceDigestGrants';
 export const MAX_DIGEST_GRANT_WINDOW_DAYS = MAX_GRANT_WINDOW_DAYS;
 
 /**
- * EMPTY ON PURPOSE. Merging the route grants nothing; the first entry is its
- * own pull request naming its decision. See the file comment.
+ * ONE entry, added by A2-294 under DEC-AUP-0049.
+ *
+ * A2-284 shipped this list EMPTY and said the first entry would be its own
+ * reviewed pull request naming its decision. This is that pull request.
+ *
+ * What the decision blocked it on, and why the reader should care: granting a
+ * workspace-wide PLAINTEXT title read to a key also hands it an id for every
+ * task of the workspace, and `GET /tasks/:taskId/field-changes` answers by id.
+ * As shipped, that route withheld `title`/`description` only from a key holding
+ * a project-read grant (DEC-AUP-0033 R4), so a digest-only key would have read
+ * every title AND description in the workspace — measured live, 926 of them.
+ * This pull request closes that door in the same change
+ * (`agent-task-scope.guard.ts`, `assertTaskInWorkspace`), so there is no window
+ * in which the grant exists without the fix.
+ *
+ * `until` is 14 days, not the 30-day ceiling: the ceiling was set for the
+ * NARROWER project index, this read's only no-merge reversal is `until` passing
+ * (agent-key revocation is JWT-only), and 2026-10-09 lands before DEC-AUP-0033's
+ * 2026-10-14 so the workspace's two grants do not outlive each other unobserved.
  */
-export const WORKSPACE_DIGEST_GRANT_LIST: readonly WorkspaceDigestGrantEntry[] = [];
+export const WORKSPACE_DIGEST_GRANT_LIST: readonly WorkspaceDigestGrantEntry[] =
+  [
+    {
+      agentId: "565171f7-a3ca-45a4-b50e-4d8b07cf0b86",
+      agentName: "arcanada-assistant",
+      workspaceId: "05f8cddf-e91f-430b-81e3-d67965aa4de3",
+      until: "2026-10-09T00:00:00Z",
+      decision: "DEC-AUP-0049",
+      evidence:
+        "Live 2026-09-24/25: this key reads GET /tasks/digest -> 403 DIGEST_GRANT_REQUIRED and " +
+        "GET /agents/tasks -> 200, so the credential is valid and the refusal is real. Its measured " +
+        "alternative, GET /tasks/project/:id, answers 200 [] on a board of 880+ rows — an authorised, " +
+        'well-formed, completely false "nothing happened today" (runs/A2-281/probe-routes.txt). The three ' +
+        "KBSYNC-0 secret-bearing titles were re-read live on 2026-09-25 and each is still redacted " +
+        "(runs/A2-294/out/titles-today-*.json), discharging the DEC-AUP-0029 R7 title precondition.",
+    },
+  ];
 
 /** Case-insensitive: the ids are PostgreSQL `uuid`s, which are. */
 const sameId = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
@@ -106,14 +139,16 @@ function entriesFor(
   grants: readonly WorkspaceDigestGrantEntry[],
 ): WorkspaceDigestGrantEntry[] {
   return grants
-    .filter((g) => sameId(g.agentId, agentId) && sameId(g.workspaceId, workspaceId))
+    .filter(
+      (g) => sameId(g.agentId, agentId) && sameId(g.workspaceId, workspaceId),
+    )
     .sort((a, b) => Date.parse(b.until) - Date.parse(a.until));
 }
 
 export type WorkspaceDigestGrantState =
-  | { kind: 'live'; entry: WorkspaceDigestGrantEntry }
-  | { kind: 'expired'; entry: WorkspaceDigestGrantEntry }
-  | { kind: 'none' };
+  | { kind: "live"; entry: WorkspaceDigestGrantEntry }
+  | { kind: "expired"; entry: WorkspaceDigestGrantEntry }
+  | { kind: "none" };
 
 /**
  * Live, expired, or never granted — three answers, not two. A holder whose
@@ -127,9 +162,11 @@ export function workspaceDigestGrantState(
   grants: readonly WorkspaceDigestGrantEntry[] = WORKSPACE_DIGEST_GRANT_LIST,
 ): WorkspaceDigestGrantState {
   const entries = entriesFor(agentId, workspaceId, grants);
-  if (entries.length === 0) return { kind: 'none' };
+  if (entries.length === 0) return { kind: "none" };
   const live = entries.find((e) => now.getTime() < Date.parse(e.until));
-  return live ? { kind: 'live', entry: live } : { kind: 'expired', entry: entries[0] };
+  return live
+    ? { kind: "live", entry: live }
+    : { kind: "expired", entry: entries[0] };
 }
 
 /** When the holder should renew: `GRANT_RENEWAL_LEAD_DAYS` before `until`. */

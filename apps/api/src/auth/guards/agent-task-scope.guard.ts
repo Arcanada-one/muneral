@@ -6,29 +6,30 @@ import {
   Injectable,
   NotFoundException,
   Optional,
-} from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import type { Request } from 'express';
-import { Agent } from '@prisma/client';
-import { PrismaService } from '../../prisma/prisma.service.js';
-import { AGENT_SCOPE_KEY } from '../agent-scope.decorator.js';
-import type { AgentScopeKind } from '../agent-scope.decorator.js';
-import { agentOwnTaskWhere, agentStatusAuthorityWhere } from '../agent-task-visibility.js';
-import { assignCompatWindowAdmits } from '../assign-compat-window.js';
+} from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
+import type { Request } from "express";
+import { Agent } from "@prisma/client";
+import { PrismaService } from "../../prisma/prisma.service.js";
+import { AGENT_SCOPE_KEY } from "../agent-scope.decorator.js";
+import type { AgentScopeKind } from "../agent-scope.decorator.js";
+import {
+  agentOwnTaskWhere,
+  agentStatusAuthorityWhere,
+} from "../agent-task-visibility.js";
+import { assignCompatWindowAdmits } from "../assign-compat-window.js";
 import {
   PROJECT_READ_GRANTS,
   PROJECT_READ_GRANT_LIST,
-  agentHoldsAnyLiveProjectReadGrant,
-  projectHasLiveGrantForAgent,
   projectReadGrantState,
-} from '../project-read-grants.js';
-import type { ProjectReadGrantEntry } from '../project-read-grants.js';
+} from "../project-read-grants.js";
+import type { ProjectReadGrantEntry } from "../project-read-grants.js";
 import {
   WORKSPACE_DIGEST_GRANTS,
   WORKSPACE_DIGEST_GRANT_LIST,
   workspaceDigestGrantState,
-} from '../workspace-digest-grants.js';
-import type { WorkspaceDigestGrantEntry } from '../workspace-digest-grants.js';
+} from "../workspace-digest-grants.js";
+import type { WorkspaceDigestGrantEntry } from "../workspace-digest-grants.js";
 
 /** What an authorised agent request carries downstream: the id the handler must
  *  narrow its answer to. Absent on JWT requests, which are not narrowed. */
@@ -54,7 +55,7 @@ export interface AgentScopeContext {
   withholdFreeTextValues?: boolean;
 }
 
-export type AssignBasis = 'creator' | 'executor' | 'compat-window';
+export type AssignBasis = "creator" | "executor" | "compat-window";
 
 /** MUN-0051: the order in which an assignment may be handed on. A creator may
  *  grant any role; an executor may grant executor or reviewer, never lead. */
@@ -130,7 +131,8 @@ export class AgentTaskScopeGuard implements CanActivate {
     workspaceDigestGrants?: readonly WorkspaceDigestGrantEntry[],
   ) {
     this.projectReadGrants = projectReadGrants ?? PROJECT_READ_GRANT_LIST;
-    this.workspaceDigestGrants = workspaceDigestGrants ?? WORKSPACE_DIGEST_GRANT_LIST;
+    this.workspaceDigestGrants =
+      workspaceDigestGrants ?? WORKSPACE_DIGEST_GRANT_LIST;
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -147,17 +149,18 @@ export class AgentTaskScopeGuard implements CanActivate {
 
     if (!kind) {
       throw new ForbiddenException(
-        'This route is not available to an agent API key. ' +
-          'Authenticate as a user, or ask for the route to be scoped (MUN-0043).',
+        "This route is not available to an agent API key. " +
+          "Authenticate as a user, or ask for the route to be scoped (MUN-0043).",
       );
     }
 
     switch (kind) {
       // MUN-0051: 'task' (read, activity, comment) admits the creator as well
       // as an assignee — see agentOwnTaskWhere.
-      case 'task': {
-        const taskId = this.paramOf(req, 'taskId');
-        if (!taskId) throw new ForbiddenException('No task in scope for this key.');
+      case "task": {
+        const taskId = this.paramOf(req, "taskId");
+        if (!taskId)
+          throw new ForbiddenException("No task in scope for this key.");
         await this.assertOwnTask(agent, taskId);
         break;
       }
@@ -165,9 +168,10 @@ export class AgentTaskScopeGuard implements CanActivate {
       // must be assigned to the task — and is listed separately so the write
       // can be revoked without touching the read/comment/status routes.
       // MUN-0051 deliberately did not widen it to the creator.
-      case 'task-redaction': {
-        const taskId = this.paramOf(req, 'taskId');
-        if (!taskId) throw new ForbiddenException('No task in scope for this key.');
+      case "task-redaction": {
+        const taskId = this.paramOf(req, "taskId");
+        if (!taskId)
+          throw new ForbiddenException("No task in scope for this key.");
         await this.assertAssignedToTask(agent, taskId);
         break;
       }
@@ -177,21 +181,23 @@ export class AgentTaskScopeGuard implements CanActivate {
       // holds no `task_agents` row for it, and the assignment-only rule would
       // refuse it on exactly the task whose evidence it has (MUN-0054). Its own
       // scope name so the write can be revoked without touching the reads.
-      case 'task-evidence': {
-        const taskId = this.paramOf(req, 'taskId');
-        if (!taskId) throw new ForbiddenException('No task in scope for this key.');
+      case "task-evidence": {
+        const taskId = this.paramOf(req, "taskId");
+        if (!taskId)
+          throw new ForbiddenException("No task in scope for this key.");
         await this.assertOwnTask(agent, taskId);
         break;
       }
       // MUN-0051: the assign route — see assertMayAssign.
-      case 'task-assign': {
-        const taskId = this.paramOf(req, 'taskId');
-        if (!taskId) throw new ForbiddenException('No task in scope for this key.');
+      case "task-assign": {
+        const taskId = this.paramOf(req, "taskId");
+        if (!taskId)
+          throw new ForbiddenException("No task in scope for this key.");
         const assignBasis = await this.assertMayAssign(
           agent,
           taskId,
-          this.bodyFieldOf(req, 'agentId'),
-          this.bodyFieldOf(req, 'role'),
+          this.bodyFieldOf(req, "agentId"),
+          this.bodyFieldOf(req, "role"),
           new Date(),
         );
         req.agentScope = { agentId: agent.id, kind, assignBasis };
@@ -205,30 +211,38 @@ export class AgentTaskScopeGuard implements CanActivate {
       // rebuild every title and description of project aup. Renewing the grant
       // without removing that combination would have made a one-week residual
       // permanent, so the renewal removes it instead.
-      case 'task-workspace': {
-        const taskId = this.paramOf(req, 'taskId');
-        if (!taskId) throw new ForbiddenException('No task in scope for this key.');
+      case "task-workspace": {
+        const taskId = this.paramOf(req, "taskId");
+        if (!taskId)
+          throw new ForbiddenException("No task in scope for this key.");
         const withhold = await this.assertTaskInWorkspace(agent, taskId);
-        req.agentScope = { agentId: agent.id, kind, withholdFreeTextValues: withhold };
+        req.agentScope = {
+          agentId: agent.id,
+          kind,
+          withholdFreeTextValues: withhold,
+        };
         return true;
       }
       // MUN-0050: the status route. Creator OR executor assignment, inside the
       // agent's own workspace — see assertCreatorOrExecutorOfTask.
-      case 'task-status': {
-        const taskId = this.paramOf(req, 'taskId');
-        if (!taskId) throw new ForbiddenException('No task in scope for this key.');
+      case "task-status": {
+        const taskId = this.paramOf(req, "taskId");
+        if (!taskId)
+          throw new ForbiddenException("No task in scope for this key.");
         await this.assertCreatorOrExecutorOfTask(agent, taskId);
         break;
       }
-      case 'project-write': {
-        const projectId = this.bodyFieldOf(req, 'projectId');
-        if (!projectId) throw new ForbiddenException('No project in scope for this key.');
+      case "project-write": {
+        const projectId = this.bodyFieldOf(req, "projectId");
+        if (!projectId)
+          throw new ForbiddenException("No project in scope for this key.");
         await this.assertProjectInWorkspace(agent, projectId);
         break;
       }
-      case 'project': {
-        const projectId = this.paramOf(req, 'projectId');
-        if (!projectId) throw new ForbiddenException('No project in scope for this key.');
+      case "project": {
+        const projectId = this.paramOf(req, "projectId");
+        if (!projectId)
+          throw new ForbiddenException("No project in scope for this key.");
         await this.assertProjectInWorkspace(agent, projectId);
         break;
       }
@@ -250,26 +264,37 @@ export class AgentTaskScopeGuard implements CanActivate {
       // consults no grant list. The uniform 404 cost a legitimate holder its
       // diagnosis — two days of a silently dead board read — and bought no
       // secrecy against the one caller who could reach it.
-      case 'project-index': {
-        const projectId = this.paramOf(req, 'projectId');
-        if (!projectId) throw new ForbiddenException('No project in scope for this key.');
+      case "project-index": {
+        const projectId = this.paramOf(req, "projectId");
+        if (!projectId)
+          throw new ForbiddenException("No project in scope for this key.");
         await this.assertProjectInWorkspace(agent, projectId);
-        const state = projectReadGrantState(agent.id, projectId, new Date(), this.projectReadGrants);
-        if (state.kind === 'expired') {
+        const state = projectReadGrantState(
+          agent.id,
+          projectId,
+          new Date(),
+          this.projectReadGrants,
+        );
+        if (state.kind === "expired") {
           // The body is an object, so NestJS serialises it verbatim: a caller
           // reads `code`, not prose. Same convention as migration.errors.ts.
           throw new ForbiddenException({
-            code: 'GRANT_EXPIRED',
+            code: "GRANT_EXPIRED",
             message:
               `The project read grant for this key expired at ${state.entry.until}. ` +
-              'It is renewed by a pull request citing a program decision, not by an environment edit (MUN-0055).',
+              "It is renewed by a pull request citing a program decision, not by an environment edit (MUN-0055).",
             projectId,
             until: state.entry.until,
             decision: state.entry.decision,
           });
         }
-        if (state.kind === 'none') throw new NotFoundException(`Project ${projectId} not found.`);
-        req.agentScope = { agentId: agent.id, kind, projectReadGrant: state.entry };
+        if (state.kind === "none")
+          throw new NotFoundException(`Project ${projectId} not found.`);
+        req.agentScope = {
+          agentId: agent.id,
+          kind,
+          projectReadGrant: state.entry,
+        };
         return true;
       }
       // A2-284: the workspace digest. The only kind with NO route param and no
@@ -283,35 +308,35 @@ export class AgentTaskScopeGuard implements CanActivate {
       // entry is told apart from no entry at all for the MUN-0055 reason: the
       // first grant of DEC-AUP-0029 lapsed and the read simply went quiet for
       // two days.
-      case 'workspace-digest': {
+      case "workspace-digest": {
         const state = workspaceDigestGrantState(
           agent.id,
           agent.workspaceId,
           new Date(),
           this.workspaceDigestGrants,
         );
-        if (state.kind === 'expired') {
+        if (state.kind === "expired") {
           // An object body, so NestJS serialises it verbatim and a caller reads
           // `code` rather than prose — same convention as 'project-index'.
           throw new ForbiddenException({
-            code: 'GRANT_EXPIRED',
-            scope: 'workspace-digest',
+            code: "GRANT_EXPIRED",
+            scope: "workspace-digest",
             message:
               `The workspace digest grant for this key expired at ${state.entry.until}. ` +
-              'It is renewed by a pull request citing a program decision, not by an environment edit (A2-284).',
+              "It is renewed by a pull request citing a program decision, not by an environment edit (A2-284).",
             workspaceId: agent.workspaceId,
             until: state.entry.until,
             decision: state.entry.decision,
           });
         }
-        if (state.kind === 'none') {
+        if (state.kind === "none") {
           throw new ForbiddenException({
-            code: 'DIGEST_GRANT_REQUIRED',
-            scope: 'workspace-digest',
+            code: "DIGEST_GRANT_REQUIRED",
+            scope: "workspace-digest",
             message:
-              'The workspace task digest is available only to an agent API key named in ' +
+              "The workspace task digest is available only to an agent API key named in " +
               "Muneral's workspace digest grant list (A2-284). Scoping the route grants nothing " +
-              'by itself: the grant is per agent and merges as its own pull request.',
+              "by itself: the grant is per agent and merges as its own pull request.",
             workspaceId: agent.workspaceId,
           });
         }
@@ -329,7 +354,9 @@ export class AgentTaskScopeGuard implements CanActivate {
       // could not make that guarantee.
       default: {
         const exhaustive: never = kind;
-        throw new ForbiddenException(`Unhandled agent scope kind: ${String(exhaustive)}`);
+        throw new ForbiddenException(
+          `Unhandled agent scope kind: ${String(exhaustive)}`,
+        );
       }
     }
 
@@ -340,7 +367,7 @@ export class AgentTaskScopeGuard implements CanActivate {
   private paramOf(req: AgentScopedRequest, name: string): string | undefined {
     const params = req.params as Record<string, string> | undefined;
     const value = params?.[name];
-    return typeof value === 'string' && value.length > 0 ? value : undefined;
+    return typeof value === "string" && value.length > 0 ? value : undefined;
   }
 
   /** MUN-0045: 'project-write' reads its scoped id from the body, because
@@ -348,14 +375,20 @@ export class AgentTaskScopeGuard implements CanActivate {
    *  param. This runs BEFORE the body is validated/transformed by the
    *  handler's ValidationPipe, so it reads the raw field defensively rather
    *  than trusting its shape. */
-  private bodyFieldOf(req: AgentScopedRequest, name: string): string | undefined {
+  private bodyFieldOf(
+    req: AgentScopedRequest,
+    name: string,
+  ): string | undefined {
     const body = req.body as Record<string, unknown> | undefined;
     const value = body?.[name];
-    return typeof value === 'string' && value.length > 0 ? value : undefined;
+    return typeof value === "string" && value.length > 0 ? value : undefined;
   }
 
   /** 403 for "no such task" as well as for "not yours": see the class comment. */
-  private async assertAssignedToTask(agent: Agent, taskId: string): Promise<void> {
+  private async assertAssignedToTask(
+    agent: Agent,
+    taskId: string,
+  ): Promise<void> {
     const assignment = await this.prisma.taskAgent
       .findFirst({
         where: {
@@ -441,19 +474,20 @@ export class AgentTaskScopeGuard implements CanActivate {
       );
     if (!task) throw refuseTask();
 
-    const isCreator = task.createdById === agent.id && task.actorType === 'agent';
-    const isExecutor = task.agents.some((a) => a.role === 'executor');
+    const isCreator =
+      task.createdById === agent.id && task.actorType === "agent";
+    const isExecutor = task.agents.some((a) => a.role === "executor");
 
     let basis: AssignBasis;
     let callerRank: number;
     if (isCreator) {
-      basis = 'creator';
+      basis = "creator";
       callerRank = ROLE_RANK.lead;
     } else if (isExecutor) {
-      basis = 'executor';
+      basis = "executor";
       callerRank = ROLE_RANK.executor;
     } else if (assignCompatWindowAdmits(agent.id, assigneeAgentId, role, now)) {
-      basis = 'compat-window';
+      basis = "compat-window";
       callerRank = ROLE_RANK.executor;
     } else {
       throw refuseTask();
@@ -463,7 +497,7 @@ export class AgentTaskScopeGuard implements CanActivate {
     if (requestedRank === undefined || requestedRank > callerRank) {
       throw new ForbiddenException(
         `Agent "${agent.name}" may not grant role "${String(role)}" on task ${taskId}: ` +
-          `a ${basis} may grant ${basis === 'creator' ? 'lead, executor or reviewer' : 'executor or reviewer'} (MUN-0051).`,
+          `a ${basis} may grant ${basis === "creator" ? "lead, executor or reviewer" : "executor or reviewer"} (MUN-0051).`,
       );
     }
 
@@ -498,7 +532,10 @@ export class AgentTaskScopeGuard implements CanActivate {
    * `assertAssignedToTask`, so the status route cannot be used to enumerate
    * task ids either.
    */
-  private async assertCreatorOrExecutorOfTask(agent: Agent, taskId: string): Promise<void> {
+  private async assertCreatorOrExecutorOfTask(
+    agent: Agent,
+    taskId: string,
+  ): Promise<void> {
     const task = await this.prisma.task
       .findFirst({
         where: {
@@ -533,7 +570,10 @@ export class AgentTaskScopeGuard implements CanActivate {
    * but the ones the grant list names — takes the early return and issues
    * exactly the queries it issued before.
    */
-  private async assertTaskInWorkspace(agent: Agent, taskId: string): Promise<boolean> {
+  private async assertTaskInWorkspace(
+    agent: Agent,
+    taskId: string,
+  ): Promise<boolean> {
     const task = await this.prisma.task
       .findFirst({
         where: { id: taskId, project: { workspaceId: agent.workspaceId } },
@@ -542,17 +582,39 @@ export class AgentTaskScopeGuard implements CanActivate {
       .catch(() => null);
 
     if (!task) {
-      throw new NotFoundException('Task not found');
+      throw new NotFoundException("Task not found");
     }
 
-    const now = new Date();
-    if (!agentHoldsAnyLiveProjectReadGrant(agent.id, now, this.projectReadGrants)) {
-      return false;
-    }
-    if (!projectHasLiveGrantForAgent(agent.id, task.projectId, now, this.projectReadGrants)) {
-      return false;
-    }
-
+    // A2-294 (DEC-AUP-0049 R2) — UNCONDITIONAL on ownership, and no longer
+    // conditional on holding a project-read grant.
+    //
+    // As shipped by MUN-0055 (DEC-AUP-0033 R4) this method returned `false` —
+    // DO NOT withhold — for any key that held no live project-read grant, and
+    // again for any task whose project that key's grant did not name. So the
+    // withholding protected the workspace from the MORE privileged key and left
+    // the less privileged one reading plaintext `title` and `description` of
+    // every task in its workspace by id. Measured live 2026-09-25 with a valid
+    // in-workspace key holding no grant at all: 926 tasks answered 200 with both
+    // values in clear and `valueWithheld` on none of them
+    // (`runs/A2-294/out/title-scan-20260925T000214Z.json`).
+    //
+    // That is the DEC-AUP-0029 R7 residual, which DEC-AUP-0033 recorded as
+    // REMOVED. It was removed for grant holders only. Four isolated consilium
+    // roles found it independently before the grant that would have exploited it
+    // was issued: `GET /tasks/:taskId/field-changes` answers by id and needs an
+    // id, and `GET /tasks/digest` is exactly that id source for a whole
+    // workspace.
+    //
+    // The rule now reads the way R4 meant it: a key reads the free-text VALUES
+    // of a task it OWNS (creator or assignee) and of no other. `version`, `hash`
+    // and `changed` are untouched for every task, so the MUN-0018 change signal
+    // an unattended poller depends on still works on tasks it does not own — it
+    // learns THAT a title changed, not what to.
+    //
+    // This does narrow a live route for keys that held no grant, which is why it
+    // is a reviewed pull request and not a quiet fix: a caller that was reading
+    // an unassigned task's title VALUE inside its own workspace stops being able
+    // to. That capability is the defect.
     const own = await this.prisma.task
       .findFirst({
         where: { id: taskId, ...agentOwnTaskWhere(agent.id) },
@@ -566,7 +628,10 @@ export class AgentTaskScopeGuard implements CanActivate {
   /** The project must at least belong to the agent's workspace. Which tasks
    *  inside it the agent may see is then narrowed by the handler from
    *  `req.agentScope`. */
-  private async assertProjectInWorkspace(agent: Agent, projectId: string): Promise<void> {
+  private async assertProjectInWorkspace(
+    agent: Agent,
+    projectId: string,
+  ): Promise<void> {
     const project = await this.prisma.project
       .findFirst({
         where: { id: projectId, workspaceId: agent.workspaceId },
