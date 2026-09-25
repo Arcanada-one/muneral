@@ -578,6 +578,51 @@ function observedInvocation(jsonPath) {
   };
 }
 
+// A2-307. The snapshot below used to cover EVERY tracked path, which made this
+// evidence a function of bytes the assembly battery cannot read: two of the
+// three merges to main before this change touched only `.github/`, `receipts/`
+// and `apps/web/`, and each one staled the evidence of every open pull request
+// — #172, #173/#175 and #174 each needed a hand rebind, and #174 went stale a
+// second time the moment #175 merged. `git rebase origin/main` conflicted
+// inside the evidence file every single time.
+//
+// The scope is a DENYLIST, not an allowlist, and that direction is the whole
+// point. An allowlist of read paths fails OPEN: a new spec imports a directory
+// nobody listed, the evidence verifies green, and the thing it attests is no
+// longer what was measured — the failure an evidence document exists to
+// prevent. A denylist fails NOISY: a directory nobody classified keeps binding
+// and costs one rebind, which is loud and cheap. Three prefixes are declared
+// here, each one a whole subtree the battery provably never opens; everything
+// else tracked — including root `package.json`, `.npmrc`, `turbo.json`,
+// `prisma.config.ts` and `docker-compose.prod.yml`, which
+// `test/deploy-bind.contract.spec.ts` reads by path — still binds.
+//
+// Adding a prefix here is a change to what this evidence attests. It is
+// reviewable as a diff line because the resolved list is recorded INTO the
+// evidence document (`supplementalGit.excludedPrefixes`) and pinned by
+// `test/mutation-evidence.spec.ts`, which also refuses a prefix that matches
+// no tracked path and a prefix that would swallow a path the battery reads.
+const EVIDENCE_SCOPE_EXCLUSIONS = Object.freeze([
+  // CI configuration and the vendored graph-admission bundle. What the battery
+  // runs ON is pinned separately and by value — `tools` and
+  // `toolchainCompatibility` in this document — not by hashing the workflow
+  // that launches it. The bundle's integrity is re-measured by the gate's own
+  // B6 arms, which corrupt a byte of this artefact and require the declared
+  // verifier to refuse it; none of those arms reads this snapshot.
+  '.github/',
+  // The other deployable. A separate Next application with its own toolchain;
+  // no module under it is resolvable from `apps/api`, whose jest `rootDir` is
+  // `apps/api` and whose `moduleNameMapper` reaches only into
+  // `packages/types` and `apps/api/test/support`.
+  'apps/web/',
+  // The admission gate's own records. Inert JSON: never imported, never read
+  // by a spec. This is the prefix that made the receipt of a change stale the
+  // evidence of that same change, which is why
+  // .arcana/derived-artefacts.v1.json had to mandate recomputing the evidence
+  // after the receipt commit and amending it in.
+  'receipts/',
+].sort());
+
 function gitSupplement(repoRoot = REPO_ROOT, evidencePath = 'apps/api/test/assembly/mutation-results.json') {
   // A commit id cannot be embedded in a file contained by that commit: adding
   // the id changes the commit again. It is also unstable after a squash merge.
@@ -585,6 +630,7 @@ function gitSupplement(repoRoot = REPO_ROOT, evidencePath = 'apps/api/test/assem
   // current tracked bytes (including staged new files) and deliberately omits
   // this evidence file, avoiding self-reference while remaining identical in
   // the generation worktree, a clean PR checkout, and the eventual main tree.
+  // It also omits the declared out-of-scope prefixes above.
   const indexed = spawnSync('git', ['write-tree'], {
     cwd: repoRoot,
     encoding: 'utf8',
@@ -615,6 +661,10 @@ function gitSupplement(repoRoot = REPO_ROOT, evidencePath = 'apps/api/test/assem
     run(['read-tree', indexed.stdout.trim()]);
     run(['add', '-u', '--', '.']);
     run(['rm', '--cached', '-f', '--ignore-unmatch', '--', evidencePath]);
+    // -r: each entry is a whole subtree. --ignore-unmatch keeps a prefix that
+    // matches nothing from throwing here; the spec is what refuses it, with a
+    // message that says which prefix went dead.
+    run(['rm', '--cached', '-r', '-f', '--ignore-unmatch', '--', ...EVIDENCE_SCOPE_EXCLUSIONS]);
     const tree = run(['write-tree']);
     const emptyTree = run(['hash-object', '-w', '-t', 'tree', '--stdin'], { input: '' });
     // Raw recursive diff is a compact Git-native manifest of mode/path/blob
@@ -624,6 +674,9 @@ function gitSupplement(repoRoot = REPO_ROOT, evidencePath = 'apps/api/test/assem
       'diff-tree', '--no-commit-id', '--raw', '-r', '-z', '--no-renames', emptyTree, tree,
     ], { trim: false });
     return {
+      // Recorded so the scope is a reviewable line in the evidence, never an
+      // implicit property of whatever the harness happened to do that day.
+      excludedPrefixes: [...EVIDENCE_SCOPE_EXCLUSIONS],
       trackedTreeWithoutEvidence: tree,
       trackedSnapshotDiffSha256: sha256Bytes(diff),
     };
@@ -1063,6 +1116,7 @@ export {
   currentTools,
   enumerateSites,
   gitSupplement,
+  EVIDENCE_SCOPE_EXCLUSIONS,
   recordedOutcomeMatches,
   toolchainCompatibility,
 };
