@@ -22,11 +22,11 @@
   },
   "binding": {
     "algorithm": "sha256",
-    "aggregateSha256": "d5e4a2fbf9d7da08d1dca3cad926f30d3d4e96fcc08396c48a9e6e9325b28554",
+    "aggregateSha256": "84e5ce6141080a5d5189bf03ddb304c136176a6c11568a188441c31a52dfa5ba",
     "files": [
       {
         "path": "apps/api/package.json",
-        "sha256": "dac65df23eee2a8f093127256f4500fb9bd5707951942b7e27430e2095859088"
+        "sha256": "919202c86e4a269cb8e4e680b9fdb768e555bbf8d7caf449adea37123657652c"
       },
       {
         "path": "apps/api/src/assembly/assembly.canonical.ts",
@@ -250,7 +250,7 @@
       },
       {
         "path": "apps/api/test/mutation-evidence.spec.ts",
-        "sha256": "23cb6f77d33e3d308f3cea0c5701124406fbea4a6f597d8176f724c494c6e963"
+        "sha256": "0621c127b42a4b5b32be9c16e2d49ccdd7e4c83fb77a5c5fb824244089f961aa"
       },
       {
         "path": "apps/api/tsconfig.json",
@@ -258,15 +258,15 @@
       },
       {
         "path": "apps/api/tsconfig.test.json",
-        "sha256": "a0601bab5138760d64c960a4256e845acdd2624c55da1ddc876b7f5b9093ad05"
+        "sha256": "b45b51f10e6897b5fa212f421842c1334c9e1f7942e446dcf278bb08b9c55d1d"
       },
       {
         "path": "package.json",
-        "sha256": "9ee97b393e1a668fd10f5698ef587908a24124cb06346134381ec790e61de5ff"
+        "sha256": "bed33a36322376b1f9e321b1ce836e3c4cdcec9bd84131d4f05e64e1e01a2e36"
       },
       {
         "path": "pnpm-lock.yaml",
-        "sha256": "6cbe851fb5e5780723c5b64abea2c6aeb187e3986759c72eebad8192797de63b"
+        "sha256": "b9fd7a00c104eccb56944baa49ef119aee98792efb68467fd6018cfae5d84978"
       }
     ]
   },
@@ -276,8 +276,8 @@
       "apps/web/",
       "receipts/"
     ],
-    "trackedTreeWithoutEvidence": "e94c216f97af74036d91fe589f0236274223b1d0",
-    "trackedSnapshotDiffSha256": "f087ed214e335835c87eae05d370f9e80d784da27a56937b7829d3cdee4e99fe"
+    "trackedTreeWithoutEvidence": "5fab58a6baca9ef680167caed94c9296f7382013",
+    "trackedSnapshotDiffSha256": "88676f4d3f9dc9c371954c4434dc57e15c3a7eab95e43485d6eeb4228dae20d1"
   },
   "baseline": {
     "outcome": "SURVIVED",
