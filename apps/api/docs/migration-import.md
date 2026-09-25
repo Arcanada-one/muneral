@@ -5,8 +5,9 @@ Muneral as first-class Work Items, implementing program requirements
 **AUP-DAT-002** (identity), **AUP-DAT-003** (minimal Muneral path),
 **AUP-X01..X05** (import profiles) and **MIG-003** (bootstrap stamp).
 
-The older `POST /sync/datarim/:projectId/import` still works and is unchanged,
-but it is **legacy**: it answers with `{created, updated}` counts and matches
+The older `POST /sync/datarim/:projectId/import` still works, but it is
+**legacy** (and since A2-379 scoped like every other agent route — see the
+README): it answers with `{created, updated, unchanged}` counts and matches
 tasks by title, so it cannot tell you where a card came from, when it was
 actually done, or whether two cards with the same ID are the same work. Use the
 endpoints below for anything that has to be audited, resumed, or read back.

@@ -1,7 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  NotFoundException,
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+} from '@nestjs/common';
+import type { Actor } from '@muneral/types';
 import { SyncService } from '../src/sync/sync.service.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
+import { TasksService } from '../src/tasks/tasks.service.js';
 // ESM has no injected globals, so `jest` must be imported for the RUNTIME.
 // Its type, though, comes from @types/jest (already in tsconfig `types`),
 // which is what the 339 existing jest.fn() call sites are written against —
@@ -15,6 +22,9 @@ const makePrisma = () => ({
   project: {
     findUnique: jest.fn(),
   },
+  agent: {
+    findUnique: jest.fn().mockResolvedValue({ workspaceId: 'ws-1' }),
+  },
   task: {
     findMany: jest.fn().mockResolvedValue([]),
     findFirst: jest.fn(),
@@ -22,6 +32,15 @@ const makePrisma = () => ({
     update: jest.fn((args) => Promise.resolve({ id: args.where.id, ...args.data })),
   },
 });
+
+// A2-379: the import writes only through TasksService — never raw Prisma.
+const makeTasks = () => ({
+  create: jest.fn((_actor, dto) => Promise.resolve({ id: 'task-new', ...dto })),
+  update: jest.fn((id) => Promise.resolve({ id })),
+  updateStatus: jest.fn((id) => Promise.resolve({ id })),
+});
+
+const AGENT: Actor = { type: 'agent', id: 'agent-1', name: 'importer' };
 
 const MOCK_PROJECT = {
   id: 'proj-1',
@@ -32,14 +51,17 @@ const MOCK_PROJECT = {
 describe('SyncService', () => {
   let service: SyncService;
   let prisma: ReturnType<typeof makePrisma>;
+  let tasks: ReturnType<typeof makeTasks>;
 
   beforeEach(async () => {
     prisma = makePrisma();
+    tasks = makeTasks();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SyncService,
         { provide: PrismaService, useValue: prisma },
+        { provide: TasksService, useValue: tasks },
       ],
     }).compile();
 
@@ -139,23 +161,43 @@ describe('SyncService', () => {
   });
 
   describe('importDatarim', () => {
+    it('refuses anything but an agent actor (A2-379)', async () => {
+      prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
+      await expect(
+        service.importDatarim('proj-1', '### x', { type: 'human', id: 'u-1', name: 'u' }),
+      ).rejects.toThrow(ForbiddenException);
+      await expect(service.importDatarim('proj-1', '### x', undefined)).rejects.toThrow(
+        ForbiddenException,
+      );
+      expect(tasks.create).not.toHaveBeenCalled();
+    });
+
     it('throws NotFoundException for unknown project', async () => {
       prisma.project.findUnique.mockResolvedValue(null);
       await expect(
-        service.importDatarim('unknown', '# Tasks'),
+        service.importDatarim('unknown', '# Tasks', AGENT),
       ).rejects.toThrow(NotFoundException);
+    });
+
+    it("answers 404 for a project outside the key agent's workspace, even without the guard", async () => {
+      prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
+      prisma.agent.findUnique.mockResolvedValue({ workspaceId: 'ws-other' });
+      await expect(
+        service.importDatarim('proj-1', '### only a new title', AGENT),
+      ).rejects.toThrow(NotFoundException);
+      expect(tasks.create).not.toHaveBeenCalled();
     });
 
     it('throws BadRequestException for empty markdown', async () => {
       prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
-      await expect(service.importDatarim('proj-1', '')).rejects.toThrow(
+      await expect(service.importDatarim('proj-1', '', AGENT)).rejects.toThrow(
         BadRequestException,
       );
     });
 
-    it('creates new tasks from parsed markdown', async () => {
+    it('creates new tasks through TasksService, as the key agent', async () => {
       prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
-      prisma.task.findFirst.mockResolvedValue(null); // no existing tasks
+      prisma.task.findMany.mockResolvedValue([]); // no existing tasks
 
       const markdown = `
 # Tasks — Test
@@ -173,23 +215,22 @@ Last Updated: 2026-04-13
 - **Priority:** medium
 `;
 
-      const result = await service.importDatarim('proj-1', markdown);
-      expect(result.created).toBe(2);
-      expect(result.updated).toBe(0);
-      expect(prisma.task.create).toHaveBeenCalledTimes(2);
+      const result = await service.importDatarim('proj-1', markdown, AGENT);
+      expect(result).toEqual({ created: 2, updated: 0, unchanged: 0 });
+      expect(tasks.create).toHaveBeenCalledTimes(2);
+      expect(tasks.create).toHaveBeenCalledWith(
+        AGENT,
+        expect.objectContaining({ projectId: 'proj-1', title: 'Fix critical bug', status: 'in_progress' }),
+      );
+      expect(prisma.task.create).not.toHaveBeenCalled();
     });
 
-    it('updates existing tasks when title matches', async () => {
+    it('moves a matched task through updateStatus when the agent may move it', async () => {
       prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
-      const existingTask = {
-        id: 'task-existing',
-        title: 'Fix critical bug',
-        status: 'todo',
-        priority: 'low',
-        dueDate: null,
-      };
-      prisma.task.findFirst.mockResolvedValue(existingTask);
-      prisma.task.update.mockResolvedValue({ ...existingTask, status: 'in_progress', priority: 'high' });
+      prisma.task.findMany.mockResolvedValue([
+        { id: 'task-existing', status: 'todo', priority: 'low', dueDate: null },
+      ]);
+      prisma.task.findFirst.mockResolvedValue({ id: 'task-existing' }); // creator or executor
 
       const markdown = `
 ### MUN-AAAA: Fix critical bug
@@ -197,20 +238,63 @@ Last Updated: 2026-04-13
 - **Priority:** high
 `;
 
-      const result = await service.importDatarim('proj-1', markdown);
-      expect(result.updated).toBe(1);
-      expect(result.created).toBe(0);
-      expect(prisma.task.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { id: 'task-existing' },
-          data: expect.objectContaining({ status: 'in_progress', priority: 'high' }),
-        }),
-      );
+      const result = await service.importDatarim('proj-1', markdown, AGENT);
+      expect(result).toEqual({ created: 0, updated: 1, unchanged: 0 });
+      expect(tasks.update).toHaveBeenCalledWith('task-existing', AGENT, { priority: 'high' });
+      expect(tasks.updateStatus).toHaveBeenCalledWith('task-existing', AGENT, { status: 'in_progress' });
+      expect(prisma.task.update).not.toHaveBeenCalled();
+      // The authority query is the 'task-status' rule, inside the workspace.
+      const where = (prisma.task.findFirst as jest.Mock).mock.calls[0][0].where;
+      expect(where).toMatchObject({ id: 'task-existing', project: { workspaceId: 'ws-1' } });
+      expect(where.OR).toEqual([
+        { createdById: 'agent-1', actorType: 'agent' },
+        { agents: { some: { agentId: 'agent-1', role: 'executor' } } },
+      ]);
+    });
+
+    it('refuses the whole import when a matched task is not the agent\'s to move', async () => {
+      prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
+      prisma.task.findMany
+        .mockResolvedValueOnce([]) // line 1: new
+        .mockResolvedValueOnce([{ id: 'task-x', status: 'todo', priority: 'medium', dueDate: null }]);
+      prisma.task.findFirst.mockResolvedValue(null);
+
+      await expect(
+        service.importDatarim('proj-1', '### new one\n\n### someone else\n- **Status:** done\n', AGENT),
+      ).rejects.toThrow(ForbiddenException);
+      expect(tasks.create).not.toHaveBeenCalled();
+      expect(tasks.updateStatus).not.toHaveBeenCalled();
+    });
+
+    it('refuses a move TASK_TRANSITIONS forbids, before writing', async () => {
+      prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
+      prisma.task.findMany.mockResolvedValue([
+        { id: 'task-existing', status: 'todo', priority: 'medium', dueDate: null },
+      ]);
+      prisma.task.findFirst.mockResolvedValue({ id: 'task-existing' });
+
+      await expect(
+        service.importDatarim('proj-1', '### t\n- **Status:** done\n', AGENT),
+      ).rejects.toThrow(BadRequestException);
+      expect(tasks.updateStatus).not.toHaveBeenCalled();
+    });
+
+    it('refuses a title that matches more than one task', async () => {
+      prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
+      prisma.task.findMany.mockResolvedValue([
+        { id: 'a', status: 'todo', priority: 'medium', dueDate: null },
+        { id: 'b', status: 'todo', priority: 'medium', dueDate: null },
+      ]);
+
+      await expect(
+        service.importDatarim('proj-1', '### dup\n- **Status:** in_progress\n', AGENT),
+      ).rejects.toThrow(ConflictException);
+      expect(tasks.updateStatus).not.toHaveBeenCalled();
     });
 
     it('ignores invalid status values', async () => {
       prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
-      prisma.task.findFirst.mockResolvedValue(null);
+      prisma.task.findMany.mockResolvedValue([]);
 
       const markdown = `
 ### Invalid status task
@@ -218,11 +302,11 @@ Last Updated: 2026-04-13
 - **Priority:** medium
 `;
 
-      const result = await service.importDatarim('proj-1', markdown);
+      const result = await service.importDatarim('proj-1', markdown, AGENT);
       expect(result.created).toBe(1);
-      // Should default to 'todo' since invalid_status is not valid
-      const createCall = (prisma.task.create as jest.Mock).mock.calls[0][0];
-      expect(createCall.data.status).toBe('todo');
+      // No status is passed, so TasksService.create applies its 'todo' default.
+      const [, dto] = (tasks.create as jest.Mock).mock.calls[0];
+      expect(dto.status).toBeUndefined();
     });
   });
 });
