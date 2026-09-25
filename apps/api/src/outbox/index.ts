@@ -48,3 +48,11 @@ export {
   DEFAULT_MAX_RETRIES,
   DEFAULT_BATCH_SIZE,
 } from './outbox.types.js';
+
+export { OutboxModule } from './outbox.module.js';
+export { OutboxRelayWorker, relayEnabled, relayIntervalMs } from './outbox-relay.worker.js';
+export {
+  WorkOutcomeLedgerConsumer,
+  WORK_OUTCOME_LEDGER_CONSUMER_ID,
+  WORK_OUTCOME_EVENT_TYPES,
+} from './work-outcome-ledger.consumer.js';

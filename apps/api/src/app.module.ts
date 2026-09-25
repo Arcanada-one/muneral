@@ -23,6 +23,7 @@ import { WebhooksModule } from './webhooks/webhooks.module.js';
 import { WsModule } from './ws/ws.module.js';
 import { SolutionLogHeadModule } from './solution-log-head/solution-log-head.module.js';
 import { MigrationModule } from './migration/migration.module.js';
+import { OutboxModule } from './outbox/outbox.module.js';
 
 @Module({
   controllers: [HealthController, RouteTableController],
@@ -61,6 +62,7 @@ import { MigrationModule } from './migration/migration.module.js';
     WsModule,
     SolutionLogHeadModule,
     MigrationModule,
+    OutboxModule,
   ],
   providers: [
     {
