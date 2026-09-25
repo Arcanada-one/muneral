@@ -8,6 +8,7 @@ import { PrismaModule } from './prisma/prisma.module.js';
 
 // Health
 import { HealthController } from './health.controller.js';
+import { RouteTableController } from './route-table.controller.js';
 
 // Feature modules
 import { AuthModule } from './auth/auth.module.js';
@@ -24,7 +25,7 @@ import { SolutionLogHeadModule } from './solution-log-head/solution-log-head.mod
 import { MigrationModule } from './migration/migration.module.js';
 
 @Module({
-  controllers: [HealthController],
+  controllers: [HealthController, RouteTableController],
   imports: [
     PrismaModule,
     ThrottlerModule.forRoot([
