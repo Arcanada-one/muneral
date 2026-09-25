@@ -7,14 +7,9 @@ import { BadRequestException, RequestMethod } from '@nestjs/common';
 import { ApiKeyGuard } from '../src/auth/guards/api-key.guard.js';
 import { JwtOrApiKeyGuard } from '../src/auth/guards/jwt-or-api-key.guard.js';
 import { MigrationController } from '../src/migration/migration.controller.js';
-// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
-// Its type, though, comes from @types/jest (already in tsconfig `types`),
-// which is what the 339 existing jest.fn() call sites are written against —
-// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
-// and would red 416 lines that are not otherwise wrong. Value from one,
-// type from the other.
-import { jest as _jestRuntime } from '@jest/globals';
-const jest = _jestRuntime as unknown as typeof globalThis.jest;
+// vitest exposes describe/it/expect as globals (vitest.config.ts `globals: true`);
+// `vi` is the one name that must be imported, exactly as `jest` had to be.
+import { vi } from 'vitest';
 
 type Handler = (...args: never[]) => unknown;
 
@@ -37,21 +32,21 @@ function routeOf(method: keyof MigrationController): { path: string; verb: numbe
 
 describe('MigrationController', () => {
   const service = {
-    createBatch: jest.fn(),
-    getBatch: jest.fn(),
-    commitBatch: jest.fn(),
-    createWorkItem: jest.fn(),
-    getWorkItemByLegacy: jest.fn(),
-    searchByLegacyId: jest.fn(),
-    transition: jest.fn(),
-    decide: jest.fn(),
-    getReverseMapping: jest.fn(),
+    createBatch: vi.fn(),
+    getBatch: vi.fn(),
+    commitBatch: vi.fn(),
+    createWorkItem: vi.fn(),
+    getWorkItemByLegacy: vi.fn(),
+    searchByLegacyId: vi.fn(),
+    transition: vi.fn(),
+    decide: vi.fn(),
+    getReverseMapping: vi.fn(),
   };
   const controller = new MigrationController(service as never);
   const actor = { type: 'agent' as const, id: 'agent-1', name: 'producer0' };
   const req = { actor } as never;
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('is mounted under the migration prefix', () => {
     expect(Reflect.getMetadata(PATH_METADATA, MigrationController)).toBe('migration');
@@ -99,7 +94,7 @@ describe('MigrationController', () => {
   });
 
   it('answers 201 on a created batch and 200 on a replayed one', async () => {
-    const res = { status: jest.fn() };
+    const res = { status: vi.fn() };
     service.createBatch.mockResolvedValueOnce({ created: true, batch: { id: 'b' } });
     await expect(controller.createBatch({} as never, req, res as never)).resolves.toEqual({ id: 'b' });
     expect(res.status).toHaveBeenCalledWith(201);
@@ -110,7 +105,7 @@ describe('MigrationController', () => {
   });
 
   it('answers 201 on a fresh import and 200 on its replay', async () => {
-    const res = { status: jest.fn() };
+    const res = { status: vi.fn() };
     service.createWorkItem.mockResolvedValueOnce({ replayed: false, body: { ok: 1 } });
     await expect(
       controller.createWorkItem({} as never, req, res as never),

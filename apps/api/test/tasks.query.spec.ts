@@ -1,9 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 // ESM has no injected globals, so `jest` must be imported for the RUNTIME;
-// its type still comes from @types/jest, which every jest.fn() here is
+// its type still comes from @types/jest, which every vi.fn() here is
 // written against. Same split as the other suites in this directory.
-import { jest as _jestRuntime } from '@jest/globals';
-const jest = _jestRuntime as unknown as typeof globalThis.jest;
+// vitest exposes describe/it/expect as globals (vitest.config.ts `globals: true`);
+// `vi` is the one name that must be imported, exactly as `jest` had to be.
+import { vi } from 'vitest';
 import { TasksService } from '../src/tasks/tasks.service.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
 import { ActivityService } from '../src/activity/activity.service.js';
@@ -20,14 +21,14 @@ import { TaskExecutionRecorderService } from '../src/execution-authority/task-ex
  */
 const makePrisma = () => {
   const task = {
-    findMany: jest.fn().mockResolvedValue([]),
-    count: jest.fn().mockResolvedValue(0),
+    findMany: vi.fn().mockResolvedValue([]),
+    count: vi.fn().mockResolvedValue(0),
   };
   return {
     task,
     // $transaction here takes an ARRAY of promises (the batch form), unlike the
     // callback form used by the mutating paths.
-    $transaction: jest.fn((ops: unknown[]) => Promise.all(ops as Promise<unknown>[])),
+    $transaction: vi.fn((ops: unknown[]) => Promise.all(ops as Promise<unknown>[])),
   };
 };
 
@@ -41,9 +42,9 @@ describe('TasksService.query', () => {
       providers: [
         TasksService,
         { provide: PrismaService, useValue: prisma },
-        { provide: ActivityService, useValue: { log: jest.fn() } },
-        { provide: KanbanService, useValue: { notify: jest.fn() } },
-        { provide: TaskFieldStateService, useValue: { initialise: jest.fn() } },
+        { provide: ActivityService, useValue: { log: vi.fn() } },
+        { provide: KanbanService, useValue: { notify: vi.fn() } },
+        { provide: TaskFieldStateService, useValue: { initialise: vi.fn() } },
         // MUN-0040 added a fifth constructor argument after this suite was
         // written. `query` is a read and never reaches the recorder, so an
         // empty stub is the honest substitute — the same one the other

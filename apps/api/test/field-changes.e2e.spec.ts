@@ -15,14 +15,9 @@ import { PrismaService } from '../src/prisma/prisma.service.js';
 import { AuthService } from '../src/auth/auth.service.js';
 import { KanbanService } from '../src/ws/kanban.service.js';
 import { TaskFieldStateService } from '../src/tasks/field-state/task-field-state.service.js';
-// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
-// Its type, though, comes from @types/jest (already in tsconfig `types`),
-// which is what the 339 existing jest.fn() call sites are written against —
-// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
-// and would red 416 lines that are not otherwise wrong. Value from one,
-// type from the other.
-import { jest as _jestRuntime } from '@jest/globals';
-const jest = _jestRuntime as unknown as typeof globalThis.jest;
+// vitest exposes describe/it/expect as globals (vitest.config.ts `globals: true`);
+// `vi` is the one name that must be imported, exactly as `jest` had to be.
+import { vi, type MockInstance } from 'vitest';
 
 // ---------------------------------------------------------------------------
 // Minimal test AppModule: no BullMQ, no WebhooksModule, no WsGateway
@@ -41,7 +36,7 @@ class TestAppModule {}
 describe('Field-change tracking (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
-  let disconnectSpy: jest.Spied<() => unknown>;
+  let disconnectSpy: MockInstance<() => unknown>;
   let authSvc: AuthService;
   let fsSvc: TaskFieldStateService;
 
@@ -68,7 +63,7 @@ describe('Field-change tracking (e2e)', () => {
     await app.init();
 
     prisma = moduleRef.get(PrismaService);
-    disconnectSpy = jest.spyOn(prisma, '$disconnect');
+    disconnectSpy = vi.spyOn(prisma, '$disconnect');
     authSvc = moduleRef.get(AuthService);
     fsSvc = moduleRef.get(TaskFieldStateService);
   });

@@ -10,14 +10,9 @@ import { PrismaService } from '../src/prisma/prisma.service.js';
 import { ActivityService } from '../src/activity/activity.service.js';
 import { KanbanService } from '../src/ws/kanban.service.js';
 import { TaskFieldStateService } from '../src/tasks/field-state/task-field-state.service.js';
-// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
-// Its type, though, comes from @types/jest (already in tsconfig `types`),
-// which is what the 339 existing jest.fn() call sites are written against —
-// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
-// and would red 416 lines that are not otherwise wrong. Value from one,
-// type from the other.
-import { jest as _jestRuntime } from '@jest/globals';
-const jest = _jestRuntime as unknown as typeof globalThis.jest;
+// vitest exposes describe/it/expect as globals (vitest.config.ts `globals: true`);
+// `vi` is the one name that must be imported, exactly as `jest` had to be.
+import { vi } from 'vitest';
 
 const HVS = 'hvs.' + 'SyntheticTestToken' + '0'.repeat(10);
 const ACTOR: Actor = { type: 'agent', id: 'a1b2c3d4-0000-4000-8000-000000000001', name: 'aup' };
@@ -44,31 +39,31 @@ function makeDeps(task: { title: string; description: string | null } | null, ex
   };
   const tx = {
     task: {
-      update: jest.fn(async (args: { data: Record<string, unknown> }) => {
+      update: vi.fn(async (args: { data: Record<string, unknown> }) => {
         updates.push(args.data);
         return { id: TASK_ID, ...task, ...args.data };
       }),
     },
     taskRedaction: {
-      create: jest.fn(async (args: { data: Record<string, unknown> }) => {
+      create: vi.fn(async (args: { data: Record<string, unknown> }) => {
         created.push(args.data);
         return { ...record, ...args.data };
       }),
     },
-    activityLog: { create: jest.fn(async (args: { data: unknown }) => args.data) },
+    activityLog: { create: vi.fn(async (args: { data: unknown }) => args.data) },
   };
   const prisma = {
     task: {
-      findUnique: jest.fn(async () =>
+      findUnique: vi.fn(async () =>
         task ? { id: TASK_ID, projectId: 'p-1', status: 'todo', ...task, project: { id: 'p-1', workspaceId: 'ws-1' } } : null,
       ),
     },
-    taskRedaction: { findUnique: jest.fn(async () => existing) },
-    $transaction: jest.fn(async (fn: (t: typeof tx) => Promise<unknown>) => fn(tx)),
+    taskRedaction: { findUnique: vi.fn(async () => existing) },
+    $transaction: vi.fn(async (fn: (t: typeof tx) => Promise<unknown>) => fn(tx)),
   };
   const activity = new ActivityService(prisma as unknown as PrismaService);
-  const kanban = { notify: jest.fn() };
-  const fieldState = { recompute: jest.fn(async (_t: unknown, u: unknown) => void recomputed.push(u)) };
+  const kanban = { notify: vi.fn() };
+  const fieldState = { recompute: vi.fn(async (_t: unknown, u: unknown) => void recomputed.push(u)) };
   const service = new TaskRedactionService(
     prisma as unknown as PrismaService,
     activity,

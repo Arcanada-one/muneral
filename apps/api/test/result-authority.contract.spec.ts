@@ -60,14 +60,9 @@ import {
   IdempotencyCollisionError,
   StaleVersionError,
 } from '../src/execution-authority/execution-authority.errors.js';
-// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
-// Its type, though, comes from @types/jest (already in tsconfig `types`),
-// which is what the 339 existing jest.fn() call sites are written against —
-// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
-// and would red 416 lines that are not otherwise wrong. Value from one,
-// type from the other.
-import { jest as _jestRuntime } from '@jest/globals';
-const jest = _jestRuntime as unknown as typeof globalThis.jest;
+// vitest exposes describe/it/expect as globals (vitest.config.ts `globals: true`);
+// `vi` is the one name that must be imported, exactly as `jest` had to be.
+import { vi, type Mock } from 'vitest';
 
 // ---------------------------------------------------------------------------
 // Fixtures — fixed card, projection and committed result node
@@ -208,14 +203,14 @@ function makeIdSource(): IdSource {
 }
 
 interface MockTx {
-  taskResultBinding: Record<string, jest.Mock>;
-  taskExecutionState: Record<string, jest.Mock>;
-  taskExecutionAttempt: Record<string, jest.Mock>;
-  taskExecutionTransition: Record<string, jest.Mock>;
-  taskOutboxEvent: Record<string, jest.Mock>;
-  outboxLease: Record<string, jest.Mock>;
-  taskResultNode: Record<string, jest.Mock>;
-  taskCommittedResultRef: Record<string, jest.Mock>;
+  taskResultBinding: Record<string, Mock>;
+  taskExecutionState: Record<string, Mock>;
+  taskExecutionAttempt: Record<string, Mock>;
+  taskExecutionTransition: Record<string, Mock>;
+  taskOutboxEvent: Record<string, Mock>;
+  outboxLease: Record<string, Mock>;
+  taskResultNode: Record<string, Mock>;
+  taskCommittedResultRef: Record<string, Mock>;
 }
 
 /** A task that already has an aggregate at version 2 and a running attempt. */
@@ -223,7 +218,7 @@ interface MockTx {
 function makeTx(overrides: Record<string, any> = {}): MockTx {
   const tx: MockTx = {
     taskResultBinding: {
-      findUnique: jest.fn().mockResolvedValue({
+      findUnique: vi.fn().mockResolvedValue({
         taskId: TASK_ID,
         attemptId: ATTEMPT_ID,
         cardId: 'card-1',
@@ -235,7 +230,7 @@ function makeTx(overrides: Record<string, any> = {}): MockTx {
       }),
     },
     taskExecutionState: {
-      findUnique: jest.fn().mockResolvedValue({
+      findUnique: vi.fn().mockResolvedValue({
         taskId: TASK_ID,
         aggregateVersion: 2n,
         currentAttemptId: ATTEMPT_ID,
@@ -244,11 +239,11 @@ function makeTx(overrides: Record<string, any> = {}): MockTx {
         retryBackoffMs: 1_000n,
         retryEligibleAt: null,
       }),
-      create: jest.fn().mockResolvedValue({}),
-      updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+      create: vi.fn().mockResolvedValue({}),
+      updateMany: vi.fn().mockResolvedValue({ count: 1 }),
     },
     taskExecutionAttempt: {
-      findUnique: jest.fn().mockResolvedValue({
+      findUnique: vi.fn().mockResolvedValue({
         attemptId: ATTEMPT_ID,
         taskId: TASK_ID,
         ordinal: 1,
@@ -257,32 +252,32 @@ function makeTx(overrides: Record<string, any> = {}): MockTx {
         startedAt: FIXED_NOW,
         completedAt: null,
       }),
-      create: jest.fn().mockResolvedValue({}),
-      update: jest.fn().mockResolvedValue({}),
+      create: vi.fn().mockResolvedValue({}),
+      update: vi.fn().mockResolvedValue({}),
     },
     taskExecutionTransition: {
-      findFirst: jest.fn().mockResolvedValue(null),
-      findMany: jest.fn().mockResolvedValue([]),
+      findFirst: vi.fn().mockResolvedValue(null),
+      findMany: vi.fn().mockResolvedValue([]),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      create: jest.fn().mockImplementation(async (args: any) => ({
+      create: vi.fn().mockImplementation(async (args: any) => ({
         ...args.data,
         recordedAt: FIXED_NOW,
       })),
     },
     taskOutboxEvent: {
-      create: jest.fn().mockResolvedValue({}),
-      findUnique: jest.fn().mockResolvedValue(null),
+      create: vi.fn().mockResolvedValue({}),
+      findUnique: vi.fn().mockResolvedValue(null),
     },
     outboxLease: {
-      create: jest.fn().mockResolvedValue({}),
+      create: vi.fn().mockResolvedValue({}),
     },
     taskResultNode: {
-      findFirst: jest.fn().mockResolvedValue(null),
-      create: jest.fn().mockResolvedValue({}),
+      findFirst: vi.fn().mockResolvedValue(null),
+      create: vi.fn().mockResolvedValue({}),
     },
     taskCommittedResultRef: {
-      findFirst: jest.fn().mockResolvedValue(null),
-      create: jest.fn().mockResolvedValue({}),
+      findFirst: vi.fn().mockResolvedValue(null),
+      create: vi.fn().mockResolvedValue({}),
     },
     ...overrides,
   };
@@ -291,7 +286,7 @@ function makeTx(overrides: Record<string, any> = {}): MockTx {
 
 function makePrisma(tx: MockTx): TransactionalClient {
   return {
-    $transaction: jest
+    $transaction: vi
       .fn()
       .mockImplementation(
         async (fn: (t: unknown) => Promise<unknown>) => fn(tx),
@@ -652,7 +647,7 @@ describe('D. authoritative commit seam', () => {
   it('a first result without a pre-existing authority binding creates zero writes', async () => {
     const tx = makeTx({
       taskResultBinding: {
-        findUnique: jest.fn().mockResolvedValue(null),
+        findUnique: vi.fn().mockResolvedValue(null),
       },
     });
     const outcome = await service.commitOwnedResult(
@@ -753,7 +748,7 @@ describe('D. authoritative commit seam', () => {
   it('F4: a wrong principal against an established binding creates zero writes', async () => {
     const tx = makeTx({
       taskResultBinding: {
-        findUnique: jest.fn().mockResolvedValue({
+        findUnique: vi.fn().mockResolvedValue({
           taskId: TASK_ID,
           attemptId: ATTEMPT_ID,
           cardId: 'card-1',
@@ -775,7 +770,7 @@ describe('D. authoritative commit seam', () => {
   it('F4: a wrong card digest against an established binding creates zero writes', async () => {
     const tx = makeTx({
       taskResultBinding: {
-        findUnique: jest.fn().mockResolvedValue({
+        findUnique: vi.fn().mockResolvedValue({
           taskId: TASK_ID,
           attemptId: ATTEMPT_ID,
           cardId: 'card-1',
@@ -797,7 +792,7 @@ describe('D. authoritative commit seam', () => {
   it('F4: a wrong projection digest against an established binding creates zero writes', async () => {
     const tx = makeTx({
       taskResultBinding: {
-        findUnique: jest.fn().mockResolvedValue({
+        findUnique: vi.fn().mockResolvedValue({
           taskId: TASK_ID,
           attemptId: ATTEMPT_ID,
           cardId: 'card-1',
@@ -819,8 +814,8 @@ describe('D. authoritative commit seam', () => {
   it('F4: a wrong expected node version creates zero writes', async () => {
     const tx = makeTx({
       taskResultNode: {
-        findFirst: jest.fn().mockResolvedValue({ nodeVersion: 2 }),
-        create: jest.fn().mockResolvedValue({}),
+        findFirst: vi.fn().mockResolvedValue({ nodeVersion: 2 }),
+        create: vi.fn().mockResolvedValue({}),
       },
     });
     const outcome = await service.commitOwnedResult(
@@ -858,7 +853,7 @@ describe('D. authoritative commit seam', () => {
     const tx = makeTx();
     // The unique constraint on (task, attempt, card, node, node version) is the
     // arbiter: the loser's insert raises P2002 and the transaction rolls back.
-    tx.taskCommittedResultRef.create = jest
+    tx.taskCommittedResultRef.create = vi
       .fn()
       .mockRejectedValue(
         Object.assign(new Error('unique'), {
@@ -883,7 +878,7 @@ describe('D. authoritative commit seam', () => {
 
   it('an unidentified P2002 remains a loud persistence failure', async () => {
     const tx = makeTx();
-    tx.taskCommittedResultRef.create = jest
+    tx.taskCommittedResultRef.create = vi
       .fn()
       .mockRejectedValue(
         Object.assign(new Error('unexpected unique collision'), {
@@ -900,7 +895,7 @@ describe('D. authoritative commit seam', () => {
   it('F5: a returned authority stale-version race maps to ResultBindingError', async () => {
     const tx = makeTx();
     const authority = {
-      executeWithinTransaction: jest.fn().mockResolvedValue(
+      executeWithinTransaction: vi.fn().mockResolvedValue(
         new StaleVersionError(TASK_ID, 2, 3),
       ),
     } as unknown as ExecutionAuthorityService;
@@ -932,7 +927,7 @@ describe('D. authoritative commit seam', () => {
 
     const replayTx = makeTx({
       taskCommittedResultRef: {
-        findFirst: jest.fn().mockImplementation(async (args: {
+        findFirst: vi.fn().mockImplementation(async (args: {
           where: Record<string, unknown>;
         }) =>
           args.where.mutationId === undefined
@@ -945,7 +940,7 @@ describe('D. authoritative commit seam', () => {
                 correlationId: 'corr-1',
               },
         ),
-        create: jest.fn().mockResolvedValue({}),
+        create: vi.fn().mockResolvedValue({}),
       },
     });
     const replay = await new ResultAuthorityService(
@@ -995,8 +990,8 @@ describe('D. authoritative commit seam', () => {
       };
       const tx = makeTx({
         taskCommittedResultRef: {
-          findFirst: jest.fn().mockResolvedValue(stored),
-          create: jest.fn().mockResolvedValue({}),
+          findFirst: vi.fn().mockResolvedValue(stored),
+          create: vi.fn().mockResolvedValue({}),
         },
       });
 
@@ -1013,7 +1008,7 @@ describe('D. authoritative commit seam', () => {
   it('F7: reusing an idempotency key with different canonical bytes fails as a conflict', async () => {
     const tx = makeTx({
       taskExecutionTransition: {
-        findFirst: jest.fn().mockResolvedValue({
+        findFirst: vi.fn().mockResolvedValue({
           id: TRANSITION_ID,
           taskId: TASK_ID,
           aggregateVersion: 3n,
@@ -1021,8 +1016,8 @@ describe('D. authoritative commit seam', () => {
           commandDigest: 'a'.repeat(64),
           committedResult: {},
         }),
-        findMany: jest.fn().mockResolvedValue([]),
-        create: jest.fn().mockResolvedValue({}),
+        findMany: vi.fn().mockResolvedValue([]),
+        create: vi.fn().mockResolvedValue({}),
       },
     });
     const outcome = await service.commitOwnedResult(
@@ -1035,7 +1030,7 @@ describe('D. authoritative commit seam', () => {
 
   it('F9: a failure after the node write rolls the whole set back', async () => {
     const tx = makeTx();
-    tx.taskExecutionTransition.create = jest
+    tx.taskExecutionTransition.create = vi
       .fn()
       .mockRejectedValue(new Error('crash between node and transition'));
     await expect(
@@ -1047,7 +1042,7 @@ describe('D. authoritative commit seam', () => {
 
   it('F9: a failure after the transition write leaves no reference or receipt', async () => {
     const tx = makeTx();
-    tx.taskCommittedResultRef.create = jest
+    tx.taskCommittedResultRef.create = vi
       .fn()
       .mockRejectedValue(new Error('crash before reference'));
     await expect(

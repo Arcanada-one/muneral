@@ -4,6 +4,14 @@ packages:
 allowBuilds:
   '@nestjs/core': true
   '@prisma/engines': true
+  # A2-304c: apps/api runs vitest, whose esbuild transform does NOT implement
+  # `emitDecoratorMetadata` — without it Nest's DI reads no `design:paramtypes`
+  # and every `Test.createTestingModule` with a class provider fails to resolve.
+  # unplugin-swc supplies that metadata. swc's native binary ships as a platform
+  # optionalDependency, so it loads with the postinstall script NOT run (measured:
+  # `transformSync` emits design:paramtypes with allowBuilds false). Kept false so
+  # the build grants this package no script execution it does not need.
+  '@swc/core': false
   bcrypt: true
   esbuild: true
   msgpackr-extract: true

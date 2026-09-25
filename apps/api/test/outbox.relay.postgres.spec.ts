@@ -11,14 +11,9 @@
 import { randomUUID } from 'node:crypto';
 
 import { createDisposablePostgres } from './support/disposable-postgres.js';
-// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
-// Its type, though, comes from @types/jest (already in tsconfig `types`),
-// which is what the 339 existing jest.fn() call sites are written against —
-// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
-// and would red 416 lines that are not otherwise wrong. Value from one,
-// type from the other.
-import { jest as _jestRuntime } from '@jest/globals';
-const jest = _jestRuntime as unknown as typeof globalThis.jest;
+// vitest exposes describe/it/expect as globals (vitest.config.ts `globals: true`);
+// `vi` is the one name that must be imported, exactly as `jest` had to be.
+import { vi } from 'vitest';
 import { createRequire } from 'node:module';
 // These four modules are pulled in statically. Under ESM a `nodeRequire()` cannot
 // resolve a .ts source module at all, and the createRequire bridge only reaches
@@ -498,7 +493,7 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
     let consumerCalledWith: any = null;
     const consumer = {
       consumerId: 'svc-path-consumer',
-      consume: jest.fn().mockImplementation(
+      consume: vi.fn().mockImplementation(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         async (_event: any, _tx: any) => {
           consumerCalledWith = _event;
@@ -608,7 +603,7 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
 
     const midRaceConsumer = {
       consumerId: 'mid-race-consumer',
-      consume: jest.fn().mockImplementation(
+      consume: vi.fn().mockImplementation(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         async (_event: any, _tx: any) => {
           consumerCalled = true;
@@ -722,7 +717,7 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
     let consumeCount = 0;
     const consumer1 = {
       consumerId: 'crash-consumer',
-      consume: jest.fn().mockImplementation(async () => {
+      consume: vi.fn().mockImplementation(async () => {
         consumeCount++;
         return { digest: 'sha256:committed-then-crashed' };
       }),
@@ -777,7 +772,7 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
 
     const consumer2 = {
       consumerId: 'crash-consumer', // same consumer
-      consume: jest.fn().mockResolvedValue({ digest: 'should-not-be-called' }),
+      consume: vi.fn().mockResolvedValue({ digest: 'should-not-be-called' }),
     };
 
     const disp2 = await relay2.dispatch(
@@ -836,7 +831,7 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
 
     const consumer = {
       consumerId: `stop-consumer-${randomUUID().slice(0, 6)}`,
-      consume: jest.fn().mockResolvedValue({ digest: 'sha256:consumer-digest' }),
+      consume: vi.fn().mockResolvedValue({ digest: 'sha256:consumer-digest' }),
     };
 
     // Dispatch evt1 successfully, then stop()
@@ -902,7 +897,7 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
 
     const consumer2 = {
       consumerId: `stop-consumer-2-${randomUUID().slice(0, 6)}`,
-      consume: jest.fn().mockResolvedValue({ digest: 'resumed-digest' }),
+      consume: vi.fn().mockResolvedValue({ digest: 'resumed-digest' }),
     };
 
     // Deliver the recovered events
@@ -957,7 +952,7 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
 
     const failingConsumer = {
       consumerId: 'f1-db-consumer',
-      consume: jest.fn().mockRejectedValue(new Error('simulated failure')),
+      consume: vi.fn().mockRejectedValue(new Error('simulated failure')),
     };
 
     // Cycle 1: failure_count 0 → 1
@@ -1074,7 +1069,7 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
     // Consumer that stops the relay after delivering exactly one of OUR events
     const consumer = {
       consumerId: `cycle-stop-consumer-${randomUUID().slice(0, 6)}`,
-      consume: jest.fn().mockImplementation(
+      consume: vi.fn().mockImplementation(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         async (event: any, _tx: any) => {
           consumeCount++;
@@ -1118,7 +1113,7 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
 
     const consumer2 = {
       consumerId: `cycle-stop-consumer-2-${randomUUID().slice(0, 6)}`,
-      consume: jest.fn().mockResolvedValue({
+      consume: vi.fn().mockResolvedValue({
         digest: `sha256:recovered-${randomUUID().slice(0, 16)}`,
       }),
     };
@@ -1174,7 +1169,7 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
 
     const consumer = {
       consumerId: 'wp-consumer',
-      consume: jest.fn().mockResolvedValue({ digest: 'unused' }),
+      consume: vi.fn().mockResolvedValue({ digest: 'unused' }),
     };
 
     await expect(
@@ -1224,7 +1219,7 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
     const [leased] = await relay.lease(ours);
     const consumer = {
       consumerId: 'malformed-consumer',
-      consume: jest.fn().mockResolvedValue({ digest: 'unused' }),
+      consume: vi.fn().mockResolvedValue({ digest: 'unused' }),
     };
 
     await expect(relay.dispatch(leased, consumer)).rejects.toThrow(
@@ -1270,7 +1265,7 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
     await expect(
       relay.dispatch(leased, {
         consumerId: 'expired-wp-consumer',
-        consume: jest.fn().mockResolvedValue({ digest: 'unused' }),
+        consume: vi.fn().mockResolvedValue({ digest: 'unused' }),
       }),
     ).resolves.toBe('expired');
     await expect(

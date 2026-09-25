@@ -9,9 +9,9 @@ import type { ActivityService } from '../src/activity/activity.service.js';
 import type { KanbanService } from '../src/ws/kanban.service.js';
 import type { TaskFieldStateService } from '../src/tasks/field-state/task-field-state.service.js';
 import type { TaskExecutionRecorderService } from '../src/execution-authority/task-execution-recorder.service.js';
-// Value from @jest/globals, type from @types/jest — see tasks.service.spec.ts.
-import { jest as _jestRuntime } from '@jest/globals';
-const jest = _jestRuntime as unknown as typeof globalThis.jest;
+// vitest exposes describe/it/expect as globals (vitest.config.ts `globals: true`);
+// `vi` is the one name that must be imported, exactly as `jest` had to be.
+import { vi } from 'vitest';
 
 const GRANT = {
   agentId: 'agent-1',
@@ -24,15 +24,15 @@ const GRANT = {
 
 function makeService() {
   const prisma = {
-    project: { findUnique: jest.fn().mockResolvedValue({ workspaceId: 'ws-1' }) },
+    project: { findUnique: vi.fn().mockResolvedValue({ workspaceId: 'ws-1' }) },
     task: {
-      findMany: jest.fn().mockResolvedValue([
+      findMany: vi.fn().mockResolvedValue([
         { id: 't-1', parentId: null, status: 'todo', priority: 'high', actorType: 'human', createdAt: new Date(0), updatedAt: new Date(0), title: 'plain' },
       ]),
     },
     activityLog: {
-      create: jest.fn().mockResolvedValue({ id: 'audit-1', createdAt: new Date('2026-09-14T00:00:00Z') }),
-      count: jest.fn().mockResolvedValue(1),
+      create: vi.fn().mockResolvedValue({ id: 'audit-1', createdAt: new Date('2026-09-14T00:00:00Z') }),
+      count: vi.fn().mockResolvedValue(1),
     },
   };
   const service = new TasksService(

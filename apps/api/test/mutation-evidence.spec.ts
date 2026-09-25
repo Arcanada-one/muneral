@@ -9,14 +9,9 @@ import * as path from 'node:path';
 
 import { canonicalJsonV1 } from '../src/execution-authority/canonical-json-v1.js';
 import * as url from 'node:url';
-// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
-// Its type, though, comes from @types/jest (already in tsconfig `types`),
-// which is what the 339 existing jest.fn() call sites are written against —
-// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
-// and would red 416 lines that are not otherwise wrong. Value from one,
-// type from the other.
-import { jest as _jestRuntime } from '@jest/globals';
-const jest = _jestRuntime as unknown as typeof globalThis.jest;
+// vitest exposes describe/it/expect as globals (vitest.config.ts `globals: true`);
+// `vi` is the one name that must be imported, exactly as `jest` had to be.
+import { vi } from 'vitest';
 // The harness is ESM now, so it is imported once here rather than require()d
 // in six separate test bodies: a CommonJS bridge cannot load an ES module
 // synchronously. The namespace import also drops six hand-written local
@@ -27,7 +22,7 @@ import * as harness from './assembly/mutation-harness.js';
 // ESM has no __dirname, and declaring that NAME would mark the module CommonJS.
 const thisDir = path.dirname(url.fileURLToPath(import.meta.url));
 
-jest.setTimeout(30_000);
+vi.setConfig({ testTimeout: 30_000, hookTimeout: 30_000 });
 
 const API_ROOT = path.resolve(thisDir, '..');
 const HARNESS = path.join(API_ROOT, 'test', 'assembly', 'mutation-harness.js');
