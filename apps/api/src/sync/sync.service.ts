@@ -1,15 +1,47 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { TASK_STATUSES } from '@muneral/types';
-import type { TaskStatus, TaskPriority } from '@muneral/types';
+import { TasksService } from '../tasks/tasks.service.js';
+import { agentStatusAuthorityWhere } from '../auth/agent-task-visibility.js';
+import { TASK_STATUSES, isValidTransition } from '@muneral/types';
+import type { Actor, TaskStatus, TaskPriority } from '@muneral/types';
+
+type ImportBlock = {
+  title: string;
+  status?: TaskStatus;
+  priority?: TaskPriority;
+  dueDate?: string;
+  description?: string;
+};
+
+/** One line of the import, decided before anything is written (A2-379). */
+type ImportStep =
+  | { kind: 'create'; block: ImportBlock }
+  | {
+      kind: 'update';
+      taskId: string;
+      status?: TaskStatus;
+      fields: { priority?: string; dueDate?: string };
+    }
+  | { kind: 'unchanged' };
+
+/** The same bound `POST /tasks` puts on a title (CreateTaskDto). */
+const MAX_TITLE_LENGTH = 500;
 
 /**
  * SyncService — bidirectional sync with Datarim tasks.md format.
  */
 @Injectable()
 export class SyncService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly tasksService: TasksService,
+  ) {}
 
   /**
    * Export project tasks in Datarim tasks.md format.
@@ -81,70 +113,165 @@ export class SyncService {
   /**
    * Import tasks from Datarim markdown format.
    * Creates new tasks; updates existing ones matched by title.
+   *
+   * A2-379. Before this change the import wrote with raw Prisma calls: a
+   * created task was recorded as `actorType: 'human'` with no creator whatever
+   * credential called, a matched task had its status overwritten with any
+   * value (no TASK_TRANSITIONS, `todo → done` in one line), and neither wrote
+   * an activity row, so the audit log could not even show that it happened.
+   * Now every write goes through TasksService — the same code `POST /tasks`,
+   * `PATCH /tasks/:id/status` and the field update run — so authorship is the
+   * key's agent, the state machine binds, and the activity log records it.
+   *
+   * The whole markdown is decided BEFORE the first write. A line that matches
+   * a task the key may not move (not its creator, not its executor — the
+   * 'task-status' rule, MUN-0050), a title that matches more than one task, a
+   * move TASK_TRANSITIONS forbids or an over-long title refuses the import
+   * with nothing written, rather than leaving half of it applied. A match
+   * needs authority even when nothing would change: a key that could "touch"
+   * a task it has no relation to is the hole this closes.
    */
-  async importDatarim(projectId: string, markdown: string): Promise<{ created: number; updated: number }> {
+  async importDatarim(
+    projectId: string,
+    markdown: string,
+    actor: Actor | undefined,
+  ): Promise<{ created: number; updated: number; unchanged: number }> {
+    // The route is agent-key only (ApiKeyGuard) and its workspace wall is the
+    // 'project' scope. Refuse anything else rather than guess who wrote.
+    if (actor?.type !== 'agent') {
+      throw new ForbiddenException('The Datarim import is available to an agent API key only.');
+    }
+
     const project = await this.prisma.project.findUnique({
       where: { id: projectId },
     });
-    if (!project) {
+    // The 'project' scope already answers 404 for a project outside the key's
+    // workspace; this repeats it where the writes are, so the import stays
+    // closed even if the route ever loses its guard (the A2-379 hole was
+    // exactly a route whose guard list was one entry short).
+    const agent = project
+      ? await this.prisma.agent.findUnique({ where: { id: actor.id }, select: { workspaceId: true } })
+      : null;
+    if (!project || agent?.workspaceId !== project.workspaceId) {
       throw new NotFoundException('Project not found');
     }
-    if (!markdown?.trim()) {
+    if (typeof markdown !== 'string' || !markdown.trim()) {
       throw new BadRequestException('Empty markdown');
     }
 
     const taskBlocks = this.parseDatarimMarkdown(markdown);
-    let created = 0;
-    let updated = 0;
+    const steps: ImportStep[] = [];
+    const seenTitles = new Set<string>();
 
-    for (const block of taskBlocks) {
-      const existing = await this.prisma.task.findFirst({
+    for (const [index, block] of taskBlocks.entries()) {
+      const line = index + 1;
+      if (block.title.length > MAX_TITLE_LENGTH) {
+        throw new BadRequestException(
+          `Task ${line}: title longer than ${MAX_TITLE_LENGTH} characters.`,
+        );
+      }
+      if (seenTitles.has(block.title)) {
+        throw new ConflictException({
+          code: 'AMBIGUOUS_TITLE',
+          message: `Task ${line}: the markdown names this title twice; nothing was imported.`,
+        });
+      }
+      seenTitles.add(block.title);
+
+      const matches = await this.prisma.task.findMany({
         where: { projectId, title: block.title },
+        select: { id: true, status: true, priority: true, dueDate: true },
+        take: 2,
       });
 
-      if (existing) {
-        await this.prisma.task.update({
-          where: { id: existing.id },
-          data: {
-            status: block.status ?? existing.status,
-            priority: block.priority ?? existing.priority,
-            dueDate: block.dueDate ?? existing.dueDate,
-          },
+      if (matches.length === 0) {
+        steps.push({ kind: 'create', block });
+        continue;
+      }
+      if (matches.length > 1) {
+        // Matching by title is all this format has; with two candidates any
+        // choice would write to a task nobody named. Refuse instead.
+        throw new ConflictException({
+          code: 'AMBIGUOUS_TITLE',
+          message: `Task ${line}: more than one task in this project has this title; nothing was imported.`,
         });
-        updated++;
+      }
+
+      const existing = matches[0];
+      const mayMove = await this.prisma.task.findFirst({
+        where: {
+          id: existing.id,
+          project: { workspaceId: project.workspaceId },
+          ...agentStatusAuthorityWhere(actor.id),
+        },
+        select: { id: true },
+      });
+      if (!mayMove) {
+        // No task id in the answer: 'task' answers 403 for "no such task" and
+        // "not yours" alike so a key cannot enumerate ids; do not undo that here.
+        throw new ForbiddenException({
+          code: 'IMPORT_NOT_AUTHORISED',
+          message:
+            `Task ${line}: agent "${actor.name}" neither created the matching task nor is its ` +
+            'executor; nothing was imported (A2-379).',
+        });
+      }
+
+      const status =
+        block.status !== undefined && block.status !== existing.status ? block.status : undefined;
+      if (status !== undefined && !isValidTransition(existing.status as TaskStatus, status)) {
+        throw new BadRequestException(
+          `Task ${line}: invalid status transition: ${existing.status} → ${status}; nothing was imported.`,
+        );
+      }
+      const fields: { priority?: string; dueDate?: string } = {};
+      if (block.priority !== undefined && block.priority !== existing.priority) {
+        fields.priority = block.priority;
+      }
+      if (block.dueDate !== undefined && block.dueDate !== existing.dueDate) {
+        fields.dueDate = block.dueDate;
+      }
+
+      if (status === undefined && Object.keys(fields).length === 0) {
+        steps.push({ kind: 'unchanged' });
       } else {
-        await this.prisma.task.create({
-          data: {
-            projectId,
-            title: block.title,
-            description: block.description ?? null,
-            status: block.status ?? 'todo',
-            priority: block.priority ?? 'medium',
-            dueDate: block.dueDate ?? null,
-            actorType: 'human',
-          },
-        });
-        created++;
+        steps.push({ kind: 'update', taskId: existing.id, status, fields });
       }
     }
 
-    return { created, updated };
+    let created = 0;
+    let updated = 0;
+    let unchanged = 0;
+
+    for (const step of steps) {
+      if (step.kind === 'create') {
+        await this.tasksService.create(actor, {
+          projectId,
+          title: step.block.title,
+          description: step.block.description,
+          status: step.block.status,
+          priority: step.block.priority,
+          dueDate: step.block.dueDate,
+        });
+        created++;
+      } else if (step.kind === 'update') {
+        if (Object.keys(step.fields).length > 0) {
+          await this.tasksService.update(step.taskId, actor, step.fields);
+        }
+        if (step.status !== undefined) {
+          await this.tasksService.updateStatus(step.taskId, actor, { status: step.status });
+        }
+        updated++;
+      } else {
+        unchanged++;
+      }
+    }
+
+    return { created, updated, unchanged };
   }
 
-  private parseDatarimMarkdown(markdown: string): Array<{
-    title: string;
-    status?: TaskStatus;
-    priority?: TaskPriority;
-    dueDate?: string;
-    description?: string;
-  }> {
-    const blocks: Array<{
-      title: string;
-      status?: TaskStatus;
-      priority?: TaskPriority;
-      dueDate?: string;
-      description?: string;
-    }> = [];
+  private parseDatarimMarkdown(markdown: string): ImportBlock[] {
+    const blocks: ImportBlock[] = [];
 
     const lines = markdown.split('\n');
     let current: (typeof blocks)[0] | null = null;

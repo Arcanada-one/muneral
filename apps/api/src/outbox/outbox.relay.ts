@@ -4,8 +4,10 @@
 // fixture consumer with durable inbox deduplication, and quarantines poison
 // events without head-of-line blocking.
 //
-// This is a plain class, NOT a NestJS service. No @Injectable(), no module
-// registration, no runtime wiring. The caller instantiates and calls cycle().
+// This is a plain class, NOT a NestJS service. No @Injectable(). The caller
+// instantiates and calls cycle(). A2-370: the runtime caller is
+// OutboxRelayWorker (outbox-relay.worker.ts, OutboxModule), which runs cycles
+// only when OUTBOX_RELAY_ENABLED=true.
 //
 // Fleet supervision is a forbidden ownership leak — this relay transports
 // committed Muneral task facts only: no fleet registry, lifecycle, placement,

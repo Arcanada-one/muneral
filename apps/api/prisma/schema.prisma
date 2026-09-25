@@ -606,6 +606,7 @@ model TaskOutboxEvent {
   deliveryAttempts DeliveryAttemptEvidence[]
   quarantines      QuarantineEvidence[]
   inboxEntries     ConsumerInbox[]
+  workOutcomes     WorkOutcomeRecord[]
 
   @@unique([taskId, transitionId])
   @@unique([transitionId, taskId])
@@ -690,6 +691,29 @@ model ConsumerInbox {
   @@id([consumerId, outboxEventId])
   @@unique([consumerId, outboxEventId])
   @@map("consumer_inbox")
+}
+
+// A2-370: effect of the `work-outcome-ledger` outbox consumer — one row per
+// delivered outcome event (AEV `work.outcome.recorded`). Append-only (trigger).
+// Deduplication is ConsumerInbox, written in the same transaction; this table
+// deliberately has no unique on outboxEventId (see the migration).
+model WorkOutcomeRecord {
+  id                String   @id @db.Uuid
+  outboxEventId     String   @map("outbox_event_id") @db.Uuid
+  taskId            String   @map("task_id") @db.Uuid
+  attemptId         String   @map("attempt_id") @db.Uuid
+  eventType         String   @map("event_type") @db.VarChar(64)
+  aggregateVersion  BigInt   @map("aggregate_version")
+  idempotencyKey    String   @map("idempotency_key") @db.VarChar(256)
+  outcomeRecordedAt DateTime @map("outcome_recorded_at") @db.Timestamptz()
+  consumedAt        DateTime @map("consumed_at") @db.Timestamptz()
+
+  // Relations
+  outboxEvent TaskOutboxEvent @relation(fields: [outboxEventId], references: [id], onDelete: Restrict)
+
+  @@index([taskId], map: "idx_work_outcome_records_task_id")
+  @@index([outboxEventId], map: "idx_work_outcome_records_outbox_event_id")
+  @@map("work_outcome_records")
 }
 
 // ---------------------------------------------------------------------------

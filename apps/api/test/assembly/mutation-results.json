@@ -22,11 +22,11 @@
   },
   "binding": {
     "algorithm": "sha256",
-    "aggregateSha256": "650a6f6decd6dfe9da85fbac65fe09e0167d34886fcf8b05ec4442df8d1597bc",
+    "aggregateSha256": "84e5ce6141080a5d5189bf03ddb304c136176a6c11568a188441c31a52dfa5ba",
     "files": [
       {
         "path": "apps/api/package.json",
-        "sha256": "10a3ed98001568e5271cb9bee7b02b0a0f245cf4590768c2e16dfbccf1bd5797"
+        "sha256": "919202c86e4a269cb8e4e680b9fdb768e555bbf8d7caf449adea37123657652c"
       },
       {
         "path": "apps/api/src/assembly/assembly.canonical.ts",
@@ -262,11 +262,11 @@
       },
       {
         "path": "package.json",
-        "sha256": "9ee97b393e1a668fd10f5698ef587908a24124cb06346134381ec790e61de5ff"
+        "sha256": "bed33a36322376b1f9e321b1ce836e3c4cdcec9bd84131d4f05e64e1e01a2e36"
       },
       {
         "path": "pnpm-lock.yaml",
-        "sha256": "0da3d99dfe01d06d9eb88131eb47a12d90159230526159c56e01d207045fb2e9"
+        "sha256": "b9fd7a00c104eccb56944baa49ef119aee98792efb68467fd6018cfae5d84978"
       }
     ]
   },
@@ -276,8 +276,8 @@
       "apps/web/",
       "receipts/"
     ],
-    "trackedTreeWithoutEvidence": "058e3448351f0fe19253f21f368feabf0f21f697",
-    "trackedSnapshotDiffSha256": "b03c11fe30c1219dfd656280c5f05fbdf667b3ffd6717c281addcfb07092d937"
+    "trackedTreeWithoutEvidence": "8f3f92142f41e7210e3939500214cc2f131e1409",
+    "trackedSnapshotDiffSha256": "0bcc8a9c75ecb343325fc5aafbf146d0e578bdd2ce80956edfa1cd001e202eb6"
   },
   "baseline": {
     "outcome": "SURVIVED",

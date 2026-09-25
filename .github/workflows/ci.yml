@@ -76,6 +76,10 @@ jobs:
       # the key missing or malformed from a loopback stub and asserts the probe goes RED on each.
       - name: Test the contract-digest probe goes red on a build without the field
         run: bash scripts/ci/probe-contract-digest.test.sh
+      # A2-330: the post-deploy canary must be able to go red — a route missing from the resident
+      # route table, a 405, a router no-match 404 — and must never send anything but a GET.
+      - name: Test the post-deploy canary goes red
+        run: python3 -m unittest discover -s scripts/canary -p 'test_*.py'
       - name: Enable corepack (pnpm@11.5.2 from packageManager field)
         run: |
           COREPACK_HOME="${RUNNER_TEMP}/corepack-bin"
@@ -145,7 +149,7 @@ jobs:
     # and no retrievable annotation. Recorded as a hole, not as a solved problem.
     uses: ./.github/workflows/graph-admission.yml
     with:
-      program_ref: '46cbdc0adfd7e5d14e38b1b1ce2b5f1778bd8840'
+      program_ref: '1fd5e867ac559588cf97e22be4c9ae65575618a5'
       verifier_job: 'lint-and-test'
       verifier_conclusion: ${{ needs.lint-and-test.result }}
       # AUP-GRAPH-006:gate2b. The fingerprint of the Ed25519 key that signs the vendored bundle's
@@ -271,6 +275,48 @@ jobs:
           echo "Health check failed after 100s"
           sudo -n /usr/local/sbin/arcanada-compose-broker muneral logs 100
           exit 1
+
+      # A2-330: the post-deploy canary (observed-edges-and-deploy-gate.v1 rules C1/C3/C5). The program's
+      # admission policy lists muneral under decision_exemptions.no_live_contour.live_contours, so an
+      # inferred boundary here is lifted by running this, never by an exemption. Route presence is
+      # read from the RESIDENT process's own route table (/health/routes) and the router's no-match
+      # fingerprint, never from a status code; a 405 is a refusal. GET only, no body, no credential:
+      # nothing here writes. `-I` keeps scripts/canary/ off the import path (scrutator A2-329).
+      - name: Post-deploy canary
+        id: canary
+        if: steps.preflight.outputs.status != 'fail'
+        run: |
+          set -uo pipefail
+          mkdir -p "${RUNNER_TEMP}/canary"
+          rc=0
+          python3 -I scripts/canary/canary_probe.py \
+            --plan deploy/canary/muneral-route-presence.plan.json \
+            --phase post --base-url http://127.0.0.1:3500 --repo . \
+            --out "${RUNNER_TEMP}/canary/muneral-route-presence-post.json" || rc=$?
+          # Recorded, not raised here, so the result is uploaded before the verdict fails the run
+          # (every deploy step carries the same preflight `if:`; see preflight-caller-contract).
+          echo "rc=${rc}" >> "$GITHUB_OUTPUT"
+
+      - name: Keep the canary result
+        if: steps.preflight.outputs.status != 'fail'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: canary-post-${{ github.sha }}
+          path: ${{ runner.temp }}/canary/
+          if-no-files-found: error
+
+      # 0 = every entity verified; 3 = some not_measured (absence of measurement, rule C3: not a
+      # regression, never a pass); 1 = a measured failure; 2 = the plan was refused.
+      - name: Canary verdict
+        if: steps.preflight.outputs.status != 'fail'
+        env:
+          CANARY_RC: ${{ steps.canary.outputs.rc }}
+        run: |
+          case "${CANARY_RC}" in
+            0) echo "canary: every entity verified" ;;
+            3) echo "::warning title=canary::some entities not_measured (rule C3)" ;;
+            *) echo "::error title=canary::canary rc=${CANARY_RC:-missing}: a failed entity or a refused plan"; exit 1 ;;
+          esac
 
       - name: Semantic aggregate readback
         if: steps.preflight.outputs.status != 'fail'
