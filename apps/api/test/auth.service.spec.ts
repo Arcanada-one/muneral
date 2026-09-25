@@ -3,56 +3,45 @@ import { JwtService } from '@nestjs/jwt';
 import { UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { createHash } from 'crypto';
 import { PrismaService } from '../src/prisma/prisma.service.js';
-// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
-// Its type, though, comes from @types/jest (already in tsconfig `types`),
-// which is what the 339 existing jest.fn() call sites are written against —
-// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
-// and would red 416 lines that are not otherwise wrong. Value from one,
-// type from the other.
-import { jest as _jestRuntime } from '@jest/globals';
-// Intersection, not a plain cast to globalThis.jest: `unstable_mockModule` exists
-// only on the @jest/globals object, while the 339 existing `jest.fn()` call sites
-// are written against @types/jest (whose bare fn() infers a usable type where the
-// @jest/globals generic infers `never`). Value from one, each half of the type
-// from the one that declares it.
-const jest = _jestRuntime as unknown as typeof globalThis.jest &
-  Pick<typeof _jestRuntime, 'unstable_mockModule'>;
+// vitest exposes describe/it/expect as globals (vitest.config.ts `globals: true`);
+// `vi` is the one name that must be imported, exactly as `jest` had to be.
+import { vi, type Mock } from 'vitest';
 
 // Mock bcrypt to speed up tests (no real hashing).
 //
-// ESM has no hoisting for module mocks: `jest.mock` runs where it is written,
+// ESM has no hoisting for module mocks: `vi.mock` runs where it is written,
 // which is AFTER the static imports have already resolved, so the real bcrypt
 // would be the one AuthService holds. `unstable_mockModule` registers the mock
 // against the module registry first, and the subject is then pulled in with a
 // dynamic import so it resolves to the mocked copy. Both are awaited at module
 // top level, which the ESM runner permits.
 const bcrypt = {
-  hash: jest.fn((value: string) => Promise.resolve(`hashed:${value}`)),
-  compare: jest.fn((plain: string, hash: string) =>
+  hash: vi.fn((value: string) => Promise.resolve(`hashed:${value}`)),
+  compare: vi.fn((plain: string, hash: string) =>
     Promise.resolve(hash === `hashed:${plain}`),
   ),
 };
-jest.unstable_mockModule('bcrypt', () => bcrypt);
+vi.doMock('bcrypt', () => bcrypt);
 
 const { AuthService } = await import('../src/auth/auth.service.js');
 type AuthService = InstanceType<typeof AuthService>;
 
 const makePrisma = () => ({
   user: {
-    findUnique: jest.fn(),
-    create: jest.fn((args) => Promise.resolve({ id: 'user-1', ...args.data })),
+    findUnique: vi.fn(),
+    create: vi.fn((args) => Promise.resolve({ id: 'user-1', ...args.data })),
   },
   apiKey: {
-    findUnique: jest.fn(),
-    create: jest.fn((args) => Promise.resolve({ id: 'key-1', ...args.data })),
-    update: jest.fn((args) => Promise.resolve({ id: args.where.id, ...args.data })),
-    findMany: jest.fn().mockResolvedValue([]),
+    findUnique: vi.fn(),
+    create: vi.fn((args) => Promise.resolve({ id: 'key-1', ...args.data })),
+    update: vi.fn((args) => Promise.resolve({ id: args.where.id, ...args.data })),
+    findMany: vi.fn().mockResolvedValue([]),
   },
 });
 
 const makeJwtService = () => ({
-  sign: jest.fn((payload, opts) => `jwt.${JSON.stringify(payload)}.${JSON.stringify(opts)}`),
-  verify: jest.fn(),
+  sign: vi.fn((payload, opts) => `jwt.${JSON.stringify(payload)}.${JSON.stringify(opts)}`),
+  verify: vi.fn(),
 });
 
 describe('AuthService', () => {
@@ -145,13 +134,13 @@ describe('AuthService', () => {
     it('stores a bcrypt hash of the key', async () => {
       await service.createApiKey('agent-1');
       expect(bcrypt.hash).toHaveBeenCalled();
-      const createCall = (prisma.apiKey.create as jest.Mock).mock.calls[0][0];
+      const createCall = (prisma.apiKey.create as Mock).mock.calls[0][0];
       expect(createCall.data.keyHash).toMatch(/^hashed:/);
     });
 
     it('MUN-0051: stores the sha256 lookup id of the raw key, never the key itself', async () => {
       const { key } = await service.createApiKey('agent-1');
-      const createCall = (prisma.apiKey.create as jest.Mock).mock.calls[0][0];
+      const createCall = (prisma.apiKey.create as Mock).mock.calls[0][0];
       expect(createCall.data.lookupHash).toBe(createHash('sha256').update(key).digest('hex'));
       expect(createCall.data.lookupHash).not.toContain(key.slice('mun_sk_'.length));
     });
@@ -193,7 +182,7 @@ describe('AuthService', () => {
       const after = Date.now();
 
       // Find the update call for the old key
-      const updateCalls = (prisma.apiKey.update as jest.Mock).mock.calls;
+      const updateCalls = (prisma.apiKey.update as Mock).mock.calls;
       const oldKeyUpdate = updateCalls.find(
         (call) => call[0].where?.id === 'key-1',
       );
@@ -212,7 +201,7 @@ describe('AuthService', () => {
 
       await service.revokeApiKey('key-1');
 
-      const updateCall = (prisma.apiKey.update as jest.Mock).mock.calls[0][0];
+      const updateCall = (prisma.apiKey.update as Mock).mock.calls[0][0];
       expect(updateCall.data.revokedAt).toBeInstanceOf(Date);
     });
 
@@ -286,7 +275,7 @@ describe('AuthService', () => {
       await expect(service.validateApiKey('mun_sk_unknown')).resolves.toBeNull();
 
       expect(bcrypt.compare).toHaveBeenCalledTimes(1);
-      const where = (prisma.apiKey.findMany as jest.Mock).mock.calls[0][0].where;
+      const where = (prisma.apiKey.findMany as Mock).mock.calls[0][0].where;
       expect(where).toEqual(expect.objectContaining({ lookupHash: null, revokedAt: null }));
     });
 

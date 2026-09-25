@@ -1,13 +1,8 @@
 import { ConflictException } from '@nestjs/common';
 import { SolutionLogHeadService } from '../src/solution-log-head/solution-log-head.service.js';
-// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
-// Its type, though, comes from @types/jest (already in tsconfig `types`),
-// which is what the 339 existing jest.fn() call sites are written against —
-// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
-// and would red 416 lines that are not otherwise wrong. Value from one,
-// type from the other.
-import { jest as _jestRuntime } from '@jest/globals';
-const jest = _jestRuntime as unknown as typeof globalThis.jest;
+// vitest exposes describe/it/expect as globals (vitest.config.ts `globals: true`);
+// `vi` is the one name that must be imported, exactly as `jest` had to be.
+import { vi } from 'vitest';
 
 const SHA_A = 'a'.repeat(64);
 const SHA_B = 'b'.repeat(64);
@@ -34,15 +29,15 @@ describe('SolutionLogHeadService integrity failures', () => {
     const principalId = '33333333-3333-4333-8333-333333333333';
     const queries: string[] = [];
     const tx = {
-      task: { findUnique: jest.fn().mockResolvedValue({ id: taskId }) },
+      task: { findUnique: vi.fn().mockResolvedValue({ id: taskId }) },
       taskExecutionAttempt: {
-        findUnique: jest.fn().mockResolvedValue({ status: 'running' }),
+        findUnique: vi.fn().mockResolvedValue({ status: 'running' }),
       },
       solutionLogHeadReceipt: {
-        findFirst: jest.fn().mockResolvedValue(null),
-        create: jest.fn().mockResolvedValue({}),
+        findFirst: vi.fn().mockResolvedValue(null),
+        create: vi.fn().mockResolvedValue({}),
       },
-      $queryRawUnsafe: jest.fn().mockImplementation(async (sql: string) => {
+      $queryRawUnsafe: vi.fn().mockImplementation(async (sql: string) => {
         queries.push(sql);
         if (sql.includes('FROM public.task_agents')) {
           return [{ role: 'executor' }];
@@ -57,7 +52,7 @@ describe('SolutionLogHeadService integrity failures', () => {
       }),
     };
     const prisma = {
-      $transaction: jest.fn(
+      $transaction: vi.fn(
         async (callback: (client: typeof tx) => Promise<unknown>) => callback(tx),
       ),
     };
@@ -77,7 +72,7 @@ describe('SolutionLogHeadService integrity failures', () => {
     { code: 'P2002', meta: { target: ['receipt_id'] } },
     { code: '23505', constraint: 'solution_log_head_receipts_head_unique' },
   ])('does not relabel $code uniqueness failures as a normal race', async (error) => {
-    const prisma = { $transaction: jest.fn().mockRejectedValue(error) };
+    const prisma = { $transaction: vi.fn().mockRejectedValue(error) };
     const service = new SolutionLogHeadService(prisma as never);
 
     try {

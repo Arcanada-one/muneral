@@ -31,20 +31,15 @@ import { WsModule } from '../src/ws/ws.module.js';
 import { HealthController } from '../src/health.controller.js';
 import { WebhooksService } from '../src/webhooks/webhooks.service.js';
 import { MigrationModule } from '../src/migration/migration.module.js';
-// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
-// Its type, though, comes from @types/jest (already in tsconfig `types`),
-// which is what the 339 existing jest.fn() call sites are written against —
-// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
-// and would red 416 lines that are not otherwise wrong. Value from one,
-// type from the other.
-import { jest as _jestRuntime } from '@jest/globals';
+// vitest exposes describe/it/expect as globals (vitest.config.ts `globals: true`);
+// `vi` is the one name that must be imported, exactly as `jest` had to be.
+import { vi } from 'vitest';
 // Imported statically. Under ESM a dynamic import inside the test body can
 // still be resolving when jest tears the environment down, which surfaces as
 // `import after the Jest environment has been torn down` — 137 of them from
 // this one suite, and the noise lands on whichever suites run alongside it.
 import { SyncController } from '../src/sync/sync.controller.js';
 import { MigrationController } from '../src/migration/migration.controller.js';
-const jest = _jestRuntime as unknown as typeof globalThis.jest;
 
 /**
  * Stub that satisfies any consumer of WebhooksService without registering a
@@ -55,10 +50,10 @@ const jest = _jestRuntime as unknown as typeof globalThis.jest;
     {
       provide: WebhooksService,
       useValue: {
-        create: jest.fn(),
-        findAll: jest.fn(),
-        remove: jest.fn(),
-        dispatch: jest.fn(),
+        create: vi.fn(),
+        findAll: vi.fn(),
+        remove: vi.fn(),
+        dispatch: vi.fn(),
       },
     },
   ],

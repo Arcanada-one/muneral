@@ -7,24 +7,19 @@ import {
   type TaskLike,
 } from '../src/tasks/field-state/task-field-state.service.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
-// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
-// Its type, though, comes from @types/jest (already in tsconfig `types`),
-// which is what the 339 existing jest.fn() call sites are written against —
-// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
-// and would red 416 lines that are not otherwise wrong. Value from one,
-// type from the other.
-import { jest as _jestRuntime } from '@jest/globals';
-const jest = _jestRuntime as unknown as typeof globalThis.jest;
+// vitest exposes describe/it/expect as globals (vitest.config.ts `globals: true`);
+// `vi` is the one name that must be imported, exactly as `jest` had to be.
+import { vi } from 'vitest';
 
 // ---------------------------------------------------------------------------
 // Minimal mock PrismaService — only methods used by TaskFieldStateService
 // ---------------------------------------------------------------------------
 const makePrisma = () => ({
   taskFieldState: {
-    findUnique: jest.fn(),
-    create: jest.fn(),
-    updateMany: jest.fn(),
-    findMany: jest.fn().mockResolvedValue([]),
+    findUnique: vi.fn(),
+    create: vi.fn(),
+    updateMany: vi.fn(),
+    findMany: vi.fn().mockResolvedValue([]),
   },
 });
 
@@ -237,11 +232,11 @@ describe('TaskFieldStateService', () => {
     it('field-state recompute is in service layer transaction', async () => {
       // Verify recompute uses the tx argument, not the injected PrismaService.
       const txTaskFieldState = {
-        findUnique: jest.fn().mockResolvedValue(null),
-        create: jest.fn().mockImplementation(
+        findUnique: vi.fn().mockResolvedValue(null),
+        create: vi.fn().mockImplementation(
           ({ data }: { data: unknown }) => Promise.resolve(data),
         ),
-        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+        updateMany: vi.fn().mockResolvedValue({ count: 1 }),
       };
       const txMock = {
         taskFieldState: txTaskFieldState,

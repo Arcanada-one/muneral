@@ -17,19 +17,14 @@ import { spawnSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as url from 'node:url';
-// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
-// Its type, though, comes from @types/jest (already in tsconfig `types`),
-// which is what the 339 existing jest.fn() call sites are written against —
-// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
-// and would red 416 lines that are not otherwise wrong. Value from one,
-// type from the other.
-import { jest as _jestRuntime } from '@jest/globals';
-const jest = _jestRuntime as unknown as typeof globalThis.jest;
+// vitest exposes describe/it/expect as globals (vitest.config.ts `globals: true`);
+// `vi` is the one name that must be imported, exactly as `jest` had to be.
+import { vi } from 'vitest';
 
 // ESM has no __dirname, and declaring that NAME would mark the module CommonJS.
 const thisDir = path.dirname(url.fileURLToPath(import.meta.url));
 
-jest.setTimeout(600_000);
+vi.setConfig({ testTimeout: 600_000, hookTimeout: 600_000 });
 
 const API_ROOT = path.resolve(thisDir, '..');
 const MAPPER = path.join(API_ROOT, 'src', 'migration', 'migration.status.ts');
@@ -171,15 +166,23 @@ const MUTANTS: readonly Mutant[] = [
 ];
 
 function runTargetSuite(): { status: number | null; output: string } {
+  // A2-304c: spawns VITEST, not jest. Unlike the assembly battery, this one records
+  // nothing — it recomputes every kill on each run, so its verdicts are produced by the
+  // runner under test rather than replayed from a file, and moving it is measured by the
+  // battery itself going green. Its two target suites use no runner-specific API.
+  // The ESM flag that jest needed is gone with jest: vitest loads ESM natively.
   const result = spawnSync(
     process.execPath,
     [
-      path.join(API_ROOT, 'node_modules', 'jest', 'bin', 'jest.js'),
-      '--runInBand',
-      '--ci',
+      path.join(API_ROOT, 'node_modules', 'vitest', 'vitest.mjs'),
+      'run',
       ...TARGET_SUITES,
     ],
-    { cwd: API_ROOT, encoding: 'utf8', env: { ...process.env, CI: 'true' } },
+    {
+      cwd: API_ROOT,
+      encoding: 'utf8',
+      env: { ...process.env, CI: 'true' },
+    },
   );
   return { status: result.status, output: `${result.stdout ?? ''}${result.stderr ?? ''}` };
 }

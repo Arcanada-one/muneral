@@ -7,14 +7,9 @@ import { KanbanService } from '../src/ws/kanban.service.js';
 import { TaskFieldStateService } from '../src/tasks/field-state/task-field-state.service.js';
 import { TaskExecutionRecorderService } from '../src/execution-authority/task-execution-recorder.service.js';
 import type { Actor } from '@muneral/types';
-// ESM has no injected globals, so `jest` must be imported for the RUNTIME.
-// Its type, though, comes from @types/jest (already in tsconfig `types`),
-// which is what the 339 existing jest.fn() call sites are written against —
-// @jest/globals ships a stricter generic whose bare jest.fn() infers `never`
-// and would red 416 lines that are not otherwise wrong. Value from one,
-// type from the other.
-import { jest as _jestRuntime } from '@jest/globals';
-const jest = _jestRuntime as unknown as typeof globalThis.jest;
+// vitest exposes describe/it/expect as globals (vitest.config.ts `globals: true`);
+// `vi` is the one name that must be imported, exactly as `jest` had to be.
+import { vi } from 'vitest';
 
 const humanActor: Actor = { type: 'human', id: 'user-1', name: 'Pavel' };
 
@@ -29,41 +24,41 @@ const MOCK_TASK = {
 
 const makePrisma = () => {
   const taskFieldState = {
-    findUnique: jest.fn(),
-    create: jest.fn().mockResolvedValue({}),
-    updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+    findUnique: vi.fn(),
+    create: vi.fn().mockResolvedValue({}),
+    updateMany: vi.fn().mockResolvedValue({ count: 1 }),
   };
   const task = {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn().mockResolvedValue([]),
-    update: jest.fn(),
-    delete: jest.fn().mockResolvedValue(undefined),
+    create: vi.fn(),
+    findUnique: vi.fn(),
+    findMany: vi.fn().mockResolvedValue([]),
+    update: vi.fn(),
+    delete: vi.fn().mockResolvedValue(undefined),
   };
   const activityLog = {
-    create: jest.fn().mockResolvedValue({}),
+    create: vi.fn().mockResolvedValue({}),
   };
   const taskTag = {
-    createMany: jest.fn().mockResolvedValue({ count: 0 }),
+    createMany: vi.fn().mockResolvedValue({ count: 0 }),
   };
   const taskChecklist = {
-    create: jest.fn(),
-    findFirst: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn().mockResolvedValue(undefined),
-    findMany: jest.fn().mockResolvedValue([]),
+    create: vi.fn(),
+    findFirst: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn().mockResolvedValue(undefined),
+    findMany: vi.fn().mockResolvedValue([]),
   };
   const taskDependency = {
-    create: jest.fn(),
-    findUnique: jest.fn(),
-    findMany: jest.fn().mockResolvedValue([]),
-    delete: jest.fn().mockResolvedValue(undefined),
+    create: vi.fn(),
+    findUnique: vi.fn(),
+    findMany: vi.fn().mockResolvedValue([]),
+    delete: vi.fn().mockResolvedValue(undefined),
   };
 
   // $transaction: execute the callback with the mock tx (which is this same object)
   const self = {
     project: {
-      findUnique: jest.fn(),
+      findUnique: vi.fn(),
     },
     task,
     taskTag,
@@ -71,7 +66,7 @@ const makePrisma = () => {
     taskDependency,
     taskFieldState,
     activityLog,
-    $transaction: jest.fn().mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) => {
+    $transaction: vi.fn().mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) => {
       return fn(self);
     }),
   };
@@ -79,21 +74,21 @@ const makePrisma = () => {
 };
 
 const makeActivityService = () => ({
-  log: jest.fn().mockResolvedValue({}),
-  findForTask: jest.fn().mockResolvedValue({ data: [], total: 0, page: 1, limit: 20 }),
+  log: vi.fn().mockResolvedValue({}),
+  findForTask: vi.fn().mockResolvedValue({ data: [], total: 0, page: 1, limit: 20 }),
 });
 
 const makeKanbanService = () => ({
-  notify: jest.fn(),
+  notify: vi.fn(),
 });
 
 const makeFieldStateService = () => ({
-  recompute: jest.fn().mockResolvedValue(undefined),
-  onModuleInit: jest.fn(),
+  recompute: vi.fn().mockResolvedValue(undefined),
+  onModuleInit: vi.fn(),
 });
 
 const makeExecutionRecorder = () => ({
-  onStatusTransition: jest
+  onStatusTransition: vi
     .fn()
     .mockResolvedValue({ verdict: 'skipped', reason: 'stubbed in unit test' }),
 });

@@ -135,6 +135,14 @@ describe('validateEvidenceRef', () => {
       ]),
     );
 
+      // A2-304c: the subject call stays inside the polluted window; the ASSERTIONS
+      // moved out of it. Object.prototype gains a non-writable `uri` here (no
+      // `writable` in the descriptor), and vitest's expect writes through the
+      // prototype while building its diff — "Cannot assign to read only property
+      // 'uri'" came from the assertion library, never from the subject. jest's
+      // expect happened not to. What is under test is unchanged: the call below is
+      // still made with every field inherited and nothing own.
+    let err: ReturnType<typeof validateEvidenceRef>;
     try {
       Object.defineProperties(Object.prototype, {
         uri: {
@@ -154,11 +162,7 @@ describe('validateEvidenceRef', () => {
         },
       });
 
-      const err = validateEvidenceRef({});
-      expect(err?.code).toBe('INVALID_EVIDENCE_REF');
-      expect(err?.reason).toBe(
-        'evidence reference fields must be own enumerable data properties',
-      );
+      err = validateEvidenceRef({});
     } finally {
       for (const field of fieldNames) {
         const descriptor = previous.get(field);
@@ -169,6 +173,11 @@ describe('validateEvidenceRef', () => {
         }
       }
     }
+
+    expect(err?.code).toBe('INVALID_EVIDENCE_REF');
+    expect(err?.reason).toBe(
+      'evidence reference fields must be own enumerable data properties',
+    );
   });
 
   it('rejects symbol-keyed fields', () => {

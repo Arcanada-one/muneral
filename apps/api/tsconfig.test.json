@@ -27,8 +27,14 @@
     // shapes.
     "allowJs": true
   },
+  // A2-304c: the two runner configs are typechecked HERE and not by tsconfig.json.
+  // tsconfig.json emits to dist/ and that tree is what the production image carries —
+  // a test-runner config has no business in it. This project emits nothing (it is run
+  // with --noEmit by `pnpm run test:types`), so it is where they belong.
   "include": [
     "src",
-    "test"
+    "test",
+    "vitest.config.ts",
+    "jest.config.mjs"
   ]
 }
