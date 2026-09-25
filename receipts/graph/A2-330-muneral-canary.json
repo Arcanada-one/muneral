@@ -5,9 +5,9 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "admitted"
  },
- "captured_at_utc": "2026-09-25T17:09:15Z",
+ "captured_at_utc": "2026-09-25T17:24:54Z",
  "change_set": {
-  "base": "92a77936897f431702b27fef7696c5662fbe405c",
+  "base": "25bec4352f2da9a98850699144959f49573ee89a",
   "files": [
    {
     "kind": "config",
@@ -149,7 +149,7 @@
     "status": "A"
    }
   ],
-  "head": "49fc6cc36ac33bcff72e93bcc7bbec0b0bd55794",
+  "head": "c3dd8095f9151e92abe74ad45d169f0236fe9a6e",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -157,18 +157,18 @@
  "graph": {
   "builder_version": "1.0.1",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:4f215a3307b47a74b514f69e5333491e17ce441511a198e137773826d811ab68",
-  "path": "/home/dev/aup/arc2/runs/A2-355/vw187/verifier-out/graph-92a77936897f.json",
-  "source_commit": "92a77936897f431702b27fef7696c5662fbe405c"
+  "graph_digest": "sha256:81cc090c8ac45f64339f71c96216bef3e67cca0bc838502793aee573fd5018ba",
+  "path": "/home/dev/aup/arc2/runs/A2-355/vw187m/verifier-out/graph-25bec4352f2d.json",
+  "source_commit": "25bec4352f2da9a98850699144959f49573ee89a"
  },
  "head_graph": {
   "builder_version": "1.0.1",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:8e422baa182c7157efc22d10bce53bd4948592e813b9776a89e2c121b494f2fd",
-  "path": "/home/dev/aup/arc2/runs/A2-355/vw187/verifier-out/graph-head-49fc6cc36ac3.json",
-  "source_commit": "49fc6cc36ac33bcff72e93bcc7bbec0b0bd55794",
+  "graph_digest": "sha256:a0566bfface97ac387ada1ae9c5e489e739ed46699d8c1a5aa9b2de36668af8e",
+  "path": "/home/dev/aup/arc2/runs/A2-355/vw187m/verifier-out/graph-head-c3dd8095f915.json",
+  "source_commit": "c3dd8095f9151e92abe74ad45d169f0236fe9a6e",
   "staleness": {
-   "checked_at_utc": "2026-09-25T17:09:26Z",
+   "checked_at_utc": "2026-09-25T17:25:05Z",
    "checked_nodes": 370,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
@@ -2365,7 +2365,7 @@
   "tool": "tools/graph/verify.py",
   "version": "1.0.1"
  },
- "receipt_id": "car-verify-20260925T170915Z-49fc6cc3",
+ "receipt_id": "car-verify-20260925T172454Z-c3dd8095",
  "receipt_path": "receipts/graph/A2-330-muneral-canary.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -2471,7 +2471,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-09-25T17:09:26Z",
+  "checked_at_utc": "2026-09-25T17:25:05Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -2480,7 +2480,7 @@
   {
    "content_hash": {
     "base": null,
-    "head": "sha256:e04f4b4a6e148976e9e489a7b0a639b18794f80fd97b8bb734951cdeb980081e"
+    "head": "sha256:d06e08943802aa32d5ba74ffa0ed5519c3a8d184cf5dda7634caca4ca5897db9"
    },
    "entity": "receipt:receipts/graph/A2-330-muneral-canary.json",
    "node_type": "receipt",
@@ -2890,7 +2890,7 @@
   }
  ],
  "tree": {
-  "commit": "49fc6cc36ac33bcff72e93bcc7bbec0b0bd55794",
+  "commit": "c3dd8095f9151e92abe74ad45d169f0236fe9a6e",
   "dirty": false
  },
  "verdicts": [
@@ -3000,7 +3000,7 @@
  "verifiers": [
   {
    "command": "/home/dev/aup/arc2/runs/A2-355/work/mun/apps/api/node_modules/.bin/tsc -p /home/dev/aup/arc2/runs/A2-355/work/mun/apps/api/tsconfig.json --noEmit --incremental false --listFiles",
-   "duration_s": 2.97,
+   "duration_s": 2.89,
    "entities": [
     "code_unit:apps/api/src/app.module.ts",
     "code_unit:apps/api/src/main.ts",
@@ -3018,13 +3018,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/arc2/runs/A2-355/vw187/verifier-out/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-09-25T17:09:33Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-355/vw187m/verifier-out/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-09-25T17:25:11Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1442 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=92a77936897f, head=49fc6cc36ac3, graph=head graph)",
-   "duration_s": 2.85,
+   "command": "tools/graph/contract_diff.py.run_diff(base=25bec4352f2d, head=c3dd8095f915, graph=head graph)",
+   "duration_s": 3.0,
    "entities": [
     "code_unit:apps/api/src/route-table.controller.ts",
     "route:GET /health/routes"
@@ -3036,8 +3036,8 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "/home/dev/aup/arc2/runs/A2-355/vw187/verifier-out/v-contract-diff.json",
-   "started_at_utc": "2026-09-25T17:09:36Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-355/vw187m/verifier-out/v-contract-diff.json",
+   "started_at_utc": "2026-09-25T17:25:14Z",
    "summary": "46→46 contracts, breaking 0, edges {'verified': 148}"
   },
   {
@@ -3052,8 +3052,8 @@
    "exit_code": 0,
    "id": "v-route-config",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/arc2/runs/A2-355/vw187/verifier-out/v-route-config.txt",
-   "started_at_utc": "2026-09-25T17:09:39Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-355/vw187m/verifier-out/v-route-config.txt",
+   "started_at_utc": "2026-09-25T17:25:17Z",
    "summary": "1 route(s), 0 failed"
   },
   {
@@ -3068,13 +3068,13 @@
    "exit_code": 0,
    "id": "v-workflow-config-b803fcb7f17ed923",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/arc2/runs/A2-355/vw187/verifier-out/v-workflow-config-b803fcb7f17ed923.txt",
-   "started_at_utc": "2026-09-25T17:09:39Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-355/vw187m/verifier-out/v-workflow-config-b803fcb7f17ed923.txt",
+   "started_at_utc": "2026-09-25T17:25:17Z",
    "summary": "bounded workflow configuration shape valid; expressions, shell, actions and hosted execution NOT_MEASURED"
   },
   {
    "command": "verify.py config_schema: keys read at head ⊆ declared keys",
-   "duration_s": 0.24,
+   "duration_s": 0.26,
    "entities": [
     "code_unit:apps/api/src/app.module.ts",
     "code_unit:apps/api/src/main.ts"
@@ -3086,8 +3086,8 @@
    "exit_code": 0,
    "id": "v-config-schema",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/arc2/runs/A2-355/vw187/verifier-out/v-config-schema.json",
-   "started_at_utc": "2026-09-25T17:09:39Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-355/vw187m/verifier-out/v-config-schema.json",
+   "started_at_utc": "2026-09-25T17:25:17Z",
    "summary": "2 source(s), 0 new / 3 frozen undeclared reads, 0 failed; 4 vendored file(s) not attributed to this repository (Arcanada-one/arcanada-universal-program)"
   },
   {
@@ -3116,8 +3116,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/home/dev/aup/arc2/runs/A2-355/vw187/verifier-out/v-fitness.json",
-   "started_at_utc": "2026-09-25T17:09:39Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-355/vw187m/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-09-25T17:25:17Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -3134,8 +3134,8 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/home/dev/aup/arc2/runs/A2-355/vw187/verifier-out/v-doc-reference.txt",
-   "started_at_utc": "2026-09-25T17:09:39Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-355/vw187m/verifier-out/v-doc-reference.txt",
+   "started_at_utc": "2026-09-25T17:25:17Z",
    "summary": "2 document(s), 0 failed"
   },
   {
@@ -3157,7 +3157,7 @@
    "id": "v-canary-1",
    "kind": "canary",
    "output_ref": "receipts/canary/A2-355-r182-candidate-5554956.json",
-   "started_at_utc": "2026-09-25T17:09:39Z",
+   "started_at_utc": "2026-09-25T17:25:17Z",
    "summary": "receipts/canary/A2-355-r182-candidate-5554956.json: 4 verified / 0 failed / 0 not_measured"
   },
   {
@@ -3167,8 +3167,8 @@
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/home/dev/aup/arc2/runs/A2-355/vw187/verifier-out/v-canary.json",
-   "started_at_utc": "2026-09-25T17:09:39Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-355/vw187m/verifier-out/v-canary.json",
+   "started_at_utc": "2026-09-25T17:25:17Z",
    "summary": "1 canary result(s), 1 committed at head; 4 verified / 0 failed / 0 not_measured of 4 entities"
   }
  ],
@@ -3273,9 +3273,9 @@
    ]
   },
   "seconds": {
-   "prepare": 6.89,
-   "total": 24.09,
-   "verifiers": 6.17
+   "prepare": 5.73,
+   "total": 23.28,
+   "verifiers": 6.26
   }
  },
  "work_item": "A2-330"
