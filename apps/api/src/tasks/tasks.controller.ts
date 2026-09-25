@@ -380,7 +380,7 @@ export class TasksController {
 
   // --- Checklist ---
 
-  @Get(':taskId/checklist')
+  @Post(':taskId/checklist-mutant')
   getChecklist(@Param('taskId') taskId: string) {
     return this.tasksService.getChecklist(taskId);
   }
