@@ -26,6 +26,7 @@ import { KanbanService } from '../src/ws/kanban.service.js';
 import { PROJECT_READ_GRANTS, GRANT_RENEWAL_LEAD_DAYS } from '../src/auth/project-read-grants.js';
 import type { ProjectReadGrantEntry } from '../src/auth/project-read-grants.js';
 import { PROJECT_INDEX_COUNTED, PROJECT_INDEX_READ_ACTION } from '../src/tasks/tasks.service.js';
+import { TaskFieldStateService } from '../src/tasks/field-state/task-field-state.service.js';
 
 @Module({
   imports: [PrismaModule, AuthModule, ActivityModule, AgentsModule, TasksModule],
@@ -43,6 +44,7 @@ describe('MUN-0052 — project task index for granted agent keys (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
   let authSvc: AuthService;
+  let fsSvc: TaskFieldStateService;
   // The guard reads this very array through DI; each test fills it.
   const grants: ProjectReadGrantEntry[] = [];
 
@@ -67,6 +69,7 @@ describe('MUN-0052 — project task index for granted agent keys (e2e)', () => {
     await app.init();
     prisma = moduleRef.get(PrismaService);
     authSvc = moduleRef.get(AuthService);
+    fsSvc = moduleRef.get(TaskFieldStateService);
   });
 
   afterAll(async () => {
@@ -431,15 +434,31 @@ describe('MUN-0052 — project task index for granted agent keys (e2e)', () => {
       );
     });
 
-    // MUN-0055 (DEC-AUP-0033 R4). This is the ONE route the grant now changes,
-    // and it changes it by taking something away. DEC-AUP-0029 R7 accepted, for
-    // one week, that a granted key could pair the index (which ids) with this
-    // read (which values) and rebuild every title and description of the
-    // project. The renewal removes that pairing instead of extending the
-    // residual: with the grant present the free-text VALUES are withheld from a
-    // task the key does not own; the change signal — version, hash, changed —
-    // and every other field are byte-for-byte what they were.
-    it('GET /tasks/:taskId/field-changes: the grant now WITHHOLDS title/description values (the R7 residual, closed)', async () => {
+    // DEC-AUP-0033 R4, as A2-294 corrected it. DEC-AUP-0029 R7 accepted, for one
+    // week, that a key could pair the index (which ids) with this read (which
+    // values) and rebuild every title and description of the project. MUN-0055
+    // set out to remove that pairing and removed it FOR THE GRANTED KEY ONLY:
+    // the guard returned early on "holds no live project-read grant" with "do
+    // not withhold", so the key with LESS entitlement kept reading plaintext.
+    // This very spec pinned that, asserting `value` present for the ungranted
+    // leg — the assertion below is what it used to be, inverted.
+    //
+    // Measured live before the fix: an in-workspace key holding no grant at all
+    // read 926 tasks with `title` and `description` in clear, `valueWithheld` on
+    // none (`runs/A2-294/out/title-scan-20260925T000214Z.json`).
+    //
+    // So the withholding is not differential any more. Both legs withhold,
+    // because `taskId` here is `othersTask()` — a task the reader neither created
+    // nor is assigned to — and ownership is now the whole rule. The change signal
+    // (version, hash, changed) and every other field stay byte-for-byte.
+    it('GET /tasks/:taskId/field-changes: title/description values are withheld from a key that does not own the task — with the grant AND without it', async () => {
+      // real field state, written by the service that owns it, so `version` and
+      // `hash` below are the component's own values and not a default
+      const seeded = await prisma.task.findUniqueOrThrow({ where: { id: taskId } });
+      await prisma.$transaction(async (tx) => {
+        await fsSvc.recompute(tx, seeded);
+      });
+
       const answers = await differential(() => http().get(`/tasks/${taskId}/field-changes`).set(k()), 200);
       const [granted, ungranted] = answers.map((a) => a.body.fields as Array<Record<string, unknown>>);
 
@@ -448,24 +467,77 @@ describe('MUN-0052 — project task index for granted agent keys (e2e)', () => {
       const rest = (fields: Array<Record<string, unknown>>) =>
         fields.filter((f) => f.field !== 'title' && f.field !== 'description');
 
-      // ungranted: exactly the old answer, values present
-      expect(freeText(ungranted).map((f) => f.value)).toEqual([
-        expect.stringContaining('secret-bearing title'),
-        'must never reach the index',
-      ]);
-      expect(freeText(ungranted).every((f) => f.valueWithheld === undefined)).toBe(true);
+      for (const [label, fields] of [
+        ['granted', granted],
+        ['ungranted', ungranted],
+      ] as const) {
+        expect({ label, values: freeText(fields).map((f) => f.value) }).toEqual({
+          label,
+          values: [null, null],
+        });
+        expect({ label, withheld: freeText(fields).every((f) => f.valueWithheld === true) }).toEqual({
+          label,
+          withheld: true,
+        });
+        expect({ label, leaked: JSON.stringify(fields).includes('secret-bearing title') }).toEqual({
+          label,
+          leaked: false,
+        });
+        expect({ label, leaked: JSON.stringify(fields).includes('must never reach the index') }).toEqual({
+          label,
+          leaked: false,
+        });
+      }
 
-      // granted: the same fields, the same change signal, no plaintext
-      expect(freeText(granted).map((f) => f.value)).toEqual([null, null]);
-      expect(freeText(granted).every((f) => f.valueWithheld === true)).toBe(true);
-      expect(freeText(granted).map((f) => [f.field, f.version, f.hash, f.changed])).toEqual(
-        freeText(ungranted).map((f) => [f.field, f.version, f.hash, f.changed]),
+      // the grant list is not an input to this route: the two answers are equal,
+      // field for field, including the change signal every poller reads
+      expect(granted).toEqual(ungranted);
+
+      // The change signal must survive the withholding, and "survive" is measured
+      // against what the component that WRITES it actually wrote — the
+      // `task_field_state` rows TaskFieldStateService.recompute produced above —
+      // not against a shape this test made up. A guard that nulled `version`/`hash`
+      // along with `value` would pass an `expect(granted).toEqual(ungranted)` and
+      // fail here, which is the regression a poller would feel.
+      const rows = await prisma.taskFieldState.findMany({
+        where: { taskId, fieldName: { in: ['title', 'description'] } },
+        select: { fieldName: true, version: true, hash: true },
+      });
+      expect(rows).toHaveLength(2);
+      expect(
+        freeText(granted)
+          .map((f) => ({ fieldName: f.field, version: f.version, hash: f.hash }))
+          .sort((a, b) => String(a.fieldName).localeCompare(String(b.fieldName))),
+      ).toEqual(
+        rows
+          .map((r) => ({ fieldName: r.fieldName, version: Number(r.version), hash: r.hash }))
+          .sort((a, b) => a.fieldName.localeCompare(b.fieldName)),
       );
-      expect(JSON.stringify(granted)).not.toContain('secret-bearing title');
-      expect(JSON.stringify(granted)).not.toContain('must never reach the index');
-
-      // every other tracked field is untouched by the grant
       expect(rest(granted)).toEqual(rest(ungranted));
+    });
+
+    // The other half of R4, and the reason the route is not simply closed: a key
+    // DOES read the values of a task it owns, grant or no grant. Without this the
+    // spec above would also pass a guard that withheld from everyone always.
+    it('GET /tasks/:taskId/field-changes: a key that OWNS the task still reads the values', async () => {
+      const own = await prisma.task.create({
+        data: {
+          projectId,
+          title: 'reader-owned title',
+          description: 'reader-owned description',
+          status: 'todo',
+          priority: 'high',
+          createdById: ids.reader,
+          actorType: 'agent',
+        },
+      });
+      const answers = await differential(() => http().get(`/tasks/${own.id}/field-changes`).set(k()), 200);
+      for (const res of answers) {
+        const fields = res.body.fields as Array<Record<string, unknown>>;
+        const freeText = fields.filter((f) => f.field === 'title' || f.field === 'description');
+        expect(freeText.map((f) => f.value)).toEqual(['reader-owned title', 'reader-owned description']);
+        expect(freeText.every((f) => f.valueWithheld === undefined)).toBe(true);
+      }
     });
 
     // MUN-0055 (DEC-AUP-0033 R4a) — the second door onto the same plaintext,

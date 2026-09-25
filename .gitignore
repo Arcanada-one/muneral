@@ -47,3 +47,14 @@ pids/
 # Python bytecode from the cross-language fixture validator
 __pycache__/
 *.pyc
+
+# Graph-admission verifier scratch (A2-294c). verify.py writes its captured verifier outputs and two
+# ~2 MB RelationshipGraph dumps here. Pointing --verifier-out at this path is what makes the
+# receipt's output_ref repo-relative and stable for a human reader instead of a worker's /tmp. The
+# bytes themselves are NOT committed, and that is forced, not chosen: they are a function of the
+# head (v-contract-diff names the commit; the type-check listings name the export dir), while
+# GATEORDER-0 `trailing_record_commits` admits only the receipt file and a declared derived artefact
+# into a commit after the receipt's head. Committing them therefore refuses as CHANGE_SET_INCOMPLETE
+# no matter how the commits are ordered -- measured on this branch at 76cc7ab (C06, both locally and
+# in CI run 36089950017). Recorded here so the next agent does not rediscover it by going red.
+receipts/graph/verifier-out/
