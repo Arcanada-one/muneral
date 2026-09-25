@@ -15,6 +15,11 @@ import { ActivityService } from '../activity/activity.service.js';
 import { KanbanService } from '../ws/kanban.service.js';
 import { createHash, randomUUID } from 'node:crypto';
 import { isValidTransition } from '@muneral/types';
+import {
+  assertEvidenceForDone,
+  doneRequiresEvidence,
+  evidenceRequiredForDone,
+} from './evidence/done-evidence-guard.js';
 import type { Actor, TaskStatus } from '@muneral/types';
 import { TaskFieldStateService } from './field-state/task-field-state.service.js';
 import { TaskExecutionRecorderService } from '../execution-authority/task-execution-recorder.service.js';
@@ -106,6 +111,13 @@ export class TasksService {
 
     // All mutations (task create + field-state + activity) in one transaction.
     // kanbanService.notify is post-commit (side-effect outside tx).
+    // A2-336: a task created directly in `done` cannot carry evidence yet —
+    // attachments need the task id. With the switch on it is refused; create
+    // it, attach, then move it.
+    if (dto.status === 'done' && doneRequiresEvidence()) {
+      throw evidenceRequiredForDone(null);
+    }
+
     const task = await this.prisma.$transaction(
       async (tx) => {
         const created = await tx.task.create({
@@ -468,6 +480,10 @@ export class TasksService {
 
     const updated = await this.prisma.$transaction(
       async (tx) => {
+        // A2-336: `done` needs an evidence attachment when the switch is on.
+        // Counted inside the transaction that writes the status.
+        await assertEvidenceForDone(tx, taskId, dto.status);
+
         const u = await tx.task.update({
           where: { id: taskId },
           data: { status: dto.status },
