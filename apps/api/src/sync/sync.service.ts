@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { TasksService } from '../tasks/tasks.service.js';
+import { ActivityService } from '../activity/activity.service.js';
 import { agentStatusAuthorityWhere } from '../auth/agent-task-visibility.js';
 import { TASK_STATUSES, isValidTransition } from '@muneral/types';
 import type { Actor, TaskStatus, TaskPriority } from '@muneral/types';
@@ -27,8 +28,37 @@ type ImportStep =
       taskId: string;
       status?: TaskStatus;
       fields: { priority?: string; dueDate?: string };
+      /** What the task held before, for the audit row's `from` side. */
+      before: { status: string; priority: string; dueDate: string | null };
     }
   | { kind: 'unchanged' };
+
+/**
+ * A2-383. The route-level audit row. The per-task rows TasksService writes
+ * (`task:created`, `task:status_changed`, `task:updated`) look the same
+ * whichever route caused them, so on their own they cannot answer "was the
+ * import used, by whom, on which project". This row can: one per import that
+ * reached the write phase, naming the project and every task it touched.
+ */
+export const DATARIM_IMPORT_ACTION = 'sync:datarim_imported';
+
+type Change<T> = { from: T; to: T };
+
+/** Payload of the `sync:datarim_imported` row. */
+export type DatarimImportAudit = {
+  projectId: string;
+  /** `failed`: a write threw part-way; the lists hold what was applied before it. */
+  outcome: 'completed' | 'failed';
+  created: Array<{ taskId: string; title: string; status: string }>;
+  updated: Array<{
+    taskId: string;
+    status?: Change<string>;
+    priority?: Change<string>;
+    dueDate?: Change<string | null>;
+  }>;
+  unchanged: number;
+  error?: string;
+};
 
 /** The same bound `POST /tasks` puts on a title (CreateTaskDto). */
 const MAX_TITLE_LENGTH = 500;
@@ -41,6 +71,7 @@ export class SyncService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly tasksService: TasksService,
+    private readonly activityService: ActivityService,
   ) {}
 
   /**
@@ -235,39 +266,81 @@ export class SyncService {
       if (status === undefined && Object.keys(fields).length === 0) {
         steps.push({ kind: 'unchanged' });
       } else {
-        steps.push({ kind: 'update', taskId: existing.id, status, fields });
-      }
-    }
-
-    let created = 0;
-    let updated = 0;
-    let unchanged = 0;
-
-    for (const step of steps) {
-      if (step.kind === 'create') {
-        await this.tasksService.create(actor, {
-          projectId,
-          title: step.block.title,
-          description: step.block.description,
-          status: step.block.status,
-          priority: step.block.priority,
-          dueDate: step.block.dueDate,
+        steps.push({
+          kind: 'update',
+          taskId: existing.id,
+          status,
+          fields,
+          before: { status: existing.status, priority: existing.priority, dueDate: existing.dueDate },
         });
-        created++;
-      } else if (step.kind === 'update') {
-        if (Object.keys(step.fields).length > 0) {
-          await this.tasksService.update(step.taskId, actor, step.fields);
-        }
-        if (step.status !== undefined) {
-          await this.tasksService.updateStatus(step.taskId, actor, { status: step.status });
-        }
-        updated++;
-      } else {
-        unchanged++;
       }
     }
 
+    const audit: DatarimImportAudit = {
+      projectId,
+      outcome: 'completed',
+      created: [],
+      updated: [],
+      unchanged: 0,
+    };
+
+    try {
+      for (const step of steps) {
+        if (step.kind === 'create') {
+          const task = await this.tasksService.create(actor, {
+            projectId,
+            title: step.block.title,
+            description: step.block.description,
+            status: step.block.status,
+            priority: step.block.priority,
+            dueDate: step.block.dueDate,
+          });
+          audit.created.push({ taskId: task.id, title: task.title, status: task.status });
+        } else if (step.kind === 'update') {
+          const entry: DatarimImportAudit['updated'][number] = { taskId: step.taskId };
+          if (Object.keys(step.fields).length > 0) {
+            await this.tasksService.update(step.taskId, actor, step.fields);
+            if (step.fields.priority !== undefined) {
+              entry.priority = { from: step.before.priority, to: step.fields.priority };
+            }
+            if (step.fields.dueDate !== undefined) {
+              entry.dueDate = { from: step.before.dueDate, to: step.fields.dueDate };
+            }
+          }
+          if (step.status !== undefined) {
+            await this.tasksService.updateStatus(step.taskId, actor, { status: step.status });
+            entry.status = { from: step.before.status, to: step.status };
+          }
+          audit.updated.push(entry);
+        } else {
+          audit.unchanged++;
+        }
+      }
+    } catch (err) {
+      // The writes are one TasksService call each, not one transaction: a
+      // failure part-way leaves the earlier ones applied. Record exactly those,
+      // then let the original error answer the caller.
+      audit.outcome = 'failed';
+      audit.error = err instanceof Error ? err.message : String(err);
+      await this.writeImportAudit(project.workspaceId, actor, audit).catch(() => void 0);
+      throw err;
+    }
+
+    await this.writeImportAudit(project.workspaceId, actor, audit);
+
+    const created = audit.created.length;
+    const updated = audit.updated.length;
+    const unchanged = audit.unchanged;
     return { created, updated, unchanged };
+  }
+
+  private writeImportAudit(workspaceId: string, actor: Actor, audit: DatarimImportAudit) {
+    return this.activityService.log({
+      workspaceId,
+      actor,
+      action: DATARIM_IMPORT_ACTION,
+      payload: audit,
+    });
   }
 
   private parseDatarimMarkdown(markdown: string): ImportBlock[] {

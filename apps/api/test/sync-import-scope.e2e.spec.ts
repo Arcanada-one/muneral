@@ -342,4 +342,59 @@ describe('POST /sync/datarim/:projectId/import is scoped to the key (e2e, A2-379
     expect(await snapshot(task.id)).toEqual(before);
     expect(await logRows(task.id)).toBe(0);
   });
+  // -------------------------------------------------------------------------
+  // A2-383 — the import itself is on the record, not just its per-task rows
+  // -------------------------------------------------------------------------
+
+  const importRows = () =>
+    prisma.activityLog.findMany({ where: { workspaceId, action: 'sync:datarim_imported' } });
+
+  it('an import leaves one route-level row: who, which project, what changed (old -> new)', async () => {
+    const task = await agentTask(`t-audit-${run}`);
+    const kept = await agentTask(`t-kept-${run}`);
+
+    const res = await importAs(
+      creatorKey,
+      projectId,
+      md(
+        { title: `born-${run}`, status: 'todo' },
+        { title: task.title, status: 'in_progress', priority: 'high' },
+        { title: kept.title, status: 'todo', priority: 'medium' },
+      ),
+    );
+    expect(res.status).toBe(201);
+    expect(res.body).toEqual({ created: 1, updated: 1, unchanged: 1 });
+
+    const born = await prisma.task.findFirstOrThrow({ where: { projectId, title: `born-${run}` } });
+    const rows = await importRows();
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ actorType: 'agent', actorId: creatorAgentId, taskId: null });
+    expect(rows[0].payload).toEqual({
+      projectId,
+      outcome: 'completed',
+      created: [{ taskId: born.id, title: `born-${run}`, status: 'todo' }],
+      updated: [
+        {
+          taskId: task.id,
+          status: { from: 'todo', to: 'in_progress' },
+          priority: { from: 'medium', to: 'high' },
+        },
+      ],
+      unchanged: 1,
+    });
+  });
+
+  it('a refused import writes no route-level row', async () => {
+    const victim = await createTask(`victim-audit-${run}`);
+
+    const refused = await importAs(strangerKey, projectId, md({ title: victim.title, status: 'in_progress' }));
+    expect(refused.status).toBe(403);
+    const foreign = await importAs(foreignKey, projectId, md({ title: `x-${run}` }));
+    expect(foreign.status).toBe(404);
+
+    expect(await importRows()).toHaveLength(0);
+    expect(
+      await prisma.activityLog.count({ where: { workspaceId: foreignWorkspaceId, action: 'sync:datarim_imported' } }),
+    ).toBe(0);
+  });
 });
