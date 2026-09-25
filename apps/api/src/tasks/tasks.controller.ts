@@ -148,7 +148,7 @@ export class TasksController {
    * credentials from one handler would mean one route with two answers, and the
    * narrow one would be the one easiest to lose in a later edit.
    */
-  @Get('digest')
+  @Get('digests')
   @AgentScope('workspace-digest')
   digest(@Req() req: AuthRequest, @Query() dto: QueryWorkspaceDigestDto) {
     const scope = req.agentScope;
