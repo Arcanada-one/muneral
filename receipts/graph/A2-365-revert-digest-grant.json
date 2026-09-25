@@ -3,11 +3,11 @@
   "rule": "admitted requires every verdict = verified; failed without exemption ⇒ refused; not_measured without exemption ⇒ paused_safe; exemptions (owner + expiry) are attached by the admitting agent, never by the verifier (DEC-AUP-0008, matrix P1/P4)",
   "structural_exclusion_rule": "DEC-AUP-0034: an affected entity is NOT verdict-owing when all three hold — the verifier matrix declares neither a mandatory nor a selectable verifier for its node type (so the only verdict it could ever carry states a property of the MATRIX, not of this change), the change set does not contain it, and its bytes are identical at base and head. Each one is listed in structural_exclusions with the content hash at both revisions that proves the byte-identity, and impact_pair.receipt_problems re-derives that proof from Git rather than believing the receipt.",
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
-  "verdict": "paused_safe"
+  "verdict": "admitted"
  },
- "captured_at_utc": "2026-09-25T19:29:01Z",
+ "captured_at_utc": "2026-09-25T20:00:17Z",
  "change_set": {
-  "base": "63565490df82ac8f8f32e6bd6512f91615cc6efc",
+  "base": "20ff2a1ec55a37fe059621034dfbe3efe9ec305d",
   "files": [
    {
     "kind": "code",
@@ -35,27 +35,27 @@
    },
    {
     "kind": "receipt",
-    "path": "receipts/canary/A2-355-grant-on-main-2227c3f.json",
-    "status": "D",
-    "uncovered": true
+    "new": true,
+    "path": "receipts/canary/A2-368-revert-digest-grant-6b2400e.json",
+    "status": "A"
    },
    {
     "kind": "receipt",
-    "path": "receipts/canary/A2-355-grant-on-main-2227c3f.source-evidence.json",
-    "status": "D",
-    "uncovered": true
+    "new": true,
+    "path": "receipts/canary/A2-368-revert-digest-grant-6b2400e.source-evidence.json",
+    "status": "A"
    },
    {
     "kind": "receipt",
-    "node_id": "receipt:receipts/graph/A2-294-digest-grant-on-refresh.json",
+    "node_id": "receipt:receipts/graph/A2-365-revert-digest-grant.json",
     "node_ids": [
-     "receipt:receipts/graph/A2-294-digest-grant-on-refresh.json"
+     "receipt:receipts/graph/A2-365-revert-digest-grant.json"
     ],
-    "path": "receipts/graph/A2-294-digest-grant-on-refresh.json",
-    "status": "D"
+    "path": "receipts/graph/A2-365-revert-digest-grant.json",
+    "status": "A"
    }
   ],
-  "head": "d30f4ccff62351695ee13e364e67eecce9a73fa7",
+  "head": "068496ce20a257b3985834a5c3497956baa1790c",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -63,19 +63,19 @@
  "graph": {
   "builder_version": "1.0.1",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:5861c544346e8a00be492fa6b5e3c9e87b86ef6ce5ed782ace22cf61774f7eb8",
-  "path": "/tmp/arcana-verify/verifier-out/graph-63565490df82.json",
-  "source_commit": "63565490df82ac8f8f32e6bd6512f91615cc6efc"
+  "graph_digest": "sha256:b6eb9788cd2c8e58b4ee49ab6153018188a40c0deefb0834af7fe6c8c0f182b0",
+  "path": "/tmp/arcana-verify/verifier-out/graph-20ff2a1ec55a.json",
+  "source_commit": "20ff2a1ec55a37fe059621034dfbe3efe9ec305d"
  },
  "head_graph": {
   "builder_version": "1.0.1",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:1dd926114615b9855a45d8af4b878563c395bd2920e36b50dc690974a0fb8116",
-  "path": "/tmp/arcana-verify/verifier-out/graph-head-d30f4ccff623.json",
-  "source_commit": "d30f4ccff62351695ee13e364e67eecce9a73fa7",
+  "graph_digest": "sha256:8733dcfbf002ce33d762bf32b4be9c631484d276e0e5ea70af2158719e8ce801",
+  "path": "/tmp/arcana-verify/verifier-out/graph-head-068496ce20a2.json",
+  "source_commit": "068496ce20a257b3985834a5c3497956baa1790c",
   "staleness": {
-   "checked_at_utc": "2026-09-25T19:29:14Z",
-   "checked_nodes": 370,
+   "checked_at_utc": "2026-09-25T20:00:30Z",
+   "checked_nodes": 375,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -2822,6 +2822,60 @@
      }
     ],
     "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/A2-294-digest-grant-on-refresh.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/A2-294-digest-grant-on-refresh.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
+      "via": "explicit-path"
+     }
+    ],
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/A2-294-digest-grant-on-refresh.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/A2-294-digest-grant-on-refresh.json",
+        "provenance": "deterministic",
+        "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/A2-294-digest-grant-on-refresh.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/A2-294-digest-grant-on-refresh.json",
+        "provenance": "deterministic",
+        "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
    {
     "boundary": "intra_unit",
@@ -7790,7 +7844,7 @@
   "inferred_tail": [],
   "max_depth": 3,
   "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
-  "total": 98
+  "total": 99
  },
  "notes": [
   "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.0.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
@@ -7800,10 +7854,11 @@
   "tool": "tools/graph/verify.py",
   "version": "1.0.1"
  },
- "receipt_id": "car-verify-20260925T192901Z-d30f4ccf",
+ "receipt_id": "car-verify-20260925T200017Z-068496ce",
+ "receipt_path": "receipts/graph/A2-365-revert-digest-grant.json",
  "repo": {
   "name": "Arcanada-one/muneral",
-  "path": "/home/dev/aup/arc2/runs/A2-365/work/muneral"
+  "path": "/home/dev/aup/arc2/runs/A2-368/work/muneral"
  },
  "revision_selection": {
   "base": [
@@ -7950,7 +8005,9 @@
    "contract:apps/api/src/auth/guards/agent-task-scope.guard.ts#AssignBasis",
    "deployable_unit:apps/api",
    "document:apps/api/docs/task-evidence.md",
+   "receipt:receipts/graph/A2-294-digest-grant-on-refresh.json",
    "receipt:receipts/graph/A2-330-muneral-canary.json",
+   "receipt:receipts/graph/A2-365-revert-digest-grant.json",
    "receipt:receipts/graph/a2-304-dependabot-group.json",
    "receipt:receipts/graph/a2-320-web-eslint10.json",
    "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
@@ -8016,12 +8073,23 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-09-25T19:29:14Z",
+  "checked_at_utc": "2026-09-25T20:00:30Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
  },
  "structural_exclusions": [
+  {
+   "content_hash": {
+    "base": "sha256:50d765029252af236c7620de07bf49bb53a79714adcbc008b2dab17ed475cea0",
+    "head": "sha256:50d765029252af236c7620de07bf49bb53a79714adcbc008b2dab17ed475cea0"
+   },
+   "entity": "receipt:receipts/graph/A2-294-digest-grant-on-refresh.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/A2-294-digest-grant-on-refresh.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
   {
    "content_hash": {
     "base": "sha256:a73540259214a704ad157daae543068ebaf78c3102d33b45fed9abb53a0cccb5",
@@ -8032,6 +8100,21 @@
    "path": "receipts/graph/A2-330-muneral-canary.json",
    "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
    "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": null,
+    "head": "sha256:c6bffda917ea56459ced6422e9b0d715555b8875718776c70efbc0c84978c9e3"
+   },
+   "entity": "receipt:receipts/graph/A2-365-revert-digest-grant.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/A2-365-revert-digest-grant.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it; superseded by construction — this run re-issues the receipt at receipts/graph/A2-365-revert-digest-grant.json for work item A2-365",
+   "rule": "DEC-AUP-0035",
+   "superseded": {
+    "receipt_path": "receipts/graph/A2-365-revert-digest-grant.json",
+    "work_item": "A2-365"
+   }
   },
   {
    "content_hash": {
@@ -8310,16 +8393,16 @@
   }
  ],
  "tree": {
-  "commit": "d30f4ccff62351695ee13e364e67eecce9a73fa7",
+  "commit": "068496ce20a257b3985834a5c3497956baa1790c",
   "dirty": false
  },
  "verdicts": [
   {
    "entity": "code_unit:apps/api/src/agents/agents.controller.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation (1 frozen: FR-01); v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: all 9 cited probes verified; first: route-delete-agents-keys-keyid: DELETE /api/v1/agents/keys/:keyId is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -8446,10 +8529,10 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation (1 frozen: FR-01); v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: all 2 cited probes verified; first: route-get-tasks-taskid-field-changes: status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/field-changes is in the resident route table",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -8457,10 +8540,10 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/tasks.controller.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 9 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: all 23 cited probes verified; first: route-delete-tasks-taskid: DELETE /api/v1/tasks/:taskId is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -8681,16 +8764,11 @@
    ]
   },
   {
-   "entity": "receipt:receipts/graph/A2-294-digest-grant-on-refresh.json",
-   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
-   "verdict": "not_measured"
-  },
-  {
    "entity": "route:DELETE /agents/keys/:keyId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-delete-agents-keys-keyid: DELETE /api/v1/agents/keys/:keyId is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8698,10 +8776,10 @@
   },
   {
    "entity": "route:DELETE /agents/tasks/:taskId/assign/:agentId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-delete-agents-tasks-taskid-assign-agentid: DELETE /api/v1/agents/tasks/:taskId/assign/:agentId is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8709,10 +8787,10 @@
   },
   {
    "entity": "route:DELETE /tasks/:taskId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-delete-tasks-taskid: DELETE /api/v1/tasks/:taskId is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8720,10 +8798,10 @@
   },
   {
    "entity": "route:DELETE /tasks/:taskId/checklist/:itemId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-delete-tasks-taskid-checklist-itemid: DELETE /api/v1/tasks/:taskId/checklist/:itemId is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8731,10 +8809,10 @@
   },
   {
    "entity": "route:DELETE /tasks/:taskId/dependencies/:depId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-delete-tasks-taskid-dependencies-depid: DELETE /api/v1/tasks/:taskId/dependencies/:depId is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8742,10 +8820,10 @@
   },
   {
    "entity": "route:GET /agents/tasks",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-get-agents-tasks: status 401 (not 404/405/5xx) and GET /api/v1/agents/tasks is in the resident route table",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8753,10 +8831,10 @@
   },
   {
    "entity": "route:GET /agents/workspace/:workspaceId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-get-agents-workspace-workspaceid: status 401 (not 404/405/5xx) and GET /api/v1/agents/workspace/:workspaceId is in the resident route table",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8764,10 +8842,10 @@
   },
   {
    "entity": "route:GET /tasks",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-get-tasks: status 401 (not 404/405/5xx) and GET /api/v1/tasks is in the resident route table",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8775,10 +8853,10 @@
   },
   {
    "entity": "route:GET /tasks/:taskId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-get-tasks-taskid: status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId is in the resident route table",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8786,10 +8864,10 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/activity",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-get-tasks-taskid-activity: status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/activity is in the resident route table",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8797,10 +8875,10 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/checklist",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-get-tasks-taskid-checklist: status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/checklist is in the resident route table",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8808,10 +8886,10 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/dependencies",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-get-tasks-taskid-dependencies: status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/dependencies is in the resident route table",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8819,10 +8897,10 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/dependency-graph",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-get-tasks-taskid-dependency-graph: status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/dependency-graph is in the resident route table",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8830,10 +8908,10 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/evidence",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-get-tasks-taskid-evidence: status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/evidence is in the resident route table",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8841,10 +8919,10 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/field-changes",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-get-tasks-taskid-field-changes: status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/field-changes is in the resident route table",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8852,10 +8930,10 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/readiness",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-get-tasks-taskid-readiness: status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/readiness is in the resident route table",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8863,10 +8941,10 @@
   },
   {
    "entity": "route:GET /tasks/digest",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-get-tasks-digest: status 401 (not 404/405/5xx) and GET /api/v1/tasks/digest is in the resident route table",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8874,10 +8952,10 @@
   },
   {
    "entity": "route:GET /tasks/project/:projectId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-get-tasks-project-projectid: status 401 (not 404/405/5xx) and GET /api/v1/tasks/project/:projectId is in the resident route table",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8885,10 +8963,10 @@
   },
   {
    "entity": "route:GET /tasks/project/:projectId/index",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-get-tasks-project-projectid-index: status 401 (not 404/405/5xx) and GET /api/v1/tasks/project/:projectId/index is in the resident route table",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8896,10 +8974,10 @@
   },
   {
    "entity": "route:GET /tasks/project/:projectId/staleness",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-get-tasks-project-projectid-staleness: status 401 (not 404/405/5xx) and GET /api/v1/tasks/project/:projectId/staleness is in the resident route table",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8907,10 +8985,10 @@
   },
   {
    "entity": "route:PATCH /tasks/:taskId/checklist/:itemId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-patch-tasks-taskid-checklist-itemid: PATCH /api/v1/tasks/:taskId/checklist/:itemId is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8918,10 +8996,10 @@
   },
   {
    "entity": "route:PATCH /tasks/:taskId/status",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-patch-tasks-taskid-status: PATCH /api/v1/tasks/:taskId/status is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8929,10 +9007,10 @@
   },
   {
    "entity": "route:POST /agents",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-post-agents: POST /api/v1/agents is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8940,10 +9018,10 @@
   },
   {
    "entity": "route:POST /agents/:agentId/keys",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-post-agents-agentid-keys: POST /api/v1/agents/:agentId/keys is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8951,10 +9029,10 @@
   },
   {
    "entity": "route:POST /agents/keys/:keyId/rotate",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-post-agents-keys-keyid-rotate: POST /api/v1/agents/keys/:keyId/rotate is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8962,10 +9040,10 @@
   },
   {
    "entity": "route:POST /agents/keys/self/revoke",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-post-agents-keys-self-revoke: POST /api/v1/agents/keys/self/revoke is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8973,10 +9051,10 @@
   },
   {
    "entity": "route:POST /agents/tasks/:taskId/assign",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-post-agents-tasks-taskid-assign: POST /api/v1/agents/tasks/:taskId/assign is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8984,10 +9062,10 @@
   },
   {
    "entity": "route:POST /tasks",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-post-tasks: POST /api/v1/tasks is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -8995,10 +9073,10 @@
   },
   {
    "entity": "route:POST /tasks/:taskId/checklist",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-post-tasks-taskid-checklist: POST /api/v1/tasks/:taskId/checklist is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -9006,10 +9084,10 @@
   },
   {
    "entity": "route:POST /tasks/:taskId/comments",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-post-tasks-taskid-comments: POST /api/v1/tasks/:taskId/comments is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -9017,10 +9095,10 @@
   },
   {
    "entity": "route:POST /tasks/:taskId/dependencies",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-post-tasks-taskid-dependencies: POST /api/v1/tasks/:taskId/dependencies is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -9028,10 +9106,10 @@
   },
   {
    "entity": "route:POST /tasks/:taskId/evidence",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-post-tasks-taskid-evidence: POST /api/v1/tasks/:taskId/evidence is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -9039,10 +9117,10 @@
   },
   {
    "entity": "route:POST /tasks/:taskId/field-ack",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-post-tasks-taskid-field-ack: POST /api/v1/tasks/:taskId/field-ack is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -9050,10 +9128,10 @@
   },
   {
    "entity": "route:POST /tasks/:taskId/redactions",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, controller registered; v-canary-1: canary muneral-route-presence (pre) on a2-368-candidate-local: route-post-tasks-taskid-redactions: POST /api/v1/tasks/:taskId/redactions is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -9062,8 +9140,8 @@
  ],
  "verifiers": [
   {
-   "command": "/home/dev/aup/arc2/runs/A2-365/work/muneral/apps/api/node_modules/.bin/tsc -p /home/dev/aup/arc2/runs/A2-365/work/muneral/apps/api/tsconfig.json --noEmit --incremental false --listFiles",
-   "duration_s": 3.42,
+   "command": "/home/dev/aup/arc2/runs/A2-368/work/muneral/apps/api/node_modules/.bin/tsc -p /home/dev/aup/arc2/runs/A2-368/work/muneral/apps/api/tsconfig.json --noEmit --incremental false --listFiles",
+   "duration_s": 4.08,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -9182,12 +9260,12 @@
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-09-25T19:29:22Z",
+   "started_at_utc": "2026-09-25T20:00:38Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1442 files listed"
   },
   {
-   "command": "/home/dev/aup/arc2/runs/A2-365/work/muneral/apps/api/node_modules/.bin/tsc -p /home/dev/aup/arc2/runs/A2-365/work/muneral/apps/api/tsconfig.test.json --noEmit --incremental false --listFiles",
-   "duration_s": 5.52,
+   "command": "/home/dev/aup/arc2/runs/A2-368/work/muneral/apps/api/node_modules/.bin/tsc -p /home/dev/aup/arc2/runs/A2-368/work/muneral/apps/api/tsconfig.test.json --noEmit --incremental false --listFiles",
+   "duration_s": 6.41,
    "entities": [
     "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts",
     "code_unit:apps/api/test/agent-project-index.e2e.spec.ts",
@@ -9230,12 +9308,12 @@
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-09-25T19:29:26Z",
-   "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1590 files listed"
+   "started_at_utc": "2026-09-25T20:00:43Z",
+   "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1595 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=63565490df82, head=d30f4ccff623, graph=head graph)",
-   "duration_s": 3.65,
+   "command": "tools/graph/contract_diff.py.run_diff(base=20ff2a1ec55a, head=068496ce20a2, graph=head graph)",
+   "duration_s": 4.49,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.service.ts",
@@ -9324,7 +9402,7 @@
    "id": "v-contract-diff",
    "kind": "contract_diff",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-contract-diff.json",
-   "started_at_utc": "2026-09-25T19:29:32Z",
+   "started_at_utc": "2026-09-25T20:00:50Z",
    "summary": "46→46 contracts, breaking 0, edges {'verified': 148}"
   },
   {
@@ -9406,12 +9484,12 @@
    "id": "v-route-config",
    "kind": "config_schema",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-route-config.txt",
-   "started_at_utc": "2026-09-25T19:29:35Z",
+   "started_at_utc": "2026-09-25T20:00:54Z",
    "summary": "34 route(s), 0 failed"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.11,
+   "duration_s": 0.13,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -9496,7 +9574,7 @@
    "id": "v-fitness",
    "kind": "fitness_rules",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-fitness.json",
-   "started_at_utc": "2026-09-25T19:29:35Z",
+   "started_at_utc": "2026-09-25T20:00:54Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -9512,12 +9590,12 @@
    "id": "v-doc-reference",
    "kind": "doc_reference",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-doc-reference.txt",
-   "started_at_utc": "2026-09-25T19:29:35Z",
+   "started_at_utc": "2026-09-25T20:00:55Z",
    "summary": "1 document(s), 0 failed"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.0,
+   "duration_s": 0.02,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts",
@@ -9558,58 +9636,75 @@
     "route:POST /tasks/:taskId/redactions"
    ],
    "entity_verdicts": {
-    "code_unit:apps/api/src/agents/agents.controller.ts": "not_measured",
-    "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts": "not_measured",
-    "code_unit:apps/api/src/tasks/tasks.controller.ts": "not_measured",
-    "route:DELETE /agents/keys/:keyId": "not_measured",
-    "route:DELETE /agents/tasks/:taskId/assign/:agentId": "not_measured",
-    "route:DELETE /tasks/:taskId": "not_measured",
-    "route:DELETE /tasks/:taskId/checklist/:itemId": "not_measured",
-    "route:DELETE /tasks/:taskId/dependencies/:depId": "not_measured",
-    "route:GET /agents/tasks": "not_measured",
-    "route:GET /agents/workspace/:workspaceId": "not_measured",
-    "route:GET /tasks": "not_measured",
-    "route:GET /tasks/:taskId": "not_measured",
-    "route:GET /tasks/:taskId/activity": "not_measured",
-    "route:GET /tasks/:taskId/checklist": "not_measured",
-    "route:GET /tasks/:taskId/dependencies": "not_measured",
-    "route:GET /tasks/:taskId/dependency-graph": "not_measured",
-    "route:GET /tasks/:taskId/evidence": "not_measured",
-    "route:GET /tasks/:taskId/field-changes": "not_measured",
-    "route:GET /tasks/:taskId/readiness": "not_measured",
-    "route:GET /tasks/digest": "not_measured",
-    "route:GET /tasks/project/:projectId": "not_measured",
-    "route:GET /tasks/project/:projectId/index": "not_measured",
-    "route:GET /tasks/project/:projectId/staleness": "not_measured",
-    "route:PATCH /tasks/:taskId/checklist/:itemId": "not_measured",
-    "route:PATCH /tasks/:taskId/status": "not_measured",
-    "route:POST /agents": "not_measured",
-    "route:POST /agents/:agentId/keys": "not_measured",
-    "route:POST /agents/keys/:keyId/rotate": "not_measured",
-    "route:POST /agents/keys/self/revoke": "not_measured",
-    "route:POST /agents/tasks/:taskId/assign": "not_measured",
-    "route:POST /tasks": "not_measured",
-    "route:POST /tasks/:taskId/checklist": "not_measured",
-    "route:POST /tasks/:taskId/comments": "not_measured",
-    "route:POST /tasks/:taskId/dependencies": "not_measured",
-    "route:POST /tasks/:taskId/evidence": "not_measured",
-    "route:POST /tasks/:taskId/field-ack": "not_measured",
-    "route:POST /tasks/:taskId/redactions": "not_measured"
+    "code_unit:apps/api/src/agents/agents.controller.ts": "verified",
+    "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts": "verified",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts": "verified",
+    "route:DELETE /agents/keys/:keyId": "verified",
+    "route:DELETE /agents/tasks/:taskId/assign/:agentId": "verified",
+    "route:DELETE /tasks/:taskId": "verified",
+    "route:DELETE /tasks/:taskId/checklist/:itemId": "verified",
+    "route:DELETE /tasks/:taskId/dependencies/:depId": "verified",
+    "route:GET /agents/tasks": "verified",
+    "route:GET /agents/workspace/:workspaceId": "verified",
+    "route:GET /tasks": "verified",
+    "route:GET /tasks/:taskId": "verified",
+    "route:GET /tasks/:taskId/activity": "verified",
+    "route:GET /tasks/:taskId/checklist": "verified",
+    "route:GET /tasks/:taskId/dependencies": "verified",
+    "route:GET /tasks/:taskId/dependency-graph": "verified",
+    "route:GET /tasks/:taskId/evidence": "verified",
+    "route:GET /tasks/:taskId/field-changes": "verified",
+    "route:GET /tasks/:taskId/readiness": "verified",
+    "route:GET /tasks/digest": "verified",
+    "route:GET /tasks/project/:projectId": "verified",
+    "route:GET /tasks/project/:projectId/index": "verified",
+    "route:GET /tasks/project/:projectId/staleness": "verified",
+    "route:PATCH /tasks/:taskId/checklist/:itemId": "verified",
+    "route:PATCH /tasks/:taskId/status": "verified",
+    "route:POST /agents": "verified",
+    "route:POST /agents/:agentId/keys": "verified",
+    "route:POST /agents/keys/:keyId/rotate": "verified",
+    "route:POST /agents/keys/self/revoke": "verified",
+    "route:POST /agents/tasks/:taskId/assign": "verified",
+    "route:POST /tasks": "verified",
+    "route:POST /tasks/:taskId/checklist": "verified",
+    "route:POST /tasks/:taskId/comments": "verified",
+    "route:POST /tasks/:taskId/dependencies": "verified",
+    "route:POST /tasks/:taskId/evidence": "verified",
+    "route:POST /tasks/:taskId/field-ack": "verified",
+    "route:POST /tasks/:taskId/redactions": "verified"
    },
+   "exit_code": 0,
+   "id": "v-canary-1",
+   "kind": "canary",
+   "output_ref": "receipts/canary/A2-368-revert-digest-grant-6b2400e.json",
+   "started_at_utc": "2026-09-25T20:00:55Z",
+   "summary": "receipts/canary/A2-368-revert-digest-grant-6b2400e.json: 37 verified / 0 failed / 0 not_measured"
+  },
+  {
+   "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
+   "duration_s": 0.02,
+   "entities": [],
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-canary.json",
-   "started_at_utc": "2026-09-25T19:29:35Z",
-   "summary": "0 canary result(s), 0 committed at head; 0 verified / 0 failed / 37 not_measured of 37 entities"
+   "started_at_utc": "2026-09-25T20:00:55Z",
+   "summary": "1 canary result(s), 1 committed at head; 37 verified / 0 failed / 0 not_measured of 37 entities"
   }
  ],
  "verify": {
   "events": [
    {
+    "code": "SUPERSEDED_SELF_EXCLUSION",
+    "entity": "receipt:receipts/graph/A2-365-revert-digest-grant.json",
+    "rule": "DEC-AUP-0035",
+    "text": "the receipt at receipts/graph/A2-365-revert-digest-grant.json is the previous version of the one this run is writing, for the same work item A2-365 — superseded by construction, so it owes this change no verdict"
+   },
+   {
     "code": "STRUCTURAL_EXCLUSION",
     "rule": "DEC-AUP-0034",
-    "text": "26 affected entity(ies) owe no verdict (receipt: 26): unchanged at both revisions and given no verifier by the matrix"
+    "text": "28 affected entity(ies) owe no verdict (receipt: 28): unchanged at both revisions and given no verifier by the matrix"
    }
   ],
   "required_by_entity": {
@@ -9781,6 +9876,7 @@
    ],
    "receipt:receipts/graph/A2-294-digest-grant-on-refresh.json": [],
    "receipt:receipts/graph/A2-330-muneral-canary.json": [],
+   "receipt:receipts/graph/A2-365-revert-digest-grant.json": [],
    "receipt:receipts/graph/a2-304-dependabot-group.json": [],
    "receipt:receipts/graph/a2-320-web-eslint10.json": [],
    "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json": [],
@@ -10012,9 +10108,9 @@
    ]
   },
   "seconds": {
-   "prepare": 7.63,
-   "total": 34.62,
-   "verifiers": 12.7
+   "prepare": 8.2,
+   "total": 38.05,
+   "verifiers": 15.15
   }
  },
  "work_item": "A2-365"
