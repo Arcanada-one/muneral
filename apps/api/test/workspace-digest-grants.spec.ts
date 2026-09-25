@@ -13,6 +13,8 @@
  * not a `toBeLessThan`: a pull request that adds the assistant's grant must
  * change this file too, which is where a reviewer is told what the entry buys.
  */
+import { createHash } from "node:crypto";
+
 import {
   WORKSPACE_DIGEST_GRANT_LIST,
   MAX_DIGEST_GRANT_WINDOW_DAYS,
@@ -24,6 +26,18 @@ import {
   GRANT_RENEWAL_LEAD_DAYS,
 } from "../src/auth/project-read-grants.js";
 import type { WorkspaceDigestGrantEntry } from "../src/auth/workspace-digest-grants.js";
+
+const evidenceSha256Of = (evidence: string) =>
+  createHash("sha256").update(evidence, "utf8").digest("hex").slice(0, 16);
+
+/**
+ * A LITERAL, not `evidenceSha256Of(WORKSPACE_DIGEST_GRANT_LIST[0].evidence)` —
+ * that first draft compared the shipped entry against itself and would have
+ * passed whatever `evidence` said. This is the sha256 prefix of the evidence
+ * DEC-AUP-0049 admitted; editing that string fails the equality below, which is
+ * the whole point of covering it.
+ */
+const EVIDENCE_SHA256_PREFIX = "40150c92d41ca7c1";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -65,6 +79,10 @@ describe("the shipped workspace-digest grant list", () => {
       workspaceId: "05f8cddf-e91f-430b-81e3-d67965aa4de3",
       until: "2026-10-09T00:00:00Z",
       decision: "DEC-AUP-0049",
+      // A prefix of sha256(evidence), so the projection covers `evidence` too:
+      // the string that tells a reviewer what the entry bought could otherwise
+      // be rewritten freely without failing this equality.
+      evidenceSha256: EVIDENCE_SHA256_PREFIX,
     },
   ];
 
@@ -76,6 +94,7 @@ describe("the shipped workspace-digest grant list", () => {
         workspaceId: g.workspaceId,
         until: g.until,
         decision: g.decision,
+        evidenceSha256: evidenceSha256Of(g.evidence),
       })),
     ).toEqual(ENTRIES_THE_DECISIONS_NAME);
   });
@@ -85,9 +104,11 @@ describe("the shipped workspace-digest grant list", () => {
     // ahead" was satisfied by every past date too. An entry merged with a `until`
     // in the past is inert on arrival and looks like a live grant in review.
     for (const g of WORKSPACE_DIGEST_GRANT_LIST) {
-      expect(Date.parse(g.until)).toBeGreaterThan(
-        Date.parse("2026-09-25T00:00:00Z"),
-      );
+      // Date.now(), NOT a frozen date: this was first written as
+      // `> 2026-09-25T00:00:00Z`, which would have passed forever and let an
+      // expired entry through after 2026-10-09 — the exact failure the comment
+      // above says the test exists to prevent.
+      expect(Date.parse(g.until)).toBeGreaterThan(Date.now());
     }
   });
 
