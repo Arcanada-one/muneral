@@ -3,9 +3,9 @@
   "rule": "admitted requires every verdict = verified; failed without exemption ⇒ refused; not_measured without exemption ⇒ paused_safe; exemptions (owner + expiry) are attached by the admitting agent, never by the verifier (DEC-AUP-0008, matrix P1/P4)",
   "structural_exclusion_rule": "DEC-AUP-0034: an affected entity is NOT verdict-owing when all three hold — the verifier matrix declares neither a mandatory nor a selectable verifier for its node type (so the only verdict it could ever carry states a property of the MATRIX, not of this change), the change set does not contain it, and its bytes are identical at base and head. Each one is listed in structural_exclusions with the content hash at both revisions that proves the byte-identity, and impact_pair.receipt_problems re-derives that proof from Git rather than believing the receipt.",
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
-  "verdict": "paused_safe"
+  "verdict": "admitted"
  },
- "captured_at_utc": "2026-09-25T12:33:28Z",
+ "captured_at_utc": "2026-09-25T12:35:47Z",
  "change_set": {
   "base": "321daae4948454ee1383a807146bb720f9e22190",
   "files": [
@@ -47,9 +47,42 @@
     "status": "A"
    },
    {
+    "kind": "test",
+    "path": "apps/api/test/assembly/mutation-results.json",
+    "status": "M",
+    "uncovered": true
+   },
+   {
     "kind": "config",
     "new": true,
     "path": "deploy/canary/muneral-route-presence.plan.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/A2-330-own-candidate.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/A2-330-own-candidate.source-evidence.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/muneral-route-presence.plan.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/A2-330-muneral-canary.json",
+    "node_ids": [
+     "receipt:receipts/graph/A2-330-muneral-canary.json"
+    ],
+    "path": "receipts/graph/A2-330-muneral-canary.json",
     "status": "A"
    },
    {
@@ -80,7 +113,7 @@
     "status": "A"
    }
   ],
-  "head": "49cf255503afabdd73238b60b33d649c3eececa4",
+  "head": "0fe262134622d0b1d5de07c7eeff2686fc679130",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -89,18 +122,18 @@
   "builder_version": "1.0.1",
   "built_at_utc": "2026-09-05T00:00:00Z",
   "graph_digest": "sha256:e7e7ba1b5ef2f5e1f6ea58214e661180b16d84b0596c017a37b24160fffae141",
-  "path": "/home/dev/aup/arc2/runs/A2-330/work/vw/own/verifier-out/graph-321daae49484.json",
+  "path": "/home/dev/aup/arc2/runs/A2-330/work/vw/own3/verifier-out/graph-321daae49484.json",
   "source_commit": "321daae4948454ee1383a807146bb720f9e22190"
  },
  "head_graph": {
   "builder_version": "1.0.1",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:9ed758f9620ff7823ce9e89cc13e5c9878e1b714fcd2cbe62c402a2c87a7c59b",
-  "path": "/home/dev/aup/arc2/runs/A2-330/work/vw/own/verifier-out/graph-head-49cf255503af.json",
-  "source_commit": "49cf255503afabdd73238b60b33d649c3eececa4",
+  "graph_digest": "sha256:a1b24e9081526d5c9ea4a2ccf2c27c7eb8f3fcfcf6c0eb8688c398c33fb986c2",
+  "path": "/home/dev/aup/arc2/runs/A2-330/work/vw/own3/verifier-out/graph-head-0fe262134622.json",
+  "source_commit": "0fe262134622d0b1d5de07c7eeff2686fc679130",
   "staleness": {
-   "checked_at_utc": "2026-09-25T12:33:41Z",
-   "checked_nodes": 368,
+   "checked_at_utc": "2026-09-25T12:36:00Z",
+   "checked_nodes": 369,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -2242,7 +2275,7 @@
   "tool": "tools/graph/verify.py",
   "version": "1.0.1"
  },
- "receipt_id": "car-verify-20260925T123328Z-49cf2555",
+ "receipt_id": "car-verify-20260925T123547Z-0fe26213",
  "receipt_path": "receipts/graph/A2-330-muneral-canary.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -2303,6 +2336,7 @@
    "deployable_unit:apps/api",
    "document:SECURITY.md",
    "document:docs/graph-admission.md",
+   "receipt:receipts/graph/A2-330-muneral-canary.json",
    "receipt:receipts/graph/a2-304-dependabot-group.json",
    "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json",
    "receipt:receipts/graph/a2-320-web-eslint10.json",
@@ -2345,12 +2379,27 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-09-25T12:33:41Z",
+  "checked_at_utc": "2026-09-25T12:36:00Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
  },
  "structural_exclusions": [
+  {
+   "content_hash": {
+    "base": null,
+    "head": "sha256:bb21bfc9af32529bf720c9e03ae64340b8bf1c67b298459ab8355d0697e4dad6"
+   },
+   "entity": "receipt:receipts/graph/A2-330-muneral-canary.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/A2-330-muneral-canary.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it; superseded by construction — this run re-issues the receipt at receipts/graph/A2-330-muneral-canary.json for work item A2-330",
+   "rule": "DEC-AUP-0035",
+   "superseded": {
+    "receipt_path": "receipts/graph/A2-330-muneral-canary.json",
+    "work_item": "A2-330"
+   }
+  },
   {
    "content_hash": {
     "base": "sha256:a65b6d3576871c8a70f92d12964fcb9fc207f2d1bbe31957d1ef39dc447746d5",
@@ -2738,7 +2787,7 @@
   }
  ],
  "tree": {
-  "commit": "49cf255503afabdd73238b60b33d649c3eececa4",
+  "commit": "0fe262134622d0b1d5de07c7eeff2686fc679130",
   "dirty": false
  },
  "verdicts": [
@@ -2753,8 +2802,8 @@
   },
   {
    "entity": "code_unit:apps/api/src/app.module.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-config-schema: every key read is declared; v-fitness: no new fitness violation; v-canary: canary muneral-route-presence (pre) on a2-330-candidate-local: health-version: status 200, status ok, resident version 0.4.6",
+   "verdict": "verified",
    "verifier_ids": [
     "v-canary",
     "v-config-schema",
@@ -2764,8 +2813,8 @@
   },
   {
    "entity": "code_unit:apps/api/src/main.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-config-schema: every key read is declared; v-fitness: no new fitness violation; v-canary: canary muneral-route-presence (pre) on a2-330-candidate-local: health-version: status 200, status ok, resident version 0.4.6",
+   "verdict": "verified",
    "verifier_ids": [
     "v-canary",
     "v-config-schema",
@@ -2775,8 +2824,8 @@
   },
   {
    "entity": "code_unit:apps/api/src/route-table.controller.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation; v-canary: canary muneral-route-presence (pre) on a2-330-candidate-local: route-get-health-routes: status 200 (not 404/405/5xx) and GET /health/routes is in the resident route table",
+   "verdict": "verified",
    "verifier_ids": [
     "v-canary",
     "v-contract-diff",
@@ -2835,8 +2884,8 @@
   },
   {
    "entity": "route:GET /health/routes",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent (route excluded from the prefix), controller registered; v-canary: canary muneral-route-presence (pre) on a2-330-candidate-local: route-get-health-routes: status 200 (not 404/405/5xx) and GET /health/routes is in the resident route table",
+   "verdict": "verified",
    "verifier_ids": [
     "v-canary",
     "v-contract-diff",
@@ -2848,7 +2897,7 @@
  "verifiers": [
   {
    "command": "/home/dev/aup/arc2/runs/A2-330/work/mun/apps/api/node_modules/.bin/tsc -p /home/dev/aup/arc2/runs/A2-330/work/mun/apps/api/tsconfig.json --noEmit --incremental false --listFiles",
-   "duration_s": 3.49,
+   "duration_s": 3.18,
    "entities": [
     "code_unit:apps/api/src/app.module.ts",
     "code_unit:apps/api/src/main.ts",
@@ -2866,13 +2915,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/arc2/runs/A2-330/work/vw/own/verifier-out/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-09-25T12:33:48Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-330/work/vw/own3/verifier-out/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-09-25T12:36:07Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1442 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=321daae49484, head=49cf255503af, graph=head graph)",
-   "duration_s": 3.75,
+   "command": "tools/graph/contract_diff.py.run_diff(base=321daae49484, head=0fe262134622, graph=head graph)",
+   "duration_s": 3.49,
    "entities": [
     "code_unit:apps/api/src/route-table.controller.ts",
     "route:GET /health/routes"
@@ -2884,8 +2933,8 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "/home/dev/aup/arc2/runs/A2-330/work/vw/own/verifier-out/v-contract-diff.json",
-   "started_at_utc": "2026-09-25T12:33:52Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-330/work/vw/own3/verifier-out/v-contract-diff.json",
+   "started_at_utc": "2026-09-25T12:36:11Z",
    "summary": "46→46 contracts, breaking 0, edges {'verified': 148}"
   },
   {
@@ -2900,8 +2949,8 @@
    "exit_code": 0,
    "id": "v-route-config",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/arc2/runs/A2-330/work/vw/own/verifier-out/v-route-config.txt",
-   "started_at_utc": "2026-09-25T12:33:56Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-330/work/vw/own3/verifier-out/v-route-config.txt",
+   "started_at_utc": "2026-09-25T12:36:14Z",
    "summary": "1 route(s), 0 failed"
   },
   {
@@ -2916,13 +2965,13 @@
    "exit_code": 0,
    "id": "v-workflow-config-b803fcb7f17ed923",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/arc2/runs/A2-330/work/vw/own/verifier-out/v-workflow-config-b803fcb7f17ed923.txt",
-   "started_at_utc": "2026-09-25T12:33:56Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-330/work/vw/own3/verifier-out/v-workflow-config-b803fcb7f17ed923.txt",
+   "started_at_utc": "2026-09-25T12:36:14Z",
    "summary": "bounded workflow configuration shape valid; expressions, shell, actions and hosted execution NOT_MEASURED"
   },
   {
    "command": "verify.py config_schema: keys read at head ⊆ declared keys",
-   "duration_s": 0.27,
+   "duration_s": 0.26,
    "entities": [
     "code_unit:apps/api/src/app.module.ts",
     "code_unit:apps/api/src/main.ts"
@@ -2934,13 +2983,13 @@
    "exit_code": 0,
    "id": "v-config-schema",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/arc2/runs/A2-330/work/vw/own/verifier-out/v-config-schema.json",
-   "started_at_utc": "2026-09-25T12:33:56Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-330/work/vw/own3/verifier-out/v-config-schema.json",
+   "started_at_utc": "2026-09-25T12:36:14Z",
    "summary": "2 source(s), 0 new / 3 frozen undeclared reads, 0 failed; 4 vendored file(s) not attributed to this repository (Arcanada-one/arcanada-universal-program)"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.12,
+   "duration_s": 0.11,
    "entities": [
     "code_unit:.github/workflows/ci.yml",
     "code_unit:apps/api/src/app.module.ts",
@@ -2964,8 +3013,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/home/dev/aup/arc2/runs/A2-330/work/vw/own/verifier-out/v-fitness.json",
-   "started_at_utc": "2026-09-25T12:33:56Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-330/work/vw/own3/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-09-25T12:36:15Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -2982,13 +3031,13 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/home/dev/aup/arc2/runs/A2-330/work/vw/own/verifier-out/v-doc-reference.txt",
-   "started_at_utc": "2026-09-25T12:33:56Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-330/work/vw/own3/verifier-out/v-doc-reference.txt",
+   "started_at_utc": "2026-09-25T12:36:15Z",
    "summary": "2 document(s), 0 failed"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.0,
+   "duration_s": 0.02,
    "entities": [
     "code_unit:apps/api/src/app.module.ts",
     "code_unit:apps/api/src/main.ts",
@@ -2996,25 +3045,31 @@
     "route:GET /health/routes"
    ],
    "entity_verdicts": {
-    "code_unit:apps/api/src/app.module.ts": "not_measured",
-    "code_unit:apps/api/src/main.ts": "not_measured",
-    "code_unit:apps/api/src/route-table.controller.ts": "not_measured",
-    "route:GET /health/routes": "not_measured"
+    "code_unit:apps/api/src/app.module.ts": "verified",
+    "code_unit:apps/api/src/main.ts": "verified",
+    "code_unit:apps/api/src/route-table.controller.ts": "verified",
+    "route:GET /health/routes": "verified"
    },
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/home/dev/aup/arc2/runs/A2-330/work/vw/own/verifier-out/v-canary.json",
-   "started_at_utc": "2026-09-25T12:33:56Z",
-   "summary": "0 canary result(s); 0 verified / 0 failed / 4 not_measured of 4 entities"
+   "output_ref": "/home/dev/aup/arc2/runs/A2-330/work/vw/own3/verifier-out/v-canary.json",
+   "started_at_utc": "2026-09-25T12:36:15Z",
+   "summary": "1 canary result(s); 4 verified / 0 failed / 0 not_measured of 4 entities"
   }
  ],
  "verify": {
   "events": [
    {
+    "code": "SUPERSEDED_SELF_EXCLUSION",
+    "entity": "receipt:receipts/graph/A2-330-muneral-canary.json",
+    "rule": "DEC-AUP-0035",
+    "text": "the receipt at receipts/graph/A2-330-muneral-canary.json is the previous version of the one this run is writing, for the same work item A2-330 — superseded by construction, so it owes this change no verdict"
+   },
+   {
     "code": "STRUCTURAL_EXCLUSION",
     "rule": "DEC-AUP-0034",
-    "text": "35 affected entity(ies) owe no verdict (receipt: 35): unchanged at both revisions and given no verifier by the matrix"
+    "text": "36 affected entity(ies) owe no verdict (receipt: 36): unchanged at both revisions and given no verifier by the matrix"
    }
   ],
   "required_by_entity": {
@@ -3059,6 +3114,7 @@
    "document:docs/graph-admission.md": [
     "doc_reference"
    ],
+   "receipt:receipts/graph/A2-330-muneral-canary.json": [],
    "receipt:receipts/graph/a2-304-dependabot-group.json": [],
    "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json": [],
    "receipt:receipts/graph/a2-320-web-eslint10.json": [],
@@ -3102,9 +3158,9 @@
    ]
   },
   "seconds": {
-   "prepare": 7.06,
-   "total": 28.01,
-   "verifiers": 7.63
+   "prepare": 7.22,
+   "total": 27.37,
+   "verifiers": 7.06
   }
  },
  "work_item": "A2-330"
