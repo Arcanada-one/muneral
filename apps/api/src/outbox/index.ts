@@ -56,3 +56,9 @@ export {
   WORK_OUTCOME_LEDGER_CONSUMER_ID,
   WORK_OUTCOME_EVENT_TYPES,
 } from './work-outcome-ledger.consumer.js';
+export { foldWorkOutcomes, readWorkOutcome } from './work-outcome-ledger.reader.js';
+export type {
+  WorkOutcomeDisposition,
+  WorkOutcomeRow,
+  WorkOutcomeView,
+} from './work-outcome-ledger.reader.js';
