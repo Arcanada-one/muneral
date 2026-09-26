@@ -9,6 +9,7 @@ import type { Actor } from '@muneral/types';
 import { SyncService } from '../src/sync/sync.service.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
 import { TasksService } from '../src/tasks/tasks.service.js';
+import { ActivityService } from '../src/activity/activity.service.js';
 // ESM has no injected globals, so `jest` must be imported for the RUNTIME.
 // Its type, though, comes from @types/jest (already in tsconfig `types`),
 // which is what the 339 existing jest.fn() call sites are written against —
@@ -40,6 +41,10 @@ const makeTasks = () => ({
   updateStatus: jest.fn((id) => Promise.resolve({ id })),
 });
 
+const makeActivity = () => ({
+  log: jest.fn(() => Promise.resolve({})),
+});
+
 const AGENT: Actor = { type: 'agent', id: 'agent-1', name: 'importer' };
 
 const MOCK_PROJECT = {
@@ -52,16 +57,19 @@ describe('SyncService', () => {
   let service: SyncService;
   let prisma: ReturnType<typeof makePrisma>;
   let tasks: ReturnType<typeof makeTasks>;
+  let activity: ReturnType<typeof makeActivity>;
 
   beforeEach(async () => {
     prisma = makePrisma();
     tasks = makeTasks();
+    activity = makeActivity();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SyncService,
         { provide: PrismaService, useValue: prisma },
         { provide: TasksService, useValue: tasks },
+        { provide: ActivityService, useValue: activity },
       ],
     }).compile();
 
@@ -307,6 +315,82 @@ Last Updated: 2026-04-13
       // No status is passed, so TasksService.create applies its 'todo' default.
       const [, dto] = (tasks.create as jest.Mock).mock.calls[0];
       expect(dto.status).toBeUndefined();
+    });
+  });
+
+  // A2-383: one route-level row per import, so the log can say the import ran.
+  describe('importDatarim audit row', () => {
+    const auditCalls = () =>
+      (activity.log as jest.Mock).mock.calls.filter(([o]) => o.action === 'sync:datarim_imported');
+
+    it('names the actor, the project and every change, old -> new', async () => {
+      prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
+      prisma.task.findMany
+        .mockResolvedValueOnce([]) // "New one": created
+        .mockResolvedValueOnce([{ id: 'task-existing', status: 'todo', priority: 'low', dueDate: null }])
+        .mockResolvedValueOnce([{ id: 'task-same', status: 'todo', priority: 'medium', dueDate: null }]);
+      prisma.task.findFirst.mockResolvedValue({ id: 'ok' });
+
+      await service.importDatarim(
+        'proj-1',
+        '### New one\n- **Status:** todo\n\n' +
+          '### Existing\n- **Status:** in_progress\n- **Priority:** high\n- **Due:** 2026-10-01\n\n' +
+          '### Same\n- **Status:** todo\n',
+        AGENT,
+      );
+
+      expect(auditCalls()).toHaveLength(1);
+      const [opts] = auditCalls()[0];
+      expect(opts).toEqual({
+        workspaceId: 'ws-1',
+        actor: AGENT,
+        action: 'sync:datarim_imported',
+        payload: {
+          projectId: 'proj-1',
+          outcome: 'completed',
+          created: [{ taskId: 'task-new', title: 'New one', status: 'todo' }],
+          updated: [
+            {
+              taskId: 'task-existing',
+              status: { from: 'todo', to: 'in_progress' },
+              priority: { from: 'low', to: 'high' },
+              dueDate: { from: null, to: '2026-10-01' },
+            },
+          ],
+          unchanged: 1,
+        },
+      });
+    });
+
+    it('records what was applied before a write failed, then rethrows', async () => {
+      prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
+      prisma.task.findMany.mockResolvedValue([]);
+      tasks.create
+        .mockImplementationOnce((_a, dto) => Promise.resolve({ id: 'first', ...dto }))
+        .mockImplementationOnce(() => Promise.reject(new Error('db down')));
+
+      await expect(
+        service.importDatarim('proj-1', '### one\n- **Status:** todo\n\n### two\n', AGENT),
+      ).rejects.toThrow('db down');
+
+      expect(auditCalls()).toHaveLength(1);
+      expect(auditCalls()[0][0].payload).toMatchObject({
+        outcome: 'failed',
+        error: 'db down',
+        created: [{ taskId: 'first', title: 'one', status: 'todo' }],
+        updated: [],
+      });
+    });
+
+    it('writes no audit row when the import is refused before any write', async () => {
+      prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
+      prisma.task.findMany.mockResolvedValue([
+        { id: 'a', status: 'todo', priority: 'medium', dueDate: null },
+        { id: 'b', status: 'todo', priority: 'medium', dueDate: null },
+      ]);
+
+      await expect(service.importDatarim('proj-1', '### dup\n', AGENT)).rejects.toThrow(ConflictException);
+      expect(activity.log).not.toHaveBeenCalled();
     });
   });
 });
