@@ -49,7 +49,7 @@ overrides:
   # advisory fixed only in 8.0.0. Version-selector key, so it applies by RESOLVED
   # version rather than by declared range.
   'deepmerge-ts@<8.0.0': ^8.0.0
-  esbuild: ">=0.28.1"
+  esbuild: ">=0.28.1 <0.29"
   # GHSA-jqff-g426-hqxp / GHSA-f65p-4m7j-42xc / GHSA-fph4-wmhf-6fwf / GHSA-5jgf-p345-68v8:
   # the prior ^3.1.5 floor was satisfied at exactly 3.1.5, which a later advisory
   # (patched 3.1.6) outran -- a caret floor pins a minimum, not a moving target.
@@ -66,7 +66,7 @@ overrides:
   axios: ">=1.18.0"
   body-parser: ">=2.3.0"
   form-data: ">=4.0.6"
-  multer: ">=2.2.0"
+  multer: ">=2.2.0 <3"
   sharp: ">=0.35.0"
   ws: ">=8.21.0"
   # GHSA-73wf-gq98-2v4g / GHSA-c83g-rgw3-j3cx: unbounded memory growth / prototype
