@@ -279,7 +279,7 @@ class Extractor:
         # Keep the runtime contract: replacing it with this alias loses the schema
         # and makes existing graph consumer edges uncheckable.
         if (prior and prior.kind == "zod" and d.kind == "type_alias"
-                and re.fullmatch(r"z\.infer\s*<\s*typeof\s+" + re.escape(d.symbol) + r"\s*>", d.body)):
+                and re.fullmatch(r"z\s*\.\s*infer\s*<\s*typeof\s+" + re.escape(d.symbol) + r"\s*>", d.body)):
             return
         self.decls.setdefault(d.path, {})[d.symbol] = d
         self.by_symbol.setdefault(d.symbol, []).append(d)
@@ -1519,16 +1519,28 @@ def projection(code: str, symbol: str, schema: dict, disabled: set[str] | None =
     type_ref = r"(?:z\.(?:infer|input|output)\s*<\s*typeof\s+)?(?:Readonly<|Partial<|Omit<|Pick<)?\s*" + sym + r"\b(?:\s*>)*"
     literal_bindings: set[str] = set()
     scoped: list[tuple[str, int, int]] = []  # (name, scope_start, scope_end) — a binding is read only inside its own function body
+    array_scoped: set[tuple[str, int, int]] = set()
+    array_declarations = []
     wrappers: list[tuple[str, int, int]] = []
     wrapper_unresolved = False
     enum_runtime_unresolved = False
     binding_code = executable if schema.get("kind") == "enum" else code
-    for m in re.finditer(r"\b(" + IDENT + r")\s*\??\s*:\s*" + type_ref + r"(?:\[\])?", binding_code):
+    typed_ref = (r"(?:(?P<array_wrapper>(?:ReadonlyArray|Array))\s*<\s*" + type_ref + r"\s*>|"
+                 + type_ref + r"(?P<array_suffix>\s*\[\s*\])?)")
+    for m in re.finditer(r"\b(" + IDENT + r")\s*\??\s*:\s*" + typed_ref, binding_code):
         bindings.add(m.group(1))
-        scoped.append((m.group(1), *scope_of(binding_code, m.start(), m.end())))
-    for m in re.finditer(r"\b(" + IDENT + r")\s*=\s*(?:new\s+" + sym + r"\(|plainToInstance\(\s*" + sym + r"\b|" + sym + r"\.(?:parse|parseAsync)\(|[^;\n]*\bas\s+" + sym + r"\b)", binding_code):
+        scope = (m.group(1), *scope_of(binding_code, m.start(), m.end()))
+        scoped.append(scope)
+        if m.group('array_wrapper') or m.group('array_suffix'):
+            array_scoped.add(scope)
+            array_declarations.append(m)
+    for m in re.finditer(r"\b(" + IDENT + r")\s*=\s*(?:new\s+" + sym + r"\(|plainToInstance\(\s*" + sym + r"\b|" + sym + r"\.(?:parse|parseAsync)\(|[^;\n]*\bas\s+" + typed_ref + r")", binding_code):
         bindings.add(m.group(1))
-        scoped.append((m.group(1), *enclosing_block(binding_code, m.start())))
+        scope = (m.group(1), *enclosing_block(binding_code, m.start()))
+        scoped.append(scope)
+        if m.group('array_wrapper') or m.group('array_suffix'):
+            array_scoped.add(scope)
+            array_declarations.append(m)
     if known_zod:
         # safeParse returns a discriminated result, NOT the contract payload.
         # Only a declaration bound directly to the extracted runtime Zod schema
@@ -1553,6 +1565,46 @@ def projection(code: str, symbol: str, schema: dict, disabled: set[str] | None =
             wrapper_unresolved = True
             incomplete.append('safeParse payload projection requires an object schema')
     if schema.get("kind") == "object":
+        def array_unresolved(reason):
+            incomplete.append(reason)
+            # The executable projection cannot determine the element usage.
+            # Keep the existing fail-first/NM protocol; never certify opacity
+            # just because this revision did not change the provider schema.
+            lexical_issues.append(reason)
+
+        def array_payload_literal(expr):
+            nonlocal literals_sent
+            expr = expr.strip()
+            if not expr.startswith('{') or match_close(expr, 0) != len(expr) - 1:
+                array_unresolved('array element payload is not a bounded literal')
+                return
+            literals_sent += 1
+            for item in split_top(expr[1:-1], ','):
+                if not item.strip():
+                    continue
+                key = re.match(r"^\s*(?:(" + IDENT + r")|['\"]([^'\"]+)['\"])\s*(?::|$)", item)
+                if item.startswith('...') or not key:
+                    array_unresolved('array element spread/computed key unresolved')
+                else:
+                    keys_sent.add(key.group(1) or key.group(2))
+
+        for declaration in array_declarations:
+            tail = re.match(r'\s*=\s*\[', code[declaration.end():])
+            if tail:
+                ob = declaration.end() + tail.end() - 1
+                cb = match_close(code, ob)
+                for item in split_top(code[ob + 1:cb], ','):
+                    if item.strip():
+                        array_payload_literal(item)
+            elif re.search(r'\bas\s+', declaration.group(0)):
+                rhs = declaration.group(0).split('=', 1)[1].strip()
+                if rhs.startswith('['):
+                    cb = match_close(rhs, 0)
+                    for item in split_top(rhs[1:cb], ','):
+                        if item.strip():
+                            array_payload_literal(item)
+                else:
+                    array_unresolved('asserted array initial payload unresolved')
         # destructured parameters typed with the symbol
         for m in re.finditer(r"\(\s*\{([^{}]*)\}\s*:\s*" + type_ref, code):
             keys_read.update(destructured_keys(m.group(1), incomplete))
@@ -1573,6 +1625,41 @@ def projection(code: str, symbol: str, schema: dict, disabled: set[str] | None =
                     keys_sent.add(km.group(1) or km.group(2))
             literals_sent += 1
         for b, s0, s1 in sorted(scoped):
+            if (b, s0, s1) in array_scoped:
+                # T[] / Array<T> bind a CONTAINER. Its members are not fields
+                # of T; only actual element payloads contribute provider keys.
+                shadowed = [(a, z) for a, z in _shadow_ranges(executable, b)
+                            if s0 <= a and z <= s1 and (a, z) != (s0, s1)]
+                seg = ''.join(' ' if any(a <= s0 + i < z for a, z in shadowed) else ch
+                              for i, ch in enumerate(code[s0:s1]))
+                seg_exec = ''.join(' ' if any(a <= s0 + i < z for a, z in shadowed) else ch
+                                   for i, ch in enumerate(executable[s0:s1]))
+                for member in re.finditer(r"\b" + re.escape(b) + r"\s*\??\.\s*(" + IDENT + r")", seg_exec):
+                    name = member.group(1)
+                    if name == 'length':
+                        continue
+                    call = re.match(r'\s*\(', seg_exec[member.end():])
+                    if name in ('push', 'unshift') and call:
+                        ob = member.end() + call.end() - 1
+                        cb = match_close(seg, ob)
+                        for arg in split_top(seg[ob + 1:cb], ','):
+                            if arg.strip():
+                                array_payload_literal(arg)
+                    else:
+                        array_unresolved(f'array container {b}.{name} element projection unresolved')
+                for index in re.finditer(r"\b" + re.escape(b) + r"\s*\[", seg_exec):
+                    ob = index.end() - 1
+                    cb = match_close(seg, ob)
+                    key = re.match(r"\s*\??\.\s*(" + IDENT + r")", seg_exec[cb + 1:])
+                    if key:
+                        keys_read.add(key.group(1))
+                    if not key or not re.fullmatch(r'\s*\d+\s*', seg[ob + 1:cb]):
+                        array_unresolved(f'array container {b} computed/whole element use unresolved')
+                if re.search(r'[(,]\s*' + re.escape(b) + r'\s*[,)]|\breturn\s+' + re.escape(b) + r'\s*[;}]', seg_exec):
+                    array_unresolved(f'array container {b} forwarded as a whole')
+                if re.search(r'\.\.\.\s*' + re.escape(b) + r'\b|\bfor\s*\([^)]*\b(?:in|of)\s+' + re.escape(b) + r'\b', seg_exec):
+                    array_unresolved(f'array container {b} spread/iteration unresolved')
+                continue
             seg = executable[s0:s1]
             for m in re.finditer(r"\b" + re.escape(b) + r"\s*\??\.\s*(" + IDENT + r")", seg):
                 keys_read.add(m.group(1))
@@ -1637,9 +1724,15 @@ def projection(code: str, symbol: str, schema: dict, disabled: set[str] | None =
                     enum_runtime_unresolved = True
         declarations = list(re.finditer(r"\b(" + IDENT + r")\s*\??\s*:\s*" + type_ref + r"(?:\[\])?", executable))
         for m in re.finditer(r"\b" + sym + r"\s*\.\s*(" + IDENT + r")", code):
+            if (known_zod and executable[m.start():m.start() + len(m.group(0))] == m.group(0)
+                    and m.group(1) in ('parse', 'parseAsync', 'safeParse', 'safeParseAsync', 'options')
+                    and any(a <= m.start() < z for a, z in symbol_shadows)):
+                incomplete.append('runtime Zod enum schema binding shadowed')
+                enum_runtime_unresolved = True
             if executable[m.start():m.start() + len(m.group(0))] == m.group(0) and not any(a <= m.start() < z for a, z in symbol_shadows):
-                if known_zod and m.group(1) in ('parse', 'parseAsync', 'safeParse', 'safeParseAsync'):
-                    incomplete.append('enum runtime parsing input/result unresolved')
+                if known_zod and m.group(1) in ('parse', 'parseAsync', 'safeParse', 'safeParseAsync', 'options'):
+                    incomplete.append('enum runtime options/iteration unresolved' if m.group(1) == 'options'
+                                      else 'enum runtime parsing input/result unresolved')
                     enum_runtime_unresolved = True
                 else:
                     values.add(m.group(1))

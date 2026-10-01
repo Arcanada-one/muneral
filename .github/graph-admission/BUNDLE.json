@@ -1,5 +1,5 @@
 {
- "bundle_digest": "sha256:33e3f88caa54ce11f527581d9163be07893be750f97e6a9b3985e0dbe56919bc",
+ "bundle_digest": "sha256:f0b0e0a751d72eb519ba8c431705a8d3082396d182f175461cb6295930226f55",
  "files": [
   {
    "blob_oid": "29c292424c5d1e520abb6a8a89d6830b1b8d940f",
@@ -30,9 +30,9 @@
    "sha256": "sha256:0b8966dccde17c5316e788050c8ed35073d8c178b3fac48f3b4aca063454ae51"
   },
   {
-   "blob_oid": "a275bdb785a8f9fc3b36a55f77d69ca0d1208c30",
+   "blob_oid": "3d69790a9a52944af5d57742f36b02e7841c3c41",
    "path": "tools/graph/workflow_config.py",
-   "sha256": "sha256:687c921891291e7261174c25453673f024d065cfd9718a62dd28124180d0f85c"
+   "sha256": "sha256:4ebd1993dacd68599d8997cbc389b66da34f89f6a960dc4534e7964c6ecef52e"
   },
   {
    "blob_oid": "ee37210baf384195e36f45075dabc29cc2cffa57",
@@ -45,14 +45,14 @@
    "sha256": "sha256:e5cc9be249c3be5ec78c6dea861d59014a434bfda8a99f78b0d5c0ea18d43c54"
   },
   {
-   "blob_oid": "ec28e1e859321034a1deccbbe72187b3972ab141",
+   "blob_oid": "e531bd4f704886b4bdfeb140b2e060de1f41f418",
    "path": "tools/graph/verify.py",
-   "sha256": "sha256:109ab70fae761ba8b73aa1442378655149d893db4693faabfb2af385f1c7f288"
+   "sha256": "sha256:b878e146163477bd3cf30f8ff704fd656181dec01866d97cbb0e73ea4ba17fe0"
   },
   {
-   "blob_oid": "4b4bbd740b3e24908fef413c38c9199cf2e7ff2c",
+   "blob_oid": "5e0a8dfcd9acf7a8079e5f9cff0e6f656d794519",
    "path": "tools/graph/contract_diff.py",
-   "sha256": "sha256:36b5b59a76496d469c13f6b5d4d4fd9b145162c7f54181ad1a0bda18dd3e83ca"
+   "sha256": "sha256:f6aee2683d20b89775e8dca73081025246dc2a129a210be517139ee5dcbb3578"
   },
   {
    "blob_oid": "fbcafbfcab4f4b720e8db491d146ae24887198c1",
@@ -111,7 +111,7 @@
   "tool": "tools/graph/ci_gate.py",
   "version": "1.0.0"
  },
- "program_ref": "72eaacd9842d829cbb9c8f26190c61bfac84a9cb",
+ "program_ref": "2784a547e8b01632932a88a39394a233729c973c",
  "program_repo": "Arcanada-one/arcanada-universal-program",
  "provisional_until_fable_review": true,
  "rule": "The workflow refuses unless every file's sha256 matches this manifest AND the caller's `program_ref` input matches `program_ref` here. The bundle is a VENDORED copy of one pinned program-repo SHA (the program repository is private and no shared credential exists to check it out from a caller's CI). A pull request that changes anything under the bundle directory is refused by the gate job \u2014 a bundle refresh is its own pull request. Each entry's `blob_oid` is the git object id the bytes were read at: `git hash-object <file>` must equal it, which is how a caller with no credential for the program repository can CONTRADICT this manifest offline (DEC-AUP-0036 R2). Every byte here was read from the object store at program_ref, never from a working tree (R1).",
