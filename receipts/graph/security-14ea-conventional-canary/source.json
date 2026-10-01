@@ -1,0 +1,8 @@
+{
+  "schema": "MeasuredGitSource/v1",
+  "commit": "c200cd98739cfebee392a0a33ed6ed8063ad89a6",
+  "tree": "4c031b2a544d2d6b853de1d91afda2c66a77c59f",
+  "dirty": false,
+  "producer": "Codex task_14ea7ca947f3 ctx_1f2c8ede82c1 exact source before native owned execution",
+  "captured_at_utc": "2026-10-01T10:22:52.393413+00:00"
+}
