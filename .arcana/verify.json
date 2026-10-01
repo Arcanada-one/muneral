@@ -6,7 +6,10 @@
         "pnpm",
         "test"
       ],
-      "full_test_timeout_seconds": 1800
+      "full_test_timeout_seconds": 1800,
+      "tsconfig": [
+        "tsconfig.prisma.json"
+      ]
     },
     "apps/api": {
       "full_test": [
