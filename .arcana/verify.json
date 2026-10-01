@@ -1,0 +1,34 @@
+{
+  "schema": "VerifyProfile/v1",
+  "deployables": {
+    ".": {
+      "full_test": [
+        "pnpm",
+        "test"
+      ],
+      "full_test_timeout_seconds": 1800
+    },
+    "apps/api": {
+      "full_test": [
+        "pnpm",
+        "test"
+      ],
+      "full_test_timeout_seconds": 1800
+    },
+    "apps/web": {
+      "full_test": [
+        "pnpm",
+        "test"
+      ],
+      "full_test_timeout_seconds": 300
+    },
+    "packages/types": {
+      "full_test": [
+        "pnpm",
+        "--workspace-root",
+        "test"
+      ],
+      "full_test_timeout_seconds": 1800
+    }
+  }
+}
