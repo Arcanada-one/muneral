@@ -1,0 +1,562 @@
+{
+  "schema": "CanaryPlan/v2",
+  "id": "muneral-source-process-canonical-a457-task14ea",
+  "environment": "isolated-source-verification",
+  "owner": "task_14ea7ca947f3",
+  "read_only": false,
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "1a956812a0fdf42f540c82bec9ee2fe2ccb0659d",
+    "tree": "d863182ae60e93b49948fa3cd4a70af742f8b2ce",
+    "evidence": {
+      "path": "source.json",
+      "sha256": "4a685e800e51af05157d59ed4e974e69fa9030d8bb3818a6d93cf12f392b2e62",
+      "source_field": "commit"
+    }
+  },
+  "probes": [
+    {
+      "id": "muneral-actual-source-process",
+      "kind": "process",
+      "argv": [
+        "/home/dev/aup/security-task-14ea7ca947f3/node-v24.21.0-linux-x64/bin/node",
+        "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/mutation-harness.js",
+        "--verify-structure",
+        "apps/api/test/assembly/mutation-results.json"
+      ],
+      "cwd": ".",
+      "env_keys": [
+        "PATH"
+      ],
+      "timeout_seconds": 120,
+      "capture_limit_bytes": 1048576,
+      "mutating": true,
+      "entities": [
+        "code_unit:apps/api/test/assembly/mutation-harness.js"
+      ],
+      "executable_sha256": "7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c",
+      "execution_files": [
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/.arcana/verify.json",
+          "sha256": "d8c3de29b066b891e920929102afd1aac02a12b2bfb90365b6b9c572decefcbe"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/package.json",
+          "sha256": "919202c86e4a269cb8e4e680b9fdb768e555bbf8d7caf449adea37123657652c"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260607103126_init_schema/migration.sql",
+          "sha256": "202365ac271c9ced71974087f6f243a06477e0fa072d35d824b8bfb254ef1f94"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260607200000_add_field_tracking/migration.sql",
+          "sha256": "850dc6dfd6f250bda1e41207295544fba66fe2349c54518b312d721817833765"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260715170000_add_muneral_kb_task_changes/migration.sql",
+          "sha256": "c280e2dd28fdfc64d81fed953cb790642256da5c5a76f0de5403ee99cdea1324"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260715170000_add_muneral_kb_task_changes/rollback.sql",
+          "sha256": "ff11d75734cda4eb85debaafe7d9c968be64c0d01f20a7f3bbddfb836004a1e5"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260730000000_add_execution_authority/migration.sql",
+          "sha256": "3a67e7f6b1027b8e2e89d0b25fe598972ae59afb7e81f729ac55e68ad51eab05"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260730000000_add_execution_authority/rollback.sql",
+          "sha256": "34378ee5870fe3bcf29fee6a09a9e56c34a82e9e1e2d0e143228f53cefdd73df"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260730010000_add_outbox_relay/migration.sql",
+          "sha256": "f409ab87670c5a2a4354829a1e7eae1546fed1c7be1b4a6c720f6cd9ada14531"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260730010000_add_outbox_relay/rollback.sql",
+          "sha256": "152a42dcf913c1f7d239860d572a0da2561a30355a70ec87b232ae161c9cd3ed"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260731010000_add_committed_result_refs/migration.sql",
+          "sha256": "f0cb90f9645046622ef7102379749913aab7c0755c6aa37fa208818c311b3b31"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260731010000_add_committed_result_refs/rollback.sql",
+          "sha256": "3045b5b314a5a356ee12e9384469d439856ec3db338081bfb8d56aec06874c82"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260731090000_add_execution_truncate_guard/migration.sql",
+          "sha256": "ff13c9d58f1a13f6a1277266b24c40bbec16170d5ef9c9e65e01bb3013bb3fd3"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260731090000_add_execution_truncate_guard/rollback.sql",
+          "sha256": "b453d5f0153a0e7555015ec041995e21181266c0856b5f5eb0b6d86887cd617e"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260801093000_harden_result_authority_binding/migration.sql",
+          "sha256": "320358d83dbd2f5e3e4c4c8b38810a28c1cda86625a535324400bdf7cfd67b57"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260801093000_harden_result_authority_binding/rollback.sql",
+          "sha256": "523657236732d62cd60190dda65972b098456ec778eee3f4ff8f5bd1b9c33891"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260809180000_add_solution_log_head_receipts/migration.sql",
+          "sha256": "cd88aa0a1bf099777e5c96f1417336f8c613b4e2e3e89a30c4fd7ff05690e87c"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260809180000_add_solution_log_head_receipts/rollback.sql",
+          "sha256": "059b9796c4fda1016befd4f2d288f2ccec2709e3ca03f5adfd5985497824c0ea"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260905120000_add_migration_import_surface/migration.sql",
+          "sha256": "28f789eb7792fedce8c8249dadf8874a616743573f0de834301d4437a51efc30"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260905120000_add_migration_import_surface/rollback.sql",
+          "sha256": "eab86d13cf26d96d391b593ab17a4cb1dffb26dac8e3a711c3f74aff2d4d894a"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260905190000_add_status_map_provenance/migration.sql",
+          "sha256": "5fb62a36d03c55864b93cc3769ee5a3a86bd5b54f56c030d6aba1e13f65877d8"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260905190000_add_status_map_provenance/rollback.sql",
+          "sha256": "fd20072cbe1a469140f24051b9ae28b9e84f9a344287cb7dc1488f5477dfcc16"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260905210000_add_archived_task_status/migration.sql",
+          "sha256": "5df800915ee8d9f5a47b121cf913286998b3ba1760acc19eab78d64d27524981"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260905210000_add_archived_task_status/rollback.sql",
+          "sha256": "b9e6cfda140b6125e19401163dd13292f6f5eee15ddbe4d047aea4384bf1f469"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260913180000_add_task_redactions/migration.sql",
+          "sha256": "dc50ca59f2103ab94bfdba894bf1509ae8aa2e68725da09902d7cfc80f61a8ac"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260913180000_add_task_redactions/rollback.sql",
+          "sha256": "527dd5c3338b712ef20769a3c358281191e0756f6778657cf8aa7cf4fcce9862"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260914100000_add_api_key_lookup_hash/migration.sql",
+          "sha256": "fcdb39a35f01adf76416daa75dd38d0defb7ee0a1b4f5b49e4343a6657a181c5"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260914100000_add_api_key_lookup_hash/rollback.sql",
+          "sha256": "bd8adf0db9b49ccd96306dd779d8020c188acd52d6b3904abc9a27917e3908bb"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260924120000_add_task_contract_digest/migration.sql",
+          "sha256": "41241c09b65934a794c4b619131de0fd69ea4a4e43034bf7b3c84b8507d75f36"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260924120000_add_task_contract_digest/rollback.sql",
+          "sha256": "02171e535094cc14ceddf740ead15b914b550f2e2bb5206b8f641001c2e99711"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260924170000_add_task_evidence_attachments/migration.sql",
+          "sha256": "d7c624344b08cbf59774a6c9104c29054a2e6b0e379ffa6c63a6c791dd7e4bb3"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260924170000_add_task_evidence_attachments/rollback.sql",
+          "sha256": "cf73c1a286cc92622e6afba9cf3e11cbf1938ae725ebcda600441ae893d03fa6"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/20260925120000_add_work_outcome_records/migration.sql",
+          "sha256": "2a217ccdba647cb6aa6f1e21c9ad67fd61736d5031232cc30af14ac90a940745"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/migrations/migration_lock.toml",
+          "sha256": "99836963713b4f5b269ad49af0ed3d7b0b2e336115c2f92dc9ac683d139d0900"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/schema.prisma",
+          "sha256": "4ba70ef686a76611855b6fa59c5fc3b1ca4abcfe622f46c611ac846bdc2e753c"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/tests/execution_authority_preseed.sql",
+          "sha256": "e5ae1797170984ccb8529077c848dfdd75559fd2b2c157459c4ab0183d6bfdf4"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/tests/execution_authority_smoke.sql",
+          "sha256": "f4b53920a1894045d1b331789455b391638ce05d2171260dc066d33f3042f7db"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/tests/muneral_kb_change_registry_concurrency_assert.sql",
+          "sha256": "d87809ffd3ec79322656ab7247a0f5a8957908aa8d6aa177c9662c09f796b285"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/tests/muneral_kb_change_registry_concurrency_setup.sql",
+          "sha256": "4ca0a7391dfe76c06e927b14b5da50c4cf8124372f85471c77722bd891c16cb3"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/tests/muneral_kb_change_registry_post_rollback.sql",
+          "sha256": "d3f5619d65af0daf49fd90a8bd644ac34458a3a021e7b601095c8f48af041c97"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/tests/muneral_kb_change_registry_preseed.sql",
+          "sha256": "834bc8ac2af1d4a1c2d37f49123187217f6de40e064cd0f3e8c650a81774a2d5"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/tests/muneral_kb_change_registry_smoke.sql",
+          "sha256": "29003663898067a5b1ab59213d33a471ffb6ba2913fcaa8ea35c4bd9e2166262"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/tests/run_execution_authority_smoke.sh",
+          "sha256": "c6670dc7b3a59bda9e6aed480c1e25024cac524be88f02ca4736caff54b9ec0d"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/prisma/tests/run_muneral_kb_change_registry_smoke.sh",
+          "sha256": "23baaf78a15403185d55aea9f45064fcbffe30178213821a65522c7e5b731caf"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/assembly/assembly.canonical.ts",
+          "sha256": "4e52a503637d583bc1292b3d9cd3c9a9dad25148790547ba15d91eff9ff0c28d"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/assembly/assembly.compiler.ts",
+          "sha256": "9a37682a5558d2215caddc453e2edacab44eeb07c740054e7493e89a60abee99"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/assembly/assembly.errors.ts",
+          "sha256": "a1bf3c097c639034cae219cc4b8bb11fd60bc414409d15b980b85975874968df"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/assembly/assembly.types.ts",
+          "sha256": "ff222a96051614348e38702a175578f812abdff05980ce40e9f392e8fb831d1a"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/assembly/assembly.validator.ts",
+          "sha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/assembly/credential-policy-v0.generated.ts",
+          "sha256": "c6f03a742292d2f160d1f51feeeddab43fb877847292420e9debba7bf6263d66"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/assembly/index.ts",
+          "sha256": "c9a0d891fa1cee47e3004ff05030106983ec09baf92606d43666c2b3d2535a0b"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/execution-authority/canonical-json-v1.ts",
+          "sha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/execution-authority/canonical-json.ts",
+          "sha256": "eaea71d2b543175dd5210f7b9edf7d25451ae95b295dc9007cd75cd7aee1f4ce"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/execution-authority/evidence-ref.validator.ts",
+          "sha256": "34992f3acf3cb207a7a451583140402f79ad58fed17f2573c4ad40bf2c73bf66"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/execution-authority/execution-authority.errors.ts",
+          "sha256": "d620cc12524b60c2c0aa5101484b34d8dbd2d9b7467c8bce33a68f80517639fc"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/execution-authority/execution-authority.module.ts",
+          "sha256": "1ac3f2ff71f728781c0b2c9126ad99a118738c0d2f8fa1d726911455e18c75b3"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/execution-authority/execution-authority.reducer.ts",
+          "sha256": "5b260ef92121341653e85ec4096a35f859ca0be96337ab213fffb885da2888dc"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/execution-authority/execution-authority.replay.ts",
+          "sha256": "f9dc477b9366c62f0d0338c87d1763489f67740c8a5f53ff9df35d8cc4d59a60"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/execution-authority/execution-authority.service.ts",
+          "sha256": "9a68ff0cd9c3176439eda39d3c6171033d1e6b649ccecbf0b044c13477d00764"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/execution-authority/execution-authority.types.ts",
+          "sha256": "8e8258cb65668ccae76e26a4da176682fffe96a8ec16fcb0d197b16208540669"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/execution-authority/index.ts",
+          "sha256": "2c51874616ce2b5bfafecc881199150a70725dac8696eccf08dfdfe40ca1d56c"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/execution-authority/task-execution-recorder.service.ts",
+          "sha256": "72b39fdbd43f84a53d9726b07847ebb5f30c41381184ee6e453f774893063b46"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/execution-authority/task-staleness.service.ts",
+          "sha256": "87a8f98cb957dad11376d6c824f455659a347771ed255535cc802bd1c0cc7c66"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/migration/dto/create-batch.dto.ts",
+          "sha256": "64da4c8301783313219bd97e4fcf4c1d38ae22dda32951d5f36e0d07240d4760"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/migration/dto/create-decision.dto.ts",
+          "sha256": "69d606a6fcb59c1385875d84a594a65f9ede085b13b8bc94cf876bff573d2692"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/migration/dto/create-transition.dto.ts",
+          "sha256": "6d8b9142544deed2afe313485dd214b9f011e15d227713cc8b0995e30894f74d"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/migration/dto/create-work-item.dto.ts",
+          "sha256": "6240fcf8c336a1aa37fab7444c8681c5b096652fa444f476263531e8ae9eb388"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/migration/index.ts",
+          "sha256": "574ec7655200069ec8a06c36e4493455168d1122e6795a652d629e9ba15303ea"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/migration/migration-scope.ts",
+          "sha256": "702ea6e227496d0c2bf28238d3c65626166490d769dd707d4a9d4f3207227d02"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/migration/migration.controller.ts",
+          "sha256": "7ce7af7186db8ca77940f065abbb75534276aaeee1ecfe1ecd68c6833a654391"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/migration/migration.errors.ts",
+          "sha256": "02d18e9084cd560aa121ceaef2ae8997e8990a7b6c3a97a942552c1422fd0283"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/migration/migration.module.ts",
+          "sha256": "27d74ff8ce88e6be87ee696c428c3bd914c733e4968148ee0bc3ed8964b58a4d"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/migration/migration.service.ts",
+          "sha256": "f1861495df52bc6cdf0d09620ae5ea7442ed35d08f804aed10c5bfc79cebec4e"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/migration/migration.status.ts",
+          "sha256": "70e0497ddbfc47d067b8b847ea2641fd5961bfc87d73efd947c2a562222ce5ba"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/migration/status-map/status-map-v1-rev2.json",
+          "sha256": "8ea5bc468328083d618e51561fb4606251fd72b99a55fa3b3b5b77af021e8414"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/migration/status-map/status-map-v1-rev3.json",
+          "sha256": "a57044b1a4607584183eafb64716372f8b1890ae361457425c90abe4e25972b6"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/src/migration/status-map/status-map.ts",
+          "sha256": "0aca5a8640e66749f43a1e609cd78bbd898b4f4a4eb925da6597d56cd9c349b1"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/assembly.boundary.spec.ts",
+          "sha256": "d964818efa2fc7ebfa421005d845b26515ca08114fe0682e81dc434a16c8962c"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/assembly.bounds.spec.ts",
+          "sha256": "cd05ce1e4b5bbd9868c2a1e2fafd67f3cb604e256fcc9ce118e8fa75c2fb634a"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/assembly.canonical.spec.ts",
+          "sha256": "38ed526a384c07fa757a6a819048e80c98980a2c0c34ee57795ef01aba7be994"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/assembly.closedschema.spec.ts",
+          "sha256": "1cf290bd03f84b65a4fd6e160b3ae3cdca78279000cba323eb4abaf62cf956cc"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/assembly.compiler.spec.ts",
+          "sha256": "16ec60023cb426c9e80c6356ce96a950208ea3083106f1e6760eed02d9079e64"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/assembly.credential-policy.spec.ts",
+          "sha256": "d7b18183dda4205ae864d34cbb774abf85f6b166968018973d295a7128930312"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/assembly.errors.spec.ts",
+          "sha256": "a7dec95776e47f8e60ef7838708605ec8adb4fe7de60ddf95a83f9f5a968c340"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/assembly.f10.spec.ts",
+          "sha256": "d1978ee6ad4e087671461e2910060f8dd1d8fa6f5e6cd48d74b62d54afdc1fc9"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/assembly.falsification.spec.ts",
+          "sha256": "52dc9b5b13ca51bd76fc34cc0da0eda67af00b6b69f945d3596c1547ed5438f7"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/assembly.generator.spec.ts",
+          "sha256": "f1a208734d22f5b23acf0d1c51f2090d7575bab0c3be63c1e9b5babd7d09454f"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/assembly.instant.spec.ts",
+          "sha256": "1dbe8fa8ea48ac0ca9d09816d650ba92209d4829831f8c2046c5b775b6d9578b"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/assembly.keyorder.spec.ts",
+          "sha256": "f47868ae2c3d11d3a9d76958b6c4df74348b1c2597db02effdf3af333147235a"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/assembly.lexical.spec.ts",
+          "sha256": "0aabaa0d41732e4d62c0be4ed524d67cd1160de60d5212545cc14c1246569586"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/assembly.parity.spec.ts",
+          "sha256": "3a67e997074fa2b3979d651be07becea601c39e6235b0eca408a6b01b2e168d3"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/assembly.purity.spec.ts",
+          "sha256": "eb4bffa41b70f689975fd585303d9700c3005c95682c149a28ea59c40abc012f"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/assembly.rejectionsites.spec.ts",
+          "sha256": "a08b2ab335421dcd666e540ef26fe8ddd0eba7d876a15fe5c3c48061189d0790"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/assembly.rereview-regressions.spec.ts",
+          "sha256": "966e8494cef29a16094b77f2896f96f8438fcdc8715bc33c5a7b2e4f44f84d8f"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/assembly.types.spec.ts",
+          "sha256": "1050f45017f73fbcb3428d92a49c673070c9731861fc3ae6cc322d92a4e99716"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/assembly.validator.spec.ts",
+          "sha256": "11d15b18650e8a051f44d537c39ee6bd54d38c27228fc2eb716e3cda6dd34173"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/assembly.validatorcli.spec.ts",
+          "sha256": "7ba6d622df769004a16aecf35545e1f03166076ed0f7ef2d6f52b495bc99cca7"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/credential-policy-v0.json",
+          "sha256": "a9f647334cdc9fb1af8e24495333f340fb911c4f18d507e13f3e38a830db4ce8"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/credential_policy_v0_generated.py",
+          "sha256": "aa090463c133fc9d6a5635a8f0f62563948fa3aaa141d51e7230f182105c1202"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/fixture-instant.ts",
+          "sha256": "e8a3302fde96d465921f8bb280a951cffec00c389d0bd398a0e3593bc1843849"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/fixtures/negative/ambiguous-canonical-value.json",
+          "sha256": "eb94fd1585ac3fb12dfe27ccd6f1bc40231e6718e0ed7a9ef65a9f83e4ff39ac"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/fixtures/negative/attempt-budget-exceeded.json",
+          "sha256": "25a7f40231172d86a2b2aaddfbaa5751b4dec672b1f0ba2b2d71776c5d49ea32"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/fixtures/negative/authority-widening.json",
+          "sha256": "0e2ce0174ba5ed6864b88801869a1e7ad54d46e89340d85f415734b4a86cc389"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/fixtures/negative/credential-bearer.json",
+          "sha256": "cd63d97c6b8666f3ccc2220fff7af6e7ef089161beee047e107647f7fdccc23d"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/fixtures/negative/credential-key.json",
+          "sha256": "8c0a19151f27813c4d8399ed1c5557561d3411aad69d976ff633a342f3e25c0f"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/fixtures/negative/deadline-exceeded.json",
+          "sha256": "a1fb6607267d1c214112aa51db9bed0f1badc75253ac9470ccdfce7770dbebd3"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/fixtures/negative/expired-policy.json",
+          "sha256": "e9f1cc344a1bc90945606999d5f7b2c1b2f4fe9dca03d7e378dde29e997792ef"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/fixtures/negative/invalid-digest.json",
+          "sha256": "496d7f9950368d14ab8943a030135969277a409bbc5ceb7905f353ae6778d603"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/fixtures/negative/invalid-provenance.json",
+          "sha256": "182b2fdfa9a98752c259625108fa4ad6b25e053bac1b9cfdd4a3a602412a5bbe"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/fixtures/negative/unknown-execution-field.json",
+          "sha256": "70e580f4614b44ffc0b1b3156f44625424768d6218217d9c4de489a9a5500d60"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/fixtures/negative/unsafe-nesting.json",
+          "sha256": "ca6beac62d2b559cc754ecba181560afa63ba01675d847b53af9781c71309896"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/fixtures/negative/unsafe-size.json",
+          "sha256": "d68247c9cdd5c8b2b87e49b114cf5872042292077b6570c5a1e5496d6d726d00"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/fixtures/negative/unsupported-schema-version.json",
+          "sha256": "0c27dc412a4b24a1e46810af84abc134ef3c80e545fe8643c872a79d17d11a4a"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/fixtures/positive/full-request.json",
+          "sha256": "0b1127e662aa72c03a912fbbc523f2b27fbdf27ebe34ad5ab61d3b89db41917e"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/fixtures/positive/minimal-request.json",
+          "sha256": "020ee9aaed17711d1e37b2e291946fa625851ed68fc961817a1a955b384b4a68"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/fixtures/positive/narrow-scope.json",
+          "sha256": "b3858c0bf73ec76fdb46d3f8f53dc9265604e7da1a1953a6df3ac8984c5cebc7"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/fixtures/positive/no-deadline.json",
+          "sha256": "ce4ab66f4236dbd4d537d5853a5e7306ec2994f7dbbe0a16bd147e5d2fff1895"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/fixtures/positive/with-trace-fields.json",
+          "sha256": "86e24118ce25dd3138f90e3a91c62620651cfed997254adc37b60cbcaa3b259b"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/generate-credential-policy.js",
+          "sha256": "70fec0b6e321a4abc3624dc1ef59db6a1b3dba44beae78aa481a2913ad99f38c"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/generate-fixtures.js",
+          "sha256": "1701aae769ba1b6a30a519acfeb68df00e14956903a1601ee28d69e948cd116e"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/mutation-harness.js",
+          "sha256": "8c28bc75a92c6d4ff5fde80e6791986a45979ffa7767dfaf62f9da0988d3ff04"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/mutation-results.json",
+          "sha256": "5f4ada35bcd5bf0ac4876783cbed6bb6302eaf2cf6e2b030bbd17e361734200d"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/mutation-sites.json",
+          "sha256": "26f6fe28a6bd047ef5c2759399844fbd7768456114cc7260c670c59a1b848305"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/test/assembly/validate_assembly_fixtures.py",
+          "sha256": "ac2b5da426da342435ef04d00ad5f68ec00185a9217909eaeb683a838e7808a7"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/tsconfig.json",
+          "sha256": "e9d48a8d90da20846c7725067dd944d1f1f7c6d21faff18022360aa8759740bf"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/apps/api/tsconfig.test.json",
+          "sha256": "b45b51f10e6897b5fa212f421842c1334c9e1f7942e446dcf278bb08b9c55d1d"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/package.json",
+          "sha256": "bed33a36322376b1f9e321b1ce836e3c4cdcec9bd84131d4f05e64e1e01a2e36"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-source/security-muneral-14ea/pnpm-lock.yaml",
+          "sha256": "f34a716b029c0bb48cf39cb29ed29f518498a3ba350aa9981a49c88804c1550e"
+        }
+      ],
+      "expect": {
+        "exit_codes": [
+          0
+        ],
+        "stdout_contains": [
+          "Structurally verified 85 source-bound mutation records."
+        ]
+      }
+    }
+  ]
+}
