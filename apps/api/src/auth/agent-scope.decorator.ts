@@ -121,7 +121,14 @@ import { SetMetadata } from '@nestjs/common';
  */
 export const AGENT_SCOPE_KEY = 'mun0043:agentScope';
 
+// API959a: metadata is limited to the credential's workspace. Dependency
+// writes require creator/executor authority on BOTH endpoints; grants for
+// broad read-only indices never authorize these writes.
 export type AgentScopeKind =
+  | 'workspace-metadata'
+  | 'project-metadata'
+  | 'project-create'
+  | 'task-dependency'
   | 'task'
   | 'project'
   | 'task-workspace'

@@ -654,21 +654,38 @@ export class TasksService {
     await this.findOne(fromTaskId);
     await this.findOne(dto.toTaskId);
 
-    return this.prisma.taskDependency.create({
-      data: {
-        fromTaskId,
-        toTaskId: dto.toTaskId,
-        type: dto.type,
-      },
+    if (fromTaskId === dto.toTaskId) throw new BadRequestException('A task cannot depend on itself.');
+    return this.prisma.$transaction(async (tx) => {
+      // Serialize cycle/duplicate checks and inserts, including opposite edges.
+      await tx.$executeRaw`LOCK TABLE task_dependencies IN SHARE ROW EXCLUSIVE MODE`;
+      const existing = await tx.taskDependency.findFirst({
+        where: { fromTaskId, toTaskId: dto.toTaskId, type: dto.type },
+      });
+      if (existing) return existing;
+      if (dto.type === 'depends_on' || dto.type === 'blocks') {
+        const source = dto.type === 'blocks' ? dto.toTaskId : fromTaskId;
+        const target = dto.type === 'blocks' ? fromTaskId : dto.toTaskId;
+        const reached = await tx.$queryRaw<Array<{ cycle: boolean }>>`
+          WITH RECURSIVE edges(source, target) AS (
+            SELECT CASE WHEN type = 'blocks' THEN to_task_id ELSE from_task_id END,
+                   CASE WHEN type = 'blocks' THEN from_task_id ELSE to_task_id END
+            FROM task_dependencies WHERE type IN ('depends_on', 'blocks')
+          ), walk(id) AS (
+            SELECT ${target}::uuid
+            UNION SELECT edges.target FROM edges JOIN walk ON edges.source = walk.id
+          ) SELECT EXISTS(SELECT 1 FROM walk WHERE id = ${source}::uuid) AS cycle`;
+        if (reached[0]?.cycle) throw new ConflictException('Dependency would create a cycle.');
+      }
+      return tx.taskDependency.create({ data: { fromTaskId, toTaskId: dto.toTaskId, type: dto.type } });
     });
   }
 
-  async removeDependency(depId: string): Promise<void> {
+  async removeDependency(depId: string, fromTaskId?: string): Promise<void> {
     const dep = await this.prisma.taskDependency.findUnique({ where: { id: depId } });
     if (!dep) {
       throw new NotFoundException('Dependency not found');
     }
-    await this.prisma.taskDependency.delete({ where: { id: depId } });
+    await this.prisma.taskDependency.delete({ where: { id: depId, ...(fromTaskId ? { fromTaskId } : {}) } });
   }
 
   async getDependencies(taskId: string) {
