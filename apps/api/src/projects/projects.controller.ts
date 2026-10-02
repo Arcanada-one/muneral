@@ -9,35 +9,42 @@ import {
   UseInterceptors,
   HttpCode,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 import { ProjectsService } from './projects.service.js';
 import { CreateProjectDto } from './dto/create-project.dto.js';
 import { AddGitRefDto } from './dto/add-git-ref.dto.js';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
+import { JwtOrApiKeyGuard } from '../auth/guards/jwt-or-api-key.guard.js';
+import { AgentTaskScopeGuard } from '../auth/guards/agent-task-scope.guard.js';
+import type { AgentScopedRequest } from '../auth/guards/agent-task-scope.guard.js';
+import { AgentScope } from '../auth/agent-scope.decorator.js';
 import { ActorInterceptor } from '../common/interceptors/actor.interceptor.js';
 
 /**
  * Projects and git-refs management.
  */
 @Controller('projects')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtOrApiKeyGuard, AgentTaskScopeGuard)
 @UseInterceptors(ActorInterceptor)
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
   @Post()
-  create(@Body() dto: CreateProjectDto) {
-    return this.projectsService.create(dto);
+  @AgentScope('project-create')
+  create(@Body() dto: CreateProjectDto, @Req() req: AgentScopedRequest) {
+    return this.projectsService.create(dto, !!req.agentScope);
   }
 
   @Get('workspace/:workspaceId')
-  findByWorkspace(@Param('workspaceId') workspaceId: string) {
-    return this.projectsService.findByWorkspace(workspaceId);
+  @AgentScope('workspace-metadata')
+  findByWorkspace(@Param('workspaceId') workspaceId: string, @Req() req: AgentScopedRequest) {
+    return this.projectsService.findByWorkspace(workspaceId, !!req.agentScope);
   }
 
   @Get(':projectId')
-  findOne(@Param('projectId') projectId: string) {
-    return this.projectsService.findOne(projectId);
+  @AgentScope('project-metadata')
+  findOne(@Param('projectId') projectId: string, @Req() req: AgentScopedRequest) {
+    return this.projectsService.findOne(projectId, req.agentScope?.workspaceId);
   }
 
   @Delete(':projectId')
