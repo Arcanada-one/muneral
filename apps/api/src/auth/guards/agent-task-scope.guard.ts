@@ -154,6 +154,47 @@ export class AgentTaskScopeGuard implements CanActivate {
     }
 
     switch (kind) {
+      case 'workspace-metadata': {
+        const workspaceId = this.paramOf(req, 'workspaceId');
+        if (workspaceId && workspaceId !== agent.workspaceId) {
+          throw new NotFoundException('Workspace not found.');
+        }
+        req.agentScope = { agentId: agent.id, kind, workspaceId: agent.workspaceId };
+        return true;
+      }
+      case 'project-create': {
+        if (this.bodyFieldOf(req, 'workspaceId') !== agent.workspaceId) {
+          throw new NotFoundException('Workspace not found.');
+        }
+        req.agentScope = { agentId: agent.id, kind, workspaceId: agent.workspaceId };
+        return true;
+      }
+      case 'project-metadata': {
+        const projectId = this.paramOf(req, 'projectId');
+        if (!projectId) throw new NotFoundException('Project not found.');
+        await this.assertProjectInWorkspace(agent, projectId);
+        req.agentScope = { agentId: agent.id, kind, workspaceId: agent.workspaceId };
+        return true;
+      }
+      case 'task-dependency': {
+        const taskId = this.paramOf(req, 'taskId');
+        if (!taskId) throw new ForbiddenException('No task in scope for this key.');
+        await this.assertCreatorOrExecutorOfTask(agent, taskId);
+        const depId = this.paramOf(req, 'depId');
+        let targetId = this.bodyFieldOf(req, 'toTaskId');
+        if (depId) {
+          const dep = await this.prisma.taskDependency.findFirst({
+            where: { id: depId, fromTaskId: taskId },
+            select: { toTaskId: true },
+          }).catch(() => null);
+          if (!dep) throw new ForbiddenException('Dependency is not in scope for this key.');
+          targetId = dep.toTaskId;
+        }
+        if (!targetId) throw new ForbiddenException('No dependency target in scope for this key.');
+        await this.assertCreatorOrExecutorOfTask(agent, targetId);
+        break;
+      }
+
       // MUN-0051: 'task' (read, activity, comment) admits the creator as well
       // as an assignee — see agentOwnTaskWhere.
       case 'task': {
