@@ -1948,7 +1948,8 @@ def discover_edges(ex_h: Extractor, ch: dict, ex_b: Extractor, cb: dict) -> list
 
 
 def run_diff(base_tree: build_graph.Tree, head_tree: build_graph.Tree, *, graph: dict | None = None, directions: dict | None = None,
-             consumer_keys: dict | None = None, disabled: set[str] | None = None, repo_name: str = "", only: set[str] | None = None) -> dict:
+             consumer_keys: dict | None = None, disabled: set[str] | None = None, repo_name: str = "", only: set[str] | None = None,
+             metadata_root: Path | None = None, metadata_git_repo: Path | None = None) -> dict:
     disabled = disabled or set()
     ex_b, ex_h = Extractor(base_tree, disabled), Extractor(head_tree, disabled)
     cb, ch = ex_b.contracts(), ex_h.contracts()
@@ -1975,6 +1976,24 @@ def run_diff(base_tree: build_graph.Tree, head_tree: build_graph.Tree, *, graph:
         contracts[cid] = {"kind": (o or n)["kind"], "path": (o or n)["path"], "symbol": sym, "status": res["status"], "direction": res["direction"],
                           "decl_hash_base": o and o["decl_hash"], "decl_hash_head": n and n["decl_hash"], "changes": res["changes"],
                           "error_code": bool((o or n).get("error_code"))}
+    # Native compiler evidence applies to this internal metadata transport only.
+    # No caller-supplied proof, direction override or generic enum exception enters here.
+    metadata_proof, metadata_covered = None, set()
+    if metadata_root is not None:
+        import metadata_contract_proof
+        target = metadata_contract_proof.CONTRACT
+        changed = contracts.get(target, {}).get("changes", [])
+        if changed and all(c["code"] == "ENUM_VALUE_ADDED" for c in changed):
+            metadata_proof = metadata_contract_proof.observe(head_tree, metadata_root, git_repo=metadata_git_repo)
+            observation = (metadata_proof.get("observation") or {}).get("observation", {})
+            values = ch.get(target, {}).get("schema", {}).get("values", [])
+            if (metadata_proof.get("source_observation_closed") and not metadata_proof["errors"]
+                    and set(values) == set(observation.get("union", []))):
+                metadata_covered = set(observation.get("covered_consumers", []))
+                for change in changed:
+                    change["severity"] = "compatible"
+                    change["compatibility_basis"] = "native source-bound metadata input and closed consumers"
+                contracts[target]["native_metadata_proof"] = metadata_proof
     breaking = [{"contract": cid, **c} for cid, c in contracts.items() for c in c["changes"] if c["severity"] == "breaking"]
     # edges
     edges_in = edges_from_graph(graph) if graph else discover_edges(ex_h, ch, ex_b, cb)
@@ -2020,6 +2039,12 @@ def run_diff(base_tree: build_graph.Tree, head_tree: build_graph.Tree, *, graph:
             proj = {"bindings": [], "keys_read": [], "keys_sent": [], "literals_sent": 0, "values_used": [], "complete": False,
                     "incomplete_reasons": ["consumer file absent at head"]}
         v, reasons = edge_verdict(proj, headc, cd, e.get("provenance", "deterministic"), disabled)
+        if metadata_proof and cd.get("native_metadata_proof") is metadata_proof:
+            if path in metadata_covered and v != "failed":
+                v, reasons = "verified", ["native compiler proved this metadata consumer's symbol-bound handling and closure"]
+                proj["native_metadata_observation_sha256"] = metadata_proof["observation_sha256"]
+            elif path not in metadata_covered and v != "failed":
+                v, reasons = "not_measured", ["metadata consumer is outside the native compiler's proven symbol closure"]
         rec = {"edge": e, "verdict": v, "reasons": reasons, "projection": proj}
         if e.get("provenance") != "deterministic":
             rec["requires_canary"] = True
@@ -2054,6 +2079,7 @@ def run_diff(base_tree: build_graph.Tree, head_tree: build_graph.Tree, *, graph:
             "graph": {"source_commit": graph["manifest"]["source_commit"], "graph_digest": graph["manifest"].get("graph_digest")} if graph else None,
             "edge_source": "graph" if graph else "discovered-by-import",
             "contracts": contracts, "breaking": breaking, "edges": edges_out,
+            **({"native_metadata_proof": metadata_proof} if metadata_proof is not None else {}),
             "limitations": sorted(set(ex_b.limitations + ex_h.limitations)),
             "summary": {"contracts_base": len(cb), "contracts_head": len(ch), "statuses": dict(sorted(statuses.items())), "codes": dict(sorted(codes.items())),
                         "breaking": len(breaking), "edges": len(edges_out), "edge_verdicts": dict(sorted(verdicts.items())),
