@@ -1,0 +1,8 @@
+{
+  "schema": "MeasuredGitSource/v1",
+  "commit": "1a956812a0fdf42f540c82bec9ee2fe2ccb0659d",
+  "tree": "d863182ae60e93b49948fa3cd4a70af742f8b2ce",
+  "dirty": false,
+  "producer": "Codex task_14ea7ca947f3 ctx_1f2c8ede82c1 measured committed source before evidence-only descendants",
+  "captured_at_utc": "2026-10-01T09:18:15.796632+00:00"
+}
