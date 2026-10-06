@@ -1,0 +1,35 @@
+{
+  "schema": "CanaryPlan/v1",
+  "id": "api959a-web-genuine-source-bootstrap",
+  "environment": "isolated-source-local-no-production",
+  "owner": "task_14ea7ca947f3",
+  "base_url": "http://127.0.0.1:36741",
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "efd089721818b7da9b72e047bc0970836a79e8ad",
+    "tree": "72ad186c525492074cfb1de5acbc32c4efbbc985",
+    "evidence": {
+      "path": "source.json",
+      "sha256": "dce81d9718b173aa172ac8fe7fb1b3c77d71fb334d49c0f950349d24e1aaf76d",
+      "source_field": "commit"
+    }
+  },
+  "probes": [
+    {
+      "id": "actual-fresh-next-public-login",
+      "kind": "http",
+      "method": "GET",
+      "path": "/login",
+      "auth": "none",
+      "entities": [
+        "deployable_unit:apps/web"
+      ],
+      "expect": {
+        "status_in": [
+          200
+        ],
+        "route_present": true
+      }
+    }
+  ]
+}

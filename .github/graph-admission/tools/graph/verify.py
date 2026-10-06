@@ -1786,7 +1786,8 @@ class Verify:
         t0 = time.monotonic()
         cmd = f"{contract_diff.TOOL}.run_diff(base={self.tree_base.meta.get('source_commit', '?')[:12]}, head={'worktree' if self.mode == 'worktree' else self.head[:12]}, graph=head graph)"
         try:
-            res = contract_diff.run_diff(self.tree_base, self.tree_head, graph=self.graph_head, repo_name=self.repo.name)
+            res = contract_diff.run_diff(self.tree_base, self.tree_head, graph=self.graph_head, repo_name=self.repo.name,
+                                         metadata_root=self.exec_root, metadata_git_repo=self.top)
         except contract_diff.Refusal as r:
             self.record("v-contract-diff", "contract_diff", cmd, ents, 2, f"REFUSAL {r.code}: {r.detail}", started, round(time.monotonic() - t0, 2),
                         f"refusal {r.code}", {e: ("not_measured", f"contract_diff refused: {r.code}") for e in ents}, "txt")

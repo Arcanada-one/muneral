@@ -54,7 +54,7 @@ type AuthRequest = Request & { actor: Actor; agentScope?: AgentScopeContext };
  * accepts either credential, and `AgentTaskScopeGuard` then refuses an API key
  * on every route that is not explicitly marked `@AgentScope(...)`, and on every
  * marked route whose task the key's agent is not assigned to. Routes with no
- * marker — delete, checklists, dependencies — stay exactly as JWT-only as they
+ * marker — delete, checklists — stay exactly as JWT-only as they
  * were; the only visible difference is that a valid key is now told 403
  * instead of 401.
  *
@@ -449,6 +449,7 @@ export class TasksController {
   }
 
   @Post(':taskId/dependencies')
+  @AgentScope('task-dependency')
   addDependency(
     @Param('taskId') taskId: string,
     @Body() dto: AddDependencyDto,
@@ -457,9 +458,10 @@ export class TasksController {
   }
 
   @Delete(':taskId/dependencies/:depId')
+  @AgentScope('task-dependency')
   @HttpCode(HttpStatus.NO_CONTENT)
-  removeDependency(@Param('depId') depId: string) {
-    return this.tasksService.removeDependency(depId);
+  removeDependency(@Param('taskId') taskId: string, @Param('depId') depId: string) {
+    return this.tasksService.removeDependency(depId, taskId);
   }
 
   // --- Comments (activity log entries) ---
