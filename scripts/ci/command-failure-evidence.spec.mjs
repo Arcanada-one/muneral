@@ -19,3 +19,14 @@ test('diagnostics accept missing streams and bound retained output', () => {
   assert.equal(result.stderr.text.length, 8192);
   assert.equal(result.stderr.truncated, true);
 });
+
+test('non-object throwables retain empty bounded diagnostic streams', () => {
+  for (const error of [null, undefined, 'fixture error', 42]) {
+    const result = commandFailureEvidence(error);
+    for (const stream of [result.stderr, result.stdout]) {
+      assert.equal(stream.text, '');
+      assert.equal(stream.truncated, false);
+      assert.match(stream.sha256, /^[0-9a-f]{64}$/);
+    }
+  }
+});

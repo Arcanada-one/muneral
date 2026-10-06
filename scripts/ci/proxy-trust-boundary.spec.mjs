@@ -8,6 +8,7 @@ const api = createRequire(resolve('apps/api/package.json'));
 const nest = createRequire(api.resolve('@nestjs/platform-express'));
 const express = createRequire(nest.resolve('express'));
 const proxyaddr = express('proxy-addr');
+/** @param {string} remoteAddress @param {string} forwarded */
 const request = (remoteAddress, forwarded) => ({
   socket: { remoteAddress }, headers: { 'x-forwarded-for': forwarded },
 });

@@ -117,6 +117,8 @@ jobs:
         run: node --test scripts/ci/proxy-trust-boundary.spec.mjs
       - name: Lint
         run: pnpm lint
+      - name: Type-check CI JavaScript source
+        run: apps/api/node_modules/.bin/tsc --project scripts/ci/tsconfig.json --listFiles
       - name: Build shared types
         run: pnpm --filter @muneral/types build
       - name: Generate Prisma client

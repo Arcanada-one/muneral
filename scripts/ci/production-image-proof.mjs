@@ -9,7 +9,7 @@ const argv = process.argv.slice(2);
 const options = Object.fromEntries(argv.reduce((pairs, value, index) => {
   if (index % 2 === 0) pairs.push([value, argv[index + 1]]);
   return pairs;
-}, []));
+}, /** @type {Array<[string, string]>} */ ([])));
 assert.equal(argv.length, 12, 'six explicit candidate/fixture arguments required');
 const head = options['--head'];
 assert.match(head, /^[0-9a-f]{40}$/);
@@ -26,18 +26,33 @@ const out = resolve(options['--out']);
 mkdirSync(out, { recursive: false });
 const image = `muneral-image-proof:${run}`;
 const label = `security14ea-image-${run}`;
+/**
+ * @typedef {{name: string, verdict: 'verified'} & Record<string, unknown>} Observation
+ * @typedef {{schema: 'CandidateProductionImageProof/v1', head: string, run: string,
+ * verdict: 'not_measured' | 'verified' | 'failed', scope: string,
+ * runtime_authorized: false, observations: Observation[],
+ * failure?: {phase: string, error: string, exit: number | null,
+ * diagnostic: ReturnType<typeof commandFailureEvidence>}, cleanup?: 'failed'}} CandidateReceipt
+ */
+/** @type {CandidateReceipt} */
 const receipt = { schema: 'CandidateProductionImageProof/v1', head, run,
   verdict: 'not_measured', scope: 'Ephemeral hosted CI candidate image; not deploy/live permissions',
   runtime_authorized: false, observations: [] };
 let phase = 'capability';
+/** @type {string | undefined} */
 let container;
+/** @type {string | undefined} */
 let exported;
+/** @param {string} binary @param {string[]} args */
 function command(binary, args) {
   return execFileSync(binary, args, { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024,
     timeout: 20 * 60 * 1000, stdio: ['ignore', 'pipe', 'pipe'] }).trim();
 }
+/** @param {...string} args */
 function docker(...args) { return command('docker', args); }
+/** @param {string} name @param {Record<string, unknown>} data */
 function observed(name, data) { receipt.observations.push({ name, verdict: 'verified', ...data }); }
+/** @param {string} network @param {string} program @param {string} [workdir] */
 function inImage(network, program, workdir = '/app/apps/api') {
   return docker('run', '--rm', '--network', network, '--workdir', workdir,
     '--env', 'DATABASE_URL=postgresql://image_fixture:image_fixture@postgres:5432/muneral_image_test',
@@ -58,7 +73,7 @@ try {
   assert.equal(networks.length, 1);
   const [network, binding] = networks[0];
   assert(binding.Aliases.includes('postgres'));
-  const pgEnv = new Map(pg.Config.Env.map(item => {
+  const pgEnv = new Map(pg.Config.Env.map(/** @param {string} item */ item => {
     const index = item.indexOf('='); return [item.slice(0, index), item.slice(index + 1)];
   }));
   assert.equal(pgEnv.get('POSTGRES_DB'), 'muneral_image_test');
@@ -130,11 +145,14 @@ try {
   receipt.verdict = 'verified';
 } catch (error) {
   receipt.verdict = 'failed';
-  receipt.failure = { phase, error: error.name, exit: error.status ?? null,
+  const status = typeof error === 'object' && error !== null && 'status' in error
+    && typeof error.status === 'number' ? error.status : null;
+  receipt.failure = { phase, error: error instanceof Error ? error.name : 'NonErrorThrown', exit: status,
     diagnostic: commandFailureEvidence(error) };
   process.exitCode = 1;
 } finally {
-  for (const id of [container, exported].filter(Boolean)) {
+  for (const id of [container, exported]) {
+    if (!id) continue;
     try {
       assert.equal(JSON.parse(docker('inspect', id))[0].Config.Labels['muneral.image-proof'], label);
       docker('rm', '-f', id);
