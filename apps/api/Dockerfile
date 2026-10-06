@@ -21,10 +21,27 @@ RUN pnpm --filter @muneral/types build
 
 # Generate Prisma client into node_modules (requires schema + engines)
 # prisma.config.ts at repo root resolves schema: apps/api/prisma/schema.prisma
-RUN pnpm --filter @muneral/api exec prisma generate
+RUN DATABASE_URL=postgresql://image_fixture:image_fixture@127.0.0.1:1/muneral_image_test \
+    pnpm --filter @muneral/api exec prisma generate --config=/app/prisma.config.ts
 
 # Compile the API
 RUN pnpm --filter @muneral/api build
+
+# Install into an empty stage: removing dev links from the builder would leave
+# their affected bytes in the final image's inherited layers/virtual store.
+FROM node:24.21.0-alpine AS production-deps
+WORKDIR /app
+RUN corepack enable
+COPY .npmrc ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml prisma.config.ts ./
+COPY apps/api/package.json ./apps/api/
+COPY packages/types/package.json ./packages/types/
+COPY apps/api/prisma ./apps/api/prisma
+RUN pnpm install --prod --frozen-lockfile
+# Generation reads the schema, not a database. This unreachable local fixture
+# satisfies the config parser without accepting a secret or production URL.
+RUN DATABASE_URL=postgresql://image_fixture:image_fixture@127.0.0.1:1/muneral_image_test \
+    pnpm --filter @muneral/api exec prisma generate --config=/app/prisma.config.ts
 
 # ---- production image ----
 FROM node:24.21.0-alpine AS production
@@ -44,21 +61,15 @@ ENV MUNERAL_BUILD_SHA=$MUNERAL_BUILD_SHA
 # where every interface is the right answer, says so here.
 ENV HOST=0.0.0.0
 
-# Carry over the FULL builder workspace. With pnpm's non-hoisting layout the
-# generated Prisma client + query-engine binaries live inside the per-workspace
-# .pnpm virtual store (node_modules/.pnpm/@prisma+client@.../...), NOT in a root
-# node_modules/@prisma directory — so the old per-package COPY of
-# node_modules/@prisma resolved to a non-existent path and broke the build.
-# Copying the whole node_modules tree (root + per-workspace, incl. symlinks into
-# .pnpm) preserves the generated client and avoids a fragile prod re-install
-# that pnpm cannot reproduce deterministically for a partially-built monorepo.
-COPY --from=builder /app/.npmrc /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/apps/api/package.json ./apps/api/
-COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
+# Preserve pnpm's complete PRODUCTION workspace/virtual store and generated
+# client together. Only compiled application/types output comes from builder.
+COPY --from=production-deps /app/.npmrc /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml /app/prisma.config.ts ./
+COPY --from=production-deps /app/node_modules ./node_modules
+COPY --from=production-deps /app/apps/api/package.json ./apps/api/
+COPY --from=production-deps /app/apps/api/node_modules ./apps/api/node_modules
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
-COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
-COPY --from=builder /app/packages/types/package.json ./packages/types/
+COPY --from=production-deps /app/apps/api/prisma ./apps/api/prisma
+COPY --from=production-deps /app/packages/types/package.json ./packages/types/
 COPY --from=builder /app/packages/types/dist ./packages/types/dist
 
 WORKDIR /app/apps/api

@@ -92,6 +92,10 @@ jobs:
         with:
           node-version: 24.21.0
           cache: pnpm
+      - name: Test candidate image query transport and filesystem guards
+        run: |
+          node --test scripts/ci/production-image-proof.spec.mjs
+          python3 -B -m unittest discover -s scripts/ci -p 'test_image_filesystem_proof.py'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Lint
