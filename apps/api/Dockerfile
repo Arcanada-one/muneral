@@ -38,6 +38,11 @@ COPY apps/api/package.json ./apps/api/
 COPY packages/types/package.json ./packages/types/
 COPY apps/api/prisma ./apps/api/prisma
 RUN pnpm install --prod --frozen-lockfile
+# pnpm reserves the root manifest's dev-only prisma name, so public hoisting
+# does not create /app/node_modules/prisma in a production install. The root
+# config must resolve the API's already-locked production CLI without NODE_PATH.
+RUN test -d apps/api/node_modules/prisma && test ! -e node_modules/prisma \
+    && ln -s ../apps/api/node_modules/prisma node_modules/prisma
 # Generation reads the schema, not a database. This unreachable local fixture
 # satisfies the config parser without accepting a secret or production URL.
 RUN DATABASE_URL=postgresql://image_fixture:image_fixture@127.0.0.1:1/muneral_image_test \
@@ -75,4 +80,6 @@ COPY --from=builder /app/packages/types/dist ./packages/types/dist
 WORKDIR /app/apps/api
 EXPOSE 3500
 USER node
+# Check the root config's real import boundary as the final runtime user.
+RUN cd /app && node --input-type=module -e "await import('prisma/config')"
 CMD ["node", "dist/main.js"]
