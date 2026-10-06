@@ -135,6 +135,30 @@ describe('Task contract CAS binding (af868172, real PostgreSQL)', () => {
     }
   });
 
+  it('invalidates the native conditional GET when project custody changes with the same digest', async () => {
+    const id = await create();
+    await patch(id, { contractDigest: DIGEST_A, expectedContractDigest: null }).expect(200);
+    const previous = await conditionalGet(id).expect(200);
+    const destination = await prisma.project.create({
+      data: { workspaceId, slug: `etag-moved-${uuidv4()}`, name: 'Conditional read fixture' },
+    });
+    try {
+      await prisma.task.update({ where: { id }, data: { projectId: destination.id } });
+      const current = await conditionalGet(id, previous.headers.etag).expect(200);
+      expect(current.body.projectId).toBe(destination.id);
+      expect(current.body.contractDigest).toBe(DIGEST_A);
+      expect(current.headers.etag).not.toBe(previous.headers.etag);
+      await conditionalGet(id, current.headers.etag).expect(304);
+      await patch(id, {
+        contractDigest: DIGEST_B, expectedContractDigest: DIGEST_A, expectedProjectId: projectId,
+      }).expect(409);
+      await conditionalGet(id, current.headers.etag).expect(304);
+    } finally {
+      await prisma.task.update({ where: { id }, data: { projectId } });
+      await prisma.project.delete({ where: { id: destination.id } });
+    }
+  });
+
   it('keeps the native conditional validator on a refused CAS and a no-op bind', async () => {
     const id = await create();
     const previous = await conditionalGet(id).expect(200);

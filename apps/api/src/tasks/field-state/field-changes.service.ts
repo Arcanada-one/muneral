@@ -245,10 +245,10 @@ export class FieldChangesService {
   }
 
   /**
-   * Compute ETag for GET /tasks/:taskId from field versions and its contract pointer.
-   * Use the pointer from the response row, not a second task read that may race.
+   * Compute ETag for GET /tasks/:taskId from field versions and its contract/project custody.
+   * Use the values from the response row, not a second task read that may race.
    */
-  async computeTaskEtag(taskId: string, contractDigest: string | null): Promise<string | null> {
+  async computeTaskEtag(taskId: string, contractDigest: string | null, projectId: string): Promise<string | null> {
     const fieldStates = await this.prisma.taskFieldState.findMany({
       where: { taskId },
     });
@@ -260,7 +260,7 @@ export class FieldChangesService {
       .join('|');
 
     return createHash('sha256')
-      .update(`${pairs}|contractDigest:${contractDigest ?? 'null'}`, 'utf8')
+      .update(`${pairs}|projectId:${projectId}|contractDigest:${contractDigest ?? 'null'}`, 'utf8')
       .digest('hex');
   }
 

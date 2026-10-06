@@ -33,7 +33,12 @@ clear, strict input validation, and rollback if the audit write fails. Fixture
 API keys exist only in the disposable test database; these tests are not live
 KC2 admission evidence.
 
-Conditional `GET /tasks/:id` includes the contract pointer from its response row
-in its ETag. A successful bind, rebind or clear invalidates a cached pointer; an
+Conditional `GET /tasks/:id` includes the contract pointer and actual project ID from
+its response row in its ETag. A successful bind, rebind or clear invalidates a cached pointer; an
 unchanged pointer or refused/rolled-back write keeps the validator. This is
 representation cache invalidation, not a binding epoch or effect-time lease.
+
+A project transfer with an unchanged digest also invalidates the cached task
+representation. `expectedProjectId` is a write precondition, not a stored field;
+the validator binds the actual `projectId` returned by GET. This does not grant
+project access or replace the atomic project check during CAS.

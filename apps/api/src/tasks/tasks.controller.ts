@@ -208,9 +208,9 @@ export class TasksController {
       `not-in-body; see /tasks/${taskId}/readiness`,
     );
 
-    // Bind the validator to the contract pointer in this exact response row.
+    // Bind the validator to contract/project custody in this exact response row.
     // Pointer CAS does not update the ordinary field-state versions.
-    const etag = await this.fieldChangesService.computeTaskEtag(taskId, task.contractDigest);
+    const etag = await this.fieldChangesService.computeTaskEtag(taskId, task.contractDigest, task.projectId);
     if (etag) {
       const etagValue = `"${etag}"`;
       res.setHeader('ETag', etagValue);
