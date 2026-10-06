@@ -5,9 +5,9 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "admitted"
  },
- "captured_at_utc": "2026-10-06T17:10:52Z",
+ "captured_at_utc": "2026-09-25T23:45:39Z",
  "change_set": {
-  "base": "dbfd7c8c905c7986595ad2b0cec1094fa21c1799",
+  "base": "99938af7c1198176dd68b600775be4904e0f4325",
   "files": [
    {
     "kind": "config",
@@ -19,35 +19,33 @@
     "status": "M"
    }
   ],
-  "head": "6df17a63310872358dd36beb4daa7adbfc0d0a3e",
+  "head": "8446c5856e7c73a3f505bf16a93bb2d04d848e90",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
  "exemptions": [],
  "graph": {
-  "builder_version": "1.0.3",
-  "built_at_utc": "2026-10-06T17:08:25Z",
-  "graph_digest": "sha256:b93b27e21f7f3873d1c62c4c2c497250f31bb04c811a0fbc4a2e721ebb1a6909",
-  "path": "/home/dev/.ci-executor-0f02/datarim-pin-incident/capacity/MUNERAL-EXACT-BASE-GRAPH.json",
-  "source_commit": "dbfd7c8c905c7986595ad2b0cec1094fa21c1799"
+  "builder_version": "1.0.1",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:4b484ecb1c6af893bee427d924329f5696c2a80cf39072b0b56a30684d993b6b",
+  "path": "/home/dev/aup/arc2/runs/A2-384/verify-work/mun2/verifier-out/graph-99938af7c119.json",
+  "source_commit": "99938af7c1198176dd68b600775be4904e0f4325"
  },
  "head_graph": {
-  "builder_version": "1.0.3",
+  "builder_version": "1.0.1",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:859e6a0b99e2c3317fcc62db62b408c47820af700e569b755871f477ad843c3a",
-  "path": "/home/dev/.ci-executor-0f02/datarim-pin-incident/capacity/muneral-verifier-output/graph-head-6df17a633108.json",
-  "source_commit": "6df17a63310872358dd36beb4daa7adbfc0d0a3e",
+  "graph_digest": "sha256:13036704a485e5ea198b1031756c67d10aa7ee5dd6742d511a1ff44f7b8b967d",
+  "path": "/home/dev/aup/arc2/runs/A2-384/verify-work/mun2/verifier-out/graph-head-8446c5856e7c.json",
+  "source_commit": "8446c5856e7c73a3f505bf16a93bb2d04d848e90",
   "staleness": {
-   "checked_at_utc": "2026-10-06T17:11:09Z",
-   "checked_nodes": 401,
+   "checked_at_utc": "2026-09-25T23:45:50Z",
+   "checked_nodes": 389,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
   }
  },
- "host": "ci-executor",
- "host_redacted": true,
- "host_sha256": "14fa4b6c130d10199976401d087931140e6fbccdbfebbbcf38ec190355ce4557",
+ "host": "arcana-devs",
  "impact_set": {
   "deterministic_core": [
    {
@@ -64,9 +62,43 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "document:SECURITY.md",
+      "node_type": "document",
+      "path": [
+       {
+        "edge_type": "documents",
+        "from": "document:SECURITY.md",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "doc reference check (path/id still resolves)"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "document:SECURITY.md",
+      "node_type": "document",
+      "path": [
+       {
+        "edge_type": "documents",
+        "from": "document:SECURITY.md",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "doc reference check (path/id still resolves)"
+     }
     ],
     "verifier_hint": "doc reference check (path/id still resolves)"
    },
@@ -84,9 +116,43 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "document:docs/graph-admission.md",
+      "node_type": "document",
+      "path": [
+       {
+        "edge_type": "documents",
+        "from": "document:docs/graph-admission.md",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "doc reference check (path/id still resolves)"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "document:docs/graph-admission.md",
+      "node_type": "document",
+      "path": [
+       {
+        "edge_type": "documents",
+        "from": "document:docs/graph-admission.md",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "doc reference check (path/id still resolves)"
+     }
     ],
     "verifier_hint": "doc reference check (path/id still resolves)"
    },
@@ -104,9 +170,43 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/A2-330-muneral-canary.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/A2-330-muneral-canary.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/A2-330-muneral-canary.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/A2-330-muneral-canary.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -124,9 +224,43 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -144,9 +278,43 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/a2-304-dependabot-group.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/a2-304-dependabot-group.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/a2-304-dependabot-group.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/a2-304-dependabot-group.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -171,9 +339,57 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 2,
+      "entity": "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "documents",
+        "from": "document:docs/graph-admission.md",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       },
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json",
+        "provenance": "deterministic",
+        "to": "document:docs/graph-admission.md",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 2,
+      "entity": "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "documents",
+        "from": "document:docs/graph-admission.md",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       },
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json",
+        "provenance": "deterministic",
+        "to": "document:docs/graph-admission.md",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -191,69 +407,43 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
-    ],
-    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
-   },
-   {
-    "boundary": "intra_unit",
-    "depth": 1,
-    "entity": "receipt:receipts/graph/bundle-refresh-8681292.json",
-    "node_type": "receipt",
-    "path": [
+    "revision_paths": [
      {
-      "edge_type": "verifies",
-      "from": "receipt:receipts/graph/bundle-refresh-8681292.json",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/ci.yml",
-      "via": "explicit-path"
-     }
-    ],
-    "revisions": [
-     "base",
-     "head"
-    ],
-    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
-   },
-   {
-    "boundary": "intra_unit",
-    "depth": 1,
-    "entity": "receipt:receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json",
-    "node_type": "receipt",
-    "path": [
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/a2-320-web-eslint10.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/a2-320-web-eslint10.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
      {
-      "edge_type": "verifies",
-      "from": "receipt:receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/ci.yml",
-      "via": "explicit-path"
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/a2-320-web-eslint10.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/a2-320-web-eslint10.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
      }
-    ],
-    "revisions": [
-     "base",
-     "head"
-    ],
-    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
-   },
-   {
-    "boundary": "intra_unit",
-    "depth": 1,
-    "entity": "receipt:receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json",
-    "node_type": "receipt",
-    "path": [
-     {
-      "edge_type": "verifies",
-      "from": "receipt:receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/ci.yml",
-      "via": "explicit-path"
-     }
-    ],
-    "revisions": [
-     "base",
-     "head"
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -278,9 +468,57 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 2,
+      "entity": "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "documents",
+        "from": "document:docs/graph-admission.md",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       },
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
+        "provenance": "deterministic",
+        "to": "document:docs/graph-admission.md",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 2,
+      "entity": "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "documents",
+        "from": "document:docs/graph-admission.md",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       },
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
+        "provenance": "deterministic",
+        "to": "document:docs/graph-admission.md",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -298,9 +536,43 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -318,9 +590,43 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -345,9 +651,57 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 2,
+      "entity": "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "documents",
+        "from": "document:docs/graph-admission.md",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       },
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
+        "provenance": "deterministic",
+        "to": "document:docs/graph-admission.md",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 2,
+      "entity": "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "documents",
+        "from": "document:docs/graph-admission.md",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       },
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
+        "provenance": "deterministic",
+        "to": "document:docs/graph-admission.md",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -372,9 +726,57 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 2,
+      "entity": "receipt:receipts/graph/change-admission-a2275-20260924T172252Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "documents",
+        "from": "document:docs/graph-admission.md",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       },
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-a2275-20260924T172252Z.json",
+        "provenance": "deterministic",
+        "to": "document:docs/graph-admission.md",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 2,
+      "entity": "receipt:receipts/graph/change-admission-a2275-20260924T172252Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "documents",
+        "from": "document:docs/graph-admission.md",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       },
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-a2275-20260924T172252Z.json",
+        "provenance": "deterministic",
+        "to": "document:docs/graph-admission.md",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -399,9 +801,57 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 2,
+      "entity": "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "documents",
+        "from": "document:docs/graph-admission.md",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       },
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
+        "provenance": "deterministic",
+        "to": "document:docs/graph-admission.md",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 2,
+      "entity": "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "documents",
+        "from": "document:docs/graph-admission.md",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       },
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
+        "provenance": "deterministic",
+        "to": "document:docs/graph-admission.md",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -419,9 +869,43 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -439,29 +923,43 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
-    ],
-    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
-   },
-   {
-    "boundary": "intra_unit",
-    "depth": 1,
-    "entity": "receipt:receipts/graph/change-admission-bundle-515c-20261003.json",
-    "node_type": "receipt",
-    "path": [
+    "revision_paths": [
      {
-      "edge_type": "verifies",
-      "from": "receipt:receipts/graph/change-admission-bundle-515c-20261003.json",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/ci.yml",
-      "via": "explicit-path"
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-bundle-46cbdc0-a2-291c.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-bundle-46cbdc0-a2-291c.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-bundle-46cbdc0-a2-291c.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-bundle-46cbdc0-a2-291c.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
      }
-    ],
-    "revisions": [
-     "base",
-     "head"
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -479,9 +977,43 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-bundle-5fde907.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-bundle-5fde907.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-bundle-5fde907.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-bundle-5fde907.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -499,9 +1031,43 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-bundle-966bcf3.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-bundle-966bcf3.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-bundle-966bcf3.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-bundle-966bcf3.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -519,29 +1085,43 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
-    ],
-    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
-   },
-   {
-    "boundary": "intra_unit",
-    "depth": 1,
-    "entity": "receipt:receipts/graph/change-admission-ci-pr-concurrency-454a9f0.json",
-    "node_type": "receipt",
-    "path": [
+    "revision_paths": [
      {
-      "edge_type": "verifies",
-      "from": "receipt:receipts/graph/change-admission-ci-pr-concurrency-454a9f0.json",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/ci.yml",
-      "via": "explicit-path"
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-bundle-a81a6d5.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-bundle-a81a6d5.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-bundle-a81a6d5.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-bundle-a81a6d5.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
      }
-    ],
-    "revisions": [
-     "base",
-     "head"
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -559,9 +1139,43 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -586,9 +1200,57 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 2,
+      "entity": "receipt:receipts/graph/change-admission-gateorder0-proof-20260914T172339Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "documents",
+        "from": "document:docs/graph-admission.md",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       },
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-gateorder0-proof-20260914T172339Z.json",
+        "provenance": "deterministic",
+        "to": "document:docs/graph-admission.md",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 2,
+      "entity": "receipt:receipts/graph/change-admission-gateorder0-proof-20260914T172339Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "documents",
+        "from": "document:docs/graph-admission.md",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       },
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-gateorder0-proof-20260914T172339Z.json",
+        "provenance": "deterministic",
+        "to": "document:docs/graph-admission.md",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -606,9 +1268,43 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-infra0417-muneral-20260916T100801Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-infra0417-muneral-20260916T100801Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-infra0417-muneral-20260916T100801Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-infra0417-muneral-20260916T100801Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -626,9 +1322,43 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-integration-batch1.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-integration-batch1.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-integration-batch1.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-integration-batch1.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -646,9 +1376,43 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -666,9 +1430,43 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-mun0053-revert-override-20260914T150343Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-mun0053-revert-override-20260914T150343Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-mun0053-revert-override-20260914T150343Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-mun0053-revert-override-20260914T150343Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -693,9 +1491,57 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 2,
+      "entity": "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "documents",
+        "from": "document:docs/graph-admission.md",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       },
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+        "provenance": "deterministic",
+        "to": "document:docs/graph-admission.md",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 2,
+      "entity": "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "documents",
+        "from": "document:docs/graph-admission.md",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       },
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+        "provenance": "deterministic",
+        "to": "document:docs/graph-admission.md",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -720,9 +1566,57 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 2,
+      "entity": "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "documents",
+        "from": "document:docs/graph-admission.md",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       },
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json",
+        "provenance": "deterministic",
+        "to": "document:docs/graph-admission.md",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 2,
+      "entity": "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "documents",
+        "from": "document:docs/graph-admission.md",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       },
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json",
+        "provenance": "deterministic",
+        "to": "document:docs/graph-admission.md",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -740,9 +1634,43 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -760,9 +1688,43 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -780,9 +1742,43 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -800,9 +1796,43 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -820,9 +1850,43 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    },
@@ -840,9 +1904,43 @@
       "via": "explicit-path"
      }
     ],
-    "revisions": [
-     "base",
-     "head"
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/ctl-bundle-refresh-20260925.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/ctl-bundle-refresh-20260925.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "receipt:receipts/graph/ctl-bundle-refresh-20260925.json",
+      "node_type": "receipt",
+      "path": [
+       {
+        "edge_type": "verifies",
+        "from": "receipt:receipts/graph/ctl-bundle-refresh-20260925.json",
+        "provenance": "deterministic",
+        "to": "code_unit:.github/workflows/ci.yml",
+        "via": "explicit-path"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+     }
     ],
     "verifier_hint": "selectable: run the targeted test / re-read the receipt"
    }
@@ -854,20 +1952,21 @@
   "inferred_tail": [],
   "max_depth": 3,
   "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
-  "total": 37
+  "total": 32
  },
  "notes": [
-  "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.3.0) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
-  "profile: (auto-detected); baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none"
+  "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.0.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
+  "profile: (auto-detected); baseline: contracts/graph-verified-change/fitness-baseline/Arcanada-one__muneral.v1.json (valid); selected: none; disabled: none"
  ],
  "producer": {
   "tool": "tools/graph/verify.py",
-  "version": "1.3.0"
+  "version": "1.0.1"
  },
- "receipt_id": "car-verify-20261006T171052Z-6df17a63",
+ "receipt_id": "car-verify-20260925T234539Z-8446c585",
+ "receipt_path": "receipts/graph/A2-384-deploy-gate-lane.json",
  "repo": {
   "name": "Arcanada-one/muneral",
-  "path": "/home/dev/.ci-executor-0f02/datarim-pin-incident/capacity/muneral-source"
+  "path": "/home/dev/aup/arc2/runs/A2-384/work/muneral"
  },
  "revision_selection": {
   "base": [
@@ -879,9 +1978,6 @@
    "receipt:receipts/graph/a2-304-dependabot-group.json",
    "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json",
    "receipt:receipts/graph/a2-320-web-eslint10.json",
-   "receipt:receipts/graph/bundle-refresh-8681292.json",
-   "receipt:receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json",
-   "receipt:receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json",
    "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
    "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
    "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json",
@@ -890,11 +1986,9 @@
    "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
    "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
    "receipt:receipts/graph/change-admission-bundle-46cbdc0-a2-291c.json",
-   "receipt:receipts/graph/change-admission-bundle-515c-20261003.json",
    "receipt:receipts/graph/change-admission-bundle-5fde907.json",
    "receipt:receipts/graph/change-admission-bundle-966bcf3.json",
    "receipt:receipts/graph/change-admission-bundle-a81a6d5.json",
-   "receipt:receipts/graph/change-admission-ci-pr-concurrency-454a9f0.json",
    "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
    "receipt:receipts/graph/change-admission-gateorder0-proof-20260914T172339Z.json",
    "receipt:receipts/graph/change-admission-infra0417-muneral-20260916T100801Z.json",
@@ -919,9 +2013,6 @@
    "receipt:receipts/graph/a2-304-dependabot-group.json",
    "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json",
    "receipt:receipts/graph/a2-320-web-eslint10.json",
-   "receipt:receipts/graph/bundle-refresh-8681292.json",
-   "receipt:receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json",
-   "receipt:receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json",
    "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
    "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
    "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json",
@@ -930,11 +2021,9 @@
    "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
    "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
    "receipt:receipts/graph/change-admission-bundle-46cbdc0-a2-291c.json",
-   "receipt:receipts/graph/change-admission-bundle-515c-20261003.json",
    "receipt:receipts/graph/change-admission-bundle-5fde907.json",
    "receipt:receipts/graph/change-admission-bundle-966bcf3.json",
    "receipt:receipts/graph/change-admission-bundle-a81a6d5.json",
-   "receipt:receipts/graph/change-admission-ci-pr-concurrency-454a9f0.json",
    "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
    "receipt:receipts/graph/change-admission-gateorder0-proof-20260914T172339Z.json",
    "receipt:receipts/graph/change-admission-infra0417-muneral-20260916T100801Z.json",
@@ -955,7 +2044,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-06T17:11:08Z",
+  "checked_at_utc": "2026-09-25T23:45:50Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -1013,39 +2102,6 @@
    "entity": "receipt:receipts/graph/a2-320-web-eslint10.json",
    "node_type": "receipt",
    "path": "receipts/graph/a2-320-web-eslint10.json",
-   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
-   "rule": "DEC-AUP-0034"
-  },
-  {
-   "content_hash": {
-    "base": "sha256:7ae2451fc38e3cbd1214a7ab874f14bd9a6eb1a04873a477175ae4803bb86c17",
-    "head": "sha256:7ae2451fc38e3cbd1214a7ab874f14bd9a6eb1a04873a477175ae4803bb86c17"
-   },
-   "entity": "receipt:receipts/graph/bundle-refresh-8681292.json",
-   "node_type": "receipt",
-   "path": "receipts/graph/bundle-refresh-8681292.json",
-   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
-   "rule": "DEC-AUP-0034"
-  },
-  {
-   "content_hash": {
-    "base": "sha256:38d90ac106910780419665124dc15f9add77b173e1600b6d3bb0befc30373f7d",
-    "head": "sha256:38d90ac106910780419665124dc15f9add77b173e1600b6d3bb0befc30373f7d"
-   },
-   "entity": "receipt:receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json",
-   "node_type": "receipt",
-   "path": "receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json",
-   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
-   "rule": "DEC-AUP-0034"
-  },
-  {
-   "content_hash": {
-    "base": "sha256:f9b6c3baf08919477d75899363b56cce00d2c29778d0bc5602d12048fd733cc8",
-    "head": "sha256:f9b6c3baf08919477d75899363b56cce00d2c29778d0bc5602d12048fd733cc8"
-   },
-   "entity": "receipt:receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json",
-   "node_type": "receipt",
-   "path": "receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json",
    "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
    "rule": "DEC-AUP-0034"
   },
@@ -1139,17 +2195,6 @@
   },
   {
    "content_hash": {
-    "base": "sha256:b400407f288da6983f75afd7c9e5c4f9247ec28e6259a947377417795f9ce71a",
-    "head": "sha256:b400407f288da6983f75afd7c9e5c4f9247ec28e6259a947377417795f9ce71a"
-   },
-   "entity": "receipt:receipts/graph/change-admission-bundle-515c-20261003.json",
-   "node_type": "receipt",
-   "path": "receipts/graph/change-admission-bundle-515c-20261003.json",
-   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
-   "rule": "DEC-AUP-0034"
-  },
-  {
-   "content_hash": {
     "base": "sha256:72a007da29724339945b73809d737ddab10e25173f0c362509e3850aded11af0",
     "head": "sha256:72a007da29724339945b73809d737ddab10e25173f0c362509e3850aded11af0"
    },
@@ -1178,17 +2223,6 @@
    "entity": "receipt:receipts/graph/change-admission-bundle-a81a6d5.json",
    "node_type": "receipt",
    "path": "receipts/graph/change-admission-bundle-a81a6d5.json",
-   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
-   "rule": "DEC-AUP-0034"
-  },
-  {
-   "content_hash": {
-    "base": "sha256:e99afecd9e01da14081728b16bcba56c1429ffd4f5fc216e14d9e5634c9e3db6",
-    "head": "sha256:e99afecd9e01da14081728b16bcba56c1429ffd4f5fc216e14d9e5634c9e3db6"
-   },
-   "entity": "receipt:receipts/graph/change-admission-ci-pr-concurrency-454a9f0.json",
-   "node_type": "receipt",
-   "path": "receipts/graph/change-admission-ci-pr-concurrency-454a9f0.json",
    "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
    "rule": "DEC-AUP-0034"
   },
@@ -1348,13 +2382,13 @@
   }
  ],
  "tree": {
-  "commit": "6df17a63310872358dd36beb4daa7adbfc0d0a3e",
+  "commit": "8446c5856e7c73a3f505bf16a93bb2d04d848e90",
   "dirty": false
  },
  "verdicts": [
   {
    "entity": "code_unit:.github/workflows/ci.yml",
-   "reason": "v-workflow-config-b803fcb7f17ed923: bounded workflow configuration shape valid; expressions, shell, actions, callee interface compatibility and hosted execution NOT_MEASURED; v-fitness: no new fitness violation",
+   "reason": "v-workflow-config-b803fcb7f17ed923: bounded workflow configuration shape valid; expressions, shell, actions and hosted execution NOT_MEASURED; v-fitness: no new fitness violation",
    "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
@@ -1378,12 +2412,6 @@
    ]
   }
  ],
- "verifier_selection": {
-  "applied": {},
-  "not_applied": [],
-  "requested": [],
-  "schema": "VerifierSelection/v1"
- },
  "verifiers": [
   {
    "command": "workflow_config.validate exact head bytes",
@@ -1397,13 +2425,13 @@
    "exit_code": 0,
    "id": "v-workflow-config-b803fcb7f17ed923",
    "kind": "config_schema",
-   "output_ref": "/home/dev/.ci-executor-0f02/datarim-pin-incident/capacity/muneral-verifier-output/v-workflow-config-b803fcb7f17ed923.txt",
-   "started_at_utc": "2026-10-06T17:11:30Z",
-   "summary": "bounded workflow configuration shape valid; expressions, shell, actions, callee interface compatibility and hosted execution NOT_MEASURED"
+   "output_ref": "/home/dev/aup/arc2/runs/A2-384/verify-work/mun2/verifier-out/v-workflow-config-b803fcb7f17ed923.txt",
+   "started_at_utc": "2026-09-25T23:45:56Z",
+   "summary": "bounded workflow configuration shape valid; expressions, shell, actions and hosted execution NOT_MEASURED"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.2,
+   "duration_s": 0.09,
    "entities": [
     "code_unit:.github/workflows/ci.yml"
    ],
@@ -1413,8 +2441,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/home/dev/.ci-executor-0f02/datarim-pin-incident/capacity/muneral-verifier-output/v-fitness.json",
-   "started_at_utc": "2026-10-06T17:11:30Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-384/verify-work/mun2/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-09-25T23:45:56Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -1431,8 +2459,8 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/home/dev/.ci-executor-0f02/datarim-pin-incident/capacity/muneral-verifier-output/v-doc-reference.txt",
-   "started_at_utc": "2026-10-06T17:11:30Z",
+   "output_ref": "/home/dev/aup/arc2/runs/A2-384/verify-work/mun2/verifier-out/v-doc-reference.txt",
+   "started_at_utc": "2026-09-25T23:45:56Z",
    "summary": "2 document(s), 0 failed"
   }
  ],
@@ -1441,7 +2469,7 @@
    {
     "code": "STRUCTURAL_EXCLUSION",
     "rule": "DEC-AUP-0034",
-    "text": "35 affected entity(ies) owe no verdict (receipt: 35): unchanged at both revisions and given no verifier by the matrix"
+    "text": "30 affected entity(ies) owe no verdict (receipt: 30): unchanged at both revisions and given no verifier by the matrix"
    }
   ],
   "required_by_entity": {
@@ -1460,9 +2488,6 @@
    "receipt:receipts/graph/a2-304-dependabot-group.json": [],
    "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json": [],
    "receipt:receipts/graph/a2-320-web-eslint10.json": [],
-   "receipt:receipts/graph/bundle-refresh-8681292.json": [],
-   "receipt:receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json": [],
-   "receipt:receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json": [],
    "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json": [],
    "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json": [],
    "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json": [],
@@ -1471,11 +2496,9 @@
    "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json": [],
    "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json": [],
    "receipt:receipts/graph/change-admission-bundle-46cbdc0-a2-291c.json": [],
-   "receipt:receipts/graph/change-admission-bundle-515c-20261003.json": [],
    "receipt:receipts/graph/change-admission-bundle-5fde907.json": [],
    "receipt:receipts/graph/change-admission-bundle-966bcf3.json": [],
    "receipt:receipts/graph/change-admission-bundle-a81a6d5.json": [],
-   "receipt:receipts/graph/change-admission-ci-pr-concurrency-454a9f0.json": [],
    "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json": [],
    "receipt:receipts/graph/change-admission-gateorder0-proof-20260914T172339Z.json": [],
    "receipt:receipts/graph/change-admission-infra0417-muneral-20260916T100801Z.json": [],
@@ -1492,10 +2515,10 @@
    "receipt:receipts/graph/ctl-bundle-refresh-20260925.json": []
   },
   "seconds": {
-   "prepare": 18.61,
-   "total": 38.77,
-   "verifiers": 0.2
+   "prepare": 6.02,
+   "total": 16.96,
+   "verifiers": 0.09
   }
  },
- "work_item": "0f02de80-dba6-43cd-acbc-24005074611d"
+ "work_item": "A2-384"
 }
