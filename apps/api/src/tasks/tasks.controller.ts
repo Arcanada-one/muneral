@@ -187,9 +187,8 @@ export class TasksController {
    * than before; a consumer that checks it cannot mistake this route's silence
    * for "no dependencies", because the silence now says where to look. A
    * header rather than a body field on purpose: the body is the persisted task
-   * row, byte-compared against the ETag computed from field versions, and
-   * adding a non-column key to it would put a value in the document that no
-   * field version covers.
+   * row. Keeping the dependency hint in a header preserves that response
+   * contract; the strong ETag covers the complete serialized row.
    */
   @Get(':taskId')
   @AgentScope('task')
@@ -208,9 +207,8 @@ export class TasksController {
       `not-in-body; see /tasks/${taskId}/readiness`,
     );
 
-    // Bind the validator to contract/project custody in this exact response row.
-    // Pointer CAS does not update the ordinary field-state versions.
-    const etag = await this.fieldChangesService.computeTaskEtag(taskId, task.contractDigest, task.projectId);
+    // Every returned column participates, regardless of which writer changed it.
+    const etag = this.fieldChangesService.computeTaskEtag(task);
     if (etag) {
       const etagValue = `"${etag}"`;
       res.setHeader('ETag', etagValue);

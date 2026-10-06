@@ -60,7 +60,7 @@ describe('Task representation validator and migration field-state (23e7, real Po
     prisma = moduleRef.get(PrismaService);
     authSvc = moduleRef.get(AuthService);
     migration = moduleRef.get(MigrationService);
-    fields = moduleRef.get(TaskFieldStateService);
+    fields = moduleRef.select(MigrationModule).get(TaskFieldStateService, { strict: true });
   }, 180_000);
 
   afterAll(async () => {

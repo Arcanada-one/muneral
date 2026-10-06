@@ -159,13 +159,19 @@ describe('Task contract CAS binding (af868172, real PostgreSQL)', () => {
     }
   });
 
-  it('keeps the native conditional validator on a refused CAS and a no-op bind', async () => {
+  it('keeps the validator on refused CAS and exposes updatedAt from a same-pointer CAS write', async () => {
     const id = await create();
     const previous = await conditionalGet(id).expect(200);
     await patch(id, { contractDigest: DIGEST_A, expectedContractDigest: DIGEST_B }).expect(409);
     await conditionalGet(id, previous.headers.etag).expect(304);
     await patch(id, { contractDigest: null, expectedContractDigest: null }).expect(200);
-    await conditionalGet(id, previous.headers.etag).expect(304);
+    // A successful same-pointer CAS still writes updatedAt and an audit row.
+    // A strong whole-response validator must expose that actual row change.
+    const current = await conditionalGet(id, previous.headers.etag).expect(200);
+    expect(current.body.contractDigest).toBeNull();
+    expect(current.body.updatedAt).not.toBe(previous.body.updatedAt);
+    expect(current.headers.etag).not.toBe(previous.headers.etag);
+    await conditionalGet(id, current.headers.etag).expect(304);
   });
 
   it('keeps the native conditional validator when the pointer audit rolls back', async () => {

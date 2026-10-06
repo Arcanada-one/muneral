@@ -245,23 +245,14 @@ export class FieldChangesService {
   }
 
   /**
-   * Compute ETag for GET /tasks/:taskId from field versions and its contract/project custody.
-   * Use the values from the response row, not a second task read that may race.
+   * Strong validator for the exact JSON row returned by GET /tasks/:taskId.
+   * Field versions serve conflict tracking, not whole-response cache validation:
+   * migration/bootstrap and future writers can change untracked columns.
+   * Serialize the already-read row exactly as the untransformed JSON response;
+   * no second database read may race it. Dates and Decimals use their toJSON.
    */
-  async computeTaskEtag(taskId: string, contractDigest: string | null, projectId: string): Promise<string | null> {
-    const fieldStates = await this.prisma.taskFieldState.findMany({
-      where: { taskId },
-    });
-    if (fieldStates.length === 0) return null;
-
-    const pairs = [...fieldStates]
-      .sort((a, b) => a.fieldName.localeCompare(b.fieldName))
-      .map((fs) => `${fs.fieldName}:${fs.version}`)
-      .join('|');
-
-    return createHash('sha256')
-      .update(`${pairs}|projectId:${projectId}|contractDigest:${contractDigest ?? 'null'}`, 'utf8')
-      .digest('hex');
+  computeTaskEtag(task: object): string {
+    return createHash('sha256').update(JSON.stringify(task), 'utf8').digest('hex');
   }
 
   private _computeEtag(fields: FieldChangeEntry[]): string {

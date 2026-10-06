@@ -35,6 +35,7 @@ import {
   jsonDigest,
   type JsonValue,
 } from '../execution-authority/canonical-json.js';
+import { TaskFieldStateService } from '../tasks/field-state/task-field-state.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { CreateBatchDto } from './dto/create-batch.dto.js';
 import type { CreateDecisionDto } from './dto/create-decision.dto.js';
@@ -126,6 +127,7 @@ export class MigrationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly activity: ActivityService,
+    private readonly taskFieldState: TaskFieldStateService,
   ) {}
 
   // -------------------------------------------------------------------------
@@ -627,6 +629,11 @@ export class MigrationService {
           current?.status ?? task.status,
         );
       }
+
+      // The CAS, field-state, audit and replay response share one transaction.
+      // A failed recompute must leave no published status/revision change.
+      const currentTask = await tx.task.findUniqueOrThrow({ where: { id: taskId } });
+      await this.taskFieldState.recompute(tx, currentTask);
 
       const revision = dto.expectedRevision + 1;
       await this.activity.log(

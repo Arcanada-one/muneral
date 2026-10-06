@@ -9,6 +9,7 @@ import { BadRequestException, ConflictException, NotFoundException } from '@nest
 import { createHash, randomUUID } from 'node:crypto';
 import { ActivityService } from '../src/activity/activity.service.js';
 import { MIGRATION_ERROR_CODES } from '../src/migration/migration.errors.js';
+import { TaskFieldStateService } from '../src/tasks/field-state/task-field-state.service.js';
 import { MigrationService } from '../src/migration/migration.service.js';
 import type { CreateWorkItemDto } from '../src/migration/dto/create-work-item.dto.js';
 import { createDisposablePostgres } from './support/disposable-postgres.js';
@@ -47,7 +48,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { PrismaPg } = nodeRequire('@prisma/adapter-pg');
     prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: pg.url() }) });
-    service = new MigrationService(prisma, new ActivityService(prisma));
+    service = new MigrationService(prisma, new ActivityService(prisma), new TaskFieldStateService(prisma));
 
     const ownerId = randomUUID();
     workspaceId = randomUUID();
