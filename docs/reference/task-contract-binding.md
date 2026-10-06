@@ -32,3 +32,8 @@ CAS conflict/concurrency, foreign-task refusal, creator/executor scope, rebind,
 clear, strict input validation, and rollback if the audit write fails. Fixture
 API keys exist only in the disposable test database; these tests are not live
 KC2 admission evidence.
+
+Conditional `GET /tasks/:id` includes the contract pointer from its response row
+in its ETag. A successful bind, rebind or clear invalidates a cached pointer; an
+unchanged pointer or refused/rolled-back write keeps the validator. This is
+representation cache invalidation, not a binding epoch or effect-time lease.

@@ -112,6 +112,47 @@ describe('Task contract CAS binding (af868172, real PostgreSQL)', () => {
     http().patch(`/tasks/${id}/contract`).set('Authorization', `Bearer ${key}`).send(body);
   const create = async () => (await createWithKey({}).expect(201)).body.id as string;
 
+  const conditionalGet = (id: string, etag?: string) => {
+    const request = http().get(`/tasks/${id}`).set('Authorization', `Bearer ${agentKey}`);
+    return etag ? request.set('If-None-Match', etag) : request;
+  };
+
+  it('invalidates the native conditional GET on bind, rebind and clear', async () => {
+    const id = await create();
+    let previous = await conditionalGet(id).expect(200);
+    expect(previous.headers.etag).toBeDefined();
+    await conditionalGet(id, previous.headers.etag).expect(304);
+    for (const [expectedContractDigest, contractDigest] of [
+      [null, DIGEST_A], [DIGEST_A, DIGEST_B], [DIGEST_B, null],
+    ]) {
+      await patch(id, { contractDigest, expectedContractDigest }).expect(200);
+      const current = await conditionalGet(id, previous.headers.etag).expect(200);
+      expect(current.body.contractDigest).toBe(contractDigest);
+      expect(current.headers.etag).toBeDefined();
+      expect(current.headers.etag).not.toBe(previous.headers.etag);
+      await conditionalGet(id, current.headers.etag).expect(304);
+      previous = current;
+    }
+  });
+
+  it('keeps the native conditional validator on a refused CAS and a no-op bind', async () => {
+    const id = await create();
+    const previous = await conditionalGet(id).expect(200);
+    await patch(id, { contractDigest: DIGEST_A, expectedContractDigest: DIGEST_B }).expect(409);
+    await conditionalGet(id, previous.headers.etag).expect(304);
+    await patch(id, { contractDigest: null, expectedContractDigest: null }).expect(200);
+    await conditionalGet(id, previous.headers.etag).expect(304);
+  });
+
+  it('keeps the native conditional validator when the pointer audit rolls back', async () => {
+    const id = await create();
+    const previous = await conditionalGet(id).expect(200);
+    jest.spyOn(activity, 'log').mockRejectedValueOnce(new Error('fixture audit failure'));
+    await patch(id, { contractDigest: DIGEST_A, expectedContractDigest: null }).expect(500);
+    await conditionalGet(id, previous.headers.etag).expect(304);
+    expect((await conditionalGet(id).expect(200)).body.contractDigest).toBeNull();
+  });
+
   it('binds the existing creator-owned task, GET reads it, and audits the same actor and digests', async () => {
     const id = await create();
     const before = await prisma.task.count({ where: { projectId } });
