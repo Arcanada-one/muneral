@@ -3,9 +3,9 @@
   "rule": "admitted requires every verdict = verified; failed without exemption ⇒ refused; not_measured without exemption ⇒ paused_safe; exemptions (owner + expiry) are attached by the admitting agent, never by the verifier (DEC-AUP-0008, matrix P1/P4)",
   "structural_exclusion_rule": "DEC-AUP-0034: an affected entity is NOT verdict-owing when all three hold — the verifier matrix declares neither a mandatory nor a selectable verifier for its node type (so the only verdict it could ever carry states a property of the MATRIX, not of this change), the change set does not contain it, and its bytes are identical at base and head. Each one is listed in structural_exclusions with the content hash at both revisions that proves the byte-identity, and impact_pair.receipt_problems re-derives that proof from Git rather than believing the receipt.",
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
-  "verdict": "paused_safe"
+  "verdict": "admitted_with_exemptions"
  },
- "captured_at_utc": "2026-10-06T22:37:16Z",
+ "captured_at_utc": "2026-10-06T23:15:11Z",
  "change_set": {
   "base": "36f93ac475eab7424b8704587fafcec8a538f566",
   "files": [
@@ -17,29 +17,97 @@
     ],
     "path": ".github/workflows/ci.yml",
     "status": "M"
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/AUP-GRAPH-CI-01-MUNERAL209-MAIN36-CAR.json",
+    "node_ids": [
+     "receipt:receipts/graph/AUP-GRAPH-CI-01-MUNERAL209-MAIN36-CAR.json"
+    ],
+    "path": "receipts/graph/AUP-GRAPH-CI-01-MUNERAL209-MAIN36-CAR.json",
+    "status": "A"
    }
   ],
-  "head": "ca35b231e7b4c23b2b1da216b872fafb06a8a7a0",
+  "head": "d6599bdf7873b4043bdcf7720942dec93666d21b",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
- "exemptions": [],
+ "exemptions": [
+  {
+   "code": "BOUNDED_CHECKER_OUT_OF_SCOPE",
+   "entity": "code_unit:.github/workflows/ci.yml",
+   "evidence": {
+    "CAR": "/home/dev/.ci-executor-0f02/datarim-pin-incident/capacity/priority-window-20261006T2104/muneral209-published-record-source/receipts/graph/AUP-GRAPH-CI-01-MUNERAL209-MAIN36-CAR.json",
+    "CAR_sha256": "b2b031ba9e0a1e243d3c5041df401806146a9f0a3040eb1109f8aaad870520ec",
+    "at": "2026-10-06T22:44:02.482951+00:00",
+    "base": "36f93ac475eab7424b8704587fafcec8a538f566",
+    "base_sha256": "4d832968cd0eb44ce5143c91d1676d586620ceb1427b86797d5291d980b06f50",
+    "base_validator": [
+     "not_measured",
+     "workflow configuration not measured: reusable workflow input expression value/type unresolved"
+    ],
+    "changed_callee_and_ref": "network-exposure-lint.yml/Datarim5800861ad1e1a75f7e3ad986212a0faeaa1bfc98",
+    "changed_files": [
+     ".github/workflows/ci.yml"
+    ],
+    "current_whole_or_CAN_run": false,
+    "exact_two_pin_reversal_restores_original_bytes": true,
+    "head": "ca35b231e7b4c23b2b1da216b872fafb06a8a7a0",
+    "head_sha256": "2398f4caa983526c8bcbc507e014646065e1f6a216bcb8196ecff95ab4c07182",
+    "head_validator": [
+     "not_measured",
+     "workflow configuration not measured: reusable workflow input expression value/type unresolved"
+    ],
+    "old319_approval_or_declaration_transferred": false,
+    "path": ".github/workflows/ci.yml",
+    "published_tool": "e4e6d4b686cdaca521c41cac9c2bbfddf0c1a906",
+    "receiver": "d6599bdf7873b4043bdcf7720942dec93666d21b",
+    "schema": "ExactMuneral209WorkflowPinDispositionEvidence/v1",
+    "scope": "Only exact unresolvable preexisting workflow input expression property; not external callee source/runtime/network proof",
+    "unchanged_input_expressions": [
+     "needs.lint-and-test.result",
+     "runner_labels literal string choice"
+    ],
+    "work_item": "0f02de80-dba6-43cd-acbc-24005074611d",
+    "workflow_validator_sha256": "4ebd1993dacd68599d8997cbc389b66da34f89f6a960dc4534e7964c6ecef52e"
+   },
+   "expires_at_utc": "2026-10-07T22:45:00Z",
+   "independent_review": {
+    "native_evidence_id": "6fb25690-4e1e-4791-9b12-82a37b87b819",
+    "path": "/home/dev/aup/arc2/control/recovery-20261001T1520Z/cross-lane-reviews/MUNERAL209-CTXBAF-BOUNDED-DISPOSITION-20261006T225412Z.json",
+    "sha256": "51105a53ba48c997ac0ab2b76f4240be2c28308d7899b4a020578b063cb26390"
+   },
+   "issued_at_utc": "2026-10-06T22:59:00Z",
+   "issued_by": "Original Program independent admitting agent 9437639a-5f7c-4fe4-be04-18112ba0bada",
+   "owner": "Original independent Program admitting agent 9437639a-5f7c-4fe4-be04-18112ba0bada; original CI source custody retained",
+   "reason": "Exact current canonical BASE and HEAD both refuse the same existing reusable input expression typing. Only two network-exposure reusable workflow/ref pin literals changed; exact reversal restores all BASE bytes. This bounded declaration preserves actual not_measured and requires independent exactpin source review and real currentCI/gate; it proves neither external callee execution nor runtime network exposure.",
+   "reverse_if": "Revoke if exactworkflow or source range changes, new FAILED/unknown reason appears, current checker measures the expressions, externalcallee pin/source review refuses, or expiry reached before actual merge. No scope transfer to another receiving source.",
+   "reviewed_receiver": "d6599bdf7873b4043bdcf7720942dec93666d21b",
+   "scope_binding": {
+    "base": "36f93ac475eab7424b8704587fafcec8a538f566",
+    "head": "ca35b231e7b4c23b2b1da216b872fafb06a8a7a0",
+    "head_sha256": "2398f4caa983526c8bcbc507e014646065e1f6a216bcb8196ecff95ab4c07182",
+    "path": ".github/workflows/ci.yml"
+   },
+   "status": "ISSUED_BOUNDED_EXACT_SOURCE_ONLY"
+  }
+ ],
  "graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
   "graph_digest": "sha256:83e7614d89d7b02f69b6535581e914a2493dd3c9bfb496ee9cfd37586e5a9976",
-  "path": "/home/dev/.ci-executor-0f02/datarim-pin-incident/capacity/priority-window-20261006T2104/muneral209-published-verifier-out/graph-36f93ac475ea.json",
+  "path": "/home/dev/.ci-executor-0f02/datarim-pin-incident/capacity/priority-window-20261006T2104/muneral209-superseding-verifier-out/graph-36f93ac475ea.json",
   "source_commit": "36f93ac475eab7424b8704587fafcec8a538f566"
  },
  "head_graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:fca06e17cf4d4e5064313c9218b52f8b6a0684d3b7db681537af43cb1a1d4da0",
-  "path": "/home/dev/.ci-executor-0f02/datarim-pin-incident/capacity/priority-window-20261006T2104/muneral209-published-verifier-out/graph-head-ca35b231e7b4.json",
-  "source_commit": "ca35b231e7b4c23b2b1da216b872fafb06a8a7a0",
+  "graph_digest": "sha256:ddafb9b5ce5e2d0e7e978ae36f89645034bc674b048247c185e4316cfe5e888e",
+  "path": "/home/dev/.ci-executor-0f02/datarim-pin-incident/capacity/priority-window-20261006T2104/muneral209-superseding-verifier-out/graph-head-d6599bdf7873.json",
+  "source_commit": "d6599bdf7873b4043bdcf7720942dec93666d21b",
   "staleness": {
-   "checked_at_utc": "2026-10-06T22:37:56Z",
-   "checked_nodes": 413,
+   "checked_at_utc": "2026-10-06T23:15:48Z",
+   "checked_nodes": 414,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -47,7 +115,7 @@
  },
  "host": "ci-executor",
  "host_redacted": true,
- "host_sha256": "2c0f99f1093123fc63a2ad6c13c851a376a803c6081b6855457ccba81953c40c",
+ "host_sha256": "a69f174f421220f6f447f709c6101b7a62fc1a78c886d1c57b6edfbc65837396",
  "impact_set": {
   "deterministic_core": [
    {
@@ -878,16 +946,18 @@
  },
  "notes": [
   "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
-  "profile: (auto-detected); baseline: contracts/graph-verified-change/fitness-baseline/Arcanada-one__muneral.v1.json (valid); selected: none; disabled: none"
+  "profile: (auto-detected); baseline: contracts/graph-verified-change/fitness-baseline/Arcanada-one__muneral.v1.json (valid); selected: none; disabled: none",
+  "exemptions: 1 attached from /home/dev/.producer-ctx41/MERGE-GATE-GRAPH-DISJOINT-20261006/MUNERAL209-INDEPENDENT-WORKFLOW-DISPOSITION/ISSUED-EXEMPTIONS.json"
  ],
  "producer": {
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261006T223716Z-ca35b231",
+ "receipt_id": "car-verify-20261006T231511Z-d6599bdf",
+ "receipt_path": "receipts/graph/AUP-GRAPH-CI-01-MUNERAL209-MAIN36-CAR.json",
  "repo": {
   "name": "Arcanada-one/muneral",
-  "path": "/home/dev/.ci-executor-0f02/datarim-pin-incident/capacity/muneral209-main36-source"
+  "path": "/home/dev/.ci-executor-0f02/datarim-pin-incident/capacity/priority-window-20261006T2104/muneral209-issued-record-source"
  },
  "revision_selection": {
   "base": [
@@ -938,6 +1008,7 @@
    "receipt:receipts/graph/A2-330-muneral-canary.json",
    "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
    "receipt:receipts/graph/A2-384-deploy-gate-lane.json",
+   "receipt:receipts/graph/AUP-GRAPH-CI-01-MUNERAL209-MAIN36-CAR.json",
    "receipt:receipts/graph/a2-304-dependabot-group.json",
    "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json",
    "receipt:receipts/graph/a2-320-web-eslint10.json",
@@ -977,7 +1048,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-06T22:37:56Z",
+  "checked_at_utc": "2026-10-06T23:15:48Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -1015,6 +1086,21 @@
    "path": "receipts/graph/A2-384-deploy-gate-lane.json",
    "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
    "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": null,
+    "head": "sha256:b2b031ba9e0a1e243d3c5041df401806146a9f0a3040eb1109f8aaad870520ec"
+   },
+   "entity": "receipt:receipts/graph/AUP-GRAPH-CI-01-MUNERAL209-MAIN36-CAR.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/AUP-GRAPH-CI-01-MUNERAL209-MAIN36-CAR.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it; superseded by construction — this run re-issues the receipt at receipts/graph/AUP-GRAPH-CI-01-MUNERAL209-MAIN36-CAR.json for work item 0f02de80-dba6-43cd-acbc-24005074611d",
+   "rule": "DEC-AUP-0035",
+   "superseded": {
+    "receipt_path": "receipts/graph/AUP-GRAPH-CI-01-MUNERAL209-MAIN36-CAR.json",
+    "work_item": "0f02de80-dba6-43cd-acbc-24005074611d"
+   }
   },
   {
    "content_hash": {
@@ -1381,7 +1467,7 @@
   }
  ],
  "tree": {
-  "commit": "ca35b231e7b4c23b2b1da216b872fafb06a8a7a0",
+  "commit": "d6599bdf7873b4043bdcf7720942dec93666d21b",
   "dirty": false
  },
  "verdicts": [
@@ -1430,13 +1516,13 @@
    "exit_code": 1,
    "id": "v-workflow-config-b803fcb7f17ed923",
    "kind": "config_schema",
-   "output_ref": "/home/dev/.ci-executor-0f02/datarim-pin-incident/capacity/priority-window-20261006T2104/muneral209-published-verifier-out/v-workflow-config-b803fcb7f17ed923.txt",
-   "started_at_utc": "2026-10-06T22:38:00Z",
+   "output_ref": "/home/dev/.ci-executor-0f02/datarim-pin-incident/capacity/priority-window-20261006T2104/muneral209-superseding-verifier-out/v-workflow-config-b803fcb7f17ed923.txt",
+   "started_at_utc": "2026-10-06T23:15:52Z",
    "summary": "workflow configuration not measured: reusable workflow input expression value/type unresolved"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.21,
+   "duration_s": 0.22,
    "entities": [
     "code_unit:.github/workflows/ci.yml"
    ],
@@ -1446,8 +1532,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/home/dev/.ci-executor-0f02/datarim-pin-incident/capacity/priority-window-20261006T2104/muneral209-published-verifier-out/v-fitness.json",
-   "started_at_utc": "2026-10-06T22:38:00Z",
+   "output_ref": "/home/dev/.ci-executor-0f02/datarim-pin-incident/capacity/priority-window-20261006T2104/muneral209-superseding-verifier-out/v-fitness.json",
+   "started_at_utc": "2026-10-06T23:15:52Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -1464,17 +1550,23 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/home/dev/.ci-executor-0f02/datarim-pin-incident/capacity/priority-window-20261006T2104/muneral209-published-verifier-out/v-doc-reference.txt",
-   "started_at_utc": "2026-10-06T22:38:00Z",
+   "output_ref": "/home/dev/.ci-executor-0f02/datarim-pin-incident/capacity/priority-window-20261006T2104/muneral209-superseding-verifier-out/v-doc-reference.txt",
+   "started_at_utc": "2026-10-06T23:15:52Z",
    "summary": "2 document(s), 0 failed"
   }
  ],
  "verify": {
   "events": [
    {
+    "code": "SUPERSEDED_SELF_EXCLUSION",
+    "entity": "receipt:receipts/graph/AUP-GRAPH-CI-01-MUNERAL209-MAIN36-CAR.json",
+    "rule": "DEC-AUP-0035",
+    "text": "the receipt at receipts/graph/AUP-GRAPH-CI-01-MUNERAL209-MAIN36-CAR.json is the previous version of the one this run is writing, for the same work item 0f02de80-dba6-43cd-acbc-24005074611d — superseded by construction, so it owes this change no verdict"
+   },
+   {
     "code": "STRUCTURAL_EXCLUSION",
     "rule": "DEC-AUP-0034",
-    "text": "36 affected entity(ies) owe no verdict (receipt: 36): unchanged at both revisions and given no verifier by the matrix"
+    "text": "37 affected entity(ies) owe no verdict (receipt: 37): unchanged at both revisions and given no verifier by the matrix"
    }
   ],
   "required_by_entity": {
@@ -1491,6 +1583,7 @@
    "receipt:receipts/graph/A2-330-muneral-canary.json": [],
    "receipt:receipts/graph/A2-370-outbox-relay-wired.json": [],
    "receipt:receipts/graph/A2-384-deploy-gate-lane.json": [],
+   "receipt:receipts/graph/AUP-GRAPH-CI-01-MUNERAL209-MAIN36-CAR.json": [],
    "receipt:receipts/graph/a2-304-dependabot-group.json": [],
    "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json": [],
    "receipt:receipts/graph/a2-320-web-eslint10.json": [],
@@ -1526,9 +1619,9 @@
    "receipt:receipts/graph/ctl-bundle-refresh-20260925.json": []
   },
   "seconds": {
-   "prepare": 3.1,
-   "total": 44.6,
-   "verifiers": 0.21
+   "prepare": 3.22,
+   "total": 41.65,
+   "verifiers": 0.22
   }
  },
  "work_item": "0f02de80-dba6-43cd-acbc-24005074611d"
