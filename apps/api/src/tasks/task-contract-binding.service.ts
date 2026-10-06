@@ -36,7 +36,11 @@ export class TaskContractBindingService {
       // Under READ COMMITTED PostgreSQL rechecks the predicate after a row-lock
       // wait. Two concurrent requests with one expected value cannot both win.
       const changed = await tx.task.updateMany({
-        where: { ...authority, contractDigest: dto.expectedContractDigest },
+        where: {
+          ...authority,
+          contractDigest: dto.expectedContractDigest,
+          ...(dto.expectedProjectId ? { projectId: dto.expectedProjectId } : {}),
+        },
         data: { contractDigest: dto.contractDigest },
       });
       if (changed.count !== 1) {
@@ -51,6 +55,7 @@ export class TaskContractBindingService {
         actor,
         action: CONTRACT_BINDING_ACTION,
         payload: {
+          expectedProjectId: dto.expectedProjectId ?? null,
           expectedContractDigest: dto.expectedContractDigest,
           contractDigest: dto.contractDigest,
         },

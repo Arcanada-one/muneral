@@ -123,7 +123,22 @@ describe('Task contract CAS binding (af868172, real PostgreSQL)', () => {
     const rows = await prisma.activityLog.findMany({ where: { taskId: id, action: CONTRACT_BINDING_ACTION } });
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({ actorType: 'agent', actorId: agentId,
-      payload: { expectedContractDigest: null, contractDigest: DIGEST_A } });
+      payload: { expectedProjectId: null, expectedContractDigest: null, contractDigest: DIGEST_A } });
+  });
+
+  it('refuses a changed project in the atomic write even when the agent owns both projects', async () => {
+    const id = await create();
+    const destination = await prisma.project.create({ data: { workspaceId, slug: `moved-${uuidv4()}`, name: 'Moved fixture' } });
+    try {
+      await prisma.task.update({ where: { id }, data: { projectId: destination.id } });
+      await patch(id, { contractDigest: DIGEST_A, expectedContractDigest: null, expectedProjectId: projectId }).expect(409);
+      expect((await prisma.task.findUniqueOrThrow({ where: { id } })).contractDigest).toBeNull();
+      expect(await prisma.activityLog.count({ where: { taskId: id, action: CONTRACT_BINDING_ACTION } })).toBe(0);
+      await patch(id, { contractDigest: DIGEST_A, expectedContractDigest: null, expectedProjectId: destination.id }).expect(200);
+    } finally {
+      await prisma.task.update({ where: { id }, data: { projectId } });
+      await prisma.project.delete({ where: { id: destination.id } });
+    }
   });
 
   it('refuses stale expected digest with 409 without mutation or audit', async () => {

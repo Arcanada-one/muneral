@@ -22,9 +22,10 @@ This route stores a pointer. It does not validate KC2 admission, authorize a
 provider/effect, revoke a contract globally, or invalidate in-flight work.
 Digest-only CAS does not prevent ABA replay after clear. Replay-safe withdrawal
 requires a separately verified monotonic authority/binding generation and a
-consumer revocation boundary. Project-specific restrictions narrower than the
-agent's workspace require an additional atomic project precondition. Neither
-property is claimed by this two-field endpoint.
+consumer revocation boundary. For a receiver restricted to one project, also send `expectedProjectId` (UUID).
+The same atomic UPDATE checks that project; a project move returns 409 without
+a pointer write. This additional custody condition is not an admission lease
+and does not solve digest-only ABA.
 
 The accompanying PostgreSQL e2e tests cover authenticated bind, independent GET,
 CAS conflict/concurrency, foreign-task refusal, creator/executor scope, rebind,
