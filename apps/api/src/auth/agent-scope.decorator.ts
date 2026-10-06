@@ -78,6 +78,9 @@ import { SetMetadata } from '@nestjs/common';
  *                      work item the fleet registered stayed `todo`). The
  *                      state machine is not part of the scope: the service
  *                      holds every caller, key or JWT, to TASK_TRANSITIONS.
+ *   'task-contract' — existing-card digest bind/clear. Creator or executor,
+ *                      inside the credential's workspace; no assignment or grant
+ *                      is created. The service rechecks this scope in the CAS.
  *   'task-assign'    — MUN-0051. The route names a task (`:taskId`) and writes
  *                      a `task_agents` row for the agent and role named in the
  *                      body. Before MUN-0051 the route had no scope at all: any
@@ -136,6 +139,7 @@ export type AgentScopeKind =
   | 'task-redaction'
   | 'task-evidence'
   | 'task-status'
+  | 'task-contract'
   | 'task-assign'
   | 'project-index'
   | 'workspace-digest';

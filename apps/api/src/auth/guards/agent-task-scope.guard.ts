@@ -262,6 +262,13 @@ export class AgentTaskScopeGuard implements CanActivate {
         await this.assertCreatorOrExecutorOfTask(agent, taskId);
         break;
       }
+      case 'task-contract': {
+        const taskId = this.paramOf(req, 'taskId');
+        if (!taskId) throw new ForbiddenException('No task in scope for this key.');
+        await this.assertCreatorOrExecutorOfTask(agent, taskId);
+        req.agentScope = { agentId: agent.id, kind, workspaceId: agent.workspaceId };
+        return true;
+      }
       case 'project-write': {
         const projectId = this.bodyFieldOf(req, 'projectId');
         if (!projectId) throw new ForbiddenException('No project in scope for this key.');
