@@ -85,6 +85,9 @@ try {
   assert.equal(filesystem.verdict, 'verified');
   observed('every_final_layer_and_rootfs_member', {
     layers: filesystem.layers.length, members: filesystem.rootfs.members.length });
+  phase = 'proxy_trust_boundary';
+  inImage(network, readFileSync('scripts/ci/proxy-trust-boundary.spec.mjs', 'utf8'), '/app');
+  observed('final_image_express_proxy_trust_boundary', { tests: 2 });
   phase = 'migration';
   docker('run', '--rm', '--network', network, '--workdir', '/app',
     '--env', 'DATABASE_URL=postgresql://image_fixture:image_fixture@postgres:5432/muneral_image_test',
