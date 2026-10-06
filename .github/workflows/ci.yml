@@ -131,6 +131,73 @@ jobs:
           DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
           MUN0020_DB_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
 
+  # SEC85: a candidate image is measured in an ephemeral hosted job, separately
+  # from the main-only production broker. No repository secrets are passed here.
+  candidate-api-image:
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: image_fixture
+          POSTGRES_PASSWORD: image_fixture
+          POSTGRES_DB: muneral_image_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24.21.0
+      - name: Measure exact candidate image and owned PostgreSQL fixture
+        env:
+          CANDIDATE_HEAD: ${{ github.event.pull_request.head.sha }}
+          CANDIDATE_RUN: ${{ github.run_id }}-${{ github.run_attempt }}
+          FIXTURE_POSTGRES_ID: ${{ job.services.postgres.id }}
+          FIXTURE_POSTGRES_PORT: ${{ job.services.postgres.ports['5432'] }}
+        run: |
+          set -euo pipefail
+          test "${RUNNER_ENVIRONMENT}" = github-hosted
+          node --test scripts/ci/production-image-proof.spec.mjs
+          python3 -B -m unittest discover -s scripts/ci -p 'test_image_filesystem_proof.py'
+          node scripts/ci/production-image-proof.mjs \
+            --head "${CANDIDATE_HEAD}" \
+            --runner-environment "${RUNNER_ENVIRONMENT}" \
+            --run "${CANDIDATE_RUN}" \
+            --postgres-id "${FIXTURE_POSTGRES_ID}" \
+            --postgres-port "${FIXTURE_POSTGRES_PORT}" \
+            --out "${RUNNER_TEMP}/candidate-image-proof-${CANDIDATE_RUN}"
+      - name: Preserve candidate proof and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: candidate-api-image-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/candidate-image-proof-${{ github.run_id }}-${{ github.run_attempt }}/runtime.json
+            ${{ runner.temp }}/candidate-image-proof-${{ github.run_id }}-${{ github.run_attempt }}/filesystem.json
+            ${{ runner.temp }}/candidate-image-proof-${{ github.run_id }}-${{ github.run_attempt }}/image-id
+          if-no-files-found: error
+          retention-days: 7
+
   # AUP-GRAPH-006 `gate1` (DEC-AUP-0008): «нет receipt — нет мержа». A pull request is admitted only
   # when a ChangeAdmissionReceipt/v1 is bound to exactly this change range — in the head tree under
   # receipts/graph/, or as a ```json block in the pull-request body. Doc-only changes report
