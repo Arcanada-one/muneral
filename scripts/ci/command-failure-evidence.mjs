@@ -1,0 +1,17 @@
+import { createHash } from 'node:crypto';
+
+// Candidate commands receive only owned fixture credentials. Redact them anyway;
+// keep bounded failure evidence in the artifact instead of dumping subprocess logs.
+export function commandFailureEvidence(error) {
+  const redact = value => String(value ?? '')
+    .replace(/-----BEGIN [^-]*PRIVATE KEY-----[\s\S]*?-----END [^-]*PRIVATE KEY-----/g, '[redacted private key]')
+    .replace(/([a-z][a-z0-9+.-]*:\/\/)[^\s/@]+:[^\s/@]+@/gi, '$1[redacted]@')
+    .replace(/Bearer\s+[^\s"']+/gi, 'Bearer [redacted]')
+    .replace(/(?:mun_sk_|gh[pousr]_)[A-Za-z0-9_-]+/g, '[redacted token]')
+    .replace(/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g, '[redacted JWT]');
+  return Object.fromEntries(['stderr', 'stdout'].map(name => {
+    const text = redact(error[name]);
+    return [name, { text: text.slice(-8192), truncated: text.length > 8192,
+      sha256: createHash('sha256').update(text).digest('hex') }];
+  }));
+}

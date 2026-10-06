@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { commandFailureEvidence } from './command-failure-evidence.mjs';
 import { assertEphemeralBase } from '../../apps/api/test/support/disposable-postgres-url.ts';
 
 const argv = process.argv.slice(2);
@@ -126,7 +127,8 @@ try {
   receipt.verdict = 'verified';
 } catch (error) {
   receipt.verdict = 'failed';
-  receipt.failure = { phase, error: error.name, exit: error.status ?? null };
+  receipt.failure = { phase, error: error.name, exit: error.status ?? null,
+    diagnostic: commandFailureEvidence(error) };
   process.exitCode = 1;
 } finally {
   for (const id of [container, exported].filter(Boolean)) {

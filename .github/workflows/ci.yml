@@ -101,7 +101,7 @@ jobs:
           cache: pnpm
       - name: Test candidate image query transport and filesystem guards
         run: |
-          node --test scripts/ci/production-image-proof.spec.mjs
+          node --test scripts/ci/production-image-proof.spec.mjs scripts/ci/command-failure-evidence.spec.mjs
           python3 -B -m unittest discover -s scripts/ci -p 'test_image_filesystem_proof.py'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -177,7 +177,7 @@ jobs:
         run: |
           set -euo pipefail
           test "${RUNNER_ENVIRONMENT}" = github-hosted
-          node --test scripts/ci/production-image-proof.spec.mjs
+          node --test scripts/ci/production-image-proof.spec.mjs scripts/ci/command-failure-evidence.spec.mjs
           python3 -B -m unittest discover -s scripts/ci -p 'test_image_filesystem_proof.py'
           node scripts/ci/production-image-proof.mjs \
             --head "${CANDIDATE_HEAD}" \
