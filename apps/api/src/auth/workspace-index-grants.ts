@@ -26,6 +26,6 @@ export const WORKSPACE_INDEX_GRANT_LIST: readonly WorkspaceIndexGrantEntry[] = [
   anchorProjectId: AUP_ANCHOR_PROJECT_ID,
   excludedProjectSlugs: ['tbt', 'mt5-bridge'],
   until: '2026-11-04T00:00:00Z',
-  decision: 'DEC-AUP-0113',
+  decision: 'DEC-AUP-0114',
   evidence: 'Named coordinator index-only workspace scope; independent five-role council, fixed identity bindings, unchanged explicit expiries, transactional admission and audit. Current excluded slugs are denied. Expiry closes this entry without deployment; renewal requires a reviewed decision and PR.',
 }];
