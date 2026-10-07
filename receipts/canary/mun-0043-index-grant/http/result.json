@@ -1,6 +1,6 @@
 {
- "base_url": "http://127.0.0.1:35211",
- "captured_at_utc": "2026-10-07T03:33:50Z",
+ "base_url": "http://127.0.0.1:3611",
+ "captured_at_utc": "2026-10-07T05:41:52Z",
  "card": "A2-330",
  "counters": {
   "failed": 0,
@@ -29,7 +29,7 @@
    "probe_ids": [
     "health-version"
    ],
-   "reason": "health-version: status 200, status ok, resident version 0.4.6+4276801155396612e09518b530bb65d9a4b63b99",
+   "reason": "health-version: status 200, status ok, resident version 0.4.6",
    "verdict": "verified"
   },
   {
@@ -55,7 +55,7 @@
    "probe_ids": [
     "health-version"
    ],
-   "reason": "health-version: status 200, status ok, resident version 0.4.6+4276801155396612e09518b530bb65d9a4b63b99",
+   "reason": "health-version: status 200, status ok, resident version 0.4.6",
    "verdict": "verified"
   },
   {
@@ -809,9 +809,9 @@
    "verdict": "verified"
   }
  ],
- "environment": "isolated-source-local-no-production",
+ "environment": "production",
  "model": "none: deterministic HTTP producer",
- "phase": "pre",
+ "phase": "post",
  "plan": {
   "digest": "sha256:839c10de621b64fb7b4e248e1430b5cb3a97c187673a58b2f1ee1e67a2477b8d",
   "id": "muneral-route-presence",
@@ -819,17 +819,17 @@
  },
  "probes": [
   {
-   "body_bytes": 121,
-   "body_sha256": "357c43b741003ca713cd5138400006bc362514135cfda96bda56c08710b8e53f",
+   "body_bytes": 362,
+   "body_sha256": "d32a53597eab1c45f9e855375ce789abb5a984c3376c0eec13188296d3275bfd",
    "executed": true,
    "id": "health-version",
    "kind": "http",
    "method": "GET",
-   "observed_version": "0.4.6+4276801155396612e09518b530bb65d9a4b63b99",
+   "observed_version": "0.4.6",
    "outcome": "verified",
-   "reason": "status 200, status ok, resident version 0.4.6+4276801155396612e09518b530bb65d9a4b63b99",
+   "reason": "status 200, status ok, resident version 0.4.6",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health"
+   "url": "http://127.0.0.1:3611/health"
   },
   {
    "declared_by_resident_route_table": true,
@@ -844,7 +844,7 @@
    "reason": "DELETE /api/v1/agents/keys/:keyId is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/agents/keys/:keyId",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -859,7 +859,7 @@
    "reason": "DELETE /api/v1/agents/tasks/:taskId/assign/:agentId is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/agents/tasks/:taskId/assign/:agentId",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -874,7 +874,7 @@
    "reason": "DELETE /api/v1/milestones/:milestoneId is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/milestones/:milestoneId",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -889,7 +889,7 @@
    "reason": "DELETE /api/v1/projects/:projectId is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/projects/:projectId",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -904,7 +904,7 @@
    "reason": "DELETE /api/v1/projects/git-refs/:refId is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/projects/git-refs/:refId",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -919,7 +919,7 @@
    "reason": "DELETE /api/v1/sprints/:sprintId is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/sprints/:sprintId",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -934,7 +934,7 @@
    "reason": "DELETE /api/v1/tasks/:taskId is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/tasks/:taskId",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -949,7 +949,7 @@
    "reason": "DELETE /api/v1/tasks/:taskId/checklist/:itemId is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/tasks/:taskId/checklist/:itemId",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -964,7 +964,7 @@
    "reason": "DELETE /api/v1/tasks/:taskId/dependencies/:depId is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/tasks/:taskId/dependencies/:depId",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -979,7 +979,7 @@
    "reason": "DELETE /api/v1/webhooks/:webhookId is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/webhooks/:webhookId",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -994,7 +994,7 @@
    "reason": "DELETE /api/v1/workspaces/:workspaceId/members/:userId is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/workspaces/:workspaceId/members/:userId",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "body_bytes": 70,
@@ -1010,13 +1010,13 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/agents/tasks is in the resident route table",
    "route": "/api/v1/agents/tasks",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/agents/tasks"
+   "url": "http://127.0.0.1:3611/api/v1/agents/tasks"
   },
   {
    "body_bytes": 43,
    "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
    "declared_by_resident_route_table": true,
-   "elapsed_ms": 4,
+   "elapsed_ms": 6,
    "evidence_kind": "resident_route_table+no_match_fingerprint",
    "executed": true,
    "id": "route-get-agents-workspace-workspaceid",
@@ -1026,13 +1026,13 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/agents/workspace/:workspaceId is in the resident route table",
    "route": "/api/v1/agents/workspace/:workspaceId",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/agents/workspace/00000000-0000-4000-8000-000000000000"
+   "url": "http://127.0.0.1:3611/api/v1/agents/workspace/00000000-0000-4000-8000-000000000000"
   },
   {
    "body_bytes": 52,
    "body_sha256": "fcbda2e2660dbbff82ba8df76212f3d4ab9ced3b9b9a8b8700621f45fb5ce006",
    "declared_by_resident_route_table": true,
-   "elapsed_ms": 3,
+   "elapsed_ms": 4,
    "evidence_kind": "resident_route_table+no_match_fingerprint",
    "executed": true,
    "id": "route-get-auth-github",
@@ -1042,13 +1042,13 @@
    "reason": "status 500: the contour answered with a fault, not with the route",
    "route": "/api/v1/auth/github",
    "status": 500,
-   "url": "http://127.0.0.1:35211/api/v1/auth/github"
+   "url": "http://127.0.0.1:3611/api/v1/auth/github"
   },
   {
    "body_bytes": 52,
    "body_sha256": "fcbda2e2660dbbff82ba8df76212f3d4ab9ced3b9b9a8b8700621f45fb5ce006",
    "declared_by_resident_route_table": true,
-   "elapsed_ms": 1,
+   "elapsed_ms": 2,
    "evidence_kind": "resident_route_table+no_match_fingerprint",
    "executed": true,
    "id": "route-get-auth-github-callback",
@@ -1058,13 +1058,13 @@
    "reason": "status 500: the contour answered with a fault, not with the route",
    "route": "/api/v1/auth/github/callback",
    "status": 500,
-   "url": "http://127.0.0.1:35211/api/v1/auth/github/callback"
+   "url": "http://127.0.0.1:3611/api/v1/auth/github/callback"
   },
   {
-   "body_bytes": 121,
-   "body_sha256": "357c43b741003ca713cd5138400006bc362514135cfda96bda56c08710b8e53f",
+   "body_bytes": 362,
+   "body_sha256": "d32a53597eab1c45f9e855375ce789abb5a984c3376c0eec13188296d3275bfd",
    "declared_by_resident_route_table": true,
-   "elapsed_ms": 2,
+   "elapsed_ms": 4,
    "evidence_kind": "resident_route_table+no_match_fingerprint",
    "executed": true,
    "id": "route-get-health",
@@ -1074,13 +1074,13 @@
    "reason": "status 200 (not 404/405/5xx) and GET /health is in the resident route table",
    "route": "/health",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health"
+   "url": "http://127.0.0.1:3611/health"
   },
   {
-   "body_bytes": 4740,
-   "body_sha256": "d54183c18fbb22534549c54398cb9bc7bfdb24d08e26a2eda81d5a8a0e8741a0",
+   "body_bytes": 4981,
+   "body_sha256": "d1afc51ea84f88fa51757a9e0cdbb7447d594e9965677ef30d005d05b615a281",
    "declared_by_resident_route_table": true,
-   "elapsed_ms": 2,
+   "elapsed_ms": 5,
    "evidence_kind": "resident_route_table+no_match_fingerprint",
    "executed": true,
    "id": "route-get-health-routes",
@@ -1090,7 +1090,7 @@
    "reason": "status 200 (not 404/405/5xx) and GET /health/routes is in the resident route table",
    "route": "/health/routes",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "body_bytes": 43,
@@ -1106,13 +1106,13 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/migration/batches/:batchId is in the resident route table",
    "route": "/api/v1/migration/batches/:batchId",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/migration/batches/00000000-0000-4000-8000-000000000000"
+   "url": "http://127.0.0.1:3611/api/v1/migration/batches/00000000-0000-4000-8000-000000000000"
   },
   {
    "body_bytes": 43,
    "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
    "declared_by_resident_route_table": true,
-   "elapsed_ms": 2,
+   "elapsed_ms": 3,
    "evidence_kind": "resident_route_table+no_match_fingerprint",
    "executed": true,
    "id": "route-get-migration-identities-identityid-mappings",
@@ -1122,7 +1122,7 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/migration/identities/:identityId/mappings is in the resident route table",
    "route": "/api/v1/migration/identities/:identityId/mappings",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/migration/identities/00000000-0000-4000-8000-000000000000/mappings"
+   "url": "http://127.0.0.1:3611/api/v1/migration/identities/00000000-0000-4000-8000-000000000000/mappings"
   },
   {
    "body_bytes": 43,
@@ -1138,13 +1138,13 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/migration/work-items/by-legacy/:sourceNamespace/:legacyId is in the resident route table",
    "route": "/api/v1/migration/work-items/by-legacy/:sourceNamespace/:legacyId",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/migration/work-items/by-legacy/00000000-0000-4000-8000-000000000000/00000000-0000-4000-8000-000000000000"
+   "url": "http://127.0.0.1:3611/api/v1/migration/work-items/by-legacy/00000000-0000-4000-8000-000000000000/00000000-0000-4000-8000-000000000000"
   },
   {
    "body_bytes": 43,
    "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
    "declared_by_resident_route_table": true,
-   "elapsed_ms": 2,
+   "elapsed_ms": 4,
    "evidence_kind": "resident_route_table+no_match_fingerprint",
    "executed": true,
    "id": "route-get-migration-work-items-search",
@@ -1154,7 +1154,7 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/migration/work-items/search is in the resident route table",
    "route": "/api/v1/migration/work-items/search",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/migration/work-items/search"
+   "url": "http://127.0.0.1:3611/api/v1/migration/work-items/search"
   },
   {
    "body_bytes": 43,
@@ -1170,7 +1170,7 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/projects/:projectId is in the resident route table",
    "route": "/api/v1/projects/:projectId",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/projects/00000000-0000-4000-8000-000000000000"
+   "url": "http://127.0.0.1:3611/api/v1/projects/00000000-0000-4000-8000-000000000000"
   },
   {
    "body_bytes": 43,
@@ -1186,13 +1186,13 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/projects/:projectId/milestones is in the resident route table",
    "route": "/api/v1/projects/:projectId/milestones",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/projects/00000000-0000-4000-8000-000000000000/milestones"
+   "url": "http://127.0.0.1:3611/api/v1/projects/00000000-0000-4000-8000-000000000000/milestones"
   },
   {
    "body_bytes": 43,
    "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
    "declared_by_resident_route_table": true,
-   "elapsed_ms": 1,
+   "elapsed_ms": 3,
    "evidence_kind": "resident_route_table+no_match_fingerprint",
    "executed": true,
    "id": "route-get-projects-projectid-sprints",
@@ -1202,13 +1202,13 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/projects/:projectId/sprints is in the resident route table",
    "route": "/api/v1/projects/:projectId/sprints",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/projects/00000000-0000-4000-8000-000000000000/sprints"
+   "url": "http://127.0.0.1:3611/api/v1/projects/00000000-0000-4000-8000-000000000000/sprints"
   },
   {
    "body_bytes": 43,
    "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
    "declared_by_resident_route_table": true,
-   "elapsed_ms": 1,
+   "elapsed_ms": 8,
    "evidence_kind": "resident_route_table+no_match_fingerprint",
    "executed": true,
    "id": "route-get-projects-tasks-taskid-git-refs",
@@ -1218,13 +1218,13 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/projects/tasks/:taskId/git-refs is in the resident route table",
    "route": "/api/v1/projects/tasks/:taskId/git-refs",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/projects/tasks/00000000-0000-4000-8000-000000000000/git-refs"
+   "url": "http://127.0.0.1:3611/api/v1/projects/tasks/00000000-0000-4000-8000-000000000000/git-refs"
   },
   {
    "body_bytes": 43,
    "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
    "declared_by_resident_route_table": true,
-   "elapsed_ms": 2,
+   "elapsed_ms": 4,
    "evidence_kind": "resident_route_table+no_match_fingerprint",
    "executed": true,
    "id": "route-get-projects-workspace-workspaceid",
@@ -1234,13 +1234,13 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/projects/workspace/:workspaceId is in the resident route table",
    "route": "/api/v1/projects/workspace/:workspaceId",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/projects/workspace/00000000-0000-4000-8000-000000000000"
+   "url": "http://127.0.0.1:3611/api/v1/projects/workspace/00000000-0000-4000-8000-000000000000"
   },
   {
    "body_bytes": 43,
    "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
    "declared_by_resident_route_table": true,
-   "elapsed_ms": 1,
+   "elapsed_ms": 7,
    "evidence_kind": "resident_route_table+no_match_fingerprint",
    "executed": true,
    "id": "route-get-sync-datarim-projectid",
@@ -1250,7 +1250,7 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/sync/datarim/:projectId is in the resident route table",
    "route": "/api/v1/sync/datarim/:projectId",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/sync/datarim/00000000-0000-4000-8000-000000000000"
+   "url": "http://127.0.0.1:3611/api/v1/sync/datarim/00000000-0000-4000-8000-000000000000"
   },
   {
    "body_bytes": 43,
@@ -1266,13 +1266,13 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/tasks is in the resident route table",
    "route": "/api/v1/tasks",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/tasks"
+   "url": "http://127.0.0.1:3611/api/v1/tasks"
   },
   {
    "body_bytes": 43,
    "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
    "declared_by_resident_route_table": true,
-   "elapsed_ms": 2,
+   "elapsed_ms": 1,
    "evidence_kind": "resident_route_table+no_match_fingerprint",
    "executed": true,
    "id": "route-get-tasks-taskid",
@@ -1282,13 +1282,13 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId is in the resident route table",
    "route": "/api/v1/tasks/:taskId",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/tasks/00000000-0000-4000-8000-000000000000"
+   "url": "http://127.0.0.1:3611/api/v1/tasks/00000000-0000-4000-8000-000000000000"
   },
   {
    "body_bytes": 43,
    "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
    "declared_by_resident_route_table": true,
-   "elapsed_ms": 2,
+   "elapsed_ms": 1,
    "evidence_kind": "resident_route_table+no_match_fingerprint",
    "executed": true,
    "id": "route-get-tasks-taskid-activity",
@@ -1298,13 +1298,13 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/activity is in the resident route table",
    "route": "/api/v1/tasks/:taskId/activity",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/tasks/00000000-0000-4000-8000-000000000000/activity"
+   "url": "http://127.0.0.1:3611/api/v1/tasks/00000000-0000-4000-8000-000000000000/activity"
   },
   {
    "body_bytes": 70,
    "body_sha256": "fee3d135d639945a7035a39d5a989494ef2425ff4ba8ee5050026530c057d075",
    "declared_by_resident_route_table": true,
-   "elapsed_ms": 2,
+   "elapsed_ms": 3,
    "evidence_kind": "resident_route_table+no_match_fingerprint",
    "executed": true,
    "id": "route-get-tasks-taskid-attempts-attemptid-solution-log-head",
@@ -1314,13 +1314,13 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/attempts/:attemptId/solution-log-head is in the resident route table",
    "route": "/api/v1/tasks/:taskId/attempts/:attemptId/solution-log-head",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/tasks/00000000-0000-4000-8000-000000000000/attempts/00000000-0000-4000-8000-000000000000/solution-log-head"
+   "url": "http://127.0.0.1:3611/api/v1/tasks/00000000-0000-4000-8000-000000000000/attempts/00000000-0000-4000-8000-000000000000/solution-log-head"
   },
   {
    "body_bytes": 43,
    "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
    "declared_by_resident_route_table": true,
-   "elapsed_ms": 1,
+   "elapsed_ms": 2,
    "evidence_kind": "resident_route_table+no_match_fingerprint",
    "executed": true,
    "id": "route-get-tasks-taskid-checklist",
@@ -1330,13 +1330,13 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/checklist is in the resident route table",
    "route": "/api/v1/tasks/:taskId/checklist",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/tasks/00000000-0000-4000-8000-000000000000/checklist"
+   "url": "http://127.0.0.1:3611/api/v1/tasks/00000000-0000-4000-8000-000000000000/checklist"
   },
   {
    "body_bytes": 43,
    "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
    "declared_by_resident_route_table": true,
-   "elapsed_ms": 5,
+   "elapsed_ms": 1,
    "evidence_kind": "resident_route_table+no_match_fingerprint",
    "executed": true,
    "id": "route-get-tasks-taskid-dependencies",
@@ -1346,7 +1346,7 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/dependencies is in the resident route table",
    "route": "/api/v1/tasks/:taskId/dependencies",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/tasks/00000000-0000-4000-8000-000000000000/dependencies"
+   "url": "http://127.0.0.1:3611/api/v1/tasks/00000000-0000-4000-8000-000000000000/dependencies"
   },
   {
    "body_bytes": 43,
@@ -1362,13 +1362,13 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/dependency-graph is in the resident route table",
    "route": "/api/v1/tasks/:taskId/dependency-graph",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/tasks/00000000-0000-4000-8000-000000000000/dependency-graph"
+   "url": "http://127.0.0.1:3611/api/v1/tasks/00000000-0000-4000-8000-000000000000/dependency-graph"
   },
   {
    "body_bytes": 43,
    "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
    "declared_by_resident_route_table": true,
-   "elapsed_ms": 2,
+   "elapsed_ms": 5,
    "evidence_kind": "resident_route_table+no_match_fingerprint",
    "executed": true,
    "id": "route-get-tasks-taskid-evidence",
@@ -1378,13 +1378,13 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/evidence is in the resident route table",
    "route": "/api/v1/tasks/:taskId/evidence",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/tasks/00000000-0000-4000-8000-000000000000/evidence"
+   "url": "http://127.0.0.1:3611/api/v1/tasks/00000000-0000-4000-8000-000000000000/evidence"
   },
   {
    "body_bytes": 70,
    "body_sha256": "fee3d135d639945a7035a39d5a989494ef2425ff4ba8ee5050026530c057d075",
    "declared_by_resident_route_table": true,
-   "elapsed_ms": 4,
+   "elapsed_ms": 1,
    "evidence_kind": "resident_route_table+no_match_fingerprint",
    "executed": true,
    "id": "route-get-tasks-taskid-field-changes",
@@ -1394,7 +1394,7 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/field-changes is in the resident route table",
    "route": "/api/v1/tasks/:taskId/field-changes",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/tasks/00000000-0000-4000-8000-000000000000/field-changes"
+   "url": "http://127.0.0.1:3611/api/v1/tasks/00000000-0000-4000-8000-000000000000/field-changes"
   },
   {
    "body_bytes": 43,
@@ -1410,7 +1410,7 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/readiness is in the resident route table",
    "route": "/api/v1/tasks/:taskId/readiness",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/tasks/00000000-0000-4000-8000-000000000000/readiness"
+   "url": "http://127.0.0.1:3611/api/v1/tasks/00000000-0000-4000-8000-000000000000/readiness"
   },
   {
    "body_bytes": 43,
@@ -1426,13 +1426,13 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/tasks/digest is in the resident route table",
    "route": "/api/v1/tasks/digest",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/tasks/digest"
+   "url": "http://127.0.0.1:3611/api/v1/tasks/digest"
   },
   {
    "body_bytes": 43,
    "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
    "declared_by_resident_route_table": true,
-   "elapsed_ms": 5,
+   "elapsed_ms": 3,
    "evidence_kind": "resident_route_table+no_match_fingerprint",
    "executed": true,
    "id": "route-get-tasks-project-projectid",
@@ -1442,13 +1442,13 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/tasks/project/:projectId is in the resident route table",
    "route": "/api/v1/tasks/project/:projectId",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/tasks/project/00000000-0000-4000-8000-000000000000"
+   "url": "http://127.0.0.1:3611/api/v1/tasks/project/00000000-0000-4000-8000-000000000000"
   },
   {
    "body_bytes": 43,
    "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
    "declared_by_resident_route_table": true,
-   "elapsed_ms": 3,
+   "elapsed_ms": 2,
    "evidence_kind": "resident_route_table+no_match_fingerprint",
    "executed": true,
    "id": "route-get-tasks-project-projectid-index",
@@ -1458,13 +1458,13 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/tasks/project/:projectId/index is in the resident route table",
    "route": "/api/v1/tasks/project/:projectId/index",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/tasks/project/00000000-0000-4000-8000-000000000000/index"
+   "url": "http://127.0.0.1:3611/api/v1/tasks/project/00000000-0000-4000-8000-000000000000/index"
   },
   {
    "body_bytes": 43,
    "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
    "declared_by_resident_route_table": true,
-   "elapsed_ms": 1,
+   "elapsed_ms": 2,
    "evidence_kind": "resident_route_table+no_match_fingerprint",
    "executed": true,
    "id": "route-get-tasks-project-projectid-staleness",
@@ -1474,13 +1474,13 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/tasks/project/:projectId/staleness is in the resident route table",
    "route": "/api/v1/tasks/project/:projectId/staleness",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/tasks/project/00000000-0000-4000-8000-000000000000/staleness"
+   "url": "http://127.0.0.1:3611/api/v1/tasks/project/00000000-0000-4000-8000-000000000000/staleness"
   },
   {
    "body_bytes": 43,
    "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
    "declared_by_resident_route_table": true,
-   "elapsed_ms": 3,
+   "elapsed_ms": 2,
    "evidence_kind": "resident_route_table+no_match_fingerprint",
    "executed": true,
    "id": "route-get-webhooks-workspace-workspaceid",
@@ -1490,13 +1490,13 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/webhooks/workspace/:workspaceId is in the resident route table",
    "route": "/api/v1/webhooks/workspace/:workspaceId",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/webhooks/workspace/00000000-0000-4000-8000-000000000000"
+   "url": "http://127.0.0.1:3611/api/v1/webhooks/workspace/00000000-0000-4000-8000-000000000000"
   },
   {
    "body_bytes": 43,
    "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
    "declared_by_resident_route_table": true,
-   "elapsed_ms": 3,
+   "elapsed_ms": 1,
    "evidence_kind": "resident_route_table+no_match_fingerprint",
    "executed": true,
    "id": "route-get-workspaces",
@@ -1506,13 +1506,13 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/workspaces is in the resident route table",
    "route": "/api/v1/workspaces",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/workspaces"
+   "url": "http://127.0.0.1:3611/api/v1/workspaces"
   },
   {
    "body_bytes": 43,
    "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
    "declared_by_resident_route_table": true,
-   "elapsed_ms": 2,
+   "elapsed_ms": 1,
    "evidence_kind": "resident_route_table+no_match_fingerprint",
    "executed": true,
    "id": "route-get-workspaces-workspaceid",
@@ -1522,13 +1522,13 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/workspaces/:workspaceId is in the resident route table",
    "route": "/api/v1/workspaces/:workspaceId",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/workspaces/00000000-0000-4000-8000-000000000000"
+   "url": "http://127.0.0.1:3611/api/v1/workspaces/00000000-0000-4000-8000-000000000000"
   },
   {
    "body_bytes": 43,
    "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
    "declared_by_resident_route_table": true,
-   "elapsed_ms": 2,
+   "elapsed_ms": 4,
    "evidence_kind": "resident_route_table+no_match_fingerprint",
    "executed": true,
    "id": "route-get-workspaces-workspaceid-members",
@@ -1538,7 +1538,7 @@
    "reason": "status 401 (not 404/405/5xx) and GET /api/v1/workspaces/:workspaceId/members is in the resident route table",
    "route": "/api/v1/workspaces/:workspaceId/members",
    "status": 401,
-   "url": "http://127.0.0.1:35211/api/v1/workspaces/00000000-0000-4000-8000-000000000000/members"
+   "url": "http://127.0.0.1:3611/api/v1/workspaces/00000000-0000-4000-8000-000000000000/members"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1553,7 +1553,7 @@
    "reason": "PATCH /api/v1/tasks/:taskId/checklist/:itemId is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/tasks/:taskId/checklist/:itemId",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1568,7 +1568,7 @@
    "reason": "PATCH /api/v1/tasks/:taskId/status is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/tasks/:taskId/status",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1583,7 +1583,7 @@
    "reason": "PATCH /api/v1/webhooks/:webhookId/activate is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/webhooks/:webhookId/activate",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1598,7 +1598,7 @@
    "reason": "PATCH /api/v1/webhooks/:webhookId/deactivate is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/webhooks/:webhookId/deactivate",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1613,7 +1613,7 @@
    "reason": "PATCH /api/v1/workspaces/:workspaceId/members/:userId/role is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/workspaces/:workspaceId/members/:userId/role",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1628,7 +1628,7 @@
    "reason": "POST /api/v1/agents is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/agents",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1643,7 +1643,7 @@
    "reason": "POST /api/v1/agents/:agentId/keys is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/agents/:agentId/keys",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1658,7 +1658,7 @@
    "reason": "POST /api/v1/agents/keys/:keyId/rotate is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/agents/keys/:keyId/rotate",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1673,7 +1673,7 @@
    "reason": "POST /api/v1/agents/keys/self/revoke is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/agents/keys/self/revoke",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1688,7 +1688,7 @@
    "reason": "POST /api/v1/agents/tasks/:taskId/assign is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/agents/tasks/:taskId/assign",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1703,7 +1703,7 @@
    "reason": "POST /api/v1/auth/telegram is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/auth/telegram",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1718,7 +1718,7 @@
    "reason": "POST /api/v1/migration/batches is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/migration/batches",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1733,7 +1733,7 @@
    "reason": "POST /api/v1/migration/batches/:batchId/commit is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/migration/batches/:batchId/commit",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1748,7 +1748,7 @@
    "reason": "POST /api/v1/migration/identities/:identityId/decisions is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/migration/identities/:identityId/decisions",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1763,7 +1763,7 @@
    "reason": "POST /api/v1/migration/work-items is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/migration/work-items",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1778,7 +1778,7 @@
    "reason": "POST /api/v1/migration/work-items/:taskId/transitions is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/migration/work-items/:taskId/transitions",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1793,7 +1793,7 @@
    "reason": "POST /api/v1/milestones is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/milestones",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1808,7 +1808,7 @@
    "reason": "POST /api/v1/projects is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/projects",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1823,7 +1823,7 @@
    "reason": "POST /api/v1/projects/git-refs is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/projects/git-refs",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1838,7 +1838,7 @@
    "reason": "POST /api/v1/sprints is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/sprints",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1853,7 +1853,7 @@
    "reason": "POST /api/v1/sync/datarim/:projectId/import is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/sync/datarim/:projectId/import",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1868,7 +1868,7 @@
    "reason": "POST /api/v1/tasks is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/tasks",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1883,7 +1883,7 @@
    "reason": "POST /api/v1/tasks/:taskId/attempts/:attemptId/solution-log-heads is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/tasks/:taskId/attempts/:attemptId/solution-log-heads",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1898,7 +1898,7 @@
    "reason": "POST /api/v1/tasks/:taskId/checklist is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/tasks/:taskId/checklist",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1913,7 +1913,7 @@
    "reason": "POST /api/v1/tasks/:taskId/comments is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/tasks/:taskId/comments",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1928,7 +1928,7 @@
    "reason": "POST /api/v1/tasks/:taskId/dependencies is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/tasks/:taskId/dependencies",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1943,7 +1943,7 @@
    "reason": "POST /api/v1/tasks/:taskId/evidence is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/tasks/:taskId/evidence",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1958,7 +1958,7 @@
    "reason": "POST /api/v1/tasks/:taskId/field-ack is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/tasks/:taskId/field-ack",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1973,7 +1973,7 @@
    "reason": "POST /api/v1/tasks/:taskId/redactions is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/tasks/:taskId/redactions",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -1988,7 +1988,7 @@
    "reason": "POST /api/v1/webhooks is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/webhooks",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -2003,7 +2003,7 @@
    "reason": "POST /api/v1/workspaces is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/workspaces",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   },
   {
    "declared_by_resident_route_table": true,
@@ -2018,7 +2018,7 @@
    "reason": "POST /api/v1/workspaces/:workspaceId/members/:userId is in the resident route table (not called: not a safe verb)",
    "route": "/api/v1/workspaces/:workspaceId/members/:userId",
    "status": 200,
-   "url": "http://127.0.0.1:35211/health/routes"
+   "url": "http://127.0.0.1:3611/health/routes"
   }
  ],
  "producer": {
@@ -2028,28 +2028,29 @@
  "read_only": true,
  "resident_route_table": {
   "build": {
-   "sha": "4276801155396612e09518b530bb65d9a4b63b99",
-   "source": "MUNERAL_BUILD_SHA"
+   "problem": "MUNERAL_BUILD_SHA is not set, so this process cannot name the commit it was built from. It is baked into the image from the build arg fed by docker-compose.prod.yml; an instance started by hand from a working tree has no value to report. Read this as not_measured, never as a pass.",
+   "sha": null,
+   "source": null
   },
   "routes": 77,
-  "sha256": "d54183c18fbb22534549c54398cb9bc7bfdb24d08e26a2eda81d5a8a0e8741a0",
+  "sha256": "d1afc51ea84f88fa51757a9e0cdbb7447d594e9965677ef30d005d05b615a281",
   "status": 200,
-  "url": "http://127.0.0.1:35211/health/routes"
+  "url": "http://127.0.0.1:3611/health/routes"
  },
- "resident_version": "0.4.6+4276801155396612e09518b530bb65d9a4b63b99",
+ "resident_version": "0.4.6",
  "rules": [
   "C3 a probe that could not run is not_measured, never verified",
   "C4 read-only: GET only, no body, no credential; a non-GET route is judged by the resident route table and never called"
  ],
  "schema": "CanaryResult/v1",
  "subject": {
-  "commit": "4276801155396612e09518b530bb65d9a4b63b99",
+  "commit": "2ab4b87fb69b5e639a73aae2d5afd2247816cdbf",
   "evidence": {
    "path": "result.source-evidence.json",
-   "sha256": "90996555819f7683946d342423eb7ba91d7e9a502781b4bda9f271e0561e966c",
+   "sha256": "66583a76235d4b87a6469f14ac8fda0ed3f1bd4fb203ffbe74243658e85fcf4b",
    "source_field": "commit"
   },
   "schema": "GitCanarySubject/v1",
-  "tree": "ace383f5ad138ea5600f51deb860f098e6429c87"
+  "tree": "2c5ffa2bb53991ccb749d4ea678412670082e01b"
  }
 }
