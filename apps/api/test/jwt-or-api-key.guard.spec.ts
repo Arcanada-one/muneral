@@ -1,6 +1,13 @@
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { JwtOrApiKeyGuard } from '../src/auth/guards/jwt-or-api-key.guard.js';
 import { ApiKeyGuard } from '../src/auth/guards/api-key.guard.js';
+import { TaskReadApiKeyHeader } from '../src/auth/task-read-api-key-header.js';
+
+class TaskReadFixture {
+  @TaskReadApiKeyHeader()
+  read() {}
+}
+function unmarkedHandler() {}
 // ESM has no injected globals, so `jest` must be imported for the RUNTIME.
 // Its type, though, comes from @types/jest (already in tsconfig `types`),
 // which is what the 339 existing jest.fn() call sites are written against —
@@ -10,10 +17,13 @@ import { ApiKeyGuard } from '../src/auth/guards/api-key.guard.js';
 import { jest as _jestRuntime } from '@jest/globals';
 const jest = _jestRuntime as unknown as typeof globalThis.jest;
 
-function makeContext(authHeader?: string): ExecutionContext {
+function makeContext(authHeader?: string, marked = false, rawHeaders?: string[]): ExecutionContext {
   return {
+    getHandler: () => marked ? TaskReadFixture.prototype.read : unmarkedHandler,
     switchToHttp: () => ({
       getRequest: () => ({
+        method: 'GET',
+        rawHeaders: rawHeaders ?? (authHeader ? ['Authorization', authHeader] : []),
         headers: authHeader ? { authorization: authHeader } : {},
       }),
     }),
@@ -71,4 +81,38 @@ describe('JwtOrApiKeyGuard', () => {
     expect(superCanActivate).toHaveBeenCalledWith(ctx);
     superCanActivate.mockRestore();
   });
+  it.each([false, true])('preserves a single JWT on a task handler marked=%s', (marked) => {
+    const ctx = makeContext('Bearer some.jwt.token', marked);
+    const passport = jest.spyOn(Object.getPrototypeOf(Object.getPrototypeOf(guard)), 'canActivate')
+      .mockReturnValue(true);
+    try {
+      expect(guard.canActivate(ctx)).toBe(true);
+      expect(passport).toHaveBeenCalledWith(ctx);
+      expect(apiKeyGuard.canActivate).not.toHaveBeenCalled();
+    } finally { passport.mockRestore(); }
+  });
+
+  it('refuses repeated JWT Authorization before Passport on the marked task GET', () => {
+    const ctx = makeContext('Bearer some.jwt.token', true,
+      ['Authorization', 'Bearer some.jwt.token', 'authorization', 'Bearer second.jwt.token']);
+    const passport = jest.spyOn(Object.getPrototypeOf(Object.getPrototypeOf(guard)), 'canActivate')
+      .mockReturnValue(true);
+    try {
+      expect(() => guard.canActivate(ctx)).toThrow(UnauthorizedException);
+      expect(passport).not.toHaveBeenCalled();
+      expect(apiKeyGuard.canActivate).not.toHaveBeenCalled();
+    } finally { passport.mockRestore(); }
+  });
+
+  it('preserves existing JWT dispatch on an unmarked handler with repeated Authorization', () => {
+    const ctx = makeContext('Bearer some.jwt.token', false,
+      ['Authorization', 'Bearer some.jwt.token', 'authorization', 'Bearer second.jwt.token']);
+    const passport = jest.spyOn(Object.getPrototypeOf(Object.getPrototypeOf(guard)), 'canActivate')
+      .mockReturnValue(true);
+    try {
+      expect(guard.canActivate(ctx)).toBe(true);
+      expect(passport).toHaveBeenCalledWith(ctx);
+    } finally { passport.mockRestore(); }
+  });
+
 });
