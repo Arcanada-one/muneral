@@ -1,3 +1,4 @@
+import { humanTaskWhere } from '../auth/human-task-visibility.js';
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateProjectDto } from './dto/create-project.dto.js';
@@ -83,9 +84,9 @@ export class ProjectsService {
     await this.prisma.taskGitRef.delete({ where: { id: refId } });
   }
 
-  async getGitRefs(taskId: string) {
+  async getGitRefs(taskId: string, humanUserId?: string) {
     return this.prisma.taskGitRef.findMany({
-      where: { taskId },
+      where: { taskId, ...(humanUserId ? { task: humanTaskWhere(humanUserId) } : {}) },
       orderBy: { createdAt: 'desc' },
     });
   }
