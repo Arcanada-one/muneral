@@ -260,7 +260,10 @@ export class AgentTaskScopeGuard implements CanActivate {
         const taskId = this.paramOf(req, 'taskId');
         if (!taskId) throw new ForbiddenException('No task in scope for this key.');
         await this.assertCreatorOrExecutorOfTask(agent, taskId);
-        break;
+        // Carry authenticated workspace custody for services that recheck this
+        // creator/executor predicate atomically. This grants no new operation.
+        req.agentScope = { agentId: agent.id, kind, workspaceId: agent.workspaceId };
+        return true;
       }
       case 'project-write': {
         const projectId = this.bodyFieldOf(req, 'projectId');

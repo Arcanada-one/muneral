@@ -208,8 +208,9 @@ export class TasksController {
       `not-in-body; see /tasks/${taskId}/readiness`,
     );
 
-    // Strong ETag: SHA-256 of sorted field:version pairs
-    const etag = await this.fieldChangesService.computeTaskEtag(taskId);
+    // Bind the validator to contract/project custody in this exact response row.
+    // Pointer CAS does not update the ordinary field-state versions.
+    const etag = await this.fieldChangesService.computeTaskEtag(taskId, task.contractDigest, task.projectId);
     if (etag) {
       const etagValue = `"${etag}"`;
       res.setHeader('ETag', etagValue);
