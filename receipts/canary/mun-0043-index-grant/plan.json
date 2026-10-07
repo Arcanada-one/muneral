@@ -6,11 +6,11 @@
  "read_only": false,
  "subject": {
   "schema": "GitCanarySubject/v1",
-  "commit": "2ab4b87fb69b5e639a73aae2d5afd2247816cdbf",
-  "tree": "2c5ffa2bb53991ccb749d4ea678412670082e01b",
+  "commit": "df82aba3b1d25de78df845e9b2cd7c979a507635",
+  "tree": "dfaac0342262f11d0f2ba13a76a4b45b35e75ec8",
   "evidence": {
    "path": "source-evidence.json",
-   "sha256": "addfe5a6897f75e18bbf95ea12f2899a7f358dfc25da4d542df3cde87414ebaa",
+   "sha256": "bf48a1bc92645352dbad5e1b715e9f10d139bf3078c621c968fb16e4b29f2792",
    "source_field": "commit"
   }
  },
