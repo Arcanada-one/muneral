@@ -5,7 +5,7 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "admitted_with_exemptions"
  },
- "captured_at_utc": "2026-10-07T19:33:45Z",
+ "captured_at_utc": "2026-10-07T20:43:46Z",
  "change_set": {
   "base": "5b67dea437be93b988f50b3d312879798dc79f89",
   "files": [
@@ -86,12 +86,69 @@
    },
    {
     "kind": "test",
+    "node_id": "code_unit:apps/api/test/jwt-or-api-key.guard.spec.ts",
+    "node_ids": [
+     "code_unit:apps/api/test/jwt-or-api-key.guard.spec.ts"
+    ],
+    "path": "apps/api/test/jwt-or-api-key.guard.spec.ts",
+    "status": "M"
+   },
+   {
+    "kind": "test",
     "node_id": "code_unit:apps/api/test/tasks-agent-scope.e2e.spec.ts",
     "node_ids": [
      "code_unit:apps/api/test/tasks-agent-scope.e2e.spec.ts"
     ],
     "path": "apps/api/test/tasks-agent-scope.e2e.spec.ts",
     "status": "M"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/assigned-task-read-221-jwt-20261007/positive/plan.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/assigned-task-read-221-jwt-20261007/positive/result.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/assigned-task-read-221-jwt-20261007/positive/source-evidence.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/assigned-task-read-221-jwt-20261007/routes/plan.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/assigned-task-read-221-jwt-20261007/routes/result.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/assigned-task-read-221-jwt-20261007/routes/route-plan.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/assigned-task-read-221-jwt-20261007/routes/route-result.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/assigned-task-read-221-jwt-20261007/routes/source-evidence.json",
+    "status": "A"
    },
    {
     "kind": "receipt",
@@ -140,9 +197,18 @@
     "new": true,
     "path": "receipts/canary/assigned-task-read-221/routes/source-evidence.json",
     "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/assigned-task-read-221-20261007.json",
+    "node_ids": [
+     "receipt:receipts/graph/assigned-task-read-221-20261007.json"
+    ],
+    "path": "receipts/graph/assigned-task-read-221-20261007.json",
+    "status": "A"
    }
   ],
-  "head": "934f0564b42eaba4b04e8c2f63640d0c232d9a6a",
+  "head": "24905e3b68c35086bd9708e58a44d2f09c4a1232",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -152,7 +218,7 @@
    "entity": "code_unit:apps/web/__tests__/kanban-board.test.ts",
    "expires_at_utc": "2026-11-04T00:00:00Z",
    "owner": "95df19c8-2483-48e1-b68e-b191a89a849c / MUNERAL-IMPORT",
-   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard52/52 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
+   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard56/56 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
    "ref": "native-api-and-route-canaries"
   },
   {
@@ -160,7 +226,7 @@
    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
    "expires_at_utc": "2026-11-04T00:00:00Z",
    "owner": "95df19c8-2483-48e1-b68e-b191a89a849c / MUNERAL-IMPORT",
-   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard52/52 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
+   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard56/56 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
    "ref": "native-api-and-route-canaries"
   },
   {
@@ -168,7 +234,7 @@
    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
    "expires_at_utc": "2026-11-04T00:00:00Z",
    "owner": "95df19c8-2483-48e1-b68e-b191a89a849c / MUNERAL-IMPORT",
-   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard52/52 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
+   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard56/56 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
    "ref": "native-api-and-route-canaries"
   },
   {
@@ -176,7 +242,7 @@
    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
    "expires_at_utc": "2026-11-04T00:00:00Z",
    "owner": "95df19c8-2483-48e1-b68e-b191a89a849c / MUNERAL-IMPORT",
-   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard52/52 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
+   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard56/56 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
    "ref": "native-api-and-route-canaries"
   },
   {
@@ -184,7 +250,7 @@
    "entity": "code_unit:apps/web/components/dashboard/BlockersList.tsx",
    "expires_at_utc": "2026-11-04T00:00:00Z",
    "owner": "95df19c8-2483-48e1-b68e-b191a89a849c / MUNERAL-IMPORT",
-   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard52/52 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
+   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard56/56 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
    "ref": "native-api-and-route-canaries"
   },
   {
@@ -192,7 +258,7 @@
    "entity": "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
    "expires_at_utc": "2026-11-04T00:00:00Z",
    "owner": "95df19c8-2483-48e1-b68e-b191a89a849c / MUNERAL-IMPORT",
-   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard52/52 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
+   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard56/56 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
    "ref": "native-api-and-route-canaries"
   },
   {
@@ -200,7 +266,7 @@
    "entity": "code_unit:apps/web/components/kanban/KanbanCard.tsx",
    "expires_at_utc": "2026-11-04T00:00:00Z",
    "owner": "95df19c8-2483-48e1-b68e-b191a89a849c / MUNERAL-IMPORT",
-   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard52/52 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
+   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard56/56 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
    "ref": "native-api-and-route-canaries"
   },
   {
@@ -208,7 +274,7 @@
    "entity": "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
    "expires_at_utc": "2026-11-04T00:00:00Z",
    "owner": "95df19c8-2483-48e1-b68e-b191a89a849c / MUNERAL-IMPORT",
-   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard52/52 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
+   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard56/56 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
    "ref": "native-api-and-route-canaries"
   },
   {
@@ -216,7 +282,7 @@
    "entity": "code_unit:apps/web/components/task/AuditLog.tsx",
    "expires_at_utc": "2026-11-04T00:00:00Z",
    "owner": "95df19c8-2483-48e1-b68e-b191a89a849c / MUNERAL-IMPORT",
-   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard52/52 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
+   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard56/56 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
    "ref": "native-api-and-route-canaries"
   },
   {
@@ -224,7 +290,7 @@
    "entity": "code_unit:apps/web/components/task/TaskChecklist.tsx",
    "expires_at_utc": "2026-11-04T00:00:00Z",
    "owner": "95df19c8-2483-48e1-b68e-b191a89a849c / MUNERAL-IMPORT",
-   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard52/52 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
+   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard56/56 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
    "ref": "native-api-and-route-canaries"
   },
   {
@@ -232,7 +298,7 @@
    "entity": "code_unit:apps/web/components/task/TaskDependencies.tsx",
    "expires_at_utc": "2026-11-04T00:00:00Z",
    "owner": "95df19c8-2483-48e1-b68e-b191a89a849c / MUNERAL-IMPORT",
-   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard52/52 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
+   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard56/56 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
    "ref": "native-api-and-route-canaries"
   },
   {
@@ -240,7 +306,7 @@
    "entity": "code_unit:apps/web/components/task/TaskDetail.tsx",
    "expires_at_utc": "2026-11-04T00:00:00Z",
    "owner": "95df19c8-2483-48e1-b68e-b191a89a849c / MUNERAL-IMPORT",
-   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard52/52 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
+   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard56/56 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
    "ref": "native-api-and-route-canaries"
   },
   {
@@ -248,7 +314,7 @@
    "entity": "code_unit:apps/web/lib/api/tasks.ts",
    "expires_at_utc": "2026-11-04T00:00:00Z",
    "owner": "95df19c8-2483-48e1-b68e-b191a89a849c / MUNERAL-IMPORT",
-   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard52/52 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
+   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard56/56 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
    "ref": "native-api-and-route-canaries"
   },
   {
@@ -256,7 +322,7 @@
    "entity": "code_unit:apps/web/lib/api/workspaces.ts",
    "expires_at_utc": "2026-11-04T00:00:00Z",
    "owner": "95df19c8-2483-48e1-b68e-b191a89a849c / MUNERAL-IMPORT",
-   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard52/52 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
+   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard56/56 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
    "ref": "native-api-and-route-canaries"
   },
   {
@@ -264,7 +330,7 @@
    "entity": "deployable_unit:apps/web",
    "expires_at_utc": "2026-11-04T00:00:00Z",
    "owner": "95df19c8-2483-48e1-b68e-b191a89a849c / MUNERAL-IMPORT",
-   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard52/52 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
+   "reason": "Unchanged browser consumer reached through inferred HTTP boundary. API/type/test projects compile with zero errors; actual source-bound disposable PostgreSQL task HTTP+guard56/56 pass,62 authenticated alias route-denials and62 unauthenticated401 dispatches pass under native canaries. This covers authentication selection and exact task read/denial semantics, not browser session/cache/render interactions. Those remain NOT_MEASURED and do not authorize I05 implementation or browser acceptance. Reverse if a valid Bearer/JWT consumer regresses or credential/tenant boundaries widen.",
    "ref": "native-api-and-route-canaries"
   }
  ],
@@ -272,18 +338,18 @@
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
   "graph_digest": "sha256:016f1e1a336f724ffade4345f76a7074031472318d11308bc88f00cfb67e2521",
-  "path": "/home/dev/aup/import-audit-work/runs/assigned-read-221-record-verifier-out/graph-5b67dea437be.json",
+  "path": "/home/dev/aup/import-audit-work/runs/assigned-read-jwt-record-verify/verifier-out/graph-5b67dea437be.json",
   "source_commit": "5b67dea437be93b988f50b3d312879798dc79f89"
  },
  "head_graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:5e1ee408033a164e71b0287a1b079d1c1b904d57671f8c7fc1e8ad7bfaf94589",
-  "path": "/home/dev/aup/import-audit-work/runs/assigned-read-221-record-verifier-out/graph-head-934f0564b42e.json",
-  "source_commit": "934f0564b42eaba4b04e8c2f63640d0c232d9a6a",
+  "graph_digest": "sha256:3cc15d273b613fc6814ea9acfbfb102d24730017084dc892495ec33ec3ad4045",
+  "path": "/home/dev/aup/import-audit-work/runs/assigned-read-jwt-record-verify/verifier-out/graph-head-24905e3b68c3.json",
+  "source_commit": "24905e3b68c35086bd9708e58a44d2f09c4a1232",
   "staleness": {
-   "checked_at_utc": "2026-10-07T19:34:17Z",
-   "checked_nodes": 432,
+   "checked_at_utc": "2026-10-07T20:44:16Z",
+   "checked_nodes": 433,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -1036,26 +1102,6 @@
       "from": "code_unit:apps/api/test/field-changes.e2e.spec.ts",
       "provenance": "deterministic",
       "to": "code_unit:apps/api/src/auth/auth.module.ts",
-      "via": "relative"
-     }
-    ],
-    "revisions": [
-     "base",
-     "head"
-    ],
-    "verifier_hint": "type-check / compile of the importer"
-   },
-   {
-    "boundary": "intra_unit",
-    "depth": 1,
-    "entity": "code_unit:apps/api/test/jwt-or-api-key.guard.spec.ts",
-    "node_type": "code_unit",
-    "path": [
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/test/jwt-or-api-key.guard.spec.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/api-key.guard.ts",
       "via": "relative"
      }
     ],
@@ -3893,19 +3939,20 @@
   ],
   "max_depth": 3,
   "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
-  "total": 148
+  "total": 147
  },
  "notes": [
   "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
   "profile: (auto-detected); baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none",
-  "exemptions: 15 attached from /home/dev/aup/import-audit-work/runs/assigned-read-221-browser-exemptions.json",
+  "exemptions: 15 attached from /home/dev/aup/import-audit-work/runs/assigned-read-jwt-browser-exemptions.json",
   "A2-353: `canary` discharged for 1 test code_unit(s) — a canary lists live-contour entities and can never name a test file; their other verifiers (config_schema, type_check, fitness) still apply: code_unit:apps/api/test/tasks-agent-scope.e2e.spec.ts"
  ],
  "producer": {
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261007T193345Z-934f0564",
+ "receipt_id": "car-verify-20261007T204346Z-24905e3b",
+ "receipt_path": "receipts/graph/assigned-task-read-221-20261007.json",
  "repo": {
   "name": "Arcanada-one/muneral",
   "path": "/home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007"
@@ -4180,6 +4227,7 @@
    "receipt:receipts/graph/A2-394-reinstate-digest-grant.json",
    "receipt:receipts/graph/a2-304-dependabot-group.json",
    "receipt:receipts/graph/a2-320-web-eslint10.json",
+   "receipt:receipts/graph/assigned-task-read-221-20261007.json",
    "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json",
    "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
    "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
@@ -4275,7 +4323,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-07T19:34:16Z",
+  "checked_at_utc": "2026-10-07T20:44:16Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -4390,6 +4438,21 @@
    "path": "receipts/graph/a2-320-web-eslint10.json",
    "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
    "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": null,
+    "head": "sha256:e156d56948664710b68a8f7bb351f36f09e77e1ff1eaf68de2138a2ab6798af6"
+   },
+   "entity": "receipt:receipts/graph/assigned-task-read-221-20261007.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/assigned-task-read-221-20261007.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it; superseded by construction — this run re-issues the receipt at receipts/graph/assigned-task-read-221-20261007.json for work item 95df19c8-2483-48e1-b68e-b191a89a849c",
+   "rule": "DEC-AUP-0035",
+   "superseded": {
+    "receipt_path": "receipts/graph/assigned-task-read-221-20261007.json",
+    "work_item": "95df19c8-2483-48e1-b68e-b191a89a849c"
+   }
   },
   {
    "content_hash": {
@@ -4690,13 +4753,13 @@
   }
  ],
  "tree": {
-  "commit": "934f0564b42eaba4b04e8c2f63640d0c232d9a6a",
+  "commit": "24905e3b68c35086bd9708e58a44d2f09c4a1232",
   "dirty": false
  },
  "verdicts": [
   {
    "entity": "code_unit:apps/api/src/agents/agents.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation (1 frozen: FR-01); v-canary-2: canary assigned-read-route-process (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation (1 frozen: FR-01); v-canary-2: canary assigned-read-route-process-jwt-correction (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
    "verdict": "verified",
    "verifier_ids": [
     "v-canary-2",
@@ -4799,7 +4862,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/migration/migration.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 4 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-2: canary assigned-read-route-process (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 4 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-2: canary assigned-read-route-process-jwt-correction (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
    "verdict": "verified",
    "verifier_ids": [
     "v-canary-2",
@@ -4828,7 +4891,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/projects/projects.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-2: canary assigned-read-route-process (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-2: canary assigned-read-route-process-jwt-correction (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
    "verdict": "verified",
    "verifier_ids": [
     "v-canary-2",
@@ -4857,7 +4920,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/solution-log-head/solution-log-head.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation (1 frozen: FR-01); v-canary-2: canary assigned-read-route-process (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation (1 frozen: FR-01); v-canary-2: canary assigned-read-route-process-jwt-correction (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
    "verdict": "verified",
    "verifier_ids": [
     "v-canary-2",
@@ -4877,7 +4940,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/sync/sync.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation; v-canary-2: canary assigned-read-route-process (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation; v-canary-2: canary assigned-read-route-process-jwt-correction (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
    "verdict": "verified",
    "verifier_ids": [
     "v-canary-2",
@@ -4897,7 +4960,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation (1 frozen: FR-01); v-canary-2: canary assigned-read-route-process (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation (1 frozen: FR-01); v-canary-2: canary assigned-read-route-process-jwt-correction (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
    "verdict": "verified",
    "verifier_ids": [
     "v-canary-2",
@@ -4908,7 +4971,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-2: canary assigned-read-route-process (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-2: canary assigned-read-route-process-jwt-correction (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
    "verdict": "verified",
    "verifier_ids": [
     "v-canary-2",
@@ -4928,7 +4991,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/tasks.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 9 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-1: canary assigned-read-positive (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 9 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-1: canary assigned-read-positive-jwt-correction (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
    "verdict": "verified",
    "verifier_ids": [
     "v-canary-1",
@@ -4957,7 +5020,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation (1 frozen: FR-01); v-canary-2: canary assigned-read-route-process (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation (1 frozen: FR-01); v-canary-2: canary assigned-read-route-process-jwt-correction (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
    "verdict": "verified",
    "verifier_ids": [
     "v-canary-2",
@@ -6135,8 +6198,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007/apps/api/node_modules/.bin/tsc -p /home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/assigned-read-221-record-verifier-out/type-check-oai0t4h6/check.tsbuildinfo --listFiles",
-   "duration_s": 4.47,
+   "command": "/home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007/apps/api/node_modules/.bin/tsc -p /home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/assigned-read-jwt-record-verify/verifier-out/type-check-ywlkw5a2/check.tsbuildinfo --listFiles",
+   "duration_s": 4.74,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -6328,13 +6391,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-221-record-verifier-out/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-10-07T19:34:22Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-jwt-record-verify/verifier-out/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-10-07T20:44:21Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1452 files listed"
   },
   {
-   "command": "/home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007/apps/api/node_modules/.bin/tsc -p /home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/assigned-read-221-record-verifier-out/type-check-ubhw67w6/check.tsbuildinfo --listFiles",
-   "duration_s": 7.37,
+   "command": "/home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007/apps/api/node_modules/.bin/tsc -p /home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/assigned-read-jwt-record-verify/verifier-out/type-check-lv3l02fb/check.tsbuildinfo --listFiles",
+   "duration_s": 7.55,
    "entities": [
     "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts",
     "code_unit:apps/api/test/agent-project-dependencies.e2e.spec.ts",
@@ -6390,13 +6453,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-221-record-verifier-out/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-10-07T19:34:27Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-jwt-record-verify/verifier-out/v-type-check-apps-api-tsconfig-test.txt",
+   "started_at_utc": "2026-10-07T20:44:27Z",
    "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1613 files listed"
   },
   {
-   "command": "/home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007/apps/web/node_modules/.bin/tsc -p /home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/assigned-read-221-record-verifier-out/type-check-i0lhgf14/check.tsbuildinfo --listFiles",
-   "duration_s": 5.51,
+   "command": "/home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007/apps/web/node_modules/.bin/tsc -p /home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/assigned-read-jwt-record-verify/verifier-out/type-check-_tudd2bl/check.tsbuildinfo --listFiles",
+   "duration_s": 5.85,
    "entities": [
     "code_unit:apps/web/__tests__/kanban-board.test.ts",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
@@ -6434,13 +6497,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-221-record-verifier-out/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-10-07T19:34:34Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-jwt-record-verify/verifier-out/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-10-07T20:44:35Z",
    "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1296 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=5b67dea437be, head=934f0564b42e, graph=head graph)",
-   "duration_s": 7.65,
+   "command": "tools/graph/contract_diff.py.run_diff(base=5b67dea437be, head=24905e3b68c3, graph=head graph)",
+   "duration_s": 5.37,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.service.ts",
@@ -6624,8 +6687,8 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-221-record-verifier-out/v-contract-diff.json",
-   "started_at_utc": "2026-10-07T19:34:40Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-jwt-record-verify/verifier-out/v-contract-diff.json",
+   "started_at_utc": "2026-10-07T20:44:41Z",
    "summary": "48→48 contracts, breaking 0, edges {'verified': 153}"
   },
   {
@@ -6762,13 +6825,13 @@
    "exit_code": 0,
    "id": "v-route-config",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-221-record-verifier-out/v-route-config.txt",
-   "started_at_utc": "2026-10-07T19:34:48Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-jwt-record-verify/verifier-out/v-route-config.txt",
+   "started_at_utc": "2026-10-07T20:44:46Z",
    "summary": "62 route(s), 0 failed"
   },
   {
    "command": "verify.py config_schema: keys read at head ⊆ declared keys",
-   "duration_s": 0.52,
+   "duration_s": 0.51,
    "entities": [
     "code_unit:apps/api/test/tasks-agent-scope.e2e.spec.ts"
    ],
@@ -6778,13 +6841,13 @@
    "exit_code": 0,
    "id": "v-config-schema",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-221-record-verifier-out/v-config-schema.json",
-   "started_at_utc": "2026-10-07T19:34:48Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-jwt-record-verify/verifier-out/v-config-schema.json",
+   "started_at_utc": "2026-10-07T20:44:46Z",
    "summary": "2 source(s), 0 new / 3 frozen undeclared reads, 0 failed; 4 vendored file(s) not attributed to this repository (Arcanada-one/arcanada-universal-program)"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.15,
+   "duration_s": 0.14,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -6928,8 +6991,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-221-record-verifier-out/v-fitness.json",
-   "started_at_utc": "2026-10-07T19:34:48Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-jwt-record-verify/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-10-07T20:44:47Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -6962,13 +7025,13 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-221-record-verifier-out/v-doc-reference.txt",
-   "started_at_utc": "2026-10-07T19:34:49Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-jwt-record-verify/verifier-out/v-doc-reference.txt",
+   "started_at_utc": "2026-10-07T20:44:47Z",
    "summary": "10 document(s), 0 failed"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.57,
+   "duration_s": 0.58,
    "entities": [
     "code_unit:apps/api/src/tasks/tasks.controller.ts"
    ],
@@ -6978,13 +7041,13 @@
    "exit_code": 0,
    "id": "v-canary-1",
    "kind": "canary",
-   "output_ref": "receipts/canary/assigned-task-read-221/positive/result.json",
-   "started_at_utc": "2026-10-07T19:34:49Z",
-   "summary": "receipts/canary/assigned-task-read-221/positive/result.json: 1 verified / 0 failed / 0 not_measured"
+   "output_ref": "receipts/canary/assigned-task-read-221-jwt-20261007/positive/result.json",
+   "started_at_utc": "2026-10-07T20:44:47Z",
+   "summary": "receipts/canary/assigned-task-read-221-jwt-20261007/positive/result.json: 1 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.57,
+   "duration_s": 0.58,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/migration/migration.controller.ts",
@@ -7010,13 +7073,13 @@
    "exit_code": 0,
    "id": "v-canary-2",
    "kind": "canary",
-   "output_ref": "receipts/canary/assigned-task-read-221/routes/result.json",
-   "started_at_utc": "2026-10-07T19:34:49Z",
-   "summary": "receipts/canary/assigned-task-read-221/routes/result.json: 9 verified / 0 failed / 0 not_measured"
+   "output_ref": "receipts/canary/assigned-task-read-221-jwt-20261007/routes/result.json",
+   "started_at_utc": "2026-10-07T20:44:47Z",
+   "summary": "receipts/canary/assigned-task-read-221-jwt-20261007/routes/result.json: 9 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.57,
+   "duration_s": 0.58,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/migration/migration.controller.ts",
@@ -7166,13 +7229,13 @@
    "exit_code": 0,
    "id": "v-canary-3",
    "kind": "canary",
-   "output_ref": "receipts/canary/assigned-task-read-221/routes/route-result.json",
-   "started_at_utc": "2026-10-07T19:34:49Z",
-   "summary": "receipts/canary/assigned-task-read-221/routes/route-result.json: 71 verified / 0 failed / 0 not_measured"
+   "output_ref": "receipts/canary/assigned-task-read-221-jwt-20261007/routes/route-result.json",
+   "started_at_utc": "2026-10-07T20:44:47Z",
+   "summary": "receipts/canary/assigned-task-read-221-jwt-20261007/routes/route-result.json: 71 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.57,
+   "duration_s": 0.58,
    "entities": [
     "code_unit:apps/web/__tests__/kanban-board.test.ts",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
@@ -7210,17 +7273,23 @@
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-221-record-verifier-out/v-canary.json",
-   "started_at_utc": "2026-10-07T19:34:49Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-jwt-record-verify/verifier-out/v-canary.json",
+   "started_at_utc": "2026-10-07T20:44:47Z",
    "summary": "3 canary result(s), 3 committed at head; 71 verified / 0 failed / 15 not_measured of 86 entities"
   }
  ],
  "verify": {
   "events": [
    {
+    "code": "SUPERSEDED_SELF_EXCLUSION",
+    "entity": "receipt:receipts/graph/assigned-task-read-221-20261007.json",
+    "rule": "DEC-AUP-0035",
+    "text": "the receipt at receipts/graph/assigned-task-read-221-20261007.json is the previous version of the one this run is writing, for the same work item 95df19c8-2483-48e1-b68e-b191a89a849c — superseded by construction, so it owes this change no verdict"
+   },
+   {
     "code": "STRUCTURAL_EXCLUSION",
     "rule": "DEC-AUP-0034",
-    "text": "37 affected entity(ies) owe no verdict (receipt: 37): unchanged at both revisions and given no verifier by the matrix"
+    "text": "38 affected entity(ies) owe no verdict (receipt: 38): unchanged at both revisions and given no verifier by the matrix"
    }
   ],
   "required_by_entity": {
@@ -7575,6 +7644,7 @@
    "receipt:receipts/graph/A2-394-reinstate-digest-grant.json": [],
    "receipt:receipts/graph/a2-304-dependabot-group.json": [],
    "receipt:receipts/graph/a2-320-web-eslint10.json": [],
+   "receipt:receipts/graph/assigned-task-read-221-20261007.json": [],
    "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json": [],
    "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json": [],
    "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json": [],
@@ -7977,8 +8047,8 @@
   },
   "seconds": {
    "prepare": 2.13,
-   "total": 64.31,
-   "verifiers": 28.02
+   "total": 61.25,
+   "verifiers": 26.55
   }
  },
  "work_item": "95df19c8-2483-48e1-b68e-b191a89a849c"
