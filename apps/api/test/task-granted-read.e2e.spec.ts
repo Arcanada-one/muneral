@@ -94,7 +94,7 @@ describe('Separate named program task/evidence GET capability (real PostgreSQL/H
     authSvc = moduleRef.get(AuthService);
     fsSvc = moduleRef.get(TaskFieldStateService);
     tasksSvc = moduleRef.get(TasksService);
-  });
+  }, 120_000);
 
   afterAll(async () => {
     try { if (app) await app.close(); } finally {
@@ -102,7 +102,7 @@ describe('Separate named program task/evidence GET capability (real PostgreSQL/H
       if (previousDatabaseUrl === undefined) delete process.env.DATABASE_URL;
       else process.env.DATABASE_URL = previousDatabaseUrl;
     }
-  });
+  }, 30_000);
 
   beforeEach(async () => {
     capabilities.length = 0;
