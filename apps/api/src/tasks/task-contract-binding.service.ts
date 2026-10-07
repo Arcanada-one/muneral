@@ -19,7 +19,7 @@ export class TaskContractBindingService {
   async bind(taskId: string, actor: Actor, scope: AgentScopeContext | undefined, dto: UpdateTaskContractDto) {
     // JWT requests carry no agent scope. Do not turn this new mutation into an
     // unscoped human door or borrow the intake service's agent identity.
-    if (actor?.type !== 'agent' || scope?.kind !== 'task-contract' ||
+    if (actor?.type !== 'agent' || scope?.kind !== 'task-status' ||
         scope.agentId !== actor.id || !scope.workspaceId) {
       throw new ForbiddenException({ code: 'AGENT_CONTRACT_SCOPE_REQUIRED' });
     }

@@ -18,7 +18,9 @@ export class TaskContractBindingController {
   constructor(private readonly binding: TaskContractBindingService) {}
 
   @Patch(':taskId/contract')
-  @AgentScope('task-contract')
+  // Reuse the existing creator/executor custody predicate, not a new scope
+  // enum or grant. The binding service separately enforces pointer CAS.
+  @AgentScope('task-status')
   bind(@Param('taskId') taskId: string, @Req() req: ScopedRequest, @Body() dto: UpdateTaskContractDto) {
     return this.binding.bind(taskId, req.actor, req.agentScope, dto);
   }

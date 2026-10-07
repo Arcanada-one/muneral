@@ -262,11 +262,23 @@ describe('Task contract CAS binding (af868172, real PostgreSQL)', () => {
     }
   });
 
+  it('refuses a broad task scope and missing authenticated workspace custody', async () => {
+    const id = await create();
+    const actor = { type: 'agent' as const, id: agentId, name: 'fixture agent' };
+    const dto = { contractDigest: DIGEST_A, expectedContractDigest: null };
+    await expect(binding.bind(id, actor, { kind: 'task', agentId, workspaceId }, dto))
+      .rejects.toMatchObject({ status: 403 });
+    await expect(binding.bind(id, actor, { kind: 'task-status', agentId }, dto))
+      .rejects.toMatchObject({ status: 403 });
+    expect((await prisma.task.findUniqueOrThrow({ where: { id } })).contractDigest).toBeNull();
+    expect(await prisma.activityLog.count({ where: { taskId: id, action: CONTRACT_BINDING_ACTION } })).toBe(0);
+  });
+
   it('rechecks ownership in the service after the outer guard snapshot', async () => {
     const id = await create();
     await prisma.task.update({ where: { id }, data: { createdById: null } });
     await expect(binding.bind(id, { type: 'agent', id: agentId, name: 'fixture agent' },
-      { kind: 'task-contract', agentId, workspaceId }, { contractDigest: DIGEST_A, expectedContractDigest: null }))
+      { kind: 'task-status', agentId, workspaceId }, { contractDigest: DIGEST_A, expectedContractDigest: null }))
       .rejects.toMatchObject({ status: 403 });
     expect((await prisma.task.findUniqueOrThrow({ where: { id } })).contractDigest).toBeNull();
   });
