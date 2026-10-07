@@ -6,6 +6,7 @@ import { ExecutionContext, ForbiddenException, NotFoundException } from '@nestjs
 import { Reflector } from '@nestjs/core';
 import { Agent } from '@prisma/client';
 import { AGENT_SCOPE_KEY } from '../src/auth/agent-scope.decorator.js';
+import { TASK_GRANTED_READ_HANDLER } from '../src/auth/task-project-read-capabilities.js';
 import { AgentTaskScopeGuard } from '../src/auth/guards/agent-task-scope.guard.js';
 import type { AgentScopedRequest } from '../src/auth/guards/agent-task-scope.guard.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
@@ -38,7 +39,7 @@ function makeContext(req: Partial<AgentScopedRequest>): {
 }
 
 describe('AgentTaskScopeGuard', () => {
-  let reflector: { getAllAndOverride: jest.Mock };
+  let reflector: { getAllAndOverride: jest.Mock; get: jest.Mock };
   let prisma: {
     taskAgent: { findFirst: jest.Mock };
     project: { findFirst: jest.Mock };
@@ -48,7 +49,7 @@ describe('AgentTaskScopeGuard', () => {
   let guard: AgentTaskScopeGuard;
 
   beforeEach(() => {
-    reflector = { getAllAndOverride: jest.fn() };
+    reflector = { getAllAndOverride: jest.fn(), get: jest.fn().mockReturnValue(undefined) };
     prisma = {
       taskAgent: { findFirst: jest.fn() },
       project: { findFirst: jest.fn() },
@@ -59,6 +60,35 @@ describe('AgentTaskScopeGuard', () => {
       reflector as unknown as Reflector,
       prisma as unknown as PrismaService,
     );
+  });
+
+  it.each(['POST', 'PATCH'])('refuses handler read marker on %s before owner lookup', async method => {
+    reflector.getAllAndOverride.mockReturnValue('task');
+    reflector.get.mockReturnValue(true);
+    const { ctx } = makeContext({ apiKeyAgent: AGENT, method, params: { taskId: 't-1' } });
+    await expect(guard.canActivate(ctx)).rejects.toThrow(ForbiddenException);
+    expect(prisma.task.findFirst).not.toHaveBeenCalled();
+  });
+
+  it('refuses handler read marker on a project scope before lookup', async () => {
+    reflector.getAllAndOverride.mockReturnValue('project');
+    reflector.get.mockReturnValue(true);
+    const { ctx } = makeContext({ apiKeyAgent: AGENT, method: 'GET', params: { projectId: 'p-1' } });
+    await expect(guard.canActivate(ctx)).rejects.toThrow(ForbiddenException);
+    expect(prisma.project.findFirst).not.toHaveBeenCalled();
+  });
+
+  it('does not inherit a class-only task read marker into an unowned task handler', async () => {
+    class Controller {}
+    function handler() {}
+    Reflect.defineMetadata(AGENT_SCOPE_KEY, 'task', handler);
+    Reflect.defineMetadata(TASK_GRANTED_READ_HANDLER, true, Controller);
+    const { ctx } = makeContext({ apiKeyAgent: AGENT, method: 'GET', params: { taskId: 't-1' } });
+    Object.assign(ctx, { getHandler: () => handler, getClass: () => Controller });
+    prisma.task.findFirst.mockResolvedValue(null);
+    const nativeGuard = new AgentTaskScopeGuard(new Reflector(), prisma as unknown as PrismaService);
+    await expect(nativeGuard.canActivate(ctx)).rejects.toThrow(ForbiddenException);
+    expect(prisma.agent.findUnique).not.toHaveBeenCalled();
   });
 
   it('lets a JWT request through untouched and never queries for a scope', async () => {

@@ -1,3 +1,4 @@
+import { GrantedTaskReadService } from './granted-task-read.service.js';
 import {
   Controller,
   Get,
@@ -29,6 +30,7 @@ import { JwtOrApiKeyGuard } from '../auth/guards/jwt-or-api-key.guard.js';
 import { AgentTaskScopeGuard } from '../auth/guards/agent-task-scope.guard.js';
 import type { AgentScopeContext } from '../auth/guards/agent-task-scope.guard.js';
 import { AgentScope } from '../auth/agent-scope.decorator.js';
+import { AgentGrantedTaskRead } from '../auth/task-project-read-capabilities.js';
 import { ActorInterceptor } from '../common/interceptors/actor.interceptor.js';
 import type { Actor } from '@muneral/types';
 import { FieldChangesService } from './field-state/field-changes.service.js';
@@ -92,7 +94,8 @@ type AuthRequest = Request & { actor: Actor; agentScope?: AgentScopeContext };
  * scope `'task-status'` (creator or executor assignment): see the handler.
  *
  * A2-274 — `POST /tasks/:taskId/evidence` is the fourth, with the matching
- * read `GET /tasks/:taskId/evidence`. Both are marked `'task-evidence'`; the
+ * read `GET /tasks/:taskId/evidence`. POST retains 'task-evidence'; GET uses
+ * the independent handler-only task read capability in addition to owner access. The
  * write additionally refuses a JWT, because the record names the AGENT that
  * attached it and a human has no agent id (see `agentKeyRequired`).
  *
@@ -113,6 +116,7 @@ export class TasksController {
     private readonly stalenessService: TaskStalenessService,
     private readonly redactionService: TaskRedactionService,
     private readonly evidenceService: TaskEvidenceService,
+    private readonly grantedTaskReadService: GrantedTaskReadService,
   ) {}
 
   /** Creatable by an agent's API key inside its own workspace (MUN-0045) or by
@@ -193,12 +197,20 @@ export class TasksController {
    */
   @Get(':taskId')
   @AgentScope('task')
+  @AgentGrantedTaskRead()
   async findOne(
     @Param('taskId') taskId: string,
     @Headers('if-none-match') ifNoneMatch: string | undefined,
     @Res({ passthrough: true }) res: Response,
+    @Req() req: AuthRequest,
   ) {
-    const task = await this.tasksService.findOne(taskId);
+    const broad = req.agentScope?.grantedTaskRead;
+    const granted = broad ? await this.grantedTaskReadService.read(taskId, req.agentScope!.agentId, broad, 'task') : undefined;
+    const task = granted ? granted.task : await this.tasksService.findOne(taskId);
+    if (granted) {
+      res.setHeader('X-Muneral-Read-Audit', granted.auditEventId);
+      res.setHeader('X-Muneral-Read-Audit-Count', String(granted.auditReadCount));
+    }
 
     // MUN-0054: set before the 304 branch, so a conditional request that gets
     // no body is told this too — a poller on the ETag loop is exactly the
@@ -210,7 +222,7 @@ export class TasksController {
 
     // Bind the validator to contract/project custody in this exact response row.
     // Pointer CAS does not update the ordinary field-state versions.
-    const etag = await this.fieldChangesService.computeTaskEtag(taskId, task.contractDigest, task.projectId);
+    const etag = granted ? granted.etag : await this.fieldChangesService.computeTaskEtag(taskId, task.contractDigest, task.projectId);
     if (etag) {
       const etagValue = `"${etag}"`;
       res.setHeader('ETag', etagValue);
@@ -365,12 +377,19 @@ export class TasksController {
   }
 
   /** A2-274. The evidence attached to this work item, oldest first, each record
-   *  carrying its `sha256`. Readable by the same agent key that may attach
-   *  (`'task-evidence'`) and by a JWT, which is what the dashboard uses. */
+   *  carrying its `sha256`. Owner/JWT access is unchanged; an additional
+   *  named project capability admits only this GET, never evidence attachment. */
   @Get(':taskId/evidence')
   @AgentScope('task-evidence')
-  listEvidence(@Param('taskId') taskId: string) {
-    return this.evidenceService.list(taskId);
+  @AgentGrantedTaskRead()
+  async listEvidence(@Param('taskId') taskId: string, @Req() req: AuthRequest,
+    @Res({ passthrough: true }) res: Response) {
+    const broad = req.agentScope?.grantedTaskRead;
+    if (!broad) return this.evidenceService.list(taskId);
+    const granted = await this.grantedTaskReadService.read(taskId, req.agentScope!.agentId, broad, 'evidence');
+    res.setHeader('X-Muneral-Read-Audit', granted.auditEventId);
+    res.setHeader('X-Muneral-Read-Audit-Count', String(granted.auditReadCount));
+    return granted.evidence;
   }
 
   @Delete(':taskId')
