@@ -5,19 +5,10 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "paused_safe"
  },
- "captured_at_utc": "2026-10-07T05:07:07Z",
+ "captured_at_utc": "2026-10-07T13:09:59Z",
  "change_set": {
-  "base": "094dc9baa6acd086c97f0ad547537712396d32b4",
+  "base": "5b67dea437be93b988f50b3d312879798dc79f89",
   "files": [
-   {
-    "kind": "code",
-    "node_id": "code_unit:apps/api/src/migration/migration.module.ts",
-    "node_ids": [
-     "code_unit:apps/api/src/migration/migration.module.ts"
-    ],
-    "path": "apps/api/src/migration/migration.module.ts",
-    "status": "M"
-   },
    {
     "kind": "code",
     "node_id": "code_unit:apps/api/src/migration/migration.service.ts",
@@ -76,15 +67,6 @@
    },
    {
     "kind": "test",
-    "node_id": "code_unit:apps/api/test/migration.postgres.spec.ts",
-    "node_ids": [
-     "code_unit:apps/api/test/migration.postgres.spec.ts"
-    ],
-    "path": "apps/api/test/migration.postgres.spec.ts",
-    "status": "M"
-   },
-   {
-    "kind": "test",
     "node_id": "code_unit:apps/api/test/task-contract-binding.e2e.spec.ts",
     "node_ids": [
      "code_unit:apps/api/test/task-contract-binding.e2e.spec.ts"
@@ -111,7 +93,7 @@
     "status": "A"
    }
   ],
-  "head": "430ea6be7e65b0d24e7b2d4b1f578fde24a4c1cd",
+  "head": "1a1c06896d5c929edcf693f468083f5c3a3727c7",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -119,33 +101,42 @@
  "graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:5316f545d119a793f23b5a3e386338a3a6210fcbf2abc89115d67cc016eb96af",
-  "path": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/212-verifier-out/graph-094dc9baa6ac.json",
-  "source_commit": "094dc9baa6acd086c97f0ad547537712396d32b4"
+  "graph_digest": "sha256:016f1e1a336f724ffade4345f76a7074031472318d11308bc88f00cfb67e2521",
+  "path": "/home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN212/CORRECTED-RAW-OUTPUTS/graph-5b67dea437be.json",
+  "source_commit": "5b67dea437be93b988f50b3d312879798dc79f89"
  },
  "head_graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:540e25683f44b6b7819ee94d9dde978d9be5633981ef2e7064b32abd0a8fd559",
-  "path": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/212-verifier-out/graph-head-430ea6be7e65.json",
-  "source_commit": "430ea6be7e65b0d24e7b2d4b1f578fde24a4c1cd",
+  "graph_digest": "sha256:eb244dab33289bacf0c26277f451489c050eb61d95b6ccf7303621af49ccd918",
+  "path": "/home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN212/CORRECTED-RAW-OUTPUTS/graph-head-1a1c06896d5c.json",
+  "source_commit": "1a1c06896d5c929edcf693f468083f5c3a3727c7",
   "staleness": {
-   "checked_at_utc": "2026-10-07T05:07:47Z",
-   "checked_nodes": 422,
+   "checked_at_utc": "2026-10-07T13:10:40Z",
+   "checked_nodes": 433,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
   }
  },
- "host": "arcana-devs",
+ "host": "aras-owner",
+ "host_redacted": true,
+ "host_sha256": "8f11354085e54087c4d09df948ab557f0ad69fe7bb75770ced5c5b188ec9b02e",
  "impact_set": {
   "deterministic_core": [
    {
     "boundary": "intra_unit",
-    "depth": 1,
+    "depth": 2,
     "entity": "code_unit:apps/api/src/app.module.ts",
     "node_type": "code_unit",
     "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/api/src/migration/migration.module.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
+      "via": "relative"
+     },
      {
       "edge_type": "imports",
       "from": "code_unit:apps/api/src/app.module.ts",
@@ -162,10 +153,17 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 3,
     "entity": "code_unit:apps/api/src/main.ts",
     "node_type": "code_unit",
     "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/api/src/migration/migration.module.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
+      "via": "relative"
+     },
      {
       "edge_type": "imports",
       "from": "code_unit:apps/api/src/app.module.ts",
@@ -197,7 +195,7 @@
       "edge_type": "imports",
       "from": "code_unit:apps/api/src/migration/index.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
       "via": "relative"
      }
     ],
@@ -216,6 +214,26 @@
      {
       "edge_type": "imports",
       "from": "code_unit:apps/api/src/migration/migration.controller.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
+      "via": "relative"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/api/src/migration/migration.module.ts",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/api/src/migration/migration.module.ts",
       "provenance": "deterministic",
       "to": "code_unit:apps/api/src/migration/migration.service.ts",
       "via": "relative"
@@ -403,15 +421,22 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 1,
+    "depth": 2,
     "entity": "code_unit:apps/api/test/app-module-boot.e2e.spec.ts",
     "node_type": "code_unit",
     "path": [
      {
       "edge_type": "imports",
+      "from": "code_unit:apps/api/src/migration/migration.controller.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
       "from": "code_unit:apps/api/test/app-module-boot.e2e.spec.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/migration/migration.controller.ts",
       "via": "relative"
      }
     ],
@@ -450,15 +475,42 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 1,
+    "depth": 2,
     "entity": "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts",
     "node_type": "code_unit",
     "path": [
      {
       "edge_type": "imports",
+      "from": "code_unit:apps/api/src/migration/migration.module.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
       "from": "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts",
       "provenance": "deterministic",
       "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "via": "relative"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/api/test/migration.archive-projection.postgres.spec.ts",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/api/test/migration.archive-projection.postgres.spec.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
       "via": "relative"
      }
     ],
@@ -486,6 +538,26 @@
       "from": "code_unit:apps/api/test/migration.controller.spec.ts",
       "provenance": "deterministic",
       "to": "code_unit:apps/api/src/migration/migration.controller.ts",
+      "via": "relative"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/api/test/migration.postgres.spec.ts",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/api/test/migration.postgres.spec.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
       "via": "relative"
      }
     ],
@@ -739,7 +811,7 @@
     "path": [
      {
       "edge_type": "deploys_to",
-      "from": "code_unit:apps/api/src/migration/migration.module.ts",
+      "from": "code_unit:apps/api/src/migration/migration.service.ts",
       "provenance": "deterministic",
       "to": "deployable_unit:apps/api",
       "via": "containment"
@@ -961,7 +1033,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/A2-294-digest-grant-on-refresh.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "via": "explicit-path"
      }
     ],
@@ -973,10 +1045,17 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 3,
     "entity": "receipt:receipts/graph/A2-330-muneral-canary.json",
     "node_type": "receipt",
     "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/api/src/migration/migration.module.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
+      "via": "relative"
+     },
      {
       "edge_type": "imports",
       "from": "code_unit:apps/api/src/app.module.ts",
@@ -1008,7 +1087,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/A2-365-revert-digest-grant.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "via": "explicit-path"
      }
     ],
@@ -1028,7 +1107,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
       "via": "explicit-path"
      }
     ],
@@ -1045,17 +1124,17 @@
     "node_type": "receipt",
     "path": [
      {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/app.module.ts",
+      "edge_type": "documents",
+      "from": "document:apps/api/docs/migration-import.md",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
-      "via": "relative"
+      "to": "route:PATCH /tasks/:taskId/status",
+      "via": "explicit-route"
      },
      {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/A2-379-sync-import-scope.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/app.module.ts",
+      "to": "document:apps/api/docs/migration-import.md",
       "via": "explicit-path"
      }
     ],
@@ -1092,17 +1171,17 @@
     "node_type": "receipt",
     "path": [
      {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/app.module.ts",
+      "edge_type": "documents",
+      "from": "document:apps/api/docs/migration-import.md",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
-      "via": "relative"
+      "to": "route:PATCH /tasks/:taskId/status",
+      "via": "explicit-route"
      },
      {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/A2-387-sync-import-audit.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/app.module.ts",
+      "to": "document:apps/api/docs/migration-import.md",
       "via": "explicit-path"
      }
     ],
@@ -1122,7 +1201,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/A2-394-reinstate-digest-grant.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "via": "explicit-path"
      }
     ],
@@ -1142,7 +1221,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/a2-304-dependabot-group.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
       "via": "explicit-path"
      }
     ],
@@ -1162,7 +1241,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/a2-320-web-eslint10.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
       "via": "explicit-path"
      }
     ],
@@ -1182,7 +1261,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/tasks/field-state/field-changes.service.ts",
       "via": "explicit-path"
      }
     ],
@@ -1202,7 +1281,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "via": "explicit-path"
      }
     ],
@@ -1222,7 +1301,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
       "via": "explicit-path"
      }
     ],
@@ -1242,7 +1321,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
       "via": "explicit-path"
      }
     ],
@@ -1262,7 +1341,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
       "via": "explicit-path"
      }
     ],
@@ -1282,7 +1361,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "via": "explicit-path"
      }
     ],
@@ -1302,7 +1381,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
       "via": "explicit-path"
      }
     ],
@@ -1342,7 +1421,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
       "via": "explicit-path"
      }
     ],
@@ -1362,7 +1441,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-integration-batch1.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
       "via": "explicit-path"
      }
     ],
@@ -1402,7 +1481,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-mun0049-20260913T182304Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
       "via": "explicit-path"
      }
     ],
@@ -1422,7 +1501,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-mun0050-20260914T075259Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
       "via": "explicit-path"
      }
     ],
@@ -1442,7 +1521,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-mun0051-20260914T092314Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
       "via": "explicit-path"
      }
     ],
@@ -1462,7 +1541,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-mun0052-20260914T103558Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
       "via": "explicit-path"
      }
     ],
@@ -1482,7 +1561,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-mun0053-20260914T125817Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
       "via": "explicit-path"
      }
     ],
@@ -1522,7 +1601,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
       "via": "explicit-path"
      }
     ],
@@ -1542,7 +1621,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
       "via": "explicit-path"
      }
     ],
@@ -1562,7 +1641,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
       "via": "explicit-path"
      }
     ],
@@ -1582,7 +1661,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
       "via": "explicit-path"
      }
     ],
@@ -1602,7 +1681,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
       "via": "explicit-path"
      }
     ],
@@ -1622,7 +1701,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
       "via": "explicit-path"
      }
     ],
@@ -1642,7 +1721,47 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/mun-0043-index-grant-20261007.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/mun-0043-index-grant-20261007.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/revision4-public-20261007.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/revision4-public-20261007.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/migration/migration.service.ts",
       "via": "explicit-path"
      }
     ],
@@ -1662,7 +1781,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/security-api959a-caller788.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.module.ts",
+      "to": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "via": "explicit-path"
      }
     ],
@@ -2368,7 +2487,7 @@
   ],
   "max_depth": 3,
   "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
-  "total": 95
+  "total": 100
  },
  "notes": [
   "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
@@ -2379,7 +2498,7 @@
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261007T050707Z-430ea6be",
+ "receipt_id": "car-verify-20261007T130959Z-1a1c0689",
  "receipt_path": "receipts/graph/change-admission-MUNERAL212-761630b.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -2405,6 +2524,7 @@
    "code_unit:apps/api/test/app-module-boot.e2e.spec.ts",
    "code_unit:apps/api/test/field-changes.e2e.spec.ts",
    "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts",
+   "code_unit:apps/api/test/migration.archive-projection.postgres.spec.ts",
    "code_unit:apps/api/test/migration.controller.spec.ts",
    "code_unit:apps/api/test/migration.postgres.spec.ts",
    "code_unit:apps/api/test/outbox-relay-probe.postgres.spec.ts",
@@ -2476,6 +2596,8 @@
    "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
    "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
    "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+   "receipt:receipts/graph/mun-0043-index-grant-20261007.json",
+   "receipt:receipts/graph/revision4-public-20261007.json",
    "receipt:receipts/graph/security-api959a-caller788.json",
    "route:DELETE /tasks/:taskId",
    "route:DELETE /tasks/:taskId/checklist/:itemId",
@@ -2531,6 +2653,7 @@
    "code_unit:apps/api/test/app-module-boot.e2e.spec.ts",
    "code_unit:apps/api/test/field-changes.e2e.spec.ts",
    "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts",
+   "code_unit:apps/api/test/migration.archive-projection.postgres.spec.ts",
    "code_unit:apps/api/test/migration.controller.spec.ts",
    "code_unit:apps/api/test/migration.postgres.spec.ts",
    "code_unit:apps/api/test/outbox-relay-probe.postgres.spec.ts",
@@ -2604,6 +2727,8 @@
    "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
    "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
    "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+   "receipt:receipts/graph/mun-0043-index-grant-20261007.json",
+   "receipt:receipts/graph/revision4-public-20261007.json",
    "receipt:receipts/graph/security-api959a-caller788.json",
    "route:DELETE /tasks/:taskId",
    "route:DELETE /tasks/:taskId/checklist/:itemId",
@@ -2645,7 +2770,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-07T05:07:47Z",
+  "checked_at_utc": "2026-10-07T13:10:39Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -2763,8 +2888,8 @@
   },
   {
    "content_hash": {
-    "base": "sha256:b5b0ef3e5f5f165552a6062a0ddf39648d8b24b3d4663c0329c1271ecb796dee",
-    "head": "sha256:b5b0ef3e5f5f165552a6062a0ddf39648d8b24b3d4663c0329c1271ecb796dee"
+    "base": "sha256:bd5f160945334359817620023e2ead14018a99597509515bcc5ecf5967998192",
+    "head": "sha256:bd5f160945334359817620023e2ead14018a99597509515bcc5ecf5967998192"
    },
    "entity": "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json",
    "node_type": "receipt",
@@ -2775,7 +2900,7 @@
   {
    "content_hash": {
     "base": null,
-    "head": "sha256:0caff75537c71b792d5648ce5ad42033aa71d364981739a0995cd77780ffc1fc"
+    "head": "sha256:bc12b0abe3af95042ebdaf40399bcc523b954d986fa7de803df22247060aa214"
    },
    "entity": "receipt:receipts/graph/change-admission-MUNERAL212-761630b.json",
    "node_type": "receipt",
@@ -3042,6 +3167,28 @@
   },
   {
    "content_hash": {
+    "base": "sha256:b4200f9b902e14918acd557f41b1f80ff77b51855de60fada33bec7f774eada3",
+    "head": "sha256:b4200f9b902e14918acd557f41b1f80ff77b51855de60fada33bec7f774eada3"
+   },
+   "entity": "receipt:receipts/graph/mun-0043-index-grant-20261007.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/mun-0043-index-grant-20261007.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:1c94d3471b00a482ab1b9c14c147b36a16a6985f827ba0cb9fc2776387963530",
+    "head": "sha256:1c94d3471b00a482ab1b9c14c147b36a16a6985f827ba0cb9fc2776387963530"
+   },
+   "entity": "receipt:receipts/graph/revision4-public-20261007.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/revision4-public-20261007.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
     "base": "sha256:32fe4de334dfc155b83c1147706675b80eed51426cee16655ce78ab1aaf5fa90",
     "head": "sha256:32fe4de334dfc155b83c1147706675b80eed51426cee16655ce78ab1aaf5fa90"
    },
@@ -3053,7 +3200,7 @@
   }
  ],
  "tree": {
-  "commit": "430ea6be7e65b0d24e7b2d4b1f578fde24a4c1cd",
+  "commit": "1a1c06896d5c929edcf693f468083f5c3a3727c7",
   "dirty": false
  },
  "verdicts": [
@@ -3227,6 +3374,15 @@
    ]
   },
   {
+   "entity": "code_unit:apps/api/test/migration.archive-projection.postgres.spec.ts",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-api-tsconfig-test"
+   ]
+  },
+  {
    "entity": "code_unit:apps/api/test/migration.controller.spec.ts",
    "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
    "verdict": "verified",
@@ -3237,10 +3393,9 @@
   },
   {
    "entity": "code_unit:apps/api/test/migration.postgres.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
    "verdict": "verified",
    "verifier_ids": [
-    "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
    ]
@@ -3970,8 +4125,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/arcanada/_temp/kc-closure/MUNERAL-ETAG-CLASS-23E7-20261006/source/apps/api/node_modules/.bin/tsc -p /home/dev/arcanada/_temp/kc-closure/MUNERAL-ETAG-CLASS-23E7-20261006/source/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/212-verifier-out/type-check-9qyqtkdh/check.tsbuildinfo --listFiles",
-   "duration_s": 7.46,
+   "command": "/home/dev/arcanada/_temp/kc-closure/MUNERAL-ETAG-CLASS-23E7-20261006/source/apps/api/node_modules/.bin/tsc -p /home/dev/arcanada/_temp/kc-closure/MUNERAL-ETAG-CLASS-23E7-20261006/source/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN212/CORRECTED-RAW-OUTPUTS/type-check-t920tsz_/check.tsbuildinfo --listFiles",
+   "duration_s": 6.2,
    "entities": [
     "code_unit:apps/api/src/app.module.ts",
     "code_unit:apps/api/src/main.ts",
@@ -4071,13 +4226,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/212-verifier-out/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-10-07T05:07:51Z",
-   "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1449 files listed"
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN212/CORRECTED-RAW-OUTPUTS/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-10-07T13:10:43Z",
+   "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1451 files listed"
   },
   {
-   "command": "/home/dev/arcanada/_temp/kc-closure/MUNERAL-ETAG-CLASS-23E7-20261006/source/apps/api/node_modules/.bin/tsc -p /home/dev/arcanada/_temp/kc-closure/MUNERAL-ETAG-CLASS-23E7-20261006/source/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/212-verifier-out/type-check-achnlcfw/check.tsbuildinfo --listFiles",
-   "duration_s": 11.45,
+   "command": "/home/dev/arcanada/_temp/kc-closure/MUNERAL-ETAG-CLASS-23E7-20261006/source/apps/api/node_modules/.bin/tsc -p /home/dev/arcanada/_temp/kc-closure/MUNERAL-ETAG-CLASS-23E7-20261006/source/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN212/CORRECTED-RAW-OUTPUTS/type-check-_zhz2blx/check.tsbuildinfo --listFiles",
+   "duration_s": 10.39,
    "entities": [
     "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts",
     "code_unit:apps/api/test/agent-project-dependencies.e2e.spec.ts",
@@ -4086,6 +4241,7 @@
     "code_unit:apps/api/test/app-module-boot.e2e.spec.ts",
     "code_unit:apps/api/test/field-changes.e2e.spec.ts",
     "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts",
+    "code_unit:apps/api/test/migration.archive-projection.postgres.spec.ts",
     "code_unit:apps/api/test/migration.controller.spec.ts",
     "code_unit:apps/api/test/migration.postgres.spec.ts",
     "code_unit:apps/api/test/outbox-relay-probe.postgres.spec.ts",
@@ -4109,6 +4265,7 @@
     "code_unit:apps/api/test/app-module-boot.e2e.spec.ts": "verified",
     "code_unit:apps/api/test/field-changes.e2e.spec.ts": "verified",
     "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/migration.archive-projection.postgres.spec.ts": "verified",
     "code_unit:apps/api/test/migration.controller.spec.ts": "verified",
     "code_unit:apps/api/test/migration.postgres.spec.ts": "verified",
     "code_unit:apps/api/test/outbox-relay-probe.postgres.spec.ts": "verified",
@@ -4127,13 +4284,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
-   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/212-verifier-out/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-10-07T05:07:59Z",
-   "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1609 files listed"
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN212/CORRECTED-RAW-OUTPUTS/v-type-check-apps-api-tsconfig-test.txt",
+   "started_at_utc": "2026-10-07T13:10:50Z",
+   "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1613 files listed"
   },
   {
-   "command": "/home/dev/arcanada/_temp/kc-closure/MUNERAL-ETAG-CLASS-23E7-20261006/source/apps/web/node_modules/.bin/tsc -p /home/dev/arcanada/_temp/kc-closure/MUNERAL-ETAG-CLASS-23E7-20261006/source/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/212-verifier-out/type-check-3eo08_eh/check.tsbuildinfo --listFiles",
-   "duration_s": 8.56,
+   "command": "/home/dev/arcanada/_temp/kc-closure/MUNERAL-ETAG-CLASS-23E7-20261006/source/apps/web/node_modules/.bin/tsc -p /home/dev/arcanada/_temp/kc-closure/MUNERAL-ETAG-CLASS-23E7-20261006/source/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN212/CORRECTED-RAW-OUTPUTS/type-check-g4ic1zau/check.tsbuildinfo --listFiles",
+   "duration_s": 7.83,
    "entities": [
     "code_unit:apps/web/__tests__/kanban-board.test.ts",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
@@ -4169,19 +4326,18 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/212-verifier-out/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-10-07T05:08:11Z",
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN212/CORRECTED-RAW-OUTPUTS/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-10-07T13:11:01Z",
    "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1296 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=094dc9baa6ac, head=430ea6be7e65, graph=head graph)",
-   "duration_s": 7.81,
+   "command": "tools/graph/contract_diff.py.run_diff(base=5b67dea437be, head=1a1c06896d5c, graph=head graph)",
+   "duration_s": 7.07,
    "entities": [
     "code_unit:apps/api/src/migration/migration.controller.ts",
     "code_unit:apps/api/src/migration/migration.service.ts",
     "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts",
     "code_unit:apps/api/src/tasks/tasks.controller.ts",
-    "code_unit:apps/api/test/migration.postgres.spec.ts",
     "code_unit:apps/web/__tests__/kanban-board.test.ts",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
@@ -4235,7 +4391,6 @@
     "code_unit:apps/api/src/migration/migration.service.ts": "verified",
     "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts": "verified",
     "code_unit:apps/api/src/tasks/tasks.controller.ts": "verified",
-    "code_unit:apps/api/test/migration.postgres.spec.ts": "verified",
     "code_unit:apps/web/__tests__/kanban-board.test.ts": "verified",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx": "verified",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx": "verified",
@@ -4287,13 +4442,13 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/212-verifier-out/v-contract-diff.json",
-   "started_at_utc": "2026-10-07T05:08:20Z",
-   "summary": "48→48 contracts, breaking 0, edges {'verified': 152}"
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN212/CORRECTED-RAW-OUTPUTS/v-contract-diff.json",
+   "started_at_utc": "2026-10-07T13:11:09Z",
+   "summary": "48→48 contracts, breaking 0, edges {'verified': 153}"
   },
   {
    "command": "verify.py route_config_consistency RC-01 prefix / RC-02 registration / RC-03 served",
-   "duration_s": 0.08,
+   "duration_s": 0.07,
    "entities": [
     "route:DELETE /tasks/:taskId",
     "route:DELETE /tasks/:taskId/checklist/:itemId",
@@ -4369,13 +4524,13 @@
    "exit_code": 0,
    "id": "v-route-config",
    "kind": "config_schema",
-   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/212-verifier-out/v-route-config.txt",
-   "started_at_utc": "2026-10-07T05:08:28Z",
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN212/CORRECTED-RAW-OUTPUTS/v-route-config.txt",
+   "started_at_utc": "2026-10-07T13:11:16Z",
    "summary": "34 route(s), 0 failed"
   },
   {
    "command": "verify.py config_schema: keys read at head ⊆ declared keys",
-   "duration_s": 0.65,
+   "duration_s": 0.67,
    "entities": [
     "code_unit:apps/api/test/task-representation-etag.e2e.spec.ts"
    ],
@@ -4385,8 +4540,8 @@
    "exit_code": 0,
    "id": "v-config-schema",
    "kind": "config_schema",
-   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/212-verifier-out/v-config-schema.json",
-   "started_at_utc": "2026-10-07T05:08:28Z",
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN212/CORRECTED-RAW-OUTPUTS/v-config-schema.json",
+   "started_at_utc": "2026-10-07T13:11:16Z",
    "summary": "2 source(s), 0 new / 3 frozen undeclared reads, 0 failed; 4 vendored file(s) not attributed to this repository (Arcanada-one/arcanada-universal-program)"
   },
   {
@@ -4411,6 +4566,7 @@
     "code_unit:apps/api/test/app-module-boot.e2e.spec.ts",
     "code_unit:apps/api/test/field-changes.e2e.spec.ts",
     "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts",
+    "code_unit:apps/api/test/migration.archive-projection.postgres.spec.ts",
     "code_unit:apps/api/test/migration.controller.spec.ts",
     "code_unit:apps/api/test/migration.postgres.spec.ts",
     "code_unit:apps/api/test/outbox-relay-probe.postgres.spec.ts",
@@ -4459,6 +4615,7 @@
     "code_unit:apps/api/test/app-module-boot.e2e.spec.ts": "verified",
     "code_unit:apps/api/test/field-changes.e2e.spec.ts": "verified",
     "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/migration.archive-projection.postgres.spec.ts": "verified",
     "code_unit:apps/api/test/migration.controller.spec.ts": "verified",
     "code_unit:apps/api/test/migration.postgres.spec.ts": "verified",
     "code_unit:apps/api/test/outbox-relay-probe.postgres.spec.ts": "verified",
@@ -4491,8 +4648,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/212-verifier-out/v-fitness.json",
-   "started_at_utc": "2026-10-07T05:08:29Z",
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN212/CORRECTED-RAW-OUTPUTS/v-fitness.json",
+   "started_at_utc": "2026-10-07T13:11:17Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -4525,8 +4682,8 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/212-verifier-out/v-doc-reference.txt",
-   "started_at_utc": "2026-10-07T05:08:29Z",
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN212/CORRECTED-RAW-OUTPUTS/v-doc-reference.txt",
+   "started_at_utc": "2026-10-07T13:11:17Z",
    "summary": "10 document(s), 0 failed"
   },
   {
@@ -4641,8 +4798,8 @@
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/212-verifier-out/v-canary.json",
-   "started_at_utc": "2026-10-07T05:08:29Z",
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN212/CORRECTED-RAW-OUTPUTS/v-canary.json",
+   "started_at_utc": "2026-10-07T13:11:17Z",
    "summary": "0 canary result(s), 0 committed at head; 0 verified / 0 failed / 51 not_measured of 51 entities"
   }
  ],
@@ -4657,7 +4814,7 @@
    {
     "code": "STRUCTURAL_EXCLUSION",
     "rule": "DEC-AUP-0034",
-    "text": "36 affected entity(ies) owe no verdict (receipt: 36): unchanged at both revisions and given no verifier by the matrix"
+    "text": "38 affected entity(ies) owe no verdict (receipt: 38): unchanged at both revisions and given no verifier by the matrix"
    }
   ],
   "required_by_entity": {
@@ -4740,12 +4897,15 @@
     "fitness_rules",
     "type_check"
    ],
+   "code_unit:apps/api/test/migration.archive-projection.postgres.spec.ts": [
+    "fitness_rules",
+    "type_check"
+   ],
    "code_unit:apps/api/test/migration.controller.spec.ts": [
     "fitness_rules",
     "type_check"
    ],
    "code_unit:apps/api/test/migration.postgres.spec.ts": [
-    "contract_diff",
     "fitness_rules",
     "type_check"
    ],
@@ -4932,6 +5092,8 @@
    "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json": [],
    "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json": [],
    "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json": [],
+   "receipt:receipts/graph/mun-0043-index-grant-20261007.json": [],
+   "receipt:receipts/graph/revision4-public-20261007.json": [],
    "receipt:receipts/graph/security-api959a-caller788.json": [],
    "route:DELETE /tasks/:taskId": [
     "canary",
@@ -5139,9 +5301,9 @@
    ]
   },
   "seconds": {
-   "prepare": 3.24,
-   "total": 82.12,
-   "verifiers": 36.23
+   "prepare": 2.92,
+   "total": 77.93,
+   "verifiers": 32.45
   }
  },
  "work_item": "23e7cd6a-5229-4e79-af2b-ea4bb4b860ca"
