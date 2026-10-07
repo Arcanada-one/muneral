@@ -5,9 +5,9 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "paused_safe"
  },
- "captured_at_utc": "2026-10-07T05:03:12Z",
+ "captured_at_utc": "2026-10-07T11:32:42Z",
  "change_set": {
-  "base": "439862de08153a8afe56b4b4411239228c6c72af",
+  "base": "6fda07006a2e8543a4bb842f99f9b086dbe4c224",
   "files": [
    {
     "kind": "contract",
@@ -141,7 +141,7 @@
     "status": "A"
    }
   ],
-  "head": "be16d4bddaeb4cced37e309065a39a4868f94261",
+  "head": "f3cf93e074bdf5912d7b58296a17e90867236c1a",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -149,25 +149,27 @@
  "graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:27c1aafeba9359cf7a75633fffc2ddb89d94ce23926587fa2474ddd3b2807674",
-  "path": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/210-work-pinned/verifier-out/graph-439862de0815.json",
-  "source_commit": "439862de08153a8afe56b4b4411239228c6c72af"
+  "graph_digest": "sha256:fa504c87b2d7539b2e96279db2b99686b474036fe67cad38f920193e7dfa28ea",
+  "path": "/home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/graph-6fda07006a2e.json",
+  "source_commit": "6fda07006a2e8543a4bb842f99f9b086dbe4c224"
  },
  "head_graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:b8c3ebdefefd3344d615d8771463386b5ba821e8d490f97ff9db6b0f602196f2",
-  "path": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/210-work-pinned/verifier-out/graph-head-be16d4bddaeb.json",
-  "source_commit": "be16d4bddaeb4cced37e309065a39a4868f94261",
+  "graph_digest": "sha256:360be25349b043dcb19ced8609ad09b7dfecff9d77429e5225b9158314e2333d",
+  "path": "/home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/graph-head-f3cf93e074bd.json",
+  "source_commit": "f3cf93e074bdf5912d7b58296a17e90867236c1a",
   "staleness": {
-   "checked_at_utc": "2026-10-07T05:03:59Z",
-   "checked_nodes": 420,
+   "checked_at_utc": "2026-10-07T11:33:26Z",
+   "checked_nodes": 431,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
   }
  },
- "host": "arcana-devs",
+ "host": "aras-owner",
+ "host_redacted": true,
+ "host_sha256": "d727d07d99c18295fe61f36c9c743078eb549a53f7f5a647631a4d54db6edafc",
  "impact_set": {
   "deterministic_core": [
    {
@@ -733,6 +735,26 @@
       "from": "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts",
       "provenance": "deterministic",
       "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "via": "relative"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/api/test/migration.archive-projection.postgres.spec.ts",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/api/test/migration.archive-projection.postgres.spec.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/tasks/field-state/field-changes.service.ts",
       "via": "relative"
      }
     ],
@@ -1794,6 +1816,53 @@
       "from": "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
       "provenance": "deterministic",
       "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/mun-0043-index-grant-20261007.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/mun-0043-index-grant-20261007.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/revision4-public-20261007.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/api/src/app.module.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/tasks/tasks.module.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/revision4-public-20261007.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/app.module.ts",
       "via": "explicit-path"
      }
     ],
@@ -2962,18 +3031,19 @@
   ],
   "max_depth": 3,
   "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
-  "total": 120
+  "total": 123
  },
  "notes": [
   "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
   "profile: (auto-detected); baseline: contracts/graph-verified-change/fitness-baseline/Arcanada-one__muneral.v1.json (valid); selected: none; disabled: none",
-  "DEC-AUP-0035 not applied to receipt:receipts/graph/change-admission-MUNERAL210-075162f.json: it declares this run's work item af868172-bd90-4522-b817-c2a2d1804dfe, but the receipt is being written to /home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/210-PINNED-CAR.json, which is outside this repository, so no path in the tree is the one this run supersedes."
+  "head tree f3cf93e074bd exported with git archive into /home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN210/verify-work/export-f3cf93e074bd (node_modules linked from the repository for ['.', 'apps/api', 'apps/web', 'packages/types']; workspace packages built: ['packages/types (tsc exit 0, 0.8s)']); the repository was not written"
  ],
  "producer": {
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261007T050312Z-be16d4bd",
+ "receipt_id": "car-verify-20261007T113242Z-f3cf93e0",
+ "receipt_path": "receipts/graph/change-admission-MUNERAL210-075162f.json",
  "repo": {
   "name": "Arcanada-one/muneral",
   "path": "/home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source"
@@ -3010,6 +3080,7 @@
    "code_unit:apps/api/test/app-module-boot.e2e.spec.ts",
    "code_unit:apps/api/test/field-changes.e2e.spec.ts",
    "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts",
+   "code_unit:apps/api/test/migration.archive-projection.postgres.spec.ts",
    "code_unit:apps/api/test/outbox-relay-probe.postgres.spec.ts",
    "code_unit:apps/api/test/outbox-relay-wired.e2e.spec.ts",
    "code_unit:apps/api/test/sync-import-scope.e2e.spec.ts",
@@ -3078,6 +3149,8 @@
    "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
    "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
    "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+   "receipt:receipts/graph/mun-0043-index-grant-20261007.json",
+   "receipt:receipts/graph/revision4-public-20261007.json",
    "receipt:receipts/graph/security-api959a-caller788.json",
    "route:DELETE /agents/keys/:keyId",
    "route:DELETE /agents/tasks/:taskId/assign/:agentId",
@@ -3164,6 +3237,7 @@
    "code_unit:apps/api/test/app-module-boot.e2e.spec.ts",
    "code_unit:apps/api/test/field-changes.e2e.spec.ts",
    "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts",
+   "code_unit:apps/api/test/migration.archive-projection.postgres.spec.ts",
    "code_unit:apps/api/test/outbox-relay-probe.postgres.spec.ts",
    "code_unit:apps/api/test/outbox-relay-wired.e2e.spec.ts",
    "code_unit:apps/api/test/sync-import-scope.e2e.spec.ts",
@@ -3236,6 +3310,8 @@
    "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
    "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
    "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+   "receipt:receipts/graph/mun-0043-index-grant-20261007.json",
+   "receipt:receipts/graph/revision4-public-20261007.json",
    "receipt:receipts/graph/security-api959a-caller788.json",
    "route:DELETE /agents/keys/:keyId",
    "route:DELETE /agents/tasks/:taskId/assign/:agentId",
@@ -3294,7 +3370,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-07T05:03:59Z",
+  "checked_at_utc": "2026-10-07T11:33:26Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -3409,6 +3485,21 @@
    "path": "receipts/graph/a2-320-web-eslint10.json",
    "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
    "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": null,
+    "head": "sha256:b5b0ef3e5f5f165552a6062a0ddf39648d8b24b3d4663c0329c1271ecb796dee"
+   },
+   "entity": "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-MUNERAL210-075162f.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it; superseded by construction — this run re-issues the receipt at receipts/graph/change-admission-MUNERAL210-075162f.json for work item af868172-bd90-4522-b817-c2a2d1804dfe",
+   "rule": "DEC-AUP-0035",
+   "superseded": {
+    "receipt_path": "receipts/graph/change-admission-MUNERAL210-075162f.json",
+    "work_item": "af868172-bd90-4522-b817-c2a2d1804dfe"
+   }
   },
   {
    "content_hash": {
@@ -3665,6 +3756,28 @@
   },
   {
    "content_hash": {
+    "base": "sha256:b4200f9b902e14918acd557f41b1f80ff77b51855de60fada33bec7f774eada3",
+    "head": "sha256:b4200f9b902e14918acd557f41b1f80ff77b51855de60fada33bec7f774eada3"
+   },
+   "entity": "receipt:receipts/graph/mun-0043-index-grant-20261007.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/mun-0043-index-grant-20261007.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:1c94d3471b00a482ab1b9c14c147b36a16a6985f827ba0cb9fc2776387963530",
+    "head": "sha256:1c94d3471b00a482ab1b9c14c147b36a16a6985f827ba0cb9fc2776387963530"
+   },
+   "entity": "receipt:receipts/graph/revision4-public-20261007.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/revision4-public-20261007.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
     "base": "sha256:32fe4de334dfc155b83c1147706675b80eed51426cee16655ce78ab1aaf5fa90",
     "head": "sha256:32fe4de334dfc155b83c1147706675b80eed51426cee16655ce78ab1aaf5fa90"
    },
@@ -3676,7 +3789,7 @@
   }
  ],
  "tree": {
-  "commit": "be16d4bddaeb4cced37e309065a39a4868f94261",
+  "commit": "f3cf93e074bdf5912d7b58296a17e90867236c1a",
   "dirty": false
  },
  "verdicts": [
@@ -3988,6 +4101,15 @@
   },
   {
    "entity": "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-api-tsconfig-test"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/api/test/migration.archive-projection.postgres.spec.ts",
    "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
    "verdict": "verified",
    "verifier_ids": [
@@ -4353,11 +4475,6 @@
    "verifier_ids": [
     "v-doc-reference"
    ]
-  },
-  {
-   "entity": "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json",
-   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
-   "verdict": "not_measured"
   },
   {
    "entity": "route:DELETE /agents/keys/:keyId",
@@ -4929,8 +5046,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/apps/api/node_modules/.bin/tsc -p /home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/210-work-pinned/verifier-out/type-check-7q0kn21s/check.tsbuildinfo --listFiles",
-   "duration_s": 11.65,
+   "command": "/home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN210/verify-work/export-f3cf93e074bd/apps/api/node_modules/.bin/tsc -p /home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN210/verify-work/export-f3cf93e074bd/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/type-check-q2f07tnz/check.tsbuildinfo --listFiles",
+   "duration_s": 8.12,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -5092,13 +5209,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/210-work-pinned/verifier-out/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-10-07T05:04:05Z",
-   "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1449 files listed"
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-10-07T11:33:32Z",
+   "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1451 files listed"
   },
   {
-   "command": "/home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/apps/api/node_modules/.bin/tsc -p /home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/210-work-pinned/verifier-out/type-check-fx5a_rqs/check.tsbuildinfo --listFiles",
-   "duration_s": 15.53,
+   "command": "/home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN210/verify-work/export-f3cf93e074bd/apps/api/node_modules/.bin/tsc -p /home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN210/verify-work/export-f3cf93e074bd/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/type-check-xb16f2ux/check.tsbuildinfo --listFiles",
+   "duration_s": 12.76,
    "entities": [
     "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts",
     "code_unit:apps/api/test/agent-project-dependencies.e2e.spec.ts",
@@ -5108,6 +5225,7 @@
     "code_unit:apps/api/test/app-module-boot.e2e.spec.ts",
     "code_unit:apps/api/test/field-changes.e2e.spec.ts",
     "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts",
+    "code_unit:apps/api/test/migration.archive-projection.postgres.spec.ts",
     "code_unit:apps/api/test/outbox-relay-probe.postgres.spec.ts",
     "code_unit:apps/api/test/outbox-relay-wired.e2e.spec.ts",
     "code_unit:apps/api/test/sync-import-scope.e2e.spec.ts",
@@ -5129,6 +5247,7 @@
     "code_unit:apps/api/test/app-module-boot.e2e.spec.ts": "verified",
     "code_unit:apps/api/test/field-changes.e2e.spec.ts": "verified",
     "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/migration.archive-projection.postgres.spec.ts": "verified",
     "code_unit:apps/api/test/outbox-relay-probe.postgres.spec.ts": "verified",
     "code_unit:apps/api/test/outbox-relay-wired.e2e.spec.ts": "verified",
     "code_unit:apps/api/test/sync-import-scope.e2e.spec.ts": "verified",
@@ -5144,13 +5263,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
-   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/210-work-pinned/verifier-out/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-10-07T05:04:17Z",
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/v-type-check-apps-api-tsconfig-test.txt",
+   "started_at_utc": "2026-10-07T11:33:40Z",
    "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1608 files listed"
   },
   {
-   "command": "/home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/apps/web/node_modules/.bin/tsc -p /home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/210-work-pinned/verifier-out/type-check-553zgh8j/check.tsbuildinfo --listFiles",
-   "duration_s": 12.83,
+   "command": "/home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN210/verify-work/export-f3cf93e074bd/apps/web/node_modules/.bin/tsc -p /home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN210/verify-work/export-f3cf93e074bd/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/type-check-iu6rg6v2/check.tsbuildinfo --listFiles",
+   "duration_s": 10.51,
    "entities": [
     "code_unit:apps/web/__tests__/kanban-board.test.ts",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
@@ -5188,13 +5307,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/210-work-pinned/verifier-out/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-10-07T05:04:33Z",
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-10-07T11:33:54Z",
    "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1296 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=439862de0815, head=be16d4bddaeb, graph=head graph)",
-   "duration_s": 9.13,
+   "command": "tools/graph/contract_diff.py.run_diff(base=6fda07006a2e, head=f3cf93e074bd, graph=head graph)",
+   "duration_s": 7.97,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.service.ts",
@@ -5358,13 +5477,13 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/210-work-pinned/verifier-out/v-contract-diff.json",
-   "started_at_utc": "2026-10-07T05:04:47Z",
-   "summary": "47→48 contracts, breaking 0, edges {'verified': 152}"
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/v-contract-diff.json",
+   "started_at_utc": "2026-10-07T11:34:05Z",
+   "summary": "47→48 contracts, breaking 0, edges {'verified': 153}"
   },
   {
    "command": "verify.py route_config_consistency RC-01 prefix / RC-02 registration / RC-03 served",
-   "duration_s": 0.08,
+   "duration_s": 0.07,
    "entities": [
     "route:DELETE /agents/keys/:keyId",
     "route:DELETE /agents/tasks/:taskId/assign/:agentId",
@@ -5474,13 +5593,13 @@
    "exit_code": 0,
    "id": "v-route-config",
    "kind": "config_schema",
-   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/210-work-pinned/verifier-out/v-route-config.txt",
-   "started_at_utc": "2026-10-07T05:04:56Z",
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/v-route-config.txt",
+   "started_at_utc": "2026-10-07T11:34:13Z",
    "summary": "51 route(s), 0 failed"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.27,
+   "duration_s": 0.24,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -5515,6 +5634,7 @@
     "code_unit:apps/api/test/app-module-boot.e2e.spec.ts",
     "code_unit:apps/api/test/field-changes.e2e.spec.ts",
     "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts",
+    "code_unit:apps/api/test/migration.archive-projection.postgres.spec.ts",
     "code_unit:apps/api/test/outbox-relay-probe.postgres.spec.ts",
     "code_unit:apps/api/test/outbox-relay-wired.e2e.spec.ts",
     "code_unit:apps/api/test/sync-import-scope.e2e.spec.ts",
@@ -5576,6 +5696,7 @@
     "code_unit:apps/api/test/app-module-boot.e2e.spec.ts": "verified",
     "code_unit:apps/api/test/field-changes.e2e.spec.ts": "verified",
     "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/migration.archive-projection.postgres.spec.ts": "verified",
     "code_unit:apps/api/test/outbox-relay-probe.postgres.spec.ts": "verified",
     "code_unit:apps/api/test/outbox-relay-wired.e2e.spec.ts": "verified",
     "code_unit:apps/api/test/sync-import-scope.e2e.spec.ts": "verified",
@@ -5606,13 +5727,13 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/210-work-pinned/verifier-out/v-fitness.json",
-   "started_at_utc": "2026-10-07T05:04:56Z",
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-10-07T11:34:13Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
    "command": "verify.py doc_reference: path / route / model references of affected documents resolve at head",
-   "duration_s": 0.01,
+   "duration_s": 0.02,
    "entities": [
     "document:README.md",
     "document:apps/api/docs/agent-read-loop.md",
@@ -5640,8 +5761,8 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/210-work-pinned/verifier-out/v-doc-reference.txt",
-   "started_at_utc": "2026-10-07T05:04:56Z",
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/v-doc-reference.txt",
+   "started_at_utc": "2026-10-07T11:34:13Z",
    "summary": "10 document(s), 0 failed"
   },
   {
@@ -5800,22 +5921,23 @@
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/210-work-pinned/verifier-out/v-canary.json",
-   "started_at_utc": "2026-10-07T05:04:56Z",
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/v-canary.json",
+   "started_at_utc": "2026-10-07T11:34:13Z",
    "summary": "0 canary result(s), 0 committed at head; 0 verified / 0 failed / 73 not_measured of 73 entities"
   }
  ],
  "verify": {
   "events": [
    {
-    "code": "SUPERSEDED_SELF_NOT_APPLICABLE",
+    "code": "SUPERSEDED_SELF_EXCLUSION",
+    "entity": "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json",
     "rule": "DEC-AUP-0035",
-    "text": "DEC-AUP-0035 not applied to receipt:receipts/graph/change-admission-MUNERAL210-075162f.json: it declares this run's work item af868172-bd90-4522-b817-c2a2d1804dfe, but the receipt is being written to /home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/210-PINNED-CAR.json, which is outside this repository, so no path in the tree is the one this run supersedes."
+    "text": "the receipt at receipts/graph/change-admission-MUNERAL210-075162f.json is the previous version of the one this run is writing, for the same work item af868172-bd90-4522-b817-c2a2d1804dfe — superseded by construction, so it owes this change no verdict"
    },
    {
     "code": "STRUCTURAL_EXCLUSION",
     "rule": "DEC-AUP-0034",
-    "text": "34 affected entity(ies) owe no verdict (receipt: 34): unchanged at both revisions and given no verifier by the matrix"
+    "text": "37 affected entity(ies) owe no verdict (receipt: 37): unchanged at both revisions and given no verifier by the matrix"
    }
   ],
   "required_by_entity": {
@@ -5966,6 +6088,10 @@
     "type_check"
    ],
    "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/api/test/migration.archive-projection.postgres.spec.ts": [
     "fitness_rules",
     "type_check"
    ],
@@ -6158,6 +6284,8 @@
    "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json": [],
    "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json": [],
    "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json": [],
+   "receipt:receipts/graph/mun-0043-index-grant-20261007.json": [],
+   "receipt:receipts/graph/revision4-public-20261007.json": [],
    "receipt:receipts/graph/security-api959a-caller788.json": [],
    "route:DELETE /agents/keys/:keyId": [
     "canary",
@@ -6467,9 +6595,9 @@
    ]
   },
   "seconds": {
-   "prepare": 5.0,
-   "total": 104.57,
-   "verifiers": 49.5
+   "prepare": 4.64,
+   "total": 91.01,
+   "verifiers": 39.69
   }
  },
  "work_item": "af868172-bd90-4522-b817-c2a2d1804dfe"
