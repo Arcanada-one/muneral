@@ -1,6 +1,7 @@
 packages:
-  - 'apps/*'
-  - 'packages/*'
+  - 'apps/api'
+  - 'apps/web'
+  - 'packages/types'
 allowBuilds:
   '@nestjs/core': true
   '@prisma/engines': true

@@ -105,6 +105,8 @@ jobs:
         run: pnpm lint
       - name: Build shared types
         run: pnpm --filter @muneral/types build
+      - name: Typecheck root configuration
+        run: pnpm run typecheck:root
       - name: Generate Prisma client
         # Run from repo root so prisma.config.ts (root) resolves apps/api/prisma/schema.prisma
         run: pnpm exec prisma generate
@@ -126,6 +128,17 @@ jobs:
         env:
           DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
           MUN0020_DB_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
+      # Exact package commands let the authenticated full-suite importer bind
+      # each deployable to real execution, including the shared runtime policies.
+      - name: API full suite
+        run: pnpm --filter @muneral/api test
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
+          MUN0020_DB_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
+      - name: Web full suite
+        run: pnpm --filter @muneral/web test
+      - name: Shared types full suite
+        run: pnpm --filter @muneral/types test
 
   # AUP-GRAPH-006 `gate1` (DEC-AUP-0008): «нет receipt — нет мержа». A pull request is admitted only
   # when a ChangeAdmissionReceipt/v1 is bound to exactly this change range — in the head tree under
