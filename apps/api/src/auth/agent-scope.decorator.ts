@@ -119,6 +119,8 @@ import { SetMetadata } from '@nestjs/common';
  *                      route and what bounds it. Read-only: no write consults
  *                      the list, and the route has no write sibling.
  */
+/** task-granted-read: only task/evidence GET; owner first, otherwise independent
+ * dated task-read capability AND current project-index permission. Never a write. */
 export const AGENT_SCOPE_KEY = 'mun0043:agentScope';
 
 // API959a: metadata is limited to the credential's workspace. Dependency
@@ -130,6 +132,7 @@ export type AgentScopeKind =
   | 'project-create'
   | 'task-dependency'
   | 'task'
+  | 'task-granted-read'
   | 'project'
   | 'task-workspace'
   | 'project-write'

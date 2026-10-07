@@ -1,3 +1,7 @@
+import { admitGrantedTaskRead, taskReadDenied } from '../task-project-read-admission.js';
+import type { GrantedTaskReadContext } from '../task-project-read-admission.js';
+import { TASK_PROJECT_READ_CAPABILITIES, TASK_PROJECT_READ_CAPABILITY_LIST } from '../task-project-read-capabilities.js';
+import type { TaskProjectReadCapability } from '../task-project-read-capabilities.js';
 import { admitProjectIndex } from '../project-index-admission.js';
 import { WORKSPACE_INDEX_GRANTS, WORKSPACE_INDEX_GRANT_LIST } from '../workspace-index-grants.js';
 import type { ProjectIndexGrant, WorkspaceIndexGrantEntry } from '../workspace-index-grants.js';
@@ -34,6 +38,7 @@ import type { WorkspaceDigestGrantEntry } from '../workspace-digest-grants.js';
  *  narrow its answer to. Absent on JWT requests, which are not narrowed. */
 export interface AgentScopeContext {
   agentId: string;
+  grantedTaskRead?: GrantedTaskReadContext;
   kind: AgentScopeKind;
   /** MUN-0051, 'task-assign' only: what entitled the key to assign — recorded
    *  in the activity row the assignment writes. */
@@ -119,6 +124,7 @@ export type AgentScopedRequest = Request & {
  */
 @Injectable()
 export class AgentTaskScopeGuard implements CanActivate {
+  private readonly taskReadCapabilities: readonly TaskProjectReadCapability[];
   private readonly projectReadGrants: readonly ProjectReadGrantEntry[];
   private readonly workspaceIndexGrants: readonly WorkspaceIndexGrantEntry[];
   private readonly workspaceDigestGrants: readonly WorkspaceDigestGrantEntry[];
@@ -135,7 +141,11 @@ export class AgentTaskScopeGuard implements CanActivate {
     @Optional()
     @Inject(WORKSPACE_INDEX_GRANTS)
     workspaceIndexGrants?: readonly WorkspaceIndexGrantEntry[],
+    @Optional()
+    @Inject(TASK_PROJECT_READ_CAPABILITIES)
+    taskReadCapabilities?: readonly TaskProjectReadCapability[],
   ) {
+    this.taskReadCapabilities = taskReadCapabilities ?? TASK_PROJECT_READ_CAPABILITY_LIST;
     this.workspaceIndexGrants = workspaceIndexGrants ?? WORKSPACE_INDEX_GRANT_LIST;
     this.projectReadGrants = projectReadGrants ?? PROJECT_READ_GRANT_LIST;
     this.workspaceDigestGrants = workspaceDigestGrants ?? WORKSPACE_DIGEST_GRANT_LIST;
@@ -204,6 +214,21 @@ export class AgentTaskScopeGuard implements CanActivate {
 
       // MUN-0051: 'task' (read, activity, comment) admits the creator as well
       // as an assignee — see agentOwnTaskWhere.
+      case 'task-granted-read': {
+        if (req.method !== 'GET') throw taskReadDenied();
+        const taskId = this.paramOf(req, 'taskId');
+        if (!taskId) throw taskReadDenied();
+        try {
+          await this.assertOwnTask(agent, taskId);
+        } catch (error) {
+          if (!(error instanceof ForbiddenException)) throw error;
+          const admitted = await admitGrantedTaskRead(this.prisma, agent.id, taskId, new Date(),
+            this.taskReadCapabilities, this.projectReadGrants, this.workspaceIndexGrants);
+          req.agentScope = { agentId: agent.id, kind, workspaceId: admitted.workspaceId, grantedTaskRead: admitted };
+          return true;
+        }
+        break;
+      }
       case 'task': {
         const taskId = this.paramOf(req, 'taskId');
         if (!taskId) throw new ForbiddenException('No task in scope for this key.');
