@@ -1,0 +1,21 @@
+{
+  "schema": "VerifyProfile/v1",
+  "deployables": {
+    ".": {
+      "full_test": ["pnpm", "test"],
+      "full_test_timeout_seconds": 1800
+    },
+    "apps/api": {
+      "full_test": ["pnpm", "--filter", "@muneral/api", "test"],
+      "full_test_timeout_seconds": 1800
+    },
+    "apps/web": {
+      "full_test": ["pnpm", "--filter", "@muneral/web", "test"],
+      "full_test_timeout_seconds": 180
+    },
+    "packages/types": {
+      "full_test": ["pnpm", "--filter", "@muneral/types", "test"],
+      "full_test_timeout_seconds": 180
+    }
+  }
+}
