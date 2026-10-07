@@ -1,0 +1,133 @@
+{
+  "schema": "CanaryPlan/v2",
+  "id": "mun0043-rev4-positive",
+  "owner": "term_146be82e-2b0a-4387-8d4b-54d68d494956",
+  "environment": "arcana-devs disposable PostgreSQL; synthetic identities",
+  "read_only": false,
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "1c6b6d51a70f0c6344d8775ccb01827d49f01676",
+    "tree": "a7a16018bfe6d4555369e748887b6bec2fa17c5f",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "13835846ae2416ae71cbf209d1873d3bdde3c2440da3cc3bffd8be061a658ea4",
+      "source_field": "commit"
+    }
+  },
+  "purpose": "Execute actual revision loader and transactional synthetic archive behavior. Parent negative control lacks revision 4. This proves local source behavior only; HTTP routing and production remain unmeasured.",
+  "probes": [
+    {
+      "kind": "process",
+      "id": "actual-revision-loader",
+      "argv": [
+        "/home/dev/aup/import-audit-work/runs/m211c/node-v24.21.0-linux-x64/bin/node",
+        "/home/dev/aup/import-audit-work/runs/rev4-loader-probe.mjs",
+        "/home/dev/aup/import-audit-work/mun-rev4"
+      ],
+      "cwd": ".",
+      "env_keys": [
+        "PATH",
+        "HOME",
+        "TMPDIR"
+      ],
+      "timeout_seconds": 120,
+      "capture_limit_bytes": 524288,
+      "executable_sha256": "7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c",
+      "execution_files": [
+        {
+          "path": "/home/dev/aup/import-audit-work/runs/rev4-loader-probe.mjs",
+          "sha256": "d2026aab906b46b6943f3b5e97012ee92f332f7dc0187bae1ebe36d71aac62c4"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/src/migration/status-map/status-map.ts",
+          "sha256": "b1987139d57b9ecd9b1c03d63b16baf709656e557f4c775cc0d246c4f73e776b"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/src/migration/status-map/status-map-v1-rev2.json",
+          "sha256": "8ea5bc468328083d618e51561fb4606251fd72b99a55fa3b3b5b77af021e8414"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/src/migration/status-map/status-map-v1-rev3.json",
+          "sha256": "a57044b1a4607584183eafb64716372f8b1890ae361457425c90abe4e25972b6"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/src/migration/status-map/status-map-v1-rev4.json",
+          "sha256": "e6037dd07abaf7f92102f69ac60395f0e2890c12a5f9268c0d5156f570e7f873"
+        }
+      ],
+      "entities": [
+        "code_unit:apps/api/src/migration/status-map/status-map.ts"
+      ],
+      "expect": {
+        "exit_codes": [
+          0
+        ],
+        "stdout_contains": [
+          "REV4_LOADER_BEHAVIOR_VERIFIED"
+        ]
+      },
+      "mutating": true
+    },
+    {
+      "kind": "process",
+      "id": "postgres-archive-projection",
+      "argv": [
+        "/home/dev/aup/import-audit-work/runs/m211c/node-v24.21.0-linux-x64/bin/node",
+        "--experimental-vm-modules",
+        "/home/dev/aup/import-audit-work/mun-rev4/apps/api/node_modules/jest/bin/jest.js",
+        "test/migration.archive-projection.postgres.spec.ts",
+        "--runInBand",
+        "--verbose"
+      ],
+      "cwd": "apps/api",
+      "env_keys": [
+        "PATH",
+        "HOME",
+        "TMPDIR",
+        "MUN0021_PG_BASE_URL"
+      ],
+      "timeout_seconds": 120,
+      "capture_limit_bytes": 524288,
+      "executable_sha256": "7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c",
+      "execution_files": [
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/src/migration/migration.archive-projection.ts",
+          "sha256": "c8442761851ffaadb98db97d0b59921c55f002a6be48ab6df374b66b9e524aa5"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/src/migration/migration.service.ts",
+          "sha256": "d290cf02917c397118348a3aac96429841dab00f5ce7f6f583c23ae7732fa2c8"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/src/tasks/field-state/task-field-state.service.ts",
+          "sha256": "e82b32d2fc9d1be7d0a086cca544518cc467fd09c9da05037372e11244dbb5fa"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/test/migration.archive-projection.postgres.spec.ts",
+          "sha256": "9b3090bf49eb039b46ecbdd376003a27d538e9ddc673d11556ba0072845e87a4"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/test/support/disposable-postgres.ts",
+          "sha256": "6644ee5e273b9bc866254288f8e4c426800da68875f485c932f28dc1e8576e3b"
+        }
+      ],
+      "entities": [
+        "code_unit:apps/api/src/migration/migration.archive-projection.ts",
+        "code_unit:apps/api/src/migration/migration.service.ts",
+        "code_unit:apps/api/src/tasks/field-state/task-field-state.service.ts"
+      ],
+      "expect": {
+        "exit_codes": [
+          0
+        ],
+        "stderr_contains": [
+          "9 passed",
+          "publishes a changed status hash and version",
+          "never overwrites a successful concurrent native CAS transition",
+          "keeps an exact request replay byte-identical"
+        ]
+      },
+      "mutating": true
+    }
+  ]
+}
