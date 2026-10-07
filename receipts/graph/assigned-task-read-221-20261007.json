@@ -5,7 +5,7 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "admitted_with_exemptions"
  },
- "captured_at_utc": "2026-10-07T22:10:02Z",
+ "captured_at_utc": "2026-10-07T22:37:24Z",
  "change_set": {
   "base": "5b67dea437be93b988f50b3d312879798dc79f89",
   "files": [
@@ -91,6 +91,15 @@
      "code_unit:apps/api/test/jwt-or-api-key.guard.spec.ts"
     ],
     "path": "apps/api/test/jwt-or-api-key.guard.spec.ts",
+    "status": "M"
+   },
+   {
+    "kind": "test",
+    "node_id": "code_unit:apps/api/test/migration.postgres.spec.ts",
+    "node_ids": [
+     "code_unit:apps/api/test/migration.postgres.spec.ts"
+    ],
+    "path": "apps/api/test/migration.postgres.spec.ts",
     "status": "M"
    },
    {
@@ -256,7 +265,7 @@
     "status": "A"
    }
   ],
-  "head": "a08f5e53363a7020d047d961c44d13404d2d113b",
+  "head": "19e6daa2c42730c1ad6cc1165231e4e557b54fe8",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -386,17 +395,17 @@
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
   "graph_digest": "sha256:016f1e1a336f724ffade4345f76a7074031472318d11308bc88f00cfb67e2521",
-  "path": "/home/dev/aup/import-audit-work/runs/assigned-read-project-header-final-record-verify/verifier-out/graph-5b67dea437be.json",
+  "path": "/home/dev/aup/import-audit-work/runs/assigned-read-221-fixture-native-verify-v2/verifier-out/graph-5b67dea437be.json",
   "source_commit": "5b67dea437be93b988f50b3d312879798dc79f89"
  },
  "head_graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:7c736df30edcb793799b133737c50a7e6108846463ed91e9a0b0cb2ada1dcf17",
-  "path": "/home/dev/aup/import-audit-work/runs/assigned-read-project-header-final-record-verify/verifier-out/graph-head-a08f5e53363a.json",
-  "source_commit": "a08f5e53363a7020d047d961c44d13404d2d113b",
+  "graph_digest": "sha256:8f5f9dd9ffacfe40bc40b6d5751263862995d71eaeb1b63dad353c9982120d54",
+  "path": "/home/dev/aup/import-audit-work/runs/assigned-read-221-fixture-native-verify-v2/verifier-out/graph-head-19e6daa2c427.json",
+  "source_commit": "19e6daa2c42730c1ad6cc1165231e4e557b54fe8",
   "staleness": {
-   "checked_at_utc": "2026-10-07T22:10:36Z",
+   "checked_at_utc": "2026-10-07T22:37:55Z",
    "checked_nodes": 433,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
@@ -2480,22 +2489,15 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/revision4-public-20261007.json",
     "node_type": "receipt",
     "path": [
      {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/migration/migration.controller.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/api-key.guard.ts",
-      "via": "relative"
-     },
-     {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/revision4-public-20261007.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/migration/migration.controller.ts",
+      "to": "code_unit:apps/api/test/migration.postgres.spec.ts",
       "via": "explicit-path"
      }
     ],
@@ -3999,7 +4001,7 @@
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261007T221002Z-a08f5e53",
+ "receipt_id": "car-verify-20261007T223724Z-19e6daa2",
  "receipt_path": "receipts/graph/assigned-task-read-221-20261007.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -4045,6 +4047,7 @@
    "code_unit:apps/api/test/jwt-or-api-key.guard.spec.ts",
    "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts",
    "code_unit:apps/api/test/migration.controller.spec.ts",
+   "code_unit:apps/api/test/migration.postgres.spec.ts",
    "code_unit:apps/api/test/outbox-relay-probe.postgres.spec.ts",
    "code_unit:apps/api/test/outbox-relay-wired.e2e.spec.ts",
    "code_unit:apps/api/test/solution-log-head.contract.spec.ts",
@@ -4225,6 +4228,7 @@
    "code_unit:apps/api/test/jwt-or-api-key.guard.spec.ts",
    "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts",
    "code_unit:apps/api/test/migration.controller.spec.ts",
+   "code_unit:apps/api/test/migration.postgres.spec.ts",
    "code_unit:apps/api/test/outbox-relay-probe.postgres.spec.ts",
    "code_unit:apps/api/test/outbox-relay-wired.e2e.spec.ts",
    "code_unit:apps/api/test/solution-log-head.contract.spec.ts",
@@ -4371,7 +4375,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-07T22:10:36Z",
+  "checked_at_utc": "2026-10-07T22:37:54Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -4490,7 +4494,7 @@
   {
    "content_hash": {
     "base": null,
-    "head": "sha256:8dfafeb42c3c7a4031dabe91c325df47c31e6c90a8825aad9f84edfb947ee579"
+    "head": "sha256:bc9e55ea2e9d2dfc57988b5f56e0e83b921702b4731e2225dd35aafdc0d48210"
    },
    "entity": "receipt:receipts/graph/assigned-task-read-221-20261007.json",
    "node_type": "receipt",
@@ -4801,13 +4805,13 @@
   }
  ],
  "tree": {
-  "commit": "a08f5e53363a7020d047d961c44d13404d2d113b",
+  "commit": "19e6daa2c42730c1ad6cc1165231e4e557b54fe8",
   "dirty": false
  },
  "verdicts": [
   {
    "entity": "code_unit:apps/api/src/agents/agents.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation (1 frozen: FR-01); v-canary-2: canary assigned-read-project-header-final-routes (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation (1 frozen: FR-01); v-canary-2: canary assigned-read-fixture-routes (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
    "verdict": "verified",
    "verifier_ids": [
     "v-canary-2",
@@ -4910,7 +4914,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/migration/migration.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 4 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-2: canary assigned-read-project-header-final-routes (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 4 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-2: canary assigned-read-fixture-routes (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
    "verdict": "verified",
    "verifier_ids": [
     "v-canary-2",
@@ -4939,7 +4943,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/projects/projects.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-2: canary assigned-read-project-header-final-routes (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-2: canary assigned-read-fixture-routes (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
    "verdict": "verified",
    "verifier_ids": [
     "v-canary-2",
@@ -4968,7 +4972,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/solution-log-head/solution-log-head.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation (1 frozen: FR-01); v-canary-2: canary assigned-read-project-header-final-routes (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation (1 frozen: FR-01); v-canary-2: canary assigned-read-fixture-routes (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
    "verdict": "verified",
    "verifier_ids": [
     "v-canary-2",
@@ -4988,7 +4992,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/sync/sync.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation; v-canary-2: canary assigned-read-project-header-final-routes (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation; v-canary-2: canary assigned-read-fixture-routes (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
    "verdict": "verified",
    "verifier_ids": [
     "v-canary-2",
@@ -5008,7 +5012,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation (1 frozen: FR-01); v-canary-2: canary assigned-read-project-header-final-routes (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation (1 frozen: FR-01); v-canary-2: canary assigned-read-fixture-routes (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
    "verdict": "verified",
    "verifier_ids": [
     "v-canary-2",
@@ -5019,7 +5023,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-2: canary assigned-read-project-header-final-routes (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-2: canary assigned-read-fixture-routes (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
    "verdict": "verified",
    "verifier_ids": [
     "v-canary-2",
@@ -5039,7 +5043,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/tasks.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 9 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-1: canary assigned-read-project-header-final-positive (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 9 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-1: canary assigned-read-fixture-positive (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
    "verdict": "verified",
    "verifier_ids": [
     "v-canary-1",
@@ -5068,7 +5072,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation (1 frozen: FR-01); v-canary-2: canary assigned-read-project-header-final-routes (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation (1 frozen: FR-01); v-canary-2: canary assigned-read-fixture-routes (pre) on Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
    "verdict": "verified",
    "verifier_ids": [
     "v-canary-2",
@@ -5172,6 +5176,16 @@
    "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
    "verdict": "verified",
    "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-api-tsconfig-test"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/api/test/migration.postgres.spec.ts",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
    ]
@@ -6246,8 +6260,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007/apps/api/node_modules/.bin/tsc -p /home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/assigned-read-project-header-final-record-verify/verifier-out/type-check-_ui6ott9/check.tsbuildinfo --listFiles",
-   "duration_s": 5.22,
+   "command": "/home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007/apps/api/node_modules/.bin/tsc -p /home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/assigned-read-221-fixture-native-verify-v2/verifier-out/type-check-rbhbxg1d/check.tsbuildinfo --listFiles",
+   "duration_s": 4.97,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -6439,13 +6453,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-project-header-final-record-verify/verifier-out/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-10-07T22:10:39Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-221-fixture-native-verify-v2/verifier-out/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-10-07T22:37:57Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1452 files listed"
   },
   {
-   "command": "/home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007/apps/api/node_modules/.bin/tsc -p /home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/assigned-read-project-header-final-record-verify/verifier-out/type-check-ro6quayy/check.tsbuildinfo --listFiles",
-   "duration_s": 7.72,
+   "command": "/home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007/apps/api/node_modules/.bin/tsc -p /home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/assigned-read-221-fixture-native-verify-v2/verifier-out/type-check-_n3p5voz/check.tsbuildinfo --listFiles",
+   "duration_s": 8.3,
    "entities": [
     "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts",
     "code_unit:apps/api/test/agent-project-dependencies.e2e.spec.ts",
@@ -6457,6 +6471,7 @@
     "code_unit:apps/api/test/jwt-or-api-key.guard.spec.ts",
     "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts",
     "code_unit:apps/api/test/migration.controller.spec.ts",
+    "code_unit:apps/api/test/migration.postgres.spec.ts",
     "code_unit:apps/api/test/outbox-relay-probe.postgres.spec.ts",
     "code_unit:apps/api/test/outbox-relay-wired.e2e.spec.ts",
     "code_unit:apps/api/test/solution-log-head.contract.spec.ts",
@@ -6483,6 +6498,7 @@
     "code_unit:apps/api/test/jwt-or-api-key.guard.spec.ts": "verified",
     "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts": "verified",
     "code_unit:apps/api/test/migration.controller.spec.ts": "verified",
+    "code_unit:apps/api/test/migration.postgres.spec.ts": "verified",
     "code_unit:apps/api/test/outbox-relay-probe.postgres.spec.ts": "verified",
     "code_unit:apps/api/test/outbox-relay-wired.e2e.spec.ts": "verified",
     "code_unit:apps/api/test/solution-log-head.contract.spec.ts": "verified",
@@ -6501,13 +6517,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-project-header-final-record-verify/verifier-out/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-10-07T22:10:44Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-221-fixture-native-verify-v2/verifier-out/v-type-check-apps-api-tsconfig-test.txt",
+   "started_at_utc": "2026-10-07T22:38:03Z",
    "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1613 files listed"
   },
   {
-   "command": "/home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007/apps/web/node_modules/.bin/tsc -p /home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/assigned-read-project-header-final-record-verify/verifier-out/type-check-2ycregml/check.tsbuildinfo --listFiles",
-   "duration_s": 7.97,
+   "command": "/home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007/apps/web/node_modules/.bin/tsc -p /home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/assigned-read-221-fixture-native-verify-v2/verifier-out/type-check-wj7rmxnz/check.tsbuildinfo --listFiles",
+   "duration_s": 5.67,
    "entities": [
     "code_unit:apps/web/__tests__/kanban-board.test.ts",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
@@ -6545,13 +6561,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-project-header-final-record-verify/verifier-out/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-10-07T22:10:53Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-221-fixture-native-verify-v2/verifier-out/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-10-07T22:38:11Z",
    "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1296 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=5b67dea437be, head=a08f5e53363a, graph=head graph)",
-   "duration_s": 8.67,
+   "command": "tools/graph/contract_diff.py.run_diff(base=5b67dea437be, head=19e6daa2c427, graph=head graph)",
+   "duration_s": 6.02,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.service.ts",
@@ -6564,6 +6580,7 @@
     "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts",
     "code_unit:apps/api/src/tasks/tasks.controller.ts",
     "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
+    "code_unit:apps/api/test/migration.postgres.spec.ts",
     "code_unit:apps/web/__tests__/kanban-board.test.ts",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
@@ -6654,6 +6671,7 @@
     "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts": "verified",
     "code_unit:apps/api/src/tasks/tasks.controller.ts": "verified",
     "code_unit:apps/api/src/workspaces/workspaces.controller.ts": "verified",
+    "code_unit:apps/api/test/migration.postgres.spec.ts": "verified",
     "code_unit:apps/web/__tests__/kanban-board.test.ts": "verified",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx": "verified",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx": "verified",
@@ -6735,13 +6753,13 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-project-header-final-record-verify/verifier-out/v-contract-diff.json",
-   "started_at_utc": "2026-10-07T22:11:01Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-221-fixture-native-verify-v2/verifier-out/v-contract-diff.json",
+   "started_at_utc": "2026-10-07T22:38:17Z",
    "summary": "48→48 contracts, breaking 0, edges {'verified': 153}"
   },
   {
    "command": "verify.py route_config_consistency RC-01 prefix / RC-02 registration / RC-03 served",
-   "duration_s": 0.13,
+   "duration_s": 0.06,
    "entities": [
     "route:DELETE /agents/keys/:keyId",
     "route:DELETE /agents/tasks/:taskId/assign/:agentId",
@@ -6873,13 +6891,13 @@
    "exit_code": 0,
    "id": "v-route-config",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-project-header-final-record-verify/verifier-out/v-route-config.txt",
-   "started_at_utc": "2026-10-07T22:11:10Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-221-fixture-native-verify-v2/verifier-out/v-route-config.txt",
+   "started_at_utc": "2026-10-07T22:38:23Z",
    "summary": "62 route(s), 0 failed"
   },
   {
    "command": "verify.py config_schema: keys read at head ⊆ declared keys",
-   "duration_s": 1.37,
+   "duration_s": 0.49,
    "entities": [
     "code_unit:apps/api/test/tasks-agent-scope.e2e.spec.ts"
    ],
@@ -6889,13 +6907,13 @@
    "exit_code": 0,
    "id": "v-config-schema",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-project-header-final-record-verify/verifier-out/v-config-schema.json",
-   "started_at_utc": "2026-10-07T22:11:10Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-221-fixture-native-verify-v2/verifier-out/v-config-schema.json",
+   "started_at_utc": "2026-10-07T22:38:24Z",
    "summary": "2 source(s), 0 new / 3 frozen undeclared reads, 0 failed; 4 vendored file(s) not attributed to this repository (Arcanada-one/arcanada-universal-program)"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.33,
+   "duration_s": 0.16,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -6936,6 +6954,7 @@
     "code_unit:apps/api/test/jwt-or-api-key.guard.spec.ts",
     "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts",
     "code_unit:apps/api/test/migration.controller.spec.ts",
+    "code_unit:apps/api/test/migration.postgres.spec.ts",
     "code_unit:apps/api/test/outbox-relay-probe.postgres.spec.ts",
     "code_unit:apps/api/test/outbox-relay-wired.e2e.spec.ts",
     "code_unit:apps/api/test/solution-log-head.contract.spec.ts",
@@ -7006,6 +7025,7 @@
     "code_unit:apps/api/test/jwt-or-api-key.guard.spec.ts": "verified",
     "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts": "verified",
     "code_unit:apps/api/test/migration.controller.spec.ts": "verified",
+    "code_unit:apps/api/test/migration.postgres.spec.ts": "verified",
     "code_unit:apps/api/test/outbox-relay-probe.postgres.spec.ts": "verified",
     "code_unit:apps/api/test/outbox-relay-wired.e2e.spec.ts": "verified",
     "code_unit:apps/api/test/solution-log-head.contract.spec.ts": "verified",
@@ -7039,8 +7059,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-project-header-final-record-verify/verifier-out/v-fitness.json",
-   "started_at_utc": "2026-10-07T22:11:11Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-221-fixture-native-verify-v2/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-10-07T22:38:24Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -7073,13 +7093,13 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-project-header-final-record-verify/verifier-out/v-doc-reference.txt",
-   "started_at_utc": "2026-10-07T22:11:12Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-221-fixture-native-verify-v2/verifier-out/v-doc-reference.txt",
+   "started_at_utc": "2026-10-07T22:38:24Z",
    "summary": "10 document(s), 0 failed"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 1.71,
+   "duration_s": 0.55,
    "entities": [
     "code_unit:apps/api/src/tasks/tasks.controller.ts"
    ],
@@ -7090,12 +7110,12 @@
    "id": "v-canary-1",
    "kind": "canary",
    "output_ref": "receipts/canary/assigned-task-read-221-project-header-20261007/positive/result.json",
-   "started_at_utc": "2026-10-07T22:11:12Z",
+   "started_at_utc": "2026-10-07T22:38:24Z",
    "summary": "receipts/canary/assigned-task-read-221-project-header-20261007/positive/result.json: 1 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 1.71,
+   "duration_s": 0.55,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/migration/migration.controller.ts",
@@ -7122,12 +7142,12 @@
    "id": "v-canary-2",
    "kind": "canary",
    "output_ref": "receipts/canary/assigned-task-read-221-project-header-20261007/routes/result.json",
-   "started_at_utc": "2026-10-07T22:11:12Z",
+   "started_at_utc": "2026-10-07T22:38:24Z",
    "summary": "receipts/canary/assigned-task-read-221-project-header-20261007/routes/result.json: 9 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 1.71,
+   "duration_s": 0.55,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/migration/migration.controller.ts",
@@ -7278,12 +7298,12 @@
    "id": "v-canary-3",
    "kind": "canary",
    "output_ref": "receipts/canary/assigned-task-read-221-project-header-20261007/routes/route-result.json",
-   "started_at_utc": "2026-10-07T22:11:12Z",
+   "started_at_utc": "2026-10-07T22:38:24Z",
    "summary": "receipts/canary/assigned-task-read-221-project-header-20261007/routes/route-result.json: 71 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 1.71,
+   "duration_s": 0.55,
    "entities": [
     "code_unit:apps/web/__tests__/kanban-board.test.ts",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
@@ -7321,8 +7341,8 @@
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-project-header-final-record-verify/verifier-out/v-canary.json",
-   "started_at_utc": "2026-10-07T22:11:12Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/assigned-read-221-fixture-native-verify-v2/verifier-out/v-canary.json",
+   "started_at_utc": "2026-10-07T22:38:24Z",
    "summary": "3 canary result(s), 3 committed at head; 71 verified / 0 failed / 15 not_measured of 86 entities"
   }
  ],
@@ -7514,6 +7534,11 @@
     "type_check"
    ],
    "code_unit:apps/api/test/migration.controller.spec.ts": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/api/test/migration.postgres.spec.ts": [
+    "contract_diff",
     "fitness_rules",
     "type_check"
    ],
@@ -8094,9 +8119,9 @@
    ]
   },
   "seconds": {
-   "prepare": 1.91,
-   "total": 71.74,
-   "verifiers": 38.26
+   "prepare": 2.15,
+   "total": 60.62,
+   "verifiers": 27.88
   }
  },
  "work_item": "95df19c8-2483-48e1-b68e-b191a89a849c"
