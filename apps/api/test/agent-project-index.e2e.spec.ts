@@ -1,3 +1,11 @@
+import { Prisma } from '@prisma/client';
+import { jest as jestRuntime } from '@jest/globals';
+import { TasksService } from '../src/tasks/tasks.service.js';
+import { admitProjectIndex } from '../src/auth/project-index-admission.js';
+const jest = jestRuntime as unknown as typeof globalThis.jest;
+import { createDisposablePostgres } from './support/disposable-postgres.js';
+import { WORKSPACE_INDEX_GRANTS } from '../src/auth/workspace-index-grants.js';
+import type { WorkspaceIndexGrantEntry } from '../src/auth/workspace-index-grants.js';
 /**
  * MUN-0052 (e2e) — the project task index for agent keys holding a read grant
  * (DEC-AUP-0029), over real HTTP against the DATABASE_URL database.
@@ -45,8 +53,12 @@ describe('MUN-0052 — project task index for granted agent keys (e2e)', () => {
   let prisma: PrismaService;
   let authSvc: AuthService;
   let fsSvc: TaskFieldStateService;
+  let tasksSvc: TasksService;
   // The guard reads this very array through DI; each test fills it.
   const grants: ProjectReadGrantEntry[] = [];
+  const workspaceGrants: WorkspaceIndexGrantEntry[] = [];
+  const database = createDisposablePostgres('project-index');
+  const previousDatabaseUrl = process.env.DATABASE_URL;
 
   let userId: string;
   let workspaceId: string;
@@ -58,9 +70,13 @@ describe('MUN-0052 — project task index for granted agent keys (e2e)', () => {
   const keys: Record<string, string> = {};
 
   beforeAll(async () => {
+    await database.start();
+    process.env.DATABASE_URL = database.url();
     const moduleRef: TestingModule = await Test.createTestingModule({ imports: [TestAppModule] })
       .overrideProvider(KanbanService)
       .useValue({ notify: () => void 0 })
+      .overrideProvider(WORKSPACE_INDEX_GRANTS)
+      .useValue(workspaceGrants)
       .overrideProvider(PROJECT_READ_GRANTS)
       .useValue(grants)
       .compile();
@@ -70,14 +86,20 @@ describe('MUN-0052 — project task index for granted agent keys (e2e)', () => {
     prisma = moduleRef.get(PrismaService);
     authSvc = moduleRef.get(AuthService);
     fsSvc = moduleRef.get(TaskFieldStateService);
+    tasksSvc = moduleRef.get(TasksService);
   });
 
   afterAll(async () => {
-    await app.close();
+    try { if (app) await app.close(); } finally {
+      await database.stop();
+      if (previousDatabaseUrl === undefined) delete process.env.DATABASE_URL;
+      else process.env.DATABASE_URL = previousDatabaseUrl;
+    }
   });
 
   beforeEach(async () => {
     grants.length = 0;
+    workspaceGrants.length = 0;
     const id = uuidv4().slice(0, 8);
     const user = await prisma.user.create({ data: { name: `mun0052-${id}` } });
     userId = user.id;
@@ -107,6 +129,7 @@ describe('MUN-0052 — project task index for granted agent keys (e2e)', () => {
 
   afterEach(async () => {
     grants.length = 0;
+    workspaceGrants.length = 0;
     const projectIds = [projectId, siblingProjectId, foreignProjectId];
     const taskIds = await prisma.task
       .findMany({ where: { projectId: { in: projectIds } }, select: { id: true } })
@@ -641,6 +664,145 @@ describe('MUN-0052 — project task index for granted agent keys (e2e)', () => {
         (await http().post(`/tasks/${taskId}/field-ack`).set(k()).send({ agentId: ids.reader, fields: [] })).status,
       );
       expect(own[0].status).toBe(own[1].status);
+    });
+  });
+
+  describe('workspace index fallback, native HTTP and database fixtures', () => {
+    const enable = (until = FUTURE) => workspaceGrants.push({
+      agentId: ids.reader, agentName: 'reader', workspaceId, anchorProjectId: projectId,
+      excludedProjectSlugs: ['tbt','mt5-bridge'], until, decision: 'DEC-WORKSPACE-TEST', evidence: 'synthetic',
+    });
+    it('lists nonowned rows in another eligible project, preserving exact projection and audit', async () => {
+      const task = await othersTask(siblingProjectId);enable();
+      const res = await index(siblingProjectId,keys.reader).expect(200);
+      expect(Object.keys(res.body).sort()).toEqual(ENVELOPE_KEYS);
+      expect(Object.keys(res.body.tasks[0]).sort()).toEqual(ROW_KEYS);
+      expect(res.body.total).toBe(1);expect(res.body.tasks[0].id).toBe(task.id);
+      expect(res.body.grant.decision).toBe('DEC-WORKSPACE-TEST');
+      expect(JSON.stringify(res.body)).not.toContain(task.title);
+      expect(JSON.stringify(res.body)).not.toContain(task.description);
+      const event = await prisma.activityLog.findUnique({where:{id:res.body.auditEventId}});
+      expect(event).toMatchObject({workspaceId,actorId:ids.reader,action:PROJECT_INDEX_READ_ACTION});
+      expect(event?.payload).toEqual({projectId:siblingProjectId,decision:'DEC-WORKSPACE-TEST',rowCount:1});
+    });
+    it('answers empty eligible projects with a persisted audit, not a masked refusal', async () => {
+      enable();const res=await index(siblingProjectId,keys.reader).expect(200);
+      expect(res.body.total).toBe(0);expect(res.body.tasks).toEqual([]);
+      expect(await prisma.activityLog.findUnique({where:{id:res.body.auditEventId}})).not.toBeNull();
+    });
+    it.each(['tbt','mt5-bridge'])('conceals current %s slug before explicit and fallback grants', async slug => {
+      await prisma.project.update({where:{id:siblingProjectId},data:{slug}});enable();
+      const a=await index(siblingProjectId,keys.reader).expect(404);
+      grant('reader',siblingProjectId);const b=await index(siblingProjectId,keys.reader).expect(404);
+      expect(b.body).toEqual(a.body);expect(a.body).not.toHaveProperty('grant');
+      expect(await prisma.activityLog.count({where:{workspaceId,action:PROJECT_INDEX_READ_ACTION}})).toBe(0);
+    });
+    it('follows current slug after rename in either direction', async () => {
+      enable();await index(siblingProjectId,keys.reader).expect(200);
+      await prisma.project.update({where:{id:siblingProjectId},data:{slug:'tbt'}});
+      await index(siblingProjectId,keys.reader).expect(404);
+      await prisma.project.update({where:{id:siblingProjectId},data:{slug:'eligible-again'}});
+      await index(siblingProjectId,keys.reader).expect(200);
+    });
+    it('retains explicit authority and refuses its expiry despite a live fallback', async () => {
+      enable();grant('reader',siblingProjectId);
+      expect((await index(siblingProjectId,keys.reader).expect(200)).body.grant.decision).toBe('DEC-TEST');
+      grants[0].until=PAST;
+      const denied=await index(siblingProjectId,keys.reader).expect(403);
+      expect(denied.body).toMatchObject({code:'GRANT_EXPIRED',decision:'DEC-TEST',until:PAST});
+    });
+    it('refuses expired or malformed workspace grants', async () => {
+      enable(PAST);const res=await index(siblingProjectId,keys.reader).expect(403);
+      expect(res.body.code).toBe('GRANT_EXPIRED');
+      workspaceGrants[0].until='invalid';await index(siblingProjectId,keys.reader).expect(404);
+    });
+    it('conceals a foreign project and refuses another agent, a JWT and malformed UUIDs', async () => {
+      enable();await index(foreignProjectId,keys.reader).expect(404);
+      await index(siblingProjectId,keys.stranger).expect(404);
+      await index(siblingProjectId,authSvc.signAccess(userId)).expect(403);
+      await index('malformed',keys.reader).expect(404);
+      await index(uuidv4(),keys.reader).expect(404);
+    });
+    it('refuses missing or moved anchor and joint agent/anchor/target movement', async () => {
+      enable();workspaceGrants[0].anchorProjectId=uuidv4();await index(siblingProjectId,keys.reader).expect(404);
+      workspaceGrants[0].anchorProjectId=projectId;
+      await prisma.project.update({where:{id:projectId},data:{workspaceId:otherWorkspaceId}});
+      await index(siblingProjectId,keys.reader).expect(404);
+      await prisma.project.update({where:{id:siblingProjectId},data:{workspaceId:otherWorkspaceId}});
+      await prisma.agent.update({where:{id:ids.reader},data:{workspaceId:otherWorkspaceId}});
+      await index(siblingProjectId,keys.reader).expect(404);
+    });
+    it.each(['slug','workspace','actor','expiry'])('revalidates %s changed after the guard before reading', async boundary => {
+      enable();const original=tasksSvc.indexForProject.bind(tasksSvc);
+      const spy=jest.spyOn(tasksSvc,'indexForProject').mockImplementationOnce(async (...args) => {
+        if(boundary==='slug') await prisma.project.update({where:{id:siblingProjectId},data:{slug:'tbt'}});
+        if(boundary==='workspace') await prisma.project.update({where:{id:siblingProjectId},data:{workspaceId:otherWorkspaceId}});
+        if(boundary==='actor') await prisma.agent.update({where:{id:ids.reader},data:{workspaceId:otherWorkspaceId}});
+        if(boundary==='expiry') workspaceGrants[0].until=PAST;
+        return original(...args);
+      });
+      try { await index(siblingProjectId,keys.reader).expect(boundary==='expiry'?403:404); }
+      finally {spy.mockRestore();}
+      expect(await prisma.activityLog.count({where:{workspaceId,action:PROJECT_INDEX_READ_ACTION}})).toBe(0);
+    });
+    it('refuses forged or missing checked service context without an audit', async () => {
+      enable();const admitted=await admitProjectIndex(prisma,ids.reader,siblingProjectId,new Date(),grants,workspaceGrants,workspaceId);
+      await expect(tasksSvc.indexForProject(siblingProjectId,ids.reader,{...admitted.grant,decision:'FORGED'},workspaceId)).rejects.toThrow('not found');
+      await expect(tasksSvc.indexForProject(siblingProjectId,ids.reader,admitted.grant)).rejects.toThrow('not found');
+      expect(await prisma.activityLog.count({where:{workspaceId,action:PROJECT_INDEX_READ_ACTION}})).toBe(0);
+    });
+    function serviceWithBoundary(onSelect?: () => Promise<void>, failCount = false) {
+      const db={ $transaction: <T>(callback:(tx:Prisma.TransactionClient)=>Promise<T>,options?:{isolationLevel:Prisma.TransactionIsolationLevel}) =>
+        prisma.$transaction(async tx => callback(new Proxy(tx, {get(target, property) {
+          if(property==='task') return {findMany: async (args:Prisma.TaskFindManyArgs) => {if(onSelect)await onSelect();return tx.task.findMany(args);}};
+          if(property==='activityLog' && failCount) return {create:tx.activityLog.create.bind(tx.activityLog),count:async()=>{throw new Error('synthetic post-audit failure');}};
+          const value=Reflect.get(target,property);return typeof value==='function'?value.bind(target):value;
+        }})),options), };
+      return new TasksService(db as never,{} as never,{} as never,{} as never,{} as never,grants,workspaceGrants);
+    }
+    it('rolls back its real audit if a later transactional operation fails', async () => {
+      enable();const admitted=await admitProjectIndex(prisma,ids.reader,siblingProjectId,new Date(),grants,workspaceGrants,workspaceId);
+      await expect(serviceWithBoundary(undefined,true).indexForProject(siblingProjectId,ids.reader,admitted.grant,workspaceId)).rejects.toThrow('synthetic post-audit failure');
+      expect(await prisma.activityLog.count({where:{workspaceId,action:PROJECT_INDEX_READ_ACTION}})).toBe(0);
+    });
+    it('serializes a concurrent exclusion rename with the audited read on PostgreSQL', async () => {
+      enable();await othersTask(siblingProjectId);
+      const admitted=await admitProjectIndex(prisma,ids.reader,siblingProjectId,new Date(),grants,workspaceGrants,workspaceId);
+      let entered!:()=>void,release!:()=>void;
+      const atSelect=new Promise<void>(resolve=>{entered=resolve;});
+      const resume=new Promise<void>(resolve=>{release=resolve;});
+      const reader=serviceWithBoundary(async()=>{entered();await resume;}).indexForProject(siblingProjectId,ids.reader,admitted.grant,workspaceId);
+      let rename:Promise<unknown>|undefined;
+      try {
+        await atSelect;
+        const applicationName='index-rename-'+uuidv4();
+        rename=prisma.$transaction(async tx=>{
+          await tx.$queryRaw`SELECT set_config('application_name',${applicationName},true)`;
+          return tx.project.update({where:{id:siblingProjectId},data:{slug:'tbt'}});
+        });
+        let waiting=false;
+        for(let i=0;i<100 && !waiting;i++) {
+          const [row]=await prisma.$queryRaw<{waiting:boolean}[]>`SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE application_name=${applicationName} AND wait_event_type='Lock') AS waiting`;
+          waiting=row.waiting;
+          if(!waiting)await new Promise(resolve=>setTimeout(resolve,10));
+        }
+        expect(waiting).toBe(true); // observed database lock wait, not merely a delayed promise
+        release();const result=await reader;
+        expect(result.total).toBe(1);
+        expect(await prisma.activityLog.findUnique({where:{id:result.auditEventId}})).not.toBeNull();
+        await rename;
+        await index(siblingProjectId,keys.reader).expect(404);
+      } finally {release();await reader.catch(()=>void 0);if(rename)await rename.catch(()=>void 0);}
+    });
+    it('does not grant task prose, field values, digest, status changes or dependencies', async () => {
+      const task=await othersTask(siblingProjectId);enable();await index(siblingProjectId,keys.reader).expect(200);
+      const request = () => http().get(`/tasks/${task.id}`).set(bearer(keys.reader));
+      await request().expect(403);
+      const fields=await http().get(`/tasks/${task.id}/field-changes`).set(bearer(keys.reader)).expect(200);
+      expect(JSON.stringify(fields.body)).not.toContain(task.title);expect(JSON.stringify(fields.body)).not.toContain(task.description);
+      await http().get('/tasks/digest').set(bearer(keys.reader)).expect(403);
+      await http().patch(`/tasks/${task.id}/status`).set(bearer(keys.reader)).send({status:'done'}).expect(403);
+      expect((await prisma.task.findUnique({where:{id:task.id}}))?.status).toBe('todo');
     });
   });
 });

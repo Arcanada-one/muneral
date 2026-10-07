@@ -1,3 +1,6 @@
+import { admitProjectIndex } from '../project-index-admission.js';
+import { WORKSPACE_INDEX_GRANTS, WORKSPACE_INDEX_GRANT_LIST } from '../workspace-index-grants.js';
+import type { ProjectIndexGrant, WorkspaceIndexGrantEntry } from '../workspace-index-grants.js';
 import {
   CanActivate,
   ExecutionContext,
@@ -18,7 +21,6 @@ import { assignCompatWindowAdmits } from '../assign-compat-window.js';
 import {
   PROJECT_READ_GRANTS,
   PROJECT_READ_GRANT_LIST,
-  projectReadGrantState,
 } from '../project-read-grants.js';
 import type { ProjectReadGrantEntry } from '../project-read-grants.js';
 import {
@@ -37,7 +39,7 @@ export interface AgentScopeContext {
    *  in the activity row the assignment writes. */
   assignBasis?: AssignBasis;
   /** MUN-0052, 'project-index' only: the grant that admitted the read. */
-  projectReadGrant?: ProjectReadGrantEntry;
+  projectReadGrant?: ProjectIndexGrant;
   /** A2-284, 'workspace-digest' only: the grant that admitted the read. */
   workspaceDigestGrant?: WorkspaceDigestGrantEntry;
   /** A2-284, 'workspace-digest' only: the workspace the answer must be
@@ -118,6 +120,7 @@ export type AgentScopedRequest = Request & {
 @Injectable()
 export class AgentTaskScopeGuard implements CanActivate {
   private readonly projectReadGrants: readonly ProjectReadGrantEntry[];
+  private readonly workspaceIndexGrants: readonly WorkspaceIndexGrantEntry[];
   private readonly workspaceDigestGrants: readonly WorkspaceDigestGrantEntry[];
 
   constructor(
@@ -129,7 +132,11 @@ export class AgentTaskScopeGuard implements CanActivate {
     @Optional()
     @Inject(WORKSPACE_DIGEST_GRANTS)
     workspaceDigestGrants?: readonly WorkspaceDigestGrantEntry[],
+    @Optional()
+    @Inject(WORKSPACE_INDEX_GRANTS)
+    workspaceIndexGrants?: readonly WorkspaceIndexGrantEntry[],
   ) {
+    this.workspaceIndexGrants = workspaceIndexGrants ?? WORKSPACE_INDEX_GRANT_LIST;
     this.projectReadGrants = projectReadGrants ?? PROJECT_READ_GRANT_LIST;
     this.workspaceDigestGrants = workspaceDigestGrants ?? WORKSPACE_DIGEST_GRANT_LIST;
   }
@@ -295,23 +302,9 @@ export class AgentTaskScopeGuard implements CanActivate {
       case 'project-index': {
         const projectId = this.paramOf(req, 'projectId');
         if (!projectId) throw new ForbiddenException('No project in scope for this key.');
-        await this.assertProjectInWorkspace(agent, projectId);
-        const state = projectReadGrantState(agent.id, projectId, new Date(), this.projectReadGrants);
-        if (state.kind === 'expired') {
-          // The body is an object, so NestJS serialises it verbatim: a caller
-          // reads `code`, not prose. Same convention as migration.errors.ts.
-          throw new ForbiddenException({
-            code: 'GRANT_EXPIRED',
-            message:
-              `The project read grant for this key expired at ${state.entry.until}. ` +
-              'It is renewed by a pull request citing a program decision, not by an environment edit (MUN-0055).',
-            projectId,
-            until: state.entry.until,
-            decision: state.entry.decision,
-          });
-        }
-        if (state.kind === 'none') throw new NotFoundException(`Project ${projectId} not found.`);
-        req.agentScope = { agentId: agent.id, kind, projectReadGrant: state.entry };
+        const admitted = await admitProjectIndex(this.prisma, agent.id, projectId, new Date(),
+          this.projectReadGrants, this.workspaceIndexGrants, agent.workspaceId);
+        req.agentScope = { agentId: agent.id, kind, workspaceId: admitted.workspaceId, projectReadGrant: admitted.grant };
         return true;
       }
       // A2-284: the workspace digest. The only kind with NO route param and no

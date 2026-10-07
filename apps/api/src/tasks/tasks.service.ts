@@ -1,5 +1,11 @@
+import { admitProjectIndex } from '../auth/project-index-admission.js';
+import { PROJECT_READ_GRANTS, PROJECT_READ_GRANT_LIST } from '../auth/project-read-grants.js';
+import { WORKSPACE_INDEX_GRANTS, WORKSPACE_INDEX_GRANT_LIST } from '../auth/workspace-index-grants.js';
+import type { ProjectIndexGrant, WorkspaceIndexGrantEntry } from '../auth/workspace-index-grants.js';
 import {
   Injectable,
+  Inject,
+  Optional,
   NotFoundException,
   BadRequestException,
   ConflictException,
@@ -94,6 +100,10 @@ export class TasksService {
     private readonly kanbanService: KanbanService,
     private readonly fieldStateService: TaskFieldStateService,
     private readonly executionRecorder: TaskExecutionRecorderService,
+    @Optional() @Inject(PROJECT_READ_GRANTS)
+    private readonly projectReadGrants: readonly ProjectReadGrantEntry[] = PROJECT_READ_GRANT_LIST,
+    @Optional() @Inject(WORKSPACE_INDEX_GRANTS)
+    private readonly workspaceIndexGrants: readonly WorkspaceIndexGrantEntry[] = WORKSPACE_INDEX_GRANT_LIST,
   ) {}
 
   async create(actor: Actor, dto: CreateTaskDto) {
@@ -211,70 +221,41 @@ export class TasksService {
    * row's id: a caller's receipt can prove one logged event per read without a
    * database read path. A read whose row cannot be written fails.
    */
-  async indexForProject(
-    projectId: string,
-    agentId: string,
-    grant: ProjectReadGrantEntry,
-  ) {
-    const project = await this.prisma.project.findUnique({
-      where: { id: projectId },
-      select: { workspaceId: true },
-    });
-    if (!project) {
-      throw new NotFoundException(`Project ${projectId} not found.`);
-    }
-
-    const rows = await this.prisma.task.findMany({
-      where: { projectId },
-      select: PROJECT_INDEX_SELECT,
-      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
-    });
-    const tasks = rows.map(({ title, ...rest }) => ({
-      ...rest,
-      titleSha256: createHash('sha256').update(title, 'utf8').digest('hex'),
-    }));
-
-    const audit = await this.prisma.activityLog.create({
-      data: {
-        workspaceId: project.workspaceId,
-        taskId: null,
-        actorType: 'agent',
-        actorId: agentId,
-        action: PROJECT_INDEX_READ_ACTION,
-        payload: {
-          projectId,
-          decision: grant.decision,
-          rowCount: tasks.length,
-        } as Prisma.InputJsonValue,
-      },
-      select: { id: true, createdAt: true },
-    });
-    // Read back from the same table: how many index reads this agent has on
-    // record in the workspace, this one included. A caller comparing two
-    // answers sees the rows persist without any other route to the log.
-    const auditReadCount = await this.prisma.activityLog.count({
-      where: { workspaceId: project.workspaceId, actorId: agentId, action: PROJECT_INDEX_READ_ACTION },
-    });
-
-    return {
-      projectId,
-      counted: PROJECT_INDEX_COUNTED,
-      total: tasks.length,
-      generatedAt: audit.createdAt.toISOString(),
-      auditEventId: audit.id,
-      auditReadCount,
-      // MUN-0055 (DEC-AUP-0033 R3): `renewalDueAt` is how a lapse becomes
-      // visible BEFORE it happens. The first grant went quiet at its `until`
-      // and nothing noticed for two days; every caller already writes this
-      // envelope into a receipt, so the warning rides the read it already does
-      // rather than needing a watcher nobody would run.
-      grant: {
-        decision: grant.decision,
-        until: grant.until,
-        renewalDueAt: renewalDueAt(grant),
-      },
-      tasks,
-    };
+  async indexForProject(projectId: string, agentId: string, grant: ProjectIndexGrant, checkedWorkspaceId?: string) {
+    if (!checkedWorkspaceId) throw new NotFoundException(`Project ${projectId} not found.`);
+    return this.prisma.$transaction(async tx => {
+      // Shared row locks serialize actor/project rebindings with this audited read.
+      // Authorization is at the transaction snapshot, not at HTTP response delivery.
+      await tx.$queryRaw`SELECT id FROM public.agents WHERE id = ${agentId}::uuid FOR SHARE`;
+      const anchors = this.workspaceIndexGrants.filter(g => g.agentId.toLowerCase() === agentId.toLowerCase()).map(g => g.anchorProjectId);
+      for (const id of [...new Set([projectId.toLowerCase(), ...anchors.map(x => x.toLowerCase())])].sort()) {
+        await tx.$queryRaw`SELECT id FROM public.projects WHERE id = ${id}::uuid FOR SHARE`;
+      }
+      const admitted = await admitProjectIndex(tx, agentId, projectId, new Date(), this.projectReadGrants,
+        this.workspaceIndexGrants, checkedWorkspaceId);
+      if (JSON.stringify(admitted.grant) !== JSON.stringify(grant)) {
+        throw new NotFoundException(`Project ${projectId} not found.`);
+      }
+      const rows = await tx.task.findMany({
+        where: { projectId, project: { workspaceId: admitted.workspaceId, slug: { notIn: [...admitted.excludedProjectSlugs] } } },
+        select: PROJECT_INDEX_SELECT,
+        orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+      });
+      const tasks = rows.map(({ title, ...rest }) => ({
+        ...rest, titleSha256: createHash('sha256').update(title, 'utf8').digest('hex'),
+      }));
+      const audit = await tx.activityLog.create({
+        data: { workspaceId: admitted.workspaceId, taskId: null, actorType: 'agent', actorId: agentId,
+          action: PROJECT_INDEX_READ_ACTION, payload: { projectId, decision: admitted.grant.decision, rowCount: tasks.length } as Prisma.InputJsonValue },
+        select: { id: true, createdAt: true },
+      });
+      const auditReadCount = await tx.activityLog.count({
+        where: { workspaceId: admitted.workspaceId, actorId: agentId, action: PROJECT_INDEX_READ_ACTION },
+      });
+      return { projectId, counted: PROJECT_INDEX_COUNTED, total: tasks.length,
+        generatedAt: audit.createdAt.toISOString(), auditEventId: audit.id, auditReadCount,
+        grant: { decision: admitted.grant.decision, until: admitted.grant.until, renewalDueAt: renewalDueAt(admitted.grant) }, tasks };
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead });
   }
 
   /**

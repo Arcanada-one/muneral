@@ -43,7 +43,7 @@ describe('AgentTaskScopeGuard', () => {
     taskAgent: { findFirst: jest.Mock };
     project: { findFirst: jest.Mock };
     task: { findFirst: jest.Mock };
-    agent: { findFirst: jest.Mock };
+    agent: { findFirst: jest.Mock; findUnique: jest.Mock };
   };
   let guard: AgentTaskScopeGuard;
 
@@ -53,7 +53,7 @@ describe('AgentTaskScopeGuard', () => {
       taskAgent: { findFirst: jest.fn() },
       project: { findFirst: jest.fn() },
       task: { findFirst: jest.fn() },
-      agent: { findFirst: jest.fn() },
+      agent: { findFirst: jest.fn(), findUnique: jest.fn().mockResolvedValue({ workspaceId: 'ws-1' }) },
     };
     guard = new AgentTaskScopeGuard(
       reflector as unknown as Reflector,
@@ -515,7 +515,7 @@ describe('AgentTaskScopeGuard', () => {
       expect(prisma.project.findFirst).toHaveBeenCalledWith(
         expect.objectContaining({ where: { id: 'p-1', workspaceId: 'ws-1' } }),
       );
-      expect(req.agentScope).toEqual({ agentId: 'agent-1', kind: 'project-index', projectReadGrant: GRANT });
+      expect(req.agentScope).toEqual({ agentId: 'agent-1', kind: 'project-index', workspaceId: 'ws-1', projectReadGrant: GRANT });
     });
 
     // MUN-0055 (DEC-AUP-0033 R1) splits ONE case out of this equivalence
