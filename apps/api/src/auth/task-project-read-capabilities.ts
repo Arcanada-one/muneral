@@ -16,5 +16,5 @@ export const TASK_PROJECT_READ_CAPABILITY_LIST: readonly TaskProjectReadCapabili
   anchorProjectId: AUP_ANCHOR_PROJECT_ID,
   excludedProjectSlugs: ['tbt', 'mt5-bridge'],
   until: '2026-11-04T00:00:00Z',
-  decision: 'DEC-AUP-0116',
+  decision: 'DEC-AUP-0117',
 }];
