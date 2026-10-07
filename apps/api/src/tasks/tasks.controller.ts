@@ -226,11 +226,15 @@ export class TasksController {
         // The 304 still reached the client, so the suite stayed green and the
         // throw only ever showed up as a logged ERROR — which is why this
         // survived from MUN-0018 until a test finally exercised the branch.
+        res.setHeader('X-Muneral-Task-Project', task.projectId);
         res.status(304);
         return;
       }
     }
 
+    // Same row as the body; clients can refuse an unexpected project before
+    // consuming it. Emit only after the fallible ETag work has completed.
+    res.setHeader('X-Muneral-Task-Project', task.projectId);
     return task;
   }
 
