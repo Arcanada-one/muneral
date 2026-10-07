@@ -1,0 +1,17 @@
+{
+  "schema": "MeasuredGitSource/v1",
+  "commit": "e2e491766ad277b7299d18acc19233a1668b81ed",
+  "tree": "88970c6b5ebf640f6258ae6cb94f1c9048a01554",
+  "dirty": false,
+  "producer": {
+    "tool": "git rev-parse/status via SAME ARAS read-only source observer",
+    "commands": [
+      "git rev-parse HEAD",
+      "git rev-parse HEAD^{tree}",
+      "git status --porcelain"
+    ]
+  },
+  "captured_at_utc": "2026-10-07T13:33:10.264943+00:00",
+  "repository_path": "/home/dev/arcanada/_temp/kc-closure/MUNERAL-ETAG-CLASS-23E7-20261006/source",
+  "runtime_authorized": false
+}
