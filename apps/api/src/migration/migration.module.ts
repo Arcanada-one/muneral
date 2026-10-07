@@ -1,3 +1,4 @@
+import { TaskFieldStateService } from '../tasks/field-state/task-field-state.service.js';
 import { Module } from '@nestjs/common';
 import { ActivityModule } from '../activity/activity.module.js';
 import { AuthModule } from '../auth/auth.module.js';

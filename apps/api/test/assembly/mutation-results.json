@@ -276,8 +276,8 @@
       "apps/web/",
       "receipts/"
     ],
-    "trackedTreeWithoutEvidence": "8806d5897575f1a32580e39d744033f072ca0d35",
-    "trackedSnapshotDiffSha256": "6902e117f2366fd969bdb487e36abf95f98dafb6605809043e054d83f901085e"
+    "trackedTreeWithoutEvidence": "51650044e625b1717d6fb62dc0ea45267ad357c0",
+    "trackedSnapshotDiffSha256": "5bf1b75895b43fc96638d4208cd83074a76b63c862db4cf859bb1cec197fc95c"
   },
   "baseline": {
     "outcome": "SURVIVED",
@@ -305,7 +305,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "5a0e6be632cab17b39e4dc3701680fa88eda037750b6847381fca56ea9ed3d81",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● UNSUPPORTED_SCHEMA_VERSION › rejects null",
+      "detail": "\u25cf UNSUPPORTED_SCHEMA_VERSION \u203a rejects null",
       "detailSha256": "c1235a111b3870197cb086de8272f4ff3fe1590f4e105548602a4254f3824dbb"
     },
     {
@@ -323,7 +323,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "1a5a2a1a2bdf377d49b09f7137c7398988867d0d7003212be1e7161e71a28709",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● Claim 7 (all categories): execution mutations move or refuse identity › covers value/add/remove/schema mutations and catches an omitted decision field | ● UNSUPPORTED_SCHEMA_VERSION › rejects schemaVersion \"v1\" | ● compileAssembly pure artifact compiler › returns a typed error for unsupported schema | ● validator rejection sites identify their rule and path › schema",
+      "detail": "\u25cf Claim 7 (all categories): execution mutations move or refuse identity \u203a covers value/add/remove/schema mutations and catches an omitted decision field | \u25cf UNSUPPORTED_SCHEMA_VERSION \u203a rejects schemaVersion \"v1\" | \u25cf compileAssembly pure artifact compiler \u203a returns a typed error for unsupported schema | \u25cf validator rejection sites identify their rule and path \u203a schema",
       "detailSha256": "9dbfaf95aed0b9cfcb4f19c7e363a5521f92cdb66a96bffc86b7d48a09a161dd"
     },
     {
@@ -341,7 +341,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "4f82e1d91bb55279912c795631faf49bc1532c053022f1e886d1e5338c064b00",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● DEADLINE_EXCEEDED › rejects past deadline | ● authority-supplied evaluatedAt › accepts deadline and expiry equality, then rejects one millisecond later | ● validateAssemblyRequest — controlling fail-fast order › checks deadline and budget before provenance, candidate, unknown, credential, and authority | ● validateAssemblyRequest — controlling fail-fast order › checks instants, deadline, budget, and provenance before candidate cardinality | ● validator rejection sites identify their rule and path › deadline",
+      "detail": "\u25cf DEADLINE_EXCEEDED \u203a rejects past deadline | \u25cf authority-supplied evaluatedAt \u203a accepts deadline and expiry equality, then rejects one millisecond later | \u25cf validateAssemblyRequest \u2014 controlling fail-fast order \u203a checks deadline and budget before provenance, candidate, unknown, credential, and authority | \u25cf validateAssemblyRequest \u2014 controlling fail-fast order \u203a checks instants, deadline, budget, and provenance before candidate cardinality | \u25cf validator rejection sites identify their rule and path \u203a deadline",
       "detailSha256": "848965ebc0c8c11811190a221265aa9d168ab996ba33c5515bb1a060e8ea65cd"
     },
     {
@@ -359,7 +359,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "79a3e18dee59e38af3eaa55f19d0491c61fee3ba49dd0054d13d640837fb47ca",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● ATTEMPT_BUDGET_EXCEEDED › rejects budget > 1000 | ● authority-supplied evaluatedAt › uses validated evaluatedAt as the deterministic timestamp of later refusals | ● compileAssembly pure artifact compiler › returns a typed error for bad attempt budget | ● frozen-rereview regressions › recursively freezes refusal results too | ● validateAssemblyRequest — controlling fail-fast order › checks deadline and budget before provenance, candidate, unknown, credential, and authority | ● validateAssemblyRequest — controlling fail-fast order › checks instants, deadline, budget, and provenance before candidate cardinality | ● validator rejection sites identify their rule and path › budget",
+      "detail": "\u25cf ATTEMPT_BUDGET_EXCEEDED \u203a rejects budget > 1000 | \u25cf authority-supplied evaluatedAt \u203a uses validated evaluatedAt as the deterministic timestamp of later refusals | \u25cf compileAssembly pure artifact compiler \u203a returns a typed error for bad attempt budget | \u25cf frozen-rereview regressions \u203a recursively freezes refusal results too | \u25cf validateAssemblyRequest \u2014 controlling fail-fast order \u203a checks deadline and budget before provenance, candidate, unknown, credential, and authority | \u25cf validateAssemblyRequest \u2014 controlling fail-fast order \u203a checks instants, deadline, budget, and provenance before candidate cardinality | \u25cf validator rejection sites identify their rule and path \u203a budget",
       "detailSha256": "61870c61fa2f493a41603edb0ecb4760cc258cb548a1beafd0268f2e33a7ca63"
     },
     {
@@ -377,7 +377,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "4a9494ecd716bf46859bbd512f15abc237424974a06e501916c4ad949d8519db",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● UNKNOWN_EXECUTION_FIELD › rejects extra key providerConfig | ● compileAssembly pure artifact compiler › returns a typed error for unknown field | ● frozen-rereview regressions › preserves own __proto__ keys in canonical bytes and refuses them at closed schemas | ● frozen-rereview regressions › returns a typed refusal when an admitted unknown key expands during error identity encoding | ● validateAssemblyRequest — controlling fail-fast order › checks provenance then candidate then unknown then credentials then authority then evidence | ● validator rejection sites identify their rule and path › unknown",
+      "detail": "\u25cf UNKNOWN_EXECUTION_FIELD \u203a rejects extra key providerConfig | \u25cf compileAssembly pure artifact compiler \u203a returns a typed error for unknown field | \u25cf frozen-rereview regressions \u203a preserves own __proto__ keys in canonical bytes and refuses them at closed schemas | \u25cf frozen-rereview regressions \u203a returns a typed refusal when an admitted unknown key expands during error identity encoding | \u25cf validateAssemblyRequest \u2014 controlling fail-fast order \u203a checks provenance then candidate then unknown then credentials then authority then evidence | \u25cf validator rejection sites identify their rule and path \u203a unknown",
       "detailSha256": "27930f22a954d1f713f3b003ae7399e3f7063885287a86b0224364d3d28dcee0"
     },
     {
@@ -413,7 +413,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "4220733a1182e0c04cdf290686627f085e3d77cebf1d6605ea5b8eebbf0bfed9",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● parity: the two validators agree on inputs the corpus does not contain › agree on: a trace key named credentials | ● parity: the two validators agree on inputs the corpus does not contain › agree on: a trace key named token | ● parity: the two validators agree on inputs the corpus does not contain › agree on: a trace key shadowing a decision field | ● parity: the two validators agree on inputs the corpus does not contain › agree on: a trace key shadowing schemaVersion | ● traceFields strict type › rejects traceFields key shadowing schemaVersion | ● validator rejection sites identify their rule and path › trace shadow",
+      "detail": "\u25cf parity: the two validators agree on inputs the corpus does not contain \u203a agree on: a trace key named credentials | \u25cf parity: the two validators agree on inputs the corpus does not contain \u203a agree on: a trace key named token | \u25cf parity: the two validators agree on inputs the corpus does not contain \u203a agree on: a trace key shadowing a decision field | \u25cf parity: the two validators agree on inputs the corpus does not contain \u203a agree on: a trace key shadowing schemaVersion | \u25cf traceFields strict type \u203a rejects traceFields key shadowing schemaVersion | \u25cf validator rejection sites identify their rule and path \u203a trace shadow",
       "detailSha256": "03ace809261e1d9983c3c5cf1e052a575add0c4daf9330beaeb11d003d4c9463"
     },
     {
@@ -431,7 +431,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "44fcf29b331bf52afb0078156611087a3404e9b00022a3aa363b23469702fa48",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● frozen-rereview regressions › enforces the emitted-byte budget on non-authoritative traceFields",
+      "detail": "\u25cf frozen-rereview regressions \u203a enforces the emitted-byte budget on non-authoritative traceFields",
       "detailSha256": "f44484108c85f4b299b3bd11fd35091315c09c86a8f013799ebdb237c6b34956"
     },
     {
@@ -449,7 +449,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "3e7ba092dd23950637bff5fc730cb9bed784a459c4d1827ca03b3630d61c6bad",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● request boundary depth hardening › binds canonical identity containers by value rather than insertion order | ● request boundary depth hardening › source-binds malformed primitive causationId values before returning UNSAFE_SIZE | ● request boundary depth hardening › source-binds malformed primitive correlationId values before returning UNSAFE_SIZE | ● request boundary depth hardening › source-binds malformed primitive taskId values before returning UNSAFE_SIZE | ● validateAssemblyRequest — controlling fail-fast order › checks required field types before unknown fields",
+      "detail": "\u25cf request boundary depth hardening \u203a binds canonical identity containers by value rather than insertion order | \u25cf request boundary depth hardening \u203a source-binds malformed primitive causationId values before returning UNSAFE_SIZE | \u25cf request boundary depth hardening \u203a source-binds malformed primitive correlationId values before returning UNSAFE_SIZE | \u25cf request boundary depth hardening \u203a source-binds malformed primitive taskId values before returning UNSAFE_SIZE | \u25cf validateAssemblyRequest \u2014 controlling fail-fast order \u203a checks required field types before unknown fields",
       "detailSha256": "b7f72a5a00746f93a3ee21ba49d3f15dc97574c4fa88ad3e082ebc22d7a873be"
     },
     {
@@ -467,7 +467,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "23a8011200d79fb77fb63c0d0bac49349c9e07894f26afc98f4e8a926ff69049",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● parity: the two validators agree on inputs the corpus does not contain › agrees on exact required type precedence for evaluatedAt | ● validateAssemblyRequest — controlling fail-fast order › checks required evaluatedAt type before an earlier bounded-field failure | ● validateAssemblyRequest — controlling fail-fast order › rejects a non-string required evaluated instant without throwing",
+      "detail": "\u25cf parity: the two validators agree on inputs the corpus does not contain \u203a agrees on exact required type precedence for evaluatedAt | \u25cf validateAssemblyRequest \u2014 controlling fail-fast order \u203a checks required evaluatedAt type before an earlier bounded-field failure | \u25cf validateAssemblyRequest \u2014 controlling fail-fast order \u203a rejects a non-string required evaluated instant without throwing",
       "detailSha256": "06434defda4155beb63f2e43bf34487b0a8c6199b34f78b5de6e9a171d266624"
     },
     {
@@ -503,7 +503,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "4fb1b5bf1bbf4a337caa2ba34f9cc4c2e4af004bc8d64800f38d39396df59a52",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● validator rejection sites identify their rule and path › authority missing field has an independently observed refusal",
+      "detail": "\u25cf validator rejection sites identify their rule and path \u203a authority missing field has an independently observed refusal",
       "detailSha256": "3107e895a55147f953527a8a66407317375a6c2873bdcabc02847e04fc4874a5"
     },
     {
@@ -539,7 +539,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "1ecec3b69703ce5afce6c523bba7f467d1a9e63aa04cde218febd6345cf16029",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● validateAssemblyRequest — controlling fail-fast order › rejects a non-string required role policy field without throwing",
+      "detail": "\u25cf validateAssemblyRequest \u2014 controlling fail-fast order \u203a rejects a non-string required role policy field without throwing",
       "detailSha256": "acfb37e7c15b611f16d0b3752b752366a5e0e4aadc3a62983c6b27d7da5d5a18"
     },
     {
@@ -593,7 +593,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "145436fee88855b829c5e6be466bfd70c78bf34492123370496a1bf45118903f",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● validator rejection sites identify their rule and path › candidate invalid entry has an independently observed refusal",
+      "detail": "\u25cf validator rejection sites identify their rule and path \u203a candidate invalid entry has an independently observed refusal",
       "detailSha256": "8411025124c7343874288ef4b8490ce216c61a096ed7a2b431526fd9b1db7fae"
     },
     {
@@ -611,7 +611,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "8901b500fee51c81c8172f6e601f4735b0258946e207e0676d076b39a7c20bc2",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● parity: the two validators agree on inputs the corpus does not contain › agrees on exact required type precedence for candidateSet.sourceDigest | ● validateAssemblyRequest — controlling fail-fast order › checks required candidateSet.sourceDigest type before an earlier bounded-field failure | ● validateAssemblyRequest — controlling fail-fast order › rejects a non-string required candidate source digest without throwing",
+      "detail": "\u25cf parity: the two validators agree on inputs the corpus does not contain \u203a agrees on exact required type precedence for candidateSet.sourceDigest | \u25cf validateAssemblyRequest \u2014 controlling fail-fast order \u203a checks required candidateSet.sourceDigest type before an earlier bounded-field failure | \u25cf validateAssemblyRequest \u2014 controlling fail-fast order \u203a rejects a non-string required candidate source digest without throwing",
       "detailSha256": "5cc56860e099f043cdf7cead34fbfe1c54eccc209a570ff68456d9dc61c24873"
     },
     {
@@ -629,7 +629,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "6b4635f46ce4ef09262c0a1ca75ed05dfda928d9dfdb8f8bf60e49351cce9e88",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● parity: the two validators agree on inputs the corpus does not contain › agrees on exact required type precedence for candidateSet.capturedAt | ● validateAssemblyRequest — controlling fail-fast order › checks required candidateSet.capturedAt type before an earlier bounded-field failure | ● validateAssemblyRequest — controlling fail-fast order › rejects a non-string required candidate capture instant without throwing",
+      "detail": "\u25cf parity: the two validators agree on inputs the corpus does not contain \u203a agrees on exact required type precedence for candidateSet.capturedAt | \u25cf validateAssemblyRequest \u2014 controlling fail-fast order \u203a checks required candidateSet.capturedAt type before an earlier bounded-field failure | \u25cf validateAssemblyRequest \u2014 controlling fail-fast order \u203a rejects a non-string required candidate capture instant without throwing",
       "detailSha256": "473ef0020d5efd3f9c43d6b86a7ba64a1807a4850e4d6ee0de3916d0d42aaf44"
     },
     {
@@ -647,7 +647,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "5c6fe69f1bf8998703f137b330f3e868b558ccfc84827a6a3b26656db142e787",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● validateAssemblyRequest — controlling fail-fast order › checks provenance then candidate then unknown then credentials then authority then evidence | ● validator rejection sites identify their rule and path › evidence type",
+      "detail": "\u25cf validateAssemblyRequest \u2014 controlling fail-fast order \u203a checks provenance then candidate then unknown then credentials then authority then evidence | \u25cf validator rejection sites identify their rule and path \u203a evidence type",
       "detailSha256": "8ef5a2b37796d2fe1224d7bf9ebd259f742c267db70820155d4339bede870951"
     },
     {
@@ -683,7 +683,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "8b25f6a229c1a7d095feefa6eb6123e4af3ccef426e481d07033eee3c8975bbc",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● validateAssemblyRequest — controlling fail-fast order › rejects a non-string required provenance field without throwing",
+      "detail": "\u25cf validateAssemblyRequest \u2014 controlling fail-fast order \u203a rejects a non-string required provenance field without throwing",
       "detailSha256": "a0a7153426e03532a0f9a249efe42a37cf5e41457646da5d059254788fb2fd3f"
     },
     {
@@ -701,7 +701,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "59f898ec8dcaa45199c664ecfcf6bdb8f0f17ffc062a600e55f855f174627c65",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● A4: string bounds are measured in UTF-8 bytes › rejects 65 emoji (260 bytes) — accepted by both runtimes before A4 | ● A4: string bounds are measured in UTF-8 bytes › rejects a 2-byte-per-char value that overflows in bytes only | ● A4: string bounds are measured in UTF-8 bytes › reports UNSAFE_SIZE for a byte-overflowing value | ● A4: string bounds are measured in UTF-8 bytes › still rejects a plain ASCII value over the limit | ● UNSAFE_SIZE › rejects empty taskId | ● UNSAFE_SIZE › rejects taskId > 256 chars | ● validator rejection sites identify their rule and path › identity size",
+      "detail": "\u25cf A4: string bounds are measured in UTF-8 bytes \u203a rejects 65 emoji (260 bytes) \u2014 accepted by both runtimes before A4 | \u25cf A4: string bounds are measured in UTF-8 bytes \u203a rejects a 2-byte-per-char value that overflows in bytes only | \u25cf A4: string bounds are measured in UTF-8 bytes \u203a reports UNSAFE_SIZE for a byte-overflowing value | \u25cf A4: string bounds are measured in UTF-8 bytes \u203a still rejects a plain ASCII value over the limit | \u25cf UNSAFE_SIZE \u203a rejects empty taskId | \u25cf UNSAFE_SIZE \u203a rejects taskId > 256 chars | \u25cf validator rejection sites identify their rule and path \u203a identity size",
       "detailSha256": "6bcf5c378cbc65d48dffaf6d7c3e5f4b2320bf8bd14a783515d5b0719978a868"
     },
     {
@@ -719,7 +719,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "17143628678a4022e1bf9dfd076ee9bd53cf37edb49c3c038ced3070135aee35",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● validateAssemblyRequest — controlling fail-fast order › enforces the byte bound for every bounded authority field family",
+      "detail": "\u25cf validateAssemblyRequest \u2014 controlling fail-fast order \u203a enforces the byte bound for every bounded authority field family",
       "detailSha256": "c44e1332ec728a5bf72a8e2e02eccbbe06fbb6b3c848a677926f5306bb1f0dd0"
     },
     {
@@ -737,7 +737,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "1276ec594893396ee9ff2a654b367311b3a4d94aba8aa1f707c590f62818f60d",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● validator rejection sites identify their rule and path › role empty field has an independently observed refusal",
+      "detail": "\u25cf validator rejection sites identify their rule and path \u203a role empty field has an independently observed refusal",
       "detailSha256": "897197eeb03d1442adfe2ffa03be7719375f70bb1daa681a382ee4f8118a46f9"
     },
     {
@@ -755,7 +755,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "190ef52177725a9165cca0aef0d45b1b8f6cef75f7e4c3c1ba4ca34432ce895b",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● validateAssemblyRequest — controlling fail-fast order › enforces the byte bound for every bounded candidate identifier family",
+      "detail": "\u25cf validateAssemblyRequest \u2014 controlling fail-fast order \u203a enforces the byte bound for every bounded candidate identifier family",
       "detailSha256": "a285f82d1b570870fae2b990aadc1036ce0190e6ecbfeec6ec121d096601f017"
     },
     {
@@ -773,7 +773,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "3e44425dc62a523b6dd64beabe470c34148d1487c52eae4b702c0cdd3170d00e",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● validator rejection sites identify their rule and path › policy URI",
+      "detail": "\u25cf validator rejection sites identify their rule and path \u203a policy URI",
       "detailSha256": "83f00d65ffd69fb6af1b66c2b0e6849b74e0e4e0185113445648c932657635d4"
     },
     {
@@ -791,7 +791,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "c6a6a90f0e318f55423c85ed0b778acbdfdbdd16472a75d925f94ef9560541c6",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● authority-supplied evaluatedAt › rejects a missing or noncanonical evaluatedAt value 3 | ● authority-supplied evaluatedAt › rejects a missing or noncanonical evaluatedAt value 4 | ● authority-supplied evaluatedAt › rejects a missing or noncanonical evaluatedAt value 5 | ● authority-supplied evaluatedAt › rejects year 0000 rather than extending the specified instant range | ● frozen-rereview regressions › rejects impossible calendar dates instead of normalizing them | ● frozen-rereview regressions › rejects year zero at the public compiler boundary | ● parity: the two validators agree on inputs the corpus does not contain › agrees on instant semantics before candidate cardinality | ● parity: the two validators agree on inputs the corpus does not contain › agrees that the exact-instant range starts at year 0001 | ● validateAssemblyRequest — controlling fail-fast order › checks instants, deadline, budget, and provenance before candidate cardinality | ● validator rejection sites identify their rule and path › instant",
+      "detail": "\u25cf authority-supplied evaluatedAt \u203a rejects a missing or noncanonical evaluatedAt value 3 | \u25cf authority-supplied evaluatedAt \u203a rejects a missing or noncanonical evaluatedAt value 4 | \u25cf authority-supplied evaluatedAt \u203a rejects a missing or noncanonical evaluatedAt value 5 | \u25cf authority-supplied evaluatedAt \u203a rejects year 0000 rather than extending the specified instant range | \u25cf frozen-rereview regressions \u203a rejects impossible calendar dates instead of normalizing them | \u25cf frozen-rereview regressions \u203a rejects year zero at the public compiler boundary | \u25cf parity: the two validators agree on inputs the corpus does not contain \u203a agrees on instant semantics before candidate cardinality | \u25cf parity: the two validators agree on inputs the corpus does not contain \u203a agrees that the exact-instant range starts at year 0001 | \u25cf validateAssemblyRequest \u2014 controlling fail-fast order \u203a checks instants, deadline, budget, and provenance before candidate cardinality | \u25cf validator rejection sites identify their rule and path \u203a instant",
       "detailSha256": "ebac1e5154d2e02388ba6ec2298bc140a6472f03916509c5184f5e150928cf6b"
     },
     {
@@ -809,7 +809,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "5e9672de62f2cf47f8112be73f234415d84353725c34e44e97a175a462111548",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● frozen-rereview regressions › rejects an impossible candidate capture instant | ● validator rejection sites identify their rule and path › candidate instant",
+      "detail": "\u25cf frozen-rereview regressions \u203a rejects an impossible candidate capture instant | \u25cf validator rejection sites identify their rule and path \u203a candidate instant",
       "detailSha256": "18f15f7bde835963957760018c927f53cfe39cc2a821e3a9fa67305f4655f0c6"
     },
     {
@@ -827,7 +827,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "2dbf5995d25578ff41aa7b27eb4fe164955f8964bc7ad9225fea7cc4d9dae085",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● frozen-rereview regressions › rejects an impossible policy issue instant",
+      "detail": "\u25cf frozen-rereview regressions \u203a rejects an impossible policy issue instant",
       "detailSha256": "ba4677c19a8078085359e04c1faf7606a77483117d779bf990222b0b7d0209f4"
     },
     {
@@ -845,7 +845,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "22f2228b0ae8f90b99302228b2d843513a7bc5afb49dc653d9deee3f00d94e51",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● validateAssemblyRequest — controlling fail-fast order › rejects a non-string optional expiry instant at the instant phase",
+      "detail": "\u25cf validateAssemblyRequest \u2014 controlling fail-fast order \u203a rejects a non-string optional expiry instant at the instant phase",
       "detailSha256": "d73ebdc9ed9f038309d69adc3552e3fc832fafbf1e02f2a63141a478ed067eff"
     },
     {
@@ -863,7 +863,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "c094186a3fb09cd650d917ca2a7fe3882e2c63b3fa5cf02834f85fb3762bad9d",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● validateAssemblyRequest — controlling fail-fast order › rejects a non-string optional deadline instant at the instant phase",
+      "detail": "\u25cf validateAssemblyRequest \u2014 controlling fail-fast order \u203a rejects a non-string optional deadline instant at the instant phase",
       "detailSha256": "5a8e81d26dd52724ee3ac0aa6b9c49f778956f178cd430fd27e2b6b824d5a81c"
     },
     {
@@ -881,7 +881,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "c5333425472683ad0ef52ce6051251f2d05cba29f7d47926e6536c3cd5e78587",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● A5: candidateSet and provenance reject unknown keys › names the offending field in the error | ● A5: candidateSet and provenance reject unknown keys › no longer permits a digest collision via an injected provenance key | ● A5: candidateSet and provenance reject unknown keys › rejects an unknown key on candidateSet | ● A5: candidateSet and provenance reject unknown keys › rejects an unknown key on provenance | ● parity: the two validators agree on inputs the corpus does not contain › agree on: rolePolicy carrying a wrong-plane key (Python had no closed-schema check at all) | ● validator rejection sites identify their rule and path › provenance unknown | ● validator rejection sites identify their rule and path › role unknown",
+      "detail": "\u25cf A5: candidateSet and provenance reject unknown keys \u203a names the offending field in the error | \u25cf A5: candidateSet and provenance reject unknown keys \u203a no longer permits a digest collision via an injected provenance key | \u25cf A5: candidateSet and provenance reject unknown keys \u203a rejects an unknown key on candidateSet | \u25cf A5: candidateSet and provenance reject unknown keys \u203a rejects an unknown key on provenance | \u25cf parity: the two validators agree on inputs the corpus does not contain \u203a agree on: rolePolicy carrying a wrong-plane key (Python had no closed-schema check at all) | \u25cf validator rejection sites identify their rule and path \u203a provenance unknown | \u25cf validator rejection sites identify their rule and path \u203a role unknown",
       "detailSha256": "8f885b83788dc86f07142c8cb13a5c3516fe1b39f2981a55e09220dc4ad01b85"
     },
     {
@@ -899,7 +899,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "3a04884de421c878590ffdb1f044dbfd4737dab8c340597452e53ebb784a22a2",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● validator rejection sites identify their rule and path › evidence count",
+      "detail": "\u25cf validator rejection sites identify their rule and path \u203a evidence count",
       "detailSha256": "2aaaf8af1caf7eeda57823793f5d8ba615c45f51a815a6560b18632958fa74ed"
     },
     {
@@ -917,7 +917,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "c02523e37295618fb73f6793f85fe318cc4b57dc44004ca85071eb03c0ccb873",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● parity: the two validators agree on inputs the corpus does not contain › agree on rejecting an EvidenceRef label exceeding the MUN-0020 UTF-16 limit | ● parity: the two validators agree on inputs the corpus does not contain › agree on rejecting an explicitly null EvidenceRef label | ● parity: the two validators agree on inputs the corpus does not contain › agrees on the MUN-0020 UTF-16 URI bound for astral characters | ● validator rejection sites identify their rule and path › evidence invalid",
+      "detail": "\u25cf parity: the two validators agree on inputs the corpus does not contain \u203a agree on rejecting an EvidenceRef label exceeding the MUN-0020 UTF-16 limit | \u25cf parity: the two validators agree on inputs the corpus does not contain \u203a agree on rejecting an explicitly null EvidenceRef label | \u25cf parity: the two validators agree on inputs the corpus does not contain \u203a agrees on the MUN-0020 UTF-16 URI bound for astral characters | \u25cf validator rejection sites identify their rule and path \u203a evidence invalid",
       "detailSha256": "0bac031066da328a870e4e4defc420f4aa583c7de038e6825808af5bc691f762"
     },
     {
@@ -935,7 +935,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "3cb93d5aa2a2f26a4b9b73df37e342c17c4e95213afe47f3bab2657dd9dd112e",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● validator rejection sites identify their rule and path › distinguishes duplicate evidence identity from byte ordering",
+      "detail": "\u25cf validator rejection sites identify their rule and path \u203a distinguishes duplicate evidence identity from byte ordering",
       "detailSha256": "3891f0040d6acbf67e84c863b1da469f8c4a15f5936ef4e0d35906332766eb43"
     },
     {
@@ -953,7 +953,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "362989e68b9a1060b059742d6378ea9e9592cb3a6d587d15b11e153a862f6dbe",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● frozen-rereview regressions › rejects duplicate and unsorted evidence without silently sorting",
+      "detail": "\u25cf frozen-rereview regressions \u203a rejects duplicate and unsorted evidence without silently sorting",
       "detailSha256": "88f546b2dbb57cc09c3992d6b79d66e5cacd39ef04524f16d35d29e1a367cf55"
     },
     {
@@ -971,7 +971,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "f081d55855f763c63d4b6f787c85ccfa016e9bc74cf55dc0f63c74c59060b53f",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● validator rejection sites identify their rule and path › authority unknown has an independently observed refusal",
+      "detail": "\u25cf validator rejection sites identify their rule and path \u203a authority unknown has an independently observed refusal",
       "detailSha256": "3643fa7edd0c3a691ffa7ccd2f96595ee090ba933b87d56f85c56c9b6eebf50f"
     },
     {
@@ -989,7 +989,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "ea53d37109f5cda28eaca410f9e67b5fb760efc5a000dd6b826145a42112fb32",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● frozen-rereview regressions › rejects malformed or noncanonical scope read,read as AUTHORITY_WIDENING | ● frozen-rereview regressions › rejects malformed or noncanonical scope write,read as AUTHORITY_WIDENING | ● validator rejection sites identify their rule and path › ceiling shape",
+      "detail": "\u25cf frozen-rereview regressions \u203a rejects malformed or noncanonical scope read,read as AUTHORITY_WIDENING | \u25cf frozen-rereview regressions \u203a rejects malformed or noncanonical scope write,read as AUTHORITY_WIDENING | \u25cf validator rejection sites identify their rule and path \u203a ceiling shape",
       "detailSha256": "a7772d27751dc1781f813acc10c56bc45db6c02dc37ba4293b40ea7372551368"
     },
     {
@@ -1007,7 +1007,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "24350970dcca046b5bf262ae4b18686e1ae696accea64acd2f669b78114f7795",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● validateAssemblyRequest — controlling fail-fast order › checks provenance then candidate then unknown then credentials then authority then evidence | ● validator rejection sites identify their rule and path › identity mismatch",
+      "detail": "\u25cf validateAssemblyRequest \u2014 controlling fail-fast order \u203a checks provenance then candidate then unknown then credentials then authority then evidence | \u25cf validator rejection sites identify their rule and path \u203a identity mismatch",
       "detailSha256": "75a01fc15a5821742fde18b19138577092bf14a839db612647c3566faad8fae3"
     },
     {
@@ -1025,7 +1025,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "35233e1ccb7f8e240c1f33fe11aaec5d00558eee8b5c718622b8f7ea695de9fd",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● frozen-rereview regressions › makes AUTHORITY_WIDENING reachable through the public unary compiler | ● validator rejection sites identify their rule and path › scope widening",
+      "detail": "\u25cf frozen-rereview regressions \u203a makes AUTHORITY_WIDENING reachable through the public unary compiler | \u25cf validator rejection sites identify their rule and path \u203a scope widening",
       "detailSha256": "a5435b8622900a127141af23a86655f63779a48440d8437cd19e7d5c836f9cb4"
     },
     {
@@ -1043,7 +1043,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "c5fefda96b18991c0223f7cb0da3187d4f4d65f5b9dc42ede63e5c5bca49d214",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● validateAssemblyRequest — controlling fail-fast order › checks instants, deadline, budget, and provenance before candidate cardinality | ● validator rejection sites identify their rule and path › candidate count",
+      "detail": "\u25cf validateAssemblyRequest \u2014 controlling fail-fast order \u203a checks instants, deadline, budget, and provenance before candidate cardinality | \u25cf validator rejection sites identify their rule and path \u203a candidate count",
       "detailSha256": "dbe198d164483fcbf2aa296816ccc5e706bd27f2c04d171a2549888d08f964b0"
     },
     {
@@ -1061,7 +1061,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "bfde53529d720fae5fb08a98c20538f4b4d2e47291fbc257e36c9c94b365910e",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● INVALID_DIGEST › rejects non-sha256 sourceDigest | ● parity: the two validators agree on inputs the corpus does not contain › agree on: candidateSet violating TWO rules at once (bad digest + unknown key) — the order case | ● validateAssemblyRequest — controlling fail-fast order › checks provenance then candidate then unknown then credentials then authority then evidence | ● validator rejection sites identify their rule and path › candidate digest",
+      "detail": "\u25cf INVALID_DIGEST \u203a rejects non-sha256 sourceDigest | \u25cf parity: the two validators agree on inputs the corpus does not contain \u203a agree on: candidateSet violating TWO rules at once (bad digest + unknown key) \u2014 the order case | \u25cf validateAssemblyRequest \u2014 controlling fail-fast order \u203a checks provenance then candidate then unknown then credentials then authority then evidence | \u25cf validator rejection sites identify their rule and path \u203a candidate digest",
       "detailSha256": "482b29dc2edba598c39739986d084cfb9082054fcfef39272b5d2fc9426cfe68"
     },
     {
@@ -1079,7 +1079,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "b5ec47346d9666e9db0e37d3ae4c9ec30709fc462db55caa0183c3d9a53afdb1",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● INVALID_PROVENANCE › rejects short policyDigest | ● compileAssembly pure artifact compiler › returns a typed error for invalid provenance | ● parity: the two validators agree on inputs the corpus does not contain › agree on: provenance violating TWO rules at once (bad digest + unknown key) | ● parity: the two validators agree on inputs the corpus does not contain › agrees on provenance semantics before candidate cardinality | ● validateAssemblyRequest — controlling fail-fast order › checks instants, deadline, budget, and provenance before candidate cardinality | ● validateAssemblyRequest — controlling fail-fast order › checks provenance then candidate then unknown then credentials then authority then evidence | ● validator rejection sites identify their rule and path › policy digest",
+      "detail": "\u25cf INVALID_PROVENANCE \u203a rejects short policyDigest | \u25cf compileAssembly pure artifact compiler \u203a returns a typed error for invalid provenance | \u25cf parity: the two validators agree on inputs the corpus does not contain \u203a agree on: provenance violating TWO rules at once (bad digest + unknown key) | \u25cf parity: the two validators agree on inputs the corpus does not contain \u203a agrees on provenance semantics before candidate cardinality | \u25cf validateAssemblyRequest \u2014 controlling fail-fast order \u203a checks instants, deadline, budget, and provenance before candidate cardinality | \u25cf validateAssemblyRequest \u2014 controlling fail-fast order \u203a checks provenance then candidate then unknown then credentials then authority then evidence | \u25cf validator rejection sites identify their rule and path \u203a policy digest",
       "detailSha256": "360fc2166b0f50085b94ea25b1faca40ad9dca95cf4a334ba0bc1d512bda120c"
     },
     {
@@ -1097,7 +1097,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "2911ad40315baa2cccef09b1f71e06bb463899efd84cbcdbddc95dd1cccb428e",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● authority-supplied evaluatedAt › rejects policy issuance later than evaluatedAt | ● validator rejection sites identify their rule and path › policy future",
+      "detail": "\u25cf authority-supplied evaluatedAt \u203a rejects policy issuance later than evaluatedAt | \u25cf validator rejection sites identify their rule and path \u203a policy future",
       "detailSha256": "42ee984b6a00e61c56e1623193e45cc50966048bb7382f055b961ebaff9cfb22"
     },
     {
@@ -1115,7 +1115,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "e058cbef511d09eec6da9b4fd4cf160bd98f7f45af8a57a93f6986875915dcdc",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● EXPIRED_POLICY › rejects past expiresAt | ● validator rejection sites identify their rule and path › policy expiry",
+      "detail": "\u25cf EXPIRED_POLICY \u203a rejects past expiresAt | \u25cf validator rejection sites identify their rule and path \u203a policy expiry",
       "detailSha256": "ee1f59263e4d78fb1b8ff4b47a4528ef44d9ecb35a0f08c3d530be01215cfe07"
     },
     {
@@ -1133,7 +1133,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "810e6f2a2eac5fbb349299447ad2fd2fb0cf515582a819fa3cdfdb94f4f610a4",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● CREDENTIAL_IN_PROHIBITED_POSITION — recursive › DOES treat a boundary-anchored api_key assignment as a credential | ● CREDENTIAL_IN_PROHIBITED_POSITION — recursive › RED: an embedded sk- key inside a URL is still detected | ● CREDENTIAL_IN_PROHIBITED_POSITION — recursive › RED: credential in candidateSet.candidates[] entry is detected | ● CREDENTIAL_IN_PROHIBITED_POSITION — recursive › RED: credential in provenance.policyUri is detected | ● CREDENTIAL_IN_PROHIBITED_POSITION — recursive › RED: credential in rolePolicy.policyId is detected | ● CREDENTIAL_IN_PROHIBITED_POSITION — recursive › rejects bearer token in authority purpose | ● F10 deterministic and secret-safe errors › never echoes rejected aws-shaped identities | ● F10 deterministic and secret-safe errors › never echoes rejected bearer-shaped identities | ● F10 deterministic and secret-safe errors › never echoes rejected generic-base64-shaped identities | ● F10 deterministic and secret-safe errors › never echoes rejected github-shaped identities | ● F10 deterministic and secret-safe errors › never echoes rejected gitlab-shaped identities | ● F10 deterministic and secret-safe errors › never echoes rejected jwt-shaped identities | ● F10 deterministic and secret-safe errors › never echoes rejected openai-style-shaped identities | ● F10 deterministic and secret-safe errors › never echoes rejected slack-shaped identities | ● credential scan has no unconditional exemption › rejects GitHub PAT in a free-form position | ● credential scan has no unconditional exemption › rejects JWT in a free-form position | ● credential scan has no unconditional exemption › rejects Slack token in a free-form position | ● credential scan has no unconditional exemption › rejects embedded bearer in a free-form position | ● credential scan has no unconditional exemption › rejects hex-shaped secret in a free-form position | ● parity: the two validators agree on inputs the corpus does not contain › agree on: a 64-hex secret in a field that does not carry digests (exemption was blanket in Python) | ● parity: the two validators agree on inputs the corpus does not contain › agree on: a 64-hex secret under an attacker-named key in traceFields | ● parity: the two validators agree on inputs the corpus does not contain › agree on: a GitHub token (one of the seven patterns Python did not carry) | ● parity: the two validators agree on inputs the corpus does not contain › agree on: a JWT | ● parity: the two validators agree on inputs the corpus does not contain › agree on: a Slack token | ● parity: the two validators agree on inputs the corpus does not contain › agree on: an AWS access key id | ● parity: the two validators agree on inputs the corpus does not contain › agree on: an embedded Bearer token | ● validateAssemblyRequest — controlling fail-fast order › checks provenance then candidate then unknown then credentials then authority then evidence | ● validator rejection sites identify their rule and path › credential",
+      "detail": "\u25cf CREDENTIAL_IN_PROHIBITED_POSITION \u2014 recursive \u203a DOES treat a boundary-anchored api_key assignment as a credential | \u25cf CREDENTIAL_IN_PROHIBITED_POSITION \u2014 recursive \u203a RED: an embedded sk- key inside a URL is still detected | \u25cf CREDENTIAL_IN_PROHIBITED_POSITION \u2014 recursive \u203a RED: credential in candidateSet.candidates[] entry is detected | \u25cf CREDENTIAL_IN_PROHIBITED_POSITION \u2014 recursive \u203a RED: credential in provenance.policyUri is detected | \u25cf CREDENTIAL_IN_PROHIBITED_POSITION \u2014 recursive \u203a RED: credential in rolePolicy.policyId is detected | \u25cf CREDENTIAL_IN_PROHIBITED_POSITION \u2014 recursive \u203a rejects bearer token in authority purpose | \u25cf F10 deterministic and secret-safe errors \u203a never echoes rejected aws-shaped identities | \u25cf F10 deterministic and secret-safe errors \u203a never echoes rejected bearer-shaped identities | \u25cf F10 deterministic and secret-safe errors \u203a never echoes rejected generic-base64-shaped identities | \u25cf F10 deterministic and secret-safe errors \u203a never echoes rejected github-shaped identities | \u25cf F10 deterministic and secret-safe errors \u203a never echoes rejected gitlab-shaped identities | \u25cf F10 deterministic and secret-safe errors \u203a never echoes rejected jwt-shaped identities | \u25cf F10 deterministic and secret-safe errors \u203a never echoes rejected openai-style-shaped identities | \u25cf F10 deterministic and secret-safe errors \u203a never echoes rejected slack-shaped identities | \u25cf credential scan has no unconditional exemption \u203a rejects GitHub PAT in a free-form position | \u25cf credential scan has no unconditional exemption \u203a rejects JWT in a free-form position | \u25cf credential scan has no unconditional exemption \u203a rejects Slack token in a free-form position | \u25cf credential scan has no unconditional exemption \u203a rejects embedded bearer in a free-form position | \u25cf credential scan has no unconditional exemption \u203a rejects hex-shaped secret in a free-form position | \u25cf parity: the two validators agree on inputs the corpus does not contain \u203a agree on: a 64-hex secret in a field that does not carry digests (exemption was blanket in Python) | \u25cf parity: the two validators agree on inputs the corpus does not contain \u203a agree on: a 64-hex secret under an attacker-named key in traceFields | \u25cf parity: the two validators agree on inputs the corpus does not contain \u203a agree on: a GitHub token (one of the seven patterns Python did not carry) | \u25cf parity: the two validators agree on inputs the corpus does not contain \u203a agree on: a JWT | \u25cf parity: the two validators agree on inputs the corpus does not contain \u203a agree on: a Slack token | \u25cf parity: the two validators agree on inputs the corpus does not contain \u203a agree on: an AWS access key id | \u25cf parity: the two validators agree on inputs the corpus does not contain \u203a agree on: an embedded Bearer token | \u25cf validateAssemblyRequest \u2014 controlling fail-fast order \u203a checks provenance then candidate then unknown then credentials then authority then evidence | \u25cf validator rejection sites identify their rule and path \u203a credential",
       "detailSha256": "1dfbf575f6f3b0d13acb0f3051f6defea220a0cb7fe4c84f83b276405907fee6"
     },
     {
@@ -1151,7 +1151,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "c8af51321bb6f6a4290f3454264da9bac38c23a901e127d49ffe4e12cffcc171",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● F10 deterministic and secret-safe errors › never echoes rejected aws-shaped object keys | ● F10 deterministic and secret-safe errors › never echoes rejected bearer-shaped object keys | ● F10 deterministic and secret-safe errors › never echoes rejected generic-base64-shaped object keys | ● F10 deterministic and secret-safe errors › never echoes rejected github-shaped object keys | ● F10 deterministic and secret-safe errors › never echoes rejected gitlab-shaped object keys | ● F10 deterministic and secret-safe errors › never echoes rejected jwt-shaped object keys | ● F10 deterministic and secret-safe errors › never echoes rejected openai-style-shaped object keys | ● F10 deterministic and secret-safe errors › never echoes rejected slack-shaped object keys",
+      "detail": "\u25cf F10 deterministic and secret-safe errors \u203a never echoes rejected aws-shaped object keys | \u25cf F10 deterministic and secret-safe errors \u203a never echoes rejected bearer-shaped object keys | \u25cf F10 deterministic and secret-safe errors \u203a never echoes rejected generic-base64-shaped object keys | \u25cf F10 deterministic and secret-safe errors \u203a never echoes rejected github-shaped object keys | \u25cf F10 deterministic and secret-safe errors \u203a never echoes rejected gitlab-shaped object keys | \u25cf F10 deterministic and secret-safe errors \u203a never echoes rejected jwt-shaped object keys | \u25cf F10 deterministic and secret-safe errors \u203a never echoes rejected openai-style-shaped object keys | \u25cf F10 deterministic and secret-safe errors \u203a never echoes rejected slack-shaped object keys",
       "detailSha256": "7e35bf9bb5a8f0c4136ecbf4eb60044b42db74e0f57d4ee2e77b0468da8b492a"
     },
     {
@@ -1169,7 +1169,7 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "d18c345b3f19b33c653d4e32c78201b1a52e222539c8de6f53ea4eb515972b00",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● UNSAFE_NESTING › rejects deeply nested traceFields | ● request boundary depth hardening › returns UNSAFE_NESTING rather than throwing at depth 20,000 | ● request boundary depth hardening › returns a typed error when captured causationId nearly fills the raw byte budget | ● request boundary depth hardening › returns a typed error when captured correlationId nearly fills the raw byte budget | ● request boundary depth hardening › returns a typed error when captured taskId nearly fills the raw byte budget",
+      "detail": "\u25cf UNSAFE_NESTING \u203a rejects deeply nested traceFields | \u25cf request boundary depth hardening \u203a returns UNSAFE_NESTING rather than throwing at depth 20,000 | \u25cf request boundary depth hardening \u203a returns a typed error when captured causationId nearly fills the raw byte budget | \u25cf request boundary depth hardening \u203a returns a typed error when captured correlationId nearly fills the raw byte budget | \u25cf request boundary depth hardening \u203a returns a typed error when captured taskId nearly fills the raw byte budget",
       "detailSha256": "80aa5789567565d1cd534d8ab007e03707a654bc231de98bab651d2eeb8d7d59"
     },
     {
@@ -1205,7 +1205,7 @@
       "pristineSha256": "4e52a503637d583bc1292b3d9cd3c9a9dad25148790547ba15d91eff9ff0c28d",
       "mutantSha256": "aa5ea4bb753780b444c97665409882e7821f38c0804f6b3ab64f8b17346035a5",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● shared canonical v1 rejection sites › overlong string | ● shared canonical v1 rejection sites › oversized array",
+      "detail": "\u25cf shared canonical v1 rejection sites \u203a overlong string | \u25cf shared canonical v1 rejection sites \u203a oversized array",
       "detailSha256": "670f567ed44a91efad547145a228af1ebf337d160c76f62d942a9aefe9f576d5"
     },
     {
@@ -1241,7 +1241,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "178c7b391892e2ae1ef8e5e4ee012171951a7d23c020ccd594e180a3883e44bb",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● errorId is canonical and complete › source-binds oversized escaped canonical details through a bounded descriptor | ● frozen-rereview regressions › bounds the emitted canonical bytes after non-ASCII escaping | ● frozen-rereview regressions › enforces the emitted-byte budget on non-authoritative traceFields | ● parity: canonical bytes are identical for the cases D10 named › the canonicalizers both bound emitted escaped bytes",
+      "detail": "\u25cf errorId is canonical and complete \u203a source-binds oversized escaped canonical details through a bounded descriptor | \u25cf frozen-rereview regressions \u203a bounds the emitted canonical bytes after non-ASCII escaping | \u25cf frozen-rereview regressions \u203a enforces the emitted-byte budget on non-authoritative traceFields | \u25cf parity: canonical bytes are identical for the cases D10 named \u203a the canonicalizers both bound emitted escaped bytes",
       "detailSha256": "5ce81076c9f53da0b24c147b8668f26fe7a6a6deda9c3e4859976673424642fe"
     },
     {
@@ -1259,7 +1259,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "acabe60ef5a5ebde1c398a5d99a5c6f5e5ebba4f86541bba5aabad1c08a434f8",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● UNSAFE_NESTING › rejects deeply nested traceFields | ● request boundary depth hardening › returns UNSAFE_NESTING rather than throwing at depth 20,000",
+      "detail": "\u25cf UNSAFE_NESTING \u203a rejects deeply nested traceFields | \u25cf request boundary depth hardening \u203a returns UNSAFE_NESTING rather than throwing at depth 20,000",
       "detailSha256": "856a6bac671aced69258a02710377ecde029e0fd82593592de9726c95469b45e"
     },
     {
@@ -1277,7 +1277,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "7d823966b547d50a36228b0d5d3750b2cc0a656ead5ad87f0b9b3a1761d209a0",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● assemblyCanonicalJson › rejects cycles, sparse arrays, accessors, and lone surrogates | ● request boundary depth hardening › source-binds exact malformed UTF-16 code units for causationId capture failures | ● request boundary depth hardening › source-binds exact malformed UTF-16 code units for correlationId capture failures | ● request boundary depth hardening › source-binds exact malformed UTF-16 code units for taskId capture failures | ● shared canonical v1 rejection sites › lone surrogate",
+      "detail": "\u25cf assemblyCanonicalJson \u203a rejects cycles, sparse arrays, accessors, and lone surrogates | \u25cf request boundary depth hardening \u203a source-binds exact malformed UTF-16 code units for causationId capture failures | \u25cf request boundary depth hardening \u203a source-binds exact malformed UTF-16 code units for correlationId capture failures | \u25cf request boundary depth hardening \u203a source-binds exact malformed UTF-16 code units for taskId capture failures | \u25cf shared canonical v1 rejection sites \u203a lone surrogate",
       "detailSha256": "686527ee5d2000cb66d28bf35ccf73954b71e55cc1c80968124b49aa8a52a308"
     },
     {
@@ -1295,7 +1295,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "cc1c18c969c7844df5ff1dbcc9daa86cac3d2a47a5b6dd534d0ff950dce86d4a",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● ATTEMPT_BUDGET_EXCEEDED › rejects Infinity budget | ● F10 deterministic and secret-safe errors › keeps error identities distinct across bounded observable detail classes | ● F10 raw canonical ingestion bounds › keeps the object serializer closed over primitive and resource bounds | ● assemblyCanonicalJson › rejects non-canonical value 1 | ● assemblyCanonicalJson › rejects non-canonical value 2 | ● assemblyCanonicalJson › rejects non-canonical value 3 | ● assemblyCanonicalJson › rejects non-canonical value 4 | ● assemblyCanonicalJson › rejects non-canonical value 5 | ● parity: canonical bytes are identical for the cases D10 named › the canonicalizers agree that a non-integer is not representable | ● shared canonical v1 rejection sites › canonical serializer itself fails closed | ● shared canonical v1 rejection sites › infinity | ● shared canonical v1 rejection sites › unsafe integer | ● traceFields strict type › rejects Infinity in traceFields before serialization | ● traceFields strict type › rejects NaN in traceFields before serialization | ● traceFields strict type › rejects negative zero in traceFields before serialization | ● typed canonical-value boundary › returns a typed rejection for ambiguous values",
+      "detail": "\u25cf ATTEMPT_BUDGET_EXCEEDED \u203a rejects Infinity budget | \u25cf F10 deterministic and secret-safe errors \u203a keeps error identities distinct across bounded observable detail classes | \u25cf F10 raw canonical ingestion bounds \u203a keeps the object serializer closed over primitive and resource bounds | \u25cf assemblyCanonicalJson \u203a rejects non-canonical value 1 | \u25cf assemblyCanonicalJson \u203a rejects non-canonical value 2 | \u25cf assemblyCanonicalJson \u203a rejects non-canonical value 3 | \u25cf assemblyCanonicalJson \u203a rejects non-canonical value 4 | \u25cf assemblyCanonicalJson \u203a rejects non-canonical value 5 | \u25cf parity: canonical bytes are identical for the cases D10 named \u203a the canonicalizers agree that a non-integer is not representable | \u25cf shared canonical v1 rejection sites \u203a canonical serializer itself fails closed | \u25cf shared canonical v1 rejection sites \u203a infinity | \u25cf shared canonical v1 rejection sites \u203a unsafe integer | \u25cf traceFields strict type \u203a rejects Infinity in traceFields before serialization | \u25cf traceFields strict type \u203a rejects NaN in traceFields before serialization | \u25cf traceFields strict type \u203a rejects negative zero in traceFields before serialization | \u25cf typed canonical-value boundary \u203a returns a typed rejection for ambiguous values",
       "detailSha256": "358540fa984b22050a5d429aff6d7f3ec95d496e29affcc794b7b96aaabb44d6"
     },
     {
@@ -1313,7 +1313,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "65b07dec5665e4b69e1ff1a0a16d1ec1a5a9b7e69a6336da41530c14197e9d88",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● assemblyCanonicalJson › rejects non-canonical value 0 | ● assemblyCanonicalJson › rejects non-canonical value 6",
+      "detail": "\u25cf assemblyCanonicalJson \u203a rejects non-canonical value 0 | \u25cf assemblyCanonicalJson \u203a rejects non-canonical value 6",
       "detailSha256": "9298b40f5332b51880c67942f801529f57d1eb5464b29338c97b972a1de3a5bb"
     },
     {
@@ -1331,7 +1331,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "20d1cb0769d3ff06f60b353b4f532cef98511aa1378bc600ce31311343cdae04",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● frozen-rereview regressions › rejects nested stateful proxies without invoking their traps | ● frozen-rereview regressions › rejects transparent, array, and revoked proxies before reflection | ● request boundary depth hardening › uses stable opaque classes without invoking proxy traps or accessors | ● shared canonical v1 rejection sites › rejects proxies without invoking traps",
+      "detail": "\u25cf frozen-rereview regressions \u203a rejects nested stateful proxies without invoking their traps | \u25cf frozen-rereview regressions \u203a rejects transparent, array, and revoked proxies before reflection | \u25cf request boundary depth hardening \u203a uses stable opaque classes without invoking proxy traps or accessors | \u25cf shared canonical v1 rejection sites \u203a rejects proxies without invoking traps",
       "detailSha256": "9da80abf4edec3114416adfd2f0168da3f24f4b707294357091b9ef4c30598e9"
     },
     {
@@ -1349,7 +1349,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "3b9446b4fc69b2d24d1d126d00d839c67ddf7e106ed126deee8b9e1633fd3857",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● shared canonical v1 rejection sites › rejects cycles, sparse arrays, accessors, extra array properties, and symbols | ● traceFields strict type › rejects a cyclic reference in traceFields",
+      "detail": "\u25cf shared canonical v1 rejection sites \u203a rejects cycles, sparse arrays, accessors, extra array properties, and symbols | \u25cf traceFields strict type \u203a rejects a cyclic reference in traceFields",
       "detailSha256": "4fd6ebe19558a0a19d3a3378efd0917bb0f26ebbee4471da78cee33f594072f0"
     },
     {
@@ -1367,7 +1367,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "1db4e996a2b3eb1102324fdbf7c027fb60ef27112eb852d25ad779ea6e7db25c",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● shared canonical v1 rejection sites › rejects every exotic array/object descriptor branch",
+      "detail": "\u25cf shared canonical v1 rejection sites \u203a rejects every exotic array/object descriptor branch",
       "detailSha256": "941259bef52a0260cc9439c088b9eaf2717cd2469c2e08eb714b3f6b77a00163"
     },
     {
@@ -1385,7 +1385,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "60c8232420d7a83f47fd93479d84d2889fd7d388343cc8b0f7cdbc128a5c3ce2",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● shared canonical v1 rejection sites › rejects every exotic array/object descriptor branch",
+      "detail": "\u25cf shared canonical v1 rejection sites \u203a rejects every exotic array/object descriptor branch",
       "detailSha256": "941259bef52a0260cc9439c088b9eaf2717cd2469c2e08eb714b3f6b77a00163"
     },
     {
@@ -1403,7 +1403,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "b5eceaec4d42180d28c1c609bb2629b6847889ec6c060b4356920fc72e10f27b",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● F10 raw canonical ingestion bounds › keeps the object serializer closed over primitive and resource bounds | ● shared canonical v1 rejection sites › oversized array",
+      "detail": "\u25cf F10 raw canonical ingestion bounds \u203a keeps the object serializer closed over primitive and resource bounds | \u25cf shared canonical v1 rejection sites \u203a oversized array",
       "detailSha256": "ca365a88437158e30d5c5197288febb5acd00e51b961488386efd8c85cc64a07"
     },
     {
@@ -1421,7 +1421,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "4a7f2c91df087d22b853efabe33041bd422492b9b741775e87b45835794b31db",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● shared canonical v1 rejection sites › rejects cycles, sparse arrays, accessors, extra array properties, and symbols",
+      "detail": "\u25cf shared canonical v1 rejection sites \u203a rejects cycles, sparse arrays, accessors, extra array properties, and symbols",
       "detailSha256": "2de3d94d6b3702fef07e0d7233de036a1261c199d9a168733c12a64f02181121"
     },
     {
@@ -1439,7 +1439,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "1693e9b6c2f97d5efbf15dc0b2dded0bd20c750a9adbf195c8a3d2487fa675a0",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● shared canonical v1 rejection sites › rejects every exotic array/object descriptor branch",
+      "detail": "\u25cf shared canonical v1 rejection sites \u203a rejects every exotic array/object descriptor branch",
       "detailSha256": "941259bef52a0260cc9439c088b9eaf2717cd2469c2e08eb714b3f6b77a00163"
     },
     {
@@ -1457,7 +1457,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "ee899e1f7925691ad6d6b6946ea936932835d26d9684d761bebcdf613823c363",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● assemblyCanonicalJson › rejects non-canonical value 9 | ● shared canonical v1 rejection sites › date | ● traceFields strict type › rejects a Date in traceFields before serialization | ● traceFields strict type › rejects a class instance in traceFields before serialization | ● traceFields strict type › rejects a nested Date in traceFields before serialization",
+      "detail": "\u25cf assemblyCanonicalJson \u203a rejects non-canonical value 9 | \u25cf shared canonical v1 rejection sites \u203a date | \u25cf traceFields strict type \u203a rejects a Date in traceFields before serialization | \u25cf traceFields strict type \u203a rejects a class instance in traceFields before serialization | \u25cf traceFields strict type \u203a rejects a nested Date in traceFields before serialization",
       "detailSha256": "58e1bd7ab4138094245b66f6ac803a14347eabc98f34c00e3c1103161fc420fb"
     },
     {
@@ -1475,7 +1475,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "a7c825f01fa26ca0d08b948cd8247238bb5de812920dff11abc29fb8128834c9",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● shared canonical v1 rejection sites › rejects cycles, sparse arrays, accessors, extra array properties, and symbols | ● traceFields strict type › rejects a symbol-keyed object in traceFields",
+      "detail": "\u25cf shared canonical v1 rejection sites \u203a rejects cycles, sparse arrays, accessors, extra array properties, and symbols | \u25cf traceFields strict type \u203a rejects a symbol-keyed object in traceFields",
       "detailSha256": "e4789eb66f6981ccbde641c85358adac7e3f1abe28dce0c30eb431c8d8a09f2a"
     },
     {
@@ -1493,7 +1493,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "dde3d1a0e465cdbd95013c7cea0503bbb700046effd19e799b3b76e9fe26f611",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● shared canonical v1 rejection sites › rejects every exotic array/object descriptor branch",
+      "detail": "\u25cf shared canonical v1 rejection sites \u203a rejects every exotic array/object descriptor branch",
       "detailSha256": "941259bef52a0260cc9439c088b9eaf2717cd2469c2e08eb714b3f6b77a00163"
     },
     {
@@ -1511,7 +1511,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "8ab28add0e1293a56e463319a6465faa29d30bf374e4862c175b439d9556db8a",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● parity: the two validators agree on inputs the corpus does not contain › agrees that a lone surrogate in an object key is ambiguous canonical data | ● shared canonical v1 rejection sites › rejects every exotic array/object descriptor branch",
+      "detail": "\u25cf parity: the two validators agree on inputs the corpus does not contain \u203a agrees that a lone surrogate in an object key is ambiguous canonical data | \u25cf shared canonical v1 rejection sites \u203a rejects every exotic array/object descriptor branch",
       "detailSha256": "b9a8c6818576f2fbfc892c337bb60af9bc89e4decf53c2ea11d7185807c5f1b5"
     },
     {
@@ -1529,7 +1529,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "a59e045825c2986ad2a2886065d501b2c236be4cf618b712211b4d2df8d43f27",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● shared canonical v1 rejection sites › rejects every exotic array/object descriptor branch",
+      "detail": "\u25cf shared canonical v1 rejection sites \u203a rejects every exotic array/object descriptor branch",
       "detailSha256": "941259bef52a0260cc9439c088b9eaf2717cd2469c2e08eb714b3f6b77a00163"
     },
     {
@@ -1547,7 +1547,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "a35bbc97e3e8b5a615fd2a8c8cef511fe360a93aea0f7dd920a3b283cb7c935e",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● shared canonical v1 rejection sites › attributes otherwise structurally scanned invalid JSON to the JSON parser",
+      "detail": "\u25cf shared canonical v1 rejection sites \u203a attributes otherwise structurally scanned invalid JSON to the JSON parser",
       "detailSha256": "a600c027e18ebc2017d9cfbb9db7ec1891b9dc3bc60b7b06c774434d9cf03723"
     },
     {
@@ -1565,7 +1565,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "fd9dafc97799cd92f66ddceef0bd47371e8ec7db69311537c9529719e0a98017",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● shared canonical v1 rejection sites › rejects raw byte, container, and aggregate entry overflow",
+      "detail": "\u25cf shared canonical v1 rejection sites \u203a rejects raw byte, container, and aggregate entry overflow",
       "detailSha256": "110434260df53e2c275cef55895c349414618a0524ff885daf1a8e56dbde9998"
     },
     {
@@ -1583,7 +1583,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "aada19b4c14e0dda514899d6e0376e8c8d8a95bbdfda2a42185e789ce833923e",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● F10 raw canonical ingestion bounds › rejects excessive raw nesting with the typed canonical error, not RangeError",
+      "detail": "\u25cf F10 raw canonical ingestion bounds \u203a rejects excessive raw nesting with the typed canonical error, not RangeError",
       "detailSha256": "3f6a5cdbf4be637efedcb7e87f9423f1339c99acefbb4325f7a6bb29f3d27116"
     },
     {
@@ -1601,7 +1601,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "0f365714120dfc2bc07977a9cc178dfa58986a8c9c0ff29b2dfbe52d8a8d3edb",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● shared canonical v1 rejection sites › rejects raw byte, container, and aggregate entry overflow",
+      "detail": "\u25cf shared canonical v1 rejection sites \u203a rejects raw byte, container, and aggregate entry overflow",
       "detailSha256": "110434260df53e2c275cef55895c349414618a0524ff885daf1a8e56dbde9998"
     },
     {
@@ -1619,7 +1619,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "8ac1ecfb980212af70872354b8cd4c8a83a38acaafaf3ad05baa70a0c949aa0a",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● shared canonical v1 rejection sites › rejects raw byte, container, and aggregate entry overflow",
+      "detail": "\u25cf shared canonical v1 rejection sites \u203a rejects raw byte, container, and aggregate entry overflow",
       "detailSha256": "110434260df53e2c275cef55895c349414618a0524ff885daf1a8e56dbde9998"
     },
     {
@@ -1655,7 +1655,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "bcc3662365b9054ef6e636ac31974edbc714c723ad7e133e6aa757addb02643e",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● shared canonical v1 rejection sites › attributes malformed raw structure to its pre-parse branch",
+      "detail": "\u25cf shared canonical v1 rejection sites \u203a attributes malformed raw structure to its pre-parse branch",
       "detailSha256": "7704d9b4687254a6a717f77ca8ac6b492544eed2918817d002be2a99cf7fc72a"
     },
     {
@@ -1673,7 +1673,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "adb984d3785b1ad525dc22dd8c6ba92d6e4550a37362d97a198eee4f84c7037a",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● F10 raw canonical ingestion bounds › rejects duplicate decoded keys before JSON.parse can collapse them | ● canonical raw JSON boundary › rejects duplicate decoded object keys | ● shared canonical v1 rejection sites › rejects invalid raw JSON {\"a\":1,\"a\":2}",
+      "detail": "\u25cf F10 raw canonical ingestion bounds \u203a rejects duplicate decoded keys before JSON.parse can collapse them | \u25cf canonical raw JSON boundary \u203a rejects duplicate decoded object keys | \u25cf shared canonical v1 rejection sites \u203a rejects invalid raw JSON {\"a\":1,\"a\":2}",
       "detailSha256": "243d4a7257452113de025fc814de9c01c50a91fa71a81b5ab9701ce9a1fa19ba"
     },
     {
@@ -1691,7 +1691,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "3d5ce0c21b2af5df509fe071bfc217afc57e8a0563f057122ebf9d5817c229d8",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● shared canonical v1 rejection sites › attributes missing object/array separators to their exact pre-parse branches",
+      "detail": "\u25cf shared canonical v1 rejection sites \u203a attributes missing object/array separators to their exact pre-parse branches",
       "detailSha256": "44a56af313914a626541a7eb0555cfe20d688e232be7134f3f77388463308cad"
     },
     {
@@ -1709,7 +1709,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "4096eae80070ae87777863442b4a9b6975a594eb31421e64389e561f3d0ee478",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● shared canonical v1 rejection sites › attributes missing object/array separators to their exact pre-parse branches",
+      "detail": "\u25cf shared canonical v1 rejection sites \u203a attributes missing object/array separators to their exact pre-parse branches",
       "detailSha256": "44a56af313914a626541a7eb0555cfe20d688e232be7134f3f77388463308cad"
     },
     {
@@ -1727,7 +1727,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "3172103a888ddfd2888521ad9bd64e67fbf6c4c3808a8dd4e9906d44b9fe4a13",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● shared canonical v1 rejection sites › attributes missing object/array separators to their exact pre-parse branches",
+      "detail": "\u25cf shared canonical v1 rejection sites \u203a attributes missing object/array separators to their exact pre-parse branches",
       "detailSha256": "44a56af313914a626541a7eb0555cfe20d688e232be7134f3f77388463308cad"
     },
     {
@@ -1745,7 +1745,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "a90652dbfd9425201ec22125b8501e044993867b9656a84e9d4e4a320c7eef39",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● shared canonical v1 rejection sites › attributes malformed raw structure to its pre-parse branch",
+      "detail": "\u25cf shared canonical v1 rejection sites \u203a attributes malformed raw structure to its pre-parse branch",
       "detailSha256": "7704d9b4687254a6a717f77ca8ac6b492544eed2918817d002be2a99cf7fc72a"
     },
     {
@@ -1763,7 +1763,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "0b38201f616a47fa7c9d101174cbea5a1535852a87fdfee4778a0f25234dffda",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● shared canonical v1 rejection sites › attributes malformed raw structure to its pre-parse branch",
+      "detail": "\u25cf shared canonical v1 rejection sites \u203a attributes malformed raw structure to its pre-parse branch",
       "detailSha256": "7704d9b4687254a6a717f77ca8ac6b492544eed2918817d002be2a99cf7fc72a"
     },
     {
@@ -1781,7 +1781,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "d9f1fd66fb85aba9da6fefc1719ca4a16624d462c982dbd5b8628f2d3c6ab0c3",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● shared canonical v1 rejection sites › rejects negative zero before JSON.parse is reached",
+      "detail": "\u25cf shared canonical v1 rejection sites \u203a rejects negative zero before JSON.parse is reached",
       "detailSha256": "d50eb5bb66bdfb109869fcc62d3edd3319a20dfaf23f2796ebcd2fd29f84bb8f"
     },
     {
@@ -1799,7 +1799,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "0ca35b4680544ffeb45663289757518698cbf1dc896df5fde7ad69348c169780",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● A2: non-integer numeric literals are rejected lexically › rejects 5.0 — integer-valued but written as a float literal | ● A2: non-integer numeric literals are rejected lexically › rejects explicit positive exponent | ● A2: non-integer numeric literals are rejected lexically › rejects integer-valued exponent | ● A2: non-integer numeric literals are rejected lexically › rejects trailing-zero float | ● canonical raw JSON boundary › rejects the numeric token in {\"n\":1e2} | ● canonical raw JSON boundary › rejects the numeric token in {\"n\":5.0} | ● shared canonical v1 rejection sites › rejects invalid raw JSON {\"n\":1e2} | ● shared canonical v1 rejection sites › rejects invalid raw JSON {\"n\":5.0}",
+      "detail": "\u25cf A2: non-integer numeric literals are rejected lexically \u203a rejects 5.0 \u2014 integer-valued but written as a float literal | \u25cf A2: non-integer numeric literals are rejected lexically \u203a rejects explicit positive exponent | \u25cf A2: non-integer numeric literals are rejected lexically \u203a rejects integer-valued exponent | \u25cf A2: non-integer numeric literals are rejected lexically \u203a rejects trailing-zero float | \u25cf canonical raw JSON boundary \u203a rejects the numeric token in {\"n\":1e2} | \u25cf canonical raw JSON boundary \u203a rejects the numeric token in {\"n\":5.0} | \u25cf shared canonical v1 rejection sites \u203a rejects invalid raw JSON {\"n\":1e2} | \u25cf shared canonical v1 rejection sites \u203a rejects invalid raw JSON {\"n\":5.0}",
       "detailSha256": "b441792b7a518123db80e7d861020f1a0f428e9c97d34a5f5418778cc73a5ace"
     },
     {
@@ -1817,7 +1817,7 @@
       "pristineSha256": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e",
       "mutantSha256": "95bbe2f33aa84551642da7d61454c906944db635dd652c4c8d5e3fb5e068774f",
       "outcome": "KILLED_BY_TEST",
-      "detail": "● shared canonical v1 rejection sites › overlong string",
+      "detail": "\u25cf shared canonical v1 rejection sites \u203a overlong string",
       "detailSha256": "64ae84435a38dc3e5141795c1b1cec7b651be250e844777437d899d3d83e74aa"
     }
   ],

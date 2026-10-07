@@ -186,8 +186,8 @@ describe('Migration import surface — PostgreSQL proofs', () => {
       await service.createWorkItem(importRequest(batchId, { historicalStatus: 'pending' }), AGENT);
 
       const receipt = (await service.commitBatch(batchId, AGENT)).receipt as Record<string, unknown>;
-      expect(receipt.statusMapRevision).toBe(3);
-      expect(receipt.statusMapRevisions).toEqual([3]);
+      expect(receipt.statusMapRevision).toBe(4);
+      expect(receipt.statusMapRevisions).toEqual([4]);
       expect(receipt.unmappedCount).toBe(0);
       expect(receipt.counts).toEqual({ occurrences: 2, identities: 2, workItems: 2 });
     });
@@ -206,7 +206,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
 
       const receipt = (await service.commitBatch(batchId, AGENT)).receipt as Record<string, unknown>;
       expect(receipt.unmappedCount).toBe(2);
-      expect(receipt.statusMapRevision).toBe(3);
+      expect(receipt.statusMapRevision).toBe(4);
     });
 
     it('reports the revisions actually stored, not the one this build loaded', async () => {
@@ -235,8 +235,8 @@ describe('Migration import surface — PostgreSQL proofs', () => {
 
       const receipt = (await service.commitBatch(batchId, AGENT)).receipt as Record<string, unknown>;
       // 0 = "projected before this column existed", never backfilled.
-      expect(receipt.statusMapRevisions).toEqual([0, 3]);
-      expect(receipt.statusMapRevision).toBe(3);
+      expect(receipt.statusMapRevisions).toEqual([0, 4]);
+      expect(receipt.statusMapRevision).toBe(4);
       expect(receipt.unmappedCount).toBe(0);
     });
 
@@ -550,7 +550,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
       expect(result.body.occurrence).toMatchObject({
         unmapped: true,
         historicalAssertedDone: false,
-        statusMapRevision: 3,
+        statusMapRevision: 4,
       });
     });
 
@@ -579,7 +579,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
         historicalAssertedDone: true,
         currentVerification: 'not_revalidated',
         unmapped: false,
-        statusMapRevision: 3,
+        statusMapRevision: 4,
       });
 
       // ...and the revision is durable in the column, not only in the presenter.
@@ -588,7 +588,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
         select: { statusMapRevision: true, unmapped: true, historicalStatus: true },
       });
       expect(row).toEqual({
-        statusMapRevision: 3,
+        statusMapRevision: 4,
         unmapped: false,
         historicalStatus: 'archived',
       });
@@ -654,7 +654,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
           historicalAssertedDone: assertedDone,
           currentVerification: 'not_revalidated',
           unmapped: false,
-          statusMapRevision: 3,
+          statusMapRevision: 4,
         });
       },
     );

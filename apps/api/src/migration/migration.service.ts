@@ -27,6 +27,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { isValidTransition, type Actor, type TaskStatus } from '@muneral/types';
+import { TaskFieldStateService } from '../tasks/field-state/task-field-state.service.js';
 import { ActivityService } from '../activity/activity.service.js';
 import { agentStatusAuthorityWhere } from '../auth/agent-task-visibility.js';
 import {
@@ -35,7 +36,6 @@ import {
   jsonDigest,
   type JsonValue,
 } from '../execution-authority/canonical-json.js';
-import { TaskFieldStateService } from '../tasks/field-state/task-field-state.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { CreateBatchDto } from './dto/create-batch.dto.js';
 import type { CreateDecisionDto } from './dto/create-decision.dto.js';
@@ -73,6 +73,7 @@ import {
   STATUS_MAP_REVISION,
   SUPPORTED_STATUS_MAP_REVISIONS,
 } from './status-map/status-map.js';
+import { projectArchiveForNewImport } from './migration.archive-projection.js';
 
 /** PostgreSQL unique-violation code as surfaced by Prisma. */
 const UNIQUE_VIOLATION = 'P2002';
@@ -127,7 +128,7 @@ export class MigrationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly activity: ActivityService,
-    private readonly taskFieldState: TaskFieldStateService,
+    private readonly fieldState: TaskFieldStateService,
   ) {}
 
   // -------------------------------------------------------------------------
@@ -460,6 +461,9 @@ export class MigrationService {
       const occurrence = await tx.sourceOccurrence.findUniqueOrThrow({
         where: { id: occurrenceId },
       });
+      await projectArchiveForNewImport(
+        tx, identityId, taskId, dto.legacyId, mapped.statusMapRevision, actor, this.fieldState,
+      );
       const identity = await tx.legacyIdentity.findUniqueOrThrow({ where: { id: identityId } });
       const task = await tx.task.findUniqueOrThrow({ where: { id: taskId } });
 
@@ -633,7 +637,7 @@ export class MigrationService {
       // The CAS, field-state, audit and replay response share one transaction.
       // A failed recompute must leave no published status/revision change.
       const currentTask = await tx.task.findUniqueOrThrow({ where: { id: taskId } });
-      await this.taskFieldState.recompute(tx, currentTask);
+      await this.fieldState.recompute(tx, currentTask);
 
       const revision = dto.expectedRevision + 1;
       await this.activity.log(

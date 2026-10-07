@@ -36,6 +36,7 @@ import type { TaskStatus } from '@muneral/types';
 // legal on both paths.
 import rawStatusMapRev2 from './status-map-v1-rev2.json' with { type: 'json' };
 import rawStatusMapRev3 from './status-map-v1-rev3.json' with { type: 'json' };
+import rawStatusMapRev4 from './status-map-v1-rev4.json' with { type: 'json' };
 
 /** The schema this loader is written against. A different schema is refused. */
 export const STATUS_MAP_SCHEMA = 'HistoricalStatusMap/v1';
@@ -228,7 +229,7 @@ export function buildStatusMapRegistry(
 }
 
 export const STATUS_MAP_REVISIONS: ReadonlyMap<number, HistoricalStatusMapArtefact> =
-  buildStatusMapRegistry([rawStatusMapRev2, rawStatusMapRev3]);
+  buildStatusMapRegistry([rawStatusMapRev2, rawStatusMapRev3, rawStatusMapRev4]);
 
 /** The revision this build applies when the caller does not name one. The
  *  highest vendored revision, computed rather than written down, so adding an
