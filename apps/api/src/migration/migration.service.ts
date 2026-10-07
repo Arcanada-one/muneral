@@ -634,6 +634,11 @@ export class MigrationService {
         );
       }
 
+      // The CAS, field-state, audit and replay response share one transaction.
+      // A failed recompute must leave no published status/revision change.
+      const currentTask = await tx.task.findUniqueOrThrow({ where: { id: taskId } });
+      await this.fieldState.recompute(tx, currentTask);
+
       const revision = dto.expectedRevision + 1;
       await this.activity.log(
         {
