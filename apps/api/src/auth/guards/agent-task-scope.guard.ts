@@ -1,3 +1,4 @@
+import { isTaskReadKeyHandler } from '../task-read-api-key-header.js';
 import {
   CanActivate,
   ExecutionContext,
@@ -200,7 +201,7 @@ export class AgentTaskScopeGuard implements CanActivate {
       case 'task': {
         const taskId = this.paramOf(req, 'taskId');
         if (!taskId) throw new ForbiddenException('No task in scope for this key.');
-        await this.assertOwnTask(agent, taskId);
+        await this.assertOwnTask(agent, taskId, isTaskReadKeyHandler(req, context.getHandler()));
         break;
       }
       // MUN-0049: 'task-redaction' is bound to the assignment — the agent
@@ -423,7 +424,7 @@ export class AgentTaskScopeGuard implements CanActivate {
 
   /** MUN-0051 — 'task': assigned to the task OR its creator, inside the
    *  agent's workspace. 403 for every other case, as assertAssignedToTask. */
-  private async assertOwnTask(agent: Agent, taskId: string): Promise<void> {
+  private async assertOwnTask(agent: Agent, taskId: string, typedDenial = false): Promise<void> {
     const task = await this.prisma.task
       .findFirst({
         where: {
@@ -436,9 +437,11 @@ export class AgentTaskScopeGuard implements CanActivate {
       .catch(() => null);
 
     if (!task) {
-      throw new ForbiddenException(
-        `Agent "${agent.name}" neither created task ${taskId} nor is assigned to it.`,
-      );
+      const message = `Agent "${agent.name}" neither created task ${taskId} nor is assigned to it.`;
+      throw new ForbiddenException(typedDenial
+        ? { statusCode: 403, error: 'Forbidden', code: 'TASK_READ_FORBIDDEN', message }
+        : message);
+
     }
   }
 

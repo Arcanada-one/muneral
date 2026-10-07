@@ -1,3 +1,4 @@
+import { createDisposablePostgres } from './support/disposable-postgres.js';
 /**
  * MUN-0043 (e2e) — an agent's `mun_sk_` key on the task read and transition
  * routes, and the `archived` status end to end.
@@ -15,6 +16,7 @@
  * Real Prisma against the DATABASE_URL database, fixtures per test.
  */
 import supertest from 'supertest';
+import { jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe, Module } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
@@ -27,6 +29,7 @@ import { PrismaService } from '../src/prisma/prisma.service.js';
 import { AuthService } from '../src/auth/auth.service.js';
 import { KanbanService } from '../src/ws/kanban.service.js';
 import { TaskFieldStateService } from '../src/tasks/field-state/task-field-state.service.js';
+import { FieldChangesService } from '../src/tasks/field-state/field-changes.service.js';
 
 @Module({
   imports: [PrismaModule, AuthModule, ActivityModule, AgentsModule, TasksModule],
@@ -35,10 +38,12 @@ import { TaskFieldStateService } from '../src/tasks/field-state/task-field-state
 class TestAppModule {}
 
 describe('Agent-key scope on /tasks (e2e)', () => {
+  const pg = createDisposablePostgres('mun-assigned-read');
   let app: INestApplication;
   let prisma: PrismaService;
   let authSvc: AuthService;
   let fsSvc: TaskFieldStateService;
+  let fieldChangesSvc: FieldChangesService;
 
   let workspaceId: string;
   let otherWorkspaceId: string;
@@ -50,6 +55,8 @@ describe('Agent-key scope on /tasks (e2e)', () => {
   let foreignKey: string;
 
   beforeAll(async () => {
+    await pg.start();
+    process.env.DATABASE_URL = pg.url();
     const moduleRef: TestingModule = await Test.createTestingModule({
       imports: [TestAppModule],
     })
@@ -64,11 +71,12 @@ describe('Agent-key scope on /tasks (e2e)', () => {
     prisma = moduleRef.get(PrismaService);
     authSvc = moduleRef.get(AuthService);
     fsSvc = moduleRef.get(TaskFieldStateService);
-  });
+    fieldChangesSvc = moduleRef.get(FieldChangesService);
+  }, 120_000);
 
   afterAll(async () => {
-    await app.close();
-  });
+    try { if (app) await app.close(); } finally { await pg.stop(); }
+  }, 30_000);
 
   beforeEach(async () => {
     const id = uuidv4().slice(0, 8);
@@ -188,6 +196,129 @@ describe('Agent-key scope on /tasks (e2e)', () => {
 
     expect(res.body.id).toBe(task.id);
     expect(res.body.status).toBe('todo');
+  });
+
+  it('reads an assigned task and its bound digest via the handler-only header', async () => {
+    const task = await createTask();
+    const contractDigest = 'sha256:' + 'a'.repeat(64);
+    await prisma.task.update({ where: { id: task.id }, data: { contractDigest } });
+    await assign(task.id);
+    const res = await supertest(app.getHttpServer())
+      .get(`/tasks/${task.id}`).set('X-API-Key', assignedKey).expect(200);
+    expect(res.body.id).toBe(task.id);
+    expect(res.body.contractDigest).toBe(contractDigest);
+    expect(res.headers['x-muneral-task-project']).toBe(projectId);
+    expect(res.headers['x-muneral-task-project']).toBe(res.body.projectId);
+  });
+
+  it('binds the Bearer project header to the selected response row', async () => {
+    const task = await createTask();
+    await assign(task.id);
+    const res = await supertest(app.getHttpServer()).get(`/tasks/${task.id}`)
+      .set('Authorization', `Bearer ${assignedKey}`).expect(200);
+    expect(res.headers['x-muneral-task-project']).toBe(res.body.projectId);
+    expect(res.headers['x-muneral-task-project']).toBe(projectId);
+  });
+
+  it('does not expose the task project when ETag computation fails', async () => {
+    const task = await createTask();
+    await assign(task.id);
+    const failure = jest.spyOn(fieldChangesSvc, 'computeTaskEtag').mockRejectedValueOnce(new Error('Synthetic ETag failure'));
+    try {
+      const res = await supertest(app.getHttpServer()).get(`/tasks/${task.id}`)
+        .set('X-API-Key', assignedKey).expect(500);
+      expect(res.headers).not.toHaveProperty('x-muneral-task-project');
+    } finally {
+      failure.mockRestore();
+    }
+  });
+
+  it.each(['X-API-Key', 'Authorization'])('tracks a task project move via %s instead of a cached locator', async (header) => {
+    const task = await createTask();
+    await assign(task.id);
+    const destination = await prisma.project.create({
+      data: { workspaceId, slug: `moved-${uuidv4()}`, name: 'Synthetic destination' },
+    });
+    const credential = header === 'Authorization' ? `Bearer ${assignedKey}` : assignedKey;
+    try {
+      const first = await supertest(app.getHttpServer()).get(`/tasks/${task.id}`)
+        .set(header, credential).expect(200);
+      await prisma.task.update({ where: { id: task.id }, data: { projectId: destination.id } });
+      const moved = await supertest(app.getHttpServer()).get(`/tasks/${task.id}`)
+        .set(header, credential).set('If-None-Match', first.headers.etag).expect(200);
+      expect(moved.headers['x-muneral-task-project']).toBe(destination.id);
+      expect(moved.body.projectId).toBe(destination.id);
+      expect(moved.headers.etag).not.toBe(first.headers.etag);
+      const unchanged = await supertest(app.getHttpServer()).get(`/tasks/${task.id}`)
+        .set(header, credential).set('If-None-Match', moved.headers.etag).expect(304);
+      expect(unchanged.headers['x-muneral-task-project']).toBe(destination.id);
+      expect(unchanged.text).toBeFalsy();
+    } finally {
+      await prisma.task.update({ where: { id: task.id }, data: { projectId } });
+      await prisma.project.delete({ where: { id: destination.id } });
+    }
+  });
+
+  it.each(['X-API-Key', 'Authorization'])('returns typed foreign-task403 via %s', async (header) => {
+    const task = await createTask();
+    await assign(task.id);
+    const res = await supertest(app.getHttpServer()).get(`/tasks/${task.id}`)
+      .set(header, header === 'Authorization' ? `Bearer ${strangerKey}` : strangerKey).expect(403);
+    expect(res.body.code).toBe('TASK_READ_FORBIDDEN');
+    expect(res.body.statusCode).toBe(403);
+    expect(res.headers).not.toHaveProperty('x-muneral-task-project');
+  });
+
+  it.each(['mun_sk_invalid', '', 'mun_sk_one, mun_sk_two'])('rejects invalid alias %s', async (key) => {
+    const task = await createTask();
+    await assign(task.id);
+    const res = await supertest(app.getHttpServer()).get(`/tasks/${task.id}`)
+      .set('X-API-Key', key).expect(401);
+    expect(res.headers).not.toHaveProperty('x-muneral-task-project');
+  });
+
+  it('rejects repeated alias headers even when both keys are valid', async () => {
+    const task = await createTask();
+    await assign(task.id);
+    await supertest(app.getHttpServer()).get(`/tasks/${task.id}`)
+      .set('X-API-Key', [assignedKey, assignedKey] as unknown as string).expect(401);
+  });
+
+  it.each(['Bearer invalid.jwt', 'Bearer mun_sk_invalid'])('does not fall back with mixed credentials %s', async (authorization) => {
+    const task = await createTask();
+    await assign(task.id);
+    await supertest(app.getHttpServer()).get(`/tasks/${task.id}`)
+      .set('X-API-Key', assignedKey).set('Authorization', authorization).expect(401);
+  });
+
+  it('refuses cross-workspace and missing targets through the alias with the same403', async () => {
+    const task = await createTask();
+    await assign(task.id);
+    for (const [id, key] of [[task.id, foreignKey], [uuidv4(), assignedKey]]) {
+      const res = await supertest(app.getHttpServer()).get(`/tasks/${id}`)
+        .set('X-API-Key', key).expect(403);
+      expect(res.body.code).toBe('TASK_READ_FORBIDDEN');
+      expect(res.headers).not.toHaveProperty('x-muneral-task-project');
+    }
+  });
+
+  it('rejects two valid credentials and repeated Authorization', async () => {
+    const task = await createTask();
+    await assign(task.id);
+    await supertest(app.getHttpServer()).get(`/tasks/${task.id}`)
+      .set('X-API-Key', assignedKey).set('Authorization', `Bearer ${assignedKey}`).expect(401);
+    await supertest(app.getHttpServer()).get(`/tasks/${task.id}`)
+      .set('Authorization', [`Bearer ${assignedKey}`, `Bearer ${assignedKey}`] as unknown as string).expect(401);
+  });
+
+  it('rejects an alias on another GET and on a task mutation', async () => {
+    const task = await createTask();
+    await assign(task.id);
+    await supertest(app.getHttpServer()).get(`/tasks/${task.id}/activity`)
+      .set('X-API-Key', assignedKey).expect(401);
+    await supertest(app.getHttpServer()).patch(`/tasks/${task.id}/status`)
+      .set('X-API-Key', assignedKey).send({ status: 'in_progress' }).expect(401);
+    expect((await prisma.task.findUniqueOrThrow({ where: { id: task.id } })).status).toBe('todo');
   });
 
   it('refuses an agent that is not assigned to the task', async () => {
@@ -695,6 +826,7 @@ describe('Agent-key scope on /tasks (e2e)', () => {
     // A 304 carries no body, and the ETag must still be the one that matched.
     expect(res.text).toBeFalsy();
     expect(res.headers.etag).toBe(first.headers.etag);
+    expect(res.headers['x-muneral-task-project']).toBe(projectId);
   });
 
   it('lets an assigned agent read the dependencies route that used to answer 403', async () => {

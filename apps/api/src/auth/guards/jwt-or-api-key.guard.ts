@@ -3,6 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 import type { Request } from 'express';
 import { Observable } from 'rxjs';
 import { ApiKeyGuard } from './api-key.guard.js';
+import { taskReadApiKey } from '../task-read-api-key-header.js';
 
 /**
  * JwtOrApiKeyGuard — accepts either a long-lived `mun_sk_*` API key or a
@@ -18,9 +19,10 @@ export class JwtOrApiKeyGuard extends AuthGuard('jwt') {
 
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     const req = context.switchToHttp().getRequest<Request>();
+    taskReadApiKey(req, context.getHandler());
     const authHeader = req.headers['authorization'];
 
-    if (authHeader?.startsWith('Bearer mun_sk_')) {
+    if (req.headers['x-api-key'] !== undefined || authHeader?.startsWith('Bearer mun_sk_')) {
       return this.apiKeyGuard.canActivate(context);
     }
 

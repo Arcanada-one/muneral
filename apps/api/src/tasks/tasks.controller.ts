@@ -28,6 +28,7 @@ import { AddCommentDto } from './dto/add-comment.dto.js';
 import { JwtOrApiKeyGuard } from '../auth/guards/jwt-or-api-key.guard.js';
 import { AgentTaskScopeGuard } from '../auth/guards/agent-task-scope.guard.js';
 import type { AgentScopeContext } from '../auth/guards/agent-task-scope.guard.js';
+import { TaskReadApiKeyHeader } from '../auth/task-read-api-key-header.js';
 import { AgentScope } from '../auth/agent-scope.decorator.js';
 import { ActorInterceptor } from '../common/interceptors/actor.interceptor.js';
 import type { Actor } from '@muneral/types';
@@ -193,6 +194,7 @@ export class TasksController {
    */
   @Get(':taskId')
   @AgentScope('task')
+  @TaskReadApiKeyHeader()
   async findOne(
     @Param('taskId') taskId: string,
     @Headers('if-none-match') ifNoneMatch: string | undefined,
@@ -224,11 +226,15 @@ export class TasksController {
         // The 304 still reached the client, so the suite stayed green and the
         // throw only ever showed up as a logged ERROR — which is why this
         // survived from MUN-0018 until a test finally exercised the branch.
+        res.setHeader('X-Muneral-Task-Project', task.projectId);
         res.status(304);
         return;
       }
     }
 
+    // Same row as the body; clients can refuse an unexpected project before
+    // consuming it. Emit only after the fallible ETag work has completed.
+    res.setHeader('X-Muneral-Task-Project', task.projectId);
     return task;
   }
 
