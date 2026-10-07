@@ -3042,7 +3042,8 @@
   "NOT_MEASURED owner_task=af868172-bd90-4522-b817-c2a2d1804dfe owner=SAME ARAS source owner; Program maintains canonical CAN verifier interface entity=route:POST /tasks/:taskId/redactions reason=v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
   "NOT_MEASURED owner_task=af868172-bd90-4522-b817-c2a2d1804dfe owner=SAME ARAS source owner; Program maintains canonical CAN verifier interface entity=route:POST /workspaces reason=v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
   "NOT_MEASURED owner_task=af868172-bd90-4522-b817-c2a2d1804dfe owner=SAME ARAS source owner; Program maintains canonical CAN verifier interface entity=route:POST /workspaces/:workspaceId/members/:userId reason=v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-  "Verifier output files are byte-identical copies committed below receipts/graph; only output_ref locators are localized. Raw source-bound CAR remains in the private Root0330 packet. No verdict or admission changed."
+  "Verifier output files are byte-identical copies committed below receipts/graph; only output_ref locators are localized. Raw source-bound CAR remains in the private Root0330 packet. No verdict or admission changed.",
+  "Owned transcript copies preserved in private custody and prior Git history. Installed caller does not recognize these as trailing record files; output_ref locators only are restored to original private evidence, with no verdict change. A fresh receipt follows the new source head."
  ],
  "producer": {
   "tool": "tools/graph/verify.py",
@@ -5161,7 +5162,7 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "receipts/graph/change-admission-MUNERAL210-075162f-outputs/v-type-check-apps-api-tsconfig.txt",
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/210-TRAILING-OUTPUT-CUSTODY/v-type-check-apps-api-tsconfig.txt",
    "started_at_utc": "2026-10-07T03:40:06Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1449 files listed"
   },
@@ -5213,7 +5214,7 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
-   "output_ref": "receipts/graph/change-admission-MUNERAL210-075162f-outputs/v-type-check-apps-api-tsconfig-test.txt",
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/210-TRAILING-OUTPUT-CUSTODY/v-type-check-apps-api-tsconfig-test.txt",
    "started_at_utc": "2026-10-07T03:40:18Z",
    "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1608 files listed"
   },
@@ -5257,7 +5258,7 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "receipts/graph/change-admission-MUNERAL210-075162f-outputs/v-type-check-apps-web-tsconfig.txt",
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/210-TRAILING-OUTPUT-CUSTODY/v-type-check-apps-web-tsconfig.txt",
    "started_at_utc": "2026-10-07T03:40:43Z",
    "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1296 files listed"
   },
@@ -5427,7 +5428,7 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "receipts/graph/change-admission-MUNERAL210-075162f-outputs/v-contract-diff.json",
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/210-TRAILING-OUTPUT-CUSTODY/v-contract-diff.json",
    "started_at_utc": "2026-10-07T03:40:51Z",
    "summary": "47\u219248 contracts, breaking 0, edges {'verified': 152}"
   },
@@ -5543,7 +5544,7 @@
    "exit_code": 0,
    "id": "v-route-config",
    "kind": "config_schema",
-   "output_ref": "receipts/graph/change-admission-MUNERAL210-075162f-outputs/v-route-config.txt",
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/210-TRAILING-OUTPUT-CUSTODY/v-route-config.txt",
    "started_at_utc": "2026-10-07T03:40:59Z",
    "summary": "51 route(s), 0 failed"
   },
@@ -5675,7 +5676,7 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "receipts/graph/change-admission-MUNERAL210-075162f-outputs/v-fitness.json",
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/210-TRAILING-OUTPUT-CUSTODY/v-fitness.json",
    "started_at_utc": "2026-10-07T03:40:59Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
@@ -5709,7 +5710,7 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "receipts/graph/change-admission-MUNERAL210-075162f-outputs/v-doc-reference.txt",
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/210-TRAILING-OUTPUT-CUSTODY/v-doc-reference.txt",
    "started_at_utc": "2026-10-07T03:40:59Z",
    "summary": "10 document(s), 0 failed"
   },
@@ -5869,7 +5870,7 @@
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "receipts/graph/change-admission-MUNERAL210-075162f-outputs/v-canary.json",
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-ROOT0500-MUNERAL-20261007/210-TRAILING-OUTPUT-CUSTODY/v-canary.json",
    "started_at_utc": "2026-10-07T03:40:59Z",
    "summary": "0 canary result(s), 0 committed at head; 0 verified / 0 failed / 73 not_measured of 73 entities"
   }
