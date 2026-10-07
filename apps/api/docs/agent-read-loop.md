@@ -232,3 +232,13 @@ keys are untouched. A JWT gets `401`: users revoke keys with
 `DELETE /agents/keys/:keyId`.
 
 Use it when a key may have leaked and nobody holding a user credential is at hand.
+
+## Bounded workspace index fallback
+
+DEC-AUP-0114 permits the existing named coordinator to use the project-index GET route for eligible projects in its fixed workspace until **2026-11-04T00:00:00Z**, exclusively. Eligible future projects are included during that window. Current project slugs `tbt` and `mt5-bridge` are denied before grant evaluation. Actor, workspace, anchor and requested project bindings are checked against current server data; a display name does not select the credential identity.
+
+Existing exact project grants retain their dates and take precedence. An expired exact grant returns `GRANT_EXPIRED`; it cannot fall through to the workspace grant. Missing, foreign or excluded projects remain masked as 404. This fallback adds no task-detail, workspace digest, free-text or write permission and has no automatic renewal.
+
+The index service revalidates admission and expiry inside a RepeatableRead transaction, locks the actor and sorted target/anchor project rows through commit, binds the task query to workspace/exclusions and commits the audit atomically. A successful response therefore reflects that audited transaction; locks do not persist until HTTP delivery. Every successful read has its own audit event ID. Concurrent audit counts are not a global request sequence. Admission withdrawal cannot retract metadata already delivered.
+
+Issuance requires canonical decision adoption, source/CI gates, resulting-main deployment identity and bounded native readback. On boundary disproof, expire only the new workspace entry through a reviewed PR and CI deployment, preserve old grants and transaction hardening, then verify resident build and new-only refusal.

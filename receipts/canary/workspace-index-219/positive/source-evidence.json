@@ -1,0 +1,11 @@
+{
+  "schema": "MeasuredGitSource/v1",
+  "captured_at_utc": "2026-10-07T13:05:41.810634+00:00",
+  "commit": "38f7e27dd433e75b4e40485713ba53c329d98d7f",
+  "tree": "aa3988de68db211af04ebe543b29491758fbed4d",
+  "dirty": false,
+  "producer": {
+    "tool": "MUNERAL-IMPORT index canary builder",
+    "version": "1.0.0"
+  }
+}

@@ -56,6 +56,7 @@
  * message it publishes, so a lapse prints itself in Telegram rather than
  * becoming a silent zero.
  */
+import { ARCANADA_WORKSPACE_ID } from './workspace-bindings.js';
 import {
   GRANT_RENEWAL_LEAD_DAYS,
   MAX_GRANT_WINDOW_DAYS,
@@ -121,7 +122,7 @@ export const WORKSPACE_DIGEST_GRANT_LIST: readonly WorkspaceDigestGrantEntry[] =
     {
       agentId: "565171f7-a3ca-45a4-b50e-4d8b07cf0b86",
       agentName: "arcanada-assistant",
-      workspaceId: "05f8cddf-e91f-430b-81e3-d67965aa4de3",
+      workspaceId: ARCANADA_WORKSPACE_ID,
       until: "2026-10-09T00:00:00Z",
       decision: "DEC-AUP-0049",
       evidence:

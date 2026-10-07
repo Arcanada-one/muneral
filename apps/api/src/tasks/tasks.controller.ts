@@ -268,7 +268,7 @@ export class TasksController {
     if (!scope || scope.kind !== 'project-index' || !scope.projectReadGrant) {
       throw new ForbiddenException('The task index is available only to an agent API key holding a read grant (MUN-0052).');
     }
-    return this.tasksService.indexForProject(projectId, scope.agentId, scope.projectReadGrant);
+    return this.tasksService.indexForProject(projectId, scope.agentId, scope.projectReadGrant, scope.workspaceId);
   }
 
   /**

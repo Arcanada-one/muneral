@@ -1,0 +1,820 @@
+{
+  "schema": "CanaryPlan/v1",
+  "id": "workspace-index-real-route-dispatch",
+  "owner": "Arcanada-one/muneral PR #219",
+  "environment": "Task-local compiled Nest modules and synthetic disposable PostgreSQL",
+  "base_url": "http://127.0.0.1:35561",
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "89a3af0c36c21eccfbda5cac5ce5384e7d752eb8",
+    "tree": "48584e34089a44df37f28161803b1076810fa87a",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "f3770b668790a453e8f0f9a235f15775595b98ad898f538a2e24d4fcbcdb38c9",
+      "source_field": "commit"
+    }
+  },
+  "purpose": "Actual graph-impact/changed-controller route dispatch with unauthenticated HTTP401; permission floor only, not full historical endpoint semantics. Workspace index semantics are measured separately in the authenticated process canary.",
+  "probes": [
+    {
+      "id": "route-0",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/agents/keys/dfcff517-2171-4bd7-8aa9-8301f702c7ef",
+      "auth": "none",
+      "entities": [
+        "route:DELETE /agents/keys/:keyId"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-1",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/agents/tasks/fc32b17c-957e-4cd2-9d12-0ddd8122c54e/assign/fc32b17c-957e-4cd2-9d12-0ddd8122c54e",
+      "auth": "none",
+      "entities": [
+        "route:DELETE /agents/tasks/:taskId/assign/:agentId"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-2",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/projects/ec686b21-74e8-4ac7-a65b-5d8d595dc8a3",
+      "auth": "none",
+      "entities": [
+        "route:DELETE /projects/:projectId"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-3",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/projects/git-refs/cae2daa4-b2b1-4ecf-8a87-7745b7c3b6aa",
+      "auth": "none",
+      "entities": [
+        "route:DELETE /projects/git-refs/:refId"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-4",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/tasks/1888d72d-86e8-409b-ac47-e22c80074495",
+      "auth": "none",
+      "entities": [
+        "route:DELETE /tasks/:taskId"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-5",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/tasks/f76152a9-1a82-474e-9278-7912ea3809e2/checklist/f76152a9-1a82-474e-9278-7912ea3809e2",
+      "auth": "none",
+      "entities": [
+        "route:DELETE /tasks/:taskId/checklist/:itemId"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-6",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/tasks/ca1b4054-309b-4606-9c56-5a44d856faa8/dependencies/ca1b4054-309b-4606-9c56-5a44d856faa8",
+      "auth": "none",
+      "entities": [
+        "route:DELETE /tasks/:taskId/dependencies/:depId"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-7",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/workspaces/971dc941-2e31-440d-b853-4a6d76715bb6/members/971dc941-2e31-440d-b853-4a6d76715bb6",
+      "auth": "none",
+      "entities": [
+        "route:DELETE /workspaces/:workspaceId/members/:userId"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-8",
+      "kind": "http",
+      "method": "GET",
+      "path": "/agents/tasks",
+      "auth": "none",
+      "entities": [
+        "route:GET /agents/tasks"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-9",
+      "kind": "http",
+      "method": "GET",
+      "path": "/agents/workspace/c5f994af-8804-49b0-8c85-8ef2e8247833",
+      "auth": "none",
+      "entities": [
+        "route:GET /agents/workspace/:workspaceId"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-10",
+      "kind": "http",
+      "method": "GET",
+      "path": "/projects/71bfbb03-451a-40ad-855c-c0777783e239",
+      "auth": "none",
+      "entities": [
+        "route:GET /projects/:projectId"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-11",
+      "kind": "http",
+      "method": "GET",
+      "path": "/projects/tasks/44c8d779-2d3d-4fec-8acf-e5b8dddc81f6/git-refs",
+      "auth": "none",
+      "entities": [
+        "route:GET /projects/tasks/:taskId/git-refs"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-12",
+      "kind": "http",
+      "method": "GET",
+      "path": "/projects/workspace/81ee7853-732f-47e0-9f25-058b519eef1f",
+      "auth": "none",
+      "entities": [
+        "route:GET /projects/workspace/:workspaceId"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-13",
+      "kind": "http",
+      "method": "GET",
+      "path": "/sync/datarim/c9f9a0e4-64ae-43b8-96f2-92f582fc6960",
+      "auth": "none",
+      "entities": [
+        "route:GET /sync/datarim/:projectId"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-14",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks",
+      "auth": "none",
+      "entities": [
+        "route:GET /tasks"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-15",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/4cbd3263-925b-45c4-a389-4a1060063aa6",
+      "auth": "none",
+      "entities": [
+        "route:GET /tasks/:taskId"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-16",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/facb7779-0dfa-4214-9c53-49afc1c6216b/activity",
+      "auth": "none",
+      "entities": [
+        "route:GET /tasks/:taskId/activity"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-17",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/f6785423-b6ce-450e-80b4-94a13f41b0a8/checklist",
+      "auth": "none",
+      "entities": [
+        "route:GET /tasks/:taskId/checklist"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-18",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/ac827f93-a9ba-4fd7-81ca-992d73006eed/dependencies",
+      "auth": "none",
+      "entities": [
+        "route:GET /tasks/:taskId/dependencies"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-19",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/96a73dae-b5f5-4f16-bd07-95809ecc187f/dependency-graph",
+      "auth": "none",
+      "entities": [
+        "route:GET /tasks/:taskId/dependency-graph"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-20",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/14901643-6880-478f-9628-3358779d8c31/evidence",
+      "auth": "none",
+      "entities": [
+        "route:GET /tasks/:taskId/evidence"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-21",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/742c1893-02aa-403d-ad53-9a012d76b8f9/field-changes",
+      "auth": "none",
+      "entities": [
+        "route:GET /tasks/:taskId/field-changes"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-22",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/6a040423-5af2-4d09-978d-79445c0e8688/readiness",
+      "auth": "none",
+      "entities": [
+        "route:GET /tasks/:taskId/readiness"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-23",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/digest",
+      "auth": "none",
+      "entities": [
+        "route:GET /tasks/digest"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-24",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/project/f868f5c2-21d2-4b5a-b7f3-7b92f1e6e47e",
+      "auth": "none",
+      "entities": [
+        "route:GET /tasks/project/:projectId"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-25",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/project/3f922406-b6af-40d8-a66d-ef6def174f25/index",
+      "auth": "none",
+      "entities": [
+        "route:GET /tasks/project/:projectId/index"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-26",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/project/0ce9da4c-3c06-43ee-bf1c-e22fd118054b/staleness",
+      "auth": "none",
+      "entities": [
+        "route:GET /tasks/project/:projectId/staleness"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-27",
+      "kind": "http",
+      "method": "GET",
+      "path": "/workspaces",
+      "auth": "none",
+      "entities": [
+        "route:GET /workspaces"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-28",
+      "kind": "http",
+      "method": "GET",
+      "path": "/workspaces/ac5d5606-f064-43f8-bbeb-0d0390fb047a",
+      "auth": "none",
+      "entities": [
+        "route:GET /workspaces/:workspaceId"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-29",
+      "kind": "http",
+      "method": "GET",
+      "path": "/workspaces/79c2882a-a74c-4700-95be-656e7bda9d21/members",
+      "auth": "none",
+      "entities": [
+        "route:GET /workspaces/:workspaceId/members"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-30",
+      "kind": "http",
+      "method": "PATCH",
+      "path": "/tasks/a7247993-2d31-4d33-9eae-116dc5b14e8c/checklist/a7247993-2d31-4d33-9eae-116dc5b14e8c",
+      "auth": "none",
+      "entities": [
+        "route:PATCH /tasks/:taskId/checklist/:itemId"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-31",
+      "kind": "http",
+      "method": "PATCH",
+      "path": "/tasks/3b05a33f-f2c5-4a6e-85d4-7a430ac2467c/status",
+      "auth": "none",
+      "entities": [
+        "route:PATCH /tasks/:taskId/status"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-32",
+      "kind": "http",
+      "method": "PATCH",
+      "path": "/workspaces/9c39c81e-1b8a-4365-9337-999e587c7bc0/members/9c39c81e-1b8a-4365-9337-999e587c7bc0/role",
+      "auth": "none",
+      "entities": [
+        "route:PATCH /workspaces/:workspaceId/members/:userId/role"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-33",
+      "kind": "http",
+      "method": "POST",
+      "path": "/agents",
+      "auth": "none",
+      "entities": [
+        "route:POST /agents"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-34",
+      "kind": "http",
+      "method": "POST",
+      "path": "/agents/39d0e877-c72b-4464-b313-126783209228/keys",
+      "auth": "none",
+      "entities": [
+        "route:POST /agents/:agentId/keys"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-35",
+      "kind": "http",
+      "method": "POST",
+      "path": "/agents/keys/92c94c68-aee3-431f-9345-7a1451bbc912/rotate",
+      "auth": "none",
+      "entities": [
+        "route:POST /agents/keys/:keyId/rotate"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-36",
+      "kind": "http",
+      "method": "POST",
+      "path": "/agents/keys/self/revoke",
+      "auth": "none",
+      "entities": [
+        "route:POST /agents/keys/self/revoke"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-37",
+      "kind": "http",
+      "method": "POST",
+      "path": "/agents/tasks/2ae66503-d1c3-422a-82b1-08d328a3eb5c/assign",
+      "auth": "none",
+      "entities": [
+        "route:POST /agents/tasks/:taskId/assign"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-38",
+      "kind": "http",
+      "method": "POST",
+      "path": "/projects",
+      "auth": "none",
+      "entities": [
+        "route:POST /projects"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-39",
+      "kind": "http",
+      "method": "POST",
+      "path": "/projects/git-refs",
+      "auth": "none",
+      "entities": [
+        "route:POST /projects/git-refs"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-40",
+      "kind": "http",
+      "method": "POST",
+      "path": "/sync/datarim/02c94cef-8c88-4c47-8864-28acb049303a/import",
+      "auth": "none",
+      "entities": [
+        "route:POST /sync/datarim/:projectId/import"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-41",
+      "kind": "http",
+      "method": "POST",
+      "path": "/tasks",
+      "auth": "none",
+      "entities": [
+        "route:POST /tasks"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-42",
+      "kind": "http",
+      "method": "POST",
+      "path": "/tasks/21b9053b-eb5b-4bf0-bb22-f15a03901db4/checklist",
+      "auth": "none",
+      "entities": [
+        "route:POST /tasks/:taskId/checklist"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-43",
+      "kind": "http",
+      "method": "POST",
+      "path": "/tasks/0ddafa25-b755-43ca-a484-804d9b1183b4/comments",
+      "auth": "none",
+      "entities": [
+        "route:POST /tasks/:taskId/comments"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-44",
+      "kind": "http",
+      "method": "POST",
+      "path": "/tasks/75670ba8-9948-4c46-a201-0a348a8460e6/dependencies",
+      "auth": "none",
+      "entities": [
+        "route:POST /tasks/:taskId/dependencies"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-45",
+      "kind": "http",
+      "method": "POST",
+      "path": "/tasks/d509a47a-bb90-413a-8d5a-1dfa57aa6b7b/evidence",
+      "auth": "none",
+      "entities": [
+        "route:POST /tasks/:taskId/evidence"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-46",
+      "kind": "http",
+      "method": "POST",
+      "path": "/tasks/f0a1518d-6e68-4aaa-8bd7-53809b1da812/field-ack",
+      "auth": "none",
+      "entities": [
+        "route:POST /tasks/:taskId/field-ack"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-47",
+      "kind": "http",
+      "method": "POST",
+      "path": "/tasks/72242903-687e-4374-b9fa-7b315d4a3429/redactions",
+      "auth": "none",
+      "entities": [
+        "route:POST /tasks/:taskId/redactions"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-48",
+      "kind": "http",
+      "method": "POST",
+      "path": "/workspaces",
+      "auth": "none",
+      "entities": [
+        "route:POST /workspaces"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    },
+    {
+      "id": "route-49",
+      "kind": "http",
+      "method": "POST",
+      "path": "/workspaces/6aa62280-0f8f-44fc-8e40-bc56fb38b9a9/members/6aa62280-0f8f-44fc-8e40-bc56fb38b9a9",
+      "auth": "none",
+      "entities": [
+        "route:POST /workspaces/:workspaceId/members/:userId"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          401
+        ]
+      }
+    }
+  ]
+}
