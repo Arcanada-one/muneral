@@ -10,7 +10,7 @@
     "tree": "8238e843f8b8de7dbc144394f4e58bd821ea450b",
     "evidence": {
       "path": "source-evidence.json",
-      "sha256": "7533a758129b7e5558aa82f9ec41d4427f9aadae15cb4c9b17fc9ff5ea411566",
+      "sha256": "dd41a43f7adc67ee3b7a80b85b450f4b0f75a190e4954dfcf1137c30f009c679",
       "source_field": "commit"
     }
   },
@@ -23,7 +23,7 @@
         "/home/dev/aup/import-audit-work/runs/m211c/node-v24.21.0-linux-x64/bin/node",
         "/home/dev/aup/import-audit-work/runs/task-granted-read-http-probe-0117.mjs",
         "/home/dev/aup/import-audit-work/mun-rev4",
-        "/home/dev/aup/import-audit-work/runs/task-read-canary-0117/negative"
+        "/home/dev/aup/import-audit-work/runs/task-read-canary-bootstrap/negative"
       ],
       "cwd": ".",
       "env_keys": [
