@@ -3,14 +3,14 @@
   "id": "assigned-read-unauthenticated-route-floor",
   "owner": "Arcanada-one/muneral PR #221",
   "environment": "Owned synthetic disposable PostgreSQL and actual compiled Nest modules",
-  "base_url": "http://127.0.0.1:37373",
+  "base_url": "http://127.0.0.1:36081",
   "subject": {
     "schema": "GitCanarySubject/v1",
-    "commit": "00e30bc811c43642c6ab311762ee710bc57657d2",
-    "tree": "0eae5d169b15ca33057f7a6b8648c58b59285da8",
+    "commit": "99d73ecc4627e62d467e4bbd2d6291fbe92e868b",
+    "tree": "9d2d6343b6a06dee621391a3a2e1cd5721152122",
     "evidence": {
       "path": "source-evidence.json",
-      "sha256": "aa4f96e4693aca5563eae5d665bb77eb961453f89901429614bf21559161fd12",
+      "sha256": "f934a454ac691a5cc485bd76ec187797825e9e080a7e10068b8c7b0346bea370",
       "source_field": "commit"
     }
   },
@@ -20,7 +20,7 @@
       "id": "route-0",
       "kind": "http",
       "method": "DELETE",
-      "path": "/agents/keys/ab12d660-bbb6-49af-9a27-752570cebad3",
+      "path": "/agents/keys/1e38390a-d8f2-4121-a39e-21068ad313f9",
       "auth": "none",
       "entities": [
         "route:DELETE /agents/keys/:keyId",
@@ -37,7 +37,7 @@
       "id": "route-1",
       "kind": "http",
       "method": "DELETE",
-      "path": "/agents/tasks/3861c400-44c9-4bc2-9de8-ef99c2e04ca9/assign/3861c400-44c9-4bc2-9de8-ef99c2e04ca9",
+      "path": "/agents/tasks/f6875436-8e99-459a-b08c-8f5492c3c8b5/assign/f6875436-8e99-459a-b08c-8f5492c3c8b5",
       "auth": "none",
       "entities": [
         "route:DELETE /agents/tasks/:taskId/assign/:agentId",
@@ -54,7 +54,7 @@
       "id": "route-2",
       "kind": "http",
       "method": "DELETE",
-      "path": "/projects/d781b7ad-d639-49f9-be3f-25cdcf46d7ef",
+      "path": "/projects/278e1e26-e85f-4134-bafa-d7791739edd2",
       "auth": "none",
       "entities": [
         "route:DELETE /projects/:projectId",
@@ -71,7 +71,7 @@
       "id": "route-3",
       "kind": "http",
       "method": "DELETE",
-      "path": "/projects/git-refs/7b84c526-5ff8-464d-9589-e44855c5fb6a",
+      "path": "/projects/git-refs/6629b7d5-3898-4e59-8055-46c9aad1a299",
       "auth": "none",
       "entities": [
         "route:DELETE /projects/git-refs/:refId",
@@ -88,7 +88,7 @@
       "id": "route-4",
       "kind": "http",
       "method": "DELETE",
-      "path": "/tasks/3bb6b854-c3c1-4047-9ddb-b21b802e1305",
+      "path": "/tasks/01e132fd-8ebe-41bf-9cb7-9a021d1d687b",
       "auth": "none",
       "entities": [
         "route:DELETE /tasks/:taskId",
@@ -105,7 +105,7 @@
       "id": "route-5",
       "kind": "http",
       "method": "DELETE",
-      "path": "/tasks/817f9dc6-5b29-4fd4-9acb-5f44ee4a8113/checklist/817f9dc6-5b29-4fd4-9acb-5f44ee4a8113",
+      "path": "/tasks/4f7edc62-cb2c-4fef-b42e-f72b641e7e47/checklist/4f7edc62-cb2c-4fef-b42e-f72b641e7e47",
       "auth": "none",
       "entities": [
         "route:DELETE /tasks/:taskId/checklist/:itemId",
@@ -122,7 +122,7 @@
       "id": "route-6",
       "kind": "http",
       "method": "DELETE",
-      "path": "/tasks/70e85c55-8c4a-445a-93a1-c8d9cf9a9113/dependencies/70e85c55-8c4a-445a-93a1-c8d9cf9a9113",
+      "path": "/tasks/d2979ec4-6eda-45a1-9547-bb956dd292c9/dependencies/d2979ec4-6eda-45a1-9547-bb956dd292c9",
       "auth": "none",
       "entities": [
         "route:DELETE /tasks/:taskId/dependencies/:depId",
@@ -139,7 +139,7 @@
       "id": "route-7",
       "kind": "http",
       "method": "DELETE",
-      "path": "/workspaces/d00ec40e-0d7d-4e5d-af2e-847db75056b6/members/d00ec40e-0d7d-4e5d-af2e-847db75056b6",
+      "path": "/workspaces/e61db6e8-8ec4-4eb1-85b0-373835899355/members/e61db6e8-8ec4-4eb1-85b0-373835899355",
       "auth": "none",
       "entities": [
         "route:DELETE /workspaces/:workspaceId/members/:userId",
@@ -173,7 +173,7 @@
       "id": "route-9",
       "kind": "http",
       "method": "GET",
-      "path": "/agents/workspace/f8b0b716-6879-461c-a7a5-82bc01a7630c",
+      "path": "/agents/workspace/d097e48c-c93c-4423-b65d-40ea592c41f8",
       "auth": "none",
       "entities": [
         "route:GET /agents/workspace/:workspaceId",
@@ -190,7 +190,7 @@
       "id": "route-10",
       "kind": "http",
       "method": "GET",
-      "path": "/migration/batches/759f1777-9316-4a84-9947-29928081c76e",
+      "path": "/migration/batches/f5bbdcc3-a73d-4902-a1c2-89ab11f4bbbb",
       "auth": "none",
       "entities": [
         "route:GET /migration/batches/:batchId",
@@ -207,7 +207,7 @@
       "id": "route-11",
       "kind": "http",
       "method": "GET",
-      "path": "/migration/identities/1ab0d092-0279-4a65-b7b8-8d7bee9a0586/mappings",
+      "path": "/migration/identities/4c5d0096-5ea3-4c60-a27b-06d8f7fdb534/mappings",
       "auth": "none",
       "entities": [
         "route:GET /migration/identities/:identityId/mappings",
@@ -224,7 +224,7 @@
       "id": "route-12",
       "kind": "http",
       "method": "GET",
-      "path": "/migration/work-items/by-legacy/d6ff5fb4-9a9f-4965-94cb-f9043ea4b1f6/d6ff5fb4-9a9f-4965-94cb-f9043ea4b1f6",
+      "path": "/migration/work-items/by-legacy/d2d43239-cb11-4bd6-8e7b-0d4616812e0b/d2d43239-cb11-4bd6-8e7b-0d4616812e0b",
       "auth": "none",
       "entities": [
         "route:GET /migration/work-items/by-legacy/:sourceNamespace/:legacyId",
@@ -258,7 +258,7 @@
       "id": "route-14",
       "kind": "http",
       "method": "GET",
-      "path": "/projects/acf041ea-9e54-4e81-9c2e-ff8bd7a00bd4",
+      "path": "/projects/2486a97a-bd5e-4f64-b1bd-4a3326e2cfd4",
       "auth": "none",
       "entities": [
         "route:GET /projects/:projectId",
@@ -275,7 +275,7 @@
       "id": "route-15",
       "kind": "http",
       "method": "GET",
-      "path": "/projects/tasks/9d3a86ab-ea7f-421f-8d42-5569e964b6bb/git-refs",
+      "path": "/projects/tasks/2fb4d9cb-3b7f-4589-9b5d-a4306719ce29/git-refs",
       "auth": "none",
       "entities": [
         "route:GET /projects/tasks/:taskId/git-refs",
@@ -292,7 +292,7 @@
       "id": "route-16",
       "kind": "http",
       "method": "GET",
-      "path": "/projects/workspace/3759b024-7788-4bc6-8331-b7b05b999207",
+      "path": "/projects/workspace/f94cf0f7-6817-48d3-aa96-7b6a0a09da7f",
       "auth": "none",
       "entities": [
         "route:GET /projects/workspace/:workspaceId",
@@ -309,7 +309,7 @@
       "id": "route-17",
       "kind": "http",
       "method": "GET",
-      "path": "/sync/datarim/dbcf8e8e-4e60-4160-9865-8fade9b4f35d",
+      "path": "/sync/datarim/3ea3d717-94cf-4b8a-a678-b01d21f1fca9",
       "auth": "none",
       "entities": [
         "route:GET /sync/datarim/:projectId",
@@ -343,7 +343,7 @@
       "id": "route-19",
       "kind": "http",
       "method": "GET",
-      "path": "/tasks/9fb29e77-f7a6-4507-8121-9edb60557d8b",
+      "path": "/tasks/7129d0dc-9bc5-4516-b70e-b35c5d9dbbdf",
       "auth": "none",
       "entities": [
         "route:GET /tasks/:taskId",
@@ -360,7 +360,7 @@
       "id": "route-20",
       "kind": "http",
       "method": "GET",
-      "path": "/tasks/e2aa0688-da84-4b99-9daa-37aa1b0afcff/activity",
+      "path": "/tasks/46bbc026-a700-42ef-bb14-8872a4cffe40/activity",
       "auth": "none",
       "entities": [
         "route:GET /tasks/:taskId/activity",
@@ -377,7 +377,7 @@
       "id": "route-21",
       "kind": "http",
       "method": "GET",
-      "path": "/tasks/a37d4b32-bb17-41f8-9689-2f9caa3f5a98/attempts/a37d4b32-bb17-41f8-9689-2f9caa3f5a98/solution-log-head",
+      "path": "/tasks/5a4056ec-f830-443e-a96a-9be7df90ca3e/attempts/5a4056ec-f830-443e-a96a-9be7df90ca3e/solution-log-head",
       "auth": "none",
       "entities": [
         "route:GET /tasks/:taskId/attempts/:attemptId/solution-log-head",
@@ -394,7 +394,7 @@
       "id": "route-22",
       "kind": "http",
       "method": "GET",
-      "path": "/tasks/2c704911-0777-42ce-9859-df9a2523fe1b/checklist",
+      "path": "/tasks/8c63ac24-ed8d-4759-873b-6c0794a9d40f/checklist",
       "auth": "none",
       "entities": [
         "route:GET /tasks/:taskId/checklist",
@@ -411,7 +411,7 @@
       "id": "route-23",
       "kind": "http",
       "method": "GET",
-      "path": "/tasks/2c25a8d0-3570-4702-ab6c-21640e487b51/dependencies",
+      "path": "/tasks/37b018fe-c5df-42a0-a600-41fc75ace09c/dependencies",
       "auth": "none",
       "entities": [
         "route:GET /tasks/:taskId/dependencies",
@@ -428,7 +428,7 @@
       "id": "route-24",
       "kind": "http",
       "method": "GET",
-      "path": "/tasks/7afe74b8-e607-4036-9f12-d66cd7f36d88/dependency-graph",
+      "path": "/tasks/b64f187b-64bb-4a98-8996-3a2746c9aff8/dependency-graph",
       "auth": "none",
       "entities": [
         "route:GET /tasks/:taskId/dependency-graph",
@@ -445,7 +445,7 @@
       "id": "route-25",
       "kind": "http",
       "method": "GET",
-      "path": "/tasks/cb008fd5-9faf-406f-9b48-9536cee914a1/evidence",
+      "path": "/tasks/f295364d-db95-41bd-be1c-15a6483835c8/evidence",
       "auth": "none",
       "entities": [
         "route:GET /tasks/:taskId/evidence",
@@ -462,7 +462,7 @@
       "id": "route-26",
       "kind": "http",
       "method": "GET",
-      "path": "/tasks/2c3c2137-08a3-4ba8-9e5d-5dd472c1db37/field-changes",
+      "path": "/tasks/c662b8fb-17f0-47be-b34c-5198064a6918/field-changes",
       "auth": "none",
       "entities": [
         "route:GET /tasks/:taskId/field-changes",
@@ -479,7 +479,7 @@
       "id": "route-27",
       "kind": "http",
       "method": "GET",
-      "path": "/tasks/6ca08b03-3c86-4bb8-a8dc-5ff1d399e3e0/readiness",
+      "path": "/tasks/12a4e48c-6f7c-4754-9aba-ee77e56191fb/readiness",
       "auth": "none",
       "entities": [
         "route:GET /tasks/:taskId/readiness",
@@ -513,7 +513,7 @@
       "id": "route-29",
       "kind": "http",
       "method": "GET",
-      "path": "/tasks/project/3c54b208-f6d8-456e-bfb8-f25d6bce6dc2",
+      "path": "/tasks/project/77307a9d-9309-4f3e-a3f8-7c6c2f0eb3ed",
       "auth": "none",
       "entities": [
         "route:GET /tasks/project/:projectId",
@@ -530,7 +530,7 @@
       "id": "route-30",
       "kind": "http",
       "method": "GET",
-      "path": "/tasks/project/a1446336-37e9-4628-a2a1-0226a5c4fc3c/index",
+      "path": "/tasks/project/ae002b73-dc54-4e07-80e0-86345b94add5/index",
       "auth": "none",
       "entities": [
         "route:GET /tasks/project/:projectId/index",
@@ -547,7 +547,7 @@
       "id": "route-31",
       "kind": "http",
       "method": "GET",
-      "path": "/tasks/project/f222f94f-d3db-431f-acd2-666973b79518/staleness",
+      "path": "/tasks/project/8fd0f475-0055-4e9f-ae28-e9f180d1b7bb/staleness",
       "auth": "none",
       "entities": [
         "route:GET /tasks/project/:projectId/staleness",
@@ -581,7 +581,7 @@
       "id": "route-33",
       "kind": "http",
       "method": "GET",
-      "path": "/workspaces/8f7ffc90-f7ae-4ce6-94fc-a53089c4dd89",
+      "path": "/workspaces/a41fa87d-c030-446e-9311-a14dcdb429e6",
       "auth": "none",
       "entities": [
         "route:GET /workspaces/:workspaceId",
@@ -598,7 +598,7 @@
       "id": "route-34",
       "kind": "http",
       "method": "GET",
-      "path": "/workspaces/3e7c475b-4103-4166-ae2f-0eb5726b4494/members",
+      "path": "/workspaces/ce744400-6921-4c21-bad0-9a60f2ec61c6/members",
       "auth": "none",
       "entities": [
         "route:GET /workspaces/:workspaceId/members",
@@ -615,7 +615,7 @@
       "id": "route-35",
       "kind": "http",
       "method": "PATCH",
-      "path": "/tasks/624bd65a-0b43-4ffa-8f2d-c324000503bf/checklist/624bd65a-0b43-4ffa-8f2d-c324000503bf",
+      "path": "/tasks/5150d16a-d22b-4be2-97d6-6cd505038f45/checklist/5150d16a-d22b-4be2-97d6-6cd505038f45",
       "auth": "none",
       "entities": [
         "route:PATCH /tasks/:taskId/checklist/:itemId",
@@ -632,7 +632,7 @@
       "id": "route-36",
       "kind": "http",
       "method": "PATCH",
-      "path": "/tasks/f172fa1e-b884-4556-9dfb-7154ebf2e88c/contract",
+      "path": "/tasks/5a394ec7-42aa-45b1-9502-530c13ed0c2a/contract",
       "auth": "none",
       "entities": [
         "route:PATCH /tasks/:taskId/contract",
@@ -649,7 +649,7 @@
       "id": "route-37",
       "kind": "http",
       "method": "PATCH",
-      "path": "/tasks/991418a5-91f9-4e43-8164-043219a83746/status",
+      "path": "/tasks/e8540137-c03e-44f2-aac2-02cecfd7391b/status",
       "auth": "none",
       "entities": [
         "route:PATCH /tasks/:taskId/status",
@@ -666,7 +666,7 @@
       "id": "route-38",
       "kind": "http",
       "method": "PATCH",
-      "path": "/workspaces/143239e2-b67c-4790-a353-2d7234630cad/members/143239e2-b67c-4790-a353-2d7234630cad/role",
+      "path": "/workspaces/e5333acb-2fbe-4aeb-aa85-5961e3f72383/members/e5333acb-2fbe-4aeb-aa85-5961e3f72383/role",
       "auth": "none",
       "entities": [
         "route:PATCH /workspaces/:workspaceId/members/:userId/role",
@@ -700,7 +700,7 @@
       "id": "route-40",
       "kind": "http",
       "method": "POST",
-      "path": "/agents/8eb1180a-e4d3-4bac-aa58-0b4252bfddd1/keys",
+      "path": "/agents/7d495f08-5e65-469b-90e9-07210e77ed4b/keys",
       "auth": "none",
       "entities": [
         "route:POST /agents/:agentId/keys",
@@ -717,7 +717,7 @@
       "id": "route-41",
       "kind": "http",
       "method": "POST",
-      "path": "/agents/keys/23261b24-0db6-48cd-9f7c-b09fb7ce069e/rotate",
+      "path": "/agents/keys/aebfe404-06b9-455a-8e9f-d24b4cc05143/rotate",
       "auth": "none",
       "entities": [
         "route:POST /agents/keys/:keyId/rotate",
@@ -751,7 +751,7 @@
       "id": "route-43",
       "kind": "http",
       "method": "POST",
-      "path": "/agents/tasks/eff92878-2110-4d78-9daa-b8342f25317b/assign",
+      "path": "/agents/tasks/1b026c6d-b89b-4f1b-956d-296581543202/assign",
       "auth": "none",
       "entities": [
         "route:POST /agents/tasks/:taskId/assign",
@@ -785,7 +785,7 @@
       "id": "route-45",
       "kind": "http",
       "method": "POST",
-      "path": "/migration/batches/a6a66e9b-1da3-44e5-8825-39e658ceb34d/commit",
+      "path": "/migration/batches/f540ac71-5f26-48d7-a6be-294ab346def8/commit",
       "auth": "none",
       "entities": [
         "route:POST /migration/batches/:batchId/commit",
@@ -802,7 +802,7 @@
       "id": "route-46",
       "kind": "http",
       "method": "POST",
-      "path": "/migration/identities/ba457201-9e03-4539-b590-d82fb9edc493/decisions",
+      "path": "/migration/identities/ce9502a0-2cac-4fe2-a418-01fb536694ee/decisions",
       "auth": "none",
       "entities": [
         "route:POST /migration/identities/:identityId/decisions",
@@ -836,7 +836,7 @@
       "id": "route-48",
       "kind": "http",
       "method": "POST",
-      "path": "/migration/work-items/eceef594-4958-4226-b21e-1cc521401377/transitions",
+      "path": "/migration/work-items/8e06ae0e-f640-4d4a-b711-4d9557b9ab41/transitions",
       "auth": "none",
       "entities": [
         "route:POST /migration/work-items/:taskId/transitions",
@@ -887,7 +887,7 @@
       "id": "route-51",
       "kind": "http",
       "method": "POST",
-      "path": "/sync/datarim/1aff11d6-21a7-4cfe-84d8-688ecf17f9a8/import",
+      "path": "/sync/datarim/97430afe-8ecd-4796-a341-218a4dd2d510/import",
       "auth": "none",
       "entities": [
         "route:POST /sync/datarim/:projectId/import",
@@ -921,7 +921,7 @@
       "id": "route-53",
       "kind": "http",
       "method": "POST",
-      "path": "/tasks/910d85c3-1aca-4b4d-a073-c63de68d74db/attempts/910d85c3-1aca-4b4d-a073-c63de68d74db/solution-log-heads",
+      "path": "/tasks/9c042435-202e-4a5f-9f1f-f1a43a0c78e9/attempts/9c042435-202e-4a5f-9f1f-f1a43a0c78e9/solution-log-heads",
       "auth": "none",
       "entities": [
         "route:POST /tasks/:taskId/attempts/:attemptId/solution-log-heads",
@@ -938,7 +938,7 @@
       "id": "route-54",
       "kind": "http",
       "method": "POST",
-      "path": "/tasks/07c5dbdb-149f-4e08-b2b5-65c718c5a897/checklist",
+      "path": "/tasks/8fe938ef-e64f-4f3d-a477-ec23ffcae419/checklist",
       "auth": "none",
       "entities": [
         "route:POST /tasks/:taskId/checklist",
@@ -955,7 +955,7 @@
       "id": "route-55",
       "kind": "http",
       "method": "POST",
-      "path": "/tasks/9dae1fe3-188a-4890-9af6-e64233f85085/comments",
+      "path": "/tasks/d9f20ebc-4919-466a-8eec-5c403dd38e00/comments",
       "auth": "none",
       "entities": [
         "route:POST /tasks/:taskId/comments",
@@ -972,7 +972,7 @@
       "id": "route-56",
       "kind": "http",
       "method": "POST",
-      "path": "/tasks/aef7a85c-0539-4e82-992f-060cfaf72e15/dependencies",
+      "path": "/tasks/b825993d-de39-4d48-8d2c-98c6276d4682/dependencies",
       "auth": "none",
       "entities": [
         "route:POST /tasks/:taskId/dependencies",
@@ -989,7 +989,7 @@
       "id": "route-57",
       "kind": "http",
       "method": "POST",
-      "path": "/tasks/4225ceb1-d999-4bf0-b54a-35e60f2e6f16/evidence",
+      "path": "/tasks/f3267e8f-8800-4590-a05f-1fa6e4b0a8ce/evidence",
       "auth": "none",
       "entities": [
         "route:POST /tasks/:taskId/evidence",
@@ -1006,7 +1006,7 @@
       "id": "route-58",
       "kind": "http",
       "method": "POST",
-      "path": "/tasks/1583aafe-8e6d-419b-a4be-dff39f58c23d/field-ack",
+      "path": "/tasks/09b8d44f-9c8d-4d41-b688-d978f8d03232/field-ack",
       "auth": "none",
       "entities": [
         "route:POST /tasks/:taskId/field-ack",
@@ -1023,7 +1023,7 @@
       "id": "route-59",
       "kind": "http",
       "method": "POST",
-      "path": "/tasks/6d5ccb55-3a09-4e6b-b7e2-119f6e5bad43/redactions",
+      "path": "/tasks/56c2dcf1-73b7-4cbf-8083-a5cc045e9170/redactions",
       "auth": "none",
       "entities": [
         "route:POST /tasks/:taskId/redactions",
@@ -1057,7 +1057,7 @@
       "id": "route-61",
       "kind": "http",
       "method": "POST",
-      "path": "/workspaces/8188790a-1926-4062-9850-64ee47d06092/members/8188790a-1926-4062-9850-64ee47d06092",
+      "path": "/workspaces/d469c51e-014c-478d-a6ee-dd665c7cfd58/members/d469c51e-014c-478d-a6ee-dd665c7cfd58",
       "auth": "none",
       "entities": [
         "route:POST /workspaces/:workspaceId/members/:userId",

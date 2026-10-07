@@ -1,13 +1,13 @@
 {
   "schema": "MeasuredGitSource/v1",
-  "commit": "00e30bc811c43642c6ab311762ee710bc57657d2",
-  "tree": "0eae5d169b15ca33057f7a6b8648c58b59285da8",
+  "commit": "99d73ecc4627e62d467e4bbd2d6291fbe92e868b",
+  "tree": "9d2d6343b6a06dee621391a3a2e1cd5721152122",
   "test_overlay": false,
   "production_requests": 0,
-  "captured_at_utc": "2026-10-07T21:57:55.225280+00:00",
+  "captured_at_utc": "2026-10-07T22:07:26.713161+00:00",
   "dirty": false,
   "producer": {
     "tool": "MUNERAL-IMPORT assigned read canary builder",
-    "version": "1.0.1"
+    "version": "1.0.2"
   }
 }

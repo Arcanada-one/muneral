@@ -1,16 +1,16 @@
 {
   "schema": "CanaryPlan/v2",
-  "id": "assigned-read-project-header-routes",
+  "id": "assigned-read-project-header-final-routes",
   "owner": "Arcanada-one/muneral PR #221",
   "environment": "Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys",
   "read_only": false,
   "subject": {
     "schema": "GitCanarySubject/v1",
-    "commit": "00e30bc811c43642c6ab311762ee710bc57657d2",
-    "tree": "0eae5d169b15ca33057f7a6b8648c58b59285da8",
+    "commit": "99d73ecc4627e62d467e4bbd2d6291fbe92e868b",
+    "tree": "9d2d6343b6a06dee621391a3a2e1cd5721152122",
     "evidence": {
       "path": "source-evidence.json",
-      "sha256": "aa4f96e4693aca5563eae5d665bb77eb961453f89901429614bf21559161fd12",
+      "sha256": "f934a454ac691a5cc485bd76ec187797825e9e080a7e10068b8c7b0346bea370",
       "source_field": "commit"
     }
   },
@@ -23,7 +23,7 @@
         "/home/dev/aup/import-audit-work/runs/m211c/node-v24.21.0-linux-x64/bin/node",
         "/home/dev/aup/import-audit-work/runs/assigned-read-jwt-route-http.mjs",
         "/home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007",
-        "/home/dev/aup/import-audit-work/runs/assigned-read-project-header-canary/routes"
+        "/home/dev/aup/import-audit-work/runs/assigned-read-project-header-final-canary/routes"
       ],
       "cwd": ".",
       "env_keys": [

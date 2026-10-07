@@ -1,16 +1,16 @@
 {
   "schema": "CanaryPlan/v2",
-  "id": "assigned-read-project-header-positive",
+  "id": "assigned-read-project-header-final-positive",
   "owner": "Arcanada-one/muneral PR #221",
   "environment": "Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys",
   "read_only": false,
   "subject": {
     "schema": "GitCanarySubject/v1",
-    "commit": "00e30bc811c43642c6ab311762ee710bc57657d2",
-    "tree": "0eae5d169b15ca33057f7a6b8648c58b59285da8",
+    "commit": "99d73ecc4627e62d467e4bbd2d6291fbe92e868b",
+    "tree": "9d2d6343b6a06dee621391a3a2e1cd5721152122",
     "evidence": {
       "path": "source-evidence.json",
-      "sha256": "40a309b2fa471301d93930744662c36614bb1e2eef4a1be0d112db68b0b292d5",
+      "sha256": "4c7f6756ccc1b306ffd1c55e69d355cc3f57e8f2d8150e255060da4344cd1a72",
       "source_field": "commit"
     }
   },
@@ -21,7 +21,7 @@
       "id": "assigned-task-http-contract",
       "argv": [
         "/usr/bin/python3.12",
-        "/home/dev/aup/import-audit-work/runs/assigned-read-project-header-canary-tests.py"
+        "/home/dev/aup/import-audit-work/runs/assigned-read-project-header-final-canary-tests.py"
       ],
       "cwd": ".",
       "env_keys": [
@@ -94,8 +94,8 @@
           "sha256": "b9fd7a00c104eccb56944baa49ef119aee98792efb68467fd6018cfae5d84978"
         },
         {
-          "path": "/home/dev/aup/import-audit-work/runs/assigned-read-project-header-canary-tests.py",
-          "sha256": "b77bdac895a08f85517adf188e08d4ab9d14f9f6cf51485647557d11af104d70"
+          "path": "/home/dev/aup/import-audit-work/runs/assigned-read-project-header-final-canary-tests.py",
+          "sha256": "556972ecb94d6fbf44329ddf482948bc821249686991ec81a0d574d0e952d5d9"
         }
       ],
       "entities": [
