@@ -17,7 +17,7 @@ import { AddGitRefDto } from './dto/add-git-ref.dto.js';
 import { JwtOrApiKeyGuard } from '../auth/guards/jwt-or-api-key.guard.js';
 import { AgentTaskScopeGuard } from '../auth/guards/agent-task-scope.guard.js';
 import type { Request } from 'express';
-import type { User } from '@prisma/client';
+import type { Actor } from '@muneral/types';
 import { HumanTaskReadGuard } from '../auth/guards/human-task-read.guard.js';
 import type { AgentScopedRequest } from '../auth/guards/agent-task-scope.guard.js';
 import { AgentScope } from '../auth/agent-scope.decorator.js';
@@ -65,8 +65,8 @@ export class ProjectsController {
 
   @Get('tasks/:taskId/git-refs')
   @UseGuards(HumanTaskReadGuard)
-  getGitRefs(@Param('taskId') taskId: string, @Req() req: Request & { user?: User }) {
-    return this.projectsService.getGitRefs(taskId, req.user?.id);
+  getGitRefs(@Param('taskId') taskId: string, @Req() req: Request & { actor: Actor }) {
+    return this.projectsService.getGitRefs(taskId, req.actor.type === 'human' ? req.actor.id : undefined);
   }
 
   @Delete('git-refs/:refId')
