@@ -1,0 +1,165 @@
+{
+  "schema": "CanaryPlan/v1",
+  "id": "mun0043-rev4-actual-http",
+  "environment": "arcana-devs synthetic disposable database and actual compiled Nest modules",
+  "base_url": "http://127.0.0.1:37589",
+  "owner": "term_146be82e-2b0a-4387-8d4b-54d68d494956",
+  "api_key_env": "REV4_CANARY_LOCAL_KEY",
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "c9a1f7b382513d5a1195adb16e57a00ed378b6d9",
+    "tree": "aef73380c778be43a310d6d54a1ea0eb56cdfba6",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "738476b5213079201bdd67da86c028ab8d0934a8d48f0c7107a83c2a1cacf8b3",
+      "source_field": "commit"
+    }
+  },
+  "purpose": "Actual authenticated migration routes on built clean source commit. Setup has verified revision4 description/archive via real POST and GET. Invalid-body POST400 proves DTO route dispatch; full semantics covered by fifteen HTTP tests and archive PG battery. No production writes.",
+  "probes": [
+    {
+      "id": "route-0",
+      "kind": "http",
+      "method": "GET",
+      "path": "/migration/batches/092b4856-a020-4a85-9efb-9c8e3faa4c23",
+      "auth": "api_key",
+      "entities": [
+        "route:GET /migration/batches/:batchId"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          200
+        ]
+      }
+    },
+    {
+      "id": "route-1",
+      "kind": "http",
+      "method": "GET",
+      "path": "/migration/identities/04e6eecf-3e98-445d-ae92-d5adafc2bf28/mappings",
+      "auth": "api_key",
+      "entities": [
+        "route:GET /migration/identities/:identityId/mappings"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          200
+        ]
+      }
+    },
+    {
+      "id": "route-2",
+      "kind": "http",
+      "method": "GET",
+      "path": "/migration/work-items/by-legacy/rev4-route%2Fa6c7104f-4cb9-4077-bf20-7af1c53e1b23/CUBR-0014",
+      "auth": "api_key",
+      "entities": [
+        "route:GET /migration/work-items/by-legacy/:sourceNamespace/:legacyId"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          200
+        ]
+      }
+    },
+    {
+      "id": "route-3",
+      "kind": "http",
+      "method": "GET",
+      "path": "/migration/work-items/search?legacyId=CUBR-0014",
+      "auth": "api_key",
+      "entities": [
+        "route:GET /migration/work-items/search"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          200
+        ]
+      }
+    },
+    {
+      "id": "route-4",
+      "kind": "http",
+      "method": "POST",
+      "path": "/migration/batches",
+      "auth": "api_key",
+      "entities": [
+        "route:POST /migration/batches"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          400
+        ]
+      }
+    },
+    {
+      "id": "route-5",
+      "kind": "http",
+      "method": "POST",
+      "path": "/migration/batches/092b4856-a020-4a85-9efb-9c8e3faa4c23/commit",
+      "auth": "api_key",
+      "entities": [
+        "route:POST /migration/batches/:batchId/commit"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          200
+        ]
+      }
+    },
+    {
+      "id": "route-6",
+      "kind": "http",
+      "method": "POST",
+      "path": "/migration/identities/04e6eecf-3e98-445d-ae92-d5adafc2bf28/decisions",
+      "auth": "api_key",
+      "entities": [
+        "route:POST /migration/identities/:identityId/decisions"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          400
+        ]
+      }
+    },
+    {
+      "id": "route-7",
+      "kind": "http",
+      "method": "POST",
+      "path": "/migration/work-items",
+      "auth": "api_key",
+      "entities": [
+        "route:POST /migration/work-items"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          400
+        ]
+      }
+    },
+    {
+      "id": "route-8",
+      "kind": "http",
+      "method": "POST",
+      "path": "/migration/work-items/d67a6982-3e5e-4698-9ffc-02e8b6e050c6/transitions",
+      "auth": "api_key",
+      "entities": [
+        "route:POST /migration/work-items/:taskId/transitions"
+      ],
+      "mutating": true,
+      "expect": {
+        "status_in": [
+          400
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,217 @@
+{
+ "base_url": "http://127.0.0.1:37589",
+ "captured_at_utc": "2026-10-07T08:27:51Z",
+ "card": "AUP-GRAPH-008",
+ "contract_ref": "contracts/graph-verified-change/observed-edges-and-deploy-gate.v1.json",
+ "counters": {
+  "failed": 0,
+  "not_measured": 0,
+  "verified": 9
+ },
+ "entity_verdicts": [
+  {
+   "entity": "route:GET /migration/batches/:batchId",
+   "probe_ids": [
+    "route-0"
+   ],
+   "reason": "route-0: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /migration/identities/:identityId/mappings",
+   "probe_ids": [
+    "route-1"
+   ],
+   "reason": "route-1: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /migration/work-items/by-legacy/:sourceNamespace/:legacyId",
+   "probe_ids": [
+    "route-2"
+   ],
+   "reason": "route-2: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /migration/work-items/search",
+   "probe_ids": [
+    "route-3"
+   ],
+   "reason": "route-3: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /migration/batches",
+   "probe_ids": [
+    "route-4"
+   ],
+   "reason": "route-4: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /migration/batches/:batchId/commit",
+   "probe_ids": [
+    "route-5"
+   ],
+   "reason": "route-5: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /migration/identities/:identityId/decisions",
+   "probe_ids": [
+    "route-6"
+   ],
+   "reason": "route-6: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /migration/work-items",
+   "probe_ids": [
+    "route-7"
+   ],
+   "reason": "route-7: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /migration/work-items/:taskId/transitions",
+   "probe_ids": [
+    "route-8"
+   ],
+   "reason": "route-8: ",
+   "verdict": "verified"
+  }
+ ],
+ "environment": "arcana-devs synthetic disposable database and actual compiled Nest modules",
+ "model": "claude-opus-5",
+ "mutating_owner": "term_146be82e-2b0a-4387-8d4b-54d68d494956",
+ "phase": "pre",
+ "plan": {
+  "digest": "sha256:3fe934f92dfc26dbe686f2d4ea7ef2e725a42016a28f877e6e38afb067dd511a",
+  "id": "mun0043-rev4-actual-http",
+  "path": "route-plan.json"
+ },
+ "probes": [
+  {
+   "body_bytes": 386,
+   "body_sha256": "sha256:d932216b6d242eff62287682d79b61cd3050ecdea9873fd0a1c4cb16ba16c2b4",
+   "elapsed_ms": 289,
+   "id": "route-0",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "",
+   "status": 200,
+   "url": "http://127.0.0.1:37589/migration/batches/092b4856-a020-4a85-9efb-9c8e3faa4c23"
+  },
+  {
+   "body_bytes": 391,
+   "body_sha256": "sha256:943a28ae3ffbe0eb6b6a3467de4bc8c65ec1f8f712c57076783f4ab30e7572d7",
+   "elapsed_ms": 300,
+   "id": "route-1",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "",
+   "status": 200,
+   "url": "http://127.0.0.1:37589/migration/identities/04e6eecf-3e98-445d-ae92-d5adafc2bf28/mappings"
+  },
+  {
+   "body_bytes": 1953,
+   "body_sha256": "sha256:41b9ffec06d93e91d852781de01e80291a25e8212af17ca4704cf817786276a9",
+   "elapsed_ms": 264,
+   "id": "route-2",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "",
+   "status": 200,
+   "url": "http://127.0.0.1:37589/migration/work-items/by-legacy/rev4-route%2Fa6c7104f-4cb9-4077-bf20-7af1c53e1b23/CUBR-0014"
+  },
+  {
+   "body_bytes": 407,
+   "body_sha256": "sha256:3d2ab6aa56dd8ff6858e21b439376b176586a4292a3b4a5a012f2355e96cb65e",
+   "elapsed_ms": 244,
+   "id": "route-3",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "",
+   "status": 200,
+   "url": "http://127.0.0.1:37589/migration/work-items/search?legacyId=CUBR-0014"
+  },
+  {
+   "body_bytes": 451,
+   "body_sha256": "sha256:0fb9efebf3ab2272bfe8fa91cbbbdea9d65a5a7350b024a7f1c0a28f169c9ecb",
+   "elapsed_ms": 234,
+   "id": "route-4",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "",
+   "status": 400,
+   "url": "http://127.0.0.1:37589/migration/batches"
+  },
+  {
+   "body_bytes": 735,
+   "body_sha256": "sha256:9c39703b39ac1df223ba2ded68f8041b6705da6d600118ac7193941dca5bc331",
+   "elapsed_ms": 256,
+   "id": "route-5",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "",
+   "status": 200,
+   "url": "http://127.0.0.1:37589/migration/batches/092b4856-a020-4a85-9efb-9c8e3faa4c23/commit"
+  },
+  {
+   "body_bytes": 504,
+   "body_sha256": "sha256:5f83eefabb74ceafce6b89f9141dc0b5540551124ab94f4c06b16bd906476132",
+   "elapsed_ms": 254,
+   "id": "route-6",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "",
+   "status": 400,
+   "url": "http://127.0.0.1:37589/migration/identities/04e6eecf-3e98-445d-ae92-d5adafc2bf28/decisions"
+  },
+  {
+   "body_bytes": 751,
+   "body_sha256": "sha256:241f3a6528961f4b99e244c0f3382133d582b62fd738e825b67cc13018b52769",
+   "elapsed_ms": 245,
+   "id": "route-7",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "",
+   "status": 400,
+   "url": "http://127.0.0.1:37589/migration/work-items"
+  },
+  {
+   "body_bytes": 496,
+   "body_sha256": "sha256:9db6530e4395bfee3ea73bf293783f746b8e4e9a2fcae703926656e507301efc",
+   "elapsed_ms": 220,
+   "id": "route-8",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "",
+   "status": 400,
+   "url": "http://127.0.0.1:37589/migration/work-items/d67a6982-3e5e-4698-9ffc-02e8b6e050c6/transitions"
+  }
+ ],
+ "producer": {
+  "tool": "tools/graph/deploy_gate.py",
+  "version": "1.0.0"
+ },
+ "provisional_until_fable_review": true,
+ "read_only": false,
+ "resident_version": null,
+ "rules": [
+  "C3 a probe that could not run is not_measured, never verified",
+  "C4 probes are read-only unless the plan declares mutating with an owner"
+ ],
+ "schema": "CanaryResult/v1",
+ "subject": {
+  "commit": "c9a1f7b382513d5a1195adb16e57a00ed378b6d9",
+  "evidence": {
+   "path": "source-evidence.json",
+   "sha256": "738476b5213079201bdd67da86c028ab8d0934a8d48f0c7107a83c2a1cacf8b3",
+   "source_field": "commit"
+  },
+  "schema": "GitCanarySubject/v1",
+  "tree": "aef73380c778be43a310d6d54a1ea0eb56cdfba6"
+ }
+}

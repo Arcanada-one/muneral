@@ -1,0 +1,11 @@
+{
+  "schema": "MeasuredGitSource/v1",
+  "captured_at_utc": "2026-10-07T08:25:40Z",
+  "commit": "c9a1f7b382513d5a1195adb16e57a00ed378b6d9",
+  "tree": "aef73380c778be43a310d6d54a1ea0eb56cdfba6",
+  "dirty": false,
+  "producer": {
+    "tool": "MUNERAL-IMPORT real HTTP boundary probe",
+    "version": "1.0.0"
+  }
+}

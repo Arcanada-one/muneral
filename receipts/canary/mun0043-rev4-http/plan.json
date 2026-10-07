@@ -1,0 +1,90 @@
+{
+  "schema": "CanaryPlan/v2",
+  "id": "mun0043-rev4-http-boundary",
+  "owner": "term_146be82e-2b0a-4387-8d4b-54d68d494956",
+  "environment": "arcana-devs disposable PostgreSQL and actual Nest HTTP app",
+  "read_only": false,
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "c9a1f7b382513d5a1195adb16e57a00ed378b6d9",
+    "tree": "aef73380c778be43a310d6d54a1ea0eb56cdfba6",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "738476b5213079201bdd67da86c028ab8d0934a8d48f0c7107a83c2a1cacf8b3",
+      "source_field": "commit"
+    }
+  },
+  "purpose": "Exercise every actual migration HTTP route with owning/foreign workspace callers and real database, including DI startup after revision-4 change. Complements discriminating loader/archive canary and parent negative control. Production remains unmeasured.",
+  "probes": [
+    {
+      "kind": "process",
+      "id": "real-migration-http-battery",
+      "argv": [
+        "/home/dev/aup/import-audit-work/runs/m211c/node-v24.21.0-linux-x64/bin/node",
+        "/home/dev/aup/import-audit-work/runs/rev4-http-probe.mjs",
+        "/home/dev/aup/import-audit-work/mun-rev4"
+      ],
+      "cwd": ".",
+      "env_keys": [
+        "PATH",
+        "HOME",
+        "TMPDIR",
+        "MUN0021_PG_BASE_URL"
+      ],
+      "timeout_seconds": 120,
+      "capture_limit_bytes": 524288,
+      "executable_sha256": "7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c",
+      "execution_files": [
+        {
+          "path": "/home/dev/aup/import-audit-work/runs/rev4-http-probe.mjs",
+          "sha256": "3bdd6889b0e535d410358d43444e7a8bec214fcb701ded26e20d1301ee2f523a"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/test/support/disposable-postgres.ts",
+          "sha256": "6644ee5e273b9bc866254288f8e4c426800da68875f485c932f28dc1e8576e3b"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/test/migration-workspace-scope.e2e.spec.ts",
+          "sha256": "2ffbb829063f9ac21e9044ed0cb50bda33f502d7dc8ccf71547dea06471d8239"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/src/migration/migration.controller.ts",
+          "sha256": "7ce7af7186db8ca77940f065abbb75534276aaeee1ecfe1ecd68c6833a654391"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/src/migration/migration.service.ts",
+          "sha256": "d290cf02917c397118348a3aac96429841dab00f5ce7f6f583c23ae7732fa2c8"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/src/migration/migration.module.ts",
+          "sha256": "88f2cf8ff9242b0f0de31fbc0c674be06ab15aa2c25374d1e773766b8c91b331"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/src/migration/migration.archive-projection.ts",
+          "sha256": "c8442761851ffaadb98db97d0b59921c55f002a6be48ab6df374b66b9e524aa5"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/src/tasks/field-state/task-field-state.service.ts",
+          "sha256": "e82b32d2fc9d1be7d0a086cca544518cc467fd09c9da05037372e11244dbb5fa"
+        }
+      ],
+      "entities": [
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "expect": {
+        "exit_codes": [
+          0
+        ],
+        "stdout_contains": [
+          "REV4_HTTP_ROUTES_VERIFIED",
+          "REV4_HTTP_DISPOSABLE_DATABASE_CLEANUP_VERIFIED"
+        ],
+        "stderr_contains": [
+          "PASS",
+          "Tests:"
+        ]
+      },
+      "mutating": true
+    }
+  ]
+}
