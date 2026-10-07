@@ -1,0 +1,108 @@
+{
+  "schema": "CanaryPlan/v2",
+  "id": "workspace-index-parent-negative",
+  "owner": "Arcanada-one/muneral PR #219",
+  "environment": "Task-local disposable PostgreSQL and compiled Nest modules with synthetic identities",
+  "read_only": false,
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "6fda07006a2e8543a4bb842f99f9b086dbe4c224",
+    "tree": "636f9740eb3df4d06e405d0fdbdebc23a2200e0e",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "7ca485fd431e484f5cd17486ed571ceafb809445f8b67d31721047a1980d3dc1",
+      "source_field": "commit"
+    }
+  },
+  "purpose": "Actual authenticated workspace-only nonowned/empty index, exact field envelope, committed distinct audit records, other actor/current exclusions/task detail refusals; 50 real graph-impact/changed-controller routes deny unauthenticated requests. Route canary measures dispatch/auth floor only, not full existing endpoint semantics. Synthetic grant DI proves policy logic, not production identity binding. Parent negative must fail on missing workspace admission (404 vs200); production remains unmeasured. No compiler mutation replay claim.",
+  "probes": [
+    {
+      "kind": "process",
+      "id": "real-index-http-and-audit",
+      "argv": [
+        "/home/dev/aup/import-audit-work/runs/m211c/node-v24.21.0-linux-x64/bin/node",
+        "/home/dev/aup/import-audit-work/runs/index-grant-http-probe.mjs",
+        "/home/dev/aup/import-audit-work/mun-index-negative",
+        "/home/dev/aup/import-audit-work/runs/index-grant-canary/negative"
+      ],
+      "cwd": ".",
+      "env_keys": [
+        "PATH",
+        "HOME",
+        "TMPDIR",
+        "MUN0021_PG_BASE_URL"
+      ],
+      "timeout_seconds": 120,
+      "capture_limit_bytes": 524288,
+      "executable_sha256": "7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c",
+      "execution_files": [
+        {
+          "path": "/home/dev/aup/import-audit-work/runs/index-grant-http-probe.mjs",
+          "sha256": "dbaa44c1f74a0857c12831d2193678f7cecb2e364b348c9b0739616dcbbce975"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-index-negative/apps/api/test/support/disposable-postgres.ts",
+          "sha256": "6644ee5e273b9bc866254288f8e4c426800da68875f485c932f28dc1e8576e3b"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-index-negative/apps/api/src/auth/auth.module.ts",
+          "sha256": "c35615b88a7ea66f6847768745bcacdc5d48a54f95d7e6906c9b3080cbbb094e"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-index-negative/apps/api/dist/auth/auth.module.js",
+          "sha256": "e17d82e7b0bc61de39b3c749790fcf39aaa94fb806351a3969099267109ea556"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-index-negative/apps/api/src/auth/guards/agent-task-scope.guard.ts",
+          "sha256": "24821f29a542e76e428fcbbc5b8ef5d9efaca02fbed0e07474b00818f563f1a3"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-index-negative/apps/api/dist/auth/guards/agent-task-scope.guard.js",
+          "sha256": "dc2cda8cdc7e46b71ac848cf752dd314990971dcb353b13cfe7ff2bc23998631"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-index-negative/apps/api/src/tasks/tasks.controller.ts",
+          "sha256": "e588678d58f1341b7d3d0b2011b1e82e5f9e76c230ca6f60f91971a76ef3bb85"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-index-negative/apps/api/dist/tasks/tasks.controller.js",
+          "sha256": "49994de83c96bdb31f9badaddd0607b745ab9c674acc4076be39e509b6827411"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-index-negative/apps/api/src/tasks/tasks.service.ts",
+          "sha256": "141540d98ecb7bdd30bd111b19802dfbeb2ae6c0ccc01a2943161b3dda84ad62"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-index-negative/apps/api/dist/tasks/tasks.service.js",
+          "sha256": "c10150f2cd7ef25450aeda044e012c7adc0d4e5d71c43d348c42684588fdc4a5"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-index-negative/apps/api/src/auth/project-read-grants.ts",
+          "sha256": "56e2c663666077cbac19a70eff0f776b63d238b830e62bc17cebdca735e1b417"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-index-negative/apps/api/dist/auth/project-read-grants.js",
+          "sha256": "86cc67a41bcc1df8a2b13dad0fe2be88700ecb352acdf7575c4968cdb04b9c52"
+        }
+      ],
+      "entities": [
+        "code_unit:apps/api/src/auth/auth.module.ts",
+        "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts",
+        "code_unit:apps/api/src/tasks/tasks.service.ts",
+        "code_unit:apps/api/src/auth/project-read-grants.ts"
+      ],
+      "expect": {
+        "exit_codes": [
+          0
+        ],
+        "stdout_contains": [
+          "WORKSPACE_INDEX_ACTUAL_HTTP_SCOPE_AND_AUDIT_VERIFIED",
+          "WORKSPACE_INDEX_AUTHENTICATED_HTTP_AND_50_REAL_ROUTE_DENIALS_VERIFIED",
+          "Cleanup evidence:"
+        ]
+      },
+      "mutating": true
+    }
+  ]
+}
