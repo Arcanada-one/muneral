@@ -41,6 +41,10 @@ minimumReleaseAgeExclude:
   - esbuild@0.28.1
 
 overrides:
+  # SEC-ORG-DEPENDENCIES-14EA: published fixes for GHSA-p6vx-979v-rg4c,
+  # GHSA-jp82-f5mq-hwhp and GHSA-jqcg-44mw-7w3h; preserve each major.
+  seroval: ">=1.6.3 <2"
+  proxy-addr: ">=2.0.8 <3"
   # Per major line: minimatch@3 wants the CJS 1.x shape, and collapsing it into
   # 5.x breaks it with `expand is not a function` — measured, not feared.
   'brace-expansion@^1.0.0': ^1.1.18
