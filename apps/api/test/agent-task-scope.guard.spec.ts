@@ -314,7 +314,11 @@ describe('AgentTaskScopeGuard', () => {
     });
     // No separate assignment lookup: 'task' semantics are not consulted.
     expect(prisma.taskAgent.findFirst).not.toHaveBeenCalled();
-    expect(req.agentScope).toEqual({ agentId: 'agent-1', kind: 'task-status' });
+    expect(req.agentScope).toEqual({
+      agentId: 'agent-1',
+      kind: 'task-status',
+      workspaceId: 'ws-1',
+    });
   });
 
   it('refuses the status route when the agent neither created the task nor executes it', async () => {
