@@ -1,11 +1,11 @@
 {
  "admission": {
-  "rule": "admitted requires every verdict = verified; failed without exemption ⇒ refused; not_measured without exemption ⇒ paused_safe; exemptions (owner + expiry) are attached by the admitting agent, never by the verifier (DEC-AUP-0008, matrix P1/P4)",
-  "structural_exclusion_rule": "DEC-AUP-0034: an affected entity is NOT verdict-owing when all three hold — the verifier matrix declares neither a mandatory nor a selectable verifier for its node type (so the only verdict it could ever carry states a property of the MATRIX, not of this change), the change set does not contain it, and its bytes are identical at base and head. Each one is listed in structural_exclusions with the content hash at both revisions that proves the byte-identity, and impact_pair.receipt_problems re-derives that proof from Git rather than believing the receipt.",
-  "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
-  "verdict": "paused_safe"
+  "rule": "admitted requires every verdict = verified; failed without exemption \u21d2 refused; not_measured without exemption \u21d2 paused_safe; exemptions (owner + expiry) are attached by the admitting agent, never by the verifier (DEC-AUP-0008, matrix P1/P4)",
+  "structural_exclusion_rule": "DEC-AUP-0034: an affected entity is NOT verdict-owing when all three hold \u2014 the verifier matrix declares neither a mandatory nor a selectable verifier for its node type (so the only verdict it could ever carry states a property of the MATRIX, not of this change), the change set does not contain it, and its bytes are identical at base and head. Each one is listed in structural_exclusions with the content hash at both revisions that proves the byte-identity, and impact_pair.receipt_problems re-derives that proof from Git rather than believing the receipt.",
+  "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item \u2014 the ordinary case after a rebase or a second commit on a card \u2014 the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
+  "verdict": "admitted_with_exemptions"
  },
- "captured_at_utc": "2026-10-07T11:32:42Z",
+ "captured_at_utc": "2026-10-07T11:44:47Z",
  "change_set": {
   "base": "6fda07006a2e8543a4bb842f99f9b086dbe4c224",
   "files": [
@@ -139,13 +139,579 @@
     ],
     "path": "receipts/graph/change-admission-MUNERAL210-075162f.json",
     "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/graph/contract-cas-current/exemptions.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/graph/contract-cas-current/verifier-out/v-canary.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/graph/contract-cas-current/verifier-out/v-contract-diff.json",
+    "status": "A"
+   },
+   {
+    "kind": "doc",
+    "new": true,
+    "path": "receipts/graph/contract-cas-current/verifier-out/v-doc-reference.txt",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/graph/contract-cas-current/verifier-out/v-fitness.json",
+    "status": "A"
+   },
+   {
+    "kind": "doc",
+    "new": true,
+    "path": "receipts/graph/contract-cas-current/verifier-out/v-route-config.txt",
+    "status": "A"
+   },
+   {
+    "kind": "doc",
+    "new": true,
+    "path": "receipts/graph/contract-cas-current/verifier-out/v-type-check-apps-api-tsconfig-test.txt",
+    "status": "A"
+   },
+   {
+    "kind": "doc",
+    "new": true,
+    "path": "receipts/graph/contract-cas-current/verifier-out/v-type-check-apps-api-tsconfig.txt",
+    "status": "A"
+   },
+   {
+    "kind": "doc",
+    "new": true,
+    "path": "receipts/graph/contract-cas-current/verifier-out/v-type-check-apps-web-tsconfig.txt",
+    "status": "A"
    }
   ],
-  "head": "f3cf93e074bdf5912d7b58296a17e90867236c1a",
+  "head": "df1c9fd457f045d3548b3cc9b8b31ea02d19a3e6",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
- "exemptions": [],
+ "exemptions": [
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "code_unit:apps/api/src/agents/agents.controller.ts",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "code_unit:apps/api/src/projects/projects.controller.ts",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "code_unit:apps/api/src/sync/sync.controller.ts",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "code_unit:apps/web/__tests__/kanban-board.test.ts",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "code_unit:apps/web/components/dashboard/BlockersList.tsx",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "code_unit:apps/web/components/kanban/KanbanCard.tsx",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "code_unit:apps/web/components/task/AuditLog.tsx",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "code_unit:apps/web/components/task/TaskChecklist.tsx",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "code_unit:apps/web/components/task/TaskDependencies.tsx",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "code_unit:apps/web/components/task/TaskDetail.tsx",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "code_unit:apps/web/lib/api/tasks.ts",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "code_unit:apps/web/lib/api/workspaces.ts",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "deployable_unit:apps/web",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:DELETE /agents/keys/:keyId",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:DELETE /agents/tasks/:taskId/assign/:agentId",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:DELETE /projects/:projectId",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:DELETE /projects/git-refs/:refId",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:DELETE /tasks/:taskId",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:DELETE /tasks/:taskId/checklist/:itemId",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:DELETE /tasks/:taskId/dependencies/:depId",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:DELETE /workspaces/:workspaceId/members/:userId",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:GET /agents/tasks",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:GET /agents/workspace/:workspaceId",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:GET /projects/:projectId",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:GET /projects/tasks/:taskId/git-refs",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:GET /projects/workspace/:workspaceId",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:GET /sync/datarim/:projectId",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:GET /tasks",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:GET /tasks/:taskId",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:GET /tasks/:taskId/activity",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:GET /tasks/:taskId/checklist",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:GET /tasks/:taskId/dependencies",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:GET /tasks/:taskId/dependency-graph",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:GET /tasks/:taskId/evidence",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:GET /tasks/:taskId/field-changes",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:GET /tasks/:taskId/readiness",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:GET /tasks/digest",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:GET /tasks/project/:projectId",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:GET /tasks/project/:projectId/index",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:GET /tasks/project/:projectId/staleness",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:GET /workspaces",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:GET /workspaces/:workspaceId",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:GET /workspaces/:workspaceId/members",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:PATCH /tasks/:taskId/checklist/:itemId",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:PATCH /tasks/:taskId/contract",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:PATCH /tasks/:taskId/status",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:PATCH /workspaces/:workspaceId/members/:userId/role",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:POST /agents",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:POST /agents/:agentId/keys",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:POST /agents/keys/:keyId/rotate",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:POST /agents/keys/self/revoke",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:POST /agents/tasks/:taskId/assign",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:POST /projects",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:POST /projects/git-refs",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:POST /sync/datarim/:projectId/import",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:POST /tasks",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:POST /tasks/:taskId/checklist",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:POST /tasks/:taskId/comments",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:POST /tasks/:taskId/dependencies",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:POST /tasks/:taskId/evidence",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:POST /tasks/:taskId/field-ack",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:POST /tasks/:taskId/redactions",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:POST /workspaces",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  },
+  {
+   "code": "CURRENT_SOURCE_PRE_POST_CANARY_UNAVAILABLE",
+   "entity": "route:POST /workspaces/:workspaceId/members/:userId",
+   "expires_at_utc": "2026-10-08T11:39:29Z",
+   "owner": "ARAS owner / af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "ROOT1130 explicitly authorizes measured DEC-AUP-0008 exemptions. Current verifier observed no source-bound canary for this entity: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1). Read-only resident health reports main 6fda07006a2e8543a4bb842f99f9b086dbe4c224, not this original CAS source head. No matching current-source pre/post deployed canary is available; local fixture controls are not live proof. Keep NOT_MEASURED; next action is authentic source deployment, owned read-only route and authenticated harmless-card canary, then remove this debt. No runtime/model grant is inferred."
+  }
+ ],
  "graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
@@ -156,11 +722,11 @@
  "head_graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:360be25349b043dcb19ced8609ad09b7dfecff9d77429e5225b9158314e2333d",
-  "path": "/home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/graph-head-f3cf93e074bd.json",
-  "source_commit": "f3cf93e074bdf5912d7b58296a17e90867236c1a",
+  "graph_digest": "sha256:1f34308933addf42f8907f3d6408c89bcde1c50ed23d0a240f4a4fe5b289dd57",
+  "path": "/home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/graph-head-df1c9fd457f0.json",
+  "source_commit": "df1c9fd457f045d3548b3cc9b8b31ea02d19a3e6",
   "staleness": {
-   "checked_at_utc": "2026-10-07T11:33:26Z",
+   "checked_at_utc": "2026-10-07T11:45:27Z",
    "checked_nodes": 431,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
@@ -169,7 +735,7 @@
  },
  "host": "aras-owner",
  "host_redacted": true,
- "host_sha256": "d727d07d99c18295fe61f36c9c743078eb549a53f7f5a647631a4d54db6edafc",
+ "host_sha256": "2ad3f04b1f724c1aed6451fabd6dfb0cfd4c8a97739f5d0028d3603af45d3aaf",
  "impact_set": {
   "deterministic_core": [
    {
@@ -2964,7 +3530,7 @@
      "base",
      "head"
     ],
-    "verifier_hint": "consumer ⊆ provider check (contract-diff)"
+    "verifier_hint": "consumer \u2286 provider check (contract-diff)"
    },
    {
     "boundary": "service",
@@ -2998,7 +3564,7 @@
      "base",
      "head"
     ],
-    "verifier_hint": "consumer ⊆ provider check (contract-diff)"
+    "verifier_hint": "consumer \u2286 provider check (contract-diff)"
    },
    {
     "boundary": "service",
@@ -3034,15 +3600,17 @@
   "total": 123
  },
  "notes": [
-  "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
+  "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = \u22c3 edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i\u2026",
   "profile: (auto-detected); baseline: contracts/graph-verified-change/fitness-baseline/Arcanada-one__muneral.v1.json (valid); selected: none; disabled: none",
-  "head tree f3cf93e074bd exported with git archive into /home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN210/verify-work/export-f3cf93e074bd (node_modules linked from the repository for ['.', 'apps/api', 'apps/web', 'packages/types']; workspace packages built: ['packages/types (tsc exit 0, 0.8s)']); the repository was not written"
+  "exemptions: 73 attached from receipts/graph/contract-cas-current/exemptions.json",
+  "head tree df1c9fd457f0 exported with git archive into /home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN210/final-clean-work/export-df1c9fd457f0 (node_modules linked from the repository for ['.', 'apps/api', 'apps/web', 'packages/types']; workspace packages built: ['packages/types (tsc exit 0, 0.52s)']); the repository was not written",
+  "Owner custody-only relocation: raw native receipt SHA256 27363a49f775273eadb0fe381002630d1960692a98e28e49d5fd84c64c348aa1. Verifier output references relocated to byte-identical immutable artefacts; source pins, verifier execution facts, entity verdicts, exemptions and admission unchanged. CAN diagnostic is repository-relative and spends no VERIFIED claim; current-source pre/post canary debt remains explicit."
  ],
  "producer": {
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261007T113242Z-f3cf93e0",
+ "receipt_id": "car-verify-20261007T114447Z-df1c9fd4",
  "receipt_path": "receipts/graph/change-admission-MUNERAL210-075162f.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -3370,7 +3938,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-07T11:33:26Z",
+  "checked_at_utc": "2026-10-07T11:45:27Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -3489,12 +4057,12 @@
   {
    "content_hash": {
     "base": null,
-    "head": "sha256:b5b0ef3e5f5f165552a6062a0ddf39648d8b24b3d4663c0329c1271ecb796dee"
+    "head": "sha256:6eb55f79a79dc7831a5e9696ea39502e36c0ea44c3eade16f1daa2a1ddc53f51"
    },
    "entity": "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json",
    "node_type": "receipt",
    "path": "receipts/graph/change-admission-MUNERAL210-075162f.json",
-   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it; superseded by construction — this run re-issues the receipt at receipts/graph/change-admission-MUNERAL210-075162f.json for work item af868172-bd90-4522-b817-c2a2d1804dfe",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it; superseded by construction \u2014 this run re-issues the receipt at receipts/graph/change-admission-MUNERAL210-075162f.json for work item af868172-bd90-4522-b817-c2a2d1804dfe",
    "rule": "DEC-AUP-0035",
    "superseded": {
     "receipt_path": "receipts/graph/change-admission-MUNERAL210-075162f.json",
@@ -3789,7 +4357,7 @@
   }
  ],
  "tree": {
-  "commit": "f3cf93e074bdf5912d7b58296a17e90867236c1a",
+  "commit": "df1c9fd457f045d3548b3cc9b8b31ea02d19a3e6",
   "dirty": false
  },
  "verdicts": [
@@ -3815,7 +4383,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/agents/agents.service.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 3 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 3 contract edge(s) verified (consumer \u2286 provider); v-fitness: no new fitness violation",
    "verdict": "verified",
    "verifier_ids": [
     "v-contract-diff",
@@ -3843,7 +4411,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer \u2286 provider); v-fitness: no new fitness violation",
    "verdict": "verified",
    "verifier_ids": [
     "v-contract-diff",
@@ -3938,7 +4506,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/dto/update-task-contract.dto.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer \u2286 provider); v-fitness: no new fitness violation",
    "verdict": "verified",
    "verifier_ids": [
     "v-contract-diff",
@@ -3979,7 +4547,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/task-contract-binding.service.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer \u2286 provider); v-fitness: no new fitness violation",
    "verdict": "verified",
    "verifier_ids": [
     "v-contract-diff",
@@ -5046,8 +5614,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN210/verify-work/export-f3cf93e074bd/apps/api/node_modules/.bin/tsc -p /home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN210/verify-work/export-f3cf93e074bd/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/type-check-q2f07tnz/check.tsbuildinfo --listFiles",
-   "duration_s": 8.12,
+   "command": "/home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN210/final-clean-work/export-df1c9fd457f0/apps/api/node_modules/.bin/tsc -p /home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN210/final-clean-work/export-df1c9fd457f0/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/type-check-_7_kjisc/check.tsbuildinfo --listFiles",
+   "duration_s": 6.81,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -5209,13 +5777,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-10-07T11:33:32Z",
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN210/CURRENT-RAW-OUTPUTS/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-10-07T11:45:32Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1451 files listed"
   },
   {
-   "command": "/home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN210/verify-work/export-f3cf93e074bd/apps/api/node_modules/.bin/tsc -p /home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN210/verify-work/export-f3cf93e074bd/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/type-check-xb16f2ux/check.tsbuildinfo --listFiles",
-   "duration_s": 12.76,
+   "command": "/home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN210/final-clean-work/export-df1c9fd457f0/apps/api/node_modules/.bin/tsc -p /home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN210/final-clean-work/export-df1c9fd457f0/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/type-check-axgb85s5/check.tsbuildinfo --listFiles",
+   "duration_s": 10.78,
    "entities": [
     "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts",
     "code_unit:apps/api/test/agent-project-dependencies.e2e.spec.ts",
@@ -5263,13 +5831,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
-   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-10-07T11:33:40Z",
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN210/CURRENT-RAW-OUTPUTS/v-type-check-apps-api-tsconfig-test.txt",
+   "started_at_utc": "2026-10-07T11:45:39Z",
    "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1608 files listed"
   },
   {
-   "command": "/home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN210/verify-work/export-f3cf93e074bd/apps/web/node_modules/.bin/tsc -p /home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN210/verify-work/export-f3cf93e074bd/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/type-check-iu6rg6v2/check.tsbuildinfo --listFiles",
-   "duration_s": 10.51,
+   "command": "/home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN210/final-clean-work/export-df1c9fd457f0/apps/web/node_modules/.bin/tsc -p /home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN210/final-clean-work/export-df1c9fd457f0/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/type-check-k8n_bug_/check.tsbuildinfo --listFiles",
+   "duration_s": 7.79,
    "entities": [
     "code_unit:apps/web/__tests__/kanban-board.test.ts",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
@@ -5307,13 +5875,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-10-07T11:33:54Z",
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN210/CURRENT-RAW-OUTPUTS/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-10-07T11:45:51Z",
    "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1296 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=6fda07006a2e, head=f3cf93e074bd, graph=head graph)",
-   "duration_s": 7.97,
+   "command": "tools/graph/contract_diff.py.run_diff(base=6fda07006a2e, head=df1c9fd457f0, graph=head graph)",
+   "duration_s": 7.42,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.service.ts",
@@ -5477,9 +6045,9 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/v-contract-diff.json",
-   "started_at_utc": "2026-10-07T11:34:05Z",
-   "summary": "47→48 contracts, breaking 0, edges {'verified': 153}"
+   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ROOT1130-MUN210/CURRENT-RAW-OUTPUTS/v-contract-diff.json",
+   "started_at_utc": "2026-10-07T11:45:59Z",
+   "summary": "47\u219248 contracts, breaking 0, edges {'verified': 153}"
   },
   {
    "command": "verify.py route_config_consistency RC-01 prefix / RC-02 registration / RC-03 served",
@@ -5593,13 +6161,13 @@
    "exit_code": 0,
    "id": "v-route-config",
    "kind": "config_schema",
-   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/v-route-config.txt",
-   "started_at_utc": "2026-10-07T11:34:13Z",
+   "output_ref": "receipts/graph/contract-cas-current/verifier-out/v-route-config.txt",
+   "started_at_utc": "2026-10-07T11:46:06Z",
    "summary": "51 route(s), 0 failed"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.24,
+   "duration_s": 0.21,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -5727,13 +6295,13 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/v-fitness.json",
-   "started_at_utc": "2026-10-07T11:34:13Z",
+   "output_ref": "receipts/graph/contract-cas-current/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-10-07T11:46:06Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
    "command": "verify.py doc_reference: path / route / model references of affected documents resolve at head",
-   "duration_s": 0.02,
+   "duration_s": 0.01,
    "entities": [
     "document:README.md",
     "document:apps/api/docs/agent-read-loop.md",
@@ -5761,8 +6329,8 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/v-doc-reference.txt",
-   "started_at_utc": "2026-10-07T11:34:13Z",
+   "output_ref": "receipts/graph/contract-cas-current/verifier-out/v-doc-reference.txt",
+   "started_at_utc": "2026-10-07T11:46:07Z",
    "summary": "10 document(s), 0 failed"
   },
   {
@@ -5921,8 +6489,8 @@
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/home/dev/arcanada/_temp/kc-closure/ARAS-MUNERAL-BIND-AF868172-20261006/source/receipts/graph/contract-cas-current/verifier-out/v-canary.json",
-   "started_at_utc": "2026-10-07T11:34:13Z",
+   "output_ref": "receipts/graph/contract-cas-current/verifier-out/v-canary.json",
+   "started_at_utc": "2026-10-07T11:46:07Z",
    "summary": "0 canary result(s), 0 committed at head; 0 verified / 0 failed / 73 not_measured of 73 entities"
   }
  ],
@@ -5932,7 +6500,7 @@
     "code": "SUPERSEDED_SELF_EXCLUSION",
     "entity": "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json",
     "rule": "DEC-AUP-0035",
-    "text": "the receipt at receipts/graph/change-admission-MUNERAL210-075162f.json is the previous version of the one this run is writing, for the same work item af868172-bd90-4522-b817-c2a2d1804dfe — superseded by construction, so it owes this change no verdict"
+    "text": "the receipt at receipts/graph/change-admission-MUNERAL210-075162f.json is the previous version of the one this run is writing, for the same work item af868172-bd90-4522-b817-c2a2d1804dfe \u2014 superseded by construction, so it owes this change no verdict"
    },
    {
     "code": "STRUCTURAL_EXCLUSION",
@@ -6595,9 +7163,9 @@
    ]
   },
   "seconds": {
-   "prepare": 4.64,
-   "total": 91.01,
-   "verifiers": 39.69
+   "prepare": 3.88,
+   "total": 80.22,
+   "verifiers": 33.09
   }
  },
  "work_item": "af868172-bd90-4522-b817-c2a2d1804dfe"
