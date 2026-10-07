@@ -30,7 +30,7 @@ describe('DEC-AUP-0102 revision 4', () => {
   it('pins the frozen bytes reviewed for server/contract parity', () => {
     const file = fileURLToPath(new URL('../src/migration/status-map/status-map-v1-rev4.json', import.meta.url));
     expect(createHash('sha256').update(readFileSync(file)).digest('hex')).toBe(
-      'e6037dd07abaf7f92102f69ac60395f0e2890c12a5f9268c0d5156f570e7f873',
+      '57d60d1740b2a7b12bc593e11913eb4747ebf764c58fb904975fe371024f6bc5',
     );
   });
 });

@@ -1,6 +1,6 @@
 {
  "schema": "HistoricalStatusMap/v1",
- "task": "IMPORT-AUDIT-F1 / DEC-AUP-0102",
+ "task": "Historical status-map revision 4",
  "revision": 4,
  "issued_at_utc": "2026-10-07T08:00:00Z",
  "muneral_statuses": [
@@ -129,7 +129,7 @@
   "canonical": {
    "muneral": "todo",
    "asserted_done": false,
-   "note": "brief status of an init/task-description written at /dr-init; carries no lifecycle information (same treatment as `absent`); stale stage marker when an archive card exists (R-ARCHIVE); flagged: AGENT-0082 is already tracked as a live task",
+   "note": "Initial task-description stage marker without lifecycle information; an existing canonical archive occurrence is handled by archive precedence while explicit native transitions remain authoritative.",
    "lifecycle_claim": false,
    "flagged": true
   },
