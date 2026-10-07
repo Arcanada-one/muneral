@@ -5,6 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import type { Request } from 'express';
+import { taskReadApiKey } from '../task-read-api-key-header.js';
 import { AuthService } from '../auth.service.js';
 
 /**
@@ -19,11 +20,12 @@ export class ApiKeyGuard implements CanActivate {
     const req = context.switchToHttp().getRequest<Request>();
     const authHeader = req.headers['authorization'];
 
-    if (!authHeader?.startsWith('Bearer mun_sk_')) {
+    const alias = taskReadApiKey(req, context.getHandler());
+    if (!alias && !authHeader?.startsWith('Bearer mun_sk_')) {
       throw new UnauthorizedException('API key required');
     }
 
-    const rawKey = authHeader.slice('Bearer '.length);
+    const rawKey = alias ?? authHeader!.slice('Bearer '.length);
     const apiKey = await this.authService.validateApiKey(rawKey);
 
     if (!apiKey) {

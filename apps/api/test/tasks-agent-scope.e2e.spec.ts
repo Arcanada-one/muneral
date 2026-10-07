@@ -1,3 +1,4 @@
+import { createDisposablePostgres } from './support/disposable-postgres.js';
 /**
  * MUN-0043 (e2e) — an agent's `mun_sk_` key on the task read and transition
  * routes, and the `archived` status end to end.
@@ -35,6 +36,7 @@ import { TaskFieldStateService } from '../src/tasks/field-state/task-field-state
 class TestAppModule {}
 
 describe('Agent-key scope on /tasks (e2e)', () => {
+  const pg = createDisposablePostgres('mun-assigned-read');
   let app: INestApplication;
   let prisma: PrismaService;
   let authSvc: AuthService;
@@ -50,6 +52,8 @@ describe('Agent-key scope on /tasks (e2e)', () => {
   let foreignKey: string;
 
   beforeAll(async () => {
+    await pg.start();
+    process.env.DATABASE_URL = pg.url();
     const moduleRef: TestingModule = await Test.createTestingModule({
       imports: [TestAppModule],
     })
@@ -64,11 +68,11 @@ describe('Agent-key scope on /tasks (e2e)', () => {
     prisma = moduleRef.get(PrismaService);
     authSvc = moduleRef.get(AuthService);
     fsSvc = moduleRef.get(TaskFieldStateService);
-  });
+  }, 120_000);
 
   afterAll(async () => {
-    await app.close();
-  });
+    try { if (app) await app.close(); } finally { await pg.stop(); }
+  }, 30_000);
 
   beforeEach(async () => {
     const id = uuidv4().slice(0, 8);
@@ -188,6 +192,76 @@ describe('Agent-key scope on /tasks (e2e)', () => {
 
     expect(res.body.id).toBe(task.id);
     expect(res.body.status).toBe('todo');
+  });
+
+  it('reads an assigned task and its bound digest via the handler-only header', async () => {
+    const task = await createTask();
+    const contractDigest = 'sha256:' + 'a'.repeat(64);
+    await prisma.task.update({ where: { id: task.id }, data: { contractDigest } });
+    await assign(task.id);
+    const res = await supertest(app.getHttpServer())
+      .get(`/tasks/${task.id}`).set('X-API-Key', assignedKey).expect(200);
+    expect(res.body.id).toBe(task.id);
+    expect(res.body.contractDigest).toBe(contractDigest);
+  });
+
+  it.each(['X-API-Key', 'Authorization'])('returns typed foreign-task403 via %s', async (header) => {
+    const task = await createTask();
+    await assign(task.id);
+    const res = await supertest(app.getHttpServer()).get(`/tasks/${task.id}`)
+      .set(header, header === 'Authorization' ? `Bearer ${strangerKey}` : strangerKey).expect(403);
+    expect(res.body.code).toBe('TASK_READ_FORBIDDEN');
+    expect(res.body.statusCode).toBe(403);
+  });
+
+  it.each(['mun_sk_invalid', '', 'mun_sk_one, mun_sk_two'])('rejects invalid alias %s', async (key) => {
+    const task = await createTask();
+    await assign(task.id);
+    await supertest(app.getHttpServer()).get(`/tasks/${task.id}`)
+      .set('X-API-Key', key).expect(401);
+  });
+
+  it('rejects repeated alias headers even when both keys are valid', async () => {
+    const task = await createTask();
+    await assign(task.id);
+    await supertest(app.getHttpServer()).get(`/tasks/${task.id}`)
+      .set('X-API-Key', [assignedKey, assignedKey] as unknown as string).expect(401);
+  });
+
+  it.each(['Bearer invalid.jwt', 'Bearer mun_sk_invalid'])('does not fall back with mixed credentials %s', async (authorization) => {
+    const task = await createTask();
+    await assign(task.id);
+    await supertest(app.getHttpServer()).get(`/tasks/${task.id}`)
+      .set('X-API-Key', assignedKey).set('Authorization', authorization).expect(401);
+  });
+
+  it('refuses cross-workspace and missing targets through the alias with the same403', async () => {
+    const task = await createTask();
+    await assign(task.id);
+    for (const [id, key] of [[task.id, foreignKey], [uuidv4(), assignedKey]]) {
+      const res = await supertest(app.getHttpServer()).get(`/tasks/${id}`)
+        .set('X-API-Key', key).expect(403);
+      expect(res.body.code).toBe('TASK_READ_FORBIDDEN');
+    }
+  });
+
+  it('rejects two valid credentials and repeated Authorization', async () => {
+    const task = await createTask();
+    await assign(task.id);
+    await supertest(app.getHttpServer()).get(`/tasks/${task.id}`)
+      .set('X-API-Key', assignedKey).set('Authorization', `Bearer ${assignedKey}`).expect(401);
+    await supertest(app.getHttpServer()).get(`/tasks/${task.id}`)
+      .set('Authorization', [`Bearer ${assignedKey}`, `Bearer ${assignedKey}`] as unknown as string).expect(401);
+  });
+
+  it('rejects an alias on another GET and on a task mutation', async () => {
+    const task = await createTask();
+    await assign(task.id);
+    await supertest(app.getHttpServer()).get(`/tasks/${task.id}/activity`)
+      .set('X-API-Key', assignedKey).expect(401);
+    await supertest(app.getHttpServer()).patch(`/tasks/${task.id}/status`)
+      .set('X-API-Key', assignedKey).send({ status: 'in_progress' }).expect(401);
+    expect((await prisma.task.findUniqueOrThrow({ where: { id: task.id } })).status).toBe('todo');
   });
 
   it('refuses an agent that is not assigned to the task', async () => {

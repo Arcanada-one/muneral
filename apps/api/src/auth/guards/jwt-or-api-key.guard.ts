@@ -20,7 +20,7 @@ export class JwtOrApiKeyGuard extends AuthGuard('jwt') {
     const req = context.switchToHttp().getRequest<Request>();
     const authHeader = req.headers['authorization'];
 
-    if (authHeader?.startsWith('Bearer mun_sk_')) {
+    if (req.headers['x-api-key'] !== undefined || authHeader?.startsWith('Bearer mun_sk_')) {
       return this.apiKeyGuard.canActivate(context);
     }
 

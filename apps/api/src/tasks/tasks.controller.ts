@@ -28,6 +28,7 @@ import { AddCommentDto } from './dto/add-comment.dto.js';
 import { JwtOrApiKeyGuard } from '../auth/guards/jwt-or-api-key.guard.js';
 import { AgentTaskScopeGuard } from '../auth/guards/agent-task-scope.guard.js';
 import type { AgentScopeContext } from '../auth/guards/agent-task-scope.guard.js';
+import { TaskReadApiKeyHeader } from '../auth/task-read-api-key-header.js';
 import { AgentScope } from '../auth/agent-scope.decorator.js';
 import { ActorInterceptor } from '../common/interceptors/actor.interceptor.js';
 import type { Actor } from '@muneral/types';
@@ -193,6 +194,7 @@ export class TasksController {
    */
   @Get(':taskId')
   @AgentScope('task')
+  @TaskReadApiKeyHeader()
   async findOne(
     @Param('taskId') taskId: string,
     @Headers('if-none-match') ifNoneMatch: string | undefined,
