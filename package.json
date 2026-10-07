@@ -8,11 +8,14 @@
     "test": "turbo run test",
     "lint": "turbo run lint",
     "dev": "turbo run dev",
-    "clean": "turbo run clean"
+    "clean": "turbo run clean",
+    "typecheck:root": "tsc -p tsconfig.prisma.json"
   },
   "devDependencies": {
     "prisma": "^7.10.0",
-    "turbo": "^2.11.3"
+    "turbo": "^2.11.3",
+    "typescript": "5.9.3",
+    "@types/node": "24.13.6"
   },
   "engines": {
     "node": "24.21.0"

@@ -105,6 +105,8 @@ jobs:
         run: pnpm lint
       - name: Build shared types
         run: pnpm --filter @muneral/types build
+      - name: Typecheck root configuration
+        run: pnpm run typecheck:root
       - name: Generate Prisma client
         # Run from repo root so prisma.config.ts (root) resolves apps/api/prisma/schema.prisma
         run: pnpm exec prisma generate
