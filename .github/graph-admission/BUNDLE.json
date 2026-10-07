@@ -1,6 +1,14 @@
 {
- "bundle_digest": "sha256:d110697baf7c0af58dc5fdf1372a553f94243a47e8b4a414211f02e8153d4656",
+ "bundle_digest": "sha256:21019b47316f1f7d62adfe4c8aa64b0983610b2a6b03b2d587d796f204a352f8",
  "files": [
+  {
+   "blob_oid": "ee16b520309333060199903387c5f18f476ae838",
+   "note": "the workflow file itself; it is already running by the time the job checks the bundle \u2014 so THIS run cannot vouch for it. The next run's verify_bundle hashes it against this entry (BUNDLE_WORKFLOW_DIGEST_MISMATCH) and the self-update battery's B8 refuses a change to it that this manifest does not attest (KB-039, DEC-AUP-0036)",
+   "path": ".github/workflows/graph-admission.yml",
+   "sha256": "sha256:e9b045d73aa2560417cef2fe6b6d312ba0e5fa04488b8aead7fd6a5196c810d5",
+   "vendored_to": "graph-admission.yml",
+   "verified_by_the_job": false
+  },
   {
    "blob_oid": "a2fb8091875f3b071739d5fcd75469b2fa20c5df",
    "path": "tools/graph/full_suite_ci.py",
@@ -22,9 +30,14 @@
    "sha256": "sha256:8ec105df5924957f90a0e156ca06c46eccbca90bac42f12cc905a0634d241c11"
   },
   {
-   "blob_oid": "164670d3f05feead48c740cbb2a5286edd3da64c",
+   "blob_oid": "af7ac7ebb34bcfa1a70ea22cd94dd0e0c09d3277",
    "path": "tools/graph/build_graph.py",
-   "sha256": "sha256:8afdbdf0d420a32c07f15097aebad0c04bc0cd0440df425b25d8b24e9fc7413d"
+   "sha256": "sha256:009ef5d07d14e234b7f0def3a84ee903017c6cb1b9dcaaffcc927951716c37cb"
+  },
+  {
+   "blob_oid": "ce73dda0aefb90407e9238b52345cdee7875834e",
+   "path": "tools/graph/python_search_path.py",
+   "sha256": "sha256:4995fd40aebeab49d467a0a56cbc77f940b4f81a1dc0377138080173257cc925"
   },
   {
    "blob_oid": "f6ff6cc1a3eb128ff266f75fe0fe26386132ef70",
@@ -47,9 +60,9 @@
    "sha256": "sha256:c22cd6e47f29b35eeb39f5988aca65bb1ead523c5f5b8e38acfadd5512486494"
   },
   {
-   "blob_oid": "cf8c1f9c9d04c4391d37015e77f2992bdc800725",
+   "blob_oid": "16554d546e6bc26f338f5e33a143d95547530a8d",
    "path": "tools/graph/impact_pair.py",
-   "sha256": "sha256:af9ee015bd41032b0ce9ed9f5509d1fb9381026a384886dc8e8a73f8540140e8"
+   "sha256": "sha256:4ac42904f59bbf006577f906a78f4619b916d060c32514fe171825810e09b792"
   },
   {
    "blob_oid": "81c53e25214deb7b4b543fb4a245a7db78142a06",
@@ -102,9 +115,9 @@
    "sha256": "sha256:bcc2b9c986588c689a9ef015e04dcaf2e69971cf64c69e761138de70c19258a7"
   },
   {
-   "blob_oid": "97e8e95f1128e7bfac2126b349e63c6aa7f40dab",
+   "blob_oid": "f8ea03c0da83c28a7ec898d69c0563d90ad9424f",
    "path": "tools/graph/ci_gate.py",
-   "sha256": "sha256:eb780786ab1cf719596ae3f3f57506f1b1fc721dfd3242f2cc45820a0a5719e4"
+   "sha256": "sha256:cc68c7fe270798622bf253681d355cfd90274cf7345fefb8954419ff02f410b3"
   },
   {
    "blob_oid": "f97c4273c635f3e3215c13a0e063930951d7b48d",
@@ -137,13 +150,13 @@
    "sha256": "sha256:9726c7cfbff3b3ae732eba91154409014f369c89c65315400d923ef5a2cac158"
   }
  ],
- "model": "codex",
+ "model": "claude-opus-5",
  "producer": {
   "source": "git object store at program_ref",
   "tool": "tools/graph/ci_gate.py",
   "version": "1.0.0"
  },
- "program_ref": "d33325d57904d2199c1bb39f7d37021db4e369c1",
+ "program_ref": "c86dcb02c99004e7812b5da523f2b7679b3a1407",
  "program_repo": "Arcanada-one/arcanada-universal-program",
  "provisional_until_fable_review": true,
  "rule": "The workflow refuses unless every file's sha256 matches this manifest AND the caller's `program_ref` input matches `program_ref` here. The bundle is a VENDORED copy of one pinned program-repo SHA (the program repository is private and no shared credential exists to check it out from a caller's CI). A pull request that changes anything under the bundle directory is refused by the gate job \u2014 a bundle refresh is its own pull request. Each entry's `blob_oid` is the git object id the bytes were read at: `git hash-object <file>` must equal it, which is how a caller with no credential for the program repository can CONTRADICT this manifest offline (DEC-AUP-0036 R2). Every byte here was read from the object store at program_ref, never from a working tree (R1).",
