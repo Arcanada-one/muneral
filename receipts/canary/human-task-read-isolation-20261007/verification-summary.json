@@ -1,0 +1,39 @@
+{
+  "schema": "HumanTaskReadIsolationVerification/v1",
+  "source_head": "9c51c0da402bbb0c58e84fb2d975dca3b53b6038",
+  "initial_red": {
+    "conditions": 32,
+    "failed": 15,
+    "passed": 17,
+    "log_sha256": "55bc5f0e8ff56c1cb57bd005fa74897e4fa3986d5a0c05eb84e0fa4d03ccba3c"
+  },
+  "current_green": {
+    "conditions": 41,
+    "passed": 41,
+    "failed": 0,
+    "native_canary_result_sha256": "45671b011d93ff0336991d2ed97ae5bb8ebff59855ecfcce8995789d397eaf1d"
+  },
+  "additional_regressions": {
+    "cases": 81,
+    "passed": 81,
+    "suites": 3,
+    "log_sha256": "c464c9c9ef1bcd42cd3ea1cc1b6bab068b045d8449a15759dbf16de977ea0c87"
+  },
+  "query_unit": {
+    "cases": 12,
+    "passed": 12,
+    "log_sha256": "a3bb3b5a309c206641db327c0932027035b877d6e980211b270354ac801beb94"
+  },
+  "compile_exit": 0,
+  "lint_exit": 0,
+  "secrets_scan_exit": 0,
+  "production_requests": 0,
+  "merged": false,
+  "deployed": false,
+  "limits": [
+    "Source regression tests only, not production identity integration or deployment.",
+    "RepeatableRead authorization uses the transaction snapshot, not immediate cancellation of an in-flight read.",
+    "Whole-suite and hosted CI pending; mandatory unchanged dependency audit floor remains HOLD.",
+    "Initial capture failures (nonexistent test path, ESM invocation and canary source-evidence schema) retained privately; never counted as PASS."
+  ]
+}
