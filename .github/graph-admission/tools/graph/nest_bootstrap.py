@@ -163,19 +163,21 @@ def _execution_scope(ts, pairs, functions, pos, proven=()):
             raise ValueError('local bootstrap invocation not proven')
         entry = invocations[0]
         _local_function_binding(ts, owner, entry)
-        _no_prior_exit(ts, functions, entry, None)
+        _no_prior_exit(ts, pairs, functions, entry, None)
         if any(ts[a] == '{' and a < entry < z for a, z in pairs.items()):
             raise ValueError('conditional bootstrap entry')
     # Additional enclosing blocks are not proven unconditional executable scopes.
     if any(ts[a] == '{' and a < pos < z and (not owner or a != owner[0]) for a, z in pairs.items()):
         raise ValueError('conditional or deferred bootstrap configuration')
-    _no_prior_exit(ts, functions, pos, owner)
+    _no_prior_exit(ts, pairs, functions, pos, owner)
     return owner
 
 
-def _no_prior_exit(ts, functions, pos, scope):
+def _no_prior_exit(ts, pairs, functions, pos, scope):
     start = scope[0] + 1 if scope else 0
-    if any(ts[i] in ('return', 'throw', 'break', 'continue') and _owner(functions, i) == scope
+    if any((ts[i] in ('return', 'throw', 'break', 'continue') or _literal_process_exit(ts, i))
+           and _owner(functions, i) == scope
+           and not (ts[i] == 'throw' and _primitive_guard_throw(ts, pairs, functions, i, pos, scope))
            for i in range(start, pos)):
         raise ValueError('bootstrap execution may terminate before configuration')
 
@@ -284,7 +286,7 @@ def _module_entry(ts, pairs, functions, scope):
         raise ValueError('bootstrap entry unresolved')
     i = invocations[0]
     _local_function_binding(ts, scope, i)
-    _no_prior_exit(ts, functions, i, None)
+    _no_prior_exit(ts, pairs, functions, i, None)
     blocks = [a for a, z in pairs.items() if ts[a] == '{' and a < i < z]
     if not blocks:
         return 'unconditional local invocation'
@@ -423,6 +425,91 @@ def _route_neutral_configuration(ts, pairs, receiver):
     return False
 
 
+def _snapshot_shape(ts, pairs, functions, name, creation, scope):
+    """An immutable member snapshot whose mismatch throws before app creation.
+
+    This proves primitive custody, not the provider's implementation or runtime
+    fitness. Mutable configuration members never inherit this proof.
+    """
+    bindings = [j for j in range(creation) if ts[j:j + 3] == ['const', name, '=']]
+    if len(bindings) != 1:
+        return None
+    j = bindings[0]
+    if (_owner(functions, j) != scope or _statement_lead(ts, j)
+            or len(ts[j + 3:j + 7]) != 4 or ts[j + 4] != '.' or ts[j + 6] != ';'
+            or any(not re.fullmatch(r'[A-Za-z_$][\w$]*', ts[k]) for k in (j + 3, j + 5))):
+        return None
+    guard = j + 7
+    part = ts[guard:guard + 18]
+    if len(part) != 18 or part[7] not in ("'string'", '"string"', "'number'", '"number"'):
+        return None
+    expected = ['if', '(', 'typeof', name, '!', '=', '=', part[7], ')', '{',
+                'throw', 'new', 'Error', '(', part[14], ')', ';', '}']
+    if (part != expected or guard + 18 > creation or pairs.get(guard + 1) != guard + 8
+            or pairs.get(guard + 9) != guard + 17):
+        return None
+    literal(part[14])
+    if any(ts[a] == '{' and a < j < z and (not scope or a != scope[0]) for a, z in pairs.items()):
+        return None
+    if _name_shadowed(ts, 'Error') or any(t == 'import' and 'Error' in ts[i:next((k for k in range(i, len(ts)) if ts[k] == ';'), len(ts))] for i, t in enumerate(ts)):
+        return None
+    masked = list(ts)
+    masked[j + 1] = '__proven_snapshot_binding__'
+    updates = tuple(list(op) for op in ('++', '--', '+=', '-=', '*=', '/=', '%=',
+                    '&=', '|=', '^=', '**=', '<<=', '>>=', '>>>=', '&&=', '||=', '??='))
+    if _name_shadowed(masked, name) or any(
+            t == name and i != j + 1 and
+            (any(ts[i + 1:i + 1 + len(op)] == op for op in updates)
+             or ts[max(0, i - 2):i] in (['+', '+'], ['-', '-']))
+            for i, t in enumerate(ts)):
+        return None
+    return j, guard, literal(part[7])
+
+
+def _primitive_guard_throw(ts, pairs, functions, throw, limit, scope):
+    # A failed primitive guard cannot reach configuration; this proves syntax
+    # conditional on reaching it, never successful initialization or runtime.
+    guard = throw - 10
+    if guard < 0 or ts[guard:guard + 3] != ['if', '(', 'typeof']:
+        return False
+    shape = _snapshot_shape(ts, pairs, functions, ts[guard + 3], limit, scope)
+    return bool(shape and shape[1] == guard)
+
+
+def _guarded_snapshot(ts, pairs, functions, name, creation, scope):
+    shape = _snapshot_shape(ts, pairs, functions, name, creation, scope)
+    if not shape:
+        return None
+    binding, guard, primitive = shape
+    _execution_scope(ts, pairs, functions, binding)
+    _execution_scope(ts, pairs, functions, guard)
+    return primitive
+
+
+def _multipart_register(ts, pairs, functions, receiver, creation, scope):
+    """Trusted multipart parser registration; static prefix method-effect only."""
+    args = call_args(ts, receiver + 3)
+    if (len(args) != 2 or args[0] not in (['multipart'], ['multipart', 'as', 'never'])
+            or not _trusted_binding(ts, 'multipart', '@fastify/multipart')):
+        return False
+    options = args[1]
+    if options[:1] != ['{'] or options[-1:] != ['}']:
+        return False
+    outer = split(options[1:-1])
+    if len(outer) != 1 or outer[0][:2] != ['limits', ':']:
+        return False
+    limits = outer[0][2:]
+    if limits[:1] != ['{'] or limits[-1:] != ['}']:
+        return False
+    fields = split(limits[1:-1])
+    if len(fields) != 3 or any(len(f) != 3 or f[1] != ':' for f in fields):
+        return False
+    values = {f[0]: f[2] for f in fields}
+    return (set(values) == {'fileSize', 'files', 'fields'}
+            and all(re.fullmatch(r'\d+', values[k]) and int(values[k]) > 0 for k in ('files', 'fields'))
+            and _guarded_snapshot(ts, pairs, functions, values['fileSize'], creation, scope) == 'number')
+
+
 def _app_uses(ts, pairs, functions, app, declaration, scope, flow=None):
     """Only direct recognized receiver calls preserve the local application's identity."""
     limit = scope[1] if scope else len(ts)
@@ -443,6 +530,13 @@ def _app_uses(ts, pairs, functions, app, declaration, scope, flow=None):
                 raise ValueError('conditional static registration')
             _static_register(ts, pairs, i)
             flow['proof']['assumptions'] = ['static register method-effect assumption']
+            continue
+        if member == ['.', 'register', '('] and not flow:
+            _execution_scope(ts, pairs, functions, i)
+            if (_statement_lead(ts, i) != ['await']
+                    or not _multipart_register(ts, pairs, functions, i, declaration, scope)):
+                raise ValueError('multipart registration binding/options not proven')
+            neutral.append('trusted @fastify/multipart route-neutral method-effect assumption')
             continue
         if flow and member == ['.', 'getHttpServer', '('] and scope == flow['caller_scope']:
             lead = _statement_lead(ts, i)
@@ -644,6 +738,114 @@ def _diagnostic_value(tree, root, ts, expression):
     raise ValueError('diagnostic value not proven primitive')
 
 
+def _literal_process_exit(ts, pos):
+    """One unshadowed native termination statement; never a runtime success proof."""
+    return (ts[pos:pos + 4] == ['process', '.', 'exit', '(']
+            and len(ts) > pos + 5 and re.fullmatch(r'\d+', ts[pos + 4]) is not None
+            and 0 <= int(ts[pos + 4]) <= 255 and ts[pos + 5] == ')'
+            and ts[pos + 6:pos + 7] in ([], [';'], ['}'])
+            and not _statement_lead(ts, pos) and not _name_shadowed(ts, 'process'))
+
+
+def _promise_builtin_untouched(ts, pairs, functions):
+    """Permit bounded erased return types, never Promise values or prototype aliases."""
+    for i, token in enumerate(ts):
+        previous = ts[i - 1] if i else ''
+        if (previous == '.' and token in ('constructor', 'prototype', '__proto__')
+                or token == '[' and (previous in (')', ']')
+                    or re.fullmatch(r'[A-Za-z_$][\w$]*', previous)
+                    and previous not in ('return', 'throw', 'await', 'void', 'typeof', 'new')
+                    or ts[max(0, i - 2):i] == ['?', '.'])):
+            return False
+    type_positions = set()
+    for body, _, _, declaration in functions:
+        if ts[declaration] != 'function':
+            continue
+        parameters = declaration + (2 if ts[declaration + 2:declaration + 3] == ['('] else 1)
+        close = pairs.get(parameters)
+        if close is None:
+            continue
+        annotation = ts[close + 1:body]
+        if (len(annotation) == 5 and annotation[:3] == [':', 'Promise', '<']
+                and re.fullmatch(r'[A-Za-z_$][\w$]*', annotation[3])
+                and annotation[4] == '>'):
+            type_positions.add(close + 2)
+    return all(token != 'Promise' or i in type_positions for i, token in enumerate(ts))
+
+
+def _failure_handler_exit(ts, pos, pairs, functions, declarations):
+    """Bounded async entry rejection handler only; do not infer helper call reachability."""
+    scope = _owner(functions, pos)
+    if (not scope or scope[2] or ts[scope[3]:scope[3] + 2] != ['=', '>']
+            or not _promise_builtin_untouched(ts, pairs, functions)):
+        return False
+    for call in range(scope[3]):
+        if (ts[call + 1:call + 6] != ['(', ')', '.', 'catch', '(']
+                or pairs.get(call + 5) != scope[1] + 1
+                or ts[scope[1] + 2:scope[1] + 3] not in ([], [';'])
+                or _statement_lead(ts, call) or _owner(functions, call)):
+            continue
+        entries = [f for f in functions if f[2] == ts[call] and not _owner(functions, f[3])
+                   and ts[f[3] - 1:f[3]] == ['async']]
+        if len(entries) != 1 or [i for i, t in enumerate(ts) if t == 'catch'] != [call + 4]:
+            continue
+        parameters = ts[call + 6:scope[3]]
+        if (parameters[:1] == ['('] and parameters[-1:] == [')']):
+            parameters = parameters[1:-1]
+        if (len(parameters) != 1 or not re.fullmatch(r'[A-Za-z_$][\w$]*', parameters[0])
+                or not declarations
+                or any(_owner(functions, d) != entries[0] for d, _ in declarations)):
+            continue
+        try:
+            _local_function_binding(ts, entries[0], call)
+        except ValueError:
+            continue
+        return True
+    return False
+
+
+def _readonly_process_env(ts, pos, pairs):
+    """Exact member reads only; mutation, deletion, whole-object aliases stay unknown."""
+    lead = _statement_lead(ts, pos)
+    # Assignment can target a parenthesized member or any position in a destructuring
+    # pattern. Check the operator after EACH containing delimiter, not only the field.
+    ends = [pos + 5] + [close + 1 for start, close in pairs.items() if start < pos < close]
+    for end in ends:
+        suffix = ts[end:end + 4]
+        if (suffix[:1] in (['='], ['of'], ['in']) or suffix[:2] in (['+', '+'], ['-', '-'])
+                or suffix and suffix[0] in '+-*/%&|^<>?' and '=' in suffix):
+            return False
+    return (ts[pos + 1:pos + 4] == ['.', 'env', '.']
+            and len(ts) > pos + 4 and re.fullmatch(r'[A-Za-z_$][\w$]*', ts[pos + 4]) is not None
+            and not _name_shadowed(ts, 'process') and 'delete' not in lead
+            and not any(lead[i:i + 2] in (['+', '+'], ['-', '-']) for i in range(len(lead))))
+
+
+def _diagnostic_receiver(ts, pairs, functions, call, scope):
+    receiver = ts[call]
+    if receiver == 'console':
+        return (not _name_shadowed(ts, 'console') and all(
+            ts[j:j + 4] == ['console', '.', 'log', '(']
+            for j, token in enumerate(ts) if token == 'console'))
+    if not _trusted_binding(ts, 'Logger', '@nestjs/common'):
+        return False
+    bindings = [j for j in range(call) if ts[j:j + 3] == ['const', receiver, '=']]
+    if len(bindings) != 1:
+        return False
+    j = bindings[0]
+    close = pairs.get(j + 5)
+    if (ts[j + 3:j + 6] != ['new', 'Logger', '('] or close != j + 7
+            or ts[close + 1:close + 2] != [';'] or _owner(functions, j) != scope
+            or _statement_lead(ts, j)):
+        return False
+    literal(ts[j + 6])
+    _execution_scope(ts, pairs, functions, j)
+    return all(k == j + 1 or (ts[k - 1:k] in (['{'], [',']) and ts[k + 1:k + 2] == [':'])
+               or ts[k:k + 4] == [receiver, '.', 'log', '(']
+               and _owner(functions, k) == scope
+               for k, token in enumerate(ts) if token == receiver)
+
+
 def _diagnostic_templates(tree, root, ts, pairs, functions, declarations):
     """Only post-listen console output of proven primitive locals is inert.
 
@@ -654,9 +856,12 @@ def _diagnostic_templates(tree, root, ts, pairs, functions, declarations):
     if any(t in ('eval', 'Function', 'Reflect', 'Proxy', 'globalThis', 'global', 'Object') for t in ts):
         raise ValueError('dynamic bootstrap reflection not proven')
     for i, t in enumerate(ts):
-        if t == 'process' and (ts[i + 1:i + 4] != ['.', 'env', '.']
-                               or ts[i + 5:i + 6] == ['=']):
-            raise ValueError('bootstrap environment binding not read-only')
+        if t == 'process':
+            if _literal_process_exit(ts, i):
+                if not _failure_handler_exit(ts, i, pairs, functions, declarations):
+                    raise ValueError('bootstrap termination outside proven failure handler')
+            elif not _readonly_process_env(ts, i, pairs):
+                raise ValueError('bootstrap environment binding not read-only')
         if t == 'parseInt' and ts[i + 1:i + 2] != ['(']:
             raise ValueError('bootstrap numeric builtin binding replaced')
     for i, token in enumerate(ts):
@@ -666,11 +871,9 @@ def _diagnostic_templates(tree, root, ts, pairs, functions, declarations):
         residue = re.sub(r'\$\{([A-Za-z_$][\w$]*)\}', '', token)
         if not names or '${' in residue or '\\' in token:
             raise ValueError('bootstrap template interpolation not proven')
-        calls = [j for j in range(i) if ts[j:j + 4] == ['console', '.', 'log', '(']
+        calls = [j for j in range(i) if ts[j + 1:j + 4] == ['.', 'log', '(']
                  and pairs.get(j + 3, -1) > i]
-        console_uses = [j for j, t in enumerate(ts) if t == 'console']
-        if (len(calls) != 1 or _name_shadowed(ts, 'console')
-                or any(ts[j:j + 4] != ['console', '.', 'log', '('] for j in console_uses)):
+        if len(calls) != 1 or not _diagnostic_receiver(ts, pairs, functions, calls[0], _owner(functions, calls[0])):
             raise ValueError('diagnostic receiver not proven')
         call = calls[0]
         arguments = ts[call + 4:pairs[call + 3]]
@@ -697,6 +900,8 @@ def _diagnostic_templates(tree, root, ts, pairs, functions, declarations):
         if len(listens) != 1:
             raise ValueError('diagnostic not proven post-listen')
         for name in names:
+            if _guarded_snapshot(ts, pairs, functions, name, starts[0], scope):
+                continue
             bindings = [j for j in range(starts[0], call) if ts[j:j + 3] == ['const', name, '=']
                         and _owner(functions, j) == scope]
             if len(bindings) != 1:
