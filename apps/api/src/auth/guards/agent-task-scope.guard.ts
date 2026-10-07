@@ -1,6 +1,6 @@
 import { admitGrantedTaskRead, taskReadDenied } from '../task-project-read-admission.js';
 import type { GrantedTaskReadContext } from '../task-project-read-admission.js';
-import { TASK_PROJECT_READ_CAPABILITIES, TASK_PROJECT_READ_CAPABILITY_LIST } from '../task-project-read-capabilities.js';
+import { TASK_GRANTED_READ_HANDLER, TASK_PROJECT_READ_CAPABILITIES, TASK_PROJECT_READ_CAPABILITY_LIST } from '../task-project-read-capabilities.js';
 import type { TaskProjectReadCapability } from '../task-project-read-capabilities.js';
 import { admitProjectIndex } from '../project-index-admission.js';
 import { WORKSPACE_INDEX_GRANTS, WORKSPACE_INDEX_GRANT_LIST } from '../workspace-index-grants.js';
@@ -170,6 +170,22 @@ export class AgentTaskScopeGuard implements CanActivate {
       );
     }
 
+    if (this.reflector.get<boolean>(TASK_GRANTED_READ_HANDLER, context.getHandler())) {
+      if (req.method !== 'GET' || (kind !== 'task' && kind !== 'task-evidence')) throw taskReadDenied();
+      const taskId = this.paramOf(req, 'taskId');
+      if (!taskId) throw taskReadDenied();
+      try {
+        await this.assertOwnTask(agent, taskId);
+        req.agentScope = { agentId: agent.id, kind, workspaceId: agent.workspaceId };
+      } catch (error) {
+        if (!(error instanceof ForbiddenException)) throw error;
+        const admitted = await admitGrantedTaskRead(this.prisma, agent.id, taskId, new Date(),
+          this.taskReadCapabilities, this.projectReadGrants, this.workspaceIndexGrants);
+        req.agentScope = { agentId: agent.id, kind, workspaceId: admitted.workspaceId, grantedTaskRead: admitted };
+      }
+      return true;
+    }
+
     switch (kind) {
       case 'workspace-metadata': {
         const workspaceId = this.paramOf(req, 'workspaceId');
@@ -214,21 +230,6 @@ export class AgentTaskScopeGuard implements CanActivate {
 
       // MUN-0051: 'task' (read, activity, comment) admits the creator as well
       // as an assignee — see agentOwnTaskWhere.
-      case 'task-granted-read': {
-        if (req.method !== 'GET') throw taskReadDenied();
-        const taskId = this.paramOf(req, 'taskId');
-        if (!taskId) throw taskReadDenied();
-        try {
-          await this.assertOwnTask(agent, taskId);
-        } catch (error) {
-          if (!(error instanceof ForbiddenException)) throw error;
-          const admitted = await admitGrantedTaskRead(this.prisma, agent.id, taskId, new Date(),
-            this.taskReadCapabilities, this.projectReadGrants, this.workspaceIndexGrants);
-          req.agentScope = { agentId: agent.id, kind, workspaceId: admitted.workspaceId, grantedTaskRead: admitted };
-          return true;
-        }
-        break;
-      }
       case 'task': {
         const taskId = this.paramOf(req, 'taskId');
         if (!taskId) throw new ForbiddenException('No task in scope for this key.');

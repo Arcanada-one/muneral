@@ -1,3 +1,4 @@
+import { SetMetadata } from '@nestjs/common';
 import { ARCANADA_WORKSPACE_ID, AUP_ORCHESTRATOR_AGENT_ID, AUP_ANCHOR_PROJECT_ID } from './workspace-bindings.js';
 
 /** Additional full task/evidence disclosure; an index grant alone does not admit it. */
@@ -18,3 +19,7 @@ export const TASK_PROJECT_READ_CAPABILITY_LIST: readonly TaskProjectReadCapabili
   until: '2026-11-04T00:00:00Z',
   decision: 'DEC-AUP-0117',
 }];
+
+/** Handler-only opt-in; preserves the existing AgentScopeKind contract. */
+export const TASK_GRANTED_READ_HANDLER = 'task:grantedReadHandler';
+export const AgentGrantedTaskRead = () => SetMetadata(TASK_GRANTED_READ_HANDLER, true);

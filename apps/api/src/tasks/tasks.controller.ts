@@ -30,6 +30,7 @@ import { JwtOrApiKeyGuard } from '../auth/guards/jwt-or-api-key.guard.js';
 import { AgentTaskScopeGuard } from '../auth/guards/agent-task-scope.guard.js';
 import type { AgentScopeContext } from '../auth/guards/agent-task-scope.guard.js';
 import { AgentScope } from '../auth/agent-scope.decorator.js';
+import { AgentGrantedTaskRead } from '../auth/task-project-read-capabilities.js';
 import { ActorInterceptor } from '../common/interceptors/actor.interceptor.js';
 import type { Actor } from '@muneral/types';
 import { FieldChangesService } from './field-state/field-changes.service.js';
@@ -94,7 +95,7 @@ type AuthRequest = Request & { actor: Actor; agentScope?: AgentScopeContext };
  *
  * A2-274 — `POST /tasks/:taskId/evidence` is the fourth, with the matching
  * read `GET /tasks/:taskId/evidence`. POST retains 'task-evidence'; GET uses
- * the independent 'task-granted-read' capability in addition to owner access. The
+ * the independent handler-only task read capability in addition to owner access. The
  * write additionally refuses a JWT, because the record names the AGENT that
  * attached it and a human has no agent id (see `agentKeyRequired`).
  *
@@ -195,7 +196,8 @@ export class TasksController {
    * field version covers.
    */
   @Get(':taskId')
-  @AgentScope('task-granted-read')
+  @AgentScope('task')
+  @AgentGrantedTaskRead()
   async findOne(
     @Param('taskId') taskId: string,
     @Headers('if-none-match') ifNoneMatch: string | undefined,
@@ -378,7 +380,8 @@ export class TasksController {
    *  carrying its `sha256`. Owner/JWT access is unchanged; an additional
    *  named project capability admits only this GET, never evidence attachment. */
   @Get(':taskId/evidence')
-  @AgentScope('task-granted-read')
+  @AgentScope('task-evidence')
+  @AgentGrantedTaskRead()
   async listEvidence(@Param('taskId') taskId: string, @Req() req: AuthRequest,
     @Res({ passthrough: true }) res: Response) {
     const broad = req.agentScope?.grantedTaskRead;
