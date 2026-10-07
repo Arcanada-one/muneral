@@ -773,6 +773,8 @@ def _deployable_has_ts(dep_path: str, before: impact.GraphIndex, after: impact.G
             rel = p[len(prefix):]
             if rel.startswith(".github/graph-admission/") or "node_modules/" in rel or rel.startswith("vendor/"):
                 continue
-            if Path(rel).suffix in impact.CODE_EXTS:
+            # Match verify.Verify.deployable_has_ts: JS is source code for impact traversal,
+            # but does not make the deployable owe a TypeScript compiler check.
+            if Path(rel).suffix in {".ts", ".tsx", ".mts", ".cts"}:
                 return True
     return False

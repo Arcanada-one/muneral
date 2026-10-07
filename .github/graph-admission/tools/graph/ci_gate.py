@@ -53,6 +53,7 @@ BUNDLE_FILES = [
     "tools/graph/admit_change.py",
     "tools/graph/schema_check.py",
     "tools/graph/build_graph.py",
+    "tools/graph/python_search_path.py",
     "tools/graph/native_projection.py",
     "tools/graph/nest_bootstrap.py",
     # build_graph.py imports this at module scope to classify .github/workflows/* paths, so a bundle
@@ -3355,7 +3356,7 @@ def selftest_gate2b() -> tuple[list[dict], int]:
         ok_stale, _, _ = sshsig.verify_detached(msg2.read_bytes(), (d / "m.sig").read_text(),
                                                 (d / "k.pub").read_text(), SIGNING_NAMESPACE)
         check("RE-SIGN TRAP: `ssh-keygen -Y sign` over an existing .sig exits 0 and keeps the STALE signature, "
-              "which then does NOT verify over the new bytes — the defect gate3a fixes",
+              "which then does NOT verify over the new bytes — the defect gate3a fixes", 
               r_noclean.returncode == 0 and kept_stale and not ok_stale,
               exit_code=r_noclean.returncode, kept_stale=kept_stale, stale_verifies=ok_stale)
         # (b) the fix: remove the target first, exactly as cmd_bundle now does
