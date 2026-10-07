@@ -1,27 +1,27 @@
 {
   "schema": "CanaryPlan/v2",
-  "id": "assigned-read-project-header-final-positive",
+  "id": "assigned-read-fixture-positive",
   "owner": "Arcanada-one/muneral PR #221",
   "environment": "Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys",
   "read_only": false,
   "subject": {
     "schema": "GitCanarySubject/v1",
-    "commit": "99d73ecc4627e62d467e4bbd2d6291fbe92e868b",
-    "tree": "9d2d6343b6a06dee621391a3a2e1cd5721152122",
+    "commit": "7ba5c60b28ce0318cc945540e5e607c8c44ac492",
+    "tree": "66a1ccbb1768390dbe22754995e43f1a7f4a8c76",
     "evidence": {
       "path": "source-evidence.json",
-      "sha256": "4c7f6756ccc1b306ffd1c55e69d355cc3f57e8f2d8150e255060da4344cd1a72",
+      "sha256": "930dabe5a24165414adce74fdec6d716e5254bdb63f444fff7d66364e0ce57d6",
       "source_field": "commit"
     }
   },
-  "purpose": "Exact response-row project header for200/304, ETag failure/401/403 absence, paired project move; existing credential/route permission boundary retained. Owned synthetic PostgreSQL only; browser and production are not measured.",
+  "purpose": "Exact response-row project header for200/304, ETag failure/401/403 absence, paired project move; existing credential/route permission boundary retained. Owned synthetic PostgreSQL only; browser and production are not measured. Full migration fixture suite validates the complete UUID correction; prior fault injection remains private diagnostic evidence.",
   "probes": [
     {
       "kind": "process",
       "id": "assigned-task-http-contract",
       "argv": [
         "/usr/bin/python3.12",
-        "/home/dev/aup/import-audit-work/runs/assigned-read-project-header-final-canary-tests.py"
+        "/home/dev/aup/import-audit-work/runs/assigned-read-221-fixture-canary-tests.py"
       ],
       "cwd": ".",
       "env_keys": [
@@ -94,8 +94,12 @@
           "sha256": "b9fd7a00c104eccb56944baa49ef119aee98792efb68467fd6018cfae5d84978"
         },
         {
-          "path": "/home/dev/aup/import-audit-work/runs/assigned-read-project-header-final-canary-tests.py",
-          "sha256": "556972ecb94d6fbf44329ddf482948bc821249686991ec81a0d574d0e952d5d9"
+          "path": "/home/dev/aup/import-audit-work/runs/assigned-read-221-fixture-canary-tests.py",
+          "sha256": "367343a5d729b5bb63103abec95c049f606eecb2928f2efe4d27c8f5d5349d20"
+        },
+        {
+          "path": "/home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007/apps/api/test/migration.postgres.spec.ts",
+          "sha256": "1d358e496a776cc9b307176a0e289c9673ed2d54d05e46c28511d42341806b76"
         }
       ],
       "entities": [

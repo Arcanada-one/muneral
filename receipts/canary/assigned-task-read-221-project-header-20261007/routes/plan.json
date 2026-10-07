@@ -1,20 +1,20 @@
 {
   "schema": "CanaryPlan/v2",
-  "id": "assigned-read-project-header-final-routes",
+  "id": "assigned-read-fixture-routes",
   "owner": "Arcanada-one/muneral PR #221",
   "environment": "Owned disposable PostgreSQL; actual Nest HTTP requests with synthetic keys",
   "read_only": false,
   "subject": {
     "schema": "GitCanarySubject/v1",
-    "commit": "99d73ecc4627e62d467e4bbd2d6291fbe92e868b",
-    "tree": "9d2d6343b6a06dee621391a3a2e1cd5721152122",
+    "commit": "7ba5c60b28ce0318cc945540e5e607c8c44ac492",
+    "tree": "66a1ccbb1768390dbe22754995e43f1a7f4a8c76",
     "evidence": {
       "path": "source-evidence.json",
-      "sha256": "f934a454ac691a5cc485bd76ec187797825e9e080a7e10068b8c7b0346bea370",
+      "sha256": "5487c8207f6da97ee58e01a3eed3e3cef15666a5b822b96e6ef8203c6d275340",
       "source_field": "commit"
     }
   },
-  "purpose": "Exact response-row project header for200/304, ETag failure/401/403 absence, paired project move; existing credential/route permission boundary retained. Owned synthetic PostgreSQL only; browser and production are not measured.",
+  "purpose": "Exact response-row project header for200/304, ETag failure/401/403 absence, paired project move; existing credential/route permission boundary retained. Owned synthetic PostgreSQL only; browser and production are not measured. Full migration fixture suite validates the complete UUID correction; prior fault injection remains private diagnostic evidence.",
   "probes": [
     {
       "kind": "process",
@@ -23,7 +23,7 @@
         "/home/dev/aup/import-audit-work/runs/m211c/node-v24.21.0-linux-x64/bin/node",
         "/home/dev/aup/import-audit-work/runs/assigned-read-jwt-route-http.mjs",
         "/home/dev/orca/workspaces/muneral-src/muneral-assigned-task-read-20261007",
-        "/home/dev/aup/import-audit-work/runs/assigned-read-project-header-final-canary/routes"
+        "/home/dev/aup/import-audit-work/runs/assigned-read-221-fixture-canary/routes"
       ],
       "cwd": ".",
       "env_keys": [
