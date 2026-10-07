@@ -6,15 +6,15 @@
   "read_only": false,
   "subject": {
     "schema": "GitCanarySubject/v1",
-    "commit": "1ae6d16e97c209cec4cfe09a465f2559741a884c",
-    "tree": "a33b93e50af381e238c0f6f999bf9a7887687dc2",
+    "commit": "38f7e27dd433e75b4e40485713ba53c329d98d7f",
+    "tree": "aa3988de68db211af04ebe543b29491758fbed4d",
     "evidence": {
       "path": "source-evidence.json",
-      "sha256": "da016807c3d1d941829c23baec09e625b42c901143fd4f8e570a12efc3ed504b",
+      "sha256": "7664f836ef06f833b8c51b7574e5b2f5bd7e07e37333489277376664841fc13d",
       "source_field": "commit"
     }
   },
-  "purpose": "Actual authenticated workspace-only nonowned/empty index, exact field envelope, committed distinct audit records, other actor/current exclusions/task detail refusals; 50 real graph-impact/changed-controller routes deny unauthenticated requests. Route canary measures dispatch/auth floor only, not full existing endpoint semantics. Synthetic grant DI proves policy logic, not production identity binding. Parent negative must fail on missing workspace admission (404 vs200); production remains unmeasured. No compiler mutation replay claim.",
+  "purpose": "Actual authenticated workspace-only nonowned/empty index, exact field envelope, committed distinct audit records, other actor/current exclusions/task detail refusals; 51 actual graph-impact/changed-controller routes including the newly merged contract-binding route deny unauthenticated requests. Route canary measures dispatch/auth floor only, not full existing endpoint semantics. Synthetic grant DI proves policy logic, not production identity binding. Parent negative must fail on missing workspace admission (404 vs200); production remains unmeasured. No compiler mutation replay claim.",
   "probes": [
     {
       "kind": "process",
@@ -38,7 +38,11 @@
       "execution_files": [
         {
           "path": "/home/dev/aup/import-audit-work/runs/index-grant-http-probe.mjs",
-          "sha256": "dbaa44c1f74a0857c12831d2193678f7cecb2e364b348c9b0739616dcbbce975"
+          "sha256": "976ca5dd9b7bf97a2067ecb4f2d4a7e8b3936563b3afc99c2fcdd3e52e7b0d0e"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/runs/index-grant-route-binding-5b67.json",
+          "sha256": "ddd5d4ae20a566ad385269f9b40ca369a5e7822a59cf479a4a3294cd4b133139"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/test/support/disposable-postgres.ts",
@@ -54,19 +58,19 @@
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/src/auth/guards/agent-task-scope.guard.ts",
-          "sha256": "ad0e7dd3bafcd63f25b6e6fb530fc401f3ea390d7699c2a5306457ab6760543f"
+          "sha256": "f4c0f296d18dfdf129fbb703a2eb808cda38f26cf33fddd4118602894fd27fc3"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/dist/auth/guards/agent-task-scope.guard.js",
-          "sha256": "f6a30fc2f5806e07de1809e6e163fd8dc07ac4643cfd87ab46cfdb1f7c84e9a0"
+          "sha256": "8bc33b2c62a791fa8e412401fbe5e4514f4aae9002a0beef54538423518fafaf"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/src/tasks/tasks.controller.ts",
-          "sha256": "ee3b22cfa71525e7953b487ee2769fa80c7436ad385aa3bcd85eea207a63b4b6"
+          "sha256": "997371c9b82fa2db963813f4c16409a82b08019e2427d3eb80fc5c7b23694be5"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/dist/tasks/tasks.controller.js",
-          "sha256": "6c4de8f48867b15bca9495e42ec063ae57dada17c9a853a466303e9e2febf512"
+          "sha256": "dcabd6249e66fd6b481c93264a43748213091ffc364113e4b17af3944870e06d"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/src/tasks/tasks.service.ts",
@@ -107,6 +111,54 @@
         {
           "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/dist/auth/workspace-bindings.js",
           "sha256": "d0ebdeee471cb4c1443a100d6c92d1820cc4accbd3a5afc521bf407f360551e7"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/src/agents/agents.controller.ts",
+          "sha256": "c03bb05132a2a1754e96dd1caab54b3d9447cdcc0c85f751ddaacfa47938a252"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/dist/agents/agents.controller.js",
+          "sha256": "bc9bc06a0cb9499fa49cfd24607c05012ad38f94fee498b318a0eaf37d640b52"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/src/projects/projects.controller.ts",
+          "sha256": "99280d4abca849edd4d445475713cad3a6b0c16ff170d0b40406f718eddcbae7"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/dist/projects/projects.controller.js",
+          "sha256": "65dfed55ca61a697c92c282296389a5b6cda6553139ea58d6fd24c562f784061"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/src/sync/sync.controller.ts",
+          "sha256": "9498645c18e0cefd658e6bece21c4dc963ad3e403a3845e4b9115da2ec868181"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/dist/sync/sync.controller.js",
+          "sha256": "0cd55ff4eb31ef2ab3c886a180130df5fae2437bc08a5fcc1433c86977e00269"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/src/tasks/field-state/field-changes.controller.ts",
+          "sha256": "72e39e0873293af3c8abec213fc0719a5157b873128e309800efd6f062fe2865"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/dist/tasks/field-state/field-changes.controller.js",
+          "sha256": "76e4fe64cbafc8a039684f877448a8f9a6ae59d0fdcd2d0516410e651bfb5742"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/src/tasks/task-contract-binding.controller.ts",
+          "sha256": "b807124e25d017caff483938ec8dd3b787e46b62c579a8e988329403bfc3f10a"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/dist/tasks/task-contract-binding.controller.js",
+          "sha256": "c8267f34ce88ee2c9fcc155b2947530f8060088b2d95e98d62e4aa61da35ebca"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/src/workspaces/workspaces.controller.ts",
+          "sha256": "bc75f8a7a15f89e7401c6c76978ee57bbb753912a41df541f0f1b3fce33feaf9"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-rev4/apps/api/dist/workspaces/workspaces.controller.js",
+          "sha256": "a705a94ea035859f01bb0c5f3049d560b37a7e3e72ab30ee1d1c508b75f7d78b"
         }
       ],
       "entities": [
@@ -125,7 +177,7 @@
         ],
         "stdout_contains": [
           "WORKSPACE_INDEX_ACTUAL_HTTP_SCOPE_AND_AUDIT_VERIFIED",
-          "WORKSPACE_INDEX_AUTHENTICATED_HTTP_AND_50_REAL_ROUTE_DENIALS_VERIFIED",
+          "WORKSPACE_INDEX_AUTHENTICATED_HTTP_AND_51_REAL_ROUTE_DENIALS_VERIFIED",
           "Cleanup evidence:"
         ]
       },
