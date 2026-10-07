@@ -9,6 +9,7 @@ import { BadRequestException, ConflictException, NotFoundException } from '@nest
 import { createHash, randomUUID } from 'node:crypto';
 import { ActivityService } from '../src/activity/activity.service.js';
 import { MIGRATION_ERROR_CODES } from '../src/migration/migration.errors.js';
+import { TaskFieldStateService } from '../src/tasks/field-state/task-field-state.service.js';
 import { MigrationService } from '../src/migration/migration.service.js';
 import type { CreateWorkItemDto } from '../src/migration/dto/create-work-item.dto.js';
 import { createDisposablePostgres } from './support/disposable-postgres.js';
@@ -47,7 +48,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { PrismaPg } = nodeRequire('@prisma/adapter-pg');
     prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: pg.url() }) });
-    service = new MigrationService(prisma, new ActivityService(prisma));
+    service = new MigrationService(prisma, new ActivityService(prisma), new TaskFieldStateService(prisma));
 
     const ownerId = randomUUID();
     workspaceId = randomUUID();
@@ -185,8 +186,8 @@ describe('Migration import surface — PostgreSQL proofs', () => {
       await service.createWorkItem(importRequest(batchId, { historicalStatus: 'pending' }), AGENT);
 
       const receipt = (await service.commitBatch(batchId, AGENT)).receipt as Record<string, unknown>;
-      expect(receipt.statusMapRevision).toBe(3);
-      expect(receipt.statusMapRevisions).toEqual([3]);
+      expect(receipt.statusMapRevision).toBe(4);
+      expect(receipt.statusMapRevisions).toEqual([4]);
       expect(receipt.unmappedCount).toBe(0);
       expect(receipt.counts).toEqual({ occurrences: 2, identities: 2, workItems: 2 });
     });
@@ -205,7 +206,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
 
       const receipt = (await service.commitBatch(batchId, AGENT)).receipt as Record<string, unknown>;
       expect(receipt.unmappedCount).toBe(2);
-      expect(receipt.statusMapRevision).toBe(3);
+      expect(receipt.statusMapRevision).toBe(4);
     });
 
     it('reports the revisions actually stored, not the one this build loaded', async () => {
@@ -234,8 +235,8 @@ describe('Migration import surface — PostgreSQL proofs', () => {
 
       const receipt = (await service.commitBatch(batchId, AGENT)).receipt as Record<string, unknown>;
       // 0 = "projected before this column existed", never backfilled.
-      expect(receipt.statusMapRevisions).toEqual([0, 3]);
-      expect(receipt.statusMapRevision).toBe(3);
+      expect(receipt.statusMapRevisions).toEqual([0, 4]);
+      expect(receipt.statusMapRevision).toBe(4);
       expect(receipt.unmappedCount).toBe(0);
     });
 
@@ -549,7 +550,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
       expect(result.body.occurrence).toMatchObject({
         unmapped: true,
         historicalAssertedDone: false,
-        statusMapRevision: 3,
+        statusMapRevision: 4,
       });
     });
 
@@ -578,7 +579,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
         historicalAssertedDone: true,
         currentVerification: 'not_revalidated',
         unmapped: false,
-        statusMapRevision: 3,
+        statusMapRevision: 4,
       });
 
       // ...and the revision is durable in the column, not only in the presenter.
@@ -587,7 +588,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
         select: { statusMapRevision: true, unmapped: true, historicalStatus: true },
       });
       expect(row).toEqual({
-        statusMapRevision: 3,
+        statusMapRevision: 4,
         unmapped: false,
         historicalStatus: 'archived',
       });
@@ -653,7 +654,7 @@ describe('Migration import surface — PostgreSQL proofs', () => {
           historicalAssertedDone: assertedDone,
           currentVerification: 'not_revalidated',
           unmapped: false,
-          statusMapRevision: 3,
+          statusMapRevision: 4,
         });
       },
     );
