@@ -1,0 +1,45 @@
+{
+  "schema": "MuneralCollaborationAuditSourceChecks/v1",
+  "work_item": "70110cb5-8535-4366-bac8-723808602f4a",
+  "main": "e394028105cbd0d38d50c6a7b4aa2575e83b9bc9",
+  "requirement": {
+    "source": "datarim/prd/PRD-MUN-0001-muneral-arcana.md",
+    "source_repo_main": "1a984b09387780b77d6f64e53c1006486ab6cc1d",
+    "source_sha256": "5a7399d4739d9510d0ad5d239c336f500d4ea30ed4fa245ac1893585bbde05b2",
+    "clauses": "Same-task lead/reviewer/executor collaboration and actor-attributed audit log for every action"
+  },
+  "source_hashes": {
+    "apps/api/src/agents/agents.controller.ts": "7376c49eeca59ccf0ece1d6ee3ac0d4e93c1e32ce173637e0155cc497e8a9764",
+    "apps/api/src/agents/agents.service.ts": "b633c998550e9736d8ce2fa0e2d4479bc907631e65d97a5e73e46ab2a3f56c09",
+    "apps/api/test/agent-key-assign-scope.e2e.spec.ts": "dff916d14b3abe96864ba9748a04a08aa75453d478343fc743eb0af1f8a3f943"
+  },
+  "verification": {
+    "node": "24.21.0",
+    "targeted_final": "65/65, 3/3 suites, exit0",
+    "tsc": "exit0",
+    "changed_source_eslint": "exit0",
+    "controls": [
+      {
+        "case": "main_missing_audit",
+        "outcome": "RED",
+        "actual": "DELETE204, assignment absent, audit count0 vs1"
+      },
+      {
+        "case": "delete_outside_transaction",
+        "outcome": "RED",
+        "actual": "audit500 removed assignment instead of rollback"
+      },
+      {
+        "case": "wrong_actor",
+        "outcome": "RED",
+        "actual": "direct actorId equality fails"
+      }
+    ],
+    "fixture_teardown": "PostgreSQL pid absent and owned loopback port refused for each run",
+    "mutation_evidence_regression": "30/30, exit0"
+  },
+  "assembly_evidence": "54 binding hashes unchanged; original 20261002 85 kill outcomes retained; only unchanged native gitSupplement rederived, not a fresh 85 mutant run",
+  "runtime_authorized": false,
+  "production_requests": 0,
+  "task_acceptance": "partial source slice; full MUN-0007 remains in_progress"
+}

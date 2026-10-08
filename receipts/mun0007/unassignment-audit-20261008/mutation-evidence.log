@@ -1,0 +1,48 @@
+ts-jest[config] (WARN) [94mmessage[0m[90m TS151002: [0mUsing hybrid module kind (Node16/18/Next) is only supported in "isolatedModules: true". Please set "isolatedModules: true" in your tsconfig.json. To disable this message, you can set "diagnostics.ignoreCodes" to include 151002 in your ts-jest config. See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/options/diagnostics
+  console.log
+    ◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+
+      at _log (../../../mun-rev4/node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+ts-jest[config] (WARN) [94mmessage[0m[90m TS151002: [0mUsing hybrid module kind (Node16/18/Next) is only supported in "isolatedModules: true". Please set "isolatedModules: true" in your tsconfig.json. To disable this message, you can set "diagnostics.ignoreCodes" to include 151002 in your ts-jest config. See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/options/diagnostics
+ts-jest[config] (WARN) [94mmessage[0m[90m TS151002: [0mUsing hybrid module kind (Node16/18/Next) is only supported in "isolatedModules: true". Please set "isolatedModules: true" in your tsconfig.json. To disable this message, you can set "diagnostics.ignoreCodes" to include 151002 in your ts-jest config. See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/options/diagnostics
+(node:3732813) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS test/mutation-evidence.spec.ts (29.539 s)
+  Assembly mutation evidence verification
+    ✓ accepts the exact current evidence structure (1127 ms)
+    ✓ satisfies the canonical JSON v1 verifier on the running node (16 ms)
+    ✓ accepts a node/pnpm record that differs only in patch version (1128 ms)
+    ✓ rejects a different-major node record as a typed TOOLCHAIN_MISMATCH (1116 ms)
+    ✓ still rejects tampered evidence unrelated to the toolchain range (1191 ms)
+    ✓ uses a non-self-referential Git snapshot supplement (253 ms)
+    ✓ declares its excluded prefixes in the evidence it records (13 ms)
+    ✓ does not stale when a file outside the declared scope changes (265 ms)
+    ✓ still stales when a file inside the declared scope changes (546 ms)
+    ✓ records an exact repository-relative invocation that survives checkout relocation (1 ms)
+    ✓ represents tracked deletions while excluding untracked rename destinations (190 ms)
+    ✓ keeps the standalone site map semantically identical to the result map (4 ms)
+    ✓ rejects tampered invocation evidence (1189 ms)
+    ✓ rejects tampered tool version evidence (1097 ms)
+    ✓ rejects tampered baseline outcome evidence (1152 ms)
+    ✓ rejects tampered baseline count evidence (1277 ms)
+    ✓ rejects tampered summary evidence (1370 ms)
+    ✓ rejects tampered restoration verdict evidence (1174 ms)
+    ✓ rejects tampered duplicate site id evidence (1195 ms)
+    ✓ rejects tampered site line evidence (1164 ms)
+    ✓ rejects tampered site function evidence (1254 ms)
+    ✓ rejects tampered site calls evidence (1362 ms)
+    ✓ rejects tampered pristine hash evidence (1490 ms)
+    ✓ rejects tampered mutant hash evidence (1482 ms)
+    ✓ rejects tampered outcome evidence (1216 ms)
+    ✓ rejects tampered detail hash evidence (1183 ms)
+    ✓ requires a fresh run to match allowed killed-label substitutions exactly (1 ms)
+    ✓ requires a fresh run to match a replaced detail even when its self-hash is updated
+    ✓ canonicalizes all failing test identities independently of Jest output order (1 ms)
+    ✓ canonicalizes unique compiler diagnostics independently of repetition and order (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       30 passed, 30 total
+Snapshots:   0 total
+Time:        29.793 s
+Ran all test suites within paths "test/mutation-evidence.spec.ts".

@@ -10,6 +10,8 @@ import type { AssignBasis } from '../auth/guards/agent-task-scope.guard.js';
 
 /** MUN-0051: the activity row every assignment writes. */
 export const AGENT_ASSIGNED_ACTION = 'task:agent_assigned';
+/** MUN-0007: unassignment is a collaboration mutation with an attributed audit entry. */
+export const AGENT_UNASSIGNED_ACTION = 'task:agent_unassigned';
 
 @Injectable()
 export class AgentsService {
@@ -104,13 +106,26 @@ export class AgentsService {
     }
   }
 
-  async removeFromTask(taskId: string, agentId: string): Promise<void> {
-    const ta = await this.prisma.taskAgent.findUnique({
-      where: { taskId_agentId: { taskId, agentId } },
-    });
-    if (!ta) throw new NotFoundException('Agent assignment not found');
-    await this.prisma.taskAgent.delete({
-      where: { taskId_agentId: { taskId, agentId } },
+  async removeFromTask(taskId: string, agentId: string, actor: Actor): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      const assignment = await tx.taskAgent.findUnique({
+        where: { taskId_agentId: { taskId, agentId } },
+        include: { task: { select: { project: { select: { workspaceId: true } } } } },
+      });
+      if (!assignment) throw new NotFoundException('Agent assignment not found');
+      await tx.taskAgent.delete({
+        where: { taskId_agentId: { taskId, agentId } },
+      });
+      await this.activityService.log(
+        {
+          workspaceId: assignment.task.project.workspaceId,
+          taskId,
+          actor,
+          action: AGENT_UNASSIGNED_ACTION,
+          payload: { agentId, role: assignment.role },
+        },
+        tx,
+      );
     });
   }
 

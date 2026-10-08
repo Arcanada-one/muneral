@@ -79,8 +79,9 @@ export class AgentsController {
   removeFromTask(
     @Param('taskId') taskId: string,
     @Param('agentId') agentId: string,
+    @Req() req: Request & { actor: Actor },
   ) {
-    return this.agentsService.removeFromTask(taskId, agentId);
+    return this.agentsService.removeFromTask(taskId, agentId, req.actor);
   }
 
   // --- API Key lifecycle ---

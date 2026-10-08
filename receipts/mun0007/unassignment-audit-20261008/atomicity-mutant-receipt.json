@@ -1,0 +1,26 @@
+{
+  "schema": "MuneralAgentIntegrationBaseline/v1",
+  "task": "70110cb5-8535-4366-bac8-723808602f4a",
+  "main": "e394028105cbd0d38d50c6a7b4aa2575e83b9bc9",
+  "execution_head": "e394028105cbd0d38d50c6a7b4aa2575e83b9bc9",
+  "implementation_byte_identical_to_main": false,
+  "change": "unassignment actor audit transaction",
+  "source_paths": [
+    "apps/api/src/agents",
+    "apps/api/src/auth",
+    "apps/api/src/tasks",
+    "apps/api/src/activity",
+    "apps/api/test/agent-task-scope.guard.spec.ts",
+    "apps/api/test/agent-key-assign-scope.e2e.spec.ts",
+    "apps/api/test/assign-compat-window.spec.ts"
+  ],
+  "runner": "declared Node24.21 Jest",
+  "test_exit": 1,
+  "teardown": {
+    "port_closed": true,
+    "postgres_pid_absent": true
+  },
+  "production_requests": 0,
+  "no_production_data_writes": true,
+  "log_sha256": "1c022370d57a59cc4a8fd17a9fd5c94e979835cc9ee8e57ea64ff81a4c2072d7"
+}

@@ -28,6 +28,8 @@ import { ActivityModule } from '../src/activity/activity.module.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
 import { AuthService } from '../src/auth/auth.service.js';
 import { KanbanService } from '../src/ws/kanban.service.js';
+import { ActivityService } from '../src/activity/activity.service.js';
+import { jest } from '@jest/globals';
 import { AGENT_ASSIGNED_ACTION } from '../src/agents/agents.service.js';
 
 @Module({
@@ -221,6 +223,63 @@ describe('MUN-0051 — agent-key assign scope, creator read, keyed key lookup (e
     await assign(task.id, keys.creator, ids.target, 'reviewer').expect(409);
     expect(await assignedRows(task.id)).toHaveLength(1);
     await assign(uuidv4(), authSvc.signAccess(userId), ids.target, 'reviewer').expect(404);
+  });
+
+  it('MUN-0007: unassignment records the authenticated actor and removed role', async () => {
+    const task = await agentTask();
+    await http()
+      .delete(`/agents/tasks/${task.id}/assign/${ids.reviewer}`)
+      .set('Authorization', `Bearer ${authSvc.signAccess(userId)}`)
+      .expect(204);
+    expect(await rowOf(task.id, ids.reviewer)).toBeNull();
+    const activity = await prisma.activityLog.findMany({
+      where: { taskId: task.id, action: 'task:agent_unassigned' },
+    });
+    expect(activity).toHaveLength(1);
+    expect(activity[0].actorType).toBe('human');
+    expect(activity[0].actorId).toBe(userId);
+    expect(activity[0].workspaceId).toBe(workspaceId);
+    expect(activity[0].payload).toEqual({ agentId: ids.reviewer, role: 'reviewer' });
+    await http()
+      .get(`/tasks/${task.id}/activity`)
+      .set('Authorization', `Bearer ${keys.creator}`)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.data).toEqual(expect.arrayContaining([
+          expect.objectContaining({ action: 'task:agent_unassigned', actorId: userId }),
+        ]));
+      });
+  });
+
+  it('MUN-0007: audit failure rolls back unassignment', async () => {
+    const task = await agentTask();
+    const log = jest.spyOn(app.get(ActivityService), 'log');
+    log.mockRejectedValueOnce(new Error('synthetic audit failure'));
+    try {
+      await http()
+        .delete(`/agents/tasks/${task.id}/assign/${ids.reviewer}`)
+        .set('Authorization', `Bearer ${authSvc.signAccess(userId)}`)
+        .expect(500);
+      expect((await rowOf(task.id, ids.reviewer))?.role).toBe('reviewer');
+      expect(await prisma.activityLog.count({
+        where: { taskId: task.id, action: 'task:agent_unassigned' },
+      })).toBe(0);
+    } finally {
+      log.mockRestore();
+    }
+  });
+
+  it('MUN-0007: repeated unassignment returns 404 without another audit event', async () => {
+    const task = await agentTask();
+    const bearer = authSvc.signAccess(userId);
+    const remove = () => http()
+      .delete(`/agents/tasks/${task.id}/assign/${ids.reviewer}`)
+      .set('Authorization', `Bearer ${bearer}`);
+    await remove().expect(204);
+    await remove().expect(404);
+    expect(await prisma.activityLog.count({
+      where: { taskId: task.id, action: 'task:agent_unassigned' },
+    })).toBe(1);
   });
 
   // -------------------------------------------------------------------------

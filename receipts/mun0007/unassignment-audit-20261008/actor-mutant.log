@@ -1,0 +1,51 @@
+  console.log
+    ◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+
+      at _log (../../../mun-rev4/node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+ts-jest[config] (WARN) [94mmessage[0m[90m TS151002: [0mUsing hybrid module kind (Node16/18/Next) is only supported in "isolatedModules: true". Please set "isolatedModules: true" in your tsconfig.json. To disable this message, you can set "diagnostics.ignoreCodes" to include 151002 in your ts-jest config. See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/options/diagnostics
+ts-jest[config] (WARN) [94mmessage[0m[90m TS151002: [0mUsing hybrid module kind (Node16/18/Next) is only supported in "isolatedModules: true". Please set "isolatedModules: true" in your tsconfig.json. To disable this message, you can set "diagnostics.ignoreCodes" to include 151002 in your ts-jest config. See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/options/diagnostics
+ts-jest[config] (WARN) [94mmessage[0m[90m TS151002: [0mUsing hybrid module kind (Node16/18/Next) is only supported in "isolatedModules: true". Please set "isolatedModules: true" in your tsconfig.json. To disable this message, you can set "diagnostics.ignoreCodes" to include 151002 in your ts-jest config. See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/options/diagnostics
+ts-jest[config] (WARN) [94mmessage[0m[90m TS151002: [0mUsing hybrid module kind (Node16/18/Next) is only supported in "isolatedModules: true". Please set "isolatedModules: true" in your tsconfig.json. To disable this message, you can set "diagnostics.ignoreCodes" to include 151002 in your ts-jest config. See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/options/diagnostics
+[33m[Nest] 3678746  - [39m10/08/2026, 3:37:52 PM [33m   WARN[39m [38;5;3m[AuthModule] [39m[33mGITHUB_CLIENT_ID not set — GitHub OAuth disabled[39m
+(node:3678746) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL test/agent-key-assign-scope.e2e.spec.ts (10.633 s)
+  MUN-0051 — agent-key assign scope, creator read, keyed key lookup (e2e)
+    ✕ MUN-0007: unassignment records the authenticated actor and removed role (1753 ms)
+    ○ skipped the creator assigns an agent of its workspace with any role, attributed to the agent
+    ○ skipped the executor grants executor or reviewer, never lead
+    ○ skipped THE PRIVILEGE PATH IS CLOSED: a stranger cannot assign itself executor and then move the card
+    ○ skipped a lead or reviewer assignment grants no authority to assign
+    ○ skipped another workspace: its key cannot assign here, and the creator cannot assign its agent
+    ○ skipped a human-created task: no agent key assigns on it; a JWT still does, recorded with basis jwt
+    ○ skipped a repeat assignment answers 409 and writes nothing more; an unknown task 404 for a JWT
+    ○ skipped MUN-0007: audit failure rolls back unassignment
+    ○ skipped MUN-0007: repeated unassignment returns 404 without another audit event
+    ○ skipped the creator without an assignment reads, comments, reads activity and lists its task
+    ○ skipped a new key is stored with its sha256 lookup id and authenticates through it
+    ○ skipped a key created before the migration (no lookup id) still authenticates and is back-filled
+    ○ skipped an unknown, a revoked and an expired key all answer 401
+
+  ● MUN-0051 — agent-key assign scope, creator read, keyed key lookup (e2e) › MUN-0007: unassignment records the authenticated actor and removed role
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "9858c449-d86a-4fbf-80ce-434312eac3d1"
+    Received: "edebd562-f863-45c1-af80-afd21b9e1e64"
+
+      238 |     expect(activity).toHaveLength(1);
+      239 |     expect(activity[0].actorType).toBe('human');
+    > 240 |     expect(activity[0].actorId).toBe(userId);
+          |                                 ^
+      241 |     expect(activity[0].workspaceId).toBe(workspaceId);
+      242 |     expect(activity[0].payload).toEqual({ agentId: ids.reviewer, role: 'reviewer' });
+      243 |     await http()
+
+      at Object.<anonymous> (test/agent-key-assign-scope.e2e.spec.ts:240:33)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 13 skipped, 14 total
+Snapshots:   0 total
+Time:        10.998 s
+Ran all test suites within paths "test/agent-key-assign-scope.e2e.spec.ts".
