@@ -10,6 +10,7 @@ export interface Project {
   name: string;
   description?: string | null;
   workspaceId: string;
+  repoUrl?: string | null;
   status?: 'active' | 'archived';
   taskCount?: number;
   createdAt: string;

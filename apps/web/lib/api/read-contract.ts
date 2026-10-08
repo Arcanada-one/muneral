@@ -14,6 +14,7 @@ const task = z.object({
 const workspace = z.object({ id, slug: z.string().min(1), name: z.string(), createdAt: timestamp,
   description: z.string().nullable().optional(), memberCount: z.number().int().nonnegative().optional() });
 const project = z.object({ id, workspaceId: id, slug: z.string().min(1), name: z.string(), createdAt: timestamp,
+  repoUrl: z.string().nullable().optional(),
   description: z.string().nullable().optional(), status: z.enum(['active', 'archived']).optional(),
   taskCount: z.number().int().nonnegative().optional() });
 const checklist = z.object({ id, taskId: id, text: z.string(), checked: z.boolean(),
