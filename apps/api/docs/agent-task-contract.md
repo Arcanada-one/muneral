@@ -154,7 +154,7 @@ secondary data source.
 
 | Route | Agent key | Scope |
 |---|---|---|
-| `GET /tasks/:id` | yes | `task` (assigned) |
+| `GET /tasks/:id` | yes | `task-granted-read` (DEC-AUP-0134): full card for the creator or an assignee; for any other key a REDACTED card (ids, status, priority, actor type, estimate, dates, withheld flags; never title, description or a hash of them) only when its grant entry for the task's current project carries `card`; otherwise one identical 403 |
 | `GET /tasks/:id/readiness` | yes | `task` |
 | `GET /tasks/:id/dependency-graph` | yes | `task` |
 | `GET /tasks/:id/dependencies` | yes | `task` |
@@ -168,6 +168,12 @@ secondary data source.
 | `DELETE /tasks/:id` | **no — 403** | unscoped |
 | `POST /tasks/:id/dependencies`, `DELETE /tasks/:id/dependencies/:depId` | yes, creator or executor of both endpoints in own workspace | `task-dependency` |
 | checklist routes | **no — 403** | unscoped |
+
+`GET /tasks/project/:projectId/index` (a project-read grant holder) accepts the
+optional narrowing filters `status`, `updatedSince`, `updatedBefore`,
+`contractDigest`, `limit` (at most 500) and `offset`; `total` still counts the
+whole project and `matched` counts the filtered rows. The project is the path's,
+always.
 
 `403` does not distinguish "not assigned" from "does not exist" — deliberate, so
 a key cannot enumerate real task ids. **Do not read a `403` as "no such task"

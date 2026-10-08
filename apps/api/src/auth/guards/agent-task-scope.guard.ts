@@ -18,8 +18,11 @@ import { assignCompatWindowAdmits } from '../assign-compat-window.js';
 import {
   PROJECT_READ_GRANTS,
   PROJECT_READ_GRANT_LIST,
+  grantCarries,
+  projectReadGrantFor,
   projectReadGrantState,
 } from '../project-read-grants.js';
+import { taskCardRefusal } from '../task-card.js';
 import type { ProjectReadGrantEntry } from '../project-read-grants.js';
 import {
   WORKSPACE_DIGEST_GRANTS,
@@ -51,6 +54,14 @@ export interface AgentScopeContext {
    *  A2-294: no longer conditional on holding a project-read grant — as shipped
    *  by MUN-0055 it was, which withheld from the granted key only. */
   withholdFreeTextValues?: boolean;
+  /** DEC-AUP-0134, 'task-granted-read' only: which card this key is entitled to.
+   *  'full' = it owns the task (creator or assignee); 'redacted' = it does not,
+   *  and holds a live grant entry carrying `card` for the task's CURRENT project. */
+  cardView?: 'full' | 'redacted';
+  /** DEC-AUP-0134, 'redacted' only: the project the guard read off the task row
+   *  and checked the grant against. The service re-reads the task under this id,
+   *  so a task re-pointed between guard and read is refused, not answered. */
+  cardProjectId?: string;
 }
 
 export type AssignBasis = 'creator' | 'executor' | 'compat-window';
@@ -203,6 +214,49 @@ export class AgentTaskScopeGuard implements CanActivate {
         await this.assertOwnTask(agent, taskId);
         break;
       }
+      // DEC-AUP-0134: the ONE route (GET /tasks/:taskId) where a key that does not
+      // own the task may read a redacted card. One query resolves the task inside
+      // the key's workspace and returns what decides the owner question; the grant
+      // is looked up by the project OFF THE TASK ROW, never by anything the client
+      // sent. Every refusal is the same 403 (taskCardRefusal): the id-keyed route
+      // must not tell an unknown id from a foreign one from an expired grant.
+      case 'task-granted-read': {
+        const taskId = this.paramOf(req, 'taskId');
+        if (!taskId) throw taskCardRefusal();
+        const task = await this.prisma.task
+          .findFirst({
+            where: { id: taskId, project: { workspaceId: agent.workspaceId } },
+            select: {
+              projectId: true,
+              createdById: true,
+              actorType: true,
+              agents: { where: { agentId: agent.id }, select: { agentId: true } },
+            },
+          })
+          // A malformed id reaches Prisma as a bad argument, not as "no rows".
+          .catch(() => null);
+        if (!task) throw taskCardRefusal();
+
+        // Same ownership as agentOwnTaskWhere: an assignment row, or authorship
+        // under the agent actor type (a human's id can never satisfy the pair).
+        const owns =
+          task.agents.length > 0 || (task.createdById === agent.id && task.actorType === 'agent');
+        if (owns) {
+          req.agentScope = { agentId: agent.id, kind, workspaceId: agent.workspaceId, cardView: 'full' };
+          return true;
+        }
+        const entry = projectReadGrantFor(agent.id, task.projectId, new Date(), this.projectReadGrants);
+        if (!entry || !grantCarries(entry, 'card')) throw taskCardRefusal();
+        req.agentScope = {
+          agentId: agent.id,
+          kind,
+          workspaceId: agent.workspaceId,
+          cardView: 'redacted',
+          cardProjectId: task.projectId,
+          projectReadGrant: entry,
+        };
+        return true;
+      }
       // MUN-0049: 'task-redaction' is bound to the assignment — the agent
       // must be assigned to the task — and is listed separately so the write
       // can be revoked without touching the read/comment/status routes.
@@ -314,6 +368,8 @@ export class AgentTaskScopeGuard implements CanActivate {
           });
         }
         if (state.kind === 'none') throw new NotFoundException(`Project ${projectId} not found.`);
+        // DEC-AUP-0134: an entry that names `reads` without 'index' does not open the index.
+        if (!grantCarries(state.entry, 'index')) throw new NotFoundException(`Project ${projectId} not found.`);
         req.agentScope = { agentId: agent.id, kind, projectReadGrant: state.entry };
         return true;
       }

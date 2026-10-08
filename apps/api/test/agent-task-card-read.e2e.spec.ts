@@ -26,6 +26,7 @@ import { KanbanService } from '../src/ws/kanban.service.js';
 import { PROJECT_READ_GRANTS, GRANT_RENEWAL_LEAD_DAYS } from '../src/auth/project-read-grants.js';
 import type { ProjectReadGrantEntry } from '../src/auth/project-read-grants.js';
 import { TaskFieldStateService } from '../src/tasks/field-state/task-field-state.service.js';
+import { TasksService } from '../src/tasks/tasks.service.js';
 import { createDisposablePostgres } from './support/disposable-postgres.js';
 
 @Module({
@@ -325,6 +326,36 @@ describe('DEC-AUP-0134 — redacted task card for granted agent keys (e2e)', () 
     await card(t.id, keys.reader).expect(403);
   });
 
+  it('R17 the SERVICE re-reads under the authorised project AND workspace: a task moved after the guard is refused, not answered', async () => {
+    const svc = app.get(TasksService);
+    const grantEntry = { agentId: ids.reader, agentName: 'reader', projectId, until: FUTURE, decision: 'DEC-TEST', evidence: 'e2e' } as ProjectReadGrantEntry;
+    const t = await othersTask();
+    // positive control: the guard's project and workspace give the card
+    await expect(svc.redactedCardForAgent(t.id, workspaceId, projectId, grantEntry)).resolves.toMatchObject({ id: t.id, view: 'redacted' });
+    // the project the guard authorised is no longer the task's project
+    await expect(svc.redactedCardForAgent(t.id, workspaceId, siblingProjectId, grantEntry)).rejects.toMatchObject({ status: 403 });
+    // the workspace is not the task's workspace
+    await expect(svc.redactedCardForAgent(t.id, otherWorkspaceId, projectId, grantEntry)).rejects.toMatchObject({ status: 403 });
+    // and the owner's full read is workspace-bound the same way
+    await expect(svc.findOneOwnedByAgent(t.id, workspaceId)).resolves.toMatchObject({ id: t.id });
+    await expect(svc.findOneOwnedByAgent(t.id, otherWorkspaceId)).rejects.toMatchObject({ status: 403 });
+  });
+
+  it('R18 the project is decided by the task row alone: a client-supplied project (query, header, body) changes nothing', async () => {
+    grant('reader', projectId);
+    const inSibling = await othersTask(siblingProjectId);
+    for (const send of [
+      (r: supertest.Test) => r.query({ projectId }),
+      (r: supertest.Test) => r.set('X-Project-Id', projectId),
+      (r: supertest.Test) => r.send({ projectId }),
+    ]) {
+      await send(card(inSibling.id, keys.reader)).expect(403);
+    }
+    // and a client-supplied SIBLING project does not take away a granted card
+    const inGranted = await othersTask(projectId);
+    await card(inGranted.id, keys.reader).query({ projectId: siblingProjectId }).expect(200);
+  });
+
   it('R09 a re-created agent (new id) holds no grant', async () => {
     grant('reader', projectId);
     const t = await othersTask();
@@ -376,14 +407,18 @@ describe('DEC-AUP-0134 — redacted task card for granted agent keys (e2e)', () 
     const raw = JSON.stringify(res.body) + JSON.stringify(res.headers);
     expect(raw).not.toContain(t.id);
     expect(raw).not.toContain('in_progress');
-    expect(res.headers.etag).toBeUndefined();
+    // Express may stamp a WEAK validator on any body (the generic error JSON); the
+    // card's own strong tag must not have been set.
+    expect(res.headers.etag ?? 'W/').toMatch(/^W\//);
     expect(await cardAuditRows()).toHaveLength(0);
   });
 
   it('R13 ETag is view-tagged: a 304 returns no card and no audit row; the owner ETag never matches the redacted view', async () => {
     grant('reader', projectId);
     grant('creator', projectId);
-    const t = await othersTask();
+    // No contract digest: the full view's tag then ends `contractDigest:null`, so a
+    // redacted tag that fell back to the same inputs would COLLIDE with it.
+    const t = await othersTask(projectId, { contractDigest: null });
     await prisma.$transaction((tx) => fsSvc.recompute(tx, t));
 
     const red = await card(t.id, keys.reader).expect(200);
@@ -519,6 +554,12 @@ describe('DEC-AUP-0134 — redacted task card for granted agent keys (e2e)', () 
       grant('reader', projectId, { until: PAST });
       const res = await idx('?status=todo').expect(403);
       expect(res.body.code).toBe('GRANT_EXPIRED');
+    });
+
+    it('F05 an entry that names `reads` without `index` does not open the index', async () => {
+      grant('reader', projectId, { reads: ['card'] });
+      await othersTask(projectId);
+      await idx('').expect(404);
     });
 
     it('F04 a holder of an index-only entry gets the filters too (and no card)', async () => {

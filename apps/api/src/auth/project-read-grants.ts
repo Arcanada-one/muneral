@@ -36,6 +36,8 @@
  *     `projectReadGrantState`. The guard turns that into 403 `GRANT_EXPIRED`
  *     instead of the blanket 404, which told a legitimate holder nothing.
  */
+export type ProjectReadCapability = 'index' | 'card';
+
 export interface ProjectReadGrantEntry {
   agentId: string;
   agentName: string;
@@ -45,6 +47,20 @@ export interface ProjectReadGrantEntry {
   /** The program decision that admitted the grant. */
   decision: string;
   evidence: string;
+  /**
+   * DEC-AUP-0134: what this entry opens. ABSENT means `['index']` only — every
+   * entry written before that decision keeps exactly what it had. `card` is
+   * opt-in per entry: it admits the REDACTED task card on `GET /tasks/:taskId`
+   * for tasks of this entry's project that the key does not own, and nothing
+   * else. It is never inferred from the existence of the entry. Which entries
+   * may carry it is pinned by `project-read-grants.spec.ts`.
+   */
+  reads?: readonly ProjectReadCapability[];
+}
+
+/** Does this entry open `capability`? Absent `reads` is index-only. */
+export function grantCarries(entry: ProjectReadGrantEntry, capability: ProjectReadCapability): boolean {
+  return (entry.reads ?? ['index']).includes(capability);
 }
 
 /** Injection token, so a test module can supply its own list. */
@@ -71,6 +87,9 @@ export const PROJECT_READ_GRANT_LIST: readonly ProjectReadGrantEntry[] = [
     projectId: '08a50f9a-a735-4605-91ce-ce4a41193fbb',
     until: '2026-10-14T00:00:00Z',
     decision: 'DEC-AUP-0033',
+    // DEC-AUP-0134: the redacted task card is opened on THIS entry. The window is
+    // DEC-AUP-0033's, unchanged and not renewed by adding the capability.
+    reads: ['index', 'card'],
     evidence:
       'DEC-AUP-0029 renewal: the first window (until 2026-09-21) was used — two live readings 886/887 rows an hour apart and the step-13 status parity re-run, receipts/mun0052/live-reading{1,2}-20260914T*.json and status-parity-20260914T111224Z.md — then lapsed silently. 2026-10-14 is the ceiling DEC-AUP-0029 R1 set for this entry.',
   },
