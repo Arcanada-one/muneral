@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import type { Actor } from '@muneral/types';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateAgentDto } from './dto/create-agent.dto.js';
@@ -43,10 +43,14 @@ export class AgentsService {
 
   /** Get tasks assigned to a specific agent */
   async getAgentTasks(agentId: string) {
-    return this.prisma.taskAgent.findMany({
-      where: { agentId },
-      include: { task: true },
-    });
+    return this.prisma.$transaction(async (tx) => {
+      const agent = await tx.agent.findUnique({ where: { id: agentId }, select: { workspaceId: true } });
+      if (!agent) throw new ForbiddenException('Agent task read forbidden');
+      return tx.taskAgent.findMany({
+        where: { agentId, task: { project: { workspaceId: agent.workspaceId } } },
+        include: { task: true },
+      });
+    }, { isolationLevel: 'RepeatableRead' });
   }
 
   /**

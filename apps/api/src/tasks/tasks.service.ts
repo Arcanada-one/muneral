@@ -837,12 +837,31 @@ export class TasksService {
     await this.prisma.taskDependency.delete({ where: { id: depId, ...(fromTaskId ? { fromTaskId } : {}) } });
   }
 
-  async getDependencies(taskId: string, humanUserId?: string) {
-    if (!humanUserId) return this.prisma.taskDependency.findMany({ where: { fromTaskId: taskId } });
+  async getDependencies(taskId: string, humanUserId?: string, agentId?: string) {
+    if (!humanUserId && !agentId) return this.prisma.taskDependency.findMany({ where: { fromTaskId: taskId } });
     return this.prisma.$transaction(async (tx) => {
-      await this.assertHumanDependencyRead(tx, taskId, humanUserId);
+      if (humanUserId) await this.assertHumanDependencyRead(tx, taskId, humanUserId);
+      else await this.assertAgentDependencyRead(tx, taskId, agentId!);
       return tx.taskDependency.findMany({ where: { fromTaskId: taskId } });
     }, { isolationLevel: 'RepeatableRead' });
+  }
+
+  private async assertAgentDependencyRead(tx: Prisma.TransactionClient, taskId: string, agentId: string) {
+    const agent = await tx.agent.findUnique({ where: { id: agentId }, select: { workspaceId: true } });
+    if (!agent) throw new ForbiddenException('Agent task read forbidden');
+    const workspaceWhere = { project: { workspaceId: agent.workspaceId } };
+    const root = await tx.task.findFirst({
+      where: { id: taskId, ...workspaceWhere, ...agentOwnTaskWhere(agentId) }, select: { id: true },
+    });
+    if (!root) throw new ForbiddenException('Agent task read forbidden');
+    const foreign = await tx.taskDependency.findFirst({
+      where: { AND: [
+        { OR: [{ fromTaskId: taskId }, { toTaskId: taskId }] },
+        { OR: [{ fromTask: { NOT: workspaceWhere } }, { toTask: { NOT: workspaceWhere } }] },
+      ] }, select: { id: true },
+    });
+    // Refuse the whole read: hiding the edge would manufacture readiness.
+    if (foreign) throw new ForbiddenException('Agent task read forbidden');
   }
 
   private async assertHumanDependencyRead(tx: Prisma.TransactionClient, taskId: string, userId: string) {
@@ -883,13 +902,14 @@ export class TasksService {
     fromTaskId: string; toTaskId: string; otherTaskId: string;
     otherTaskTitle: string | null; otherTaskTitleWithheld?: true; otherTaskStatus: string;
   }>> {
-    if (humanUserId && !readClient) {
+    if ((humanUserId || agentId) && !readClient) {
       return this.prisma.$transaction(async (tx) => {
-        await this.assertHumanDependencyRead(tx, taskId, humanUserId);
+        if (humanUserId) await this.assertHumanDependencyRead(tx, taskId, humanUserId);
+        else await this.assertAgentDependencyRead(tx, taskId, agentId!);
         return this.getDependencyGraph(taskId, agentId, humanUserId, tx);
       }, { isolationLevel: 'RepeatableRead' });
     }
-    if (!humanUserId) await this.findOne(taskId);
+    if (!humanUserId && !agentId) await this.findOne(taskId);
     const edges = await (readClient ?? this.prisma).taskDependency.findMany({
       where: { OR: [{ fromTaskId: taskId }, { toTaskId: taskId }] },
       include: {
@@ -902,14 +922,13 @@ export class TasksService {
     // owns the task in the PATH; it says nothing about the counterpart at the
     // other end of an edge, whose title was returned in clear. So a key that
     // owned one task read the titles of tasks it did not own, one edge at a
-    // time — the same plaintext the field-change read above stopped handing
-    // out, through a different door. The counterpart's STATUS stays: it is not
-    // free text and `getReadiness` below is computed from it. Human reads additionally require membership for both dependency endpoints
-    // in one transaction snapshot; agent title withholding remains unchanged.
+    // time. Status is readable only within the agent's workspace. Both human
+    // and agent endpoint checks share the edge-read transaction snapshot.
     const ownedCounterparts = agentId
       ? await this.ownedAmong(
           agentId,
           edges.map((e) => (e.fromTaskId === taskId ? e.toTaskId : e.fromTaskId)),
+          readClient,
         )
       : null;
 
@@ -933,9 +952,9 @@ export class TasksService {
 
   /** MUN-0055: which of `ids` the agent owns — assigned or creator, the same
    *  filter every other agent-key read narrows by (agentOwnTaskWhere). */
-  private async ownedAmong(agentId: string, ids: string[]): Promise<Set<string>> {
+  private async ownedAmong(agentId: string, ids: string[], readClient?: Prisma.TransactionClient): Promise<Set<string>> {
     if (ids.length === 0) return new Set();
-    const rows = await this.prisma.task.findMany({
+    const rows = await (readClient ?? this.prisma).task.findMany({
       where: { id: { in: [...new Set(ids)] }, ...agentOwnTaskWhere(agentId) },
       select: { id: true },
     });

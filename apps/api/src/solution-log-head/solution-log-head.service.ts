@@ -159,8 +159,12 @@ export class SolutionLogHeadService {
     if (!task) throw new NotFoundException('Task not found');
 
     const assignments = await tx.$queryRawUnsafe<Array<{ role: string }>>(
-      `SELECT role FROM public.task_agents
-        WHERE task_id = $1::uuid AND agent_id = $2::uuid
+      `SELECT ta.role FROM public.task_agents ta
+        JOIN public.tasks t ON t.id = ta.task_id
+        JOIN public.projects p ON p.id = t.project_id
+        JOIN public.agents a ON a.id = ta.agent_id
+        WHERE ta.task_id = $1::uuid AND ta.agent_id = $2::uuid
+          AND a.workspace_id = p.workspace_id
         FOR SHARE`,
       taskId,
       principalId,

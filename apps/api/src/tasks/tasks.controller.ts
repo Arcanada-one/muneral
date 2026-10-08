@@ -471,7 +471,8 @@ export class TasksController {
   @Get(':taskId/dependencies')
   @AgentScope('task')
   getDependencies(@Param('taskId') taskId: string, @Req() req: AuthRequest) {
-    return this.tasksService.getDependencies(taskId, req.actor.type === 'human' ? req.actor.id : undefined);
+    return this.tasksService.getDependencies(taskId, req.actor.type === 'human' ? req.actor.id : undefined,
+      req.actor.type === 'agent' ? req.actor.id : undefined);
   }
 
   /** MUN-0054 — both directions plus the counterpart's status. See
@@ -480,9 +481,9 @@ export class TasksController {
   @Get(':taskId/dependency-graph')
   @AgentScope('task')
   getDependencyGraph(@Param('taskId') taskId: string, @Req() req: AuthRequest) {
-    // MUN-0055: the agent id narrows the COUNTERPART's free text, not the edge
-    // list. Human workspace membership is checked separately.
-    return this.tasksService.getDependencyGraph(taskId, req.agentScope?.agentId, req.actor.type === 'human' ? req.actor.id : undefined);
+    // Agent reads require both endpoints in the current agent workspace;
+    // ownership additionally narrows the counterpart's free text.
+    return this.tasksService.getDependencyGraph(taskId, req.actor.type === 'agent' ? req.actor.id : undefined, req.actor.type === 'human' ? req.actor.id : undefined);
   }
 
   /** MUN-0054 — the readiness verdict, computed server-side.
@@ -496,7 +497,7 @@ export class TasksController {
   @Get(':taskId/readiness')
   @AgentScope('task')
   getReadiness(@Param('taskId') taskId: string, @Req() req: AuthRequest) {
-    return this.tasksService.getReadiness(taskId, req.agentScope?.agentId, req.actor.type === 'human' ? req.actor.id : undefined);
+    return this.tasksService.getReadiness(taskId, req.actor.type === 'agent' ? req.actor.id : undefined, req.actor.type === 'human' ? req.actor.id : undefined);
   }
 
   @Post(':taskId/dependencies')

@@ -197,6 +197,17 @@ describe('SolutionLog head authority — PostgreSQL proofs', () => {
     expect(await prisma.solutionLogHeadReceipt.count({ where: { taskId } })).toBe(1);
   });
 
+  it('refuses an existing executor assignment after the task moves to a foreign workspace', async () => {
+    const running = await runningTask();
+    await service.commitHead(running.taskId, running.attemptId, primaryAgentId, proposal(running.taskRevision));
+    const owner = await prisma.user.create({ data: { name: 'Synthetic foreign SolutionLog owner' } });
+    const workspace = await prisma.workspace.create({ data: { slug: randomUUID(), name: 'Synthetic foreign workspace', ownerId: owner.id } });
+    const foreign = await prisma.project.create({ data: { workspaceId: workspace.id, slug: randomUUID(), name: 'Synthetic foreign project' } });
+    await prisma.task.update({ where: { id: running.taskId }, data: { projectId: foreign.id } });
+    await expect(service.getCurrentHead(running.taskId, running.attemptId, primaryAgentId)).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(service.commitHead(running.taskId, running.attemptId, primaryAgentId, proposal(running.taskRevision))).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
   it('refuses an unassigned principal, a non-current attempt, and a non-running attempt', async () => {
     const running = await runningTask();
     await expect(
