@@ -6,6 +6,8 @@ import { PrismaModule } from '../src/prisma/prisma.module.js';
 import { AuthModule } from '../src/auth/auth.module.js';
 import { ActivityModule } from '../src/activity/activity.module.js';
 import { AgentsModule } from '../src/agents/agents.module.js';
+import { SyncModule } from '../src/sync/sync.module.js';
+import { SyncService } from '../src/sync/sync.service.js';
 import { TasksModule } from '../src/tasks/tasks.module.js';
 import { ProjectsModule } from '../src/projects/projects.module.js';
 import { WorkspacesModule } from '../src/workspaces/workspaces.module.js';
@@ -20,7 +22,7 @@ import { HumanTaskReadGuard } from '../src/auth/guards/human-task-read.guard.js'
 import type { ExecutionContext } from '@nestjs/common';
 
 @Module({ imports: [PrismaModule, AuthModule, ActivityModule, AgentsModule, TasksModule,
-  ProjectsModule, WorkspacesModule] })
+  ProjectsModule, WorkspacesModule, SyncModule] })
 class FixtureModule {}
 
 describe('Human task reads isolate workspace membership (real HTTP/PostgreSQL)', () => {
@@ -224,4 +226,49 @@ describe('Human task reads isolate workspace membership (real HTTP/PostgreSQL)',
       await supertest(app.getHttpServer()).get(`/tasks/${tasks[1-i]}`).auth(agentKeys[i], { type: 'bearer' }).expect(403);
     });
   }
+  for (const i of [0, 1]) {
+    it(`principal ${i} own populated sync export is readable`, async () => {
+      const response = await supertest(app.getHttpServer()).get(`/sync/datarim/${projects[i]}`).auth(tokens[i], { type: 'bearer' }).expect(200);
+      expect(response.text).toContain(`Synthetic task ${i}`);
+      expect(response.text).toContain(`Synthetic counterpart ${i}`);
+      expect(response.text).toContain('**Status:** in_progress');
+      expect(response.text).not.toContain(`Synthetic task ${1-i}`);
+    });
+    it(`principal ${i} foreign sync export is denied`, async () => {
+      const response = await supertest(app.getHttpServer()).get(`/sync/datarim/${projects[1-i]}`).auth(tokens[i], { type: 'bearer' }).expect(403);
+      expect(response.text).not.toContain(`Synthetic task ${1-i}`);
+      expect(response.text).not.toContain(`Synthetic counterpart ${1-i}`);
+      expect(response.headers['x-muneral-task-project']).toBeUndefined();
+    });
+    it(`principal ${i} sync export denies revoked membership and restores the same JWT`, async () => {
+      await supertest(app.getHttpServer()).get(`/sync/datarim/${projects[i]}`).auth(tokens[i], { type: 'bearer' }).expect(200);
+      await prisma.workspaceMember.delete({ where: { workspaceId_userId: { workspaceId: workspaces[i], userId: users[i] } } });
+      try {
+        const denied = await supertest(app.getHttpServer()).get(`/sync/datarim/${projects[i]}`).auth(tokens[i], { type: 'bearer' }).expect(403);
+        expect(denied.text).not.toContain(`Synthetic task ${i}`);
+      } finally { await prisma.workspaceMember.create({ data: { workspaceId: workspaces[i], userId: users[i], role: 'owner' } }); }
+      const restored = await supertest(app.getHttpServer()).get(`/sync/datarim/${projects[i]}`).auth(tokens[i], { type: 'bearer' }).expect(200);
+      expect(restored.text).toContain(`Synthetic task ${i}`);
+    });
+    it(`principal ${i} sync export HEAD and conditional GET never bypass membership`, async () => {
+      const target = await supertest(app.getHttpServer()).get(`/sync/datarim/${projects[1-i]}`).auth(tokens[1-i], { type: 'bearer' }).expect(200);
+      expect(target.headers.etag).toBeTruthy();
+      await supertest(app.getHttpServer()).get(`/sync/datarim/${projects[1-i]}`).set('If-None-Match', target.headers.etag).auth(tokens[1-i], { type: 'bearer' }).expect(304);
+      const head = await supertest(app.getHttpServer()).head(`/sync/datarim/${projects[1-i]}`).auth(tokens[i], { type: 'bearer' }).expect(403);
+      expect(head.headers.etag).not.toBe(target.headers.etag);
+      const denied = await supertest(app.getHttpServer()).get(`/sync/datarim/${projects[1-i]}`).set('If-None-Match', target.headers.etag).auth(tokens[i], { type: 'bearer' }).expect(403);
+      expect(denied.headers.etag).not.toBe(target.headers.etag);
+      expect(denied.text).not.toContain(`Synthetic task ${1-i}`);
+    });
+    it(`principal ${i} anonymous sync export is unauthenticated`, async () => {
+      await supertest(app.getHttpServer()).get(`/sync/datarim/${projects[i]}`).expect(401);
+    });
+  }
+  it('sync export SQL rejects membership removed after guard authorization', async () => {
+    const context = { switchToHttp: () => ({ getRequest: () => ({ method: 'GET', path: `/sync/datarim/${projects[0]}`, params: { projectId: projects[0] }, query: {}, user: { id: users[0] } }) }) } as unknown as ExecutionContext;
+    await expect(new HumanTaskReadGuard(prisma).canActivate(context)).resolves.toBe(true);
+    await prisma.workspaceMember.delete({ where: { workspaceId_userId: { workspaceId: workspaces[0], userId: users[0] } } });
+    try { await expect(app.get(SyncService).exportDatarim(projects[0], users[0])).rejects.toMatchObject({ status: 403 }); }
+    finally { await prisma.workspaceMember.create({ data: { workspaceId: workspaces[0], userId: users[0], role: 'owner' } }); }
+  });
 });

@@ -7,7 +7,7 @@ not a fallback grant after membership removal. JWT authentication still verifies
 the token and user before authorization; this change creates no identity system.
 
 Task rows, project lists, staleness, evidence, checklist, activity, dependency
-reads and task git references apply this boundary. Global list filtering and its
+reads, task git references and Datarim Markdown project exports apply this boundary. Global list filtering and its
 count happen in SQL before paging. The project index and workspace digest retain
 their existing agent-only restrictions. Agent creator/assignment/read-grant rules
 and write handlers are unchanged.
@@ -15,7 +15,8 @@ and write handlers are unchanged.
 The human guard consumes the authenticated `req.user`, because interceptors set
 `req.actor` after guards. Actual data reads also carry the server-derived member
 predicate. Human dependency reads verify the root and both endpoints and read the
-edges in one RepeatableRead transaction. An inaccessible counterpart refuses the
+edges in one RepeatableRead transaction. Human project exports authorize the
+project and materialize its task rows in one RepeatableRead transaction. An inaccessible counterpart refuses the
 whole response; dropping a blocker would misrepresent readiness. Authorization
 uses that transaction's snapshot rather than promising instantaneous revocation
 of an already-running request. Subsequent requests evaluate membership anew.
