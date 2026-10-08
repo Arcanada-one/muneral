@@ -1,31 +1,31 @@
 {
   "schema": "CanaryPlan/v2",
-  "id": "PR225-synthetic-web-consumer-canary",
+  "id": "PR225-synthetic-web-consumer-canary-final",
   "owner": "MUNERAL successor lane",
   "environment": "Frozen byte-checked Next source with current compiled local Nest backend and two disposable synthetic principals; no production request",
   "read_only": false,
   "subject": {
     "schema": "GitCanarySubject/v1",
-    "commit": "0a97a2abfcc7a789d7ae57bf5323cf0db71070f8",
-    "tree": "c44845a8c7baf53dd6427efc3e8256172f6f318d",
+    "commit": "0ae60ff6ba19d212a50183741a4fd63d24cb39af",
+    "tree": "f1c55afa2a072e94a1bbf109c3b7c32ec1ebc3d0",
     "evidence": {
       "path": "source-evidence.json",
-      "sha256": "b1eb0c1e2c270eb9f973560dc4b8121f09380af84c370ed9d9d5730c7fe3c9c0",
+      "sha256": "bf70a0ce03b4f0862d46b0ebaf42ae97a75dd7844596a540b32516ebace21c29",
       "source_field": "commit"
     }
   },
-  "purpose": "Real HTTP over an owned disposable PostgreSQL: redacted card, owner full card, uniform 403, audit, filters; and the human-read isolation and project-index suites unchanged. No production request; no original-web acceptance claim.",
+  "purpose": "Real HTTP over an owned disposable PostgreSQL: redacted card, owner full card, uniform 403, audit, filters; and the human-read isolation and project-index suites unchanged. No production request; no original-web acceptance claim. Fresh measurements after approved SECURITY source-only repairs.",
   "probes": [
     {
       "kind": "process",
       "id": "own_task",
       "argv": [
         "/home/dev/aup/import-audit-work/runs/m211c/node-v24.21.0-linux-x64/bin/node",
-        "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/browser-probe.mjs",
+        "/home/dev/aup/import-audit-work/runs/PR225-final-drivers/browser-probe.mjs",
         "own_task",
-        "0a97a2abfcc7a789d7ae57bf5323cf0db71070f8",
+        "0ae60ff6ba19d212a50183741a4fd63d24cb39af",
         "/home/dev/aup/import-audit-work/runs/PR225-successor-web-source-782",
-        "/home/dev/aup/import-audit-work/runs/PR225-successor-browser-CAN"
+        "/home/dev/aup/import-audit-work/runs/PR225-final-browser-CAN"
       ],
       "cwd": ".",
       "env_keys": [
@@ -346,8 +346,8 @@
           "sha256": "dd0d69c41d2c55b195e2c552461ab42f29373e7018453a758e25f0a85da7436b"
         },
         {
-          "path": "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/browser-probe.mjs",
-          "sha256": "c85073c89ab8c4a50da3957fc6f3df290654789f696c0733e2370b8b8a8059e8"
+          "path": "/home/dev/aup/import-audit-work/runs/PR225-final-drivers/browser-probe.mjs",
+          "sha256": "68af52163da317908350833b9eea132d6ec6113258e4b6f31d728356dfb5b6f5"
         },
         {
           "path": "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/synthetic-browser-fixture.mjs",
@@ -382,11 +382,11 @@
       "id": "own_project",
       "argv": [
         "/home/dev/aup/import-audit-work/runs/m211c/node-v24.21.0-linux-x64/bin/node",
-        "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/browser-probe.mjs",
+        "/home/dev/aup/import-audit-work/runs/PR225-final-drivers/browser-probe.mjs",
         "own_project",
-        "0a97a2abfcc7a789d7ae57bf5323cf0db71070f8",
+        "0ae60ff6ba19d212a50183741a4fd63d24cb39af",
         "/home/dev/aup/import-audit-work/runs/PR225-successor-web-source-782",
-        "/home/dev/aup/import-audit-work/runs/PR225-successor-browser-CAN"
+        "/home/dev/aup/import-audit-work/runs/PR225-final-browser-CAN"
       ],
       "cwd": ".",
       "env_keys": [
@@ -707,8 +707,8 @@
           "sha256": "dd0d69c41d2c55b195e2c552461ab42f29373e7018453a758e25f0a85da7436b"
         },
         {
-          "path": "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/browser-probe.mjs",
-          "sha256": "c85073c89ab8c4a50da3957fc6f3df290654789f696c0733e2370b8b8a8059e8"
+          "path": "/home/dev/aup/import-audit-work/runs/PR225-final-drivers/browser-probe.mjs",
+          "sha256": "68af52163da317908350833b9eea132d6ec6113258e4b6f31d728356dfb5b6f5"
         },
         {
           "path": "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/synthetic-browser-fixture.mjs",
@@ -743,11 +743,11 @@
       "id": "own_dashboard",
       "argv": [
         "/home/dev/aup/import-audit-work/runs/m211c/node-v24.21.0-linux-x64/bin/node",
-        "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/browser-probe.mjs",
+        "/home/dev/aup/import-audit-work/runs/PR225-final-drivers/browser-probe.mjs",
         "own_dashboard",
-        "0a97a2abfcc7a789d7ae57bf5323cf0db71070f8",
+        "0ae60ff6ba19d212a50183741a4fd63d24cb39af",
         "/home/dev/aup/import-audit-work/runs/PR225-successor-web-source-782",
-        "/home/dev/aup/import-audit-work/runs/PR225-successor-browser-CAN"
+        "/home/dev/aup/import-audit-work/runs/PR225-final-browser-CAN"
       ],
       "cwd": ".",
       "env_keys": [
@@ -1068,8 +1068,8 @@
           "sha256": "dd0d69c41d2c55b195e2c552461ab42f29373e7018453a758e25f0a85da7436b"
         },
         {
-          "path": "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/browser-probe.mjs",
-          "sha256": "c85073c89ab8c4a50da3957fc6f3df290654789f696c0733e2370b8b8a8059e8"
+          "path": "/home/dev/aup/import-audit-work/runs/PR225-final-drivers/browser-probe.mjs",
+          "sha256": "68af52163da317908350833b9eea132d6ec6113258e4b6f31d728356dfb5b6f5"
         },
         {
           "path": "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/synthetic-browser-fixture.mjs",
@@ -1100,11 +1100,11 @@
       "id": "foreign_root",
       "argv": [
         "/home/dev/aup/import-audit-work/runs/m211c/node-v24.21.0-linux-x64/bin/node",
-        "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/browser-probe.mjs",
+        "/home/dev/aup/import-audit-work/runs/PR225-final-drivers/browser-probe.mjs",
         "foreign_root",
-        "0a97a2abfcc7a789d7ae57bf5323cf0db71070f8",
+        "0ae60ff6ba19d212a50183741a4fd63d24cb39af",
         "/home/dev/aup/import-audit-work/runs/PR225-successor-web-source-782",
-        "/home/dev/aup/import-audit-work/runs/PR225-successor-browser-CAN"
+        "/home/dev/aup/import-audit-work/runs/PR225-final-browser-CAN"
       ],
       "cwd": ".",
       "env_keys": [
@@ -1425,8 +1425,8 @@
           "sha256": "dd0d69c41d2c55b195e2c552461ab42f29373e7018453a758e25f0a85da7436b"
         },
         {
-          "path": "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/browser-probe.mjs",
-          "sha256": "c85073c89ab8c4a50da3957fc6f3df290654789f696c0733e2370b8b8a8059e8"
+          "path": "/home/dev/aup/import-audit-work/runs/PR225-final-drivers/browser-probe.mjs",
+          "sha256": "68af52163da317908350833b9eea132d6ec6113258e4b6f31d728356dfb5b6f5"
         },
         {
           "path": "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/synthetic-browser-fixture.mjs",
@@ -1456,11 +1456,11 @@
       "id": "dependency_denial",
       "argv": [
         "/home/dev/aup/import-audit-work/runs/m211c/node-v24.21.0-linux-x64/bin/node",
-        "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/browser-probe.mjs",
+        "/home/dev/aup/import-audit-work/runs/PR225-final-drivers/browser-probe.mjs",
         "dependency_denial",
-        "0a97a2abfcc7a789d7ae57bf5323cf0db71070f8",
+        "0ae60ff6ba19d212a50183741a4fd63d24cb39af",
         "/home/dev/aup/import-audit-work/runs/PR225-successor-web-source-782",
-        "/home/dev/aup/import-audit-work/runs/PR225-successor-browser-CAN"
+        "/home/dev/aup/import-audit-work/runs/PR225-final-browser-CAN"
       ],
       "cwd": ".",
       "env_keys": [
@@ -1781,8 +1781,8 @@
           "sha256": "dd0d69c41d2c55b195e2c552461ab42f29373e7018453a758e25f0a85da7436b"
         },
         {
-          "path": "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/browser-probe.mjs",
-          "sha256": "c85073c89ab8c4a50da3957fc6f3df290654789f696c0733e2370b8b8a8059e8"
+          "path": "/home/dev/aup/import-audit-work/runs/PR225-final-drivers/browser-probe.mjs",
+          "sha256": "68af52163da317908350833b9eea132d6ec6113258e4b6f31d728356dfb5b6f5"
         },
         {
           "path": "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/synthetic-browser-fixture.mjs",
@@ -1812,11 +1812,11 @@
       "id": "revoked_task",
       "argv": [
         "/home/dev/aup/import-audit-work/runs/m211c/node-v24.21.0-linux-x64/bin/node",
-        "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/browser-probe.mjs",
+        "/home/dev/aup/import-audit-work/runs/PR225-final-drivers/browser-probe.mjs",
         "revoked_task",
-        "0a97a2abfcc7a789d7ae57bf5323cf0db71070f8",
+        "0ae60ff6ba19d212a50183741a4fd63d24cb39af",
         "/home/dev/aup/import-audit-work/runs/PR225-successor-web-source-782",
-        "/home/dev/aup/import-audit-work/runs/PR225-successor-browser-CAN"
+        "/home/dev/aup/import-audit-work/runs/PR225-final-browser-CAN"
       ],
       "cwd": ".",
       "env_keys": [
@@ -2137,8 +2137,8 @@
           "sha256": "dd0d69c41d2c55b195e2c552461ab42f29373e7018453a758e25f0a85da7436b"
         },
         {
-          "path": "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/browser-probe.mjs",
-          "sha256": "c85073c89ab8c4a50da3957fc6f3df290654789f696c0733e2370b8b8a8059e8"
+          "path": "/home/dev/aup/import-audit-work/runs/PR225-final-drivers/browser-probe.mjs",
+          "sha256": "68af52163da317908350833b9eea132d6ec6113258e4b6f31d728356dfb5b6f5"
         },
         {
           "path": "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/synthetic-browser-fixture.mjs",

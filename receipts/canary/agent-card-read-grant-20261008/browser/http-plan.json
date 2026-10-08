@@ -1,16 +1,16 @@
 {
   "schema": "CanaryPlan/v1",
-  "id": "PR225-local-next-http-boot",
+  "id": "PR225-local-next-http-boot-final",
   "owner": "MUNERAL successor lane",
   "environment": "Current byte-checked frozen Next runtime on loopback; actual browser consumers measured separately",
   "base_url": "http://127.0.0.1:18345",
   "subject": {
     "schema": "GitCanarySubject/v1",
-    "commit": "0a97a2abfcc7a789d7ae57bf5323cf0db71070f8",
-    "tree": "c44845a8c7baf53dd6427efc3e8256172f6f318d",
+    "commit": "0ae60ff6ba19d212a50183741a4fd63d24cb39af",
+    "tree": "f1c55afa2a072e94a1bbf109c3b7c32ec1ebc3d0",
     "evidence": {
       "path": "source-evidence.json",
-      "sha256": "b1eb0c1e2c270eb9f973560dc4b8121f09380af84c370ed9d9d5730c7fe3c9c0",
+      "sha256": "bf70a0ce03b4f0862d46b0ebaf42ae97a75dd7844596a540b32516ebace21c29",
       "source_field": "commit"
     }
   },

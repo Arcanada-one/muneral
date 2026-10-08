@@ -1,6 +1,6 @@
 {
  "base_url": "http://127.0.0.1:18345",
- "captured_at_utc": "2026-10-08T08:43:48Z",
+ "captured_at_utc": "2026-10-08T09:57:22Z",
  "card": "AUP-GRAPH-008",
  "contract_ref": "contracts/graph-verified-change/observed-edges-and-deploy-gate.v1.json",
  "counters": {
@@ -22,15 +22,15 @@
  "model": "claude-opus-5",
  "phase": "pre",
  "plan": {
-  "digest": "sha256:71cbca1313ce91d24ba786433a971dd3f7e9c98bf5c1920b6cfdc7e6745bd532",
-  "id": "PR225-local-next-http-boot",
-  "path": "/home/dev/aup/import-audit-work/runs/PR225-successor-browser-canary/http-plan.json"
+  "digest": "sha256:94b8ac787c2f1dd70f11c325805739b07697d1cc0629d64c4fb3ebb98e3e305f",
+  "id": "PR225-local-next-http-boot-final",
+  "path": "/home/dev/aup/import-audit-work/runs/PR225-final-browser-CAN/http-plan.json"
  },
  "probes": [
   {
    "body_bytes": 4,
    "body_sha256": "sha256:74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
-   "elapsed_ms": 65,
+   "elapsed_ms": 2977,
    "id": "web-http-boot",
    "method": "GET",
    "outcome": "verified",
@@ -52,13 +52,13 @@
  ],
  "schema": "CanaryResult/v1",
  "subject": {
-  "commit": "0a97a2abfcc7a789d7ae57bf5323cf0db71070f8",
+  "commit": "0ae60ff6ba19d212a50183741a4fd63d24cb39af",
   "evidence": {
    "path": "source-evidence.json",
-   "sha256": "b1eb0c1e2c270eb9f973560dc4b8121f09380af84c370ed9d9d5730c7fe3c9c0",
+   "sha256": "bf70a0ce03b4f0862d46b0ebaf42ae97a75dd7844596a540b32516ebace21c29",
    "source_field": "commit"
   },
   "schema": "GitCanarySubject/v1",
-  "tree": "c44845a8c7baf53dd6427efc3e8256172f6f318d"
+  "tree": "f1c55afa2a072e94a1bbf109c3b7c32ec1ebc3d0"
  }
 }
