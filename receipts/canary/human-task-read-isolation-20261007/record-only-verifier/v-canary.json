@@ -1,0 +1,369 @@
+{
+ "sources": [
+  {
+   "path": "receipts/canary/human-task-read-isolation-20261007/exact603-positive/result.json",
+   "committed_at_head": true,
+   "errors": [],
+   "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "603bda89e014332c5e01054ff4e8333e52f78403",
+    "tree": "9d484b213d63fb966741b0de24d844a49a220f3e",
+    "evidence": {
+     "path": "source-evidence.json",
+     "sha256": "9ddcf9c260f674eda163bde668d847a3c7abbe10859d76a43d762c10ef87d4db",
+     "source_field": "commit"
+    }
+   },
+   "environment": "Owned disposable PostgreSQL and actual Nest HTTP, synthetic human principals only",
+   "captured_at_utc": "2026-10-08T01:15:02Z",
+   "freshness_not_measured": []
+  },
+  {
+   "path": "receipts/canary/human-task-read-isolation-20261007/bound78/routes/route-result.json",
+   "committed_at_head": true,
+   "errors": [],
+   "subject": {
+    "commit": "e616b3aaa0b1efc12cb763b03d006f813648ef82",
+    "evidence": {
+     "path": "source-evidence.json",
+     "sha256": "9ccb5e22738c83d7839b1aacbd72bdb107408aaa8c7b09d727c3f3b893747daa",
+     "source_field": "commit"
+    },
+    "schema": "GitCanarySubject/v1",
+    "tree": "6c88d4c75866fb44b629e5e88bdd84a387f0405b"
+   },
+   "environment": "Owned synthetic disposable PostgreSQL and actual compiled Nest modules",
+   "captured_at_utc": "2026-10-08T00:19:01Z",
+   "freshness_not_measured": []
+  }
+ ],
+ "verdicts": {
+  "code_unit:apps/api/src/agents/agents.controller.ts": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-0: "
+  ],
+  "code_unit:apps/api/src/migration/migration.controller.ts": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-10: "
+  ],
+  "code_unit:apps/api/src/projects/projects.controller.ts": [
+   "verified",
+   "canary human-task-read-security-positive (pre) on Owned disposable PostgreSQL and actual Nest HTTP, synthetic human principals only: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent"
+  ],
+  "code_unit:apps/api/src/sync/sync.controller.ts": [
+   "verified",
+   "canary human-task-read-security-positive (pre) on Owned disposable PostgreSQL and actual Nest HTTP, synthetic human principals only: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent"
+  ],
+  "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-36: "
+  ],
+  "code_unit:apps/api/src/tasks/tasks.controller.ts": [
+   "verified",
+   "canary human-task-read-security-positive (pre) on Owned disposable PostgreSQL and actual Nest HTTP, synthetic human principals only: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent"
+  ],
+  "code_unit:apps/web/__tests__/kanban-board.test.ts": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "code_unit:apps/web/components/kanban/KanbanBoard.tsx": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "code_unit:apps/web/components/kanban/KanbanCard.tsx": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "code_unit:apps/web/components/kanban/KanbanColumn.tsx": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "code_unit:apps/web/components/task/AuditLog.tsx": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "code_unit:apps/web/components/task/TaskChecklist.tsx": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "code_unit:apps/web/lib/api/tasks.ts": [
+   "not_measured",
+   "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)"
+  ],
+  "route:DELETE /agents/keys/:keyId": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-0: "
+  ],
+  "route:DELETE /agents/tasks/:taskId/assign/:agentId": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-1: "
+  ],
+  "route:DELETE /projects/:projectId": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-2: "
+  ],
+  "route:DELETE /projects/git-refs/:refId": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-3: "
+  ],
+  "route:DELETE /tasks/:taskId": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-4: "
+  ],
+  "route:DELETE /tasks/:taskId/checklist/:itemId": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-5: "
+  ],
+  "route:DELETE /tasks/:taskId/dependencies/:depId": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-6: "
+  ],
+  "route:GET /agents/tasks": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-8: "
+  ],
+  "route:GET /agents/workspace/:workspaceId": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-9: "
+  ],
+  "route:GET /migration/batches/:batchId": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-10: "
+  ],
+  "route:GET /migration/identities/:identityId/mappings": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-11: "
+  ],
+  "route:GET /migration/work-items/by-legacy/:sourceNamespace/:legacyId": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-12: "
+  ],
+  "route:GET /migration/work-items/search": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-13: "
+  ],
+  "route:GET /projects/:projectId": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-14: "
+  ],
+  "route:GET /projects/tasks/:taskId/git-refs": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-15: "
+  ],
+  "route:GET /projects/workspace/:workspaceId": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-16: "
+  ],
+  "route:GET /sync/datarim/:projectId": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-17: "
+  ],
+  "route:GET /tasks": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-18: "
+  ],
+  "route:GET /tasks/:taskId": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-19: "
+  ],
+  "route:GET /tasks/:taskId/activity": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-20: "
+  ],
+  "route:GET /tasks/:taskId/checklist": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-22: "
+  ],
+  "route:GET /tasks/:taskId/dependencies": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-23: "
+  ],
+  "route:GET /tasks/:taskId/dependency-graph": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-24: "
+  ],
+  "route:GET /tasks/:taskId/evidence": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-25: "
+  ],
+  "route:GET /tasks/:taskId/readiness": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-27: "
+  ],
+  "route:GET /tasks/digest": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-28: "
+  ],
+  "route:GET /tasks/project/:projectId": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-29: "
+  ],
+  "route:GET /tasks/project/:projectId/index": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-30: "
+  ],
+  "route:GET /tasks/project/:projectId/staleness": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-31: "
+  ],
+  "route:PATCH /tasks/:taskId/checklist/:itemId": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-35: "
+  ],
+  "route:PATCH /tasks/:taskId/contract": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-36: "
+  ],
+  "route:PATCH /tasks/:taskId/status": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-37: "
+  ],
+  "route:POST /agents": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-39: "
+  ],
+  "route:POST /agents/:agentId/keys": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-40: "
+  ],
+  "route:POST /agents/keys/:keyId/rotate": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-41: "
+  ],
+  "route:POST /agents/keys/self/revoke": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-42: "
+  ],
+  "route:POST /agents/tasks/:taskId/assign": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-43: "
+  ],
+  "route:POST /migration/batches": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-44: "
+  ],
+  "route:POST /migration/batches/:batchId/commit": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-45: "
+  ],
+  "route:POST /migration/identities/:identityId/decisions": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-46: "
+  ],
+  "route:POST /migration/work-items": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-47: "
+  ],
+  "route:POST /migration/work-items/:taskId/transitions": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-48: "
+  ],
+  "route:POST /projects": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-49: "
+  ],
+  "route:POST /projects/git-refs": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-50: "
+  ],
+  "route:POST /sync/datarim/:projectId/import": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-51: "
+  ],
+  "route:POST /tasks": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-52: "
+  ],
+  "route:POST /tasks/:taskId/checklist": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-54: "
+  ],
+  "route:POST /tasks/:taskId/comments": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-55: "
+  ],
+  "route:POST /tasks/:taskId/dependencies": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-56: "
+  ],
+  "route:POST /tasks/:taskId/evidence": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-57: "
+  ],
+  "route:POST /tasks/:taskId/redactions": [
+   "verified",
+   "canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-59: "
+  ]
+ },
+ "log": [
+  "verified     code_unit:apps/api/src/agents/agents.controller.ts  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-0: ",
+  "verified     code_unit:apps/api/src/migration/migration.controller.ts  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-10: ",
+  "verified     code_unit:apps/api/src/projects/projects.controller.ts  canary human-task-read-security-positive (pre) on Owned disposable PostgreSQL and actual Nest HTTP, synthetic human principals only: Actual owned process termin",
+  "verified     code_unit:apps/api/src/sync/sync.controller.ts  canary human-task-read-security-positive (pre) on Owned disposable PostgreSQL and actual Nest HTTP, synthetic human principals only: Actual owned process termin",
+  "verified     code_unit:apps/api/src/tasks/task-contract-binding.controller.ts  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-36: ",
+  "verified     code_unit:apps/api/src/tasks/tasks.controller.ts  canary human-task-read-security-positive (pre) on Owned disposable PostgreSQL and actual Nest HTTP, synthetic human principals only: Actual owned process termin",
+  "not_measured code_unit:apps/web/__tests__/kanban-board.test.ts  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured code_unit:apps/web/components/kanban/KanbanBoard.tsx  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured code_unit:apps/web/components/kanban/KanbanCard.tsx  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured code_unit:apps/web/components/kanban/KanbanColumn.tsx  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured code_unit:apps/web/components/task/AuditLog.tsx  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured code_unit:apps/web/components/task/TaskChecklist.tsx  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "not_measured code_unit:apps/web/lib/api/tasks.ts  INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+  "verified     route:DELETE /agents/keys/:keyId  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-0: ",
+  "verified     route:DELETE /agents/tasks/:taskId/assign/:agentId  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-1: ",
+  "verified     route:DELETE /projects/:projectId  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-2: ",
+  "verified     route:DELETE /projects/git-refs/:refId  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-3: ",
+  "verified     route:DELETE /tasks/:taskId  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-4: ",
+  "verified     route:DELETE /tasks/:taskId/checklist/:itemId  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-5: ",
+  "verified     route:DELETE /tasks/:taskId/dependencies/:depId  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-6: ",
+  "verified     route:GET /agents/tasks  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-8: ",
+  "verified     route:GET /agents/workspace/:workspaceId  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-9: ",
+  "verified     route:GET /migration/batches/:batchId  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-10: ",
+  "verified     route:GET /migration/identities/:identityId/mappings  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-11: ",
+  "verified     route:GET /migration/work-items/by-legacy/:sourceNamespace/:legacyId  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-12: ",
+  "verified     route:GET /migration/work-items/search  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-13: ",
+  "verified     route:GET /projects/:projectId  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-14: ",
+  "verified     route:GET /projects/tasks/:taskId/git-refs  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-15: ",
+  "verified     route:GET /projects/workspace/:workspaceId  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-16: ",
+  "verified     route:GET /sync/datarim/:projectId  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-17: ",
+  "verified     route:GET /tasks  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-18: ",
+  "verified     route:GET /tasks/:taskId  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-19: ",
+  "verified     route:GET /tasks/:taskId/activity  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-20: ",
+  "verified     route:GET /tasks/:taskId/checklist  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-22: ",
+  "verified     route:GET /tasks/:taskId/dependencies  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-23: ",
+  "verified     route:GET /tasks/:taskId/dependency-graph  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-24: ",
+  "verified     route:GET /tasks/:taskId/evidence  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-25: ",
+  "verified     route:GET /tasks/:taskId/readiness  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-27: ",
+  "verified     route:GET /tasks/digest  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-28: ",
+  "verified     route:GET /tasks/project/:projectId  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-29: ",
+  "verified     route:GET /tasks/project/:projectId/index  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-30: ",
+  "verified     route:GET /tasks/project/:projectId/staleness  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-31: ",
+  "verified     route:PATCH /tasks/:taskId/checklist/:itemId  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-35: ",
+  "verified     route:PATCH /tasks/:taskId/contract  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-36: ",
+  "verified     route:PATCH /tasks/:taskId/status  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-37: ",
+  "verified     route:POST /agents  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-39: ",
+  "verified     route:POST /agents/:agentId/keys  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-40: ",
+  "verified     route:POST /agents/keys/:keyId/rotate  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-41: ",
+  "verified     route:POST /agents/keys/self/revoke  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-42: ",
+  "verified     route:POST /agents/tasks/:taskId/assign  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-43: ",
+  "verified     route:POST /migration/batches  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-44: ",
+  "verified     route:POST /migration/batches/:batchId/commit  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-45: ",
+  "verified     route:POST /migration/identities/:identityId/decisions  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-46: ",
+  "verified     route:POST /migration/work-items  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-47: ",
+  "verified     route:POST /migration/work-items/:taskId/transitions  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-48: ",
+  "verified     route:POST /projects  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-49: ",
+  "verified     route:POST /projects/git-refs  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-50: ",
+  "verified     route:POST /sync/datarim/:projectId/import  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-51: ",
+  "verified     route:POST /tasks  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-52: ",
+  "verified     route:POST /tasks/:taskId/checklist  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-54: ",
+  "verified     route:POST /tasks/:taskId/comments  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-55: ",
+  "verified     route:POST /tasks/:taskId/dependencies  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-56: ",
+  "verified     route:POST /tasks/:taskId/evidence  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-57: ",
+  "verified     route:POST /tasks/:taskId/redactions  canary assigned-read-unauthenticated-route-floor (pre) on Owned synthetic disposable PostgreSQL and actual compiled Nest modules: route-59: "
+ ]
+}
