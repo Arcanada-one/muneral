@@ -15,7 +15,7 @@ const require=createRequire(root+'/apps/web/package.json');const {encode}=await 
 const closed=port=>new Promise(r=>{const s=net.createConnection({host:'127.0.0.1',port});s.setTimeout(1000);s.once('connect',()=>{s.destroy();r(false)});s.once('error',()=>r(true));s.once('timeout',()=>{s.destroy();r(false)});});
 assert(await closed(apiPort));assert(await closed(webPort));
 const waitExit=child=>new Promise((r,j)=>{if(child.exitCode!==null)return r();const t=setTimeout(()=>j(Error('Owned process teardown timeout')),15000);child.once('exit',()=>{clearTimeout(t);r();});});
-let backend,next,browser,cleanup,failure,meta;const requests=[],external=[],errors=[];
+let backend,next,browser,cleanup,failure,meta;let invalidAuthorityStatuses=[],httpsBaseControls=[];const requests=[],external=[],errors=[];
 try {
  backend=fork(root+'/apps/api/test/support/transcription-browser-fixture.mjs',[root,String(apiPort),String(webPort)],{execArgv:[],stdio:['ignore','ignore','ignore','ipc'],env:{...process.env}});
  meta=await new Promise((r,j)=>{const t=setTimeout(()=>j(Error('Fixture timeout')),30000);backend.on('message',m=>{if(m.kind==='cleanup')cleanup=m.cleanup;if(m.kind==='ready'){clearTimeout(t);r(m);}});backend.once('exit',()=>{clearTimeout(t);j(Error('Fixture exited'));});});assert.equal(meta.ttl,60);
@@ -32,13 +32,27 @@ try {
  assert((await page.locator('body').innerText()).includes('Production R2 not measured.'));
  await page.reload({waitUntil:'networkidle'});await link.waitFor();assert.equal(await link.getAttribute('href'),meta.fixture.producerRoute);
  await page.screenshot({path:out+'/task-transcription.png',fullPage:true});
- assert.deepEqual(external,[]);assert.deepEqual(errors,[]);assert(requests.every(r=>r.method==='GET'));
+ const malformed=[meta.fixture.producerRoute.replace('https://','https:'),meta.fixture.producerRoute.replace('https://','https:/'),meta.fixture.producerRoute.replace('https://','https:///'),meta.fixture.producerRoute.replace('https://','https:'+String.fromCharCode(92))];
+ const invalidStatuses=await page.evaluate(async ({api,accessToken,projectId,jobId,routes})=>{
+   const statuses=[];
+   for(const producerRoute of routes){const res=await fetch(api+'/api/v1/tasks',{method:'POST',headers:{Authorization:'Bearer '+accessToken,'Content-Type':'application/json'},body:JSON.stringify({projectId,title:'Synthetic invalid authority',transcriptionLink:{jobId,producerRoute}})});statuses.push(res.status);}
+   return statuses;
+ },{api,accessToken:meta.accessToken,projectId:meta.fixture.projectId,jobId:meta.fixture.jobId,routes:malformed});
+ invalidAuthorityStatuses=invalidStatuses;assert.deepEqual(invalidStatuses,[400,400,400,400]);
+ const probe=await context.newPage();
+ await probe.route('https://muneral.invalid/**',route=>route.fulfill({status:200,contentType:'text/html',body:'<!doctype html><title>Synthetic HTTPS document base</title>'}));
+ await probe.goto('https://muneral.invalid/workspaces/synthetic/');
+ const resolved=await probe.evaluate(routes=>routes.map(raw=>{const a=document.createElement('a');a.setAttribute('href',raw);return {raw:a.getAttribute('href'),resolved:a.href};}),[meta.fixture.producerRoute,...malformed]);
+ httpsBaseControls=resolved;assert.equal(resolved[0].raw,meta.fixture.producerRoute);assert.equal(resolved[0].resolved,meta.fixture.producerRoute);
+ assert.notEqual(resolved[1].resolved,meta.fixture.producerRoute);assert.notEqual(resolved[2].resolved,meta.fixture.producerRoute);
+ await probe.close();
+ assert.deepEqual(external,[]);assert.deepEqual(errors,[]);assert(requests.every(r=>r.method==='GET'||(r.method==='POST'&&r.path==='/api/v1/tasks')));
 } catch(e){failure={name:e.name,message:e.message};}
 finally {
  if(browser)await browser.close();
  if(next){try{process.kill(-next.pid,'SIGTERM');await waitExit(next);}catch{failure??={name:'NextTeardownFailed'};}}
  if(backend){try{if(backend.connected)backend.send({op:'shutdown'});await waitExit(backend);}catch{backend.kill('SIGTERM');failure??={name:'FixtureTeardownFailed'};}}
  const portsClosed=await Promise.all([apiPort,webPort].map(closed));if(!cleanup||Object.values(cleanup).some(v=>v!==0)||!portsClosed.every(Boolean))failure??={name:'TeardownReadbackFailed'};
- const result={schema:'MuneralTranscriptionBrowserTest/v1',head:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),verdict:failure?'failed':'verified',failure:failure??null,checks:['native synthetic task stores producer job id and route','built candidate task detail direct URL and hydration','link visible and exact href','hard reload preserves link','R2 explicitly NOT_MEASURED','no producer request or operator login','native synthetic rows removed and zero-row readback','owned API and web listeners closed'],jobId:meta?.fixture.jobId,producerRoute:meta?.fixture.producerRoute,requests,external,errors,cleanup,portsClosed,sessionTtlSeconds:60,credentialPersistence:false,productionRequests:0,r2:'not_measured'};fs.writeFileSync(out+'/browser-result.json',JSON.stringify(result,null,2)+'\n');
+ const result={schema:'MuneralTranscriptionBrowserTest/v1',head:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),verdict:failure?'failed':'verified',failure:failure??null,checks:['native synthetic task stores producer job id and route','built candidate task detail direct URL and hydration','link visible and exact href','absolute href resolves exactly against HTTPS document base','ambiguous HTTPS authority rejected by native API400; browser-relative hazard controls','hard reload preserves link','R2 explicitly NOT_MEASURED','no producer request or operator login','native synthetic rows removed and zero-row readback','owned API and web listeners closed'],jobId:meta?.fixture.jobId,producerRoute:meta?.fixture.producerRoute,requests,invalidAuthorityStatuses,httpsBaseControls,external,errors,cleanup,portsClosed,sessionTtlSeconds:60,credentialPersistence:false,productionRequests:0,r2:'not_measured'};fs.writeFileSync(out+'/browser-result.json',JSON.stringify(result,null,2)+'\n');
 }
 if(failure){console.error('TRANSCRIPTION_BROWSER_FAILED:'+failure.name);process.exitCode=1;}else console.log('TRANSCRIPTION_BROWSER_PASS');

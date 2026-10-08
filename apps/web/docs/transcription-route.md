@@ -13,7 +13,7 @@ Use the current Transcribator producer contract, GET /v1/jobs/:id/result?format=
 }
 ```
 
-The route must be HTTPS, identify the same job and have exactly one supported format query parameter. Credentials, fragments, userinfo and signed URLs are refused. The descriptor is recorded in task-linked activity in the task creation transaction; GET /tasks/:id projects it back as transcriptionLink. No tables migration is required. Existing human workspace visibility and agent task authorization remain authoritative.
+The route must start with an explicit https:// authority, contain no backslashes, identify the same job and have exactly one supported format query parameter. Credentials, fragments, userinfo and signed URLs are refused. Same-scheme forms such as https:host/path, https:/host/path and slash/backslash authority normalization are refused by both API and web, rather than silently rewriting stored bytes. Accepted href bytes are preserved exactly. The descriptor is recorded in task-linked activity in the task creation transaction; GET /tasks/:id projects it back as transcriptionLink. No tables migration is required. Existing human workspace visibility and agent task authorization remain authoritative.
 
 Task detail renders Open transcription with the exact stored producer route. The producer enforces its own JWT ownership when opened; Muneral does not relay credentials or bypass producer authentication. The browser test proves link rendering and exact href on a local built candidate, without opening the producer.
 

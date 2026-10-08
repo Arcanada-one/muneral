@@ -17,7 +17,7 @@ export function readTranscriptionLink(value: unknown): TranscriptionLinkDto {
   try {
     const url = new URL(producerRoute);
     const entries = [...url.searchParams.entries()];
-    if (producerRoute.length > 2048 || /[\s\x00-\x1f\x7f]/.test(producerRoute) || url.protocol !== 'https:' || url.username || url.password || url.hash || url.pathname !== '/v1/jobs/' + jobId + '/result' || entries.length !== 1 || entries[0][0] !== 'format' || !['txt', 'srt', 'vtt', 'json'].includes(entries[0][1])) throw new Error('route');
+    if (producerRoute.length > 2048 || /[\s\x00-\x1f\x7f]/.test(producerRoute) || !/^https:\/\/[^/\\?#]+(?:\/|$)/i.test(producerRoute) || producerRoute.includes('\\') || url.protocol !== 'https:' || url.username || url.password || url.hash || url.pathname !== '/v1/jobs/' + jobId + '/result' || entries.length !== 1 || entries[0][0] !== 'format' || !['txt', 'srt', 'vtt', 'json'].includes(entries[0][1])) throw new Error('route');
     return {jobId, producerRoute};
   } catch { throw new BadRequestException('Invalid transcription producer route'); }
 }

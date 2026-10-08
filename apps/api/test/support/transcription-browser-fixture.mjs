@@ -40,6 +40,6 @@ try {
  if(response.status!==201)throw Error('Synthetic task creation failed');const task=await response.json();fixture.taskId=task.id;
  process.on('message',async message=>{if(message.op==='shutdown'){await finish();process.exit(0);}});
  process.on('SIGTERM',()=>finish().then(()=>process.exit(0)));
- process.send?.({kind:'ready',secret:randomUUID()+randomUUID(),userId:user.id,accessToken:bearer,ttl:60,fixture:{wsSlug:ws.slug,projSlug:project.slug,taskId:task.id,jobId,producerRoute}});
+ process.send?.({kind:'ready',secret:randomUUID()+randomUUID(),userId:user.id,accessToken:bearer,ttl:60,fixture:{projectId:project.id,wsSlug:ws.slug,projSlug:project.slug,taskId:task.id,jobId,producerRoute}});
  setTimeout(()=>finish().then(()=>process.exit(0)),120000).unref();
 } catch(e){await finish();console.error('SyntheticFixtureFailed:'+e.name);process.exitCode=1;}

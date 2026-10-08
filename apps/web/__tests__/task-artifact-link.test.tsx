@@ -26,3 +26,11 @@ it('task read retains and validates the native transcription descriptor', () => 
   expect(readTask(task).transcriptionLink).toEqual({jobId, producerRoute});
   expect(() => readTask({...task, transcriptionLink: {...task.transcriptionLink, jobId: '22222222-2222-4222-8222-222222222222'}})).toThrow();
 });
+
+it.each(['https:example.invalid', 'https:/example.invalid', 'https:///example.invalid', 'https:\\example.invalid', 'https://example.invalid\\v1'])('refuses browser-base ambiguous producer authority %s', authority => {
+  render(<TaskTranscription link={{jobId, producerRoute: authority + '/v1/jobs/' + jobId + '/result?format=txt'}} />);
+  expect(screen.getByRole('alert')).toBeInTheDocument();
+  expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  const task={id:jobId,projectId:jobId,title:'Synthetic',status:'todo',priority:'medium',actorType:'human',createdAt:'2026-10-08T00:00:00Z',updatedAt:'2026-10-08T00:00:00Z',transcriptionLink:{jobId,producerRoute:authority+'/v1/jobs/'+jobId+'/result?format=txt'}};
+  expect(() => readTask(task)).toThrow();
+});

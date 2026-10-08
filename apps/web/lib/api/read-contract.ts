@@ -6,7 +6,7 @@ const timestamp = z.string().datetime({ offset: true });
 export const transcriptionLink = z.object({jobId: id, producerRoute: z.string().max(2048)}).superRefine((value, ctx) => {
   try {
     const url = new URL(value.producerRoute); const entries = [...url.searchParams.entries()];
-    if (/[\s\x00-\x1f\x7f]/.test(value.producerRoute) || url.protocol !== 'https:' || url.username || url.password || url.hash || url.pathname !== '/v1/jobs/' + value.jobId + '/result' || entries.length !== 1 || entries[0][0] !== 'format' || !['txt', 'srt', 'vtt', 'json'].includes(entries[0][1])) throw new Error('route');
+    if (/[\s\x00-\x1f\x7f]/.test(value.producerRoute) || !/^https:\/\/[^/\\?#]+(?:\/|$)/i.test(value.producerRoute) || value.producerRoute.includes('\\') || url.protocol !== 'https:' || url.username || url.password || url.hash || url.pathname !== '/v1/jobs/' + value.jobId + '/result' || entries.length !== 1 || entries[0][0] !== 'format' || !['txt', 'srt', 'vtt', 'json'].includes(entries[0][1])) throw new Error('route');
   } catch { ctx.addIssue({code: z.ZodIssueCode.custom, message: 'Invalid transcription producer route'}); }
 });
 const task = z.object({
