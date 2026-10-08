@@ -142,3 +142,42 @@ describe('the field-change withholding predicates (DEC-AUP-0033 R4)', () => {
     expect(projectHasLiveGrantForAgent(entry.agentId, 'cccccccc-0000-4000-8000-000000000003', live, [entry])).toBe(false);
   });
 });
+
+/**
+ * DEC-AUP-0134 G11 — the grant-list pin for the `card` capability.
+ *
+ * The capability is opt-in per entry (`reads`, absent = index only). The decision
+ * authorises it on two entries at most, and the second only while DEC-AUP-0096 is
+ * positively adopted (it is PROPOSED on Program main, so it is not). This spec
+ * fails on ANY other entry that carries `card`: it is the named detector of an
+ * added holder, and the `reverse_if` clause "a grant for a key other than the two
+ * existing entries appears" is evaluated here, not by a periodic human diff.
+ */
+describe('the `card` capability pin (DEC-AUP-0134 G11)', () => {
+  const AUP_ORCHESTRATOR = '9437639a-5f7c-4fe4-be04-18112ba0bada';
+  const PROJECT_AUP = '08a50f9a-a735-4605-91ce-ce4a41193fbb';
+  const carriers = () =>
+    PROJECT_READ_GRANT_LIST.filter((g) => ((g as { reads?: readonly string[] }).reads ?? []).includes('card')).map(
+      (g) => `${g.agentId.toLowerCase()}|${g.projectId.toLowerCase()}`,
+    );
+
+  it('exactly the aup-orchestrator / project aup entry carries `card` (datarim-history only if DEC-AUP-0096 is adopted: it is not)', () => {
+    expect(carriers()).toEqual([`${AUP_ORCHESTRATOR}|${PROJECT_AUP}`]);
+  });
+
+  it('every entry that names `reads` names only known capabilities, and a `card` entry keeps `index`', () => {
+    for (const g of PROJECT_READ_GRANT_LIST) {
+      const reads = (g as { reads?: readonly string[] }).reads;
+      if (reads === undefined) continue;
+      expect(reads.length).toBeGreaterThan(0);
+      for (const r of reads) expect(['index', 'card']).toContain(r);
+      if (reads.includes('card')) expect(reads).toContain('index');
+    }
+  });
+
+  it('the window of the card-carrying entry is the one DEC-AUP-0033 set — not renewed by adding `card`', () => {
+    const aup = PROJECT_READ_GRANT_LIST.find((g) => g.projectId === PROJECT_AUP);
+    expect(aup?.until).toBe('2026-10-14T00:00:00Z');
+    expect(aup?.decision).toBe('DEC-AUP-0033');
+  });
+});
