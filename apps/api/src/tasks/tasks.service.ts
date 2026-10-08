@@ -651,9 +651,16 @@ export class TasksService {
     const existing = await this.prisma.taskChecklist.findFirst({ where: { id: itemId, taskId } });
     if (!existing) throw new NotFoundException('Checklist item not found');
     await this.prisma.$transaction(async (tx) => {
-      const { task, ...item } = await tx.taskChecklist.delete({
-        where: { id: itemId, taskId },
-        include: { task: { select: { project: { select: { workspaceId: true } } } } },
+      // Prisma's relation include prefetches before DELETE. RETURNING binds the
+      // audit to the row PostgreSQL actually removes after competing updates.
+      const [item] = await tx.$queryRaw<Array<{
+        id: string; text: string; checked: boolean; position: number | null;
+      }>>`DELETE FROM "task_checklists"
+          WHERE "id" = ${itemId}::uuid AND "task_id" = ${taskId}::uuid
+          RETURNING "id", "text", "checked", "position"`;
+      if (!item) throw new NotFoundException('Checklist item not found');
+      const task = await tx.task.findUniqueOrThrow({
+        where: { id: taskId }, select: { project: { select: { workspaceId: true } } },
       });
       await this.activityService.log({
         workspaceId: task.project.workspaceId, taskId, actor,

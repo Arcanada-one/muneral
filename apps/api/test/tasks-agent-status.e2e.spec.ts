@@ -459,4 +459,44 @@ describe('PATCH /tasks/:taskId/status with an agent key — creator or executor 
       expect(await prisma.activityLog.count({ where: { taskId: task.id, action: { startsWith: 'task:checklist_' } } })).toBe(0);
     } finally { spy.mockRestore(); }
   });
+  it('checklist removal audit describes the checked row actually deleted', async () => {
+    const task = await humanTask();
+    const bearer = authSvc.signAccess(userId);
+    const item = await prisma.taskChecklist.create({data:{taskId:task.id,text:'Synthetic race',checked:false}});
+    const { createRequire } = await import('node:module');
+    const requireHere = createRequire(import.meta.url);
+    const pgPath = createRequire(requireHere.resolve('@prisma/adapter-pg')).resolve('pg');
+    const pg = (await import(pgPath)).default;
+    const proto = pg.Client.prototype;
+    const realQuery = proto.query;
+    let armed = true;
+    let reached!: () => void;
+    let release!: () => void;
+    const readDone = new Promise<void>(r => { reached = r; });
+    const resume = new Promise<void>(r => { release = r; });
+    const querySpy = jest.spyOn(proto, 'query').mockImplementation(function(this: any, ...args: any[]) {
+      const sql = typeof args[0] === 'string' ? args[0] : args[0]?.text;
+      if (armed && sql && /^DELETE FROM (?:"public"\.)?"task_checklists"/.test(sql)) {
+        armed = false;
+        reached();
+        return resume.then(() => realQuery.apply(this, args));
+      }
+      return realQuery.apply(this, args);
+    });
+    const pending = supertest(app.getHttpServer()).delete(`/tasks/${task.id}/checklist/${item.id}`)
+      .set('Authorization', `Bearer ${bearer}`).then(res => res);
+    try {
+      await Promise.race([readDone, new Promise((_, reject) => setTimeout(() => reject(new Error('delete SQL barrier timeout')), 3000))]);
+      await supertest(app.getHttpServer()).patch(`/tasks/${task.id}/checklist/${item.id}`)
+        .set('Authorization', `Bearer ${bearer}`).send({checked:true}).expect(200);
+      expect((await prisma.taskChecklist.findUnique({where:{id:item.id}}))?.checked).toBe(true);
+      release();
+      expect((await pending).status).toBe(204);
+      expect(await prisma.taskChecklist.findUnique({where:{id:item.id}})).toBeNull();
+      const rows = await prisma.activityLog.findMany({where:{taskId:task.id,action:'task:checklist_removed'}});
+      expect(rows).toHaveLength(1);
+      expect((rows[0].payload as {checked:boolean}).checked).toBe(true);
+    } finally { release(); await pending; querySpy.mockRestore(); }
+  });
+
 });
