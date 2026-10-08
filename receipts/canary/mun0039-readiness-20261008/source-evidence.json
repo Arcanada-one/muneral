@@ -1,0 +1,14 @@
+{
+  "schema": "MeasuredGitSource/v1",
+  "commit": "b310b35bef5e33175559fad4bdd36604bb96ce69",
+  "tree": "b4e8e6b76d44fd32bec00fc5170707153dcb59ba",
+  "dirty": false,
+  "repository_path": "/home/dev/aup/frontend-work/muneral-ui-read-errors",
+  "test_overlay": false,
+  "captured_at_utc": "2026-10-08T14:54:32.231620+00:00",
+  "production_requests": 0,
+  "producer": {
+    "tool": "MUNERAL exact Git source measurement",
+    "version": "1.0"
+  }
+}

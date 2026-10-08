@@ -1,0 +1,21 @@
+{
+  "db_up": {
+    "readiness": 200,
+    "liveness": 200
+  },
+  "db_down": {
+    "readiness": 503,
+    "liveness": 200,
+    "elapsed_ms": 6
+  },
+  "teardown": {
+    "processes_exited": true,
+    "loopback_ports_closed": [
+      true,
+      true,
+      true
+    ],
+    "postgres_pid_absent": true,
+    "production_requests": 0
+  }
+}
