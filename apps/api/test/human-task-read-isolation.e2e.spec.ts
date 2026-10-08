@@ -23,6 +23,7 @@ import type { ExecutionContext } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import type { Socket, Server } from 'socket.io';
 import { KanbanGateway } from '../src/ws/kanban.gateway.js';
+import { KanbanAccessService } from '../src/ws/kanban-access.service.js';
 
 @Module({ imports: [PrismaModule, AuthModule, ActivityModule, AgentsModule, TasksModule,
   ProjectsModule, WorkspacesModule, SyncModule] })
@@ -185,7 +186,7 @@ describe('Human task reads isolate workspace membership (real HTTP/PostgreSQL)',
     } finally { await prisma.task.update({ where: { id: tasks[0] }, data: { projectId: projects[0] } }); }
   });
   it('Kanban handlers deny foreign subscriptions and recheck revocation before delivery (real PostgreSQL)', async () => {
-    const gateway = new KanbanGateway(new JwtService(), prisma);
+    const gateway = new KanbanGateway(new JwtService(), new KanbanAccessService(prisma));
     const rooms = new Set<string>();
     const received: unknown[] = [];
     const socket = {
@@ -220,9 +221,9 @@ describe('Human task reads isolate workspace membership (real HTTP/PostgreSQL)',
     } finally { await prisma.project.update({ where: { id: projects[0] }, data: { workspaceId: workspaces[0] } }); }
   });
   it('Kanban handlers disclose nothing when authorization storage is unavailable', async () => {
-    const gateway = new KanbanGateway(new JwtService(), {
+    const gateway = new KanbanGateway(new JwtService(), new KanbanAccessService({
       project: { findFirst: async () => { throw new Error('Synthetic authorization store failure'); } },
-    } as unknown as PrismaService);
+    } as unknown as PrismaService));
     const received: unknown[] = [], joined: string[] = [], left: string[] = [];
     const socket = { data: { userId: users[0] },
       join: async (room: string) => { joined.push(room); },

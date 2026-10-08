@@ -10,7 +10,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service.js';
+import { KanbanAccessService } from './kanban-access.service.js';
 
 export type KanbanEvent =
   | 'task:moved'
@@ -38,7 +38,7 @@ export class KanbanGateway
   @WebSocketServer()
   server: Server;
 
-  constructor(private readonly jwtService: JwtService, private readonly prisma: PrismaService) {}
+  constructor(private readonly jwtService: JwtService, private readonly access: KanbanAccessService) {}
 
   async handleConnection(socket: Socket): Promise<void> {
     const token = socket.handshake.auth['token'] as string | undefined;
@@ -74,7 +74,7 @@ export class KanbanGateway
     @ConnectedSocket() socket: Socket,
   ): Promise<void> {
     if (typeof data?.projectId !== 'string') return;
-    if (await this.mayReadProject(data.projectId, socket.data['userId'])) {
+    if (await this.access.mayReadProject(data.projectId, socket.data['userId'])) {
       await socket.join(`project:${data.projectId}`);
     } else {
       await socket.leave(`project:${data.projectId}`);
@@ -99,7 +99,7 @@ export class KanbanGateway
     // Room admission is insufficient: membership or the project workspace
     // may have changed after join. Never broadcast without a fresh check.
     for (const socket of sockets) {
-      if (await this.mayReadProject(projectId, socket.data['userId'])) {
+      if (await this.access.mayReadProject(projectId, socket.data['userId'])) {
         socket.emit(event, payload);
       } else {
         await socket.leave(room);
@@ -107,16 +107,4 @@ export class KanbanGateway
     }
   }
 
-  private async mayReadProject(projectId: string, userId: unknown): Promise<boolean> {
-    if (typeof userId !== 'string' || !userId) return false;
-    try {
-      return !!await this.prisma.project.findFirst({
-        where: { id: projectId, workspace: { members: { some: { userId } } } },
-        select: { id: true },
-      });
-    } catch {
-      // An unavailable authorization store cannot authorize a disclosure.
-      return false;
-    }
-  }
 }
