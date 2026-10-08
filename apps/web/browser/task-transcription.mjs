@@ -6,17 +6,18 @@ import {resolve} from 'node:path';
 import fs from 'node:fs';
 import net from 'node:net';
 const root=resolve(fileURLToPath(new URL('../../../',import.meta.url)));
-const out=process.env.MUNERAL_BROWSER_OUT;assert(out);
-const apiPort=Number(process.env.MUNERAL_BROWSER_API_PORT),webPort=Number(process.env.MUNERAL_BROWSER_WEB_PORT);assert(apiPort&&webPort);
+const options=new Map();for(let i=2;i<process.argv.length;i+=2)options.set(process.argv[i],process.argv[i+1]);
+const out=options.get('--output');assert(out);
+const apiPort=Number(options.get('--api-port')),webPort=Number(options.get('--web-port'));assert(apiPort&&webPort);
 const origin='http://127.0.0.1:'+webPort,api='http://127.0.0.1:'+apiPort;
-const {chromium}=await import(process.env.MUNERAL_PLAYWRIGHT_MODULE ?? '@playwright/test');
+const {chromium}=await import(options.get('--playwright-module') ?? '@playwright/test');
 const require=createRequire(root+'/apps/web/package.json');const {encode}=await import(require.resolve('next-auth/jwt'));
 const closed=port=>new Promise(r=>{const s=net.createConnection({host:'127.0.0.1',port});s.setTimeout(1000);s.once('connect',()=>{s.destroy();r(false)});s.once('error',()=>r(true));s.once('timeout',()=>{s.destroy();r(false)});});
 assert(await closed(apiPort));assert(await closed(webPort));
 const waitExit=child=>new Promise((r,j)=>{if(child.exitCode!==null)return r();const t=setTimeout(()=>j(Error('Owned process teardown timeout')),15000);child.once('exit',()=>{clearTimeout(t);r();});});
 let backend,next,browser,cleanup,failure,meta;const requests=[],external=[],errors=[];
 try {
- backend=fork(root+'/apps/api/test/support/transcription-browser-fixture.mjs',[],{execArgv:[],stdio:['ignore','ignore','ignore','ipc'],env:{...process.env,MUNERAL_BROWSER_REPO:root}});
+ backend=fork(root+'/apps/api/test/support/transcription-browser-fixture.mjs',[root,String(apiPort),String(webPort)],{execArgv:[],stdio:['ignore','ignore','ignore','ipc'],env:{...process.env}});
  meta=await new Promise((r,j)=>{const t=setTimeout(()=>j(Error('Fixture timeout')),30000);backend.on('message',m=>{if(m.kind==='cleanup')cleanup=m.cleanup;if(m.kind==='ready'){clearTimeout(t);r(m);}});backend.once('exit',()=>{clearTimeout(t);j(Error('Fixture exited'));});});assert.equal(meta.ttl,60);
  next=spawn(process.execPath,['node_modules/next/dist/bin/next','start','--hostname','127.0.0.1','--port',String(webPort)],{cwd:root+'/apps/web',stdio:'ignore',detached:true,env:{...process.env,NEXTAUTH_SECRET:meta.secret,AUTH_SECRET:meta.secret,AUTH_TRUST_HOST:'true',AUTH_URL:origin,NEXTAUTH_URL:origin,NEXT_TELEMETRY_DISABLED:'1'}});
  for(let i=0;i<75;i++){try{if((await fetch(origin+'/login')).status===200)break;}catch{}if(i===74)throw Error('Next timeout');await new Promise(r=>setTimeout(r,200));}
