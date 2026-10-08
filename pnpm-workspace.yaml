@@ -41,10 +41,17 @@ minimumReleaseAgeExclude:
   - esbuild@0.28.1
 
 overrides:
+  # GHSA-jqcg-44mw-7w3h: IPv4 clients must not match short IPv6 trust prefixes.
+  'proxy-addr@^2.0.0': 2.0.8
+  # GHSA-p6vx-979v-rg4c and the subsequent high advisory require the patched
+  # 1.x serializer line; preserve seroval-plugins' compatible ^1.0 peer contract.
+  'seroval@^1.0.0': 1.6.3
+  # Fresh high source-map-js advisory; constrain the existing 1.x line.
+  'source-map-js@^1.0.0': 1.2.2
   # Per major line: minimatch@3 wants the CJS 1.x shape, and collapsing it into
   # 5.x breaks it with `expand is not a function` — measured, not feared.
-  'brace-expansion@^1.0.0': ^1.1.18
-  'brace-expansion@^5.0.0': ^5.0.9
+  'brace-expansion@^1.0.0': ^1.1.20
+  'brace-expansion@^5.0.0': ^5.0.11
   # ARCA-0209: @prisma/config 7.8.0 pins deepmerge-ts 7.1.5, which carries a high
   # advisory fixed only in 8.0.0. Version-selector key, so it applies by RESOLVED
   # version rather than by declared range.
@@ -63,11 +70,13 @@ overrides:
   'nanoid@^3.0.0': ^3.3.17
   postcss: ^8.5.23
   socket.io-parser: ^4.2.7
+  # GHSA-2gc4-cqfq-p2gv: apply the patched engine.io 6.x line.
+  engine.io: ">=6.6.10 <7"
   axios: ">=1.18.0"
   body-parser: ">=2.3.0"
   form-data: ">=4.0.6"
   multer: ">=2.2.0"
-  sharp: ">=0.35.0"
+  sharp: "0.35.5"
   ws: ">=8.21.0"
   # GHSA-73wf-gq98-2v4g / GHSA-c83g-rgw3-j3cx: unbounded memory growth / prototype
   # write, both fixed in 4.28.7.

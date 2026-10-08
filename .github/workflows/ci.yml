@@ -42,8 +42,9 @@ jobs:
     # A2-315: pre-deploy gates run on the dedicated `deploy-gate` lane, not on `ci-general`, where
     # KC2 batteries held all five slots for hours (argana 95 min, muneral 150 min in the queue on
     # 2026-09-24/25). The lane's runners carry ONLY that label (--no-default-labels): nothing else lands there.
-    # Pull requests keep the shared pool; only the push that deploys takes the lane.
-    runs-on: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && fromJSON('["deploy-gate"]') || fromJSON('["self-hosted","linux","ci-general"]') }}
+    # SEC85: owned PR fixtures run on ephemeral hosted Ubuntu, measured by the
+    # candidate image proof. The main-only deploying push retains its lane.
+    runs-on: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && fromJSON('["deploy-gate"]') || fromJSON('["ubuntu-latest"]') }}
     services:
       postgres:
         image: postgres:16
@@ -66,6 +67,13 @@ jobs:
           - 5432
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact source checkout
+        env:
+          EXPECTED_SOURCE_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "${EXPECTED_SOURCE_HEAD}"
       - name: Test Ops Bot secret gate contract
         run: bash scripts/ci/opsbot-secret-gate.test.sh
       - name: Test runner deploy-broker preflight contract
@@ -99,10 +107,18 @@ jobs:
         with:
           node-version: 24.21.0
           cache: pnpm
+      - name: Test candidate image query transport and filesystem guards
+        run: |
+          node --test scripts/ci/production-image-proof.spec.mjs scripts/ci/command-failure-evidence.spec.mjs
+          python3 -B -m unittest discover -s scripts/ci -p 'test_image_filesystem_proof.py'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Test installed Express proxy trust boundary
+        run: node --test scripts/ci/proxy-trust-boundary.spec.mjs
       - name: Lint
         run: pnpm lint
+      - name: Type-check CI JavaScript source
+        run: apps/api/node_modules/.bin/tsc --project scripts/ci/tsconfig.json --listFiles
       - name: Build shared types
         run: pnpm --filter @muneral/types build
       - name: Generate Prisma client
@@ -126,6 +142,73 @@ jobs:
         env:
           DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
           MUN0020_DB_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
+
+  # SEC85: a candidate image is measured in an ephemeral hosted job, separately
+  # from the main-only production broker. No repository secrets are passed here.
+  candidate-api-image:
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: image_fixture
+          POSTGRES_PASSWORD: image_fixture
+          POSTGRES_DB: muneral_image_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24.21.0
+      - name: Measure exact candidate image and owned PostgreSQL fixture
+        env:
+          CANDIDATE_HEAD: ${{ github.event.pull_request.head.sha }}
+          CANDIDATE_RUN: ${{ github.run_id }}-${{ github.run_attempt }}
+          FIXTURE_POSTGRES_ID: ${{ job.services.postgres.id }}
+          FIXTURE_POSTGRES_PORT: ${{ job.services.postgres.ports['5432'] }}
+        run: |
+          set -euo pipefail
+          test "${RUNNER_ENVIRONMENT}" = github-hosted
+          node --test scripts/ci/production-image-proof.spec.mjs scripts/ci/command-failure-evidence.spec.mjs
+          python3 -B -m unittest discover -s scripts/ci -p 'test_image_filesystem_proof.py'
+          node scripts/ci/production-image-proof.mjs \
+            --head "${CANDIDATE_HEAD}" \
+            --runner-environment "${RUNNER_ENVIRONMENT}" \
+            --run "${CANDIDATE_RUN}" \
+            --postgres-id "${FIXTURE_POSTGRES_ID}" \
+            --postgres-port "${FIXTURE_POSTGRES_PORT}" \
+            --out "${RUNNER_TEMP}/candidate-image-proof-${CANDIDATE_RUN}"
+      - name: Preserve candidate proof and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: candidate-api-image-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/candidate-image-proof-${{ github.run_id }}-${{ github.run_attempt }}/runtime.json
+            ${{ runner.temp }}/candidate-image-proof-${{ github.run_id }}-${{ github.run_attempt }}/filesystem.json
+            ${{ runner.temp }}/candidate-image-proof-${{ github.run_id }}-${{ github.run_attempt }}/image-id
+          if-no-files-found: error
+          retention-days: 7
 
   # AUP-GRAPH-006 `gate1` (DEC-AUP-0008): «нет receipt — нет мержа». A pull request is admitted only
   # when a ChangeAdmissionReceipt/v1 is bound to exactly this change range — in the head tree under
@@ -175,7 +258,7 @@ jobs:
       compose_paths: docker-compose.prod.yml
       datarim_ref: '50351e0468f57a39b280d75cf41827329d6393d2'
       # A2-315: on the deploying push this gate takes the `deploy-gate` lane too (default is ci-general).
-      runner_labels: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && '["deploy-gate"]' || '["self-hosted","linux","ci-general"]' }}
+      runner_labels: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && '["deploy-gate"]' || '["ubuntu-latest"]' }}
 
   preflight-caller-contract:
     permissions:

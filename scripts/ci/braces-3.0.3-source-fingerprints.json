@@ -1,0 +1,35 @@
+{
+  "package": "braces",
+  "version": "3.0.3",
+  "primary_metadata": "https://registry.npmjs.org/braces/3.0.3",
+  "tarball": "https://registry.npmjs.org/braces/-/braces-3.0.3.tgz",
+  "integrity": "sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==",
+  "files": [
+    {
+      "path": "lib/compile.js",
+      "sha256": "dc98f22eee3d511785d92a00758d5f0d48efed5f5813bdecc2de430c529b5c9f",
+      "bytes": 1501
+    },
+    {
+      "path": "lib/expand.js",
+      "sha256": "41ccc196ebfa7b7781a634e721eb744e4e7bcb54cba427a7e3d6806a1b9e58f7",
+      "bytes": 2797
+    },
+    {
+      "path": "lib/parse.js",
+      "sha256": "e572166565f15fa6ad9865ae49d678218e32aabfd1b3720f6d0d43d39800d310",
+      "bytes": 6899
+    },
+    {
+      "path": "lib/stringify.js",
+      "sha256": "379f22d77bfa1478341ccd49c5e4267464aabcbba03558bab332aac23fc6f23a",
+      "bytes": 708
+    }
+  ],
+  "sha256": [
+    "dc98f22eee3d511785d92a00758d5f0d48efed5f5813bdecc2de430c529b5c9f",
+    "41ccc196ebfa7b7781a634e721eb744e4e7bcb54cba427a7e3d6806a1b9e58f7",
+    "e572166565f15fa6ad9865ae49d678218e32aabfd1b3720f6d0d43d39800d310",
+    "379f22d77bfa1478341ccd49c5e4267464aabcbba03558bab332aac23fc6f23a"
+  ]
+}

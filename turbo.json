@@ -13,7 +13,8 @@
         "MUN0020_DB_URL",
         "REDIS_URL",
         "JWT_SECRET"
-      ]
+      ],
+      "passThroughEnv": ["TMPDIR", "TMP", "TEMP"]
     },
     "lint": {},
     "dev": {
