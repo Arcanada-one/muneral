@@ -1,0 +1,39 @@
+ts-jest[config] (WARN) [94mmessage[0m[90m TS151002: [0mUsing hybrid module kind (Node16/18/Next) is only supported in "isolatedModules: true". Please set "isolatedModules: true" in your tsconfig.json. To disable this message, you can set "diagnostics.ignoreCodes" to include 151002 in your ts-jest config. See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/options/diagnostics
+ts-jest[config] (WARN) [94mmessage[0m[90m TS151002: [0mUsing hybrid module kind (Node16/18/Next) is only supported in "isolatedModules: true". Please set "isolatedModules: true" in your tsconfig.json. To disable this message, you can set "diagnostics.ignoreCodes" to include 151002 in your ts-jest config. See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/options/diagnostics
+ts-jest[config] (WARN) [94mmessage[0m[90m TS151002: [0mUsing hybrid module kind (Node16/18/Next) is only supported in "isolatedModules: true". Please set "isolatedModules: true" in your tsconfig.json. To disable this message, you can set "diagnostics.ignoreCodes" to include 151002 in your ts-jest config. See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/options/diagnostics
+(node:3690254) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[33m[Nest] 3690254  - [39m10/08/2026, 3:38:27 PM [33m   WARN[39m [38;5;3m[AuthModule] [39m[33mGITHUB_CLIENT_ID not set — GitHub OAuth disabled[39m
+[31m[Nest] 3690254  - [39m10/08/2026, 3:38:46 PM [31m  ERROR[39m [38;5;3m[ExceptionsHandler] [39mError: synthetic audit failure
+    at Object.<anonymous> [90m(/home/dev/aup/import-audit-work/mun0007-collaboration/apps/api/[39mtest/agent-key-assign-scope.e2e.spec.ts:257:31[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
+PASS test/agent-key-assign-scope.e2e.spec.ts (36.727 s)
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ suppress logs { quiet: true }
+
+      at _log (../../../mun-rev4/node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/agent-task-scope.guard.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+
+      at _log (../../../mun-rev4/node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/assign-compat-window.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+
+      at _log (../../../mun-rev4/node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+
+Test Suites: 3 passed, 3 total
+Tests:       65 passed, 65 total
+Snapshots:   0 total
+Time:        37.617 s
+Ran all test suites within paths "test/agent-task-scope.guard.spec.ts", "test/agent-key-assign-scope.e2e.spec.ts", "test/assign-compat-window.spec.ts".

@@ -1,0 +1,20 @@
+{
+  "schema": "ReadinessReceipt/v1",
+  "work_item": "70110cb5-8535-4366-bac8-723808602f4a",
+  "reviewed_head": "1fa52c1a0914b028767eac074c503efc7da19182",
+  "finding": "Audit used stale pre-delete role after concurrent delete/reassignment",
+  "correction": "Role and workspace are taken from the row returned by transaction taskAgent.delete",
+  "node": "24.21.0",
+  "red": "real HTTP/PostgreSQL controlled race expected lead/reviewer; observed reviewer/reviewer, exit1",
+  "green": "66/66 targeted tests; race plus actor/rollback controls, exit0",
+  "typescript_exit": 0,
+  "eslint_exit": 0,
+  "source_hashes": {
+    "apps/api/src/agents/agents.service.ts": "1b4eb8a56a403bacffd6358b466671e7d7c723c16211c18a09012e5ff5493601",
+    "apps/api/test/agent-key-assign-scope.e2e.spec.ts": "29fe7b24a2ad40e8a432093185bb3539a679f7952d2d7dbfa8c856b402a97a83"
+  },
+  "assembly_outcomes": "Historical 85 mutant outcomes retained; native Git supplement refreshed only; not a fresh mutation run",
+  "production_requests": 0,
+  "runtime_authorized": false,
+  "limits": "Native canaries and production behavior remain unmeasured; full MUN-0007 not complete. Jest open-handle warning retained; process exited 0 on GREEN and fixture teardown was verified."
+}
