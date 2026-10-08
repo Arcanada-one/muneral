@@ -5,7 +5,7 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "paused_safe"
  },
- "captured_at_utc": "2026-10-08T08:36:25Z",
+ "captured_at_utc": "2026-10-08T08:45:42Z",
  "change_set": {
   "base": "43e79c97b05d04252b57f6cb4033fbae844bcc22",
   "files": [
@@ -163,7 +163,52 @@
    {
     "kind": "receipt",
     "new": true,
+    "path": "receipts/canary/agent-card-read-grant-20261008/browser/http-plan.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/agent-card-read-grant-20261008/browser/http-result.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/agent-card-read-grant-20261008/browser/plan.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/agent-card-read-grant-20261008/browser/result.json",
+    "status": "A"
+   },
+   {
+    "kind": "doc",
+    "node_id": "document:receipts/canary/agent-card-read-grant-20261008/browser/scope.md",
+    "node_ids": [
+     "document:receipts/canary/agent-card-read-grant-20261008/browser/scope.md"
+    ],
+    "path": "receipts/canary/agent-card-read-grant-20261008/browser/scope.md",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/agent-card-read-grant-20261008/browser/source-evidence.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
     "path": "receipts/canary/agent-card-read-grant-20261008/driver/assigned-read-route-binding.json",
+    "status": "A"
+   },
+   {
+    "kind": "doc",
+    "new": true,
+    "path": "receipts/canary/agent-card-read-grant-20261008/positive/contract-binding-tests.txt",
     "status": "A"
    },
    {
@@ -227,7 +272,7 @@
      "receipt:receipts/graph/backend-workspace-isolation-20261008.json"
     ],
     "path": "receipts/graph/backend-workspace-isolation-20261008.json",
-    "status": "D"
+    "status": "M"
    },
    {
     "kind": "receipt",
@@ -239,7 +284,7 @@
     "status": "A"
    }
   ],
-  "head": "2127fd0f0296bc7d8d704c1626a7224974c350c1",
+  "head": "57ff382355b54d3d1960de45c52d747b62b42704",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -248,18 +293,18 @@
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
   "graph_digest": "sha256:f976d1edc0ddb5f4c52c43638edd034686ae8755357a72aacead87c7327ee61e",
-  "path": "/home/dev/aup/import-audit-work/runs/PR225-corrected-verify-20261008/verifier-out/graph-43e79c97b05d.json",
+  "path": "/home/dev/aup/import-audit-work/runs/PR225-final-candidate-verify-20261008/verifier-out/graph-43e79c97b05d.json",
   "source_commit": "43e79c97b05d04252b57f6cb4033fbae844bcc22"
  },
  "head_graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:d02bed0a0a403c2f79dac8e9bda31c57b0214bfb5f4377f8c2a8792d23744377",
-  "path": "/home/dev/aup/import-audit-work/runs/PR225-corrected-verify-20261008/verifier-out/graph-head-2127fd0f0296.json",
-  "source_commit": "2127fd0f0296bc7d8d704c1626a7224974c350c1",
+  "graph_digest": "sha256:eaef06dfe5c2e1a8384134009260d35d71dd5856bff3829f3e73ce64b9b70c9e",
+  "path": "/home/dev/aup/import-audit-work/runs/PR225-final-candidate-verify-20261008/verifier-out/graph-head-57ff382355b5.json",
+  "source_commit": "57ff382355b54d3d1960de45c52d747b62b42704",
   "staleness": {
-   "checked_at_utc": "2026-10-08T08:36:58Z",
-   "checked_nodes": 441,
+   "checked_at_utc": "2026-10-08T08:46:12Z",
+   "checked_nodes": 443,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -267,7 +312,7 @@
  },
  "host": "development-host",
  "host_redacted": true,
- "host_sha256": "ea2bb349c702244bd095b406d510980bccacee44a00b4500747cfd6798552446",
+ "host_sha256": "4a42e606139966d6fd8b69946e46991196e6768eba9933489140f63eb0c80c83",
  "impact_set": {
   "deterministic_core": [
    {
@@ -3573,7 +3618,7 @@
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261008T083625Z-2127fd0f",
+ "receipt_id": "car-verify-20261008T084542Z-57ff3823",
  "receipt_path": "receipts/graph/backend-workspace-isolation-20261008.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -3845,6 +3890,7 @@
    "document:apps/api/docs/task-redactions.md",
    "document:docs/how-to/enable-outbox-relay.md",
    "document:docs/reference/task-contract-binding.md",
+   "document:receipts/canary/agent-card-read-grant-20261008/browser/scope.md",
    "receipt:receipts/graph/A2-294-digest-grant-on-refresh.json",
    "receipt:receipts/graph/A2-330-muneral-canary.json",
    "receipt:receipts/graph/A2-365-revert-digest-grant.json",
@@ -3855,6 +3901,7 @@
    "receipt:receipts/graph/A2-394-reinstate-digest-grant.json",
    "receipt:receipts/graph/a2-304-dependabot-group.json",
    "receipt:receipts/graph/a2-320-web-eslint10.json",
+   "receipt:receipts/graph/backend-workspace-isolation-20261008.json",
    "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json",
    "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
    "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
@@ -3940,7 +3987,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-08T08:36:58Z",
+  "checked_at_utc": "2026-10-08T08:46:12Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -4059,7 +4106,7 @@
   {
    "content_hash": {
     "base": "sha256:9e8cd835911bd3c7f2e61b023c67aa004bf0c2e8207176470dd2f3516a7e49cb",
-    "head": null
+    "head": "sha256:aaf902e86081cfb41182608da3c149c79656aadc59b67b49ddcedbf08ea66e11"
    },
    "entity": "receipt:receipts/graph/backend-workspace-isolation-20261008.json",
    "node_type": "receipt",
@@ -4370,7 +4417,7 @@
   }
  ],
  "tree": {
-  "commit": "2127fd0f0296bc7d8d704c1626a7224974c350c1",
+  "commit": "57ff382355b54d3d1960de45c52d747b62b42704",
   "dirty": false
  },
  "verdicts": [
@@ -4902,10 +4949,10 @@
   },
   {
    "entity": "code_unit:apps/web/__tests__/kanban-board.test.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "reached through an inferred edge across a service/repo boundary and listed verified by a canary on the live contour (matrix P6 lifted by AUP-GRAPH-008); v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-3: canary PR225-synthetic-web-consumer-canary (pre) on Frozen byte-checked Next source with current compiled local Nest backend and two disposable synthetic principals; no production request: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-3",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
@@ -4913,10 +4960,10 @@
   },
   {
    "entity": "code_unit:apps/web/__tests__/read-api-contract.test.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "reached through an inferred edge across a service/repo boundary and listed verified by a canary on the live contour (matrix P6 lifted by AUP-GRAPH-008); v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation; v-canary-3: canary PR225-synthetic-web-consumer-canary (pre) on Frozen byte-checked Next source with current compiled local Nest backend and two disposable synthetic principals; no production request: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-3",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
@@ -4924,10 +4971,10 @@
   },
   {
    "entity": "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "reached through an inferred edge across a service/repo boundary and listed verified by a canary on the live contour (matrix P6 lifted by AUP-GRAPH-008); v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation; v-canary-3: canary PR225-synthetic-web-consumer-canary (pre) on Frozen byte-checked Next source with current compiled local Nest backend and two disposable synthetic principals; no production request: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-3",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
@@ -4935,10 +4982,10 @@
   },
   {
    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "reached through an inferred edge across a service/repo boundary and listed verified by a canary on the live contour (matrix P6 lifted by AUP-GRAPH-008); v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation; v-canary-3: canary PR225-synthetic-web-consumer-canary (pre) on Frozen byte-checked Next source with current compiled local Nest backend and two disposable synthetic principals; no production request: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-3",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
@@ -4946,10 +4993,10 @@
   },
   {
    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "reached through an inferred edge across a service/repo boundary and listed verified by a canary on the live contour (matrix P6 lifted by AUP-GRAPH-008); v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation; v-canary-3: canary PR225-synthetic-web-consumer-canary (pre) on Frozen byte-checked Next source with current compiled local Nest backend and two disposable synthetic principals; no production request: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-3",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
@@ -4957,10 +5004,10 @@
   },
   {
    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "reached through an inferred edge across a service/repo boundary and listed verified by a canary on the live contour (matrix P6 lifted by AUP-GRAPH-008); v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation; v-canary-3: canary PR225-synthetic-web-consumer-canary (pre) on Frozen byte-checked Next source with current compiled local Nest backend and two disposable synthetic principals; no production request: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-3",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
@@ -4968,10 +5015,10 @@
   },
   {
    "entity": "code_unit:apps/web/components/dashboard/BlockersList.tsx",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "reached through an inferred edge across a service/repo boundary and listed verified by a canary on the live contour (matrix P6 lifted by AUP-GRAPH-008); v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation; v-canary-3: canary PR225-synthetic-web-consumer-canary (pre) on Frozen byte-checked Next source with current compiled local Nest backend and two disposable synthetic principals; no production request: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-3",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
@@ -4979,10 +5026,10 @@
   },
   {
    "entity": "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "reached through an inferred edge across a service/repo boundary and listed verified by a canary on the live contour (matrix P6 lifted by AUP-GRAPH-008); v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-3: canary PR225-synthetic-web-consumer-canary (pre) on Frozen byte-checked Next source with current compiled local Nest backend and two disposable synthetic principals; no production request: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-3",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
@@ -4990,10 +5037,10 @@
   },
   {
    "entity": "code_unit:apps/web/components/kanban/KanbanCard.tsx",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "reached through an inferred edge across a service/repo boundary and listed verified by a canary on the live contour (matrix P6 lifted by AUP-GRAPH-008); v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation; v-canary-3: canary PR225-synthetic-web-consumer-canary (pre) on Frozen byte-checked Next source with current compiled local Nest backend and two disposable synthetic principals; no production request: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-3",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
@@ -5001,10 +5048,10 @@
   },
   {
    "entity": "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "reached through an inferred edge across a service/repo boundary and listed verified by a canary on the live contour (matrix P6 lifted by AUP-GRAPH-008); v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-3: canary PR225-synthetic-web-consumer-canary (pre) on Frozen byte-checked Next source with current compiled local Nest backend and two disposable synthetic principals; no production request: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-3",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
@@ -5012,10 +5059,10 @@
   },
   {
    "entity": "code_unit:apps/web/components/task/AuditLog.tsx",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "reached through an inferred edge across a service/repo boundary and listed verified by a canary on the live contour (matrix P6 lifted by AUP-GRAPH-008); v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation; v-canary-3: canary PR225-synthetic-web-consumer-canary (pre) on Frozen byte-checked Next source with current compiled local Nest backend and two disposable synthetic principals; no production request: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-3",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
@@ -5023,10 +5070,10 @@
   },
   {
    "entity": "code_unit:apps/web/components/task/TaskChecklist.tsx",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "reached through an inferred edge across a service/repo boundary and listed verified by a canary on the live contour (matrix P6 lifted by AUP-GRAPH-008); v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation; v-canary-3: canary PR225-synthetic-web-consumer-canary (pre) on Frozen byte-checked Next source with current compiled local Nest backend and two disposable synthetic principals; no production request: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-3",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
@@ -5034,10 +5081,10 @@
   },
   {
    "entity": "code_unit:apps/web/components/task/TaskDependencies.tsx",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "reached through an inferred edge across a service/repo boundary and listed verified by a canary on the live contour (matrix P6 lifted by AUP-GRAPH-008); v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation; v-canary-3: canary PR225-synthetic-web-consumer-canary (pre) on Frozen byte-checked Next source with current compiled local Nest backend and two disposable synthetic principals; no production request: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-3",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
@@ -5045,10 +5092,10 @@
   },
   {
    "entity": "code_unit:apps/web/components/task/TaskDetail.tsx",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "reached through an inferred edge across a service/repo boundary and listed verified by a canary on the live contour (matrix P6 lifted by AUP-GRAPH-008); v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-3: canary PR225-synthetic-web-consumer-canary (pre) on Frozen byte-checked Next source with current compiled local Nest backend and two disposable synthetic principals; no production request: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-3",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
@@ -5056,10 +5103,10 @@
   },
   {
    "entity": "code_unit:apps/web/lib/api/projects.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "reached through an inferred edge across a service/repo boundary and listed verified by a canary on the live contour (matrix P6 lifted by AUP-GRAPH-008); v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation; v-canary-3: canary PR225-synthetic-web-consumer-canary (pre) on Frozen byte-checked Next source with current compiled local Nest backend and two disposable synthetic principals; no production request: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-3",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
@@ -5067,10 +5114,10 @@
   },
   {
    "entity": "code_unit:apps/web/lib/api/tasks.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "reached through an inferred edge across a service/repo boundary and listed verified by a canary on the live contour (matrix P6 lifted by AUP-GRAPH-008); v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-contract-diff: 3 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-3: canary PR225-synthetic-web-consumer-canary (pre) on Frozen byte-checked Next source with current compiled local Nest backend and two disposable synthetic principals; no production request: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-3",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
@@ -5078,10 +5125,10 @@
   },
   {
    "entity": "code_unit:apps/web/lib/api/workspaces.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "reached through an inferred edge across a service/repo boundary and listed verified by a canary on the live contour (matrix P6 lifted by AUP-GRAPH-008); v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation; v-canary-3: canary PR225-synthetic-web-consumer-canary (pre) on Frozen byte-checked Next source with current compiled local Nest backend and two disposable synthetic principals; no production request: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-3",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
@@ -5130,10 +5177,10 @@
   },
   {
    "entity": "deployable_unit:apps/web",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "reached through an inferred edge across a service/repo boundary and listed verified by a canary on the live contour (matrix P6 lifted by AUP-GRAPH-008); v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: 0 errors; v-fitness: no new violation in apps/web; v-canary-4: canary PR225-local-next-http-boot (pre) on Current byte-checked frozen Next runtime on loopback; actual browser consumers measured separately: web-http-boot: ",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-4",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
    ]
@@ -5213,6 +5260,14 @@
   {
    "entity": "document:docs/reference/task-contract-binding.md",
    "reason": "v-doc-reference: 1 reference(s) resolve at head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-doc-reference"
+   ]
+  },
+  {
+   "entity": "document:receipts/canary/agent-card-read-grant-20261008/browser/scope.md",
+   "reason": "v-doc-reference: 0 reference(s) resolve at head",
    "verdict": "verified",
    "verifier_ids": [
     "v-doc-reference"
@@ -5793,7 +5848,7 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/node_modules/.bin/tsc -p /home/dev/aup/import-audit-work/mun-card-grant/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/PR225-corrected-verify-20261008/verifier-out/type-check-4w128h0h/check.tsbuildinfo --listFiles",
+   "command": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/node_modules/.bin/tsc -p /home/dev/aup/import-audit-work/mun-card-grant/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/PR225-final-candidate-verify-20261008/verifier-out/type-check-ku43j4pj/check.tsbuildinfo --listFiles",
    "duration_s": 2.97,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
@@ -5966,13 +6021,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/PR225-corrected-verify-20261008/verifier-out/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-10-08T08:37:00Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR225-final-candidate-verify-20261008/verifier-out/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-10-08T08:46:14Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1455 files listed"
   },
   {
-   "command": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/node_modules/.bin/tsc -p /home/dev/aup/import-audit-work/mun-card-grant/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/PR225-corrected-verify-20261008/verifier-out/type-check-eics6h3e/check.tsbuildinfo --listFiles",
-   "duration_s": 4.53,
+   "command": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/node_modules/.bin/tsc -p /home/dev/aup/import-audit-work/mun-card-grant/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/PR225-final-candidate-verify-20261008/verifier-out/type-check-_kepr433/check.tsbuildinfo --listFiles",
+   "duration_s": 5.21,
    "entities": [
     "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts",
     "code_unit:apps/api/test/agent-project-dependencies.e2e.spec.ts",
@@ -6034,13 +6089,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/PR225-corrected-verify-20261008/verifier-out/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-10-08T08:37:03Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR225-final-candidate-verify-20261008/verifier-out/v-type-check-apps-api-tsconfig-test.txt",
+   "started_at_utc": "2026-10-08T08:46:18Z",
    "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1618 files listed"
   },
   {
-   "command": "/home/dev/aup/import-audit-work/mun-card-grant/apps/web/node_modules/.bin/tsc -p /home/dev/aup/import-audit-work/mun-card-grant/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/PR225-corrected-verify-20261008/verifier-out/type-check-vr91887h/check.tsbuildinfo --listFiles",
-   "duration_s": 3.56,
+   "command": "/home/dev/aup/import-audit-work/mun-card-grant/apps/web/node_modules/.bin/tsc -p /home/dev/aup/import-audit-work/mun-card-grant/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/PR225-final-candidate-verify-20261008/verifier-out/type-check-soh449rw/check.tsbuildinfo --listFiles",
+   "duration_s": 3.77,
    "entities": [
     "code_unit:apps/web/__tests__/kanban-board.test.ts",
     "code_unit:apps/web/__tests__/read-api-contract.test.ts",
@@ -6084,13 +6139,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/PR225-corrected-verify-20261008/verifier-out/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-10-08T08:37:08Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR225-final-candidate-verify-20261008/verifier-out/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-10-08T08:46:23Z",
    "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1302 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=43e79c97b05d, head=2127fd0f0296, graph=head graph)",
-   "duration_s": 8.42,
+   "command": "tools/graph/contract_diff.py.run_diff(base=43e79c97b05d, head=57ff382355b5, graph=head graph)",
+   "duration_s": 9.5,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.service.ts",
@@ -6270,13 +6325,13 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/PR225-corrected-verify-20261008/verifier-out/v-contract-diff.json",
-   "started_at_utc": "2026-10-08T08:37:12Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR225-final-candidate-verify-20261008/verifier-out/v-contract-diff.json",
+   "started_at_utc": "2026-10-08T08:46:27Z",
    "summary": "56→58 contracts, breaking 0, edges {'verified': 167}"
   },
   {
    "command": "verify.py route_config_consistency RC-01 prefix / RC-02 registration / RC-03 served",
-   "duration_s": 0.04,
+   "duration_s": 0.05,
    "entities": [
     "route:DELETE /agents/keys/:keyId",
     "route:DELETE /agents/tasks/:taskId/assign/:agentId",
@@ -6386,13 +6441,13 @@
    "exit_code": 0,
    "id": "v-route-config",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/PR225-corrected-verify-20261008/verifier-out/v-route-config.txt",
-   "started_at_utc": "2026-10-08T08:37:20Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR225-final-candidate-verify-20261008/verifier-out/v-route-config.txt",
+   "started_at_utc": "2026-10-08T08:46:37Z",
    "summary": "51 route(s), 0 failed"
   },
   {
    "command": "verify.py config_schema: keys read at head ⊆ declared keys",
-   "duration_s": 0.32,
+   "duration_s": 0.41,
    "entities": [
     "code_unit:apps/api/test/agent-task-card-read.e2e.spec.ts"
    ],
@@ -6402,13 +6457,13 @@
    "exit_code": 0,
    "id": "v-config-schema",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/PR225-corrected-verify-20261008/verifier-out/v-config-schema.json",
-   "started_at_utc": "2026-10-08T08:37:20Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR225-final-candidate-verify-20261008/verifier-out/v-config-schema.json",
+   "started_at_utc": "2026-10-08T08:46:37Z",
    "summary": "2 source(s), 0 new / 3 frozen undeclared reads, 0 failed; 4 vendored file(s) not attributed to this repository (Arcanada-one/arcanada-universal-program)"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.11,
+   "duration_s": 0.13,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -6566,8 +6621,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/PR225-corrected-verify-20261008/verifier-out/v-fitness.json",
-   "started_at_utc": "2026-10-08T08:37:20Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR225-final-candidate-verify-20261008/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-10-08T08:46:37Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -6583,7 +6638,8 @@
     "document:apps/api/docs/task-evidence.md",
     "document:apps/api/docs/task-redactions.md",
     "document:docs/how-to/enable-outbox-relay.md",
-    "document:docs/reference/task-contract-binding.md"
+    "document:docs/reference/task-contract-binding.md",
+    "document:receipts/canary/agent-card-read-grant-20261008/browser/scope.md"
    ],
    "entity_verdicts": {
     "document:README.md": "verified",
@@ -6595,18 +6651,19 @@
     "document:apps/api/docs/task-evidence.md": "verified",
     "document:apps/api/docs/task-redactions.md": "verified",
     "document:docs/how-to/enable-outbox-relay.md": "verified",
-    "document:docs/reference/task-contract-binding.md": "verified"
+    "document:docs/reference/task-contract-binding.md": "verified",
+    "document:receipts/canary/agent-card-read-grant-20261008/browser/scope.md": "verified"
    },
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/PR225-corrected-verify-20261008/verifier-out/v-doc-reference.txt",
-   "started_at_utc": "2026-10-08T08:37:21Z",
-   "summary": "10 document(s), 0 failed"
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR225-final-candidate-verify-20261008/verifier-out/v-doc-reference.txt",
+   "started_at_utc": "2026-10-08T08:46:37Z",
+   "summary": "11 document(s), 0 failed"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.12,
+   "duration_s": 2.08,
    "entities": [
     "code_unit:apps/api/src/tasks/tasks.controller.ts"
    ],
@@ -6617,12 +6674,12 @@
    "id": "v-canary-1",
    "kind": "canary",
    "output_ref": "receipts/canary/agent-card-read-grant-20261008/positive/result.json",
-   "started_at_utc": "2026-10-08T08:37:21Z",
+   "started_at_utc": "2026-10-08T08:46:37Z",
    "summary": "receipts/canary/agent-card-read-grant-20261008/positive/result.json: 1 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.12,
+   "duration_s": 2.08,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/projects/projects.controller.ts",
@@ -6747,12 +6804,12 @@
    "id": "v-canary-2",
    "kind": "canary",
    "output_ref": "receipts/canary/agent-card-read-grant-20261008/routes/route-result.json",
-   "started_at_utc": "2026-10-08T08:37:21Z",
+   "started_at_utc": "2026-10-08T08:46:37Z",
    "summary": "receipts/canary/agent-card-read-grant-20261008/routes/route-result.json: 58 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.12,
+   "duration_s": 2.08,
    "entities": [
     "code_unit:apps/web/__tests__/kanban-board.test.ts",
     "code_unit:apps/web/__tests__/read-api-contract.test.ts",
@@ -6770,35 +6827,60 @@
     "code_unit:apps/web/components/task/TaskDetail.tsx",
     "code_unit:apps/web/lib/api/projects.ts",
     "code_unit:apps/web/lib/api/tasks.ts",
-    "code_unit:apps/web/lib/api/workspaces.ts",
+    "code_unit:apps/web/lib/api/workspaces.ts"
+   ],
+   "entity_verdicts": {
+    "code_unit:apps/web/__tests__/kanban-board.test.ts": "verified",
+    "code_unit:apps/web/__tests__/read-api-contract.test.ts": "verified",
+    "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx": "verified",
+    "code_unit:apps/web/components/dashboard/BlockersList.tsx": "verified",
+    "code_unit:apps/web/components/kanban/KanbanBoard.tsx": "verified",
+    "code_unit:apps/web/components/kanban/KanbanCard.tsx": "verified",
+    "code_unit:apps/web/components/kanban/KanbanColumn.tsx": "verified",
+    "code_unit:apps/web/components/task/AuditLog.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskChecklist.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskDependencies.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskDetail.tsx": "verified",
+    "code_unit:apps/web/lib/api/projects.ts": "verified",
+    "code_unit:apps/web/lib/api/tasks.ts": "verified",
+    "code_unit:apps/web/lib/api/workspaces.ts": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-canary-3",
+   "kind": "canary",
+   "output_ref": "receipts/canary/agent-card-read-grant-20261008/browser/result.json",
+   "started_at_utc": "2026-10-08T08:46:37Z",
+   "summary": "receipts/canary/agent-card-read-grant-20261008/browser/result.json: 17 verified / 0 failed / 0 not_measured"
+  },
+  {
+   "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
+   "duration_s": 2.08,
+   "entities": [
     "deployable_unit:apps/web"
    ],
    "entity_verdicts": {
-    "code_unit:apps/web/__tests__/kanban-board.test.ts": "not_measured",
-    "code_unit:apps/web/__tests__/read-api-contract.test.ts": "not_measured",
-    "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx": "not_measured",
-    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx": "not_measured",
-    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx": "not_measured",
-    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx": "not_measured",
-    "code_unit:apps/web/components/dashboard/BlockersList.tsx": "not_measured",
-    "code_unit:apps/web/components/kanban/KanbanBoard.tsx": "not_measured",
-    "code_unit:apps/web/components/kanban/KanbanCard.tsx": "not_measured",
-    "code_unit:apps/web/components/kanban/KanbanColumn.tsx": "not_measured",
-    "code_unit:apps/web/components/task/AuditLog.tsx": "not_measured",
-    "code_unit:apps/web/components/task/TaskChecklist.tsx": "not_measured",
-    "code_unit:apps/web/components/task/TaskDependencies.tsx": "not_measured",
-    "code_unit:apps/web/components/task/TaskDetail.tsx": "not_measured",
-    "code_unit:apps/web/lib/api/projects.ts": "not_measured",
-    "code_unit:apps/web/lib/api/tasks.ts": "not_measured",
-    "code_unit:apps/web/lib/api/workspaces.ts": "not_measured",
-    "deployable_unit:apps/web": "not_measured"
+    "deployable_unit:apps/web": "verified"
    },
+   "exit_code": 0,
+   "id": "v-canary-4",
+   "kind": "canary",
+   "output_ref": "receipts/canary/agent-card-read-grant-20261008/browser/http-result.json",
+   "started_at_utc": "2026-10-08T08:46:37Z",
+   "summary": "receipts/canary/agent-card-read-grant-20261008/browser/http-result.json: 1 verified / 0 failed / 0 not_measured"
+  },
+  {
+   "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
+   "duration_s": 2.08,
+   "entities": [],
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/PR225-corrected-verify-20261008/verifier-out/v-canary.json",
-   "started_at_utc": "2026-10-08T08:37:21Z",
-   "summary": "2 canary result(s), 2 committed at head; 58 verified / 0 failed / 18 not_measured of 76 entities"
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR225-final-candidate-verify-20261008/verifier-out/v-canary.json",
+   "started_at_utc": "2026-10-08T08:46:37Z",
+   "summary": "4 canary result(s), 4 committed at head; 76 verified / 0 failed / 0 not_measured of 76 entities"
   }
  ],
  "verify": {
@@ -7199,6 +7281,9 @@
    "document:docs/reference/task-contract-binding.md": [
     "doc_reference"
    ],
+   "document:receipts/canary/agent-card-read-grant-20261008/browser/scope.md": [
+    "doc_reference"
+   ],
    "receipt:receipts/graph/A2-294-digest-grant-on-refresh.json": [],
    "receipt:receipts/graph/A2-330-muneral-canary.json": [],
    "receipt:receipts/graph/A2-365-revert-digest-grant.json": [],
@@ -7546,9 +7631,9 @@
    ]
   },
   "seconds": {
-   "prepare": 1.85,
-   "total": 55.69,
-   "verifiers": 20.32
+   "prepare": 1.7,
+   "total": 57.77,
+   "verifiers": 32.45
   }
  },
  "work_item": "7d2dadd3-8cf0-47fb-925e-71b9e2962bab"
