@@ -5,7 +5,7 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "admitted"
  },
- "captured_at_utc": "2026-10-08T12:44:43Z",
+ "captured_at_utc": "2026-10-08T12:55:17Z",
  "change_set": {
   "base": "43e79c97b05d04252b57f6cb4033fbae844bcc22",
   "files": [
@@ -144,7 +144,7 @@
     "status": "A"
    }
   ],
-  "head": "f91169888ab472de1ed9b19351b8903d1b4eae97",
+  "head": "82da27744aab9c010a8070b68a99c42f9577aca2",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -152,18 +152,18 @@
  "graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:87e1876dee22466c8d38540b63a49dff5a3ecb8cb1c8c7fc27d364c93fd6ab5b",
-  "path": "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/stock-work/verifier-out/graph-43e79c97b05d.json",
+  "graph_digest": "sha256:8b03ecf4fed8d345b7099c5d83f6d1e9a0b7452c2a0f863db1a2124000b1de36",
+  "path": "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/ci-stdlib-work/verifier-out/graph-43e79c97b05d.json",
   "source_commit": "43e79c97b05d04252b57f6cb4033fbae844bcc22"
  },
  "head_graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:e639cb0ba903adb12897884b12f8b90117b89a643d03990176f0a7670dfc194a",
-  "path": "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/stock-work/verifier-out/graph-head-f91169888ab4.json",
-  "source_commit": "f91169888ab472de1ed9b19351b8903d1b4eae97",
+  "graph_digest": "sha256:f29dd8c2fdf1ef19fa7945e8dd8225143bf75f1472e23a2e764c69180e8cfc69",
+  "path": "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/ci-stdlib-work/verifier-out/graph-head-82da27744aab.json",
+  "source_commit": "82da27744aab9c010a8070b68a99c42f9577aca2",
   "staleness": {
-   "checked_at_utc": "2026-10-08T12:45:04Z",
+   "checked_at_utc": "2026-10-08T12:55:52Z",
    "checked_nodes": 447,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
@@ -1780,7 +1780,7 @@
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261008T124443Z-f9116988",
+ "receipt_id": "car-verify-20261008T125517Z-82da2774",
  "receipt_path": "receipts/graph/change-admission-i05-adapter-20261008.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -1937,7 +1937,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-08T12:45:04Z",
+  "checked_at_utc": "2026-10-08T12:55:52Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -2089,7 +2089,7 @@
   {
    "content_hash": {
     "base": null,
-    "head": "sha256:e780fcd5726c7aa9eb2afc13f9456f739e12f0361792e909922d622232b16cbe"
+    "head": "sha256:2c830ded4440a37fe33b60541257b9e0df20ec846b230af40d303cce511e156f"
    },
    "entity": "receipt:receipts/graph/change-admission-i05-adapter-20261008.json",
    "node_type": "receipt",
@@ -2279,7 +2279,7 @@
   }
  ],
  "tree": {
-  "commit": "f91169888ab472de1ed9b19351b8903d1b4eae97",
+  "commit": "82da27744aab9c010a8070b68a99c42f9577aca2",
   "dirty": false
  },
  "verdicts": [
@@ -2709,8 +2709,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/node_modules/.bin/tsc -p /home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/stock-work/verifier-out/type-check-t5t_r3fe/check.tsbuildinfo --listFiles",
-   "duration_s": 3.85,
+   "command": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/node_modules/.bin/tsc -p /home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/ci-stdlib-work/verifier-out/type-check-l4bo17y_/check.tsbuildinfo --listFiles",
+   "duration_s": 4.95,
    "entities": [
     "code_unit:apps/web/__tests__/kanban-board.test.ts",
     "code_unit:apps/web/__tests__/read-api-contract.test.ts",
@@ -2802,13 +2802,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/stock-work/verifier-out/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-10-08T12:45:07Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/ci-stdlib-work/verifier-out/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-10-08T12:55:57Z",
    "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1327 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=43e79c97b05d, head=f91169888ab4, graph=head graph)",
-   "duration_s": 3.73,
+   "command": "tools/graph/contract_diff.py.run_diff(base=43e79c97b05d, head=82da27744aab, graph=head graph)",
+   "duration_s": 4.28,
    "entities": [
     "code_unit:apps/web/lib/api/task-detail-controller.ts",
     "code_unit:apps/web/lib/api/task-detail-read.ts",
@@ -2828,13 +2828,13 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/stock-work/verifier-out/v-contract-diff.json",
-   "started_at_utc": "2026-10-08T12:45:11Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/ci-stdlib-work/verifier-out/v-contract-diff.json",
+   "started_at_utc": "2026-10-08T12:56:02Z",
    "summary": "56→58 contracts, breaking 0, edges {'verified': 164}"
   },
   {
    "command": "verify.py config_schema: keys read at head ⊆ declared keys",
-   "duration_s": 0.34,
+   "duration_s": 0.38,
    "entities": [
     "code_unit:apps/web/app/providers.tsx",
     "code_unit:apps/web/lib/api/client.ts"
@@ -2846,13 +2846,13 @@
    "exit_code": 0,
    "id": "v-config-schema",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/stock-work/verifier-out/v-config-schema.json",
-   "started_at_utc": "2026-10-08T12:45:15Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/ci-stdlib-work/verifier-out/v-config-schema.json",
+   "started_at_utc": "2026-10-08T12:56:06Z",
    "summary": "2 source(s), 0 new / 3 frozen undeclared reads, 0 failed; 4 vendored file(s) not attributed to this repository (Arcanada-one/arcanada-universal-program)"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.1,
+   "duration_s": 0.13,
    "entities": [
     "code_unit:apps/web/__tests__/kanban-board.test.ts",
     "code_unit:apps/web/__tests__/read-api-contract.test.ts",
@@ -2944,8 +2944,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/stock-work/verifier-out/v-fitness.json",
-   "started_at_utc": "2026-10-08T12:45:15Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/ci-stdlib-work/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-10-08T12:56:07Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -2960,13 +2960,13 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/stock-work/verifier-out/v-doc-reference.txt",
-   "started_at_utc": "2026-10-08T12:45:15Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/ci-stdlib-work/verifier-out/v-doc-reference.txt",
+   "started_at_utc": "2026-10-08T12:56:07Z",
    "summary": "1 document(s), 0 failed"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.32,
+   "duration_s": 0.36,
    "entities": [
     "code_unit:apps/web/app/providers.tsx",
     "code_unit:apps/web/lib/api/client.ts"
@@ -2979,18 +2979,18 @@
    "id": "v-canary-1",
    "kind": "canary",
    "output_ref": "receipts/canary/i05-built-browser-20261008/result.json",
-   "started_at_utc": "2026-10-08T12:45:15Z",
+   "started_at_utc": "2026-10-08T12:56:07Z",
    "summary": "receipts/canary/i05-built-browser-20261008/result.json: 2 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.32,
+   "duration_s": 0.36,
    "entities": [],
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/stock-work/verifier-out/v-canary.json",
-   "started_at_utc": "2026-10-08T12:45:15Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/ci-stdlib-work/verifier-out/v-canary.json",
+   "started_at_utc": "2026-10-08T12:56:07Z",
    "summary": "1 canary result(s), 1 committed at head; 2 verified / 0 failed / 0 not_measured of 2 entities"
   }
  ],
@@ -3228,9 +3228,9 @@
    "receipt:receipts/graph/security-api959a-caller788.json": []
   },
   "seconds": {
-   "prepare": 1.63,
-   "total": 32.5,
-   "verifiers": 8.66
+   "prepare": 2.0,
+   "total": 50.55,
+   "verifiers": 10.46
   }
  },
  "work_item": "7d2dadd3-8cf0-47fb-925e-71b9e2962bab"
