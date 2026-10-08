@@ -27,6 +27,10 @@ import { PROJECT_READ_GRANTS, GRANT_RENEWAL_LEAD_DAYS } from '../src/auth/projec
 import type { ProjectReadGrantEntry } from '../src/auth/project-read-grants.js';
 import { TaskFieldStateService } from '../src/tasks/field-state/task-field-state.service.js';
 import { TasksService } from '../src/tasks/tasks.service.js';
+import { TasksController } from '../src/tasks/tasks.controller.js';
+import { AgentTaskScopeGuard } from '../src/auth/guards/agent-task-scope.guard.js';
+import type { ExecutionContext } from '@nestjs/common';
+import type { Reflector } from '@nestjs/core';
 import { createDisposablePostgres } from './support/disposable-postgres.js';
 
 @Module({
@@ -356,6 +360,47 @@ describe('DEC-AUP-0134 — redacted task card for granted agent keys (e2e)', () 
     await card(inGranted.id, keys.reader).query({ projectId: siblingProjectId }).expect(200);
   });
 
+  it('R19 the GUARD itself is workspace-bound: a foreign-workspace task is refused there even when the list names the key for that project', async () => {
+    // Called directly: over HTTP the service re-read would answer 403 on its own
+    // and hide a guard that had lost its workspace clause.
+    const guard = new AgentTaskScopeGuard({ getAllAndOverride: () => 'task-granted-read' } as unknown as Reflector, prisma, grants);
+    const agent = await prisma.agent.findUniqueOrThrow({ where: { id: ids.reader } });
+    const ctx = (taskId: string) => {
+      const req: Record<string, unknown> = { apiKeyAgent: agent, params: { taskId }, query: {} };
+      return { ctx: { switchToHttp: () => ({ getRequest: () => req }), getHandler: () => null, getClass: () => null } as unknown as ExecutionContext, req };
+    };
+    grant('reader', projectId);
+    grant('reader', foreignProjectId);
+    const foreignTask = await othersTask(foreignProjectId, { createdById: ids.foreign });
+    await expect(guard.canActivate(ctx(foreignTask.id).ctx)).rejects.toMatchObject({ status: 403 });
+    // positive control through the same harness
+    const mine = await othersTask(projectId);
+    const { ctx: okCtx, req } = ctx(mine.id);
+    await expect(guard.canActivate(okCtx)).resolves.toBe(true);
+    expect(req['agentScope']).toMatchObject({ kind: 'task-granted-read', cardView: 'redacted', cardProjectId: projectId, workspaceId });
+  });
+
+  it('R20 authorship needs the AGENT actor type: an agent id on a human-typed row is not ownership', async () => {
+    const forged = await othersTask(projectId, { createdById: ids.reader, actorType: 'human' });
+    await card(forged.id, keys.reader).expect(403); // no grant, not the owner
+    grant('reader', projectId);
+    const res = await card(forged.id, keys.reader).expect(200);
+    expect(res.body.view).toBe('redacted');
+    expect(res.body).not.toHaveProperty('title');
+  });
+
+  it('R21 the controller never serves an agent key without the card scope the guard sets', async () => {
+    const controller = app.get(TasksController);
+    const t = await othersTask(projectId, { createdById: ids.reader });
+    const res = { setHeader: () => void 0, status: () => void 0 } as never;
+    const agentActor = { type: 'agent', id: ids.reader } as never;
+    for (const agentScope of [undefined, { agentId: ids.reader, kind: 'task' }, { agentId: ids.reader, kind: 'task-granted-read' }]) {
+      await expect(
+        controller.findOne(t.id, { actor: agentActor, agentScope } as never, undefined, res),
+      ).rejects.toMatchObject({ status: 403 });
+    }
+  });
+
   it('R09 a re-created agent (new id) holds no grant', async () => {
     grant('reader', projectId);
     const t = await othersTask();
@@ -537,7 +582,9 @@ describe('DEC-AUP-0134 — redacted task card for granted agent keys (e2e)', () 
       grant('reader', projectId);
       const mine = await othersTask(projectId);
       const sib = await othersTask(siblingProjectId);
-      for (const qs of [`?projectId=${siblingProjectId}`, `?status=todo&status=done`, `?limit=100000`, `?limit=-1`, `?status=nonsense`]) {
+      // 500 is the ceiling, 501 is refused
+      await idx('?limit=500').expect(200);
+      for (const qs of [`?projectId=${siblingProjectId}`, `?status=todo&status=done`, `?limit=501`, `?limit=100000`, `?limit=-1`, `?status=nonsense`]) {
         const res = await idx(qs);
         const leaked = JSON.stringify(res.body).includes(sib.id);
         expect({ qs, leaked }).toEqual({ qs, leaked: false });
