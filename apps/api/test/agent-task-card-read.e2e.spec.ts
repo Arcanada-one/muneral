@@ -584,7 +584,9 @@ describe('DEC-AUP-0134 — redacted task card for granted agent keys (e2e)', () 
       const sib = await othersTask(siblingProjectId);
       // 500 is the ceiling, 501 is refused
       await idx('?limit=500').expect(200);
-      for (const qs of [`?projectId=${siblingProjectId}`, `?status=todo&status=done`, `?limit=501`, `?limit=100000`, `?limit=-1`, `?status=nonsense`]) {
+      // the limit cap is a hard 400, not a silent clamp
+      for (const qs of ['?limit=501', '?limit=100000', '?limit=-1', '?limit=0']) await idx(qs).expect(400);
+      for (const qs of [`?projectId=${siblingProjectId}`, `?status=todo&status=done`, `?status=nonsense`]) {
         const res = await idx(qs);
         const leaked = JSON.stringify(res.body).includes(sib.id);
         expect({ qs, leaked }).toEqual({ qs, leaked: false });
