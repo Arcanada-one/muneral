@@ -3,9 +3,9 @@
   "rule": "admitted requires every verdict = verified; failed without exemption ⇒ refused; not_measured without exemption ⇒ paused_safe; exemptions (owner + expiry) are attached by the admitting agent, never by the verifier (DEC-AUP-0008, matrix P1/P4)",
   "structural_exclusion_rule": "DEC-AUP-0034: an affected entity is NOT verdict-owing when all three hold — the verifier matrix declares neither a mandatory nor a selectable verifier for its node type (so the only verdict it could ever carry states a property of the MATRIX, not of this change), the change set does not contain it, and its bytes are identical at base and head. Each one is listed in structural_exclusions with the content hash at both revisions that proves the byte-identity, and impact_pair.receipt_problems re-derives that proof from Git rather than believing the receipt.",
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
-  "verdict": "paused_safe"
+  "verdict": "admitted"
  },
- "captured_at_utc": "2026-10-08T12:13:15Z",
+ "captured_at_utc": "2026-10-08T12:44:43Z",
  "change_set": {
   "base": "43e79c97b05d04252b57f6cb4033fbae844bcc22",
   "files": [
@@ -109,9 +109,42 @@
     ],
     "path": "apps/web/lib/api/task-detail-session.tsx",
     "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/i05-built-browser-20261008/browser-observation.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/i05-built-browser-20261008/plan.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/i05-built-browser-20261008/result.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/i05-built-browser-20261008/source-evidence.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/change-admission-i05-adapter-20261008.json",
+    "node_ids": [
+     "receipt:receipts/graph/change-admission-i05-adapter-20261008.json"
+    ],
+    "path": "receipts/graph/change-admission-i05-adapter-20261008.json",
+    "status": "A"
    }
   ],
-  "head": "e68efb2b7ad32444de8f90eab78ee97e5ebcfdd3",
+  "head": "f91169888ab472de1ed9b19351b8903d1b4eae97",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -120,18 +153,18 @@
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
   "graph_digest": "sha256:87e1876dee22466c8d38540b63a49dff5a3ecb8cb1c8c7fc27d364c93fd6ab5b",
-  "path": "/home/dev/aup/import-audit-work/runs/PR226-CI-diagnosis-20261008/stock-work/verifier-out/graph-43e79c97b05d.json",
+  "path": "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/stock-work/verifier-out/graph-43e79c97b05d.json",
   "source_commit": "43e79c97b05d04252b57f6cb4033fbae844bcc22"
  },
  "head_graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:25f4a5c4d7b8c06b292d69726f0ec7b955085a420631a62fa26cfbc7451c7c9e",
-  "path": "/home/dev/aup/import-audit-work/runs/PR226-CI-diagnosis-20261008/stock-work/verifier-out/graph-head-e68efb2b7ad3.json",
-  "source_commit": "e68efb2b7ad32444de8f90eab78ee97e5ebcfdd3",
+  "graph_digest": "sha256:e639cb0ba903adb12897884b12f8b90117b89a643d03990176f0a7670dfc194a",
+  "path": "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/stock-work/verifier-out/graph-head-f91169888ab4.json",
+  "source_commit": "f91169888ab472de1ed9b19351b8903d1b4eae97",
   "staleness": {
-   "checked_at_utc": "2026-10-08T12:13:42Z",
-   "checked_nodes": 446,
+   "checked_at_utc": "2026-10-08T12:45:04Z",
+   "checked_nodes": 447,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -1747,7 +1780,7 @@
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261008T121315Z-e68efb2b",
+ "receipt_id": "car-verify-20261008T124443Z-f9116988",
  "receipt_path": "receipts/graph/change-admission-i05-adapter-20261008.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -1881,6 +1914,7 @@
    "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
    "receipt:receipts/graph/change-admission-a2p29-archived-20260915T131011Z.json",
    "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+   "receipt:receipts/graph/change-admission-i05-adapter-20261008.json",
    "receipt:receipts/graph/change-admission-integration-batch1.json",
    "receipt:receipts/graph/change-admission-mun0048-rescue-20260915T070641Z.json",
    "receipt:receipts/graph/change-admission-mun0049-20260913T182304Z.json",
@@ -1903,7 +1937,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-08T12:13:41Z",
+  "checked_at_utc": "2026-10-08T12:45:04Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -2051,6 +2085,21 @@
    "path": "receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
    "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
    "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": null,
+    "head": "sha256:e780fcd5726c7aa9eb2afc13f9456f739e12f0361792e909922d622232b16cbe"
+   },
+   "entity": "receipt:receipts/graph/change-admission-i05-adapter-20261008.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-i05-adapter-20261008.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it; superseded by construction — this run re-issues the receipt at receipts/graph/change-admission-i05-adapter-20261008.json for work item 7d2dadd3-8cf0-47fb-925e-71b9e2962bab",
+   "rule": "DEC-AUP-0035",
+   "superseded": {
+    "receipt_path": "receipts/graph/change-admission-i05-adapter-20261008.json",
+    "work_item": "7d2dadd3-8cf0-47fb-925e-71b9e2962bab"
+   }
   },
   {
    "content_hash": {
@@ -2230,7 +2279,7 @@
   }
  ],
  "tree": {
-  "commit": "e68efb2b7ad32444de8f90eab78ee97e5ebcfdd3",
+  "commit": "f91169888ab472de1ed9b19351b8903d1b4eae97",
   "dirty": false
  },
  "verdicts": [
@@ -2398,10 +2447,10 @@
   },
   {
    "entity": "code_unit:apps/web/app/providers.tsx",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-config-schema: every key read is declared; v-fitness: no new fitness violation; v-canary-1: canary i05-built-browser-direct-hydration-auth-20261008 (pre) on Owned local production-built Next candidate and disposable native Nest/PostgreSQL synthetic fixture; loopback18446/18447: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-config-schema",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
@@ -2517,10 +2566,10 @@
   },
   {
    "entity": "code_unit:apps/web/lib/api/client.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-config-schema: every key read is declared; v-fitness: no new fitness violation; v-canary-1: canary i05-built-browser-direct-hydration-auth-20261008 (pre) on Owned local production-built Next candidate and disposable native Nest/PostgreSQL synthetic fixture; loopback18446/18447: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-config-schema",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
@@ -2660,8 +2709,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/node_modules/.bin/tsc -p /home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/PR226-CI-diagnosis-20261008/stock-work/verifier-out/type-check-g2d6h09u/check.tsbuildinfo --listFiles",
-   "duration_s": 5.94,
+   "command": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/node_modules/.bin/tsc -p /home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/stock-work/verifier-out/type-check-t5t_r3fe/check.tsbuildinfo --listFiles",
+   "duration_s": 3.85,
    "entities": [
     "code_unit:apps/web/__tests__/kanban-board.test.ts",
     "code_unit:apps/web/__tests__/read-api-contract.test.ts",
@@ -2753,13 +2802,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-CI-diagnosis-20261008/stock-work/verifier-out/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-10-08T12:13:47Z",
-   "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1309 files listed"
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/stock-work/verifier-out/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-10-08T12:45:07Z",
+   "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1327 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=43e79c97b05d, head=e68efb2b7ad3, graph=head graph)",
-   "duration_s": 5.02,
+   "command": "tools/graph/contract_diff.py.run_diff(base=43e79c97b05d, head=f91169888ab4, graph=head graph)",
+   "duration_s": 3.73,
    "entities": [
     "code_unit:apps/web/lib/api/task-detail-controller.ts",
     "code_unit:apps/web/lib/api/task-detail-read.ts",
@@ -2779,13 +2828,13 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-CI-diagnosis-20261008/stock-work/verifier-out/v-contract-diff.json",
-   "started_at_utc": "2026-10-08T12:13:54Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/stock-work/verifier-out/v-contract-diff.json",
+   "started_at_utc": "2026-10-08T12:45:11Z",
    "summary": "56→58 contracts, breaking 0, edges {'verified': 164}"
   },
   {
    "command": "verify.py config_schema: keys read at head ⊆ declared keys",
-   "duration_s": 0.41,
+   "duration_s": 0.34,
    "entities": [
     "code_unit:apps/web/app/providers.tsx",
     "code_unit:apps/web/lib/api/client.ts"
@@ -2797,13 +2846,13 @@
    "exit_code": 0,
    "id": "v-config-schema",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-CI-diagnosis-20261008/stock-work/verifier-out/v-config-schema.json",
-   "started_at_utc": "2026-10-08T12:13:59Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/stock-work/verifier-out/v-config-schema.json",
+   "started_at_utc": "2026-10-08T12:45:15Z",
    "summary": "2 source(s), 0 new / 3 frozen undeclared reads, 0 failed; 4 vendored file(s) not attributed to this repository (Arcanada-one/arcanada-universal-program)"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.13,
+   "duration_s": 0.1,
    "entities": [
     "code_unit:apps/web/__tests__/kanban-board.test.ts",
     "code_unit:apps/web/__tests__/read-api-contract.test.ts",
@@ -2895,8 +2944,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-CI-diagnosis-20261008/stock-work/verifier-out/v-fitness.json",
-   "started_at_utc": "2026-10-08T12:13:59Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/stock-work/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-10-08T12:45:15Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -2911,35 +2960,52 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-CI-diagnosis-20261008/stock-work/verifier-out/v-doc-reference.txt",
-   "started_at_utc": "2026-10-08T12:13:59Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/stock-work/verifier-out/v-doc-reference.txt",
+   "started_at_utc": "2026-10-08T12:45:15Z",
    "summary": "1 document(s), 0 failed"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.0,
+   "duration_s": 0.32,
    "entities": [
     "code_unit:apps/web/app/providers.tsx",
     "code_unit:apps/web/lib/api/client.ts"
    ],
    "entity_verdicts": {
-    "code_unit:apps/web/app/providers.tsx": "not_measured",
-    "code_unit:apps/web/lib/api/client.ts": "not_measured"
+    "code_unit:apps/web/app/providers.tsx": "verified",
+    "code_unit:apps/web/lib/api/client.ts": "verified"
    },
+   "exit_code": 0,
+   "id": "v-canary-1",
+   "kind": "canary",
+   "output_ref": "receipts/canary/i05-built-browser-20261008/result.json",
+   "started_at_utc": "2026-10-08T12:45:15Z",
+   "summary": "receipts/canary/i05-built-browser-20261008/result.json: 2 verified / 0 failed / 0 not_measured"
+  },
+  {
+   "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
+   "duration_s": 0.32,
+   "entities": [],
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-CI-diagnosis-20261008/stock-work/verifier-out/v-canary.json",
-   "started_at_utc": "2026-10-08T12:13:59Z",
-   "summary": "0 canary result(s), 0 committed at head; 0 verified / 0 failed / 2 not_measured of 2 entities"
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/stock-work/verifier-out/v-canary.json",
+   "started_at_utc": "2026-10-08T12:45:15Z",
+   "summary": "1 canary result(s), 1 committed at head; 2 verified / 0 failed / 0 not_measured of 2 entities"
   }
  ],
  "verify": {
   "events": [
    {
+    "code": "SUPERSEDED_SELF_EXCLUSION",
+    "entity": "receipt:receipts/graph/change-admission-i05-adapter-20261008.json",
+    "rule": "DEC-AUP-0035",
+    "text": "the receipt at receipts/graph/change-admission-i05-adapter-20261008.json is the previous version of the one this run is writing, for the same work item 7d2dadd3-8cf0-47fb-925e-71b9e2962bab — superseded by construction, so it owes this change no verdict"
+   },
+   {
     "code": "STRUCTURAL_EXCLUSION",
     "rule": "DEC-AUP-0034",
-    "text": "29 affected entity(ies) owe no verdict (receipt: 29): unchanged at both revisions and given no verifier by the matrix"
+    "text": "30 affected entity(ies) owe no verdict (receipt: 30): unchanged at both revisions and given no verifier by the matrix"
    }
   ],
   "required_by_entity": {
@@ -3143,6 +3209,7 @@
    "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json": [],
    "receipt:receipts/graph/change-admission-a2p29-archived-20260915T131011Z.json": [],
    "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json": [],
+   "receipt:receipts/graph/change-admission-i05-adapter-20261008.json": [],
    "receipt:receipts/graph/change-admission-integration-batch1.json": [],
    "receipt:receipts/graph/change-admission-mun0048-rescue-20260915T070641Z.json": [],
    "receipt:receipts/graph/change-admission-mun0049-20260913T182304Z.json": [],
@@ -3161,9 +3228,9 @@
    "receipt:receipts/graph/security-api959a-caller788.json": []
   },
   "seconds": {
-   "prepare": 2.47,
-   "total": 44.13,
-   "verifiers": 11.5
+   "prepare": 1.63,
+   "total": 32.5,
+   "verifiers": 8.66
   }
  },
  "work_item": "7d2dadd3-8cf0-47fb-925e-71b9e2962bab"
