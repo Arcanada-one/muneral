@@ -348,4 +348,45 @@ describe('MUN-0051 — agent-key assign scope, creator read, keyed key lookup (e
     await prisma.apiKey.updateMany({ where: { agentId: ids.reviewer }, data: { expiresAt: new Date(Date.now() - 1000) } });
     await http().get('/agents/tasks').set('Authorization', `Bearer ${keys.reviewer}`).expect(401);
   });
+
+  it('MUN-0007: audit role matches the row actually deleted after concurrent replacement', async () => {
+    const task = await agentTask();
+    const bearer = authSvc.signAccess(userId);
+    let reached!: () => void;
+    let release!: () => void;
+    const readDone = new Promise<void>(r => { reached = r; });
+    const resume = new Promise<void>(r => { release = r; });
+    const realTransaction = prisma.$transaction.bind(prisma) as any;
+    const txSpy = jest.spyOn(prisma, '$transaction');
+    txSpy.mockImplementationOnce(((callback: any) => realTransaction(async (tx: any) => {
+      const delegate = new Proxy(tx.taskAgent, {
+        get(target, key) {
+          if (key === 'findUnique') return async (args: any) => {
+            const row = await target.findUnique(args);
+            reached(); await resume; return row;
+          };
+          const value = target[key];
+          return typeof value === 'function' ? value.bind(target) : value;
+        },
+      });
+      return callback(new Proxy(tx, { get(target, key) {
+        return key === 'taskAgent' ? delegate : target[key];
+      }}));
+    })) as any);
+    const pending = http().delete(`/agents/tasks/${task.id}/assign/${ids.reviewer}`)
+      .set('Authorization', `Bearer ${bearer}`).then(res => res);
+    try {
+      await Promise.race([readDone, new Promise((_, reject) => setTimeout(() => reject(new Error('read barrier timeout')), 3000))]);
+      await http().delete(`/agents/tasks/${task.id}/assign/${ids.reviewer}`)
+        .set('Authorization', `Bearer ${bearer}`).expect(204);
+      await assign(task.id, bearer, ids.reviewer, 'lead').expect(201);
+      expect((await rowOf(task.id, ids.reviewer))?.role).toBe('lead');
+      release();
+      expect((await pending).status).toBe(204);
+      expect(await rowOf(task.id, ids.reviewer)).toBeNull();
+      const rows = await prisma.activityLog.findMany({where: {taskId: task.id, action: 'task:agent_unassigned'}, orderBy: {createdAt: 'asc'}});
+      expect(rows).toHaveLength(2);
+      expect(rows.map(row => (row.payload as {role: string}).role).sort()).toEqual(['lead', 'reviewer']);
+    } finally { release(); await pending; txSpy.mockRestore(); }
+  });
 });

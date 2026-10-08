@@ -113,16 +113,17 @@ export class AgentsService {
         include: { task: { select: { project: { select: { workspaceId: true } } } } },
       });
       if (!assignment) throw new NotFoundException('Agent assignment not found');
-      await tx.taskAgent.delete({
+      const removed = await tx.taskAgent.delete({
         where: { taskId_agentId: { taskId, agentId } },
+        include: { task: { select: { project: { select: { workspaceId: true } } } } },
       });
       await this.activityService.log(
         {
-          workspaceId: assignment.task.project.workspaceId,
+          workspaceId: removed.task.project.workspaceId,
           taskId,
           actor,
           action: AGENT_UNASSIGNED_ACTION,
-          payload: { agentId, role: assignment.role },
+          payload: { agentId, role: removed.role },
         },
         tx,
       );
