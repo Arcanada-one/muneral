@@ -22,6 +22,8 @@ import { CreateTaskDto } from './dto/create-task.dto.js';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto.js';
 import { QueryTasksDto } from './dto/query-tasks.dto.js';
 import { QueryWorkspaceDigestDto } from './dto/query-workspace-digest.dto.js';
+import { QueryProjectIndexDto } from './dto/query-project-index.dto.js';
+import { REDACTED_VIEW_ETAG_TAG, taskCardRefusal } from '../auth/task-card.js';
 import { AddDependencyDto } from './dto/add-dependency.dto.js';
 import { CreateChecklistItemDto } from './dto/create-checklist-item.dto.js';
 import { AddCommentDto } from './dto/add-comment.dto.js';
@@ -193,18 +195,66 @@ export class TasksController {
    * field version covers.
    */
   @Get(':taskId')
-  @AgentScope('task')
+  @AgentScope('task-granted-read')
   async findOne(
     @Param('taskId') taskId: string,
     @Req() req: AuthRequest,
     @Headers('if-none-match') ifNoneMatch: string | undefined,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const task = await this.tasksService.findOne(taskId, req.actor.type === 'human' ? req.actor.id : undefined);
+    // DEC-AUP-0134: a human takes the unchanged JWT path (HumanTaskReadGuard has
+    // already bound the read to workspace membership). An agent key is answered
+    // from the scope the guard resolved and from nothing else: a key request with
+    // no card scope is refused with the card route's one 403, never served by the
+    // unnarrowed `findOne` below.
+    if (req.actor.type === 'human') {
+      return this.respondFull(await this.tasksService.findOne(taskId, req.actor.id), taskId, ifNoneMatch, res);
+    }
+    const scope = req.agentScope;
+    if (!scope || scope.kind !== 'task-granted-read' || !scope.workspaceId) throw taskCardRefusal();
 
+    if (scope.cardView === 'redacted') {
+      if (!scope.cardProjectId || !scope.projectReadGrant) throw taskCardRefusal();
+      const card = await this.tasksService.redactedCardForAgent(
+        taskId,
+        scope.workspaceId,
+        scope.cardProjectId,
+        scope.projectReadGrant,
+      );
+      // The redacted view is view-tagged: it neither matches nor reveals the
+      // full view's tag, and it does not depend on the contract digest.
+      const etag = await this.fieldChangesService.computeTaskEtag(card.id, REDACTED_VIEW_ETAG_TAG, card.projectId);
+      res.setHeader('X-Muneral-Dependencies', 'not-available; redacted card');
+      if (etag && ifNoneMatch === `"${etag}"`) {
+        // A 304 carries no card and writes no row: nothing was disclosed.
+        res.setHeader('ETag', `"${etag}"`);
+        res.status(304);
+        return;
+      }
+      // Audit BEFORE the answer; a failed insert throws and no card leaves.
+      await this.tasksService.recordCardRead(card, scope.workspaceId, scope.agentId, scope.projectReadGrant);
+      if (etag) res.setHeader('ETag', `"${etag}"`);
+      return card;
+    }
+
+    if (scope.cardView !== 'full') throw taskCardRefusal();
+    return this.respondFull(
+      await this.tasksService.findOneOwnedByAgent(taskId, scope.workspaceId),
+      taskId,
+      ifNoneMatch,
+      res,
+    );
+  }
+
+  /** The full-card answer, byte-for-byte what `findOne` always returned (MUN-0054). */
+  private async respondFull(
+    task: Awaited<ReturnType<TasksService['findOne']>>,
+    taskId: string,
+    ifNoneMatch: string | undefined,
+    res: Response,
+  ) {
     // MUN-0054: set before the 304 branch, so a conditional request that gets
-    // no body is told this too — a poller on the ETag loop is exactly the
-    // consumer most likely to never see a 200 again.
+    // no body is told this too.
     res.setHeader(
       'X-Muneral-Dependencies',
       `not-in-body; see /tasks/${taskId}/readiness`,
@@ -218,14 +268,9 @@ export class TasksController {
       res.setHeader('ETag', etagValue);
 
       if (ifNoneMatch && ifNoneMatch === etagValue) {
-        // `res.status(304)` and RETURN, rather than `.status(304).end()`.
-        // `@Res({ passthrough: true })` leaves Nest in charge of finishing the
-        // response, so ending it here by hand means the interceptor chain runs
-        // against a socket that is already closed and throws `Cannot remove
-        // headers after they are sent to the client` into ExceptionsHandler.
-        // The 304 still reached the client, so the suite stayed green and the
-        // throw only ever showed up as a logged ERROR — which is why this
-        // survived from MUN-0018 until a test finally exercised the branch.
+        // `res.status(304)` and RETURN, rather than `.status(304).end()` — see
+        // the MUN-0018 note: ending the response by hand under passthrough makes
+        // the interceptor chain throw into ExceptionsHandler.
         res.status(304);
         return;
       }
@@ -265,12 +310,13 @@ export class TasksController {
   indexForProject(
     @Param('projectId') projectId: string,
     @Req() req: AuthRequest,
+    @Query() query: QueryProjectIndexDto,
   ) {
     const scope = req.agentScope;
     if (!scope || scope.kind !== 'project-index' || !scope.projectReadGrant) {
       throw new ForbiddenException('The task index is available only to an agent API key holding a read grant (MUN-0052).');
     }
-    return this.tasksService.indexForProject(projectId, scope.agentId, scope.projectReadGrant);
+    return this.tasksService.indexForProject(projectId, scope.agentId, scope.projectReadGrant, query);
   }
 
   /**
@@ -425,7 +471,8 @@ export class TasksController {
   @Get(':taskId/dependencies')
   @AgentScope('task')
   getDependencies(@Param('taskId') taskId: string, @Req() req: AuthRequest) {
-    return this.tasksService.getDependencies(taskId, req.actor.type === 'human' ? req.actor.id : undefined);
+    return this.tasksService.getDependencies(taskId, req.actor.type === 'human' ? req.actor.id : undefined,
+      req.actor.type === 'agent' ? req.actor.id : undefined);
   }
 
   /** MUN-0054 — both directions plus the counterpart's status. See
@@ -434,9 +481,9 @@ export class TasksController {
   @Get(':taskId/dependency-graph')
   @AgentScope('task')
   getDependencyGraph(@Param('taskId') taskId: string, @Req() req: AuthRequest) {
-    // MUN-0055: the agent id narrows the COUNTERPART's free text, not the edge
-    // list. Human workspace membership is checked separately.
-    return this.tasksService.getDependencyGraph(taskId, req.agentScope?.agentId, req.actor.type === 'human' ? req.actor.id : undefined);
+    // Agent reads require both endpoints in the current agent workspace;
+    // ownership additionally narrows the counterpart's free text.
+    return this.tasksService.getDependencyGraph(taskId, req.actor.type === 'agent' ? req.actor.id : undefined, req.actor.type === 'human' ? req.actor.id : undefined);
   }
 
   /** MUN-0054 — the readiness verdict, computed server-side.
@@ -450,7 +497,7 @@ export class TasksController {
   @Get(':taskId/readiness')
   @AgentScope('task')
   getReadiness(@Param('taskId') taskId: string, @Req() req: AuthRequest) {
-    return this.tasksService.getReadiness(taskId, req.agentScope?.agentId, req.actor.type === 'human' ? req.actor.id : undefined);
+    return this.tasksService.getReadiness(taskId, req.actor.type === 'agent' ? req.actor.id : undefined, req.actor.type === 'human' ? req.actor.id : undefined);
   }
 
   @Post(':taskId/dependencies')

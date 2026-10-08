@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Patch, Req, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, Param, Patch, Req, UseGuards, UseInterceptors } from '@nestjs/common';
 import type { Request } from 'express';
 import type { Actor } from '@muneral/types';
 import { JwtOrApiKeyGuard } from '../auth/guards/jwt-or-api-key.guard.js';
@@ -22,6 +22,13 @@ export class TaskContractBindingController {
   // enum or grant. The binding service separately enforces pointer CAS.
   @AgentScope('task-status')
   bind(@Param('taskId') taskId: string, @Req() req: ScopedRequest, @Body() dto: UpdateTaskContractDto) {
-    return this.binding.bind(taskId, req.actor, req.agentScope, dto);
+    // Keep metadata consumption at the guarded HTTP boundary. Passing the
+    // whole context into a service lets every future scope kind escape the
+    // exhaustive guard; the service needs only the checked status authority.
+    const scope = req.agentScope;
+    if (!scope || scope.kind !== 'task-status') {
+      throw new ForbiddenException({ code: 'AGENT_CONTRACT_SCOPE_REQUIRED' });
+    }
+    return this.binding.bind(taskId, req.actor, true, scope.agentId, scope.workspaceId, dto);
   }
 }

@@ -20,6 +20,10 @@ import { TaskFieldStateService } from '../src/tasks/field-state/task-field-state
 import { TasksService } from '../src/tasks/tasks.service.js';
 import { HumanTaskReadGuard } from '../src/auth/guards/human-task-read.guard.js';
 import type { ExecutionContext } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import type { Socket, Server } from 'socket.io';
+import { KanbanGateway } from '../src/ws/kanban.gateway.js';
+import { KanbanAccessService } from '../src/ws/kanban-access.service.js';
 
 @Module({ imports: [PrismaModule, AuthModule, ActivityModule, AgentsModule, TasksModule,
   ProjectsModule, WorkspacesModule, SyncModule] })
@@ -32,7 +36,7 @@ describe('Human task reads isolate workspace membership (real HTTP/PostgreSQL)',
   let auth: AuthService;
   let tasksService: TasksService;
   const users: string[] = [], workspaces: string[] = [], projects: string[] = [], tasks: string[] = [], tokens: string[] = [];
-  const counterparts: string[] = [], agentKeys: string[] = [];
+  const counterparts: string[] = [], agentKeys: string[] = [], agentIds: string[] = [];
   const taskEtags: string[] = [];
   beforeAll(async () => {
     await pg.start();
@@ -56,6 +60,7 @@ describe('Human task reads isolate workspace membership (real HTTP/PostgreSQL)',
       await prisma.taskChecklist.create({ data: { taskId: task.id, text: `Synthetic checklist ${i}` } });
       await prisma.activityLog.create({ data: { taskId: task.id, workspaceId: ws.id, actorType: 'human', actorId: user.id, action: 'comment', payload: { body: `Synthetic comment ${i}` } } });
       const agent = await prisma.agent.create({ data: { workspaceId: ws.id, name: `Synthetic reader ${i}` } });
+      agentIds.push(agent.id);
       agentKeys.push((await auth.createApiKey(agent.id, 'Synthetic read isolation')).key);
       await prisma.taskAgent.create({ data: { taskId: task.id, agentId: agent.id, role: 'executor' } });
       await prisma.taskEvidenceAttachment.create({ data: { taskId: task.id, uri: `https://example.test/synthetic-${i}.json`, sha256: 'a'.repeat(64), contentType: 'application/json', createdByAgentId: agent.id } });
@@ -136,6 +141,100 @@ describe('Human task reads isolate workspace membership (real HTTP/PostgreSQL)',
         await supertest(app.getHttpServer()).get(`/tasks/${tasks[0]}${suffix}`).auth(tokens[0], { type: 'bearer' }).expect(403);
       }
     } finally { await prisma.taskDependency.delete({ where: { id: edge.id } }); }
+  });
+  it('agent assignment list excludes foreign assignments and tasks moved after assignment', async () => {
+    await prisma.taskAgent.create({ data: { taskId: tasks[1], agentId: agentIds[0], role: 'executor' } });
+    try {
+      const own = await supertest(app.getHttpServer()).get('/agents/tasks').auth(agentKeys[0], { type: 'bearer' }).expect(200);
+      expect(own.body.map((x: { taskId: string }) => x.taskId)).toEqual([tasks[0]]);
+      expect(JSON.stringify(own.body)).not.toContain(tasks[1]);
+      await prisma.task.update({ where: { id: tasks[0] }, data: { projectId: projects[1] } });
+      const moved = await supertest(app.getHttpServer()).get('/agents/tasks').auth(agentKeys[0], { type: 'bearer' }).expect(200);
+      expect(moved.body).toEqual([]);
+    } finally {
+      await prisma.task.update({ where: { id: tasks[0] }, data: { projectId: projects[0] } });
+      await prisma.taskAgent.delete({ where: { taskId_agentId: { taskId: tasks[1], agentId: agentIds[0] } } });
+    }
+  });
+  for (const incoming of [false, true]) {
+    it(`agent refuses ${incoming ? 'incoming' : 'outgoing'} foreign dependency metadata on all three reads`, async () => {
+      const edge = await prisma.taskDependency.create({ data: {
+        fromTaskId: tasks[incoming ? 1 : 0], toTaskId: tasks[incoming ? 0 : 1], type: 'depends_on',
+      } });
+      try {
+        for (const suffix of ['/dependencies', '/dependency-graph', '/readiness']) {
+          const response = await supertest(app.getHttpServer()).get(`/tasks/${tasks[0]}${suffix}`).auth(agentKeys[0], { type: 'bearer' }).expect(403);
+          expect(JSON.stringify(response.body)).not.toContain(tasks[1]);
+          expect(response.body.ready).toBeUndefined();
+        }
+      } finally { await prisma.taskDependency.delete({ where: { id: edge.id } }); }
+    });
+  }
+  it('agent same-workspace dependency status remains readable while unowned title is withheld', async () => {
+    await supertest(app.getHttpServer()).get(`/tasks/${tasks[0]}/dependencies`).auth(agentKeys[0], { type: 'bearer' }).expect(200);
+    const graph = await supertest(app.getHttpServer()).get(`/tasks/${tasks[0]}/dependency-graph`).auth(agentKeys[0], { type: 'bearer' }).expect(200);
+    expect(graph.body[0]).toMatchObject({ otherTaskId: counterparts[0], otherTaskTitle: null, otherTaskTitleWithheld: true, otherTaskStatus: 'todo' });
+    const ready = await supertest(app.getHttpServer()).get(`/tasks/${tasks[0]}/readiness`).auth(agentKeys[0], { type: 'bearer' }).expect(200);
+    expect(ready.body).toMatchObject({ ready: false, dependencyCount: 1 });
+  });
+  it('agent dependency service rechecks a root moved after guard admission', async () => {
+    await prisma.task.update({ where: { id: tasks[0] }, data: { projectId: projects[1] } });
+    try {
+      await expect(tasksService.getDependencies(tasks[0], undefined, agentIds[0])).rejects.toMatchObject({ status: 403 });
+      await expect(tasksService.getDependencyGraph(tasks[0], agentIds[0])).rejects.toMatchObject({ status: 403 });
+      await expect(tasksService.getReadiness(tasks[0], agentIds[0])).rejects.toMatchObject({ status: 403 });
+    } finally { await prisma.task.update({ where: { id: tasks[0] }, data: { projectId: projects[0] } }); }
+  });
+  it('Kanban handlers deny foreign subscriptions and recheck revocation before delivery (real PostgreSQL)', async () => {
+    const gateway = new KanbanGateway(new JwtService(), new KanbanAccessService(prisma));
+    const rooms = new Set<string>();
+    const received: unknown[] = [];
+    const socket = {
+      data: { userId: users[0] },
+      join: async (room: string) => { rooms.add(room); },
+      leave: async (room: string) => { rooms.delete(room); },
+      emit: (_event: string, payload: unknown) => { received.push(payload); },
+    };
+    gateway.server = { in: (room: string) => ({ fetchSockets: async () => rooms.has(room) ? [socket] : [] }) } as unknown as Server;
+    await gateway.handleJoinProject({ projectId: projects[1] }, socket as unknown as Socket);
+    expect(rooms.size).toBe(0);
+    await gateway.handleJoinProject({ projectId: projects[0] }, socket as unknown as Socket);
+    expect(rooms.has(`project:${projects[0]}`)).toBe(true);
+    await gateway.emit(projects[0], 'task:created', { id: tasks[0] });
+    expect(received).toEqual([{ id: tasks[0] }]);
+    await prisma.workspaceMember.delete({ where: { workspaceId_userId: { workspaceId: workspaces[0], userId: users[0] } } });
+    try {
+      await gateway.emit(projects[0], 'task:created', { id: counterparts[0] });
+      expect(received).toEqual([{ id: tasks[0] }]);
+      expect(rooms.size).toBe(0);
+      await gateway.handleJoinProject({ projectId: projects[0] }, socket as unknown as Socket);
+      expect(rooms.size).toBe(0);
+    } finally { await prisma.workspaceMember.create({ data: { workspaceId: workspaces[0], userId: users[0], role: 'owner' } }); }
+    await gateway.handleJoinProject({ projectId: projects[0] }, socket as unknown as Socket);
+    await gateway.emit(projects[0], 'task:created', { id: counterparts[0] });
+    expect(received.length).toBe(2);
+    await prisma.project.update({ where: { id: projects[0] }, data: { workspaceId: workspaces[1] } });
+    try {
+      await gateway.emit(projects[0], 'task:created', { id: tasks[1] });
+      expect(received.length).toBe(2);
+      expect(rooms.size).toBe(0);
+    } finally { await prisma.project.update({ where: { id: projects[0] }, data: { workspaceId: workspaces[0] } }); }
+  });
+  it('Kanban handlers disclose nothing when authorization storage is unavailable', async () => {
+    const gateway = new KanbanGateway(new JwtService(), new KanbanAccessService({
+      project: { findFirst: async () => { throw new Error('Synthetic authorization store failure'); } },
+    } as unknown as PrismaService));
+    const received: unknown[] = [], joined: string[] = [], left: string[] = [];
+    const socket = { data: { userId: users[0] },
+      join: async (room: string) => { joined.push(room); },
+      leave: async (room: string) => { left.push(room); },
+      emit: (_event: string, payload: unknown) => { received.push(payload); },
+    };
+    gateway.server = { in: () => ({ fetchSockets: async () => [socket] }) } as unknown as Server;
+    await gateway.handleJoinProject({ projectId: projects[0] }, socket as unknown as Socket);
+    await gateway.emit(projects[0], 'task:created', { id: tasks[0] });
+    expect(joined).toEqual([]); expect(received).toEqual([]);
+    expect(left).toEqual([`project:${projects[0]}`, `project:${projects[0]}`]);
   });
   it('incoming foreign dependency also fails closed in both workspaces', async () => {
     const edge = await prisma.taskDependency.create({ data: { fromTaskId: tasks[1], toTaskId: tasks[0], type: 'depends_on' } });

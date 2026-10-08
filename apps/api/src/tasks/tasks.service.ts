@@ -26,6 +26,8 @@ import { renewalDueAt } from '../auth/project-read-grants.js';
 import type { WorkspaceDigestGrantEntry } from '../auth/workspace-digest-grants.js';
 import { digestRenewalDueAt } from '../auth/workspace-digest-grants.js';
 import { QueryWorkspaceDigestDto } from './dto/query-workspace-digest.dto.js';
+import { QueryProjectIndexDto } from './dto/query-project-index.dto.js';
+import { TASK_CARD_READ_ACTION, taskCardRefusal } from '../auth/task-card.js';
 
 /** MUN-0052: the activity action one task-index read records. */
 export const PROJECT_INDEX_READ_ACTION = 'project:index_read';
@@ -87,6 +89,50 @@ const PROJECT_INDEX_SELECT = {
   updatedAt: true,
   title: true,
 } satisfies Prisma.TaskSelect;
+
+/** DEC-AUP-0134: the ONLY task columns a redacted card is built from. An
+ *  allowlist in the SELECT: a column added to `tasks` later does not reach a key
+ *  that does not own the task. Free text, any hash of it, the bootstrap stamp,
+ *  the creator, dueDate, sprint, contract digest, revision and import time are
+ *  not here and never leave. `parent` is selected only to compare its project. */
+const TASK_CARD_SELECT = {
+  id: true,
+  projectId: true,
+  parentId: true,
+  status: true,
+  priority: true,
+  actorType: true,
+  estimateHours: true,
+  createdAt: true,
+  updatedAt: true,
+  parent: { select: { projectId: true } },
+} satisfies Prisma.TaskSelect;
+
+/** DEC-AUP-0134: turn the index DTO into a where fragment and a page. Pure. */
+function indexFilters(dto: QueryProjectIndexDto) {
+  const where: Prisma.TaskWhereInput = {};
+  const applied: Record<string, string | number> = {};
+  if (dto.status !== undefined) {
+    where.status = dto.status;
+    applied.status = dto.status;
+  }
+  if (dto.contractDigest !== undefined) {
+    where.contractDigest = dto.contractDigest;
+    applied.contractDigest = dto.contractDigest;
+  }
+  if (dto.updatedSince !== undefined || dto.updatedBefore !== undefined) {
+    where.updatedAt = {
+      ...(dto.updatedSince !== undefined ? { gte: new Date(dto.updatedSince) } : {}),
+      ...(dto.updatedBefore !== undefined ? { lt: new Date(dto.updatedBefore) } : {}),
+    };
+    if (dto.updatedSince !== undefined) applied.updatedSince = dto.updatedSince;
+    if (dto.updatedBefore !== undefined) applied.updatedBefore = dto.updatedBefore;
+  }
+  const page = { take: dto.limit, skip: dto.offset };
+  if (dto.limit !== undefined) applied.limit = dto.limit;
+  if (dto.offset !== undefined) applied.offset = dto.offset;
+  return { where, page, applied, active: Object.keys(applied).length > 0 };
+}
 
 @Injectable()
 export class TasksService {
@@ -182,6 +228,87 @@ export class TasksService {
   }
 
   /**
+   * DEC-AUP-0134 — the FULL card for an agent key that owns the task. Unchanged
+   * answer; the one addition is that the read is bound to the key's workspace by
+   * the same query, so a task re-pointed to another workspace between the guard
+   * and this read is refused with the card route's one 403.
+   */
+  async findOneOwnedByAgent(taskId: string, workspaceId: string) {
+    const task = await this.prisma.task
+      .findFirst({ where: { id: taskId, project: { workspaceId } } })
+      .catch(() => null);
+    if (!task) throw taskCardRefusal();
+    return task;
+  }
+
+  /**
+   * DEC-AUP-0134 — the REDACTED card. The task is re-read under the project id
+   * the guard authorised AND inside the key's workspace (`findFirst`, never
+   * `findUnique` by id): a task moved to another project or workspace since the
+   * guard answers the one 403, not a card. `parentId` survives only when the
+   * parent is in the same project — a parent elsewhere is a foreign id.
+   */
+  async redactedCardForAgent(
+    taskId: string,
+    workspaceId: string,
+    authorisedProjectId: string,
+    grant: ProjectReadGrantEntry,
+  ) {
+    const row = await this.prisma.task
+      .findFirst({
+        where: { id: taskId, projectId: authorisedProjectId, project: { workspaceId } },
+        select: TASK_CARD_SELECT,
+      })
+      .catch(() => null);
+    if (!row) throw taskCardRefusal();
+    return {
+      id: row.id,
+      projectId: row.projectId,
+      parentId: row.parent && row.parent.projectId === row.projectId ? row.parentId : null,
+      status: row.status,
+      priority: row.priority,
+      actorType: row.actorType,
+      estimateHours: row.estimateHours,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      titleWithheld: true as const,
+      descriptionWithheld: true as const,
+      view: 'redacted' as const,
+      // The same three keys the index returns, so a holder's receipt reads alike.
+      grant: { decision: grant.decision, until: grant.until, renewalDueAt: renewalDueAt(grant) },
+    };
+  }
+
+  /**
+   * DEC-AUP-0134 — one activity row per redacted read, written BEFORE the card is
+   * answered. A failed insert propagates: the read returns no card. The payload
+   * names ids and the decision only — never a title, a description or a hash.
+   */
+  async recordCardRead(
+    card: { id: string; projectId: string },
+    workspaceId: string,
+    agentId: string,
+    grant: ProjectReadGrantEntry,
+  ) {
+    return this.prisma.activityLog.create({
+      data: {
+        workspaceId,
+        taskId: null,
+        actorType: 'agent',
+        actorId: agentId,
+        action: TASK_CARD_READ_ACTION,
+        payload: {
+          taskId: card.id,
+          projectId: card.projectId,
+          decision: grant.decision,
+          view: 'redacted',
+        } as Prisma.InputJsonValue,
+      },
+      select: { id: true },
+    });
+  }
+
+  /**
    * Tasks in a project.
    *
    * MUN-0043: when `scopedToAgentId` is given the answer is narrowed to the
@@ -220,6 +347,7 @@ export class TasksService {
     projectId: string,
     agentId: string,
     grant: ProjectReadGrantEntry,
+    filter: QueryProjectIndexDto = {},
   ) {
     const project = await this.prisma.project.findUnique({
       where: { id: projectId },
@@ -229,15 +357,27 @@ export class TasksService {
       throw new NotFoundException(`Project ${projectId} not found.`);
     }
 
+    // DEC-AUP-0134: optional NARROWING filters. `projectId` is always the path's;
+    // a filter is ANDed onto it, so a filtered result is a subset of the
+    // unfiltered one. With no filter at all, the query and the answer are exactly
+    // what they were.
+    const filters = indexFilters(filter);
+    const where: Prisma.TaskWhereInput = { projectId, ...filters.where };
     const rows = await this.prisma.task.findMany({
-      where: { projectId },
+      where,
       select: PROJECT_INDEX_SELECT,
       orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+      ...(filters.page.take !== undefined ? { take: filters.page.take } : {}),
+      ...(filters.page.skip !== undefined ? { skip: filters.page.skip } : {}),
     });
     const tasks = rows.map(({ title, ...rest }) => ({
       ...rest,
       titleSha256: createHash('sha256').update(title, 'utf8').digest('hex'),
     }));
+    // `total` stays "every task of the project"; `matched` is what the filters
+    // select before paging. Both only when a filter or a page was asked for.
+    const total = filters.active ? await this.prisma.task.count({ where: { projectId } }) : tasks.length;
+    const matched = filters.active ? await this.prisma.task.count({ where }) : undefined;
 
     const audit = await this.prisma.activityLog.create({
       data: {
@@ -250,6 +390,7 @@ export class TasksService {
           projectId,
           decision: grant.decision,
           rowCount: tasks.length,
+          ...(filters.active ? { matched, filters: filters.applied } : {}),
         } as Prisma.InputJsonValue,
       },
       select: { id: true, createdAt: true },
@@ -264,7 +405,8 @@ export class TasksService {
     return {
       projectId,
       counted: PROJECT_INDEX_COUNTED,
-      total: tasks.length,
+      total,
+      ...(matched !== undefined ? { matched } : {}),
       generatedAt: audit.createdAt.toISOString(),
       auditEventId: audit.id,
       auditReadCount,
@@ -695,12 +837,31 @@ export class TasksService {
     await this.prisma.taskDependency.delete({ where: { id: depId, ...(fromTaskId ? { fromTaskId } : {}) } });
   }
 
-  async getDependencies(taskId: string, humanUserId?: string) {
-    if (!humanUserId) return this.prisma.taskDependency.findMany({ where: { fromTaskId: taskId } });
+  async getDependencies(taskId: string, humanUserId?: string, agentId?: string) {
+    if (!humanUserId && !agentId) return this.prisma.taskDependency.findMany({ where: { fromTaskId: taskId } });
     return this.prisma.$transaction(async (tx) => {
-      await this.assertHumanDependencyRead(tx, taskId, humanUserId);
+      if (humanUserId) await this.assertHumanDependencyRead(tx, taskId, humanUserId);
+      else await this.assertAgentDependencyRead(tx, taskId, agentId!);
       return tx.taskDependency.findMany({ where: { fromTaskId: taskId } });
     }, { isolationLevel: 'RepeatableRead' });
+  }
+
+  private async assertAgentDependencyRead(tx: Prisma.TransactionClient, taskId: string, agentId: string) {
+    const agent = await tx.agent.findUnique({ where: { id: agentId }, select: { workspaceId: true } });
+    if (!agent) throw new ForbiddenException('Agent task read forbidden');
+    const workspaceWhere = { project: { workspaceId: agent.workspaceId } };
+    const root = await tx.task.findFirst({
+      where: { id: taskId, ...workspaceWhere, ...agentOwnTaskWhere(agentId) }, select: { id: true },
+    });
+    if (!root) throw new ForbiddenException('Agent task read forbidden');
+    const foreign = await tx.taskDependency.findFirst({
+      where: { AND: [
+        { OR: [{ fromTaskId: taskId }, { toTaskId: taskId }] },
+        { OR: [{ fromTask: { NOT: workspaceWhere } }, { toTask: { NOT: workspaceWhere } }] },
+      ] }, select: { id: true },
+    });
+    // Refuse the whole read: hiding the edge would manufacture readiness.
+    if (foreign) throw new ForbiddenException('Agent task read forbidden');
   }
 
   private async assertHumanDependencyRead(tx: Prisma.TransactionClient, taskId: string, userId: string) {
@@ -741,13 +902,14 @@ export class TasksService {
     fromTaskId: string; toTaskId: string; otherTaskId: string;
     otherTaskTitle: string | null; otherTaskTitleWithheld?: true; otherTaskStatus: string;
   }>> {
-    if (humanUserId && !readClient) {
+    if ((humanUserId || agentId) && !readClient) {
       return this.prisma.$transaction(async (tx) => {
-        await this.assertHumanDependencyRead(tx, taskId, humanUserId);
+        if (humanUserId) await this.assertHumanDependencyRead(tx, taskId, humanUserId);
+        else await this.assertAgentDependencyRead(tx, taskId, agentId!);
         return this.getDependencyGraph(taskId, agentId, humanUserId, tx);
       }, { isolationLevel: 'RepeatableRead' });
     }
-    if (!humanUserId) await this.findOne(taskId);
+    if (!humanUserId && !agentId) await this.findOne(taskId);
     const edges = await (readClient ?? this.prisma).taskDependency.findMany({
       where: { OR: [{ fromTaskId: taskId }, { toTaskId: taskId }] },
       include: {
@@ -760,14 +922,13 @@ export class TasksService {
     // owns the task in the PATH; it says nothing about the counterpart at the
     // other end of an edge, whose title was returned in clear. So a key that
     // owned one task read the titles of tasks it did not own, one edge at a
-    // time — the same plaintext the field-change read above stopped handing
-    // out, through a different door. The counterpart's STATUS stays: it is not
-    // free text and `getReadiness` below is computed from it. Human reads additionally require membership for both dependency endpoints
-    // in one transaction snapshot; agent title withholding remains unchanged.
+    // time. Status is readable only within the agent's workspace. Both human
+    // and agent endpoint checks share the edge-read transaction snapshot.
     const ownedCounterparts = agentId
       ? await this.ownedAmong(
           agentId,
           edges.map((e) => (e.fromTaskId === taskId ? e.toTaskId : e.fromTaskId)),
+          readClient,
         )
       : null;
 
@@ -791,9 +952,9 @@ export class TasksService {
 
   /** MUN-0055: which of `ids` the agent owns — assigned or creator, the same
    *  filter every other agent-key read narrows by (agentOwnTaskWhere). */
-  private async ownedAmong(agentId: string, ids: string[]): Promise<Set<string>> {
+  private async ownedAmong(agentId: string, ids: string[], readClient?: Prisma.TransactionClient): Promise<Set<string>> {
     if (ids.length === 0) return new Set();
-    const rows = await this.prisma.task.findMany({
+    const rows = await (readClient ?? this.prisma).task.findMany({
       where: { id: { in: [...new Set(ids)] }, ...agentOwnTaskWhere(agentId) },
       select: { id: true },
     });

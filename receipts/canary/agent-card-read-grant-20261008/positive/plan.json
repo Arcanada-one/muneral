@@ -1,0 +1,872 @@
+{
+  "schema": "CanaryPlan/v2",
+  "id": "agent-card-read-grant-positive-http-successor-security-residuals",
+  "owner": "MUNERAL successor lane",
+  "environment": "Owned disposable PostgreSQL and actual Nest HTTP, synthetic principals only; no production request",
+  "read_only": false,
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "fa1385c74ad3dcf0f488f3061ff8f53634ba62a4",
+    "tree": "09062adeeb54a646d55addbb8067cbcd41f4b24f",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "d0d1b50a25b3022e7e60cde9adb5da7a84aa64f0e3d6dd34c76eb718413fbc9d",
+      "source_field": "commit"
+    }
+  },
+  "purpose": "Real HTTP over an owned disposable PostgreSQL: redacted card, owner full card, uniform 403, audit, filters; and the human-read isolation and project-index suites unchanged. No production request; no original-web acceptance claim. Refreshed source after independent security review. Kanban authorization uses actual handlers and PostgreSQL; WebSocket transport is not measured.",
+  "probes": [
+    {
+      "kind": "process",
+      "id": "card-read-http",
+      "argv": [
+        "/usr/bin/python3.12",
+        "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/card-positive.py",
+        "/home/dev/aup/import-audit-work/runs/PR225-security-layered-canary-20261008/positive/card-read-http-v2.log",
+        "test/agent-task-card-read.e2e.spec.ts"
+      ],
+      "cwd": ".",
+      "env_keys": [
+        "PATH",
+        "HOME",
+        "TMPDIR"
+      ],
+      "timeout_seconds": 120,
+      "capture_limit_bytes": 524288,
+      "executable_sha256": "e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f",
+      "execution_files": [
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/package.json",
+          "sha256": "919202c86e4a269cb8e4e680b9fdb768e555bbf8d7caf449adea37123657652c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/prisma/schema.prisma",
+          "sha256": "4ba70ef686a76611855b6fa59c5fc3b1ca4abcfe622f46c611ac846bdc2e753c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/activity/activity.service.ts",
+          "sha256": "ce78618a5c1c5a1242e17853bdb80e6dba623c52a115ddca47d249d26ded9553"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/agents/agents.service.ts",
+          "sha256": "4b03dcfa3de4fbe7b66662cf04377de44d356ed06899cc9cc58387496494736d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/agent-scope.decorator.ts",
+          "sha256": "2004db86fff87558f76e9aaa3f23b714f2378d8b05b57397b607758f650bbf5b"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/guards/agent-task-scope.guard.ts",
+          "sha256": "8ccf93501227988081140a8e25a3767b1f85a18c67b7b1a4fe24d51e87184c5c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/guards/human-task-read.guard.ts",
+          "sha256": "cb8de58d5c5480fb8621522d4799cb2938af2bae8ddc43ba84562ca6883b2dcc"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/guards/jwt-or-api-key.guard.ts",
+          "sha256": "a7732bb3f90512742415b9b44eb1bec26be7e3b45073ed1f94eb84144d20af58"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/human-task-visibility.ts",
+          "sha256": "d455058fbf5f3ac68ab273ff30cffe1dc846e22395e9611b837e7b084d14cfd6"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/project-read-grants.ts",
+          "sha256": "cfbb6bd4ea8114f5af922b4815de7fdcc2a6b6ae02073da62072f068aeb63189"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/task-card.ts",
+          "sha256": "ed4d158f56425ff814b1f1b2ef523ecd8b329de410cb2466f57f879b72a0bb8f"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/execution-authority/task-staleness.service.ts",
+          "sha256": "e9e359417401109e6dc8ccff2e43f048c46eaaf0e5eff7dd7420da89dc8258be"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/projects/projects.controller.ts",
+          "sha256": "0233dd5d417e4d8da15f4ddb3d5e8c4f26893c9a250a5fe45e23aaf28e54b180"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/projects/projects.module.ts",
+          "sha256": "3d63a04ee48b84c6994c47900474af7e8de7cf296de4bf9e7663bbd9ce71b9bf"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/projects/projects.service.ts",
+          "sha256": "60ba1dc8cd941dd8a8058b1ffd1bb1ee0b3362910bca3817e146d22df07cc557"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/solution-log-head/solution-log-head.service.ts",
+          "sha256": "e2f5f8127b78cc62e72d634d3f79a205d1ae88c2996c9169c790ba3c15605fbc"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/sync/sync.controller.ts",
+          "sha256": "c1e61ec0697e0281fe4a38853d95f60a44fac7f553931c7d724a075c63c34d5c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/sync/sync.module.ts",
+          "sha256": "aae58d5ceeb772a10554b670440e82e66f442f8f0d47e1c00e3332930f11a4c9"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/sync/sync.service.ts",
+          "sha256": "33f2b0c2835d6fcdbfd30b23604e19aa805550928fb00cc77cad12626b37c469"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/dto/query-project-index.dto.ts",
+          "sha256": "9d9d163a53c0c3af7e1da9eb4788014d860394be14b38194f19b64e21b91c30b"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/evidence/task-evidence.service.ts",
+          "sha256": "3f7a06494a1ff1ce98082d2f2ffccfe950310ca6db250d29b642b1cc3397f72f"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/task-contract-binding.controller.ts",
+          "sha256": "a6af6669d09ca6aea2c0078912c6bfeccd4939e0fe3cf71457d04b55531d5280"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/task-contract-binding.service.ts",
+          "sha256": "0c52bc1607712d8790f91db853e8d98f00f2189add9c965e06aa011521892994"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/tasks.controller.ts",
+          "sha256": "6b3f2ff7f25b15d9e95e778acf82ba150c753adbc66432b161c50a32b4c0bb3d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/tasks.module.ts",
+          "sha256": "4a9df746928a516de6376d4b3b950177ea4e0dd4cbe6589fe928be4de5b8ed95"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/tasks.service.ts",
+          "sha256": "63df69e840b778c8d4d4512755ad27abdafd4236bdaea4c8afe049866415f456"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/kanban.gateway.ts",
+          "sha256": "aecaaaee50810e96066b1910ebecfae9d1e5825dea001dce4e6717e706ad49a0"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/kanban.service.ts",
+          "sha256": "dd89586ed31f5bf2c2daaa5f5a185964b9fd1b590d77356f78e93835c13d9686"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/agent-project-index.e2e.spec.ts",
+          "sha256": "843d69de36e185ee353529f9613b4cb9c8cea523f349e0f340493ca3a6c1e381"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/agent-task-card-read.e2e.spec.ts",
+          "sha256": "3846169aea154b28c2f30b48751d7caf9b2a28d3b500023b367e1332a4cf5244"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/assembly/mutation-results.json",
+          "sha256": "69b8c780772a6c1e4982845dc246b68fb7f005ef9b649568b516f769d8e212d1"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/human-task-read-isolation.e2e.spec.ts",
+          "sha256": "4498b7af066ff8f11cc16fc21e1e90cd113edd2633ba581da48b9ee17eb2bc7d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/project-read-grants.spec.ts",
+          "sha256": "1def30b78815615fdd2c2a80179bf2af27165e767c94f7e6ce2fcfe4929cb314"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/setup-env.ts",
+          "sha256": "82d499fbda25da528b66c84d159e58cc94a363408d7ad9d3dc36d21e1a465d00"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/solution-log-head.postgres.spec.ts",
+          "sha256": "50e0644617383fa9fb616c2acf3999fe60f5a46736137b85ead369b757c0498c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/solution-log-head.service.spec.ts",
+          "sha256": "e64159af8ec3a30db9d40f05657bc187ce25d8d0c86d03b67ca57805478a7a87"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/support/disposable-postgres.ts",
+          "sha256": "6644ee5e273b9bc866254288f8e4c426800da68875f485c932f28dc1e8576e3b"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/task-contract-binding.e2e.spec.ts",
+          "sha256": "e108295d4ad90d9c2d139e43394ea40c7fcef396c0dccda0fcfb485a0cd984f6"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/task-contract-digest.e2e.spec.ts",
+          "sha256": "d88febb7831d9ed06f8eb439df4a80ae8a4bd0b21c865bf1e48c97e10efe5d86"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/tsconfig.test.json",
+          "sha256": "b45b51f10e6897b5fa212f421842c1334c9e1f7942e446dcf278bb08b9c55d1d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/pnpm-lock.yaml",
+          "sha256": "b9fd7a00c104eccb56944baa49ef119aee98792efb68467fd6018cfae5d84978"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/card-positive.py",
+          "sha256": "e9bc8d633826d9a728f04fecfd5cbbbac171b709575ab4b70468d4cac332f7a9"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/kanban-access.service.ts",
+          "sha256": "1aed5320f9ddbcea6ca932d3882b73d66af466aa033801a76e3dd7857979a4ab"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/ws.module.ts",
+          "sha256": "16f852b122714ddcd922618b2e0632e0aaf891f207363c212b7162a1cccebf2b"
+        }
+      ],
+      "entities": [
+        "code_unit:apps/api/src/tasks/tasks.controller.ts",
+        "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
+        "code_unit:apps/api/src/tasks/tasks.service.ts",
+        "code_unit:apps/api/src/auth/project-read-grants.ts",
+        "code_unit:apps/api/src/auth/task-card.ts",
+        "code_unit:apps/api/src/tasks/dto/query-project-index.dto.ts",
+        "code_unit:apps/api/src/auth/agent-scope.decorator.ts"
+      ],
+      "expect": {
+        "exit_codes": [
+          0
+        ],
+        "stdout_contains": [
+          "Test exit 0"
+        ]
+      },
+      "mutating": true
+    },
+    {
+      "kind": "process",
+      "id": "human-read-isolation-http",
+      "argv": [
+        "/usr/bin/python3.12",
+        "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/card-positive.py",
+        "/home/dev/aup/import-audit-work/runs/PR225-security-layered-canary-20261008/positive/human-read-isolation-http-v2.log",
+        "test/human-task-read-isolation.e2e.spec.ts"
+      ],
+      "cwd": ".",
+      "env_keys": [
+        "PATH",
+        "HOME",
+        "TMPDIR"
+      ],
+      "timeout_seconds": 120,
+      "capture_limit_bytes": 524288,
+      "executable_sha256": "e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f",
+      "execution_files": [
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/package.json",
+          "sha256": "919202c86e4a269cb8e4e680b9fdb768e555bbf8d7caf449adea37123657652c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/prisma/schema.prisma",
+          "sha256": "4ba70ef686a76611855b6fa59c5fc3b1ca4abcfe622f46c611ac846bdc2e753c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/activity/activity.service.ts",
+          "sha256": "ce78618a5c1c5a1242e17853bdb80e6dba623c52a115ddca47d249d26ded9553"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/agents/agents.service.ts",
+          "sha256": "4b03dcfa3de4fbe7b66662cf04377de44d356ed06899cc9cc58387496494736d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/agent-scope.decorator.ts",
+          "sha256": "2004db86fff87558f76e9aaa3f23b714f2378d8b05b57397b607758f650bbf5b"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/guards/agent-task-scope.guard.ts",
+          "sha256": "8ccf93501227988081140a8e25a3767b1f85a18c67b7b1a4fe24d51e87184c5c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/guards/human-task-read.guard.ts",
+          "sha256": "cb8de58d5c5480fb8621522d4799cb2938af2bae8ddc43ba84562ca6883b2dcc"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/guards/jwt-or-api-key.guard.ts",
+          "sha256": "a7732bb3f90512742415b9b44eb1bec26be7e3b45073ed1f94eb84144d20af58"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/human-task-visibility.ts",
+          "sha256": "d455058fbf5f3ac68ab273ff30cffe1dc846e22395e9611b837e7b084d14cfd6"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/project-read-grants.ts",
+          "sha256": "cfbb6bd4ea8114f5af922b4815de7fdcc2a6b6ae02073da62072f068aeb63189"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/task-card.ts",
+          "sha256": "ed4d158f56425ff814b1f1b2ef523ecd8b329de410cb2466f57f879b72a0bb8f"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/execution-authority/task-staleness.service.ts",
+          "sha256": "e9e359417401109e6dc8ccff2e43f048c46eaaf0e5eff7dd7420da89dc8258be"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/projects/projects.controller.ts",
+          "sha256": "0233dd5d417e4d8da15f4ddb3d5e8c4f26893c9a250a5fe45e23aaf28e54b180"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/projects/projects.module.ts",
+          "sha256": "3d63a04ee48b84c6994c47900474af7e8de7cf296de4bf9e7663bbd9ce71b9bf"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/projects/projects.service.ts",
+          "sha256": "60ba1dc8cd941dd8a8058b1ffd1bb1ee0b3362910bca3817e146d22df07cc557"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/solution-log-head/solution-log-head.service.ts",
+          "sha256": "e2f5f8127b78cc62e72d634d3f79a205d1ae88c2996c9169c790ba3c15605fbc"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/sync/sync.controller.ts",
+          "sha256": "c1e61ec0697e0281fe4a38853d95f60a44fac7f553931c7d724a075c63c34d5c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/sync/sync.module.ts",
+          "sha256": "aae58d5ceeb772a10554b670440e82e66f442f8f0d47e1c00e3332930f11a4c9"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/sync/sync.service.ts",
+          "sha256": "33f2b0c2835d6fcdbfd30b23604e19aa805550928fb00cc77cad12626b37c469"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/dto/query-project-index.dto.ts",
+          "sha256": "9d9d163a53c0c3af7e1da9eb4788014d860394be14b38194f19b64e21b91c30b"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/evidence/task-evidence.service.ts",
+          "sha256": "3f7a06494a1ff1ce98082d2f2ffccfe950310ca6db250d29b642b1cc3397f72f"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/task-contract-binding.controller.ts",
+          "sha256": "a6af6669d09ca6aea2c0078912c6bfeccd4939e0fe3cf71457d04b55531d5280"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/task-contract-binding.service.ts",
+          "sha256": "0c52bc1607712d8790f91db853e8d98f00f2189add9c965e06aa011521892994"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/tasks.controller.ts",
+          "sha256": "6b3f2ff7f25b15d9e95e778acf82ba150c753adbc66432b161c50a32b4c0bb3d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/tasks.module.ts",
+          "sha256": "4a9df746928a516de6376d4b3b950177ea4e0dd4cbe6589fe928be4de5b8ed95"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/tasks.service.ts",
+          "sha256": "63df69e840b778c8d4d4512755ad27abdafd4236bdaea4c8afe049866415f456"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/kanban.gateway.ts",
+          "sha256": "aecaaaee50810e96066b1910ebecfae9d1e5825dea001dce4e6717e706ad49a0"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/kanban.service.ts",
+          "sha256": "dd89586ed31f5bf2c2daaa5f5a185964b9fd1b590d77356f78e93835c13d9686"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/agent-project-index.e2e.spec.ts",
+          "sha256": "843d69de36e185ee353529f9613b4cb9c8cea523f349e0f340493ca3a6c1e381"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/agent-task-card-read.e2e.spec.ts",
+          "sha256": "3846169aea154b28c2f30b48751d7caf9b2a28d3b500023b367e1332a4cf5244"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/assembly/mutation-results.json",
+          "sha256": "69b8c780772a6c1e4982845dc246b68fb7f005ef9b649568b516f769d8e212d1"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/human-task-read-isolation.e2e.spec.ts",
+          "sha256": "4498b7af066ff8f11cc16fc21e1e90cd113edd2633ba581da48b9ee17eb2bc7d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/project-read-grants.spec.ts",
+          "sha256": "1def30b78815615fdd2c2a80179bf2af27165e767c94f7e6ce2fcfe4929cb314"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/setup-env.ts",
+          "sha256": "82d499fbda25da528b66c84d159e58cc94a363408d7ad9d3dc36d21e1a465d00"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/solution-log-head.postgres.spec.ts",
+          "sha256": "50e0644617383fa9fb616c2acf3999fe60f5a46736137b85ead369b757c0498c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/solution-log-head.service.spec.ts",
+          "sha256": "e64159af8ec3a30db9d40f05657bc187ce25d8d0c86d03b67ca57805478a7a87"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/support/disposable-postgres.ts",
+          "sha256": "6644ee5e273b9bc866254288f8e4c426800da68875f485c932f28dc1e8576e3b"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/task-contract-binding.e2e.spec.ts",
+          "sha256": "e108295d4ad90d9c2d139e43394ea40c7fcef396c0dccda0fcfb485a0cd984f6"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/task-contract-digest.e2e.spec.ts",
+          "sha256": "d88febb7831d9ed06f8eb439df4a80ae8a4bd0b21c865bf1e48c97e10efe5d86"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/tsconfig.test.json",
+          "sha256": "b45b51f10e6897b5fa212f421842c1334c9e1f7942e446dcf278bb08b9c55d1d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/pnpm-lock.yaml",
+          "sha256": "b9fd7a00c104eccb56944baa49ef119aee98792efb68467fd6018cfae5d84978"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/card-positive.py",
+          "sha256": "e9bc8d633826d9a728f04fecfd5cbbbac171b709575ab4b70468d4cac332f7a9"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/kanban-access.service.ts",
+          "sha256": "1aed5320f9ddbcea6ca932d3882b73d66af466aa033801a76e3dd7857979a4ab"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/ws.module.ts",
+          "sha256": "16f852b122714ddcd922618b2e0632e0aaf891f207363c212b7162a1cccebf2b"
+        }
+      ],
+      "entities": [
+        "code_unit:apps/api/src/tasks/tasks.controller.ts",
+        "code_unit:apps/api/src/auth/guards/human-task-read.guard.ts",
+        "code_unit:apps/api/src/agents/agents.service.ts",
+        "code_unit:apps/api/src/ws/kanban.gateway.ts",
+        "code_unit:apps/api/src/ws/kanban-access.service.ts"
+      ],
+      "expect": {
+        "exit_codes": [
+          0
+        ],
+        "stdout_contains": [
+          "Test exit 0"
+        ]
+      },
+      "mutating": true
+    },
+    {
+      "kind": "process",
+      "id": "solution-log-head-workspace",
+      "argv": [
+        "/usr/bin/python3.12",
+        "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/card-positive.py",
+        "/home/dev/aup/import-audit-work/runs/PR225-security-layered-canary-20261008/positive/solution-log-head-v2.log",
+        "test/solution-log-head.postgres.spec.ts",
+        "test/solution-log-head.service.spec.ts"
+      ],
+      "cwd": ".",
+      "env_keys": [
+        "PATH",
+        "HOME",
+        "TMPDIR"
+      ],
+      "timeout_seconds": 120,
+      "capture_limit_bytes": 524288,
+      "executable_sha256": "e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f",
+      "execution_files": [
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/package.json",
+          "sha256": "919202c86e4a269cb8e4e680b9fdb768e555bbf8d7caf449adea37123657652c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/prisma/schema.prisma",
+          "sha256": "4ba70ef686a76611855b6fa59c5fc3b1ca4abcfe622f46c611ac846bdc2e753c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/activity/activity.service.ts",
+          "sha256": "ce78618a5c1c5a1242e17853bdb80e6dba623c52a115ddca47d249d26ded9553"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/agents/agents.service.ts",
+          "sha256": "4b03dcfa3de4fbe7b66662cf04377de44d356ed06899cc9cc58387496494736d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/agent-scope.decorator.ts",
+          "sha256": "2004db86fff87558f76e9aaa3f23b714f2378d8b05b57397b607758f650bbf5b"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/guards/agent-task-scope.guard.ts",
+          "sha256": "8ccf93501227988081140a8e25a3767b1f85a18c67b7b1a4fe24d51e87184c5c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/guards/human-task-read.guard.ts",
+          "sha256": "cb8de58d5c5480fb8621522d4799cb2938af2bae8ddc43ba84562ca6883b2dcc"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/guards/jwt-or-api-key.guard.ts",
+          "sha256": "a7732bb3f90512742415b9b44eb1bec26be7e3b45073ed1f94eb84144d20af58"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/human-task-visibility.ts",
+          "sha256": "d455058fbf5f3ac68ab273ff30cffe1dc846e22395e9611b837e7b084d14cfd6"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/project-read-grants.ts",
+          "sha256": "cfbb6bd4ea8114f5af922b4815de7fdcc2a6b6ae02073da62072f068aeb63189"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/task-card.ts",
+          "sha256": "ed4d158f56425ff814b1f1b2ef523ecd8b329de410cb2466f57f879b72a0bb8f"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/execution-authority/task-staleness.service.ts",
+          "sha256": "e9e359417401109e6dc8ccff2e43f048c46eaaf0e5eff7dd7420da89dc8258be"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/projects/projects.controller.ts",
+          "sha256": "0233dd5d417e4d8da15f4ddb3d5e8c4f26893c9a250a5fe45e23aaf28e54b180"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/projects/projects.module.ts",
+          "sha256": "3d63a04ee48b84c6994c47900474af7e8de7cf296de4bf9e7663bbd9ce71b9bf"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/projects/projects.service.ts",
+          "sha256": "60ba1dc8cd941dd8a8058b1ffd1bb1ee0b3362910bca3817e146d22df07cc557"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/solution-log-head/solution-log-head.service.ts",
+          "sha256": "e2f5f8127b78cc62e72d634d3f79a205d1ae88c2996c9169c790ba3c15605fbc"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/sync/sync.controller.ts",
+          "sha256": "c1e61ec0697e0281fe4a38853d95f60a44fac7f553931c7d724a075c63c34d5c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/sync/sync.module.ts",
+          "sha256": "aae58d5ceeb772a10554b670440e82e66f442f8f0d47e1c00e3332930f11a4c9"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/sync/sync.service.ts",
+          "sha256": "33f2b0c2835d6fcdbfd30b23604e19aa805550928fb00cc77cad12626b37c469"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/dto/query-project-index.dto.ts",
+          "sha256": "9d9d163a53c0c3af7e1da9eb4788014d860394be14b38194f19b64e21b91c30b"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/evidence/task-evidence.service.ts",
+          "sha256": "3f7a06494a1ff1ce98082d2f2ffccfe950310ca6db250d29b642b1cc3397f72f"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/task-contract-binding.controller.ts",
+          "sha256": "a6af6669d09ca6aea2c0078912c6bfeccd4939e0fe3cf71457d04b55531d5280"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/task-contract-binding.service.ts",
+          "sha256": "0c52bc1607712d8790f91db853e8d98f00f2189add9c965e06aa011521892994"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/tasks.controller.ts",
+          "sha256": "6b3f2ff7f25b15d9e95e778acf82ba150c753adbc66432b161c50a32b4c0bb3d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/tasks.module.ts",
+          "sha256": "4a9df746928a516de6376d4b3b950177ea4e0dd4cbe6589fe928be4de5b8ed95"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/tasks.service.ts",
+          "sha256": "63df69e840b778c8d4d4512755ad27abdafd4236bdaea4c8afe049866415f456"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/kanban.gateway.ts",
+          "sha256": "aecaaaee50810e96066b1910ebecfae9d1e5825dea001dce4e6717e706ad49a0"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/kanban.service.ts",
+          "sha256": "dd89586ed31f5bf2c2daaa5f5a185964b9fd1b590d77356f78e93835c13d9686"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/agent-project-index.e2e.spec.ts",
+          "sha256": "843d69de36e185ee353529f9613b4cb9c8cea523f349e0f340493ca3a6c1e381"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/agent-task-card-read.e2e.spec.ts",
+          "sha256": "3846169aea154b28c2f30b48751d7caf9b2a28d3b500023b367e1332a4cf5244"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/assembly/mutation-results.json",
+          "sha256": "69b8c780772a6c1e4982845dc246b68fb7f005ef9b649568b516f769d8e212d1"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/human-task-read-isolation.e2e.spec.ts",
+          "sha256": "4498b7af066ff8f11cc16fc21e1e90cd113edd2633ba581da48b9ee17eb2bc7d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/project-read-grants.spec.ts",
+          "sha256": "1def30b78815615fdd2c2a80179bf2af27165e767c94f7e6ce2fcfe4929cb314"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/setup-env.ts",
+          "sha256": "82d499fbda25da528b66c84d159e58cc94a363408d7ad9d3dc36d21e1a465d00"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/solution-log-head.postgres.spec.ts",
+          "sha256": "50e0644617383fa9fb616c2acf3999fe60f5a46736137b85ead369b757c0498c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/solution-log-head.service.spec.ts",
+          "sha256": "e64159af8ec3a30db9d40f05657bc187ce25d8d0c86d03b67ca57805478a7a87"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/support/disposable-postgres.ts",
+          "sha256": "6644ee5e273b9bc866254288f8e4c426800da68875f485c932f28dc1e8576e3b"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/task-contract-binding.e2e.spec.ts",
+          "sha256": "e108295d4ad90d9c2d139e43394ea40c7fcef396c0dccda0fcfb485a0cd984f6"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/task-contract-digest.e2e.spec.ts",
+          "sha256": "d88febb7831d9ed06f8eb439df4a80ae8a4bd0b21c865bf1e48c97e10efe5d86"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/tsconfig.test.json",
+          "sha256": "b45b51f10e6897b5fa212f421842c1334c9e1f7942e446dcf278bb08b9c55d1d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/pnpm-lock.yaml",
+          "sha256": "b9fd7a00c104eccb56944baa49ef119aee98792efb68467fd6018cfae5d84978"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/card-positive.py",
+          "sha256": "e9bc8d633826d9a728f04fecfd5cbbbac171b709575ab4b70468d4cac332f7a9"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/kanban-access.service.ts",
+          "sha256": "1aed5320f9ddbcea6ca932d3882b73d66af466aa033801a76e3dd7857979a4ab"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/ws.module.ts",
+          "sha256": "16f852b122714ddcd922618b2e0632e0aaf891f207363c212b7162a1cccebf2b"
+        }
+      ],
+      "entities": [
+        "code_unit:apps/api/src/solution-log-head/solution-log-head.service.ts"
+      ],
+      "expect": {
+        "exit_codes": [
+          0
+        ],
+        "stdout_contains": [
+          "Test exit 0"
+        ]
+      },
+      "mutating": true
+    },
+    {
+      "kind": "process",
+      "id": "binding-status-authority",
+      "argv": [
+        "/home/dev/aup/import-audit-work/runs/m211c/node-v24.21.0-linux-x64/bin/node",
+        "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/binding-positive.mjs",
+        "/home/dev/aup/import-audit-work/mun-card-grant",
+        "/home/dev/aup/import-audit-work/runs/PR225-security-layered-canary-20261008/positive/binding-status-authority-v2.log"
+      ],
+      "cwd": ".",
+      "env_keys": [
+        "PATH",
+        "HOME",
+        "TMPDIR"
+      ],
+      "timeout_seconds": 120,
+      "capture_limit_bytes": 524288,
+      "executable_sha256": "7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c",
+      "execution_files": [
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/package.json",
+          "sha256": "919202c86e4a269cb8e4e680b9fdb768e555bbf8d7caf449adea37123657652c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/prisma/schema.prisma",
+          "sha256": "4ba70ef686a76611855b6fa59c5fc3b1ca4abcfe622f46c611ac846bdc2e753c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/activity/activity.service.ts",
+          "sha256": "ce78618a5c1c5a1242e17853bdb80e6dba623c52a115ddca47d249d26ded9553"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/agents/agents.service.ts",
+          "sha256": "4b03dcfa3de4fbe7b66662cf04377de44d356ed06899cc9cc58387496494736d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/agent-scope.decorator.ts",
+          "sha256": "2004db86fff87558f76e9aaa3f23b714f2378d8b05b57397b607758f650bbf5b"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/guards/agent-task-scope.guard.ts",
+          "sha256": "8ccf93501227988081140a8e25a3767b1f85a18c67b7b1a4fe24d51e87184c5c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/guards/human-task-read.guard.ts",
+          "sha256": "cb8de58d5c5480fb8621522d4799cb2938af2bae8ddc43ba84562ca6883b2dcc"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/guards/jwt-or-api-key.guard.ts",
+          "sha256": "a7732bb3f90512742415b9b44eb1bec26be7e3b45073ed1f94eb84144d20af58"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/human-task-visibility.ts",
+          "sha256": "d455058fbf5f3ac68ab273ff30cffe1dc846e22395e9611b837e7b084d14cfd6"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/project-read-grants.ts",
+          "sha256": "cfbb6bd4ea8114f5af922b4815de7fdcc2a6b6ae02073da62072f068aeb63189"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/task-card.ts",
+          "sha256": "ed4d158f56425ff814b1f1b2ef523ecd8b329de410cb2466f57f879b72a0bb8f"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/execution-authority/task-staleness.service.ts",
+          "sha256": "e9e359417401109e6dc8ccff2e43f048c46eaaf0e5eff7dd7420da89dc8258be"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/projects/projects.controller.ts",
+          "sha256": "0233dd5d417e4d8da15f4ddb3d5e8c4f26893c9a250a5fe45e23aaf28e54b180"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/projects/projects.module.ts",
+          "sha256": "3d63a04ee48b84c6994c47900474af7e8de7cf296de4bf9e7663bbd9ce71b9bf"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/projects/projects.service.ts",
+          "sha256": "60ba1dc8cd941dd8a8058b1ffd1bb1ee0b3362910bca3817e146d22df07cc557"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/solution-log-head/solution-log-head.service.ts",
+          "sha256": "e2f5f8127b78cc62e72d634d3f79a205d1ae88c2996c9169c790ba3c15605fbc"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/sync/sync.controller.ts",
+          "sha256": "c1e61ec0697e0281fe4a38853d95f60a44fac7f553931c7d724a075c63c34d5c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/sync/sync.module.ts",
+          "sha256": "aae58d5ceeb772a10554b670440e82e66f442f8f0d47e1c00e3332930f11a4c9"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/sync/sync.service.ts",
+          "sha256": "33f2b0c2835d6fcdbfd30b23604e19aa805550928fb00cc77cad12626b37c469"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/dto/query-project-index.dto.ts",
+          "sha256": "9d9d163a53c0c3af7e1da9eb4788014d860394be14b38194f19b64e21b91c30b"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/evidence/task-evidence.service.ts",
+          "sha256": "3f7a06494a1ff1ce98082d2f2ffccfe950310ca6db250d29b642b1cc3397f72f"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/task-contract-binding.controller.ts",
+          "sha256": "a6af6669d09ca6aea2c0078912c6bfeccd4939e0fe3cf71457d04b55531d5280"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/task-contract-binding.service.ts",
+          "sha256": "0c52bc1607712d8790f91db853e8d98f00f2189add9c965e06aa011521892994"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/tasks.controller.ts",
+          "sha256": "6b3f2ff7f25b15d9e95e778acf82ba150c753adbc66432b161c50a32b4c0bb3d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/tasks.module.ts",
+          "sha256": "4a9df746928a516de6376d4b3b950177ea4e0dd4cbe6589fe928be4de5b8ed95"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/tasks.service.ts",
+          "sha256": "63df69e840b778c8d4d4512755ad27abdafd4236bdaea4c8afe049866415f456"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/kanban.gateway.ts",
+          "sha256": "aecaaaee50810e96066b1910ebecfae9d1e5825dea001dce4e6717e706ad49a0"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/kanban.service.ts",
+          "sha256": "dd89586ed31f5bf2c2daaa5f5a185964b9fd1b590d77356f78e93835c13d9686"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/agent-project-index.e2e.spec.ts",
+          "sha256": "843d69de36e185ee353529f9613b4cb9c8cea523f349e0f340493ca3a6c1e381"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/agent-task-card-read.e2e.spec.ts",
+          "sha256": "3846169aea154b28c2f30b48751d7caf9b2a28d3b500023b367e1332a4cf5244"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/assembly/mutation-results.json",
+          "sha256": "69b8c780772a6c1e4982845dc246b68fb7f005ef9b649568b516f769d8e212d1"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/human-task-read-isolation.e2e.spec.ts",
+          "sha256": "4498b7af066ff8f11cc16fc21e1e90cd113edd2633ba581da48b9ee17eb2bc7d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/project-read-grants.spec.ts",
+          "sha256": "1def30b78815615fdd2c2a80179bf2af27165e767c94f7e6ce2fcfe4929cb314"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/setup-env.ts",
+          "sha256": "82d499fbda25da528b66c84d159e58cc94a363408d7ad9d3dc36d21e1a465d00"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/solution-log-head.postgres.spec.ts",
+          "sha256": "50e0644617383fa9fb616c2acf3999fe60f5a46736137b85ead369b757c0498c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/solution-log-head.service.spec.ts",
+          "sha256": "e64159af8ec3a30db9d40f05657bc187ce25d8d0c86d03b67ca57805478a7a87"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/support/disposable-postgres.ts",
+          "sha256": "6644ee5e273b9bc866254288f8e4c426800da68875f485c932f28dc1e8576e3b"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/task-contract-binding.e2e.spec.ts",
+          "sha256": "e108295d4ad90d9c2d139e43394ea40c7fcef396c0dccda0fcfb485a0cd984f6"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/task-contract-digest.e2e.spec.ts",
+          "sha256": "d88febb7831d9ed06f8eb439df4a80ae8a4bd0b21c865bf1e48c97e10efe5d86"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/tsconfig.test.json",
+          "sha256": "b45b51f10e6897b5fa212f421842c1334c9e1f7942e446dcf278bb08b9c55d1d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/pnpm-lock.yaml",
+          "sha256": "b9fd7a00c104eccb56944baa49ef119aee98792efb68467fd6018cfae5d84978"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/card-positive.py",
+          "sha256": "e9bc8d633826d9a728f04fecfd5cbbbac171b709575ab4b70468d4cac332f7a9"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/binding-positive.mjs",
+          "sha256": "abccb55cc9caabd616cc531a750ec83652d55437b2f6e6a12977e9490692fe44"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/kanban-access.service.ts",
+          "sha256": "1aed5320f9ddbcea6ca932d3882b73d66af466aa033801a76e3dd7857979a4ab"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/ws.module.ts",
+          "sha256": "16f852b122714ddcd922618b2e0632e0aaf891f207363c212b7162a1cccebf2b"
+        }
+      ],
+      "entities": [
+        "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts",
+        "code_unit:apps/api/src/tasks/task-contract-binding.service.ts"
+      ],
+      "expect": {
+        "exit_codes": [
+          0
+        ],
+        "stdout_contains": [
+          "Test exit 0"
+        ]
+      },
+      "mutating": true
+    }
+  ]
+}

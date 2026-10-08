@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import { TaskContractBindingController } from '../src/tasks/task-contract-binding.controller.js';
 import { ActivityService } from '../src/activity/activity.service.js';
 import { TaskContractBindingService, CONTRACT_BINDING_ACTION } from '../src/tasks/task-contract-binding.service.js';
 import supertest from 'supertest';
@@ -266,10 +267,18 @@ describe('Task contract CAS binding (af868172, real PostgreSQL)', () => {
     const id = await create();
     const actor = { type: 'agent' as const, id: agentId, name: 'fixture agent' };
     const dto = { contractDigest: DIGEST_A, expectedContractDigest: null };
-    await expect(binding.bind(id, actor, { kind: 'task', agentId, workspaceId }, dto))
+    await expect(binding.bind(id, actor, false, agentId, workspaceId, dto))
       .rejects.toMatchObject({ status: 403 });
-    await expect(binding.bind(id, actor, { kind: 'task-status', agentId }, dto))
+    await expect(binding.bind(id, actor, true, agentId, undefined, dto))
       .rejects.toMatchObject({ status: 403 });
+    await expect(binding.bind(id, actor, true, uuidv4(), workspaceId, dto))
+      .rejects.toMatchObject({ status: 403 });
+    const controller = new TaskContractBindingController(binding);
+    const request = { actor, agentScope: { kind: 'task', agentId, workspaceId } };
+    expect(() => controller.bind(id, request as Parameters<typeof controller.bind>[1], dto))
+      .toThrow(expect.objectContaining({ status: 403 }));
+    expect(() => controller.bind(id, { actor } as Parameters<typeof controller.bind>[1], dto))
+      .toThrow(expect.objectContaining({ status: 403 }));
     expect((await prisma.task.findUniqueOrThrow({ where: { id } })).contractDigest).toBeNull();
     expect(await prisma.activityLog.count({ where: { taskId: id, action: CONTRACT_BINDING_ACTION } })).toBe(0);
   });
@@ -278,7 +287,7 @@ describe('Task contract CAS binding (af868172, real PostgreSQL)', () => {
     const id = await create();
     await prisma.task.update({ where: { id }, data: { createdById: null } });
     await expect(binding.bind(id, { type: 'agent', id: agentId, name: 'fixture agent' },
-      { kind: 'task-status', agentId, workspaceId }, { contractDigest: DIGEST_A, expectedContractDigest: null }))
+      true, agentId, workspaceId, { contractDigest: DIGEST_A, expectedContractDigest: null }))
       .rejects.toMatchObject({ status: 403 });
     expect((await prisma.task.findUniqueOrThrow({ where: { id } })).contractDigest).toBeNull();
   });

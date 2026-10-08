@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { KanbanGateway } from './kanban.gateway.js';
 import { KanbanService } from './kanban.service.js';
+import { KanbanAccessService } from './kanban-access.service.js';
 
 @Module({
   imports: [
@@ -9,7 +10,7 @@ import { KanbanService } from './kanban.service.js';
       secret: process.env.JWT_SECRET ?? 'change-me-in-production',
     }),
   ],
-  providers: [KanbanGateway, KanbanService],
+  providers: [KanbanGateway, KanbanService, KanbanAccessService],
   exports: [KanbanService],
 })
 export class WsModule {}

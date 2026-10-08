@@ -102,6 +102,20 @@ import { SetMetadata } from '@nestjs/common';
  *                      unknown project gets. It is the only kind that reads
  *                      past the own slice, it returns no free text, and no
  *                      other kind — no write — consults the grant list.
+ *   'task-granted-read' — DEC-AUP-0134. ONLY `GET /tasks/:taskId`. The route names
+ *                      a task. One query resolves it INSIDE the key's workspace
+ *                      and takes its CURRENT project from the task row; the
+ *                      answer then depends on who the key is to that task: its
+ *                      creator or an assignee keeps the full card, exactly as
+ *                      under 'task'; any other key whose grant entry for that
+ *                      project carries the opt-in `card` capability gets a
+ *                      REDACTED card (positive allowlist, no free text, no
+ *                      hash of free text); everyone else, and every other
+ *                      cause (unknown, malformed or foreign id, expired or
+ *                      absent grant), gets ONE identical 403. It is its own
+ *                      kind because 'task' is shared by the comment write,
+ *                      activity, dependencies and readiness: widening 'task'
+ *                      would have opened all of them. No other route uses it.
  *   'workspace-digest' — A2-284. The route names NOTHING: no `:taskId`, no
  *                      `:projectId`. Its scope is the key's OWN workspace, and
  *                      it answers that workspace's tasks — id, projectId,
@@ -130,6 +144,7 @@ export type AgentScopeKind =
   | 'project-create'
   | 'task-dependency'
   | 'task'
+  | 'task-granted-read'
   | 'project'
   | 'task-workspace'
   | 'project-write'
