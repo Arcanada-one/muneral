@@ -1,0 +1,192 @@
+{
+  "schema": "ActualSyntheticBrowserCanary/v1",
+  "source_head": "b79a254f40d98d4d3b1ac299b79e57a934035670",
+  "build_id": "aSqRl1YgtFD9JqdFhmmlv",
+  "verdict": "verified",
+  "failure": null,
+  "checks": [
+    "built candidate direct task URL resolves authorized native synthetic principal",
+    "client hydration fetches validated own task200",
+    "hard reload succeeds",
+    "foreign tuple denied without title leak",
+    "session removal redirects to login and erases task",
+    "all API requests GET; no auth refresh POST",
+    "no page errors",
+    "synthetic teardown and zero-row readback",
+    "owned API/web listeners closed"
+  ],
+  "network": [
+    {
+      "path": "/api/v1/workspaces",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/workspaces",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/workspaces",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/projects/workspace/36694fbd-1967-469a-8404-4043bde4895e",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/tasks/dda61701-1727-4e11-b6cb-f20110dd5dec",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/tasks/dda61701-1727-4e11-b6cb-f20110dd5dec/checklist",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/tasks/dda61701-1727-4e11-b6cb-f20110dd5dec/activity",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/tasks/dda61701-1727-4e11-b6cb-f20110dd5dec/dependencies",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/workspaces",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/workspaces",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/workspaces",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/projects/workspace/36694fbd-1967-469a-8404-4043bde4895e",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/tasks/dda61701-1727-4e11-b6cb-f20110dd5dec",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/tasks/dda61701-1727-4e11-b6cb-f20110dd5dec/checklist",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/tasks/dda61701-1727-4e11-b6cb-f20110dd5dec/activity",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/tasks/dda61701-1727-4e11-b6cb-f20110dd5dec/dependencies",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/workspaces",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/workspaces",
+      "status": 200
+    },
+    {
+      "path": "/api/v1/workspaces",
+      "status": 200
+    }
+  ],
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/api/v1/workspaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/workspaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/workspaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/workspace/36694fbd-1967-469a-8404-4043bde4895e"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/tasks/dda61701-1727-4e11-b6cb-f20110dd5dec"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/tasks/dda61701-1727-4e11-b6cb-f20110dd5dec/checklist"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/tasks/dda61701-1727-4e11-b6cb-f20110dd5dec/dependencies"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/tasks/dda61701-1727-4e11-b6cb-f20110dd5dec/activity"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/workspaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/workspaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/workspaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects/workspace/36694fbd-1967-469a-8404-4043bde4895e"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/tasks/dda61701-1727-4e11-b6cb-f20110dd5dec"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/tasks/dda61701-1727-4e11-b6cb-f20110dd5dec/checklist"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/tasks/dda61701-1727-4e11-b6cb-f20110dd5dec/dependencies"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/tasks/dda61701-1727-4e11-b6cb-f20110dd5dec/activity"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/workspaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/workspaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/workspaces"
+    }
+  ],
+  "externalAttempts": [],
+  "cleanup": {
+    "workspaces": 0,
+    "users": 0,
+    "tasks": 0,
+    "disposableDatabaseTeardownVerified": true
+  },
+  "portsClosed": [
+    true,
+    true
+  ],
+  "tokenTtlSeconds": 60,
+  "credentialPersistence": false,
+  "productionRequests": 0,
+  "limitations": [
+    "Native Muneral signAccess synthetic session; no external OAuth/OIDC provider login.",
+    "Observed local candidate, not production deployment or resulting main."
+  ]
+}
