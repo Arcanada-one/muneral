@@ -9,7 +9,10 @@ import {
   MaxLength,
   IsArray,
   Matches,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+import { TranscriptionLinkDto } from './transcription-link.dto.js';
 import { TASK_STATUSES } from '@muneral/types';
 import type { TaskStatus, TaskPriority } from '@muneral/types';
 
@@ -25,6 +28,11 @@ import type { TaskStatus, TaskPriority } from '@muneral/types';
 export const CONTRACT_DIGEST_PATTERN = /^sha256:[0-9a-f]{64}$/;
 
 export class CreateTaskDto {
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => TranscriptionLinkDto)
+  transcriptionLink?: TranscriptionLinkDto;
+
   @IsUUID()
   projectId: string;
 

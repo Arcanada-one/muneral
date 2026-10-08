@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { TaskChecklist } from './TaskChecklist';
 import { TaskDependencies } from './TaskDependencies';
 import { AuditLog } from './AuditLog';
+import { TaskTranscription } from './TaskTranscription';
 import { TaskGitRefs } from './TaskGitRefs';
 import type { Task } from '@/lib/api/tasks';
 import type { TaskStatus } from '@muneral/types';
@@ -120,6 +121,8 @@ export function TaskDetail({ task }: TaskDetailProps) {
 
       {/* Git refs — empty by default (would be loaded separately) */}
       <TaskGitRefs refs={[]} />
+
+      <TaskTranscription link={task.transcriptionLink} />
 
       {/* Audit log */}
       <AuditLog taskId={task.id} />

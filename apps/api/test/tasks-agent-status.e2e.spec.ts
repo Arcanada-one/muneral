@@ -403,4 +403,24 @@ describe('PATCH /tasks/:taskId/status with an agent key — creator or executor 
       .set('Authorization', `Bearer ${strangerKey}`)
       .expect(403);
   });
+  it('MUN-0014 stores a producer job link and returns it on authorized task detail GET', async () => {
+    await prisma.workspaceMember.create({data:{workspaceId,userId,role:'owner'}});
+    const bearer = authSvc.signAccess(userId);
+    const jobId = uuidv4();
+    const transcriptionLink = {jobId, producerRoute: 'https://example.invalid/v1/jobs/' + jobId + '/result?format=txt'};
+    const created = await supertest(app.getHttpServer()).post('/tasks').set('Authorization', `Bearer ${bearer}`)
+      .send({projectId,title:'Synthetic transcription',transcriptionLink}).expect(201);
+    const read = await supertest(app.getHttpServer()).get('/tasks/' + created.body.id).set('Authorization', `Bearer ${bearer}`).expect(200);
+    expect(read.body.transcriptionLink).toEqual(transcriptionLink);
+    expect(read.body.activityLogs).toBeUndefined();
+    const record = await prisma.activityLog.findFirst({where:{taskId:created.body.id,action:'task:transcription_linked'}});
+    expect(record?.payload).toEqual(transcriptionLink);
+    const foreign = authSvc.signAccess((await prisma.user.create({data:{name:'Synthetic foreign reader'}})).id);
+    await supertest(app.getHttpServer()).get('/tasks/' + created.body.id).set('Authorization', `Bearer ${foreign}`).expect(403);
+    for (const producerRoute of [transcriptionLink.producerRoute + '&token=synthetic', transcriptionLink.producerRoute.replace(jobId, uuidv4())]) {
+      await supertest(app.getHttpServer()).post('/tasks').set('Authorization', `Bearer ${bearer}`).send({projectId,title:'Synthetic invalid link',transcriptionLink:{jobId,producerRoute}}).expect(400);
+    }
+    expect(await prisma.task.count({where:{projectId,title:'Synthetic invalid link'}})).toBe(0);
+  });
+
 });
