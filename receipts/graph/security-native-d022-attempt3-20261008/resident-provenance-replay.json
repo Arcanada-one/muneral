@@ -1,0 +1,50 @@
+{
+  "schema": "ReadinessReceipt/v1",
+  "captured_at": "2026-10-08T18:31:27.110822+00:00",
+  "task": "85e897b4-b0ed-4e64-acee-014970f1322b",
+  "purpose": "Requested contemporaneous resident entrypoint/output observation replay following independent VERIFIER verdict",
+  "head": "d022c67093029479a66ca2eeda3fdaa3dbc4898b",
+  "tree": "876b9d2e3b569fc037d9362e656229fff0f16e14",
+  "resident_observation": {
+    "at": "2026-10-08T18:30:50.998854+00:00",
+    "pid": 3200579,
+    "cmdline": [
+      "/home/dev/.local/share/pnpm/store/v11/links/@/node/24.21.0/5bb01cef859557fedd0b12813d0835b978e1fc341b0e17bb277aaea32e78d7fa/node_modules/node/bin/node",
+      "dist/main.js"
+    ],
+    "entrypoint": "/home/dev/aup/security-task-14ea7ca947f3/muneral-full-test-source-20261007/apps/api/dist/main.js",
+    "entrypoint_sha256": "27b12f7121de6e741878f29f02569ebca05625b868f0f5ab05672af94b491d6e",
+    "emitted_files": 410,
+    "compiled_manifest_equals_preboot": true,
+    "observation_method": "proc cmdline/cwd/exe and filesystem bytes while same API PID alive before stock runner",
+    "compiled_manifest_sha256": "33e1d6f8d62919ba89d579f37a10ac1443e9b50f85132d299a3458b65b4a19b5",
+    "post_probe_pid_alive": true,
+    "post_probe_manifest_unchanged": true,
+    "post_probe_at": "2026-10-08T18:30:51.380022+00:00"
+  },
+  "resident_exe": "/home/dev/.local/share/pnpm/store/v11/links/@/node/24.21.0/5bb01cef859557fedd0b12813d0835b978e1fc341b0e17bb277aaea32e78d7fa/node_modules/node/bin/node",
+  "resident_exe_sha256": "7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c",
+  "selected55": {
+    "verified": 55
+  },
+  "full_probe_counters": {
+    "failed": 0,
+    "not_measured": 2,
+    "verified": 76
+  },
+  "stock_runner_exit": 3,
+  "scope": "Original-source own native candidate, unchanged stock CanaryPlan and runner. Synthetic private PG+Redis only; no source edits, production data, credential or state change.",
+  "cleanup": {
+    "api_gone": true,
+    "redis_gone": true,
+    "pg_pid_absent": true
+  },
+  "evidence": {
+    "native-receipt.json": "e553b1a8c01b0f6104e3bc52c06aa9296ff25a2aa079e0311aaaef8d12dd1542",
+    "emitted-manifest.json": "33e1d6f8d62919ba89d579f37a10ac1443e9b50f85132d299a3458b65b4a19b5",
+    "contemporaneous-emitted-manifest.json": "33e1d6f8d62919ba89d579f37a10ac1443e9b50f85132d299a3458b65b4a19b5",
+    "result.json": "2b1cfac8aa3dffde3043c2b8148a5eba77ac785e2c46369c94d9921aaa5b9d4e",
+    "result.source-evidence.json": "4d598757d60c870f5139c7d91c35bcc986596cd9dae6bed05090608a76ac3c96"
+  },
+  "limitations": "Contemporaneous observation acquired; independent VERIFIER acceptance not yet received. Full runner exit3/2NM retained, not PR admission; old package/qualification controls preserved separately."
+}

@@ -1,0 +1,76 @@
+{
+  "schema": "ReadinessReceipt/v1",
+  "started_at": "2026-10-08T18:30:42.166572+00:00",
+  "scope": "Original-source native loopback candidate; no production credentials or mutations",
+  "steps": [
+    {
+      "step": "initdb",
+      "exit_code": 0
+    },
+    {
+      "step": "pg-start",
+      "exit_code": 0
+    },
+    {
+      "step": "createdb",
+      "exit_code": 0
+    },
+    {
+      "step": "stock-migrate",
+      "exit_code": 0
+    },
+    {
+      "step": "stock-canary",
+      "exit_code": 3
+    },
+    {
+      "step": "pg-stop",
+      "exit_code": 0
+    }
+  ],
+  "head": "d022c67093029479a66ca2eeda3fdaa3dbc4898b",
+  "tree": "876b9d2e3b569fc037d9362e656229fff0f16e14",
+  "node_version": "v24.21.0",
+  "node_sha256": "7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c",
+  "emitted_manifest_sha256": "33e1d6f8d62919ba89d579f37a10ac1443e9b50f85132d299a3458b65b4a19b5",
+  "binds": {
+    "host": "127.0.0.1",
+    "postgres": 57883,
+    "redis": 60643,
+    "api": 50563
+  },
+  "socket_dir": "/tmp/sec-d022-8fh_sb8d",
+  "redis_pid": 3200578,
+  "api_pid": 3200579,
+  "health": {
+    "status": "ok",
+    "version": "0.4.6",
+    "build": {
+      "sha": "d022c67093029479a66ca2eeda3fdaa3dbc4898b",
+      "source": "MUNERAL_BUILD_SHA"
+    }
+  },
+  "resident_exe": "/home/dev/.local/share/pnpm/store/v11/links/@/node/24.21.0/5bb01cef859557fedd0b12813d0835b978e1fc341b0e17bb277aaea32e78d7fa/node_modules/node/bin/node",
+  "resident_exe_sha256": "7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c",
+  "resident_cwd": "/home/dev/aup/security-task-14ea7ca947f3/muneral-full-test-source-20261007/apps/api",
+  "contemporaneous_resident": {
+    "at": "2026-10-08T18:30:50.998854+00:00",
+    "pid": 3200579,
+    "cmdline": [
+      "/home/dev/.local/share/pnpm/store/v11/links/@/node/24.21.0/5bb01cef859557fedd0b12813d0835b978e1fc341b0e17bb277aaea32e78d7fa/node_modules/node/bin/node",
+      "dist/main.js"
+    ],
+    "entrypoint": "/home/dev/aup/security-task-14ea7ca947f3/muneral-full-test-source-20261007/apps/api/dist/main.js",
+    "entrypoint_sha256": "27b12f7121de6e741878f29f02569ebca05625b868f0f5ab05672af94b491d6e",
+    "emitted_files": 410,
+    "compiled_manifest_equals_preboot": true,
+    "observation_method": "proc cmdline/cwd/exe and filesystem bytes while same API PID alive before stock runner",
+    "compiled_manifest_sha256": "33e1d6f8d62919ba89d579f37a10ac1443e9b50f85132d299a3458b65b4a19b5",
+    "post_probe_pid_alive": true,
+    "post_probe_manifest_unchanged": true,
+    "post_probe_at": "2026-10-08T18:30:51.380022+00:00"
+  },
+  "verdict": "not_measured",
+  "limitations": "Candidate local native fixture only; no production integration or compiler-frontier closure. Original stock runner result retained.",
+  "finished_at": "2026-10-08T18:30:51.826386+00:00"
+}
