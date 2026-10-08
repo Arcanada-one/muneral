@@ -5,7 +5,7 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "paused_safe"
  },
- "captured_at_utc": "2026-10-08T17:41:21Z",
+ "captured_at_utc": "2026-10-08T18:27:07Z",
  "change_set": {
   "base": "5d370b620dcbc9729180540820e7e6cd8d141f11",
   "files": [
@@ -75,7 +75,7 @@
     "status": "A"
    }
   ],
-  "head": "7933bd30a9d1124201dcbe132f89b909b86c92a1",
+  "head": "d291a7ba2497564705c210c5c0019bbb71c36471",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -84,17 +84,17 @@
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
   "graph_digest": "sha256:2a7f3b7b70bd1a0c5b8de2178606c6a51fdc9deb388115f22845160f57c1cb5f",
-  "path": "/home/dev/aup/import-audit-work/runs/MUN0005-checklist-audit-20261008/stock-work-final/verifier-out/graph-5d370b620dcb.json",
+  "path": "/home/dev/aup/import-audit-work/runs/PR230-delete-returning-20261008/stock-work/verifier-out/graph-5d370b620dcb.json",
   "source_commit": "5d370b620dcbc9729180540820e7e6cd8d141f11"
  },
  "head_graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:5448dd7731cacb35b16e2da561e8753a45893a5866ce698f7fdd0968bbb607e6",
-  "path": "/home/dev/aup/import-audit-work/runs/MUN0005-checklist-audit-20261008/stock-work-final/verifier-out/graph-head-7933bd30a9d1.json",
-  "source_commit": "7933bd30a9d1124201dcbe132f89b909b86c92a1",
+  "graph_digest": "sha256:a53de50bf21a495292fbdf5052728bb2c339baf6d60a76e8b4880217206bd5cf",
+  "path": "/home/dev/aup/import-audit-work/runs/PR230-delete-returning-20261008/stock-work/verifier-out/graph-head-d291a7ba2497.json",
+  "source_commit": "d291a7ba2497564705c210c5c0019bbb71c36471",
   "staleness": {
-   "checked_at_utc": "2026-10-08T17:41:45Z",
+   "checked_at_utc": "2026-10-08T18:27:36Z",
    "checked_nodes": 450,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
@@ -103,7 +103,7 @@
  },
  "host": "muneral-lane",
  "host_redacted": true,
- "host_sha256": "d5a7a7446ffb151e0386cf80e5acfe2574b56c92216a464613898fb9fce5ca72",
+ "host_sha256": "ae6ec6581bd989c954040b0f034362a956fc0bc864e1ce05d1bd852fde53c4d6",
  "impact_set": {
   "deterministic_core": [
    {
@@ -2603,7 +2603,7 @@
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261008T174121Z-7933bd30",
+ "receipt_id": "car-verify-20261008T182707Z-d291a7ba",
  "receipt_path": "receipts/graph/change-admission-mun0005-checklist-audit-20261008.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -2878,7 +2878,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-08T17:41:45Z",
+  "checked_at_utc": "2026-10-08T18:27:35Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -3129,7 +3129,7 @@
   {
    "content_hash": {
     "base": null,
-    "head": "sha256:ad60ac95420fb2520921cb5cccdc5c03ca416d71d3fa2c5946df3de4276cbe6b"
+    "head": "sha256:10dcbdc9180c8f41125c355bb872f48f07caa052e0b0cc3f4b6b304a4746f07a"
    },
    "entity": "receipt:receipts/graph/change-admission-mun0005-checklist-audit-20261008.json",
    "node_type": "receipt",
@@ -3330,7 +3330,7 @@
   }
  ],
  "tree": {
-  "commit": "7933bd30a9d1124201dcbe132f89b909b86c92a1",
+  "commit": "d291a7ba2497564705c210c5c0019bbb71c36471",
   "dirty": false
  },
  "verdicts": [
@@ -4244,8 +4244,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/aup/import-audit-work/mun0005-core-baseline/apps/api/node_modules/.bin/tsc -p /home/dev/aup/import-audit-work/mun0005-core-baseline/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/MUN0005-checklist-audit-20261008/stock-work-final/verifier-out/type-check-hoktcjor/check.tsbuildinfo --listFiles",
-   "duration_s": 3.37,
+   "command": "/home/dev/aup/import-audit-work/mun0005-core-baseline/apps/api/node_modules/.bin/tsc -p /home/dev/aup/import-audit-work/mun0005-core-baseline/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/PR230-delete-returning-20261008/stock-work/verifier-out/type-check-ztp1ticf/check.tsbuildinfo --listFiles",
+   "duration_s": 3.67,
    "entities": [
     "code_unit:apps/api/src/app.module.ts",
     "code_unit:apps/api/src/main.ts",
@@ -4321,13 +4321,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/MUN0005-checklist-audit-20261008/stock-work-final/verifier-out/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-10-08T17:41:49Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR230-delete-returning-20261008/stock-work/verifier-out/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-10-08T18:27:39Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1453 files listed"
   },
   {
-   "command": "/home/dev/aup/import-audit-work/mun0005-core-baseline/apps/api/node_modules/.bin/tsc -p /home/dev/aup/import-audit-work/mun0005-core-baseline/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/MUN0005-checklist-audit-20261008/stock-work-final/verifier-out/type-check-gb_8davu/check.tsbuildinfo --listFiles",
-   "duration_s": 5.85,
+   "command": "/home/dev/aup/import-audit-work/mun0005-core-baseline/apps/api/node_modules/.bin/tsc -p /home/dev/aup/import-audit-work/mun0005-core-baseline/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/PR230-delete-returning-20261008/stock-work/verifier-out/type-check-jqabmun3/check.tsbuildinfo --listFiles",
+   "duration_s": 9.86,
    "entities": [
     "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts",
     "code_unit:apps/api/test/agent-project-dependencies.e2e.spec.ts",
@@ -4379,13 +4379,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/MUN0005-checklist-audit-20261008/stock-work-final/verifier-out/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-10-08T17:41:53Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR230-delete-returning-20261008/stock-work/verifier-out/v-type-check-apps-api-tsconfig-test.txt",
+   "started_at_utc": "2026-10-08T18:27:43Z",
    "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1611 files listed"
   },
   {
-   "command": "/home/dev/aup/import-audit-work/mun0005-core-baseline/apps/web/node_modules/.bin/tsc -p /home/dev/aup/import-audit-work/mun0005-core-baseline/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/MUN0005-checklist-audit-20261008/stock-work-final/verifier-out/type-check-q3boo0uj/check.tsbuildinfo --listFiles",
-   "duration_s": 4.43,
+   "command": "/home/dev/aup/import-audit-work/mun0005-core-baseline/apps/web/node_modules/.bin/tsc -p /home/dev/aup/import-audit-work/mun0005-core-baseline/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/PR230-delete-returning-20261008/stock-work/verifier-out/type-check-6dspab2b/check.tsbuildinfo --listFiles",
+   "duration_s": 5.12,
    "entities": [
     "code_unit:apps/web/__tests__/kanban-board.test.ts",
     "code_unit:apps/web/__tests__/read-api-contract.test.ts",
@@ -4439,13 +4439,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/MUN0005-checklist-audit-20261008/stock-work-final/verifier-out/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-10-08T17:41:59Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR230-delete-returning-20261008/stock-work/verifier-out/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-10-08T18:27:54Z",
    "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1310 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=5d370b620dcb, head=7933bd30a9d1, graph=head graph)",
-   "duration_s": 4.76,
+   "command": "tools/graph/contract_diff.py.run_diff(base=5d370b620dcb, head=d291a7ba2497, graph=head graph)",
+   "duration_s": 4.86,
    "entities": [
     "code_unit:apps/api/src/sync/sync.controller.ts",
     "code_unit:apps/api/src/tasks/tasks.controller.ts",
@@ -4559,8 +4559,8 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/MUN0005-checklist-audit-20261008/stock-work-final/verifier-out/v-contract-diff.json",
-   "started_at_utc": "2026-10-08T17:42:03Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR230-delete-returning-20261008/stock-work/verifier-out/v-contract-diff.json",
+   "started_at_utc": "2026-10-08T18:27:59Z",
    "summary": "58→58 contracts, breaking 0, edges {'verified': 164}"
   },
   {
@@ -4623,13 +4623,13 @@
    "exit_code": 0,
    "id": "v-route-config",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/MUN0005-checklist-audit-20261008/stock-work-final/verifier-out/v-route-config.txt",
-   "started_at_utc": "2026-10-08T17:42:08Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR230-delete-returning-20261008/stock-work/verifier-out/v-route-config.txt",
+   "started_at_utc": "2026-10-08T18:28:04Z",
    "summary": "25 route(s), 0 failed"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.14,
+   "duration_s": 0.16,
    "entities": [
     "code_unit:apps/api/src/app.module.ts",
     "code_unit:apps/api/src/main.ts",
@@ -4743,8 +4743,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/MUN0005-checklist-audit-20261008/stock-work-final/verifier-out/v-fitness.json",
-   "started_at_utc": "2026-10-08T17:42:08Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR230-delete-returning-20261008/stock-work/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-10-08T18:28:04Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -4777,8 +4777,8 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/MUN0005-checklist-audit-20261008/stock-work-final/verifier-out/v-doc-reference.txt",
-   "started_at_utc": "2026-10-08T17:42:08Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR230-delete-returning-20261008/stock-work/verifier-out/v-doc-reference.txt",
+   "started_at_utc": "2026-10-08T18:28:04Z",
    "summary": "10 document(s), 0 failed"
   },
   {
@@ -4897,8 +4897,8 @@
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/MUN0005-checklist-audit-20261008/stock-work-final/verifier-out/v-canary.json",
-   "started_at_utc": "2026-10-08T17:42:08Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR230-delete-returning-20261008/stock-work/verifier-out/v-canary.json",
+   "started_at_utc": "2026-10-08T18:28:04Z",
    "summary": "0 canary result(s), 0 committed at head; 0 verified / 0 failed / 53 not_measured of 53 entities"
   }
  ],
@@ -5385,9 +5385,9 @@
    ]
   },
   "seconds": {
-   "prepare": 1.75,
-   "total": 47.06,
-   "verifiers": 18.6
+   "prepare": 1.71,
+   "total": 57.42,
+   "verifiers": 23.72
   }
  },
  "work_item": "0029f309-5c65-48d1-a2eb-fa679388b2d5"
