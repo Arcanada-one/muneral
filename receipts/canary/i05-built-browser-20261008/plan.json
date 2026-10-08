@@ -1,0 +1,1165 @@
+{
+  "schema": "CanaryPlan/v2",
+  "id": "i05-built-browser-direct-hydration-auth-20261008",
+  "owner": "MUNERAL",
+  "environment": "Owned local production-built Next candidate and disposable native Nest/PostgreSQL synthetic fixture; loopback18446/18447",
+  "read_only": false,
+  "producer_repository": "/home/dev/aup/frontend-work/muneral-ui-read-errors",
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "b79a254f40d98d4d3b1ac299b79e57a934035670",
+    "tree": "ec5bb09e76c799a9bc857a6f7f7c22c90b9cc00e",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "7b44f71cffb3e284f58e69e50962e507a371cde2f44d6ebb8d7d4d0ee939121f",
+      "source_field": "commit"
+    }
+  },
+  "purpose": "Close only provider/client inferred boundary canaries by actual headless browser; synthetic principal TTL60s in memory, native signAccess, direct URL/reload/hydration/foreign denial/logout, teardown zero rows and listener readback.",
+  "probes": [
+    {
+      "kind": "process",
+      "id": "browser-direct-hydration-auth",
+      "argv": [
+        "/home/dev/aup/import-audit-work/runs/m211c/node-v24.21.0-linux-x64/bin/node",
+        "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/browser-probe.mjs"
+      ],
+      "cwd": ".",
+      "env_keys": [
+        "PATH",
+        "HOME",
+        "TMPDIR"
+      ],
+      "timeout_seconds": 120,
+      "capture_limit_bytes": 262144,
+      "executable_sha256": "7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c",
+      "execution_files": [
+        {
+          "path": "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/browser-probe.mjs",
+          "sha256": "de282c687a9f48ce23a354990fbdceb3360dc0ba8ba3e643239abfcc3ff862dc"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/runs/PR226-real-browser-canary-20261008/synthetic-fixture.mjs",
+          "sha256": "83590f8440edbea2cb55333e3e2304892c9c0fa37ef1890e657a33369d4fff48"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/app/providers.tsx",
+          "sha256": "6352abab3c9539d65c20803c8e6012f53163a1623bb998292294d266146e0425"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/lib/api/client.ts",
+          "sha256": "768d9c7a9290a8d7f2209042f03a6cf63e41b18bc9dae4cd971abf9a6463e0d6"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/BUILD_ID",
+          "sha256": "c78a40870cf35b7ce47a19ce258216021a6c7cc7c9133669cc2eb127a064578b"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/test/support/disposable-postgres.ts",
+          "sha256": "6644ee5e273b9bc866254288f8e4c426800da68875f485c932f28dc1e8576e3b"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/react-loadable-manifest.json",
+          "sha256": "be37bdbfa6df76dd15991b0c8ae90748f9f65fa814729aceb9b02dc2ef2ecb65"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/next-server.js.nft.json",
+          "sha256": "9be24e03796706f1971e87ec85d4878fad5e70bd8fb788a9bfacd20eb42528b9"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/next-minimal-server.js.nft.json",
+          "sha256": "5b69a3e31379e0641ef29a6b09e390bda01d5c40997e5ae5264e60477b8ddd2c"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/app-path-routes-manifest.json",
+          "sha256": "54697204b4ebcc9b090e39e9afaa65a078aa5490555341472f513bfecc78bca0"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/build-manifest.json",
+          "sha256": "9ebc0d21198fe5e00157750f0af8ba9be28dc1a4cd348bc55ac29e6d0e0536df"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/routes-manifest.json",
+          "sha256": "453d075fab9b3980cba38ddb56611067427909af9b182f9b4e83cfe583942da9"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/prerender-manifest.json",
+          "sha256": "42f767aa98d8d57b33a5596f655a6dd358d02d53d158d7c4d47f3097278b25b6"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/package.json",
+          "sha256": "091a04fa67c7907b98e106fcff8b964e13129754fce72d24f3025b97c4887fa3"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/export-marker.json",
+          "sha256": "82356527db218adb95bd1eca0ede6f3391165b38b22d667d064e62e6b539d974"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/images-manifest.json",
+          "sha256": "89153990319006e8e53593d4cee9a741db8a01b9dd8897513bd4e0a4685d2f42"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/required-server-files.js",
+          "sha256": "903eeafef037d8adeaffeeaf90d5effbd7cb15539fda562e795f86e5e1014e7e"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/required-server-files.json",
+          "sha256": "47e3b151606c3eb3fd64fed72513d3e196e43adc9321008cadebf7268479b051"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/diagnostics/framework.json",
+          "sha256": "d001ec275629a256e3b456e92421bec416315bac8e17c2a2263ee1035afc988c"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/diagnostics/build-diagnostics.json",
+          "sha256": "e4932338188cf0fbd08fb45f8b04421b523d0b2d9b90f197b5ad2e24fec94306"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/types/package.json",
+          "sha256": "e3d5a4a2d8551aa52c5a01d2a0efb2e06a2d9711b4f5c5f1d20de6e21807e2cd"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/next-font-manifest.js",
+          "sha256": "f2b569a17ce4e194d6ae6d655ecd213cb6c096af3222d013deb0c838f3c030ae"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/webpack-runtime.js",
+          "sha256": "fff5561ddbc66819091667800c87f19a5398bf40cef6c9caaa27f9277974427d"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/interception-route-rewrite-manifest.js",
+          "sha256": "fc5133e40acf09e6517b073ddd7b5c0c218d09938848902210f2cc13f08e1c81"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/server-reference-manifest.js",
+          "sha256": "ce01006c00e1f63bcbfe41b3f7edd260d969b41d0a323b705c44e1ef9df13d8c"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/server-reference-manifest.json",
+          "sha256": "1e59e14de404621d81f12d8aa5e50570f2d7a01dc0877856ea0ce1b41074c2a0"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/middleware-build-manifest.js",
+          "sha256": "9ce12ccc67dfad341c0eed58227c76dd2bba5641d938dfa83d13403a9148fd05"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/middleware-manifest.json",
+          "sha256": "0a8520bc7e076f7ae717c2d62713990c83e8a3d74626f327a3844bc0504e210c"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/next-font-manifest.json",
+          "sha256": "efb21b4ff51b7e7c004b66275580fce42d849aed865ef197b8530ec4f1ede1fb"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/functions-config-manifest.json",
+          "sha256": "e7d9c7de4b1a0e8ed521c8ca071261fb4a0de053afc0040538c0a50e5e4c1ee4"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/prefetch-hints.json",
+          "sha256": "62a25f26074525a83edb20ac78beec25ca39abccf5d206064bec44c5903471ac"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app-paths-manifest.json",
+          "sha256": "40226af3caec06fe1633e16dba8a7769dbe434da2404d3bb20e4cbc90ecfe8a2"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/pages-manifest.json",
+          "sha256": "c354059caa217e72bdeb145e351b2038990972872c52df215cb1e4105c35097b"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/middleware-react-loadable-manifest.js",
+          "sha256": "c2012ad7f0ad9e880be2c3646d5e42c99c8c141410760959278f3fc89f235081"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/chunks/15.js",
+          "sha256": "53562c1c8c94bb9b6eae209070201bf91372bb48615bca0d5542e5a8472d2d2a"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/chunks/969.js",
+          "sha256": "6d47f7ff06a0f7debe73378b9efe6de62a939ec309969524b37b46c31a6ce6ac"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/chunks/163.js",
+          "sha256": "3a8afab9f62cb1258d83703d7da5f331a3c4a815687de728189417c3be8d2d4f"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/chunks/611.js",
+          "sha256": "ac50e27ab7b5813b9f187e31b37035c566b361b309f0236f1e52721706bed32a"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/chunks/223.js",
+          "sha256": "0609f3d87d0ed93d5c6406187f5925de1e8caaf512650be88ad3df0c10c83b0c"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/chunks/444.js",
+          "sha256": "6ba1cf9e50ef4a2d5182d8c79c07350180323a04094c5ec387462bcd6942db47"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/chunks/281.js",
+          "sha256": "13e3ee4dba65e7b680a64514dc73f013615e56a8dc8e40e26efcced31a6be92d"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/chunks/875.js",
+          "sha256": "051a90715ff2a93a276e756d32b9f72b86d25da6e704db72b02a20ab12fa23d3"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/chunks/626.js",
+          "sha256": "2b6cc0490e4db5dd0302a1f214c6f0c5bd20ef20f98f52786336c80740b969f4"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/chunks/8.js",
+          "sha256": "2fe6759e5efe54467297f220acb40a55d0d4f0d893336b7872c876c0a815531c"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/chunks/549.js",
+          "sha256": "6f270dc8582494e47a2c622961254d5bd31a487abae5178d6f7c35bbd2476d96"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/page.js",
+          "sha256": "27ec3ccf240d7f4ac041f8341984ce23174f7ecf829a84b8ba154210249157d4"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/page.js.nft.json",
+          "sha256": "dc12c03ecdeb00cb71002cf33e07f4368446c250363d828b0993c1ff8d96b71d"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/page_client-reference-manifest.js",
+          "sha256": "6f3340365c2f272e563c437d38333c19c9951abd1f0dcf34f2b4583ba8509f88"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/_not-found/page.js",
+          "sha256": "406db4a14973d24f1ad948573a3844ef0dca9979f18f9235f380ce9f9aea82d9"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/_not-found/page.js.nft.json",
+          "sha256": "f1d576030464eb17214826543c67b2afdf4a092d5e7fba8b708e7a4ad375d3b9"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/_not-found/page_client-reference-manifest.js",
+          "sha256": "5e78473ff502606f3e9b8ebff8991af7cd5fb53153a967a324428d4db19c9e9c"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/_global-error/page.js",
+          "sha256": "ec49f7d5047af08645c87bdde4f1e0cd77f62a4177ce07e6f9f8659b63044c12"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/_global-error/page.js.nft.json",
+          "sha256": "e9d46e5294ac4644e76f604db81f860d73a334c0b2d2412894f87185e8362aa6"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/_global-error/page_client-reference-manifest.js",
+          "sha256": "614c4a4733f053707e458411c9e5291d7c454af4aa2fd43de13a801d3e1e815e"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/page.js",
+          "sha256": "4de9d3f96949261315bfb86e1dd7d5f3024ae579ec340774c47136586b5becdd"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/page.js.nft.json",
+          "sha256": "d6a3ff24c81eebcd2edd146fee99f3c470f872257edb66140c8204cc9e581c12"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/page_client-reference-manifest.js",
+          "sha256": "561b44d6b25d6660134749fbc1dab50f8681055a484fcf67a21c8ebe6a4bbf27"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/page.js",
+          "sha256": "71441649e2675861a39ff7478c6a69afd1e319896ad4306f0c7cf5cfd4570838"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/page.js.nft.json",
+          "sha256": "e17aa3fc91b6aae2f59a22e0079aff7d98e1de50ac6470d30da63d08e346f868"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/page_client-reference-manifest.js",
+          "sha256": "72443823f423540669902494943fb691ea3f48878f87846e1b22a8015e1f69b7"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/milestones/page.js",
+          "sha256": "6833348cc4e2c7c2894fd255e820c0fb7a0b38c76e6df9abc8e4a6c5ea0df732"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/milestones/page.js.nft.json",
+          "sha256": "3d48baa543d511e6a401d42fbbcba724aae89d551bb2f7e64fd53512bd775d7c"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/milestones/page_client-reference-manifest.js",
+          "sha256": "29adc3e749a30b985d008749192c6f4e5c1a6fb5ce3a7d935b17f681e7872b9d"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/dashboard/page.js",
+          "sha256": "1dc2ee051c7e5898a95f2c56b3c5c2c8406eb4a85b677869e4df0ddae49fc10c"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/dashboard/page.js.nft.json",
+          "sha256": "5aad7ba107c7e2f251842c7f51e65d7d22995e7eb39181d73fcce2d8bdaf387c"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/dashboard/page_client-reference-manifest.js",
+          "sha256": "270aa89bef1a7abd3ff0e7f401145f6d873e9ee58153768489b0e9cdffb9d71d"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/sprints/page.js",
+          "sha256": "5aa68ef6cf6987bfb83b105287e560777f9772cfba742bfbe91ea3cfdb36e839"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/sprints/page.js.nft.json",
+          "sha256": "3d48baa543d511e6a401d42fbbcba724aae89d551bb2f7e64fd53512bd775d7c"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/sprints/page_client-reference-manifest.js",
+          "sha256": "31048c3b2ddec9224732dc1b192bbcc148cf1ac5334b5f92daeeeebf86bcd81d"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/settings/page.js",
+          "sha256": "6e40b0ab100b291c6b63fa508f42316f30073d9220da03f323914d32152072e4"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/settings/page.js.nft.json",
+          "sha256": "3d48baa543d511e6a401d42fbbcba724aae89d551bb2f7e64fd53512bd775d7c"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/settings/page_client-reference-manifest.js",
+          "sha256": "87d658755a2680415b625e519fa506ff1da39091a1d41ff9616bff89988edc07"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.js",
+          "sha256": "5349636f991c2cab14d7906296521d673953c456dde23db96659667a85a38b4b"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.js.nft.json",
+          "sha256": "ff013233b6cf201c3e01e3b73a6ed5ac24912322845e490dd2d3eab86f99b23c"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page_client-reference-manifest.js",
+          "sha256": "10e9e6d648c0c2ab15ce146ece912932b94e6e901c87969b7275347af3c680ec"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.js",
+          "sha256": "6e7a019da7b5ea5839f02759e6aeb54a93bc4a29673dfecc88ef2cc5a463dfb7"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.js.nft.json",
+          "sha256": "d98f5c665c586b3370b5cd7e9aa9b046727a931ff15e64b02aa391ecfa69f022"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page_client-reference-manifest.js",
+          "sha256": "db9c76dc2f6ee75e0f7e0e268b8f263d9bd438d330527dab3dda9049f4b53d8e"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/settings/api-keys/page.js",
+          "sha256": "cfe3f84c8ef63dcaf499205bbb19b52e19974ac3dc3d5311dd2986cbf28725c4"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/settings/api-keys/page.js.nft.json",
+          "sha256": "912a82fddc16b43b40f199dc3a0a052d58a1d821b8e9a5e5f748bdb26d503c45"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/settings/api-keys/page_client-reference-manifest.js",
+          "sha256": "3e0802544204162bbbb1f787aa37fb8b5bd378a8dfd9cb09bacc2d770cb087a7"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/settings/webhooks/page.js",
+          "sha256": "21a3012f18774a24cabc852582ec3b4b522690052d35deb3905e9637b14635c4"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/settings/webhooks/page.js.nft.json",
+          "sha256": "912a82fddc16b43b40f199dc3a0a052d58a1d821b8e9a5e5f748bdb26d503c45"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(app)/workspaces/[wsSlug]/settings/webhooks/page_client-reference-manifest.js",
+          "sha256": "1c5e90bd1ce41008137cca3369ad9b403dc8d0407091d9e32f4dbdf1904f9a72"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(auth)/login/page.js",
+          "sha256": "c18d3be7eea78369cff89b6bf168a25a604ff69cd6109d5cdd82eca9a9edaf5a"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(auth)/login/page.js.nft.json",
+          "sha256": "5d60178a242b1f4908337fd218ea69c8aa446c0f8913038ce729da0028166c7f"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/(auth)/login/page_client-reference-manifest.js",
+          "sha256": "764b03d09c2ac8fdda0c209f81d08517060831d2bbaad794af478aedf7804102"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/api/auth/[...nextauth]/route.js.nft.json",
+          "sha256": "a150d9ec24fe0b6921ec583323e9ccfe7f6d50ecc0e988f6d712337085c21bce"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/api/auth/[...nextauth]/route_client-reference-manifest.js",
+          "sha256": "1b329011a2210008eb190735d6ab9134e29631d09d85ec238a1782f00fe3a845"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/server/app/api/auth/[...nextauth]/route.js",
+          "sha256": "f19d296f3ae294374539da6a5a25e8ba34be8c681594eb1e4dac9b5e562ce0f9"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/822-8fd69f2d058a1ff4.js",
+          "sha256": "b51686772231c1f3447ca6d4e6ef24c382a2d2be964f19f1b286cf6702c9932f"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/main-app-de77eccba26a5816.js",
+          "sha256": "e05551ca2f7dd3cf0ec03f730cfcf7ab06ad8e90f6f133af63e6ede6c4b55ec7"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/834-4425bebb6cbd2520.js",
+          "sha256": "2e44fe1635fdadc32f525940dc40eba3c9797c3de9bf4fa179018ce538ffe22e"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/157-8ce259f1a00e3757.js",
+          "sha256": "d9a828df9a6c175964cbb6ad3d6231335bf51a5d0699a69df01b7b976dc14aa3"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/398-020f3cf13c4e22d6.js",
+          "sha256": "8bb01fc9df6a6c4d72a736a1a54a527539f76684d87b248d8eda4006dece9a7d"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/974-8c67ebf429dee31d.js",
+          "sha256": "6091cd5bf0405a07d848b9a51fe02c24ef632151e69a6d4038737b96456aac13"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/281-be4112f790b8241f.js",
+          "sha256": "5af898aba93e2f26298449245c8d093751ac7ebd27f535de5b1f5168d68ab269"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/436-160fc1693ff7e14b.js",
+          "sha256": "bb92a981665108c32d740935dd67fa4b74d4f00b102176655478583d680dd68e"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/698-665246127e14067c.js",
+          "sha256": "580991c5500fa58eaaa74f211abfed516f6cd3d09640af877e1eb4ccd7202416"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/6-1a67b536ba3f64a2.js",
+          "sha256": "3933949716c3a0a658e759fa3fd25839620d6a6af4498b49e29f3acf358fee15"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/framework-3567c36c71350db7.js",
+          "sha256": "111282df7bf132c88993792f03097ab2fe136035b489a1c99ce5027287f3bd73"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/220-09d7fb92abae3a84.js",
+          "sha256": "fd30da6c75953a1101aba9059920f7f86310b467032cb8b56c4bc953d682d9a3"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/661-946bafbe251090f8.js",
+          "sha256": "4e29d99bce8150b115969bad0d0fd4bf64980e9eac6560f3f75c2f792fb8e627"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/673-80a7bfd68a395398.js",
+          "sha256": "7b5e687161c546f3e3dde6aeda6f5106d2aea674ff208784b7e520b43e27ef90"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/main-1c3f22f8dacb1013.js",
+          "sha256": "e6bd74fe8f59b0f31c4eee5de309af9ec0b333949dce905e9e85852d5a47573c"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/979-13cc88dcab79611d.js",
+          "sha256": "c200e36a51c1663a10835116641b71ee6fb6e765b05cd0e880fbaf45d8c1bacd"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/687-5cf9f7e6f4ce9442.js",
+          "sha256": "95654025baee247323854af873cda3b4851595bc23aa64f3915372cc01ef51b8"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/957-7e6e1bf2fca46969.js",
+          "sha256": "85fbe0f5fd24925ba1511079cadeddef46a016693aae5a837a4cc203768ad556"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/polyfills-42372ed130431b0a.js",
+          "sha256": "0973c1d64c88adc8e3c950410cb58b288f72118d5965b78049438deb8f2f9683"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/8236d011-1e987dc3afeda85d.js",
+          "sha256": "445226f3c461a5feaf3129e2b883e890b3ab89410eb70e7e77df91b51eac34e9"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/697-a3b4f6cd4048446b.js",
+          "sha256": "7ffc1455c33f491f50f032d291b214d945ad4f84c8c8b539be7d68b9b5cbb277"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/webpack-15392f02a26e5d42.js",
+          "sha256": "05f35ed1690ae8feb9ad5929cde8cf7c8403b86c6d296a6e39a2356d93d1395e"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/982-1fba23e9fbe9e715.js",
+          "sha256": "ece5cec50834b9f803328babaa240d5b7a345899592b28c09ae2fc28b4ec10e4"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/73-b491a9637e4a37eb.js",
+          "sha256": "890afa9aec58a2e670e7cfdc5f4df57e97a9b572c66b9872b66ff0cfb5e7dec8"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/aSqRl1YgtFD9JqdFhmmlv/_ssgManifest.js",
+          "sha256": "678f6ce2cb80b1fe72fc67e7412be6e2ab6ada083111b64f7c40d35e3cba5e00"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/aSqRl1YgtFD9JqdFhmmlv/_buildManifest.js",
+          "sha256": "c334ad54a257859cd86480862899bd621033f76e79fce85c2711960c57fd19da"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/app/layout-5e2e0745223b881d.js",
+          "sha256": "86c766ff7a88662a8633d94ba0710a8aaa442fe19095f9f4dc613147575b624a"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/app/(app)/page-7e579d908f70f60b.js",
+          "sha256": "b66e85e31341a79069ebd8f68413707b028c3a9241f1ba47fef8b033b160c107"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/app/(app)/layout-7a1426884649d1d1.js",
+          "sha256": "201ba043982953d688385a1a061b0793c5911b1d44b54c199c35769afd62bfd9"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/app/_not-found/page-bba5b9c5aec40141.js",
+          "sha256": "2dd176e97bf908854fadbe77887a9921be5e0f2380d63aaace8d074246621788"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/app/_global-error/page-7e579d908f70f60b.js",
+          "sha256": "b66e85e31341a79069ebd8f68413707b028c3a9241f1ba47fef8b033b160c107"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/app/(app)/workspaces/page-52e6f4b98e44e86d.js",
+          "sha256": "288ae5cb88df33d1374df248f23ce33bd20f00677d139ea391e011a2beb633c1"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/app/(app)/workspaces/[wsSlug]/layout-e6ff1e3a54e7d5ab.js",
+          "sha256": "864f1c68811f6a23704e9890f52ef14dc4b4a770de78a83737973307dbf13ce2"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/app/(app)/workspaces/[wsSlug]/page-876db6568d4b9b73.js",
+          "sha256": "e69dc138268028234201c63d15cede82ab36444ea251ea946f0336b0f8459c67"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/app/(app)/workspaces/[wsSlug]/milestones/page-f577ba5ca6d8a4bf.js",
+          "sha256": "ff9b25c41ed760fafd07218a4d1eece0a5f0ef45f1bf523b84dd1cbc727395f7"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/app/(app)/workspaces/[wsSlug]/dashboard/page-1734ea972ecbdff5.js",
+          "sha256": "f14c5f8e2564a7dab18c48bce1276aebb2a389d564500ce6d3609ca1d1ba2b4b"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/app/(app)/workspaces/[wsSlug]/sprints/page-ef36b0dd25a88624.js",
+          "sha256": "0ab4b2854961cc67208c514c0142bf3a0d78d85c815e8590953ed541a2cfed08"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/app/(app)/workspaces/[wsSlug]/settings/page-53773a370e516230.js",
+          "sha256": "cbd73bdbaee6b271e3e78bc8055eda9e186c8e32b44ea6bc26806066a4505b3f"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page-83f39da2625e08f1.js",
+          "sha256": "2f9501dc82cd040b86c28ba5b8006d55a5887af194b79304e39ee72c2dff21d8"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page-f7905ba3091fa0b6.js",
+          "sha256": "83982fdd8fc882c81429b07ec9f94a0aea84ad5e10c2d6611241d16d0feb48ae"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/app/(app)/workspaces/[wsSlug]/settings/api-keys/page-a292313d18e7c276.js",
+          "sha256": "91ca671526b8fd4a5656f5750b1cb82472e2582ffaa996a95af1a2b82597ad79"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/app/(app)/workspaces/[wsSlug]/settings/webhooks/page-4604f27d8476a09e.js",
+          "sha256": "5591223ade07966ee57a34fb7bc48a60026908c6c54290be73a905dd10c0033b"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/app/(auth)/login/page-c2bde3bc02f1e282.js",
+          "sha256": "ae14ba142650cf720a02e9808c2f276fdf17ea03039d3043a8cc2423a572262b"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/app/api/auth/[...nextauth]/route-f77d63cd19638347.js",
+          "sha256": "b0864d7d462d266bc37a02cac9ad736a759d84632420302ba2a988f92e72f199"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/next/dist/client/components/builtin/forbidden-7e579d908f70f60b.js",
+          "sha256": "b66e85e31341a79069ebd8f68413707b028c3a9241f1ba47fef8b033b160c107"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/next/dist/client/components/builtin/not-found-7e579d908f70f60b.js",
+          "sha256": "b66e85e31341a79069ebd8f68413707b028c3a9241f1ba47fef8b033b160c107"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/next/dist/client/components/builtin/app-error-7e579d908f70f60b.js",
+          "sha256": "b66e85e31341a79069ebd8f68413707b028c3a9241f1ba47fef8b033b160c107"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/next/dist/client/components/builtin/global-error-2a858ff102cddce2.js",
+          "sha256": "30a1ea080f92e433334fd4935f01dda6225b77667bc8294ce68c1e02fec148b0"
+        },
+        {
+          "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/.next/static/chunks/next/dist/client/components/builtin/unauthorized-7e579d908f70f60b.js",
+          "sha256": "b66e85e31341a79069ebd8f68413707b028c3a9241f1ba47fef8b033b160c107"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/health.controller.js",
+          "sha256": "6b94978fdd78f82204d2825c8b4e343268e9957c25393fc08c134da595504758"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/main.js",
+          "sha256": "27b12f7121de6e741878f29f02569ebca05625b868f0f5ab05672af94b491d6e"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/app.module.js",
+          "sha256": "567fd97231be4ee5c3bcd7f8baf8ffeef69b2aa72a270b26b98deb9d98d5a888"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/route-table.controller.js",
+          "sha256": "6dc251573fc03d9c0fb8a88bf123ea71227f9d5fbcf1f1888c86c7b25a60f535"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/bind-host.js",
+          "sha256": "458f3a1652c82a21acce4bcf0d55a7f55f820a6f40a7c1fa6a2225adb025ae08"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/build-info.js",
+          "sha256": "cf640e05beef7da042a72d973e9bedcb71622af34c9fb51d989d769757586746"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/milestones/milestones.module.js",
+          "sha256": "a0c5f837594a66f94edabf9afd5f31ea9f68ebddbf65b19c08cf6b6d0e937e0a"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/milestones/milestones.controller.js",
+          "sha256": "b6e6b69ea73d3e19b9b491d56046a3b56707eda84233aea8790353cb026b299d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/milestones/milestones.service.js",
+          "sha256": "a835b8c6e736d25cf0416b320bb1a1620ea79308860c6715874f9716670919f6"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/prisma/prisma.service.js",
+          "sha256": "e6be5e52268f00c527a4b7b118259f6a9aaf5ae2d332423ee6030371923dbeb5"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/prisma/prisma.module.js",
+          "sha256": "6311a86730a3af6df240093869a54ff466aeef3eac974aeac889aa90f2e780d8"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/execution-authority/execution-authority.types.js",
+          "sha256": "11e6c727829db2b3ebf6c608198bd5c9eb50657ce5df5b23cbb4debfddb6fb79"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/execution-authority/task-staleness.service.js",
+          "sha256": "c970e19ff4651c3ccd59f800ffd8d4b4ae8689bb96e0bfc38c30be6eca198ff2"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/execution-authority/index.js",
+          "sha256": "3b2594c86ea7a046ac934d51ba5168dd208c4432a32f00362e5325fc9528c610"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/execution-authority/execution-authority.replay.js",
+          "sha256": "69f8176a34c9c7d6d906a0c2e55e9104b22a5e68123d664704621e749db40c05"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/execution-authority/execution-authority.module.js",
+          "sha256": "aa7a7d06647a04fae164bf76927773579c41064fc9bfacc41ae4227367dffa1d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/execution-authority/task-execution-recorder.service.js",
+          "sha256": "7aeba089e1fc23dc31db03f930d5a3400ed84ba5888d756414b59d5c7581795a"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/execution-authority/canonical-json-v1.js",
+          "sha256": "2082387589f1aaabe25f2bbb8e31e901948a4277328bf8ed108ffe3629020523"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/execution-authority/execution-authority.reducer.js",
+          "sha256": "c041e24c95bdbbad3e6997853deeb588ed7964725fe06c0c9b07ccd59b19b31a"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/execution-authority/canonical-json.js",
+          "sha256": "9c1a4b35aa53cda396474c4b813d24b18ce2af88295cb2726b791ef8a1540313"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/execution-authority/evidence-ref.validator.js",
+          "sha256": "fe15ea66bef2a8edef4f61abf61ff60f6edebc316c7ee95104ba539fcd4adb6e"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/execution-authority/execution-authority.errors.js",
+          "sha256": "6c4f579ee3b8ffc7cb3c2a37e643233bc0e607a5043c12a1c3d3a16eb95aea1d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/execution-authority/execution-authority.service.js",
+          "sha256": "a93fb9aa9013c224235292bf63855d5fa2112be6da4615bafaa8b8ecf05f23a8"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/migration/index.js",
+          "sha256": "de2fe3367a0535ac022dce84bef9489dd519b33cb79f3a33ac1f1c810f81ec60"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/migration/migration.controller.js",
+          "sha256": "400bc7d786b9179568bd41cfbb38c9f8b3c33ba16f664d2f47534b7350543aef"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/migration/migration.service.js",
+          "sha256": "e85f0ceb08248e4aa648cfded4748682986dae462a8d2db19288a717b670343f"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/migration/migration-scope.js",
+          "sha256": "2a6d557733b043923d1d8e1a09c88afd22af0e36c893d5974791a3a6229b5208"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/migration/migration.status.js",
+          "sha256": "b6865b008f5709183d1b2c7ef9914e703c0c0f04a9875ffa8910b358d9c97fe2"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/migration/migration.module.js",
+          "sha256": "753169a180862dd04fffe7e21929632bca36b37ad3d6b98ab3f9c48382255f4b"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/migration/migration.errors.js",
+          "sha256": "752b464d68acf80dbd2ec8cda8bcd8cee52fc77b814c193f4ce052478be84df2"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/migration/migration.archive-projection.js",
+          "sha256": "90681f3233b6f9cff4c79a8d1f1e15c7d58eeaadc5ae11ec12a7d77076d8885d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/activity/activity.module.js",
+          "sha256": "1ad5ab1079182ece015d9cbb5f3fac4d58fc9415e78228ce585ec7178c59a4f0"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/activity/activity.service.js",
+          "sha256": "65f9c5f2aa0098162c221ad2aa35f8841cb58c1f7ccbfdd94f7fbf1ec6d1e368"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/webhooks/webhooks.module.js",
+          "sha256": "4d0a2688327e3320ac134c67df9cd864b1d70b58a087dd7f148add78feda0b34"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/webhooks/webhook-dispatch.processor.js",
+          "sha256": "f52374ebc5662ce5a73ac9a43c5ed2e507f165e51872142c605e0f7ab5cb8bb0"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/webhooks/webhooks.service.js",
+          "sha256": "7405ae0a8441846367c29a74f5abe38aceee2c8ea6968af481d4389e3c1bc1fa"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/webhooks/webhooks.controller.js",
+          "sha256": "76113b363565e1e1a22bc557605cd9401027dd19d56473a4ebd17e2dc083d6e4"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/result-authority/result-authority.guards.js",
+          "sha256": "89d0b5b50854a1c0a9e8c95067dc9485e5974712d219dc05818c7b8849f7361a"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/result-authority/index.js",
+          "sha256": "74c139689bdd81d241f3477f74c7b6728bdf19c0dd274d88b1d1b7692e8941fe"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/result-authority/result-authority.errors.js",
+          "sha256": "81d52c9e4f921e669bf8dfb73ece73cd286ceaddb1c35320d7b9e1e60c7a91b2"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/result-authority/result-authority.types.js",
+          "sha256": "1e5a53aa955852023ea2a6167328f3f2386ae7075a8471b9b79196d90002f9db"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/result-authority/result-authority.canonical.js",
+          "sha256": "2b74ef777ad880cb6670b0af4376cc24a5aeaf4dc9c309628c741400583c3612"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/result-authority/result-authority.service.js",
+          "sha256": "548f0bcd7ca5defc4c715bd8410654c9b87ffe07f7cc5c2bdc3ffd36c3d02690"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/tasks/tasks.service.js",
+          "sha256": "c157f16dd278bef0b5af57812daf1e088afb55ae6c4368bef01f673a1484798b"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/tasks/task-contract-binding.controller.js",
+          "sha256": "c8267f34ce88ee2c9fcc155b2947530f8060088b2d95e98d62e4aa61da35ebca"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/tasks/task-contract-binding.service.js",
+          "sha256": "9b4bc360194129db1ca4db438b3b3321c2ce80c2f020f11d6fc974ff18a8a45b"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/tasks/tasks.module.js",
+          "sha256": "778a25d1703ddd8533bab05276d8fff465ce65f8e185564ce745f45d574cc895"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/tasks/tasks.controller.js",
+          "sha256": "c12d6d488a4c9f29e06ee4228f19cdbd21b663fd83e009a0fd0064cf22cae994"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/outbox/outbox.errors.js",
+          "sha256": "4a64564026d449739b109a51b6078dfb6119ee0dc81d879552c5d6b1b12ac1a4"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/outbox/index.js",
+          "sha256": "39896aa82d4d3a18fe77998cca984829d610e0180ce7326bc3a4e60c675435fb"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/outbox/outbox.relay.js",
+          "sha256": "98995f35f8c2de52aa9a92393cda446b4039855d642d3af6334349e31c1e6a7d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/outbox/outbox.types.js",
+          "sha256": "772c8b1be88c2c2d7e890fa078fe4eb8da8e2be84e6ce12e9d6a52cfd60e125c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/outbox/outbox-relay.worker.js",
+          "sha256": "b9d0e8fe6242e871da07c376c9f77ae4baa4bfccab8bcca9c6bd30569cb6389c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/outbox/work-outcome-ledger.reader.js",
+          "sha256": "a18161d66dac5ba99ddde7297d345868d835124a758ab3bd9b83fc9ca44058f7"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/outbox/work-outcome-ledger.consumer.js",
+          "sha256": "3eacc2a30c60cb3cda22bf60626a732d447403ded782bd62129baf6c36aeab90"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/outbox/outbox.module.js",
+          "sha256": "50a25d07e88959120c81a3914d127ae3131d4db19d8be7555a67db03c2137b50"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/auth/human-task-visibility.js",
+          "sha256": "db26ee9f99b9b681bfc44e22466eec21bd20602d280a31db4e28171da5e182a6"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/auth/assign-compat-window.js",
+          "sha256": "7cc30997066f59e05ac3f36a5c22bca9580448918db849b8486b1dea7bffb771"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/auth/agent-task-visibility.js",
+          "sha256": "1f98951d84cd1dd32ebfe5e491e1464518d4e6d22cc6af98bbfb3ad632085534"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/auth/project-read-grants.js",
+          "sha256": "86cc67a41bcc1df8a2b13dad0fe2be88700ecb352acdf7575c4968cdb04b9c52"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/auth/workspace-digest-grants.js",
+          "sha256": "9c80c7853e2198e7c756cf1e804886ec397cf06ef3f93f9440ad973ca6b824af"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/auth/auth.module.js",
+          "sha256": "e17d82e7b0bc61de39b3c749790fcf39aaa94fb806351a3969099267109ea556"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/auth/auth.service.js",
+          "sha256": "b9302a9f45760c2cee575e13081087b529a19affe7451a11423034d1f62b8a6a"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/auth/agent-scope.decorator.js",
+          "sha256": "f71ece1aca5db9888dcd4a51c7824b4dacb9c96d7cb6a535bd30f73174857b95"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/auth/auth.controller.js",
+          "sha256": "b8dda6377cfb030d0ff4bda308f17d82e7d6346623cbcaa97dabc1a993214a7d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/solution-log-head/solution-log-head.controller.js",
+          "sha256": "7312aba782d8f8ecb258b57d6144c0ab104defed6153dcf7b45283d02897144e"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/solution-log-head/index.js",
+          "sha256": "27eabd1d5f5cf460ec9e9d2a303040790837b23d9df5c859fb656b32f9e66aa8"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/solution-log-head/solution-log-head.canonical.js",
+          "sha256": "0b5dfaa00ae5529469d90a607cb2c209587e2570bd24d3b98580e8e517e29ae2"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/solution-log-head/solution-log-head.errors.js",
+          "sha256": "dd428451df5563e9c492a2fc484b129ceec5cffefeefc8459ec6f367605bfafc"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/solution-log-head/solution-log-head.service.js",
+          "sha256": "1119721f990c99923aa508c455ba3fc1a1615573308da37b75b60473a63daa7c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/solution-log-head/solution-log-head.module.js",
+          "sha256": "84e19e87f96cfe7d0acf5bfa2c96a2eba5df7e20817fad22016d53e7d9d80d9b"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/solution-log-head/solution-log-head.guards.js",
+          "sha256": "97e07c9ffbb7a90c301ddf90b627ca0e90f866de4f56df25c5f7b8b47d38cf96"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/solution-log-head/solution-log-head.types.js",
+          "sha256": "4a8d2c646b8b94f4c12fc99fbadd10b726d93b7bfc03934288db22a9e458776b"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/projects/projects.module.js",
+          "sha256": "20a2883c2d735d78fbf878e9f36e500b4f7cedf4fd6b3c0b20610cc90910706d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/projects/projects.service.js",
+          "sha256": "1233ec1b184dd9a459843610c761a79f3275fcd29ac3facb7238c2f99e21dd70"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/projects/projects.controller.js",
+          "sha256": "0a403fe900f6064c3dc128ebc5cf3af1ea40a115e49400d615c49182854f4a4d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/assembly/index.js",
+          "sha256": "676829540938b4ff57cc1ea2810d5c267ee7601e1815abcbc68cc7be1190c311"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/assembly/assembly.canonical.js",
+          "sha256": "e75f8fd005be97946791eeb30170f8ba4c34a918b74574a9b53244c4d27fa4ce"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/assembly/assembly.types.js",
+          "sha256": "e002d35ed8822647c9b20856725110467e4e01943a8054680461e9c76b5983cb"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/assembly/credential-policy-v0.generated.js",
+          "sha256": "74f13aeab22028c5805369b13107cc6abf143205de78d065116558e8cce50728"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/assembly/assembly.compiler.js",
+          "sha256": "177e375a99cbfbcb9a4ea8486a2ec820f5c1802cc5f686e9a3d224b2778d3fb2"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/assembly/assembly.validator.js",
+          "sha256": "ae75cb68afd2fba05806b9982596497230301b5402e6de9ac523bf4a8df58794"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/assembly/assembly.errors.js",
+          "sha256": "00c2aa36b588abcd66babd058e48d8773ec21d64fc71ee8ddc1e4bdec4a7e290"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/ws/kanban.service.js",
+          "sha256": "de73f3e6eb7d373a1c1c6f489e3cbf674c4f411661be999d096ac007d6f604d9"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/ws/kanban.gateway.js",
+          "sha256": "7b4ef4b42bde723579178ed959b4af1df815a6b6637513b6a9c80b717eec6422"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/ws/ws.module.js",
+          "sha256": "fa971c03a436a04990b489dba6a5728040adffc259378a10c8596f0118640838"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/sync/sync.service.js",
+          "sha256": "b7b8d65dbdd840ed675733760855222f3196a7401c11b0bc0ea4e9b26f4a0f8f"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/sync/sync.module.js",
+          "sha256": "ae45a1c5e18da9ee5372ceca0af3922a38477228ef8b8e43b551a4dddab0e285"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/sync/sync.controller.js",
+          "sha256": "8d5470de2a1041d4726c8042a488c70bf88671d305c34b7c14cc2cac8d2673b2"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/workspaces/workspaces.service.js",
+          "sha256": "c8f3314bc3e636ce591e255e78d5c1c8396df3af73a4a16fca44420b24de2567"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/workspaces/workspaces.module.js",
+          "sha256": "6e4d98c30b6dfe2d9c8d438d52cffce7b062646107572081e4e5d3012b97e9c9"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/workspaces/workspaces.controller.js",
+          "sha256": "a705a94ea035859f01bb0c5f3049d560b37a7e3e72ab30ee1d1c508b75f7d78b"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/agents/agents.service.js",
+          "sha256": "e1a81df1ad8639e85e7a7a54db6f0aeb2415c4e7fd1719e2a0afb1c597bc16ca"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/agents/agents.module.js",
+          "sha256": "227b21b978179477bc5c52e08489bd39aaa6be8990e995923d224259660dbb04"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/agents/agents.controller.js",
+          "sha256": "bc9bc06a0cb9499fa49cfd24607c05012ad38f94fee498b318a0eaf37d640b52"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/milestones/dto/create-sprint.dto.js",
+          "sha256": "09dff25fc4e44b3056b497e71678a4ea1c6d9519381c2d7c6904a3dbbb200ca8"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/milestones/dto/create-milestone.dto.js",
+          "sha256": "3511de2d21154cc981ad8d7ed58e29b41bde9edf0496db00d58c6a3976a1f8f3"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/common/interceptors/actor.interceptor.js",
+          "sha256": "296d6148d0a21dec7b9cbf5c89a38a701762acb6c607ae8ba397990d9516f61c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/common/guards/workspace-member.guard.js",
+          "sha256": "8c66ad6ea8ffabdf1a2eb200c5afba3c3e88e045a67ba84469f641b1d15aedd8"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/common/guards/workspace-role.guard.js",
+          "sha256": "c13a0c9b06de706b379d84c23033b9b6d23023d149f59885bad82213bec7baa0"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/migration/dto/create-work-item.dto.js",
+          "sha256": "b0ef7e9a129f80da402e7c8bad21dc24c380b8b3b361ef02ecf1267d3a6a6515"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/migration/dto/create-batch.dto.js",
+          "sha256": "b3589aa30a23c8417fa3f0eed3b1fd8911cb4d6cd8723a7a117a3361c4391eb4"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/migration/dto/create-decision.dto.js",
+          "sha256": "891b665434aa8e8a10d54d4c7380a297ecfbe49ffa132847c6ec9d5095c6d1a9"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/migration/dto/create-transition.dto.js",
+          "sha256": "bbc97ef83cd65c76514e819075e06929c5e7f11b1681d8be85ee20877736e74b"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/migration/status-map/status-map.js",
+          "sha256": "2bb1ed5761a4a8215191947d217ea3ed4e2195ceb0c0b66a63de86ee63bad327"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/webhooks/dto/create-webhook.dto.js",
+          "sha256": "22b1cd0c78702e8dccf575196e99c554a41d322f820b34d76744f2eec3ab5124"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/tasks/redactions/task-redaction.service.js",
+          "sha256": "52845a3a3d8e59c302a7b9623871f49179a93615afc3339d16af8b95dea6dd91"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/tasks/redactions/redact-field.dto.js",
+          "sha256": "88452bd02f4274dc2f253ee2ebb4dfd21fafdcb11a183dee4cdb0a383107f514"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/tasks/redactions/secret-rules.js",
+          "sha256": "bdb28e7146438119d7ea08f9b664f673ecf17deafa94e4dc1fe3caa2bd28e62d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/tasks/dto/add-comment.dto.js",
+          "sha256": "fd3e9418892b917b486e59918d182392e6124da146a68609791289aa91f125f6"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/tasks/dto/query-tasks.dto.js",
+          "sha256": "7b06356666af9affc3e449ffd75b01cf304e48011d707af05f337805ab2a71fb"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/tasks/dto/create-checklist-item.dto.js",
+          "sha256": "4eb9ca17026eb2366ca3f7064560f68a2ec6935eac875a133641cbae287b0b86"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/tasks/dto/update-task-status.dto.js",
+          "sha256": "932c6cb308fb4bd446c73c73e66bcbb8066f6f51feb3a47a131277ffe00cabda"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/tasks/dto/query-workspace-digest.dto.js",
+          "sha256": "8fa80f77aca1fe1514e95f8d5057a2027198f522e40d411ff1d101a97f1a6746"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/tasks/dto/create-task.dto.js",
+          "sha256": "5e165bcd30c1a27ad922129158769d89ff48100e699d79ce7df6bcfbbe80ade7"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/tasks/dto/update-task-contract.dto.js",
+          "sha256": "aecc66020bd667cddaf3707ad6b4d03809106a7c2605439847bde876a6a1d260"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/tasks/dto/add-dependency.dto.js",
+          "sha256": "2a6c3f1a551976018d2439bbbb3d2f4e04c1a69230022245b7c2c95651c24548"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/tasks/field-state/field-changes.service.js",
+          "sha256": "4fa5ea18d17f70578379008ac77b3d2a3693b52709330c6aa8492c33294ebe87"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/tasks/field-state/task-field-state.service.js",
+          "sha256": "d05bb5a87a7789401decdabd498a0bcd11ede4208284d843587ddf1ad3e0b1b1"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/tasks/field-state/field-changes.controller.js",
+          "sha256": "76e4fe64cbafc8a039684f877448a8f9a6ae59d0fdcd2d0516410e651bfb5742"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/tasks/evidence/task-evidence.errors.js",
+          "sha256": "aa38d77b2dfaa967e615bd9deb541b8de9a2f9f48ac5ea3711e8faf1c33cc9b0"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/tasks/evidence/task-evidence.service.js",
+          "sha256": "4f62fe7ff1fb00fa20cfda0bdc6168d90ab98c584215b3a91e5d3221cbdfc2a0"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/tasks/evidence/attach-evidence.dto.js",
+          "sha256": "e57d3f298927de0ec21b070637ad6555595bbb4cfef531ef0de38b45e73050a1"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/auth/dto/github-profile.dto.js",
+          "sha256": "93deb68a2a13e66f1bb1948be84564ec0a3b4e3ade73e903efa5b9e5c7ebcc56"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/auth/dto/telegram-login.dto.js",
+          "sha256": "85a84776d15dfe496aaa57aa16b04820c05b5a36a9a4a286f0997572645210e0"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/auth/guards/agent-task-scope.guard.js",
+          "sha256": "aa92d2c94f7db71c226b32f90315400b85d30031ad4b655c1ac0d45bdefa6f40"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/auth/guards/human-task-read.guard.js",
+          "sha256": "3f28608dfbe581c05d6e08f9f619b71c144b6087edaa075853e5a6c24b9ac54f"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/auth/guards/jwt-or-api-key.guard.js",
+          "sha256": "08c1b327c61bf7aa16b8c0b30dc9e21c7fa04e0cdf10b85fe4979804f7b5daf4"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/auth/guards/jwt-auth.guard.js",
+          "sha256": "5bf86187ff7327b21d87742fe3b5ae9aa2520afdc5d132f84a1ad7489386179e"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/auth/guards/api-key.guard.js",
+          "sha256": "9c829f68c766593f0c2018e06d4eff7e6b740b40a7233fa53405022032459c99"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/auth/guards/github-oauth.guard.js",
+          "sha256": "d6b691bec0349cb4d1d3b87469ec6eb992b0c3536407dfb9621f624d33eb9ba4"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/auth/strategies/github.strategy.js",
+          "sha256": "38a04c1754511f3a5575f11c7b7c8e8889db5361305a1dde5ad76bb20a2d105c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/auth/strategies/jwt.strategy.js",
+          "sha256": "301b07294d39cff03906e1a93c249c7e41795c795bc67607bc6e8e6c1d91a825"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/projects/dto/add-git-ref.dto.js",
+          "sha256": "dbbd0ccd85cb4b7309a78a39bf455b60a2c421dbc9c93b21f36e64d462ac5555"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/projects/dto/create-project.dto.js",
+          "sha256": "122b4a0a511b5e379766bf87143b1d50570b93b65c4716763986c5ea6caac658"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/workspaces/dto/update-member-role.dto.js",
+          "sha256": "c6c2508694601509e6a33de4b0e58dab352cefbb40019a231010f849cf6fe48f"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/workspaces/dto/create-workspace.dto.js",
+          "sha256": "bb69b812229ee6a8085ba51291d772a471142150e46670637b02d15b95fa5e29"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/agents/dto/create-agent.dto.js",
+          "sha256": "d0c9f577210dc5465a0c4696eff42e78d745bca2ff32d50ae8fa9d32806f4b1e"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/dist/agents/dto/assign-agent.dto.js",
+          "sha256": "6a0e059e27eabe8bf42fd16b8b98d1f4e16364ba0af9477e07dc873cd043d3f4"
+        }
+      ],
+      "entities": [
+        "code_unit:apps/web/app/providers.tsx",
+        "code_unit:apps/web/lib/api/client.ts"
+      ],
+      "expect": {
+        "exit_codes": [
+          0
+        ],
+        "stdout_contains": [
+          "BROWSER_CANARY_VERIFIED_TEARDOWN"
+        ]
+      },
+      "mutating": true
+    }
+  ]
+}
