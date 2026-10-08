@@ -1,11 +1,11 @@
 {
   "schema": "MeasuredGitSource/v1",
-  "commit": "6c7fe908039ac651446e08df8fc619eccc565145",
-  "tree": "3e734f467aa57ccea43d8a6fcc83cb24eea24572",
+  "commit": "fa1385c74ad3dcf0f488f3061ff8f53634ba62a4",
+  "tree": "09062adeeb54a646d55addbb8067cbcd41f4b24f",
   "dirty": false,
   "test_overlay": false,
   "production_requests": 0,
-  "captured_at_utc": "2026-10-08T09:18:01.984128+00:00",
+  "captured_at_utc": "2026-10-08T09:26:38.230498+00:00",
   "producer": {
     "tool": "MUNERAL successor source measurement",
     "version": "1.0"

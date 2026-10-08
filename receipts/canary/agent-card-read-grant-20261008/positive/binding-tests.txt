@@ -1,5 +1,5 @@
   console.log
-    ◇ injected env (0) from .env // tip: ⌘ suppress logs { quiet: true }
+    ◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
 
       at _log (../../../mun-rev4/node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
 
@@ -11,43 +11,40 @@ ts-jest[config] (WARN) [94mmessage[0m[90m TS151002: [0mUsing hybrid module k
 ts-jest[config] (WARN) [94mmessage[0m[90m TS151002: [0mUsing hybrid module kind (Node16/18/Next) is only supported in "isolatedModules: true". Please set "isolatedModules: true" in your tsconfig.json. To disable this message, you can set "diagnostics.ignoreCodes" to include 151002 in your ts-jest config. See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/options/diagnostics
 ts-jest[config] (WARN) [94mmessage[0m[90m TS151002: [0mUsing hybrid module kind (Node16/18/Next) is only supported in "isolatedModules: true". Please set "isolatedModules: true" in your tsconfig.json. To disable this message, you can set "diagnostics.ignoreCodes" to include 151002 in your ts-jest config. See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/options/diagnostics
 ts-jest[config] (WARN) [94mmessage[0m[90m TS151002: [0mUsing hybrid module kind (Node16/18/Next) is only supported in "isolatedModules: true". Please set "isolatedModules: true" in your tsconfig.json. To disable this message, you can set "diagnostics.ignoreCodes" to include 151002 in your ts-jest config. See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/options/diagnostics
-ts-jest[config] (WARN) [94mmessage[0m[90m TS151002: [0mUsing hybrid module kind (Node16/18/Next) is only supported in "isolatedModules: true". Please set "isolatedModules: true" in your tsconfig.json. To disable this message, you can set "diagnostics.ignoreCodes" to include 151002 in your ts-jest config. See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/options/diagnostics
-ts-jest[config] (WARN) [94mmessage[0m[90m TS151002: [0mUsing hybrid module kind (Node16/18/Next) is only supported in "isolatedModules: true". Please set "isolatedModules: true" in your tsconfig.json. To disable this message, you can set "diagnostics.ignoreCodes" to include 151002 in your ts-jest config. See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/options/diagnostics
-ts-jest[config] (WARN) [94mmessage[0m[90m TS151002: [0mUsing hybrid module kind (Node16/18/Next) is only supported in "isolatedModules: true". Please set "isolatedModules: true" in your tsconfig.json. To disable this message, you can set "diagnostics.ignoreCodes" to include 151002 in your ts-jest config. See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/options/diagnostics
-[33m[Nest] 163816  - [39m10/08/2026, 9:21:13 AM [33m   WARN[39m [38;5;3m[AuthModule] [39m[33mGITHUB_CLIENT_ID not set — GitHub OAuth disabled[39m
-(node:163816) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+[33m[Nest] 582823  - [39m10/08/2026, 9:28:27 AM [33m   WARN[39m [38;5;3m[AuthModule] [39m[33mGITHUB_CLIENT_ID not set — GitHub OAuth disabled[39m
+(node:582823) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
-[31m[Nest] 163816  - [39m10/08/2026, 9:21:21 AM [31m  ERROR[39m [38;5;3m[ExceptionsHandler] [39mError: fixture audit failure
+[31m[Nest] 582823  - [39m10/08/2026, 9:28:34 AM [31m  ERROR[39m [38;5;3m[ExceptionsHandler] [39mError: fixture audit failure
     at Object.<anonymous> [90m(/home/dev/aup/import-audit-work/mun-card-grant/apps/api/[39mtest/task-contract-binding.e2e.spec.ts:175:55[90m)[39m
 [90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
-[31m[Nest] 163816  - [39m10/08/2026, 9:21:31 AM [31m  ERROR[39m [38;5;3m[ExceptionsHandler] [39mError: fixture audit failure
+[31m[Nest] 582823  - [39m10/08/2026, 9:28:44 AM [31m  ERROR[39m [38;5;3m[ExceptionsHandler] [39mError: fixture audit failure
     at Object.<anonymous> [90m(/home/dev/aup/import-audit-work/mun-card-grant/apps/api/[39mtest/task-contract-binding.e2e.spec.ts:297:55[90m)[39m
 [90m    at processTicksAndRejections (node:internal/process/task_queues:104:5)[39m
-PASS test/task-contract-binding.e2e.spec.ts (30.219 s)
+PASS test/task-contract-binding.e2e.spec.ts (28.646 s)
   Task contract CAS binding (af868172, real PostgreSQL)
-    ✓ invalidates the native conditional GET on bind, rebind and clear (3240 ms)
-    ✓ invalidates the native conditional GET when project custody changes with the same digest (1854 ms)
-    ✓ keeps the native conditional validator on a refused CAS and a no-op bind (1748 ms)
-    ✓ keeps the native conditional validator when the pointer audit rolls back (1517 ms)
-    ✓ binds the existing creator-owned task, GET reads it, and audits the same actor and digests (954 ms)
-    ✓ refuses a changed project in the atomic write even when the agent owns both projects (947 ms)
-    ✓ refuses stale expected digest with 409 without mutation or audit (703 ms)
-    ✓ allows only one concurrent CAS from the same expected value (725 ms)
-    ✓ rebinds then clears by exact expected digest and GET returns null (1416 ms)
-    ✓ refuses an unrelated same-workspace agent and reviewer, but admits an existing executor (1372 ms)
-    ✓ refuses cross-workspace task even when an executor row exists (945 ms)
-    ✓ refuses a broad task scope and missing authenticated workspace custody (464 ms)
-    ✓ rechecks ownership in the service after the outer guard snapshot (483 ms)
-    ✓ rolls the pointer back when the audit write fails (700 ms)
-    ✓ refuses JWT and absent authentication on this agent-only mutation (475 ms)
-    ✓ refuses malformed/missing/extra input with no write: {"contractDigest":"sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1"} (700 ms)
-    ✓ refuses malformed/missing/extra input with no write: {"expectedContractDigest":null} (706 ms)
-    ✓ refuses malformed/missing/extra input with no write: {"contractDigest":"sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1\n","expectedContractDigest":null} (696 ms)
-    ✓ refuses malformed/missing/extra input with no write: {"contractDigest":"sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1","expectedContractDigest":"sha256:bad"} (705 ms)
-    ✓ refuses malformed/missing/extra input with no write: {"contractDigest":"sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1","expectedContractDigest":null,"actorId":"forged"} (768 ms)
+    ✓ invalidates the native conditional GET on bind, rebind and clear (3177 ms)
+    ✓ invalidates the native conditional GET when project custody changes with the same digest (1803 ms)
+    ✓ keeps the native conditional validator on a refused CAS and a no-op bind (1624 ms)
+    ✓ keeps the native conditional validator when the pointer audit rolls back (1390 ms)
+    ✓ binds the existing creator-owned task, GET reads it, and audits the same actor and digests (948 ms)
+    ✓ refuses a changed project in the atomic write even when the agent owns both projects (951 ms)
+    ✓ refuses stale expected digest with 409 without mutation or audit (721 ms)
+    ✓ allows only one concurrent CAS from the same expected value (738 ms)
+    ✓ rebinds then clears by exact expected digest and GET returns null (1467 ms)
+    ✓ refuses an unrelated same-workspace agent and reviewer, but admits an existing executor (1384 ms)
+    ✓ refuses cross-workspace task even when an executor row exists (923 ms)
+    ✓ refuses a broad task scope and missing authenticated workspace custody (483 ms)
+    ✓ rechecks ownership in the service after the outer guard snapshot (492 ms)
+    ✓ rolls the pointer back when the audit write fails (711 ms)
+    ✓ refuses JWT and absent authentication on this agent-only mutation (484 ms)
+    ✓ refuses malformed/missing/extra input with no write: {"contractDigest":"sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1"} (691 ms)
+    ✓ refuses malformed/missing/extra input with no write: {"expectedContractDigest":null} (682 ms)
+    ✓ refuses malformed/missing/extra input with no write: {"contractDigest":"sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1\n","expectedContractDigest":null} (690 ms)
+    ✓ refuses malformed/missing/extra input with no write: {"contractDigest":"sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1","expectedContractDigest":"sha256:bad"} (674 ms)
+    ✓ refuses malformed/missing/extra input with no write: {"contractDigest":"sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1","expectedContractDigest":null,"actorId":"forged"} (684 ms)
 
 Test Suites: 1 passed, 1 total
 Tests:       20 passed, 20 total
 Snapshots:   0 total
-Time:        30.573 s
+Time:        28.887 s, estimated 31 s
 Ran all test suites matching /test\/task-contract-binding.e2e.spec.ts/i.

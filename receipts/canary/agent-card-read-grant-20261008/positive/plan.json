@@ -6,11 +6,11 @@
   "read_only": false,
   "subject": {
     "schema": "GitCanarySubject/v1",
-    "commit": "6c7fe908039ac651446e08df8fc619eccc565145",
-    "tree": "3e734f467aa57ccea43d8a6fcc83cb24eea24572",
+    "commit": "fa1385c74ad3dcf0f488f3061ff8f53634ba62a4",
+    "tree": "09062adeeb54a646d55addbb8067cbcd41f4b24f",
     "evidence": {
       "path": "source-evidence.json",
-      "sha256": "3f9ecbf38ba99a37766632737a865f3bd1691f9e477c039dfaef23681c52505e",
+      "sha256": "d0d1b50a25b3022e7e60cde9adb5da7a84aa64f0e3d6dd34c76eb718413fbc9d",
       "source_field": "commit"
     }
   },
@@ -22,7 +22,7 @@
       "argv": [
         "/usr/bin/python3.12",
         "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/card-positive.py",
-        "/home/dev/aup/import-audit-work/runs/PR225-security-canary-20261008/positive/card-read-http-v2.log",
+        "/home/dev/aup/import-audit-work/runs/PR225-security-layered-canary-20261008/positive/card-read-http-v2.log",
         "test/agent-task-card-read.e2e.spec.ts"
       ],
       "cwd": ".",
@@ -141,7 +141,7 @@
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/kanban.gateway.ts",
-          "sha256": "87aafbcf85d7e7965b0ef46fc2f69d28813d8283a6dbcfb985c4f03e87797857"
+          "sha256": "aecaaaee50810e96066b1910ebecfae9d1e5825dea001dce4e6717e706ad49a0"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/kanban.service.ts",
@@ -157,11 +157,11 @@
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/assembly/mutation-results.json",
-          "sha256": "3dbf0f4d09e0145dc5ba7bfc58b8767f7fd451a0aca86c5dfef8b6e813d73a68"
+          "sha256": "69b8c780772a6c1e4982845dc246b68fb7f005ef9b649568b516f769d8e212d1"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/human-task-read-isolation.e2e.spec.ts",
-          "sha256": "d696274362479cfbca80c1a4aa52ff03d677419cac6634a011caf0a5bfe694da"
+          "sha256": "4498b7af066ff8f11cc16fc21e1e90cd113edd2633ba581da48b9ee17eb2bc7d"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/project-read-grants.spec.ts",
@@ -202,6 +202,14 @@
         {
           "path": "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/card-positive.py",
           "sha256": "e9bc8d633826d9a728f04fecfd5cbbbac171b709575ab4b70468d4cac332f7a9"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/kanban-access.service.ts",
+          "sha256": "1aed5320f9ddbcea6ca932d3882b73d66af466aa033801a76e3dd7857979a4ab"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/ws.module.ts",
+          "sha256": "16f852b122714ddcd922618b2e0632e0aaf891f207363c212b7162a1cccebf2b"
         }
       ],
       "entities": [
@@ -229,7 +237,7 @@
       "argv": [
         "/usr/bin/python3.12",
         "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/card-positive.py",
-        "/home/dev/aup/import-audit-work/runs/PR225-security-canary-20261008/positive/human-read-isolation-http-v2.log",
+        "/home/dev/aup/import-audit-work/runs/PR225-security-layered-canary-20261008/positive/human-read-isolation-http-v2.log",
         "test/human-task-read-isolation.e2e.spec.ts"
       ],
       "cwd": ".",
@@ -348,7 +356,7 @@
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/kanban.gateway.ts",
-          "sha256": "87aafbcf85d7e7965b0ef46fc2f69d28813d8283a6dbcfb985c4f03e87797857"
+          "sha256": "aecaaaee50810e96066b1910ebecfae9d1e5825dea001dce4e6717e706ad49a0"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/kanban.service.ts",
@@ -364,11 +372,11 @@
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/assembly/mutation-results.json",
-          "sha256": "3dbf0f4d09e0145dc5ba7bfc58b8767f7fd451a0aca86c5dfef8b6e813d73a68"
+          "sha256": "69b8c780772a6c1e4982845dc246b68fb7f005ef9b649568b516f769d8e212d1"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/human-task-read-isolation.e2e.spec.ts",
-          "sha256": "d696274362479cfbca80c1a4aa52ff03d677419cac6634a011caf0a5bfe694da"
+          "sha256": "4498b7af066ff8f11cc16fc21e1e90cd113edd2633ba581da48b9ee17eb2bc7d"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/project-read-grants.spec.ts",
@@ -409,13 +417,22 @@
         {
           "path": "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/card-positive.py",
           "sha256": "e9bc8d633826d9a728f04fecfd5cbbbac171b709575ab4b70468d4cac332f7a9"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/kanban-access.service.ts",
+          "sha256": "1aed5320f9ddbcea6ca932d3882b73d66af466aa033801a76e3dd7857979a4ab"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/ws.module.ts",
+          "sha256": "16f852b122714ddcd922618b2e0632e0aaf891f207363c212b7162a1cccebf2b"
         }
       ],
       "entities": [
         "code_unit:apps/api/src/tasks/tasks.controller.ts",
         "code_unit:apps/api/src/auth/guards/human-task-read.guard.ts",
         "code_unit:apps/api/src/agents/agents.service.ts",
-        "code_unit:apps/api/src/ws/kanban.gateway.ts"
+        "code_unit:apps/api/src/ws/kanban.gateway.ts",
+        "code_unit:apps/api/src/ws/kanban-access.service.ts"
       ],
       "expect": {
         "exit_codes": [
@@ -433,7 +450,7 @@
       "argv": [
         "/usr/bin/python3.12",
         "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/card-positive.py",
-        "/home/dev/aup/import-audit-work/runs/PR225-security-canary-20261008/positive/solution-log-head-v2.log",
+        "/home/dev/aup/import-audit-work/runs/PR225-security-layered-canary-20261008/positive/solution-log-head-v2.log",
         "test/solution-log-head.postgres.spec.ts",
         "test/solution-log-head.service.spec.ts"
       ],
@@ -553,7 +570,7 @@
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/kanban.gateway.ts",
-          "sha256": "87aafbcf85d7e7965b0ef46fc2f69d28813d8283a6dbcfb985c4f03e87797857"
+          "sha256": "aecaaaee50810e96066b1910ebecfae9d1e5825dea001dce4e6717e706ad49a0"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/kanban.service.ts",
@@ -569,11 +586,11 @@
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/assembly/mutation-results.json",
-          "sha256": "3dbf0f4d09e0145dc5ba7bfc58b8767f7fd451a0aca86c5dfef8b6e813d73a68"
+          "sha256": "69b8c780772a6c1e4982845dc246b68fb7f005ef9b649568b516f769d8e212d1"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/human-task-read-isolation.e2e.spec.ts",
-          "sha256": "d696274362479cfbca80c1a4aa52ff03d677419cac6634a011caf0a5bfe694da"
+          "sha256": "4498b7af066ff8f11cc16fc21e1e90cd113edd2633ba581da48b9ee17eb2bc7d"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/project-read-grants.spec.ts",
@@ -614,6 +631,14 @@
         {
           "path": "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/card-positive.py",
           "sha256": "e9bc8d633826d9a728f04fecfd5cbbbac171b709575ab4b70468d4cac332f7a9"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/kanban-access.service.ts",
+          "sha256": "1aed5320f9ddbcea6ca932d3882b73d66af466aa033801a76e3dd7857979a4ab"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/ws.module.ts",
+          "sha256": "16f852b122714ddcd922618b2e0632e0aaf891f207363c212b7162a1cccebf2b"
         }
       ],
       "entities": [
@@ -636,7 +661,7 @@
         "/home/dev/aup/import-audit-work/runs/m211c/node-v24.21.0-linux-x64/bin/node",
         "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/binding-positive.mjs",
         "/home/dev/aup/import-audit-work/mun-card-grant",
-        "/home/dev/aup/import-audit-work/runs/PR225-security-canary-20261008/positive/binding-status-authority-v2.log"
+        "/home/dev/aup/import-audit-work/runs/PR225-security-layered-canary-20261008/positive/binding-status-authority-v2.log"
       ],
       "cwd": ".",
       "env_keys": [
@@ -754,7 +779,7 @@
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/kanban.gateway.ts",
-          "sha256": "87aafbcf85d7e7965b0ef46fc2f69d28813d8283a6dbcfb985c4f03e87797857"
+          "sha256": "aecaaaee50810e96066b1910ebecfae9d1e5825dea001dce4e6717e706ad49a0"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/kanban.service.ts",
@@ -770,11 +795,11 @@
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/assembly/mutation-results.json",
-          "sha256": "3dbf0f4d09e0145dc5ba7bfc58b8767f7fd451a0aca86c5dfef8b6e813d73a68"
+          "sha256": "69b8c780772a6c1e4982845dc246b68fb7f005ef9b649568b516f769d8e212d1"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/human-task-read-isolation.e2e.spec.ts",
-          "sha256": "d696274362479cfbca80c1a4aa52ff03d677419cac6634a011caf0a5bfe694da"
+          "sha256": "4498b7af066ff8f11cc16fc21e1e90cd113edd2633ba581da48b9ee17eb2bc7d"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/project-read-grants.spec.ts",
@@ -819,6 +844,14 @@
         {
           "path": "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/binding-positive.mjs",
           "sha256": "abccb55cc9caabd616cc531a750ec83652d55437b2f6e6a12977e9490692fe44"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/kanban-access.service.ts",
+          "sha256": "1aed5320f9ddbcea6ca932d3882b73d66af466aa033801a76e3dd7857979a4ab"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/ws.module.ts",
+          "sha256": "16f852b122714ddcd922618b2e0632e0aaf891f207363c212b7162a1cccebf2b"
         }
       ],
       "entities": [
