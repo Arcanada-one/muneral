@@ -12,7 +12,7 @@ interface BlockersListProps {
 }
 
 export function BlockersList({ projectId, wsSlug, projSlug }: BlockersListProps) {
-  const { data: result } = useTasks(projectId, { status: 'blocked' });
+  const { data: result, isLoading, isError } = useTasks(projectId, { status: 'blocked' });
   const blockers = result?.data ?? [];
 
   return (
@@ -21,7 +21,7 @@ export function BlockersList({ projectId, wsSlug, projSlug }: BlockersListProps)
         <h3 className="flex items-center gap-2 text-sm font-medium text-destructive">
           <AlertTriangle className="h-4 w-4" />
           Blockers
-          {blockers.length > 0 && (
+          {!isError && !isLoading && blockers.length > 0 && (
             <Badge variant="destructive" className="ml-auto">
               {blockers.length}
             </Badge>
@@ -29,7 +29,15 @@ export function BlockersList({ projectId, wsSlug, projSlug }: BlockersListProps)
         </h3>
       </div>
 
-      {blockers.length === 0 ? (
+      {isError ? (
+        <div role="alert" className="px-4 py-8 text-center text-xs text-muted-foreground">
+          Blockers are unavailable. Try again later.
+        </div>
+      ) : isLoading ? (
+        <div className="px-4 py-8 text-center text-xs text-muted-foreground">
+          Loading blockers...
+        </div>
+      ) : blockers.length === 0 ? (
         <div className="px-4 py-8 text-center text-xs text-muted-foreground">
           No blockers — keep going!
         </div>

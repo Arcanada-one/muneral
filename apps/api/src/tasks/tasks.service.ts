@@ -1,6 +1,8 @@
+import { humanTaskWhere } from '../auth/human-task-visibility.js';
 import {
   Injectable,
   NotFoundException,
+  ForbiddenException,
   BadRequestException,
   ConflictException,
 } from '@nestjs/common';
@@ -169,8 +171,10 @@ export class TasksService {
     return task;
   }
 
-  async findOne(taskId: string) {
-    const task = await this.prisma.task.findUnique({ where: { id: taskId } });
+  async findOne(taskId: string, humanUserId?: string) {
+    const task = humanUserId
+      ? await this.prisma.task.findFirst({ where: { id: taskId, ...humanTaskWhere(humanUserId) } })
+      : await this.prisma.task.findUnique({ where: { id: taskId } });
     if (!task) {
       throw new NotFoundException('Task not found');
     }
@@ -183,14 +187,15 @@ export class TasksService {
    * MUN-0043: when `scopedToAgentId` is given the answer is narrowed to the
    * tasks that agent is assigned to — or, since MUN-0051, created (see
    * agentOwnTaskWhere). The parameter is the agent resolved from
-   * an API key by `AgentTaskScopeGuard`; a JWT caller passes nothing and the
-   * behaviour is unchanged. Narrowing lives here rather than in the controller
+   * an API key by `AgentTaskScopeGuard`; a human JWT caller passes its verified user ID and is restricted
+   * to current workspace memberships. Narrowing lives here rather than in the controller
    * so the database, not a post-filter, is what never returns the other rows.
    */
-  async findByProject(projectId: string, scopedToAgentId?: string) {
+  async findByProject(projectId: string, scopedToAgentId?: string, humanUserId?: string) {
     return this.prisma.task.findMany({
       where: {
         projectId,
+        ...humanTaskWhere(humanUserId),
         ...(scopedToAgentId ? agentOwnTaskWhere(scopedToAgentId) : {}),
       },
       orderBy: { createdAt: 'desc' },
@@ -404,11 +409,13 @@ export class TasksService {
    * apart from "the first page happened to be empty" — an empty list with no
    * count is exactly the shape that reads as a clean bill of health.
    */
-  async query(dto: QueryTasksDto) {
+  async query(dto: QueryTasksDto, humanUserId?: string) {
     const limit = dto.limit ?? 50;
     const offset = dto.offset ?? 0;
 
-    const where: Prisma.TaskWhereInput = {};
+    const where: Prisma.TaskWhereInput = humanUserId
+      ? { project: { workspace: { members: { some: { userId: humanUserId } } } } }
+      : {};
     if (dto.status) where.status = dto.status;
     if (dto.projectId) where.projectId = dto.projectId;
     if (dto.contractDigest) where.contractDigest = dto.contractDigest;
@@ -641,9 +648,9 @@ export class TasksService {
     await this.prisma.taskChecklist.delete({ where: { id: itemId } });
   }
 
-  async getChecklist(taskId: string) {
+  async getChecklist(taskId: string, humanUserId?: string) {
     return this.prisma.taskChecklist.findMany({
-      where: { taskId },
+      where: { taskId, ...(humanUserId ? { task: humanTaskWhere(humanUserId) } : {}) },
       orderBy: { position: { sort: 'asc', nulls: 'last' } },
     });
   }
@@ -688,10 +695,27 @@ export class TasksService {
     await this.prisma.taskDependency.delete({ where: { id: depId, ...(fromTaskId ? { fromTaskId } : {}) } });
   }
 
-  async getDependencies(taskId: string) {
-    return this.prisma.taskDependency.findMany({
-      where: { fromTaskId: taskId },
+  async getDependencies(taskId: string, humanUserId?: string) {
+    if (!humanUserId) return this.prisma.taskDependency.findMany({ where: { fromTaskId: taskId } });
+    return this.prisma.$transaction(async (tx) => {
+      await this.assertHumanDependencyRead(tx, taskId, humanUserId);
+      return tx.taskDependency.findMany({ where: { fromTaskId: taskId } });
+    }, { isolationLevel: 'RepeatableRead' });
+  }
+
+  private async assertHumanDependencyRead(tx: Prisma.TransactionClient, taskId: string, userId: string) {
+    const root = await tx.task.findFirst({ where: { id: taskId, ...humanTaskWhere(userId) }, select: { id: true } });
+    if (!root) throw new ForbiddenException('Human task read forbidden');
+    const foreign = await tx.taskDependency.findFirst({
+      where: { AND: [
+        { OR: [{ fromTaskId: taskId }, { toTaskId: taskId }] },
+        { OR: [
+          { fromTask: { NOT: humanTaskWhere(userId) } },
+          { toTask: { NOT: humanTaskWhere(userId) } },
+        ] },
+      ] }, select: { id: true },
     });
+    if (foreign) throw new ForbiddenException('Human task read forbidden');
   }
 
   /**
@@ -712,10 +736,19 @@ export class TasksService {
    * `done` is satisfied. A caller that receives only ids has to issue N more
    * requests, and an agent key would be refused on most of them.
    */
-  async getDependencyGraph(taskId: string, agentId?: string) {
-    await this.findOne(taskId); // 404 on an unknown id, not an empty graph
-
-    const edges = await this.prisma.taskDependency.findMany({
+  async getDependencyGraph(taskId: string, agentId?: string, humanUserId?: string, readClient?: Prisma.TransactionClient): Promise<Array<{
+    id: string; type: string; direction: "outgoing" | "incoming";
+    fromTaskId: string; toTaskId: string; otherTaskId: string;
+    otherTaskTitle: string | null; otherTaskTitleWithheld?: true; otherTaskStatus: string;
+  }>> {
+    if (humanUserId && !readClient) {
+      return this.prisma.$transaction(async (tx) => {
+        await this.assertHumanDependencyRead(tx, taskId, humanUserId);
+        return this.getDependencyGraph(taskId, agentId, humanUserId, tx);
+      }, { isolationLevel: 'RepeatableRead' });
+    }
+    if (!humanUserId) await this.findOne(taskId);
+    const edges = await (readClient ?? this.prisma).taskDependency.findMany({
       where: { OR: [{ fromTaskId: taskId }, { toTaskId: taskId }] },
       include: {
         fromTask: { select: { id: true, title: true, status: true } },
@@ -729,9 +762,8 @@ export class TasksService {
     // owned one task read the titles of tasks it did not own, one edge at a
     // time — the same plaintext the field-change read above stopped handing
     // out, through a different door. The counterpart's STATUS stays: it is not
-    // free text and `getReadiness` below is computed from it. A JWT is
-    // unaffected — this narrows an agent key, and a user already has the whole
-    // project.
+    // free text and `getReadiness` below is computed from it. Human reads additionally require membership for both dependency endpoints
+    // in one transaction snapshot; agent title withholding remains unchanged.
     const ownedCounterparts = agentId
       ? await this.ownedAmong(
           agentId,
@@ -778,8 +810,8 @@ export class TasksService {
    * `duplicates` are not blocking relations. An edge is satisfied once the
    * counterpart reaches a terminal status.
    */
-  async getReadiness(taskId: string, agentId?: string) {
-    const edges = await this.getDependencyGraph(taskId, agentId);
+  async getReadiness(taskId: string, agentId?: string, humanUserId?: string) {
+    const edges = await this.getDependencyGraph(taskId, agentId, humanUserId);
     const SATISFIED = new Set(['done', 'cancelled', 'archived']);
 
     const blockedBy = edges.filter(
@@ -817,8 +849,8 @@ export class TasksService {
     });
   }
 
-  async getActivity(taskId: string, page: number, limit: number) {
-    return this.activityService.findForTask(taskId, page, limit);
+  async getActivity(taskId: string, page: number, limit: number, humanUserId?: string) {
+    return this.activityService.findForTask(taskId, page, limit, humanUserId);
   }
 }
 

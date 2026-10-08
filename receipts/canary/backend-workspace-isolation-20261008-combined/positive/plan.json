@@ -1,0 +1,170 @@
+{
+  "schema": "CanaryPlan/v2",
+  "id": "backend-only-human-task-read-security-combined",
+  "owner": "MUNERAL-IMPORT",
+  "environment": "Owned disposable PostgreSQL and actual Nest HTTP, synthetic human principals only",
+  "read_only": false,
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "03b4636f2c21338a97a209608cbb8797626c3a69",
+    "tree": "71b316ac9c613f16f2b60d90a14b515fd1218208",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "8f6a4e235dc8f21ce7448e6294dbeb44fce095718b63557da20621870864b46e",
+      "source_field": "commit"
+    }
+  },
+  "purpose": "Fresh backend-only synthetic 78 HTTP controls; no original web or production acceptance claim.",
+  "probes": [
+    {
+      "kind": "process",
+      "id": "human-task-read-http",
+      "argv": [
+        "/usr/bin/python3.12",
+        "/home/dev/aup/import-audit-work/runs/PR224-combined-canary/positive/positive-tests-combined.py"
+      ],
+      "cwd": ".",
+      "env_keys": [
+        "PATH",
+        "HOME",
+        "TMPDIR"
+      ],
+      "timeout_seconds": 120,
+      "capture_limit_bytes": 524288,
+      "executable_sha256": "e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f",
+      "execution_files": [
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/src/activity/activity.service.ts",
+          "sha256": "ce78618a5c1c5a1242e17853bdb80e6dba623c52a115ddca47d249d26ded9553"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/src/auth/guards/human-task-read.guard.ts",
+          "sha256": "cb8de58d5c5480fb8621522d4799cb2938af2bae8ddc43ba84562ca6883b2dcc"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/src/auth/human-task-visibility.ts",
+          "sha256": "d455058fbf5f3ac68ab273ff30cffe1dc846e22395e9611b837e7b084d14cfd6"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/src/execution-authority/task-staleness.service.ts",
+          "sha256": "e9e359417401109e6dc8ccff2e43f048c46eaaf0e5eff7dd7420da89dc8258be"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/src/projects/projects.controller.ts",
+          "sha256": "0233dd5d417e4d8da15f4ddb3d5e8c4f26893c9a250a5fe45e23aaf28e54b180"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/src/projects/projects.module.ts",
+          "sha256": "3d63a04ee48b84c6994c47900474af7e8de7cf296de4bf9e7663bbd9ce71b9bf"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/src/projects/projects.service.ts",
+          "sha256": "60ba1dc8cd941dd8a8058b1ffd1bb1ee0b3362910bca3817e146d22df07cc557"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/src/tasks/evidence/task-evidence.service.ts",
+          "sha256": "3f7a06494a1ff1ce98082d2f2ffccfe950310ca6db250d29b642b1cc3397f72f"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/src/tasks/tasks.controller.ts",
+          "sha256": "ab2455fce8fd80c42250af59e07d46d7183ef15a2a253db5623d43a927d5be79"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/src/tasks/tasks.module.ts",
+          "sha256": "4a9df746928a516de6376d4b3b950177ea4e0dd4cbe6589fe928be4de5b8ed95"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/src/tasks/tasks.service.ts",
+          "sha256": "34225bb4e255b2d90a8a3d9a37258ea9f1d2bb6ce1b7fb2bdf8d2c0bf254d152"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/test/agent-project-index.e2e.spec.ts",
+          "sha256": "843d69de36e185ee353529f9613b4cb9c8cea523f349e0f340493ca3a6c1e381"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/test/human-task-read-isolation.e2e.spec.ts",
+          "sha256": "722849332bdb240d348cf130df75f0d355cf76df8dcd268eb86aa7e687d29f95"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/src/auth/guards/agent-task-scope.guard.ts",
+          "sha256": "69c460ff0e71095474ae4b16803e090e5ab8812c91fd1e0dcf6d055dfce7fb5a"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/src/auth/guards/jwt-or-api-key.guard.ts",
+          "sha256": "a7732bb3f90512742415b9b44eb1bec26be7e3b45073ed1f94eb84144d20af58"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/test/support/disposable-postgres.ts",
+          "sha256": "6644ee5e273b9bc866254288f8e4c426800da68875f485c932f28dc1e8576e3b"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/package.json",
+          "sha256": "919202c86e4a269cb8e4e680b9fdb768e555bbf8d7caf449adea37123657652c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/tsconfig.test.json",
+          "sha256": "b45b51f10e6897b5fa212f421842c1334c9e1f7942e446dcf278bb08b9c55d1d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/prisma/schema.prisma",
+          "sha256": "4ba70ef686a76611855b6fa59c5fc3b1ca4abcfe622f46c611ac846bdc2e753c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/pnpm-lock.yaml",
+          "sha256": "b9fd7a00c104eccb56944baa49ef119aee98792efb68467fd6018cfae5d84978"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/runs/PR224-combined-canary/positive/positive-tests-combined.py",
+          "sha256": "f449bbe619f6ed8001e3adc6f160cf242f76fc406c32b8b70dd09939f3302e89"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/src/sync/sync.controller.ts",
+          "sha256": "c1e61ec0697e0281fe4a38853d95f60a44fac7f553931c7d724a075c63c34d5c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/src/sync/sync.module.ts",
+          "sha256": "aae58d5ceeb772a10554b670440e82e66f442f8f0d47e1c00e3332930f11a4c9"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/src/sync/sync.service.ts",
+          "sha256": "33f2b0c2835d6fcdbfd30b23604e19aa805550928fb00cc77cad12626b37c469"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/test/assembly/mutation-results.json",
+          "sha256": "bb5ff7ed1a02892777b94f58c123ec855d2b28d7a39b35c17cf1aa23d26f5e9f"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/test/task-contract-digest.e2e.spec.ts",
+          "sha256": "d88febb7831d9ed06f8eb439df4a80ae8a4bd0b21c865bf1e48c97e10efe5d86"
+        }
+      ],
+      "entities": [
+        "code_unit:apps/api/src/activity/activity.service.ts",
+        "code_unit:apps/api/src/auth/guards/human-task-read.guard.ts",
+        "code_unit:apps/api/src/auth/human-task-visibility.ts",
+        "code_unit:apps/api/src/execution-authority/task-staleness.service.ts",
+        "code_unit:apps/api/src/projects/projects.controller.ts",
+        "code_unit:apps/api/src/projects/projects.module.ts",
+        "code_unit:apps/api/src/projects/projects.service.ts",
+        "code_unit:apps/api/src/tasks/evidence/task-evidence.service.ts",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts",
+        "code_unit:apps/api/src/tasks/tasks.module.ts",
+        "code_unit:apps/api/src/tasks/tasks.service.ts",
+        "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
+        "code_unit:apps/api/src/auth/guards/jwt-or-api-key.guard.ts",
+        "code_unit:apps/api/src/sync/sync.controller.ts",
+        "code_unit:apps/api/src/sync/sync.module.ts",
+        "code_unit:apps/api/src/sync/sync.service.ts"
+      ],
+      "expect": {
+        "exit_codes": [
+          0
+        ],
+        "stdout_contains": [
+          "Test exit 0"
+        ]
+      },
+      "mutating": true
+    }
+  ]
+}

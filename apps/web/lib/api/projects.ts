@@ -1,15 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from './client';
+import { fetchWorkspaces } from './workspaces';
+import { readProjects, uniqueSlug } from './read-contract';
 import type { PaginatedResult } from '@muneral/types';
 
 export interface Project {
   id: string;
   slug: string;
   name: string;
-  description?: string;
+  description?: string | null;
   workspaceId: string;
-  status: 'active' | 'archived';
-  taskCount: number;
+  status?: 'active' | 'archived';
+  taskCount?: number;
   createdAt: string;
 }
 
@@ -28,19 +30,20 @@ export interface Milestone {
   projectId: string;
   dueDate?: string;
   status: 'open' | 'closed';
-  taskCount: number;
+  taskCount?: number;
 }
 
 async function fetchProjects(wsSlug: string): Promise<Project[]> {
-  const res = await apiClient.get<PaginatedResult<Project>>(
-    `/workspaces/${wsSlug}/projects`,
-  );
-  return res.data.data;
+  const workspace = uniqueSlug(await fetchWorkspaces(), wsSlug, 'Workspace');
+  const res = await apiClient.get<unknown>(`/projects/workspace/${workspace.id}`);
+  const projects = readProjects(res.data);
+  if (projects.some(project => project.workspaceId !== workspace.id))
+    throw new Error('Projects response is unavailable: invalid workspace binding');
+  return projects;
 }
 
 async function fetchProject(wsSlug: string, projSlug: string): Promise<Project> {
-  const res = await apiClient.get<Project>(`/workspaces/${wsSlug}/projects/${projSlug}`);
-  return res.data;
+  return uniqueSlug(await fetchProjects(wsSlug), projSlug, 'Project');
 }
 
 async function fetchSprints(projectId: string): Promise<Sprint[]> {

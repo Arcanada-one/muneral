@@ -1,0 +1,13 @@
+{
+  "schema": "MeasuredGitSource/v1",
+  "commit": "03b4636f2c21338a97a209608cbb8797626c3a69",
+  "tree": "71b316ac9c613f16f2b60d90a14b515fd1218208",
+  "dirty": false,
+  "test_overlay": false,
+  "production_requests": 0,
+  "captured_at_utc": "2026-10-08T03:27:40.658455+00:00",
+  "producer": {
+    "tool": "MUNERAL-IMPORT backend-only source measurement",
+    "version": "1.0"
+  }
+}
