@@ -20,18 +20,18 @@ function formatRelativeTime(dateStr: string): string {
 }
 
 export function AgentActivityFeed({ wsSlug }: AgentActivityFeedProps) {
-  const { data: entries = [], isLoading } = useAgentActivity(wsSlug, 50);
+  const { data: entries = [], isLoading, isError } = useAgentActivity(wsSlug, 50);
 
-  // Group by agent
-  const grouped = entries.reduce<Record<string, typeof entries>>(
-    (acc, entry) => {
-      const key = entry.agentName;
-      if (!acc[key]) acc[key] = [];
-      acc[key].push(entry);
-      return acc;
-    },
-    {},
-  );
+  if (isError) {
+    return (
+      <div className="rounded-lg border p-4">
+        <h3 className="mb-3 text-sm font-medium">Agent Activity</h3>
+        <p role="alert" className="text-xs text-muted-foreground">
+          Agent activity is unavailable. Try again later.
+        </p>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
