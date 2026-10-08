@@ -5,7 +5,7 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "paused_safe"
  },
- "captured_at_utc": "2026-10-08T15:41:27Z",
+ "captured_at_utc": "2026-10-08T17:12:00Z",
  "change_set": {
   "base": "e394028105cbd0d38d50c6a7b4aa2575e83b9bc9",
   "files": [
@@ -50,6 +50,36 @@
     "path": "apps/api/test/assembly/mutation-results.json",
     "status": "M",
     "uncovered": true
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/change-admission-mun0007-unassignment-audit-20261008.json",
+    "node_ids": [
+     "receipt:receipts/graph/change-admission-mun0007-unassignment-audit-20261008.json"
+    ],
+    "path": "receipts/graph/change-admission-mun0007-unassignment-audit-20261008.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/mun0007/stale-role-race-20261008/race-green-receipt.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/mun0007/stale-role-race-20261008/race-red-receipt.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/mun0007/stale-role-race-20261008/source-checks.json",
+    "node_ids": [
+     "receipt:receipts/mun0007/stale-role-race-20261008/source-checks.json"
+    ],
+    "path": "receipts/mun0007/stale-role-race-20261008/source-checks.json",
+    "status": "A"
    },
    {
     "kind": "receipt",
@@ -112,7 +142,7 @@
     "status": "A"
    }
   ],
-  "head": "1f279c82ee304b18d0e03530c1c1c876d5fc4074",
+  "head": "fc5a625db4669a30dd8efca3e13a8e4f33461baa",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -121,18 +151,18 @@
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
   "graph_digest": "sha256:995246ddeeb8ec6795f54299f18101dcd83b502c27a03a780e59c64ec751b29a",
-  "path": "/home/dev/aup/import-audit-work/runs/MUN0007-next-20261008/stock-work/verifier-out/graph-e394028105cb.json",
+  "path": "/home/dev/aup/import-audit-work/runs/PR228-stale-role-20261008/stock-work/verifier-out/graph-e394028105cb.json",
   "source_commit": "e394028105cbd0d38d50c6a7b4aa2575e83b9bc9"
  },
  "head_graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:c3283299747d02a72bfe9b3f014643f0510580dda3e5c62b88ce2744e0d2e32a",
-  "path": "/home/dev/aup/import-audit-work/runs/MUN0007-next-20261008/stock-work/verifier-out/graph-head-1f279c82ee30.json",
-  "source_commit": "1f279c82ee304b18d0e03530c1c1c876d5fc4074",
+  "graph_digest": "sha256:fa268e338697f49b70878ecbc58282fb470937162da26b7aca4ba49d8968981d",
+  "path": "/home/dev/aup/import-audit-work/runs/PR228-stale-role-20261008/stock-work/verifier-out/graph-head-fc5a625db466.json",
+  "source_commit": "fc5a625db4669a30dd8efca3e13a8e4f33461baa",
   "staleness": {
-   "checked_at_utc": "2026-10-08T15:41:56Z",
-   "checked_nodes": 447,
+   "checked_at_utc": "2026-10-08T17:12:24Z",
+   "checked_nodes": 449,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -140,7 +170,7 @@
  },
  "host": "muneral-lane",
  "host_redacted": true,
- "host_sha256": "29f092f478a809b5193031c45fddfcf55dca13cdb8bd702c5188c9004d1d1696",
+ "host_sha256": "385bcd9d80da63cdd9d1afdc8529455c9cd398e7bb2823d1b0dfcdb6ac055fcd",
  "impact_set": {
   "deterministic_core": [
    {
@@ -1591,7 +1621,7 @@
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261008T154127Z-1f279c82",
+ "receipt_id": "car-verify-20261008T171200Z-fc5a625d",
  "receipt_path": "receipts/graph/change-admission-mun0007-unassignment-audit-20261008.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -1721,6 +1751,7 @@
    "receipt:receipts/graph/change-admission-a2p29-archived-20260915T131011Z.json",
    "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
    "receipt:receipts/graph/change-admission-integration-batch1.json",
+   "receipt:receipts/graph/change-admission-mun0007-unassignment-audit-20261008.json",
    "receipt:receipts/graph/change-admission-mun0048-rescue-20260915T070641Z.json",
    "receipt:receipts/graph/change-admission-mun0049-20260913T182304Z.json",
    "receipt:receipts/graph/change-admission-mun0050-20260914T075259Z.json",
@@ -1738,6 +1769,7 @@
    "receipt:receipts/graph/mun-0043-index-grant-20261007.json",
    "receipt:receipts/graph/revision4-public-20261007.json",
    "receipt:receipts/graph/security-api959a-caller788.json",
+   "receipt:receipts/mun0007/stale-role-race-20261008/source-checks.json",
    "route:DELETE /agents/keys/:keyId",
    "route:DELETE /agents/tasks/:taskId/assign/:agentId",
    "route:GET /agents/tasks",
@@ -1753,7 +1785,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-08T15:41:56Z",
+  "checked_at_utc": "2026-10-08T17:12:24Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -1992,6 +2024,21 @@
   },
   {
    "content_hash": {
+    "base": null,
+    "head": "sha256:7a38191485fa69dfe12cab26e2fbb416211c2d27e25674e22d7625c1e76c9664"
+   },
+   "entity": "receipt:receipts/graph/change-admission-mun0007-unassignment-audit-20261008.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-mun0007-unassignment-audit-20261008.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it; superseded by construction — this run re-issues the receipt at receipts/graph/change-admission-mun0007-unassignment-audit-20261008.json for work item 70110cb5-8535-4366-bac8-723808602f4a",
+   "rule": "DEC-AUP-0035",
+   "superseded": {
+    "receipt_path": "receipts/graph/change-admission-mun0007-unassignment-audit-20261008.json",
+    "work_item": "70110cb5-8535-4366-bac8-723808602f4a"
+   }
+  },
+  {
+   "content_hash": {
     "base": "sha256:d75da3efcea75673c9b8a6f46f0fab9a970690ee25a5e27185a177556f7dec4a",
     "head": "sha256:d75da3efcea75673c9b8a6f46f0fab9a970690ee25a5e27185a177556f7dec4a"
    },
@@ -2179,7 +2226,7 @@
   }
  ],
  "tree": {
-  "commit": "1f279c82ee304b18d0e03530c1c1c876d5fc4074",
+  "commit": "fc5a625db4669a30dd8efca3e13a8e4f33461baa",
   "dirty": false
  },
  "verdicts": [
@@ -2417,6 +2464,11 @@
    ]
   },
   {
+   "entity": "receipt:receipts/mun0007/stale-role-race-20261008/source-checks.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "verdict": "not_measured"
+  },
+  {
    "entity": "route:DELETE /agents/keys/:keyId",
    "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
@@ -2524,8 +2576,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/aup/import-audit-work/mun0007-collaboration/apps/api/node_modules/.bin/tsc -p /home/dev/aup/import-audit-work/mun0007-collaboration/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/MUN0007-next-20261008/stock-work/verifier-out/type-check-ilmacy_a/check.tsbuildinfo --listFiles",
-   "duration_s": 4.21,
+   "command": "/home/dev/aup/import-audit-work/mun0007-collaboration/apps/api/node_modules/.bin/tsc -p /home/dev/aup/import-audit-work/mun0007-collaboration/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/PR228-stale-role-20261008/stock-work/verifier-out/type-check-s0f70zq4/check.tsbuildinfo --listFiles",
+   "duration_s": 3.39,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -2563,13 +2615,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/MUN0007-next-20261008/stock-work/verifier-out/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-10-08T15:42:01Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR228-stale-role-20261008/stock-work/verifier-out/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-10-08T17:12:28Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1453 files listed"
   },
   {
-   "command": "/home/dev/aup/import-audit-work/mun0007-collaboration/apps/api/node_modules/.bin/tsc -p /home/dev/aup/import-audit-work/mun0007-collaboration/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/MUN0007-next-20261008/stock-work/verifier-out/type-check-vtupg1j7/check.tsbuildinfo --listFiles",
-   "duration_s": 6.55,
+   "command": "/home/dev/aup/import-audit-work/mun0007-collaboration/apps/api/node_modules/.bin/tsc -p /home/dev/aup/import-audit-work/mun0007-collaboration/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/PR228-stale-role-20261008/stock-work/verifier-out/type-check-f0ps30th/check.tsbuildinfo --listFiles",
+   "duration_s": 5.65,
    "entities": [
     "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts",
     "code_unit:apps/api/test/agent-project-index.e2e.spec.ts",
@@ -2611,13 +2663,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/MUN0007-next-20261008/stock-work/verifier-out/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-10-08T15:42:05Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR228-stale-role-20261008/stock-work/verifier-out/v-type-check-apps-api-tsconfig-test.txt",
+   "started_at_utc": "2026-10-08T17:12:32Z",
    "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1611 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=e394028105cb, head=1f279c82ee30, graph=head graph)",
-   "duration_s": 4.41,
+   "command": "tools/graph/contract_diff.py.run_diff(base=e394028105cb, head=fc5a625db466, graph=head graph)",
+   "duration_s": 4.29,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.service.ts",
@@ -2647,8 +2699,8 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/MUN0007-next-20261008/stock-work/verifier-out/v-contract-diff.json",
-   "started_at_utc": "2026-10-08T15:42:12Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR228-stale-role-20261008/stock-work/verifier-out/v-contract-diff.json",
+   "started_at_utc": "2026-10-08T17:12:37Z",
    "summary": "58→58 contracts, breaking 0, edges {'verified': 164}"
   },
   {
@@ -2679,13 +2731,13 @@
    "exit_code": 0,
    "id": "v-route-config",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/MUN0007-next-20261008/stock-work/verifier-out/v-route-config.txt",
-   "started_at_utc": "2026-10-08T15:42:17Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR228-stale-role-20261008/stock-work/verifier-out/v-route-config.txt",
+   "started_at_utc": "2026-10-08T17:12:42Z",
    "summary": "9 route(s), 0 failed"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.13,
+   "duration_s": 0.12,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -2737,8 +2789,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/MUN0007-next-20261008/stock-work/verifier-out/v-fitness.json",
-   "started_at_utc": "2026-10-08T15:42:17Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR228-stale-role-20261008/stock-work/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-10-08T17:12:42Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -2759,8 +2811,8 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/MUN0007-next-20261008/stock-work/verifier-out/v-doc-reference.txt",
-   "started_at_utc": "2026-10-08T15:42:17Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR228-stale-role-20261008/stock-work/verifier-out/v-doc-reference.txt",
+   "started_at_utc": "2026-10-08T17:12:42Z",
    "summary": "4 document(s), 0 failed"
   },
   {
@@ -2793,17 +2845,23 @@
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/home/dev/aup/import-audit-work/runs/MUN0007-next-20261008/stock-work/verifier-out/v-canary.json",
-   "started_at_utc": "2026-10-08T15:42:17Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR228-stale-role-20261008/stock-work/verifier-out/v-canary.json",
+   "started_at_utc": "2026-10-08T17:12:42Z",
    "summary": "0 canary result(s), 0 committed at head; 0 verified / 0 failed / 10 not_measured of 10 entities"
   }
  ],
  "verify": {
   "events": [
    {
+    "code": "SUPERSEDED_SELF_EXCLUSION",
+    "entity": "receipt:receipts/graph/change-admission-mun0007-unassignment-audit-20261008.json",
+    "rule": "DEC-AUP-0035",
+    "text": "the receipt at receipts/graph/change-admission-mun0007-unassignment-audit-20261008.json is the previous version of the one this run is writing, for the same work item 70110cb5-8535-4366-bac8-723808602f4a — superseded by construction, so it owes this change no verdict"
+   },
+   {
     "code": "STRUCTURAL_EXCLUSION",
     "rule": "DEC-AUP-0034",
-    "text": "38 affected entity(ies) owe no verdict (receipt: 38): unchanged at both revisions and given no verifier by the matrix"
+    "text": "39 affected entity(ies) owe no verdict (receipt: 39): unchanged at both revisions and given no verifier by the matrix"
    }
   ],
   "required_by_entity": {
@@ -2931,6 +2989,7 @@
    "receipt:receipts/graph/change-admission-a2p29-archived-20260915T131011Z.json": [],
    "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json": [],
    "receipt:receipts/graph/change-admission-integration-batch1.json": [],
+   "receipt:receipts/graph/change-admission-mun0007-unassignment-audit-20261008.json": [],
    "receipt:receipts/graph/change-admission-mun0048-rescue-20260915T070641Z.json": [],
    "receipt:receipts/graph/change-admission-mun0049-20260913T182304Z.json": [],
    "receipt:receipts/graph/change-admission-mun0050-20260914T075259Z.json": [],
@@ -2948,6 +3007,7 @@
    "receipt:receipts/graph/mun-0043-index-grant-20261007.json": [],
    "receipt:receipts/graph/revision4-public-20261007.json": [],
    "receipt:receipts/graph/security-api959a-caller788.json": [],
+   "receipt:receipts/mun0007/stale-role-race-20261008/source-checks.json": [],
    "route:DELETE /agents/keys/:keyId": [
     "canary",
     "contract_diff",
@@ -3004,9 +3064,9 @@
    ]
   },
   "seconds": {
-   "prepare": 2.27,
-   "total": 49.4,
-   "verifiers": 15.31
+   "prepare": 1.88,
+   "total": 42.3,
+   "verifiers": 13.46
   }
  },
  "work_item": "70110cb5-8535-4366-bac8-723808602f4a"
