@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { TaskDetailController, type DetailNavigationPort } from './task-detail-controller';
@@ -33,9 +33,11 @@ export function TaskDetailSessionProvider({children}: {children: React.ReactNode
   const {data, status} = useSession();
   const token = (data as unknown as {accessToken?: unknown} | null)?.accessToken;
   const active = status === 'authenticated' && typeof token === 'string' && token.length > 0;
-  const previous = useRef({token, status, generation: 0});
-  if (previous.current.token !== token || previous.current.status !== status) {
-    previous.current = {token, status, generation: previous.current.generation + 1};
+  const [previous, setPrevious] = useState({token, status, generation: 0});
+  if (previous.token !== token || previous.status !== status) {
+    // Adjust this component's own state and suppress children until the new lifetime commits.
+    setPrevious({token, status, generation: previous.generation + 1});
+    return null;
   }
-  return <SessionQueries key={previous.current.generation} active={active}>{children}</SessionQueries>;
+  return <SessionQueries key={previous.generation} active={active}>{children}</SessionQueries>;
 }

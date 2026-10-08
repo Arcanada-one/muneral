@@ -1,10 +1,11 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useLayoutEffect, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 import { useDetailSession } from '@/lib/api/task-detail-session';
+import type { TaskSelection } from '@/lib/api/task-detail-controller';
 import { TaskDetail } from '@/components/task/TaskDetail';
 import { Button } from '@/components/ui/button';
 
@@ -17,24 +18,33 @@ export default function TaskPage() {
   const router = useRouter();
   const session = useDetailSession();
   const selection = {workspaceSlug: wsSlug, projectSlug: projSlug, taskId};
-  const committed = useRef(selection);
-  committed.current = selection;
-  const [controller] = useState(() => session.controller({
-    current: () => committed.current,
-    open: tuple => router.push(`/workspaces/${encodeURIComponent(tuple.workspaceSlug)}/projects/${encodeURIComponent(tuple.projectSlug)}/tasks/${encodeURIComponent(tuple.taskId)}`),
-  }));
+  const [navigation] = useState(() => {
+    let location: TaskSelection | null = null;
+    return {
+      current: () => location,
+      commit: (tuple: TaskSelection) => { location = tuple; },
+      open: (tuple: TaskSelection) => router.push(`/workspaces/${encodeURIComponent(tuple.workspaceSlug)}/projects/${encodeURIComponent(tuple.projectSlug)}/tasks/${encodeURIComponent(tuple.taskId)}`),
+    };
+  });
+  const [controller] = useState(() => session.controller(navigation));
+  useLayoutEffect(() => {
+    navigation.commit({workspaceSlug: wsSlug, projectSlug: projSlug, taskId});
+  }, [navigation, wsSlug, projSlug, taskId]);
   const snapshot = useSyncExternalStore(controller.subscribe, controller.snapshot, controller.snapshot);
   useEffect(() => {
     if (session.active) controller.openTask({workspaceSlug: wsSlug, projectSlug: projSlug, taskId}, false);
     else controller.leave();
     return () => controller.leave();
   }, [controller, session.active, wsSlug, projSlug, taskId]);
-  const mounts = useRef(0);
+  const [lifetime] = useState(() => {
+    let mounts = 0;
+    return {start: () => ++mounts, current: () => mounts};
+  });
   useEffect(() => {
-    const mount = ++mounts.current;
+    const mount = lifetime.start();
     // React's development effect rehearsal must not permanently dispose its reused controller.
-    return () => { queueMicrotask(() => { if (mounts.current === mount) controller.dispose(); }); };
-  }, [controller]);
+    return () => { queueMicrotask(() => { if (lifetime.current() === mount) controller.dispose(); }); };
+  }, [controller, lifetime]);
   const task = session.active ? controller.taskFor(selection) : undefined;
 
   if (session.active && ['idle', 'loading'].includes(snapshot.outcome)) {
