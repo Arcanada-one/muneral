@@ -1,0 +1,144 @@
+{
+  "schema": "BackendOnlySourceIdentity/v1",
+  "source_head": "abf793ad46f6990a1ca0a287d9f13e926ce6ff20",
+  "base": "5b67dea437be93b988f50b3d312879798dc79f89",
+  "approved": "603bda89e014332c5e01054ff4e8333e52f78403",
+  "paths": [
+    {
+      "path": "apps/api/src/activity/activity.service.ts",
+      "approved_blob": "1a6bdca468c9980bee5bdd0cc8f611631e287c51",
+      "candidate_blob": "1a6bdca468c9980bee5bdd0cc8f611631e287c51",
+      "byte_identical": true,
+      "derived_record": false
+    },
+    {
+      "path": "apps/api/src/auth/guards/human-task-read.guard.ts",
+      "approved_blob": "06d85da56760d15ad8381c9f334b398c547a3659",
+      "candidate_blob": "06d85da56760d15ad8381c9f334b398c547a3659",
+      "byte_identical": true,
+      "derived_record": false
+    },
+    {
+      "path": "apps/api/src/auth/human-task-visibility.ts",
+      "approved_blob": "dfb39b451b5a524cbd81affeccf5f61f2bf0dacd",
+      "candidate_blob": "dfb39b451b5a524cbd81affeccf5f61f2bf0dacd",
+      "byte_identical": true,
+      "derived_record": false
+    },
+    {
+      "path": "apps/api/src/execution-authority/task-staleness.service.ts",
+      "approved_blob": "248ceb644904993f885ddbd34fc4535417466454",
+      "candidate_blob": "248ceb644904993f885ddbd34fc4535417466454",
+      "byte_identical": true,
+      "derived_record": false
+    },
+    {
+      "path": "apps/api/src/projects/projects.controller.ts",
+      "approved_blob": "b808b09a2057a6a48333b91e677aa3cfde502dcc",
+      "candidate_blob": "b808b09a2057a6a48333b91e677aa3cfde502dcc",
+      "byte_identical": true,
+      "derived_record": false
+    },
+    {
+      "path": "apps/api/src/projects/projects.module.ts",
+      "approved_blob": "8ad0ba33ba712c504f305b5edde78bcd47a43753",
+      "candidate_blob": "8ad0ba33ba712c504f305b5edde78bcd47a43753",
+      "byte_identical": true,
+      "derived_record": false
+    },
+    {
+      "path": "apps/api/src/projects/projects.service.ts",
+      "approved_blob": "935111b907c6588739eb26bf4ab5d45d23d17422",
+      "candidate_blob": "935111b907c6588739eb26bf4ab5d45d23d17422",
+      "byte_identical": true,
+      "derived_record": false
+    },
+    {
+      "path": "apps/api/src/sync/sync.controller.ts",
+      "approved_blob": "befca4bf7e4466260677b7bb32aefa256be27cbd",
+      "candidate_blob": "befca4bf7e4466260677b7bb32aefa256be27cbd",
+      "byte_identical": true,
+      "derived_record": false
+    },
+    {
+      "path": "apps/api/src/sync/sync.module.ts",
+      "approved_blob": "95ed17131d3ab9495ee99f7b201ab0f865fdc551",
+      "candidate_blob": "95ed17131d3ab9495ee99f7b201ab0f865fdc551",
+      "byte_identical": true,
+      "derived_record": false
+    },
+    {
+      "path": "apps/api/src/sync/sync.service.ts",
+      "approved_blob": "9b72ceeed8253d1bf6470bb391be714a46a4f71f",
+      "candidate_blob": "9b72ceeed8253d1bf6470bb391be714a46a4f71f",
+      "byte_identical": true,
+      "derived_record": false
+    },
+    {
+      "path": "apps/api/src/tasks/evidence/task-evidence.service.ts",
+      "approved_blob": "4fe4596ee8024101f791d44163684698cdde0692",
+      "candidate_blob": "4fe4596ee8024101f791d44163684698cdde0692",
+      "byte_identical": true,
+      "derived_record": false
+    },
+    {
+      "path": "apps/api/src/tasks/tasks.controller.ts",
+      "approved_blob": "d5f80a8080d301c04bb5aa0cdaaf84f524ffa140",
+      "candidate_blob": "d5f80a8080d301c04bb5aa0cdaaf84f524ffa140",
+      "byte_identical": true,
+      "derived_record": false
+    },
+    {
+      "path": "apps/api/src/tasks/tasks.module.ts",
+      "approved_blob": "347c86cb3905178e501424cbe3566077db644a8c",
+      "candidate_blob": "347c86cb3905178e501424cbe3566077db644a8c",
+      "byte_identical": true,
+      "derived_record": false
+    },
+    {
+      "path": "apps/api/src/tasks/tasks.service.ts",
+      "approved_blob": "38c4fa956aea595a8f42f2adfb01e7fbae22e5eb",
+      "candidate_blob": "38c4fa956aea595a8f42f2adfb01e7fbae22e5eb",
+      "byte_identical": true,
+      "derived_record": false
+    },
+    {
+      "path": "apps/api/test/agent-project-index.e2e.spec.ts",
+      "approved_blob": "d432d96d6314a62aad1b23b9466d3fa205f0b004",
+      "candidate_blob": "d432d96d6314a62aad1b23b9466d3fa205f0b004",
+      "byte_identical": true,
+      "derived_record": false
+    },
+    {
+      "path": "apps/api/test/assembly/mutation-results.json",
+      "approved_blob": "2794ecccc8a5f90f2adb18df376fb32f3fb249a9",
+      "candidate_blob": "a50ebd1c0a3c6d7e9a0615f09c75e534e6036ce0",
+      "byte_identical": false,
+      "derived_record": true
+    },
+    {
+      "path": "apps/api/test/human-task-read-isolation.e2e.spec.ts",
+      "approved_blob": "5495cf83a97068be8bf3528c2ba69a06e95fcf14",
+      "candidate_blob": "5495cf83a97068be8bf3528c2ba69a06e95fcf14",
+      "byte_identical": true,
+      "derived_record": false
+    },
+    {
+      "path": "apps/api/test/task-contract-digest.e2e.spec.ts",
+      "approved_blob": "014ae1dfe28e055ca37b5a06180c42f145707cea",
+      "candidate_blob": "014ae1dfe28e055ca37b5a06180c42f145707cea",
+      "byte_identical": true,
+      "derived_record": false
+    }
+  ],
+  "approved_source_and_tests_identical": 17,
+  "web_paths": 0,
+  "docs_paths": 0,
+  "derived_record_changes": "Only supplementalGit; original exported gitSupplement recomputation and structural verification 85/85",
+  "fresh_http_controls": {
+    "passed": 78,
+    "total": 78,
+    "log": "/home/dev/aup/import-audit-work/runs/backend-only-canonical-positive-tests.log"
+  },
+  "deployed_build_verified": false
+}
