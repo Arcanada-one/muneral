@@ -2,7 +2,6 @@ import { ConflictException, ForbiddenException, Injectable } from '@nestjs/commo
 import type { Actor } from '@muneral/types';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ActivityService } from '../activity/activity.service.js';
-import type { AgentScopeContext } from '../auth/guards/agent-task-scope.guard.js';
 import { agentStatusAuthorityWhere } from '../auth/agent-task-visibility.js';
 import { UpdateTaskContractDto } from './dto/update-task-contract.dto.js';
 
@@ -16,14 +15,13 @@ export class TaskContractBindingService {
     private readonly activity: ActivityService,
   ) {}
 
-  async bind(taskId: string, actor: Actor, scope: AgentScopeContext | undefined, dto: UpdateTaskContractDto) {
+  async bind(taskId: string, actor: Actor, statusAuthority: boolean, scopedAgentId: string | undefined, workspaceId: string | undefined, dto: UpdateTaskContractDto) {
     // JWT requests carry no agent scope. Do not turn this new mutation into an
     // unscoped human door or borrow the intake service's agent identity.
-    if (actor?.type !== 'agent' || scope?.kind !== 'task-status' ||
-        scope.agentId !== actor.id || !scope.workspaceId) {
+    if (actor?.type !== 'agent' || statusAuthority !== true ||
+        scopedAgentId !== actor.id || !workspaceId) {
       throw new ForbiddenException({ code: 'AGENT_CONTRACT_SCOPE_REQUIRED' });
     }
-    const workspaceId = scope.workspaceId;
     const authority = {
       id: taskId,
       project: { workspaceId },
