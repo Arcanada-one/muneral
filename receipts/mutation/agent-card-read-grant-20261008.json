@@ -1,0 +1,482 @@
+{
+ "schema": "MutationReceipt/v1",
+ "decision": "DEC-AUP-0134",
+ "gate": "G7",
+ "target_repo": "Arcanada-one/muneral",
+ "base": "43e79c97b05d",
+ "run_head": "970cf2f174790e3ea3d762e72a4da127bb080a28",
+ "run_by": "MUNERAL-IMPORT lane successor (author), before push; not CI",
+ "suite": [
+  "apps/api/test/agent-task-card-read.e2e.spec.ts",
+  "apps/api/test/project-read-grants.spec.ts"
+ ],
+ "method": "each mutant is one textual edit of one source file; the suite is run; the edit is restored from an in-memory copy and the file sha256 asserted equal; KILLED = at least one row red and no compile error",
+ "red_on_main": {
+  "commit": "43e79c97b05d",
+  "log": "rows R01-R16 and F01-F04 of the first version of the matrix; R17-R21 and F05 were added later, against the implementation, to kill survivors",
+  "rows": {
+   "R01": "red",
+   "R02": "red",
+   "R03": "red",
+   "R04": "green",
+   "R05": "green",
+   "R06": "red",
+   "R07": "red",
+   "R08": "red",
+   "R09": "red",
+   "R10": "green",
+   "R11": "red",
+   "R12": "red",
+   "R13": "red",
+   "R14": "green",
+   "R15": "red",
+   "R16": "green",
+   "F01": "red",
+   "F02": "green",
+   "F03": "green",
+   "F04": "green"
+  }
+ },
+ "mutants": [
+  {
+   "id": "M01-guard-workspace-clause-removed",
+   "file": "src/auth/guards/agent-task-scope.guard.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "R19"
+   ],
+   "tests_red": [
+    "R19 the GUARD itself is workspace-bound: a foreign-workspace task is refused there even when the list names the key for that project"
+   ]
+  },
+  {
+   "id": "M02-service-workspace-clause-removed",
+   "file": "src/tasks/tasks.service.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "R17"
+   ],
+   "tests_red": [
+    "R17 the SERVICE re-reads under the authorised project AND workspace: a task moved after the guard is refused, not answered"
+   ]
+  },
+  {
+   "id": "M03-service-findUnique-by-id",
+   "file": "src/tasks/tasks.service.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "R17"
+   ],
+   "tests_red": [
+    "R17 the SERVICE re-reads under the authorised project AND workspace: a task moved after the guard is refused, not answered"
+   ]
+  },
+  {
+   "id": "M04-project-from-request-not-task-row",
+   "file": "src/auth/guards/agent-task-scope.guard.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "R18"
+   ],
+   "tests_red": [
+    "R18 the project is decided by the task row alone: a client-supplied project (query, header, body) changes nothing"
+   ]
+  },
+  {
+   "id": "M05-grant-check-removed-any-nonowner-passes",
+   "file": "src/auth/guards/agent-task-scope.guard.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "F04",
+    "R06"
+   ],
+   "tests_red": [
+    "R06 every refusal on the card route is ONE 403 body (no GRANT_EXPIRED, no existence leak)",
+    "F04 a holder of an index-only entry gets the filters too (and no card)"
+   ]
+  },
+  {
+   "id": "M06-grant-check-inverted",
+   "file": "src/auth/guards/agent-task-scope.guard.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "F04",
+    "R01",
+    "R02",
+    "R03",
+    "R06",
+    "R07",
+    "R08",
+    "R09",
+    "R11",
+    "R12",
+    "R13",
+    "R15",
+    "R18",
+    "R19",
+    "R20"
+   ],
+   "tests_red": [
+    "R01 granted non-owner reads a REDACTED card: exact keys, no free text, no hash, no creator",
+    "R02 parentId in ANOTHER project is returned as null; an unparented task has null",
+    "R03 the capability is case-insensitive in the id and works with upper-case uuids",
+    "R06 every refusal on the card route is ONE 403 body (no GRANT_EXPIRED, no existence leak)",
+    "R07 expiry boundary: until-1ms reads, until exactly refuses with the no-grant body",
+    "R08 a task moved between projects is decided by its CURRENT project",
+    "R18 the project is decided by the task row alone: a client-supplied project (query, header, body) changes nothing",
+    "R19 the GUARD itself is workspace-bound: a foreign-workspace task is refused there even when the list names the key for that project",
+    "R20 authorship needs the AGENT actor type: an agent id on a human-typed row is not ownership",
+    "R09 a re-created agent (new id) holds no grant",
+    "R11 each redacted read writes exactly one audit row first; the row carries no free text",
+    "R12 audit failure: the read returns NO card (fails closed)",
+    "R13 ETag is view-tagged: a 304 returns no card and no audit row; the owner ETag never matches the redacted view",
+    "R15 sibling reads and every write stay as before for a granted non-owner",
+    "F04 a holder of an index-only entry gets the filters too (and no card)"
+   ]
+  },
+  {
+   "id": "M07-any-live-grant-anywhere-admits",
+   "file": "src/auth/guards/agent-task-scope.guard.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "R06",
+    "R08",
+    "R18"
+   ],
+   "tests_red": [
+    "R06 every refusal on the card route is ONE 403 body (no GRANT_EXPIRED, no existence leak)",
+    "R08 a task moved between projects is decided by its CURRENT project",
+    "R18 the project is decided by the task row alone: a client-supplied project (query, header, body) changes nothing"
+   ]
+  },
+  {
+   "id": "M08-card-flag-ignored",
+   "file": "src/auth/guards/agent-task-scope.guard.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "F04",
+    "R06"
+   ],
+   "tests_red": [
+    "R06 every refusal on the card route is ONE 403 body (no GRANT_EXPIRED, no existence leak)",
+    "F04 a holder of an index-only entry gets the filters too (and no card)"
+   ]
+  },
+  {
+   "id": "M09-absent-reads-means-card",
+   "file": "src/auth/project-read-grants.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "R06"
+   ],
+   "tests_red": [
+    "R06 every refusal on the card route is ONE 403 body (no GRANT_EXPIRED, no existence leak)"
+   ]
+  },
+  {
+   "id": "M10-expiry-ignored",
+   "file": "src/auth/project-read-grants.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "R06",
+    "R07"
+   ],
+   "tests_red": [
+    "R06 every refusal on the card route is ONE 403 body (no GRANT_EXPIRED, no existence leak)",
+    "R07 expiry boundary: until-1ms reads, until exactly refuses with the no-grant body"
+   ]
+  },
+  {
+   "id": "M11-owner-branch-removed",
+   "file": "src/auth/guards/agent-task-scope.guard.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "R04",
+    "R05",
+    "R13"
+   ],
+   "tests_red": [
+    "R04 the creator keeps the FULL card \u2014 with and without a grant, no redaction markers",
+    "R05 an assignee keeps the FULL card",
+    "R13 ETag is view-tagged: a 304 returns no card and no audit row; the owner ETag never matches the redacted view"
+   ]
+  },
+  {
+   "id": "M12-everyone-is-owner",
+   "file": "src/auth/guards/agent-task-scope.guard.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "F04",
+    "R01",
+    "R02",
+    "R03",
+    "R06",
+    "R07",
+    "R08",
+    "R09",
+    "R11",
+    "R12",
+    "R13",
+    "R18",
+    "R19",
+    "R20"
+   ],
+   "tests_red": [
+    "R01 granted non-owner reads a REDACTED card: exact keys, no free text, no hash, no creator",
+    "R02 parentId in ANOTHER project is returned as null; an unparented task has null",
+    "R03 the capability is case-insensitive in the id and works with upper-case uuids",
+    "R06 every refusal on the card route is ONE 403 body (no GRANT_EXPIRED, no existence leak)",
+    "R07 expiry boundary: until-1ms reads, until exactly refuses with the no-grant body",
+    "R08 a task moved between projects is decided by its CURRENT project",
+    "R18 the project is decided by the task row alone: a client-supplied project (query, header, body) changes nothing",
+    "R19 the GUARD itself is workspace-bound: a foreign-workspace task is refused there even when the list names the key for that project",
+    "R20 authorship needs the AGENT actor type: an agent id on a human-typed row is not ownership",
+    "R09 a re-created agent (new id) holds no grant",
+    "R11 each redacted read writes exactly one audit row first; the row carries no free text",
+    "R12 audit failure: the read returns NO card (fails closed)",
+    "R13 ETag is view-tagged: a 304 returns no card and no audit row; the owner ETag never matches the redacted view",
+    "F04 a holder of an index-only entry gets the filters too (and no card)"
+   ]
+  },
+  {
+   "id": "M13-creator-pair-loses-actor-type",
+   "file": "src/auth/guards/agent-task-scope.guard.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "R20"
+   ],
+   "tests_red": [
+    "R20 authorship needs the AGENT actor type: an agent id on a human-typed row is not ownership"
+   ]
+  },
+  {
+   "id": "M14-stripping-removed-full-row-for-nonowner",
+   "file": "src/tasks/tasks.controller.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "R01",
+    "R02",
+    "R03",
+    "R13",
+    "R20"
+   ],
+   "tests_red": [
+    "R01 granted non-owner reads a REDACTED card: exact keys, no free text, no hash, no creator",
+    "R02 parentId in ANOTHER project is returned as null; an unparented task has null",
+    "R03 the capability is case-insensitive in the id and works with upper-case uuids",
+    "R20 authorship needs the AGENT actor type: an agent id on a human-typed row is not ownership",
+    "R13 ETag is view-tagged: a 304 returns no card and no audit row; the owner ETag never matches the redacted view"
+   ]
+  },
+  {
+   "id": "M15-parent-from-foreign-project-leaks",
+   "file": "src/tasks/tasks.service.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "R02"
+   ],
+   "tests_red": [
+    "R02 parentId in ANOTHER project is returned as null; an unparented task has null"
+   ]
+  },
+  {
+   "id": "M16-audit-removed",
+   "file": "src/tasks/tasks.controller.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "R11",
+    "R12"
+   ],
+   "tests_red": [
+    "R11 each redacted read writes exactly one audit row first; the row carries no free text",
+    "R12 audit failure: the read returns NO card (fails closed)"
+   ]
+  },
+  {
+   "id": "M17-audit-failure-swallowed",
+   "file": "src/tasks/tasks.controller.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "R12"
+   ],
+   "tests_red": [
+    "R12 audit failure: the read returns NO card (fails closed)"
+   ]
+  },
+  {
+   "id": "M18-audit-after-reply-not-before",
+   "file": "src/tasks/tasks.controller.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "R11",
+    "R12"
+   ],
+   "tests_red": [
+    "R11 each redacted read writes exactly one audit row first; the row carries no free text",
+    "R12 audit failure: the read returns NO card (fails closed)"
+   ]
+  },
+  {
+   "id": "M19-audit-also-on-304-or-payload-leaks-title",
+   "file": "src/tasks/tasks.service.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "R11"
+   ],
+   "tests_red": [
+    "R11 each redacted read writes exactly one audit row first; the row carries no free text"
+   ]
+  },
+  {
+   "id": "M20-GRANT_EXPIRED-emitted-on-card-route",
+   "file": "src/auth/guards/agent-task-scope.guard.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "R06",
+    "R07"
+   ],
+   "tests_red": [
+    "R06 every refusal on the card route is ONE 403 body (no GRANT_EXPIRED, no existence leak)",
+    "R07 expiry boundary: until-1ms reads, until exactly refuses with the no-grant body"
+   ]
+  },
+  {
+   "id": "M21-refusal-body-differs-with-id",
+   "file": "src/auth/guards/agent-task-scope.guard.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "R06",
+    "R07"
+   ],
+   "tests_red": [
+    "R06 every refusal on the card route is ONE 403 body (no GRANT_EXPIRED, no existence leak)",
+    "R07 expiry boundary: until-1ms reads, until exactly refuses with the no-grant body"
+   ]
+  },
+  {
+   "id": "M22-human-id-pattern-on-GET-/tasks",
+   "file": "src/tasks/tasks.controller.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "R14"
+   ],
+   "tests_red": [
+    "R14 GET /tasks (the list) stays 403 for an agent key \u2014 granted with card or not"
+   ]
+  },
+  {
+   "id": "M23-etag-not-view-tagged",
+   "file": "src/tasks/tasks.controller.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "R13"
+   ],
+   "tests_red": [
+    "R13 ETag is view-tagged: a 304 returns no card and no audit row; the owner ETag never matches the redacted view"
+   ]
+  },
+  {
+   "id": "M24-304-skips-and-card-served-anyway",
+   "file": "src/tasks/tasks.controller.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "R13"
+   ],
+   "tests_red": [
+    "R13 ETag is view-tagged: a 304 returns no card and no audit row; the owner ETag never matches the redacted view"
+   ]
+  },
+  {
+   "id": "M25-human-path-routed-to-agent-branch",
+   "file": "src/tasks/tasks.controller.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "R16"
+   ],
+   "tests_red": [
+    "R16 a member JWT still reads the full card, a non-member JWT is still refused"
+   ]
+  },
+  {
+   "id": "M26-index-project-from-query-not-path-filter-dropped",
+   "file": "src/tasks/tasks.service.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "F01",
+    "F02",
+    "F04"
+   ],
+   "tests_red": [
+    "F01 unfiltered answer is unchanged; filtered answers are subsets, total counts the project, matched the filter",
+    "F02 the project comes from the path only: a query projectId, arrays and bad values never widen",
+    "F04 a holder of an index-only entry gets the filters too (and no card)"
+   ]
+  },
+  {
+   "id": "M27-index-total-is-matched",
+   "file": "src/tasks/tasks.service.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "F01"
+   ],
+   "tests_red": [
+    "F01 unfiltered answer is unchanged; filtered answers are subsets, total counts the project, matched the filter"
+   ]
+  },
+  {
+   "id": "M28-index-limit-uncapped",
+   "file": "src/tasks/dto/query-project-index.dto.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "F02"
+   ],
+   "tests_red": [
+    "F02 the project comes from the path only: a query projectId, arrays and bad values never widen"
+   ]
+  },
+  {
+   "id": "M29-index-capability-not-checked",
+   "file": "src/auth/guards/agent-task-scope.guard.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "F05"
+   ],
+   "tests_red": [
+    "F05 an entry that names `reads` without `index` does not open the index"
+   ]
+  },
+  {
+   "id": "M30-card-route-fallback-unnarrowed-findOne-for-agent",
+   "file": "src/tasks/tasks.controller.ts",
+   "status": "KILLED",
+   "rows_red": [
+    "R21"
+   ],
+   "tests_red": [
+    "R21 the controller never serves an agent key without the card scope the guard sets"
+   ]
+  }
+ ],
+ "green_after_restore": {
+  "failed": [],
+  "summary": "39 passed, 39 total",
+  "src_dirty": ""
+ },
+ "counts": {
+  "mutants": 30,
+  "killed": 30,
+  "survived": []
+ },
+ "limits": [
+  "mutants are hand-written for the security conditions named in the DEC (G7) plus the ones this lane added; a mutant not listed is not measured",
+  "equivalent mutants: none claimed; M01 and M02 are each killed only by the test that calls the guard/service directly (the HTTP path is double-guarded)"
+ ],
+ "run_head_note": "run at 970cf2f; the subject commit 6401966 differs from it only by the derived artefact apps/api/test/assembly/mutation-results.json (no source or spec file)",
+ "exhaustiveness_switch": {
+  "mutant": "delete `case 'task-granted-read'` from AgentTaskScopeGuard.canActivate",
+  "result": "tsc refuses the tree: src/auth/guards/agent-task-scope.guard.ts(395,15): error TS2322: Type '\"task-granted-read\"' is not assignable to type 'never'.",
+  "restored": "tsc rc 0",
+  "head": "970cf2f"
+ },
+ "red_on_main_log": "rows in red_on_main.rows come from the first, correct RED run against 43e79c97b05d (granted card 403; refusal bodies differ; filters absent); the final spec does not compile on main (R17/R21 call service/controller members that main lacks), which is a compile-level RED, not a behavioural one"
+}
