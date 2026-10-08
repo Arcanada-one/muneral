@@ -8,6 +8,7 @@ import { useTasks } from '@/lib/api/tasks';
 import { useProjectStore } from '@/store/project';
 import { useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
+import { ProjectRepository } from '@/components/project/ProjectRepository';
 
 export default function ProjectPage() {
   const { wsSlug, projSlug } = useParams<{ wsSlug: string; projSlug: string }>();
@@ -38,6 +39,8 @@ export default function ProjectPage() {
           {project.status}
         </Badge>
       </div>
+
+      <ProjectRepository repoUrl={project.repoUrl} />
 
       <Tabs defaultValue="kanban">
         <TabsList>
