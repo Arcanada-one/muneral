@@ -1,0 +1,37 @@
+{
+  "schema": "CanaryPlan/v1",
+  "id": "PR225-local-next-http-boot",
+  "owner": "MUNERAL successor lane",
+  "environment": "Current byte-checked frozen Next runtime on loopback; actual browser consumers measured separately",
+  "base_url": "http://127.0.0.1:18345",
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "0a97a2abfcc7a789d7ae57bf5323cf0db71070f8",
+    "tree": "c44845a8c7baf53dd6427efc3e8256172f6f318d",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "b1eb0c1e2c270eb9f973560dc4b8121f09380af84c370ed9d9d5730c7fe3c9c0",
+      "source_field": "commit"
+    }
+  },
+  "purpose": "Observe actual local Next HTTP session-route boot; no production authentication or deployment claimed.",
+  "probes": [
+    {
+      "id": "web-http-boot",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/auth/session",
+      "auth": "none",
+      "entities": [
+        "deployable_unit:apps/web"
+      ],
+      "mutating": false,
+      "expect": {
+        "status_in": [
+          200
+        ],
+        "json_equals": null
+      }
+    }
+  ]
+}
