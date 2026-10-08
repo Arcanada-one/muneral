@@ -84,6 +84,9 @@ describe('MUN-0052 — project task index for granted agent keys (e2e)', () => {
     workspaceId = (
       await prisma.workspace.create({ data: { slug: `ws-${id}`, name: `WS ${id}`, ownerId: user.id } })
     ).id;
+    // Raw fixture creation bypasses WorkspacesService.create's owner membership.
+    // Human positive controls require the same relationship as normal creation.
+    await prisma.workspaceMember.create({ data: { workspaceId, userId, role: 'owner' } });
     otherWorkspaceId = (
       await prisma.workspace.create({ data: { slug: `ws-o-${id}`, name: `Other ${id}`, ownerId: user.id } })
     ).id;
@@ -589,7 +592,7 @@ describe('MUN-0052 — project task index for granted agent keys (e2e)', () => {
       expect(res.body[0].otherTaskTitleWithheld).toBeUndefined();
     });
 
-    it('a JWT still sees counterpart titles — this narrows an agent key, not a user', async () => {
+    it('a workspace member JWT sees permitted counterpart titles', async () => {
       const own = await prisma.task.create({
         data: { projectId, title: 'path task', status: 'todo', priority: 'low', createdById: ids.reader, actorType: 'agent' },
       });

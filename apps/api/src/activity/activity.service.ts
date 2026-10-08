@@ -1,3 +1,4 @@
+import { humanTaskWhere } from '../auth/human-task-visibility.js';
 import { Prisma } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -44,16 +45,18 @@ export class ActivityService {
     taskId: string,
     page = 1,
     limit = 20,
+    humanUserId?: string,
   ): Promise<{ data: object[]; total: number; page: number; limit: number }> {
     const skip = (page - 1) * limit;
+    const where = { taskId, ...(humanUserId ? { task: humanTaskWhere(humanUserId) } : {}) };
     const [data, total] = await Promise.all([
       this.prisma.activityLog.findMany({
-        where: { taskId },
+        where,
         orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
       }),
-      this.prisma.activityLog.count({ where: { taskId } }),
+      this.prisma.activityLog.count({ where }),
     ]);
     return { data, total, page, limit };
   }

@@ -1,0 +1,151 @@
+{
+  "schema": "CanaryPlan/v2",
+  "id": "human-task-read-security-positive",
+  "owner": "MUNERAL-IMPORT",
+  "environment": "Owned disposable PostgreSQL and actual Nest HTTP, synthetic human principals only",
+  "read_only": false,
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "dce99cb97ce8ee23d7297e2695dd06cc3754409f",
+    "tree": "ba74f50b2a4b7ac54101ceee6e8fb8d81db5b39b",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "dc1ef497fe55c302c2f22f44f8f3d120128404f5d67583cd75e71a2351419675",
+      "source_field": "commit"
+    }
+  },
+  "purpose": "41 synthetic controls for existing human JWT workspace-member task-read isolation; no foreign production requests, identity/grant/writes/agent ACL unchanged.",
+  "probes": [
+    {
+      "kind": "process",
+      "id": "human-task-read-http",
+      "argv": [
+        "/usr/bin/python3.12",
+        "/home/dev/aup/import-audit-work/runs/human-task-read-final-canary-tests.py"
+      ],
+      "cwd": ".",
+      "env_keys": [
+        "PATH",
+        "HOME",
+        "TMPDIR"
+      ],
+      "timeout_seconds": 120,
+      "capture_limit_bytes": 524288,
+      "executable_sha256": "e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f",
+      "execution_files": [
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-human-read/apps/api/src/activity/activity.service.ts",
+          "sha256": "ce78618a5c1c5a1242e17853bdb80e6dba623c52a115ddca47d249d26ded9553"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-human-read/apps/api/src/auth/guards/human-task-read.guard.ts",
+          "sha256": "cb8de58d5c5480fb8621522d4799cb2938af2bae8ddc43ba84562ca6883b2dcc"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-human-read/apps/api/src/auth/human-task-visibility.ts",
+          "sha256": "d455058fbf5f3ac68ab273ff30cffe1dc846e22395e9611b837e7b084d14cfd6"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-human-read/apps/api/src/execution-authority/task-staleness.service.ts",
+          "sha256": "e9e359417401109e6dc8ccff2e43f048c46eaaf0e5eff7dd7420da89dc8258be"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-human-read/apps/api/src/projects/projects.controller.ts",
+          "sha256": "0233dd5d417e4d8da15f4ddb3d5e8c4f26893c9a250a5fe45e23aaf28e54b180"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-human-read/apps/api/src/projects/projects.module.ts",
+          "sha256": "3d63a04ee48b84c6994c47900474af7e8de7cf296de4bf9e7663bbd9ce71b9bf"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-human-read/apps/api/src/projects/projects.service.ts",
+          "sha256": "60ba1dc8cd941dd8a8058b1ffd1bb1ee0b3362910bca3817e146d22df07cc557"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-human-read/apps/api/src/tasks/evidence/task-evidence.service.ts",
+          "sha256": "3f7a06494a1ff1ce98082d2f2ffccfe950310ca6db250d29b642b1cc3397f72f"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-human-read/apps/api/src/tasks/tasks.controller.ts",
+          "sha256": "ab2455fce8fd80c42250af59e07d46d7183ef15a2a253db5623d43a927d5be79"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-human-read/apps/api/src/tasks/tasks.module.ts",
+          "sha256": "4a9df746928a516de6376d4b3b950177ea4e0dd4cbe6589fe928be4de5b8ed95"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-human-read/apps/api/src/tasks/tasks.service.ts",
+          "sha256": "34225bb4e255b2d90a8a3d9a37258ea9f1d2bb6ce1b7fb2bdf8d2c0bf254d152"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-human-read/apps/api/test/agent-project-index.e2e.spec.ts",
+          "sha256": "843d69de36e185ee353529f9613b4cb9c8cea523f349e0f340493ca3a6c1e381"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-human-read/apps/api/test/human-task-read-isolation.e2e.spec.ts",
+          "sha256": "64816672c0be37ec34f5ad46c6a9653b051c8625cce81eccc23bf54808a9645e"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-human-read/docs/human-task-read-isolation.md",
+          "sha256": "ebcd19e4d60c5bebfed7d85f0fa073aea6d8317c3b8a94d2795233c08370da0d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-human-read/apps/api/src/auth/guards/agent-task-scope.guard.ts",
+          "sha256": "69c460ff0e71095474ae4b16803e090e5ab8812c91fd1e0dcf6d055dfce7fb5a"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-human-read/apps/api/src/auth/guards/jwt-or-api-key.guard.ts",
+          "sha256": "a7732bb3f90512742415b9b44eb1bec26be7e3b45073ed1f94eb84144d20af58"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-human-read/apps/api/test/support/disposable-postgres.ts",
+          "sha256": "6644ee5e273b9bc866254288f8e4c426800da68875f485c932f28dc1e8576e3b"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-human-read/apps/api/package.json",
+          "sha256": "919202c86e4a269cb8e4e680b9fdb768e555bbf8d7caf449adea37123657652c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-human-read/apps/api/tsconfig.test.json",
+          "sha256": "b45b51f10e6897b5fa212f421842c1334c9e1f7942e446dcf278bb08b9c55d1d"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-human-read/apps/api/prisma/schema.prisma",
+          "sha256": "4ba70ef686a76611855b6fa59c5fc3b1ca4abcfe622f46c611ac846bdc2e753c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-human-read/pnpm-lock.yaml",
+          "sha256": "b9fd7a00c104eccb56944baa49ef119aee98792efb68467fd6018cfae5d84978"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/runs/human-task-read-final-canary-tests.py",
+          "sha256": "e31949569ca8a3e2cbaf66119d712fe25585391165903bcadbf83facca9d0ae9"
+        }
+      ],
+      "entities": [
+        "code_unit:apps/api/src/activity/activity.service.ts",
+        "code_unit:apps/api/src/auth/guards/human-task-read.guard.ts",
+        "code_unit:apps/api/src/auth/human-task-visibility.ts",
+        "code_unit:apps/api/src/execution-authority/task-staleness.service.ts",
+        "code_unit:apps/api/src/projects/projects.controller.ts",
+        "code_unit:apps/api/src/projects/projects.module.ts",
+        "code_unit:apps/api/src/projects/projects.service.ts",
+        "code_unit:apps/api/src/tasks/evidence/task-evidence.service.ts",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts",
+        "code_unit:apps/api/src/tasks/tasks.module.ts",
+        "code_unit:apps/api/src/tasks/tasks.service.ts",
+        "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
+        "code_unit:apps/api/src/auth/guards/jwt-or-api-key.guard.ts"
+      ],
+      "expect": {
+        "exit_codes": [
+          0
+        ],
+        "stdout_contains": [
+          "Test exit 0"
+        ]
+      },
+      "mutating": true
+    }
+  ]
+}

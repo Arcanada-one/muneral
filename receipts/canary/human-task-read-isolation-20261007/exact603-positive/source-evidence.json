@@ -1,0 +1,13 @@
+{
+  "schema": "MeasuredGitSource/v1",
+  "commit": "603bda89e014332c5e01054ff4e8333e52f78403",
+  "tree": "9d484b213d63fb966741b0de24d844a49a220f3e",
+  "dirty": false,
+  "test_overlay": false,
+  "production_requests": 0,
+  "captured_at_utc": "2026-10-08T01:14:49.585759+00:00",
+  "producer": {
+    "tool": "MUNERAL-IMPORT exact603 receipt preparation",
+    "version": "1.0"
+  }
+}

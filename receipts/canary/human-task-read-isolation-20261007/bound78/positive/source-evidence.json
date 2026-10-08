@@ -1,0 +1,13 @@
+{
+  "schema": "MeasuredGitSource/v1",
+  "commit": "e616b3aaa0b1efc12cb763b03d006f813648ef82",
+  "tree": "6c88d4c75866fb44b629e5e88bdd84a387f0405b",
+  "dirty": false,
+  "test_overlay": false,
+  "production_requests": 0,
+  "captured_at_utc": "2026-10-08T00:18:45.301785+00:00",
+  "producer": {
+    "tool": "MUNERAL-IMPORT security canary builder",
+    "version": "1.0.2"
+  }
+}
