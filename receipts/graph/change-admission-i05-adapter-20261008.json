@@ -1,0 +1,3170 @@
+{
+ "admission": {
+  "rule": "admitted requires every verdict = verified; failed without exemption ⇒ refused; not_measured without exemption ⇒ paused_safe; exemptions (owner + expiry) are attached by the admitting agent, never by the verifier (DEC-AUP-0008, matrix P1/P4)",
+  "structural_exclusion_rule": "DEC-AUP-0034: an affected entity is NOT verdict-owing when all three hold — the verifier matrix declares neither a mandatory nor a selectable verifier for its node type (so the only verdict it could ever carry states a property of the MATRIX, not of this change), the change set does not contain it, and its bytes are identical at base and head. Each one is listed in structural_exclusions with the content hash at both revisions that proves the byte-identity, and impact_pair.receipt_problems re-derives that proof from Git rather than believing the receipt.",
+  "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
+  "verdict": "paused_safe"
+ },
+ "captured_at_utc": "2026-10-08T12:13:15Z",
+ "change_set": {
+  "base": "43e79c97b05d04252b57f6cb4033fbae844bcc22",
+  "files": [
+   {
+    "kind": "test",
+    "node_id": "code_unit:apps/web/__tests__/task-detail-no-auth-retry.test.ts",
+    "node_ids": [
+     "code_unit:apps/web/__tests__/task-detail-no-auth-retry.test.ts"
+    ],
+    "path": "apps/web/__tests__/task-detail-no-auth-retry.test.ts",
+    "status": "A"
+   },
+   {
+    "kind": "test",
+    "node_id": "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
+    "node_ids": [
+     "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx"
+    ],
+    "path": "apps/web/__tests__/task-detail-page-session.test.tsx",
+    "status": "A"
+   },
+   {
+    "kind": "code",
+    "node_id": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+    "node_ids": [
+     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx"
+    ],
+    "path": "apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+    "status": "M"
+   },
+   {
+    "kind": "code",
+    "node_id": "code_unit:apps/web/app/providers.tsx",
+    "node_ids": [
+     "code_unit:apps/web/app/providers.tsx"
+    ],
+    "path": "apps/web/app/providers.tsx",
+    "status": "M"
+   },
+   {
+    "kind": "doc",
+    "node_id": "document:apps/web/docs/task-detail-command-adapter.md",
+    "node_ids": [
+     "document:apps/web/docs/task-detail-command-adapter.md"
+    ],
+    "path": "apps/web/docs/task-detail-command-adapter.md",
+    "status": "A"
+   },
+   {
+    "kind": "code",
+    "node_id": "code_unit:apps/web/lib/api/client.ts",
+    "node_ids": [
+     "code_unit:apps/web/lib/api/client.ts"
+    ],
+    "path": "apps/web/lib/api/client.ts",
+    "status": "M"
+   },
+   {
+    "kind": "test",
+    "node_id": "code_unit:apps/web/lib/api/task-detail-contract.test.ts",
+    "node_ids": [
+     "code_unit:apps/web/lib/api/task-detail-contract.test.ts"
+    ],
+    "path": "apps/web/lib/api/task-detail-contract.test.ts",
+    "status": "A"
+   },
+   {
+    "kind": "code",
+    "node_id": "code_unit:apps/web/lib/api/task-detail-controller.ts",
+    "node_ids": [
+     "code_unit:apps/web/lib/api/task-detail-controller.ts",
+     "contract:apps/web/lib/api/task-detail-controller.ts#ReadOutcome"
+    ],
+    "path": "apps/web/lib/api/task-detail-controller.ts",
+    "status": "A"
+   },
+   {
+    "kind": "test",
+    "node_id": "code_unit:apps/web/lib/api/task-detail-read.test.ts",
+    "node_ids": [
+     "code_unit:apps/web/lib/api/task-detail-read.test.ts"
+    ],
+    "path": "apps/web/lib/api/task-detail-read.test.ts",
+    "status": "A"
+   },
+   {
+    "kind": "code",
+    "node_id": "code_unit:apps/web/lib/api/task-detail-read.ts",
+    "node_ids": [
+     "code_unit:apps/web/lib/api/task-detail-read.ts",
+     "contract:apps/web/lib/api/task-detail-read.ts#revision"
+    ],
+    "path": "apps/web/lib/api/task-detail-read.ts",
+    "status": "A"
+   },
+   {
+    "kind": "code",
+    "node_id": "code_unit:apps/web/lib/api/task-detail-session.tsx",
+    "node_ids": [
+     "code_unit:apps/web/lib/api/task-detail-session.tsx"
+    ],
+    "path": "apps/web/lib/api/task-detail-session.tsx",
+    "status": "A"
+   }
+  ],
+  "head": "e68efb2b7ad32444de8f90eab78ee97e5ebcfdd3",
+  "mode": "diff"
+ },
+ "decision_ref": "DEC-AUP-0008",
+ "exemptions": [],
+ "graph": {
+  "builder_version": "1.0.5",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:87e1876dee22466c8d38540b63a49dff5a3ecb8cb1c8c7fc27d364c93fd6ab5b",
+  "path": "/home/dev/aup/import-audit-work/runs/PR226-CI-diagnosis-20261008/stock-work/verifier-out/graph-43e79c97b05d.json",
+  "source_commit": "43e79c97b05d04252b57f6cb4033fbae844bcc22"
+ },
+ "head_graph": {
+  "builder_version": "1.0.5",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:25f4a5c4d7b8c06b292d69726f0ec7b955085a420631a62fa26cfbc7451c7c9e",
+  "path": "/home/dev/aup/import-audit-work/runs/PR226-CI-diagnosis-20261008/stock-work/verifier-out/graph-head-e68efb2b7ad3.json",
+  "source_commit": "e68efb2b7ad32444de8f90eab78ee97e5ebcfdd3",
+  "staleness": {
+   "checked_at_utc": "2026-10-08T12:13:42Z",
+   "checked_nodes": 446,
+   "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+   "mismatched_nodes": [],
+   "verdict": "fresh"
+  }
+ },
+ "host": "arcana-devs",
+ "impact_set": {
+  "deterministic_core": [
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/__tests__/kanban-board.test.ts",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/__tests__/kanban-board.test.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/__tests__/read-api-contract.test.ts",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/projects.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/__tests__/read-api-contract.test.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/projects.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/app/(app)/layout.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/auth/nextauth.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "tsconfig-paths"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/(app)/layout.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/auth/nextauth.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 3,
+    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/agents.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/dashboard/AgentActivityFeed.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/agents.ts",
+      "via": "tsconfig-paths"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/dashboard/AgentActivityFeed.tsx",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/milestones/page.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/projects.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/milestones/page.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/projects.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/page.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/projects.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/page.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/projects.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/projects.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/projects.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/api-keys/page.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/agents.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/api-keys/page.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/agents.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/page.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/workspaces.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/page.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/workspaces.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/webhooks/page.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/agents.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/webhooks/page.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/agents.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/sprints/page.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/projects.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/sprints/page.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/projects.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/app/(app)/workspaces/page.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/workspaces.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/(app)/workspaces/page.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/workspaces.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/app/api/auth/[...nextauth]/route.ts",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/auth/nextauth.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "tsconfig-paths"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/api/auth/[...nextauth]/route.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/auth/nextauth.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/web/app/layout.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/layout.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/app/providers.tsx",
+      "via": "relative"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/components/dashboard/AgentActivityFeed.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/agents.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/dashboard/AgentActivityFeed.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/agents.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/components/dashboard/BlockersList.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/dashboard/BlockersList.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/components/kanban/KanbanCard.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/kanban/KanbanCard.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 3,
+    "entity": "code_unit:apps/web/components/layout/Sidebar.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/workspaces.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/layout/WorkspaceSelector.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/workspaces.ts",
+      "via": "tsconfig-paths"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/layout/Sidebar.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/layout/WorkspaceSelector.tsx",
+      "via": "relative"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/components/layout/WorkspaceSelector.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/workspaces.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/layout/WorkspaceSelector.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/workspaces.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/components/task/AuditLog.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/AuditLog.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/components/task/TaskChecklist.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskChecklist.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/components/task/TaskDependencies.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDependencies.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/components/task/TaskDetail.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/web/lib/api/agents.ts",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/agents.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/web/lib/api/projects.ts",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/projects.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/web/lib/api/tasks.ts",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/web/lib/api/workspaces.ts",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/workspaces.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/web/lib/auth/nextauth.ts",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/auth/nextauth.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "contract:apps/web/lib/auth/nextauth.ts#telegramSchema",
+    "node_type": "contract",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/auth/nextauth.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "tsconfig-paths"
+     },
+     {
+      "edge_type": "implements_contract",
+      "from": "code_unit:apps/web/lib/auth/nextauth.ts",
+      "provenance": "deterministic",
+      "to": "contract:apps/web/lib/auth/nextauth.ts#telegramSchema",
+      "via": "declaration"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "contract-diff provider side + type-check"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "deployable_unit:apps/web",
+    "node_type": "deployable_unit",
+    "path": [
+     {
+      "edge_type": "deploys_to",
+      "from": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+      "provenance": "deterministic",
+      "to": "deployable_unit:apps/web",
+      "via": "containment"
+     }
+    ],
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "deployable_unit:apps/web",
+      "node_type": "deployable_unit",
+      "path": [
+       {
+        "edge_type": "deploys_to",
+        "from": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+        "provenance": "deterministic",
+        "to": "deployable_unit:apps/web",
+        "via": "containment"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "can-i-deploy gate (GRAPH-008)"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "deployable_unit:apps/web",
+      "node_type": "deployable_unit",
+      "path": [
+       {
+        "edge_type": "deploys_to",
+        "from": "code_unit:apps/web/__tests__/task-detail-no-auth-retry.test.ts",
+        "provenance": "deterministic",
+        "to": "deployable_unit:apps/web",
+        "via": "containment"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "can-i-deploy gate (GRAPH-008)"
+     }
+    ],
+    "verifier_hint": "can-i-deploy gate (GRAPH-008)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/app/providers.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/a2-304-dependabot-group.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/a2-304-dependabot-group.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/app/providers.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/a2-320-web-eslint10.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/a2-320-web-eslint10.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/app/providers.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/backend-workspace-isolation-20261008.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/projects.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/backend-workspace-isolation-20261008.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/projects.ts",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/app/providers.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/app/providers.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-a2p29-archived-20260915T131011Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-a2p29-archived-20260915T131011Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/app/providers.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-integration-batch1.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-integration-batch1.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/app/providers.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-mun0048-rescue-20260915T070641Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun0048-rescue-20260915T070641Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-mun0049-20260913T182304Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun0049-20260913T182304Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-mun0050-20260914T075259Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun0050-20260914T075259Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-mun0051-20260914T092314Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun0051-20260914T092314Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-mun0052-20260914T103558Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun0052-20260914T103558Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-mun0053-20260914T125817Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun0053-20260914T125817Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-mun0054-deps-20260918T170850Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun0054-deps-20260918T170850Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/app/providers.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/app/providers.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/app/providers.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/app/providers.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/app/providers.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/security-api959a-caller788.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/client.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/security-api959a-caller788.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   }
+  ],
+  "edge_types": "all",
+  "global_fallback": {
+   "triggered": false
+  },
+  "inferred_tail": [],
+  "max_depth": 3,
+  "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
+  "total": 62
+ },
+ "notes": [
+  "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
+  "profile: (auto-detected); baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none"
+ ],
+ "producer": {
+  "tool": "tools/graph/verify.py",
+  "version": "1.4.1"
+ },
+ "receipt_id": "car-verify-20261008T121315Z-e68efb2b",
+ "receipt_path": "receipts/graph/change-admission-i05-adapter-20261008.json",
+ "repo": {
+  "name": "Arcanada-one/muneral",
+  "path": "/home/dev/aup/frontend-work/muneral-ui-read-errors"
+ },
+ "revision_selection": {
+  "base": [
+   "code_unit:apps/web/__tests__/kanban-board.test.ts",
+   "code_unit:apps/web/__tests__/read-api-contract.test.ts",
+   "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
+   "code_unit:apps/web/app/(app)/layout.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/milestones/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/api-keys/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/webhooks/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/sprints/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/page.tsx",
+   "code_unit:apps/web/app/api/auth/[...nextauth]/route.ts",
+   "code_unit:apps/web/app/layout.tsx",
+   "code_unit:apps/web/app/providers.tsx",
+   "code_unit:apps/web/components/dashboard/AgentActivityFeed.tsx",
+   "code_unit:apps/web/components/dashboard/BlockersList.tsx",
+   "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
+   "code_unit:apps/web/components/kanban/KanbanCard.tsx",
+   "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
+   "code_unit:apps/web/components/layout/Sidebar.tsx",
+   "code_unit:apps/web/components/layout/WorkspaceSelector.tsx",
+   "code_unit:apps/web/components/task/AuditLog.tsx",
+   "code_unit:apps/web/components/task/TaskChecklist.tsx",
+   "code_unit:apps/web/components/task/TaskDependencies.tsx",
+   "code_unit:apps/web/components/task/TaskDetail.tsx",
+   "code_unit:apps/web/lib/api/agents.ts",
+   "code_unit:apps/web/lib/api/client.ts",
+   "code_unit:apps/web/lib/api/projects.ts",
+   "code_unit:apps/web/lib/api/tasks.ts",
+   "code_unit:apps/web/lib/api/workspaces.ts",
+   "code_unit:apps/web/lib/auth/nextauth.ts",
+   "contract:apps/web/lib/auth/nextauth.ts#telegramSchema",
+   "deployable_unit:apps/web",
+   "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+   "receipt:receipts/graph/a2-304-dependabot-group.json",
+   "receipt:receipts/graph/a2-320-web-eslint10.json",
+   "receipt:receipts/graph/backend-workspace-isolation-20261008.json",
+   "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json",
+   "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
+   "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
+   "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json",
+   "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
+   "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
+   "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+   "receipt:receipts/graph/change-admission-a2p29-archived-20260915T131011Z.json",
+   "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+   "receipt:receipts/graph/change-admission-integration-batch1.json",
+   "receipt:receipts/graph/change-admission-mun0048-rescue-20260915T070641Z.json",
+   "receipt:receipts/graph/change-admission-mun0049-20260913T182304Z.json",
+   "receipt:receipts/graph/change-admission-mun0050-20260914T075259Z.json",
+   "receipt:receipts/graph/change-admission-mun0051-20260914T092314Z.json",
+   "receipt:receipts/graph/change-admission-mun0052-20260914T103558Z.json",
+   "receipt:receipts/graph/change-admission-mun0053-20260914T125817Z.json",
+   "receipt:receipts/graph/change-admission-mun0054-deps-20260918T170850Z.json",
+   "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+   "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json",
+   "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+   "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+   "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+   "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+   "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+   "receipt:receipts/graph/security-api959a-caller788.json"
+  ],
+  "head": [
+   "code_unit:apps/web/__tests__/kanban-board.test.ts",
+   "code_unit:apps/web/__tests__/read-api-contract.test.ts",
+   "code_unit:apps/web/__tests__/task-detail-no-auth-retry.test.ts",
+   "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
+   "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
+   "code_unit:apps/web/app/(app)/layout.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/milestones/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/api-keys/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/webhooks/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/sprints/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/page.tsx",
+   "code_unit:apps/web/app/api/auth/[...nextauth]/route.ts",
+   "code_unit:apps/web/app/layout.tsx",
+   "code_unit:apps/web/app/providers.tsx",
+   "code_unit:apps/web/components/dashboard/AgentActivityFeed.tsx",
+   "code_unit:apps/web/components/dashboard/BlockersList.tsx",
+   "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
+   "code_unit:apps/web/components/kanban/KanbanCard.tsx",
+   "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
+   "code_unit:apps/web/components/layout/Sidebar.tsx",
+   "code_unit:apps/web/components/layout/WorkspaceSelector.tsx",
+   "code_unit:apps/web/components/task/AuditLog.tsx",
+   "code_unit:apps/web/components/task/TaskChecklist.tsx",
+   "code_unit:apps/web/components/task/TaskDependencies.tsx",
+   "code_unit:apps/web/components/task/TaskDetail.tsx",
+   "code_unit:apps/web/lib/api/agents.ts",
+   "code_unit:apps/web/lib/api/client.ts",
+   "code_unit:apps/web/lib/api/projects.ts",
+   "code_unit:apps/web/lib/api/task-detail-contract.test.ts",
+   "code_unit:apps/web/lib/api/task-detail-controller.ts",
+   "code_unit:apps/web/lib/api/task-detail-read.test.ts",
+   "code_unit:apps/web/lib/api/task-detail-read.ts",
+   "code_unit:apps/web/lib/api/task-detail-session.tsx",
+   "code_unit:apps/web/lib/api/tasks.ts",
+   "code_unit:apps/web/lib/api/workspaces.ts",
+   "code_unit:apps/web/lib/auth/nextauth.ts",
+   "contract:apps/web/lib/api/task-detail-controller.ts#ReadOutcome",
+   "contract:apps/web/lib/api/task-detail-read.ts#revision",
+   "contract:apps/web/lib/auth/nextauth.ts#telegramSchema",
+   "deployable_unit:apps/web",
+   "document:apps/web/docs/task-detail-command-adapter.md",
+   "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+   "receipt:receipts/graph/a2-304-dependabot-group.json",
+   "receipt:receipts/graph/a2-320-web-eslint10.json",
+   "receipt:receipts/graph/backend-workspace-isolation-20261008.json",
+   "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json",
+   "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
+   "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
+   "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json",
+   "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
+   "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
+   "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+   "receipt:receipts/graph/change-admission-a2p29-archived-20260915T131011Z.json",
+   "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+   "receipt:receipts/graph/change-admission-integration-batch1.json",
+   "receipt:receipts/graph/change-admission-mun0048-rescue-20260915T070641Z.json",
+   "receipt:receipts/graph/change-admission-mun0049-20260913T182304Z.json",
+   "receipt:receipts/graph/change-admission-mun0050-20260914T075259Z.json",
+   "receipt:receipts/graph/change-admission-mun0051-20260914T092314Z.json",
+   "receipt:receipts/graph/change-admission-mun0052-20260914T103558Z.json",
+   "receipt:receipts/graph/change-admission-mun0053-20260914T125817Z.json",
+   "receipt:receipts/graph/change-admission-mun0054-deps-20260918T170850Z.json",
+   "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+   "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json",
+   "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+   "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+   "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+   "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+   "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+   "receipt:receipts/graph/security-api959a-caller788.json"
+  ],
+  "schema": "RevisionImpactSelection/v1",
+  "unmeasured_head_files": []
+ },
+ "schema": "ChangeAdmissionReceipt/v1",
+ "staleness": {
+  "checked_at_utc": "2026-10-08T12:13:41Z",
+  "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+  "mismatched_nodes": [],
+  "verdict": "fresh"
+ },
+ "structural_exclusions": [
+  {
+   "content_hash": {
+    "base": "sha256:d3f5ed8037490d1f8fb3eaad1764945d4dbabc6fcb6a88a3be173bdba9bd3441",
+    "head": "sha256:d3f5ed8037490d1f8fb3eaad1764945d4dbabc6fcb6a88a3be173bdba9bd3441"
+   },
+   "entity": "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/A2-370-outbox-relay-wired.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:a65b6d3576871c8a70f92d12964fcb9fc207f2d1bbe31957d1ef39dc447746d5",
+    "head": "sha256:a65b6d3576871c8a70f92d12964fcb9fc207f2d1bbe31957d1ef39dc447746d5"
+   },
+   "entity": "receipt:receipts/graph/a2-304-dependabot-group.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/a2-304-dependabot-group.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:49723617cfe868e4f813fb76a1faba259cf30f63411c1e6618d103276d1bed08",
+    "head": "sha256:49723617cfe868e4f813fb76a1faba259cf30f63411c1e6618d103276d1bed08"
+   },
+   "entity": "receipt:receipts/graph/a2-320-web-eslint10.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/a2-320-web-eslint10.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:9e8cd835911bd3c7f2e61b023c67aa004bf0c2e8207176470dd2f3516a7e49cb",
+    "head": "sha256:9e8cd835911bd3c7f2e61b023c67aa004bf0c2e8207176470dd2f3516a7e49cb"
+   },
+   "entity": "receipt:receipts/graph/backend-workspace-isolation-20261008.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/backend-workspace-isolation-20261008.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:bd5f160945334359817620023e2ead14018a99597509515bcc5ecf5967998192",
+    "head": "sha256:bd5f160945334359817620023e2ead14018a99597509515bcc5ecf5967998192"
+   },
+   "entity": "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-MUNERAL210-075162f.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:7f85569fb7a596227cbfe13b36d2e3dd2fb46b2b2b890b00cc5d4691225d79e0",
+    "head": "sha256:7f85569fb7a596227cbfe13b36d2e3dd2fb46b2b2b890b00cc5d4691225d79e0"
+   },
+   "entity": "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:a5fd852388f96c3125f826be256162e094dd908a532cc59d657cfc68e2d18a31",
+    "head": "sha256:a5fd852388f96c3125f826be256162e094dd908a532cc59d657cfc68e2d18a31"
+   },
+   "entity": "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-a2255-20260924T033607Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:f27383ec4780b9f37b17e7f38a659722a9c21763c2130dd40d829e3daa7d5261",
+    "head": "sha256:f27383ec4780b9f37b17e7f38a659722a9c21763c2130dd40d829e3daa7d5261"
+   },
+   "entity": "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-a2267-20260924T132227Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:a4accf806cd2431f41b9e85fbe5d0261215d7a39b9247bd656b451fec81a27f5",
+    "head": "sha256:a4accf806cd2431f41b9e85fbe5d0261215d7a39b9247bd656b451fec81a27f5"
+   },
+   "entity": "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-a2274-20260924T164654Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:0258e398331acfcb9ff6a2e1b9ac8cd9841639b5888692919e48b210dd23dce1",
+    "head": "sha256:0258e398331acfcb9ff6a2e1b9ac8cd9841639b5888692919e48b210dd23dce1"
+   },
+   "entity": "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-a2284-20260924T201424Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:2b6726e41ade2d88298595746039bb79441f86d4a8196aa8562436cf2db1ac7a",
+    "head": "sha256:2b6726e41ade2d88298595746039bb79441f86d4a8196aa8562436cf2db1ac7a"
+   },
+   "entity": "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:9e993adda7cc3f0f737063402404ce20d6aa8fddd7139b40469c7f46247b775d",
+    "head": "sha256:9e993adda7cc3f0f737063402404ce20d6aa8fddd7139b40469c7f46247b775d"
+   },
+   "entity": "receipt:receipts/graph/change-admission-a2p29-archived-20260915T131011Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-a2p29-archived-20260915T131011Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:7c0106e923b4851943e03d34cfec67b80ee496a7580f4ca92c7aaf72a25f7a89",
+    "head": "sha256:7c0106e923b4851943e03d34cfec67b80ee496a7580f4ca92c7aaf72a25f7a89"
+   },
+   "entity": "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:1defa236ec84c05632f4ca842b4c2715e15a0311a0eb3ea9828e4c23a3cc582b",
+    "head": "sha256:1defa236ec84c05632f4ca842b4c2715e15a0311a0eb3ea9828e4c23a3cc582b"
+   },
+   "entity": "receipt:receipts/graph/change-admission-integration-batch1.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-integration-batch1.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:d75da3efcea75673c9b8a6f46f0fab9a970690ee25a5e27185a177556f7dec4a",
+    "head": "sha256:d75da3efcea75673c9b8a6f46f0fab9a970690ee25a5e27185a177556f7dec4a"
+   },
+   "entity": "receipt:receipts/graph/change-admission-mun0048-rescue-20260915T070641Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-mun0048-rescue-20260915T070641Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:87a7671a79648e11450d0b718422b40e2423856709736592a3c57605eb9964d3",
+    "head": "sha256:87a7671a79648e11450d0b718422b40e2423856709736592a3c57605eb9964d3"
+   },
+   "entity": "receipt:receipts/graph/change-admission-mun0049-20260913T182304Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-mun0049-20260913T182304Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:c45d35be69fc268cd671b68a833497b7b22e4692ee2150d5e38664203a576885",
+    "head": "sha256:c45d35be69fc268cd671b68a833497b7b22e4692ee2150d5e38664203a576885"
+   },
+   "entity": "receipt:receipts/graph/change-admission-mun0050-20260914T075259Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-mun0050-20260914T075259Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:3225addd3a4683115edc421102e6797c94aa7ef5164861501b7dd977ce23a348",
+    "head": "sha256:3225addd3a4683115edc421102e6797c94aa7ef5164861501b7dd977ce23a348"
+   },
+   "entity": "receipt:receipts/graph/change-admission-mun0051-20260914T092314Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-mun0051-20260914T092314Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:aaa19b64f90550eb9a4bdfc07cae3d7e7f28500684bbfeba34ece0c2641eaa14",
+    "head": "sha256:aaa19b64f90550eb9a4bdfc07cae3d7e7f28500684bbfeba34ece0c2641eaa14"
+   },
+   "entity": "receipt:receipts/graph/change-admission-mun0052-20260914T103558Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-mun0052-20260914T103558Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:a2ca18b1cd67155ceb390ef8dafa1aedf90417605e814eaa8945a56a449f9f89",
+    "head": "sha256:a2ca18b1cd67155ceb390ef8dafa1aedf90417605e814eaa8945a56a449f9f89"
+   },
+   "entity": "receipt:receipts/graph/change-admission-mun0053-20260914T125817Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-mun0053-20260914T125817Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:edda022f2de32ee2f621c1fc71e7b648926c971fd170357337c61844e859db67",
+    "head": "sha256:edda022f2de32ee2f621c1fc71e7b648926c971fd170357337c61844e859db67"
+   },
+   "entity": "receipt:receipts/graph/change-admission-mun0054-deps-20260918T170850Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-mun0054-deps-20260918T170850Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:1e3f90014eaded028ebc824b9fb7ff3aeb5d3329bf6939e03e28672bd8fbdc4f",
+    "head": "sha256:1e3f90014eaded028ebc824b9fb7ff3aeb5d3329bf6939e03e28672bd8fbdc4f"
+   },
+   "entity": "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:370802f139dd66a6b18776e14854c6a15cc4ec16d90c028f56fa67f9956cde32",
+    "head": "sha256:370802f139dd66a6b18776e14854c6a15cc4ec16d90c028f56fa67f9956cde32"
+   },
+   "entity": "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-mun0063-20260923T132257Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:fae981897af83ddb9d208799d4c7e167c569b3cf5468e811641689be25a1023e",
+    "head": "sha256:fae981897af83ddb9d208799d4c7e167c569b3cf5468e811641689be25a1023e"
+   },
+   "entity": "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:1203469bfc87fde2407f5126a4bc488d133ca964ca607463028fcf0bf4bc31a2",
+    "head": "sha256:1203469bfc87fde2407f5126a4bc488d133ca964ca607463028fcf0bf4bc31a2"
+   },
+   "entity": "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-node2421-20260914T000213Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:8b6cdea08eb0e51062dd5cb7a903149d08ff69411f5d107b51d2dddfe5d3478c",
+    "head": "sha256:8b6cdea08eb0e51062dd5cb7a903149d08ff69411f5d107b51d2dddfe5d3478c"
+   },
+   "entity": "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:a6107936a5b0f4e1f7c0c0ecf75c8f2557da15e932e40afc37215ff2328b88a2",
+    "head": "sha256:a6107936a5b0f4e1f7c0c0ecf75c8f2557da15e932e40afc37215ff2328b88a2"
+   },
+   "entity": "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:02def6da178ea3d331171574bb64bb2c56ae0d8163b3cc013b0dcb743c556283",
+    "head": "sha256:02def6da178ea3d331171574bb64bb2c56ae0d8163b3cc013b0dcb743c556283"
+   },
+   "entity": "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:32fe4de334dfc155b83c1147706675b80eed51426cee16655ce78ab1aaf5fa90",
+    "head": "sha256:32fe4de334dfc155b83c1147706675b80eed51426cee16655ce78ab1aaf5fa90"
+   },
+   "entity": "receipt:receipts/graph/security-api959a-caller788.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/security-api959a-caller788.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  }
+ ],
+ "tree": {
+  "commit": "e68efb2b7ad32444de8f90eab78ee97e5ebcfdd3",
+  "dirty": false
+ },
+ "verdicts": [
+  {
+   "entity": "code_unit:apps/web/__tests__/kanban-board.test.ts",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/__tests__/read-api-contract.test.ts",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/__tests__/task-detail-no-auth-retry.test.ts",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/app/(app)/layout.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/milestones/page.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/page.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/api-keys/page.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/page.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/webhooks/page.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/sprints/page.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/app/(app)/workspaces/page.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/app/api/auth/[...nextauth]/route.ts",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/app/layout.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/app/providers.tsx",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-canary",
+    "v-config-schema",
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/dashboard/AgentActivityFeed.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/dashboard/BlockersList.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/kanban/KanbanCard.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/layout/Sidebar.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/layout/WorkspaceSelector.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/task/AuditLog.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/task/TaskChecklist.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/task/TaskDependencies.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/task/TaskDetail.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/lib/api/agents.ts",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/lib/api/client.ts",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-canary",
+    "v-config-schema",
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/lib/api/projects.ts",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/lib/api/task-detail-contract.test.ts",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/lib/api/task-detail-controller.ts",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-contract-diff",
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/lib/api/task-detail-read.test.ts",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/lib/api/task-detail-read.ts",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-contract-diff",
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/lib/api/task-detail-session.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/lib/api/tasks.ts",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/lib/api/workspaces.ts",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/lib/auth/nextauth.ts",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-contract-diff",
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "contract:apps/web/lib/api/task-detail-controller.ts#ReadOutcome",
+   "reason": "v-contract-diff: added: no breaking change (1 change(s))",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-contract-diff"
+   ]
+  },
+  {
+   "entity": "contract:apps/web/lib/api/task-detail-read.ts#revision",
+   "reason": "v-contract-diff: added: no breaking change (1 change(s))",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-contract-diff"
+   ]
+  },
+  {
+   "entity": "contract:apps/web/lib/auth/nextauth.ts#telegramSchema",
+   "reason": "v-contract-diff: unchanged: no breaking change (0 change(s))",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-contract-diff"
+   ]
+  },
+  {
+   "entity": "deployable_unit:apps/web",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: 0 errors; v-fitness: no new violation in apps/web",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "document:apps/web/docs/task-detail-command-adapter.md",
+   "reason": "v-doc-reference: 0 reference(s) resolve at head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-doc-reference"
+   ]
+  }
+ ],
+ "verifier_selection": {
+  "applied": {},
+  "not_applied": [],
+  "requested": [],
+  "schema": "VerifierSelection/v1"
+ },
+ "verifiers": [
+  {
+   "command": "/home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/node_modules/.bin/tsc -p /home/dev/aup/frontend-work/muneral-ui-read-errors/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/PR226-CI-diagnosis-20261008/stock-work/verifier-out/type-check-g2d6h09u/check.tsbuildinfo --listFiles",
+   "duration_s": 5.94,
+   "entities": [
+    "code_unit:apps/web/__tests__/kanban-board.test.ts",
+    "code_unit:apps/web/__tests__/read-api-contract.test.ts",
+    "code_unit:apps/web/__tests__/task-detail-no-auth-retry.test.ts",
+    "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
+    "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
+    "code_unit:apps/web/app/(app)/layout.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/milestones/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/api-keys/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/webhooks/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/sprints/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/page.tsx",
+    "code_unit:apps/web/app/api/auth/[...nextauth]/route.ts",
+    "code_unit:apps/web/app/layout.tsx",
+    "code_unit:apps/web/app/providers.tsx",
+    "code_unit:apps/web/components/dashboard/AgentActivityFeed.tsx",
+    "code_unit:apps/web/components/dashboard/BlockersList.tsx",
+    "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
+    "code_unit:apps/web/components/kanban/KanbanCard.tsx",
+    "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
+    "code_unit:apps/web/components/layout/Sidebar.tsx",
+    "code_unit:apps/web/components/layout/WorkspaceSelector.tsx",
+    "code_unit:apps/web/components/task/AuditLog.tsx",
+    "code_unit:apps/web/components/task/TaskChecklist.tsx",
+    "code_unit:apps/web/components/task/TaskDependencies.tsx",
+    "code_unit:apps/web/components/task/TaskDetail.tsx",
+    "code_unit:apps/web/lib/api/agents.ts",
+    "code_unit:apps/web/lib/api/client.ts",
+    "code_unit:apps/web/lib/api/projects.ts",
+    "code_unit:apps/web/lib/api/task-detail-contract.test.ts",
+    "code_unit:apps/web/lib/api/task-detail-controller.ts",
+    "code_unit:apps/web/lib/api/task-detail-read.test.ts",
+    "code_unit:apps/web/lib/api/task-detail-read.ts",
+    "code_unit:apps/web/lib/api/task-detail-session.tsx",
+    "code_unit:apps/web/lib/api/tasks.ts",
+    "code_unit:apps/web/lib/api/workspaces.ts",
+    "code_unit:apps/web/lib/auth/nextauth.ts",
+    "deployable_unit:apps/web"
+   ],
+   "entity_verdicts": {
+    "code_unit:apps/web/__tests__/kanban-board.test.ts": "verified",
+    "code_unit:apps/web/__tests__/read-api-contract.test.ts": "verified",
+    "code_unit:apps/web/__tests__/task-detail-no-auth-retry.test.ts": "verified",
+    "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx": "verified",
+    "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx": "verified",
+    "code_unit:apps/web/app/(app)/layout.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/milestones/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/api-keys/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/webhooks/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/sprints/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/page.tsx": "verified",
+    "code_unit:apps/web/app/api/auth/[...nextauth]/route.ts": "verified",
+    "code_unit:apps/web/app/layout.tsx": "verified",
+    "code_unit:apps/web/app/providers.tsx": "verified",
+    "code_unit:apps/web/components/dashboard/AgentActivityFeed.tsx": "verified",
+    "code_unit:apps/web/components/dashboard/BlockersList.tsx": "verified",
+    "code_unit:apps/web/components/kanban/KanbanBoard.tsx": "verified",
+    "code_unit:apps/web/components/kanban/KanbanCard.tsx": "verified",
+    "code_unit:apps/web/components/kanban/KanbanColumn.tsx": "verified",
+    "code_unit:apps/web/components/layout/Sidebar.tsx": "verified",
+    "code_unit:apps/web/components/layout/WorkspaceSelector.tsx": "verified",
+    "code_unit:apps/web/components/task/AuditLog.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskChecklist.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskDependencies.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskDetail.tsx": "verified",
+    "code_unit:apps/web/lib/api/agents.ts": "verified",
+    "code_unit:apps/web/lib/api/client.ts": "verified",
+    "code_unit:apps/web/lib/api/projects.ts": "verified",
+    "code_unit:apps/web/lib/api/task-detail-contract.test.ts": "verified",
+    "code_unit:apps/web/lib/api/task-detail-controller.ts": "verified",
+    "code_unit:apps/web/lib/api/task-detail-read.test.ts": "verified",
+    "code_unit:apps/web/lib/api/task-detail-read.ts": "verified",
+    "code_unit:apps/web/lib/api/task-detail-session.tsx": "verified",
+    "code_unit:apps/web/lib/api/tasks.ts": "verified",
+    "code_unit:apps/web/lib/api/workspaces.ts": "verified",
+    "code_unit:apps/web/lib/auth/nextauth.ts": "verified",
+    "deployable_unit:apps/web": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-type-check-apps-web-tsconfig",
+   "kind": "type_check",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-CI-diagnosis-20261008/stock-work/verifier-out/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-10-08T12:13:47Z",
+   "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1309 files listed"
+  },
+  {
+   "command": "tools/graph/contract_diff.py.run_diff(base=43e79c97b05d, head=e68efb2b7ad3, graph=head graph)",
+   "duration_s": 5.02,
+   "entities": [
+    "code_unit:apps/web/lib/api/task-detail-controller.ts",
+    "code_unit:apps/web/lib/api/task-detail-read.ts",
+    "code_unit:apps/web/lib/auth/nextauth.ts",
+    "contract:apps/web/lib/api/task-detail-controller.ts#ReadOutcome",
+    "contract:apps/web/lib/api/task-detail-read.ts#revision",
+    "contract:apps/web/lib/auth/nextauth.ts#telegramSchema"
+   ],
+   "entity_verdicts": {
+    "code_unit:apps/web/lib/api/task-detail-controller.ts": "verified",
+    "code_unit:apps/web/lib/api/task-detail-read.ts": "verified",
+    "code_unit:apps/web/lib/auth/nextauth.ts": "verified",
+    "contract:apps/web/lib/api/task-detail-controller.ts#ReadOutcome": "verified",
+    "contract:apps/web/lib/api/task-detail-read.ts#revision": "verified",
+    "contract:apps/web/lib/auth/nextauth.ts#telegramSchema": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-contract-diff",
+   "kind": "contract_diff",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-CI-diagnosis-20261008/stock-work/verifier-out/v-contract-diff.json",
+   "started_at_utc": "2026-10-08T12:13:54Z",
+   "summary": "56→58 contracts, breaking 0, edges {'verified': 164}"
+  },
+  {
+   "command": "verify.py config_schema: keys read at head ⊆ declared keys",
+   "duration_s": 0.41,
+   "entities": [
+    "code_unit:apps/web/app/providers.tsx",
+    "code_unit:apps/web/lib/api/client.ts"
+   ],
+   "entity_verdicts": {
+    "code_unit:apps/web/app/providers.tsx": "verified",
+    "code_unit:apps/web/lib/api/client.ts": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-config-schema",
+   "kind": "config_schema",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-CI-diagnosis-20261008/stock-work/verifier-out/v-config-schema.json",
+   "started_at_utc": "2026-10-08T12:13:59Z",
+   "summary": "2 source(s), 0 new / 3 frozen undeclared reads, 0 failed; 4 vendored file(s) not attributed to this repository (Arcanada-one/arcanada-universal-program)"
+  },
+  {
+   "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
+   "duration_s": 0.13,
+   "entities": [
+    "code_unit:apps/web/__tests__/kanban-board.test.ts",
+    "code_unit:apps/web/__tests__/read-api-contract.test.ts",
+    "code_unit:apps/web/__tests__/task-detail-no-auth-retry.test.ts",
+    "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
+    "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
+    "code_unit:apps/web/app/(app)/layout.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/milestones/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/api-keys/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/webhooks/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/sprints/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/page.tsx",
+    "code_unit:apps/web/app/api/auth/[...nextauth]/route.ts",
+    "code_unit:apps/web/app/layout.tsx",
+    "code_unit:apps/web/app/providers.tsx",
+    "code_unit:apps/web/components/dashboard/AgentActivityFeed.tsx",
+    "code_unit:apps/web/components/dashboard/BlockersList.tsx",
+    "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
+    "code_unit:apps/web/components/kanban/KanbanCard.tsx",
+    "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
+    "code_unit:apps/web/components/layout/Sidebar.tsx",
+    "code_unit:apps/web/components/layout/WorkspaceSelector.tsx",
+    "code_unit:apps/web/components/task/AuditLog.tsx",
+    "code_unit:apps/web/components/task/TaskChecklist.tsx",
+    "code_unit:apps/web/components/task/TaskDependencies.tsx",
+    "code_unit:apps/web/components/task/TaskDetail.tsx",
+    "code_unit:apps/web/lib/api/agents.ts",
+    "code_unit:apps/web/lib/api/client.ts",
+    "code_unit:apps/web/lib/api/projects.ts",
+    "code_unit:apps/web/lib/api/task-detail-contract.test.ts",
+    "code_unit:apps/web/lib/api/task-detail-controller.ts",
+    "code_unit:apps/web/lib/api/task-detail-read.test.ts",
+    "code_unit:apps/web/lib/api/task-detail-read.ts",
+    "code_unit:apps/web/lib/api/task-detail-session.tsx",
+    "code_unit:apps/web/lib/api/tasks.ts",
+    "code_unit:apps/web/lib/api/workspaces.ts",
+    "code_unit:apps/web/lib/auth/nextauth.ts",
+    "deployable_unit:apps/web"
+   ],
+   "entity_verdicts": {
+    "code_unit:apps/web/__tests__/kanban-board.test.ts": "verified",
+    "code_unit:apps/web/__tests__/read-api-contract.test.ts": "verified",
+    "code_unit:apps/web/__tests__/task-detail-no-auth-retry.test.ts": "verified",
+    "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx": "verified",
+    "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx": "verified",
+    "code_unit:apps/web/app/(app)/layout.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/milestones/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/api-keys/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/webhooks/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/sprints/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/page.tsx": "verified",
+    "code_unit:apps/web/app/api/auth/[...nextauth]/route.ts": "verified",
+    "code_unit:apps/web/app/layout.tsx": "verified",
+    "code_unit:apps/web/app/providers.tsx": "verified",
+    "code_unit:apps/web/components/dashboard/AgentActivityFeed.tsx": "verified",
+    "code_unit:apps/web/components/dashboard/BlockersList.tsx": "verified",
+    "code_unit:apps/web/components/kanban/KanbanBoard.tsx": "verified",
+    "code_unit:apps/web/components/kanban/KanbanCard.tsx": "verified",
+    "code_unit:apps/web/components/kanban/KanbanColumn.tsx": "verified",
+    "code_unit:apps/web/components/layout/Sidebar.tsx": "verified",
+    "code_unit:apps/web/components/layout/WorkspaceSelector.tsx": "verified",
+    "code_unit:apps/web/components/task/AuditLog.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskChecklist.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskDependencies.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskDetail.tsx": "verified",
+    "code_unit:apps/web/lib/api/agents.ts": "verified",
+    "code_unit:apps/web/lib/api/client.ts": "verified",
+    "code_unit:apps/web/lib/api/projects.ts": "verified",
+    "code_unit:apps/web/lib/api/task-detail-contract.test.ts": "verified",
+    "code_unit:apps/web/lib/api/task-detail-controller.ts": "verified",
+    "code_unit:apps/web/lib/api/task-detail-read.test.ts": "verified",
+    "code_unit:apps/web/lib/api/task-detail-read.ts": "verified",
+    "code_unit:apps/web/lib/api/task-detail-session.tsx": "verified",
+    "code_unit:apps/web/lib/api/tasks.ts": "verified",
+    "code_unit:apps/web/lib/api/workspaces.ts": "verified",
+    "code_unit:apps/web/lib/auth/nextauth.ts": "verified",
+    "deployable_unit:apps/web": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-fitness",
+   "kind": "fitness_rules",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-CI-diagnosis-20261008/stock-work/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-10-08T12:13:59Z",
+   "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
+  },
+  {
+   "command": "verify.py doc_reference: path / route / model references of affected documents resolve at head",
+   "duration_s": 0.0,
+   "entities": [
+    "document:apps/web/docs/task-detail-command-adapter.md"
+   ],
+   "entity_verdicts": {
+    "document:apps/web/docs/task-detail-command-adapter.md": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-doc-reference",
+   "kind": "doc_reference",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-CI-diagnosis-20261008/stock-work/verifier-out/v-doc-reference.txt",
+   "started_at_utc": "2026-10-08T12:13:59Z",
+   "summary": "1 document(s), 0 failed"
+  },
+  {
+   "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
+   "duration_s": 0.0,
+   "entities": [
+    "code_unit:apps/web/app/providers.tsx",
+    "code_unit:apps/web/lib/api/client.ts"
+   ],
+   "entity_verdicts": {
+    "code_unit:apps/web/app/providers.tsx": "not_measured",
+    "code_unit:apps/web/lib/api/client.ts": "not_measured"
+   },
+   "exit_code": 0,
+   "id": "v-canary",
+   "kind": "canary",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR226-CI-diagnosis-20261008/stock-work/verifier-out/v-canary.json",
+   "started_at_utc": "2026-10-08T12:13:59Z",
+   "summary": "0 canary result(s), 0 committed at head; 0 verified / 0 failed / 2 not_measured of 2 entities"
+  }
+ ],
+ "verify": {
+  "events": [
+   {
+    "code": "STRUCTURAL_EXCLUSION",
+    "rule": "DEC-AUP-0034",
+    "text": "29 affected entity(ies) owe no verdict (receipt: 29): unchanged at both revisions and given no verifier by the matrix"
+   }
+  ],
+  "required_by_entity": {
+   "code_unit:apps/web/__tests__/kanban-board.test.ts": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/__tests__/read-api-contract.test.ts": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/__tests__/task-detail-no-auth-retry.test.ts": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/app/(app)/layout.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/milestones/page.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/page.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/api-keys/page.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/page.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/webhooks/page.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/sprints/page.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/app/(app)/workspaces/page.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/app/api/auth/[...nextauth]/route.ts": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/app/layout.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/app/providers.tsx": [
+    "canary",
+    "config_schema",
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/components/dashboard/AgentActivityFeed.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/components/dashboard/BlockersList.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/components/kanban/KanbanBoard.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/components/kanban/KanbanCard.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/components/kanban/KanbanColumn.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/components/layout/Sidebar.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/components/layout/WorkspaceSelector.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/components/task/AuditLog.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/components/task/TaskChecklist.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/components/task/TaskDependencies.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/components/task/TaskDetail.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/lib/api/agents.ts": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/lib/api/client.ts": [
+    "canary",
+    "config_schema",
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/lib/api/projects.ts": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/lib/api/task-detail-contract.test.ts": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/lib/api/task-detail-controller.ts": [
+    "contract_diff",
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/lib/api/task-detail-read.test.ts": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/lib/api/task-detail-read.ts": [
+    "contract_diff",
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/lib/api/task-detail-session.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/lib/api/tasks.ts": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/lib/api/workspaces.ts": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/lib/auth/nextauth.ts": [
+    "contract_diff",
+    "fitness_rules",
+    "type_check"
+   ],
+   "contract:apps/web/lib/api/task-detail-controller.ts#ReadOutcome": [
+    "contract_diff"
+   ],
+   "contract:apps/web/lib/api/task-detail-read.ts#revision": [
+    "contract_diff"
+   ],
+   "contract:apps/web/lib/auth/nextauth.ts#telegramSchema": [
+    "contract_diff"
+   ],
+   "deployable_unit:apps/web": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "document:apps/web/docs/task-detail-command-adapter.md": [
+    "doc_reference"
+   ],
+   "receipt:receipts/graph/A2-370-outbox-relay-wired.json": [],
+   "receipt:receipts/graph/a2-304-dependabot-group.json": [],
+   "receipt:receipts/graph/a2-320-web-eslint10.json": [],
+   "receipt:receipts/graph/backend-workspace-isolation-20261008.json": [],
+   "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json": [],
+   "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json": [],
+   "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json": [],
+   "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json": [],
+   "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json": [],
+   "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json": [],
+   "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json": [],
+   "receipt:receipts/graph/change-admission-a2p29-archived-20260915T131011Z.json": [],
+   "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json": [],
+   "receipt:receipts/graph/change-admission-integration-batch1.json": [],
+   "receipt:receipts/graph/change-admission-mun0048-rescue-20260915T070641Z.json": [],
+   "receipt:receipts/graph/change-admission-mun0049-20260913T182304Z.json": [],
+   "receipt:receipts/graph/change-admission-mun0050-20260914T075259Z.json": [],
+   "receipt:receipts/graph/change-admission-mun0051-20260914T092314Z.json": [],
+   "receipt:receipts/graph/change-admission-mun0052-20260914T103558Z.json": [],
+   "receipt:receipts/graph/change-admission-mun0053-20260914T125817Z.json": [],
+   "receipt:receipts/graph/change-admission-mun0054-deps-20260918T170850Z.json": [],
+   "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json": [],
+   "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json": [],
+   "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json": [],
+   "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json": [],
+   "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json": [],
+   "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json": [],
+   "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json": [],
+   "receipt:receipts/graph/security-api959a-caller788.json": []
+  },
+  "seconds": {
+   "prepare": 2.47,
+   "total": 44.13,
+   "verifiers": 11.5
+  }
+ },
+ "work_item": "7d2dadd3-8cf0-47fb-925e-71b9e2962bab"
+}
