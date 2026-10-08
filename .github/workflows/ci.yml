@@ -241,7 +241,7 @@ jobs:
     # and no retrievable annotation. Recorded as a hole, not as a solved problem.
     uses: ./.github/workflows/graph-admission.yml
     with:
-      program_ref: '788c72a0b9c7eceaceb0c447e6856a9e62715a1e'
+      program_ref: 'd33325d57904d2199c1bb39f7d37021db4e369c1'
       verifier_job: 'lint-and-test'
       verifier_conclusion: ${{ needs.lint-and-test.result }}
       # AUP-GRAPH-006:gate2b. The fingerprint of the Ed25519 key that signs the vendored bundle's
@@ -253,10 +253,10 @@ jobs:
       signing_key_fingerprint: 'SHA256:9QFqysn44UjA8rXyfHjItP3b2Oadhnbf1bDNqXrsCig'
 
   network-exposure:
-    uses: Arcanada-one/datarim/.github/workflows/network-exposure-lint.yml@5800861ad1e1a75f7e3ad986212a0faeaa1bfc98
+    uses: Arcanada-one/datarim/.github/workflows/network-exposure-lint.yml@50351e0468f57a39b280d75cf41827329d6393d2
     with:
       compose_paths: docker-compose.prod.yml
-      datarim_ref: '5800861ad1e1a75f7e3ad986212a0faeaa1bfc98'
+      datarim_ref: '50351e0468f57a39b280d75cf41827329d6393d2'
       # A2-315: on the deploying push this gate takes the `deploy-gate` lane too (default is ci-general).
       runner_labels: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && '["deploy-gate"]' || '["ubuntu-latest"]' }}
 
@@ -270,7 +270,7 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ github.workflow_sha }}
-      - uses: Arcanada-one/datarim/.github/actions/preflight-caller-contract@dcba69e8811be8680fc1096b5ad572b73c65023b
+      - uses: Arcanada-one/datarim/.github/actions/preflight-caller-contract@50351e0468f57a39b280d75cf41827329d6393d2
         with:
           vault-addr: ${{ vars.VAULT_ADDR }}
 
@@ -299,7 +299,7 @@ jobs:
     steps:
       - name: Pre-deploy host readiness
         id: preflight
-        uses: Arcanada-one/datarim/.github/actions/preflight-check@dcba69e8811be8680fc1096b5ad572b73c65023b
+        uses: Arcanada-one/datarim/.github/actions/preflight-check@50351e0468f57a39b280d75cf41827329d6393d2
         with:
           target-host: arcana-prd
           service-name: muneral
@@ -316,6 +316,7 @@ jobs:
           ops-bot-agent: muneral
           ops-bot-key: ${{ secrets.OPSBOT_API_KEY }}
           ops-bot-url: https://ops.arcanada.ai/events
+          allowed_hosts: ops.arcanada.ai
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 

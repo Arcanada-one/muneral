@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TasksService } from './tasks.service.js';
 import { TasksController } from './tasks.controller.js';
+import { TaskContractBindingController } from './task-contract-binding.controller.js';
+import { TaskContractBindingService } from './task-contract-binding.service.js';
 import { FieldChangesController } from './field-state/field-changes.controller.js';
 import { ActivityModule } from '../activity/activity.module.js';
 import { WsModule } from '../ws/ws.module.js';
@@ -15,9 +17,10 @@ import { TaskEvidenceService } from './evidence/task-evidence.service.js';
 
 @Module({
   imports: [ActivityModule, WsModule, AuthModule, ExecutionAuthorityModule],
-  controllers: [TasksController, FieldChangesController],
+  controllers: [TasksController, FieldChangesController, TaskContractBindingController],
   providers: [
     TasksService,
+    TaskContractBindingService,
     TaskFieldStateService,
     FieldChangesService,
     TaskExecutionRecorderService,
