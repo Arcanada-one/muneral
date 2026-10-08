@@ -29,6 +29,8 @@ import { ActivityModule } from '../src/activity/activity.module.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
 import { AuthService } from '../src/auth/auth.service.js';
 import { KanbanService } from '../src/ws/kanban.service.js';
+import { ActivityService } from '../src/activity/activity.service.js';
+import { jest } from '@jest/globals';
 import { TaskFieldStateService } from '../src/tasks/field-state/task-field-state.service.js';
 
 @Module({
@@ -402,5 +404,59 @@ describe('PATCH /tasks/:taskId/status with an agent key — creator or executor 
       .get(`/tasks/${task.id}`)
       .set('Authorization', `Bearer ${strangerKey}`)
       .expect(403);
+  });
+
+  it('MUN-0005: checklist mutations record authenticated actor and affected item', async () => {
+    await prisma.workspaceMember.create({ data: { workspaceId, userId, role: 'owner' } });
+    const task = await humanTask();
+    const bearer = authSvc.signAccess(userId);
+    const http = () => supertest(app.getHttpServer());
+    const created = await http().post(`/tasks/${task.id}/checklist`)
+      .set('Authorization', `Bearer ${bearer}`).send({ text: 'Synthetic checklist item' }).expect(201);
+    const itemId = created.body.id as string;
+    await http().patch(`/tasks/${task.id}/checklist/${itemId}`)
+      .set('Authorization', `Bearer ${bearer}`).send({ checked: true }).expect(200);
+    await http().delete(`/tasks/${task.id}/checklist/${itemId}`)
+      .set('Authorization', `Bearer ${bearer}`).expect(204);
+    const response = await http().get(`/tasks/${task.id}/activity`)
+      .set('Authorization', `Bearer ${bearer}`).expect(200);
+    const rows = response.body.data.filter((row: { action: string }) => row.action.startsWith('task:checklist_'));
+    expect(rows).toHaveLength(3);
+    expect(rows.map((row: { action: string }) => row.action).sort()).toEqual([
+      'task:checklist_added', 'task:checklist_removed', 'task:checklist_updated',
+    ]);
+    for (const row of rows) {
+      expect(row.actorType).toBe('human');
+      expect(row.actorId).toBe(userId);
+      expect(row.workspaceId).toBe(workspaceId);
+      expect(row.payload.itemId).toBe(itemId);
+    }
+    expect(rows.find((row: { action: string }) => row.action === 'task:checklist_updated').payload.checked).toBe(true);
+  });
+
+  it.each(['add', 'update', 'delete'] as const)('MUN-0005: checklist %s rolls back when audit fails', async (operation) => {
+    const task = await humanTask();
+    const bearer = authSvc.signAccess(userId);
+    const item = operation === 'add' ? null : await prisma.taskChecklist.create({
+      data: { taskId: task.id, text: 'Synthetic rollback item', checked: false },
+    });
+    const writer = app.get(ActivityService);
+    const spy = jest.spyOn(writer, 'log').mockRejectedValueOnce(new Error('Synthetic audit failure'));
+    try {
+      const http = supertest(app.getHttpServer());
+      if (operation === 'add') {
+        await http.post(`/tasks/${task.id}/checklist`).set('Authorization', `Bearer ${bearer}`)
+          .send({ text: 'Synthetic rollback item' }).expect(500);
+      } else if (operation === 'update') {
+        await http.patch(`/tasks/${task.id}/checklist/${item!.id}`).set('Authorization', `Bearer ${bearer}`)
+          .send({ checked: true }).expect(500);
+      } else {
+        await http.delete(`/tasks/${task.id}/checklist/${item!.id}`).set('Authorization', `Bearer ${bearer}`).expect(500);
+      }
+      const rows = await prisma.taskChecklist.findMany({ where: { taskId: task.id } });
+      if (operation === 'add') expect(rows).toHaveLength(0);
+      else { expect(rows).toHaveLength(1); expect(rows[0].checked).toBe(false); expect(rows[0].id).toBe(item!.id); }
+      expect(await prisma.activityLog.count({ where: { taskId: task.id, action: { startsWith: 'task:checklist_' } } })).toBe(0);
+    } finally { spy.mockRestore(); }
   });
 });

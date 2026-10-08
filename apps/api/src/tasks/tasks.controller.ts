@@ -394,8 +394,9 @@ export class TasksController {
   addChecklistItem(
     @Param('taskId') taskId: string,
     @Body() dto: CreateChecklistItemDto,
+    @Req() req: AuthRequest,
   ) {
-    return this.tasksService.addChecklistItem(taskId, dto);
+    return this.tasksService.addChecklistItem(taskId, dto, req.actor);
   }
 
   @Patch(':taskId/checklist/:itemId')
@@ -403,8 +404,9 @@ export class TasksController {
     @Param('taskId') taskId: string,
     @Param('itemId') itemId: string,
     @Body() body: { checked: boolean },
+    @Req() req: AuthRequest,
   ) {
-    return this.tasksService.toggleChecklistItem(taskId, itemId, body.checked);
+    return this.tasksService.toggleChecklistItem(taskId, itemId, body.checked, req.actor);
   }
 
   @Delete(':taskId/checklist/:itemId')
@@ -412,8 +414,9 @@ export class TasksController {
   deleteChecklistItem(
     @Param('taskId') taskId: string,
     @Param('itemId') itemId: string,
+    @Req() req: AuthRequest,
   ) {
-    return this.tasksService.deleteChecklistItem(taskId, itemId);
+    return this.tasksService.deleteChecklistItem(taskId, itemId, req.actor);
   }
 
   // --- Dependencies ---
