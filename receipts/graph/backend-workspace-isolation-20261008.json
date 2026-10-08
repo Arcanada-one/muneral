@@ -5,7 +5,7 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "paused_safe"
  },
- "captured_at_utc": "2026-10-08T02:42:07Z",
+ "captured_at_utc": "2026-10-08T03:29:31Z",
  "change_set": {
   "base": "5b67dea437be93b988f50b3d312879798dc79f89",
   "files": [
@@ -202,6 +202,164 @@
     "status": "M"
    },
    {
+    "kind": "test",
+    "node_id": "code_unit:apps/web/__tests__/read-api-contract.test.ts",
+    "node_ids": [
+     "code_unit:apps/web/__tests__/read-api-contract.test.ts"
+    ],
+    "path": "apps/web/__tests__/read-api-contract.test.ts",
+    "status": "A"
+   },
+   {
+    "kind": "test",
+    "node_id": "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
+    "node_ids": [
+     "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx"
+    ],
+    "path": "apps/web/__tests__/task-read-error-presentation.test.tsx",
+    "status": "A"
+   },
+   {
+    "kind": "code",
+    "node_id": "code_unit:apps/web/components/dashboard/BlockersList.tsx",
+    "node_ids": [
+     "code_unit:apps/web/components/dashboard/BlockersList.tsx"
+    ],
+    "path": "apps/web/components/dashboard/BlockersList.tsx",
+    "status": "M"
+   },
+   {
+    "kind": "code",
+    "node_id": "code_unit:apps/web/components/kanban/KanbanCard.tsx",
+    "node_ids": [
+     "code_unit:apps/web/components/kanban/KanbanCard.tsx"
+    ],
+    "path": "apps/web/components/kanban/KanbanCard.tsx",
+    "status": "M"
+   },
+   {
+    "kind": "code",
+    "node_id": "code_unit:apps/web/components/task/AuditLog.tsx",
+    "node_ids": [
+     "code_unit:apps/web/components/task/AuditLog.tsx"
+    ],
+    "path": "apps/web/components/task/AuditLog.tsx",
+    "status": "M"
+   },
+   {
+    "kind": "code",
+    "node_id": "code_unit:apps/web/components/task/TaskChecklist.tsx",
+    "node_ids": [
+     "code_unit:apps/web/components/task/TaskChecklist.tsx"
+    ],
+    "path": "apps/web/components/task/TaskChecklist.tsx",
+    "status": "M"
+   },
+   {
+    "kind": "code",
+    "node_id": "code_unit:apps/web/components/task/TaskDependencies.tsx",
+    "node_ids": [
+     "code_unit:apps/web/components/task/TaskDependencies.tsx"
+    ],
+    "path": "apps/web/components/task/TaskDependencies.tsx",
+    "status": "M"
+   },
+   {
+    "kind": "code",
+    "node_id": "code_unit:apps/web/components/task/TaskDetail.tsx",
+    "node_ids": [
+     "code_unit:apps/web/components/task/TaskDetail.tsx"
+    ],
+    "path": "apps/web/components/task/TaskDetail.tsx",
+    "status": "M"
+   },
+   {
+    "kind": "code",
+    "node_id": "code_unit:apps/web/lib/api/projects.ts",
+    "node_ids": [
+     "code_unit:apps/web/lib/api/projects.ts"
+    ],
+    "path": "apps/web/lib/api/projects.ts",
+    "status": "M"
+   },
+   {
+    "kind": "code",
+    "node_id": "code_unit:apps/web/lib/api/read-contract.ts",
+    "node_ids": [
+     "code_unit:apps/web/lib/api/read-contract.ts",
+     "contract:apps/web/lib/api/read-contract.ts#activity",
+     "contract:apps/web/lib/api/read-contract.ts#checklist",
+     "contract:apps/web/lib/api/read-contract.ts#dependency",
+     "contract:apps/web/lib/api/read-contract.ts#id",
+     "contract:apps/web/lib/api/read-contract.ts#project",
+     "contract:apps/web/lib/api/read-contract.ts#task",
+     "contract:apps/web/lib/api/read-contract.ts#timestamp",
+     "contract:apps/web/lib/api/read-contract.ts#workspace"
+    ],
+    "path": "apps/web/lib/api/read-contract.ts",
+    "status": "A"
+   },
+   {
+    "kind": "code",
+    "node_id": "code_unit:apps/web/lib/api/tasks.ts",
+    "node_ids": [
+     "code_unit:apps/web/lib/api/tasks.ts"
+    ],
+    "path": "apps/web/lib/api/tasks.ts",
+    "status": "M"
+   },
+   {
+    "kind": "code",
+    "node_id": "code_unit:apps/web/lib/api/workspaces.ts",
+    "node_ids": [
+     "code_unit:apps/web/lib/api/workspaces.ts"
+    ],
+    "path": "apps/web/lib/api/workspaces.ts",
+    "status": "M"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/backend-workspace-isolation-20261008-combined/positive/plan.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/backend-workspace-isolation-20261008-combined/positive/result.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/backend-workspace-isolation-20261008-combined/positive/source-evidence.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/backend-workspace-isolation-20261008-combined/routes/plan-v2.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/backend-workspace-isolation-20261008-combined/routes/route-plan.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/backend-workspace-isolation-20261008-combined/routes/route-result.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/backend-workspace-isolation-20261008-combined/routes/source-evidence.json",
+    "status": "A"
+   },
+   {
     "kind": "receipt",
     "new": true,
     "path": "receipts/canary/backend-workspace-isolation-20261008/positive/plan.json",
@@ -260,29 +418,38 @@
     "new": true,
     "path": "receipts/canary/backend-workspace-isolation-20261008/verifier/v-canary.json",
     "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/backend-workspace-isolation-20261008.json",
+    "node_ids": [
+     "receipt:receipts/graph/backend-workspace-isolation-20261008.json"
+    ],
+    "path": "receipts/graph/backend-workspace-isolation-20261008.json",
+    "status": "A"
    }
   ],
-  "head": "ee200a6779e42d60c31c86a5647bd5a7ed9f1e26",
+  "head": "11fed894836a4766ab6f2e945520d2faaeb7a3de",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
  "exemptions": [],
  "graph": {
   "builder_version": "1.0.5",
-  "built_at_utc": "2026-10-08T02:26:15Z",
+  "built_at_utc": "2026-10-08T02:57:12Z",
   "graph_digest": "sha256:016f1e1a336f724ffade4345f76a7074031472318d11308bc88f00cfb67e2521",
-  "path": "/home/dev/aup/import-audit-work/runs/PR223-a4d0-hosted-graph-result/graph-5b67dea437be.json",
+  "path": "/home/dev/aup/import-audit-work/runs/PR224-hosted-graph/graph-5b67dea437be.json",
   "source_commit": "5b67dea437be93b988f50b3d312879798dc79f89"
  },
  "head_graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:ecafbd8da2f49d86658da9806fe5d6fd824868de809425c6c667c31ae8cdf938",
-  "path": "receipts/canary/backend-workspace-isolation-20261008/verifier/graph-head-ee200a6779e4.json",
-  "source_commit": "ee200a6779e42d60c31c86a5647bd5a7ed9f1e26",
+  "graph_digest": "sha256:445e40e1394a1dee66cd291012b5220b0b52df87dc148a50f65159494fcfd742",
+  "path": "/home/dev/aup/import-audit-work/runs/PR224-combined-verifier-out2/graph-head-11fed894836a.json",
+  "source_commit": "11fed894836a4766ab6f2e945520d2faaeb7a3de",
   "staleness": {
-   "checked_at_utc": "2026-10-08T02:42:24Z",
-   "checked_nodes": 434,
+   "checked_at_utc": "2026-10-08T03:29:45Z",
+   "checked_nodes": 438,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -1143,6 +1310,307 @@
    {
     "boundary": "intra_unit",
     "depth": 1,
+    "entity": "code_unit:apps/web/__tests__/kanban-board.test.ts",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/__tests__/kanban-board.test.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/tasks.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 3,
+    "entity": "code_unit:apps/web/app/(app)/layout.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/layout/WorkspaceSelector.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/workspaces.ts",
+      "via": "tsconfig-paths"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/layout/Sidebar.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/layout/WorkspaceSelector.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/(app)/layout.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/layout/Sidebar.tsx",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/dashboard/BlockersList.tsx",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/milestones/page.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/milestones/page.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/projects.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/page.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/page.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/projects.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/projects.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/page.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/page.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/workspaces.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/sprints/page.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/sprints/page.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/projects.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/web/app/(app)/workspaces/page.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/(app)/workspaces/page.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/workspaces.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/kanban/KanbanCard.tsx",
+      "via": "relative"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/kanban/KanbanCard.tsx",
+      "via": "relative"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/components/layout/Sidebar.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/layout/WorkspaceSelector.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/workspaces.ts",
+      "via": "tsconfig-paths"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/layout/Sidebar.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/layout/WorkspaceSelector.tsx",
+      "via": "relative"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/web/components/layout/WorkspaceSelector.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/layout/WorkspaceSelector.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/lib/api/workspaces.ts",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
     "entity": "deployable_unit:apps/api",
     "node_type": "deployable_unit",
     "path": [
@@ -1157,6 +1625,60 @@
     "revisions": [
      "base",
      "head"
+    ],
+    "verifier_hint": "can-i-deploy gate (GRAPH-008)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "deployable_unit:apps/web",
+    "node_type": "deployable_unit",
+    "path": [
+     {
+      "edge_type": "deploys_to",
+      "from": "code_unit:apps/web/components/dashboard/BlockersList.tsx",
+      "provenance": "deterministic",
+      "to": "deployable_unit:apps/web",
+      "via": "containment"
+     }
+    ],
+    "revision_paths": [
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "deployable_unit:apps/web",
+      "node_type": "deployable_unit",
+      "path": [
+       {
+        "edge_type": "deploys_to",
+        "from": "code_unit:apps/web/components/dashboard/BlockersList.tsx",
+        "provenance": "deterministic",
+        "to": "deployable_unit:apps/web",
+        "via": "containment"
+       }
+      ],
+      "revision": "base",
+      "section": "deterministic_core",
+      "verifier_hint": "can-i-deploy gate (GRAPH-008)"
+     },
+     {
+      "boundary": "intra_unit",
+      "depth": 1,
+      "entity": "deployable_unit:apps/web",
+      "node_type": "deployable_unit",
+      "path": [
+       {
+        "edge_type": "deploys_to",
+        "from": "code_unit:apps/web/__tests__/read-api-contract.test.ts",
+        "provenance": "deterministic",
+        "to": "deployable_unit:apps/web",
+        "via": "containment"
+       }
+      ],
+      "revision": "head",
+      "section": "deterministic_core",
+      "verifier_hint": "can-i-deploy gate (GRAPH-008)"
+     }
     ],
     "verifier_hint": "can-i-deploy gate (GRAPH-008)"
    },
@@ -2765,416 +3287,21 @@
   "global_fallback": {
    "triggered": false
   },
-  "inferred_tail": [
-   {
-    "boundary": "service",
-    "depth": 2,
-    "entity": "code_unit:apps/web/__tests__/kanban-board.test.ts",
-    "node_type": "code_unit",
-    "path": [
-     {
-      "boundary": "service",
-      "edge_type": "consumes_contract",
-      "from": "code_unit:apps/web/lib/api/tasks.ts",
-      "inferred_by": "http-client-url-match",
-      "provenance": "inferred",
-      "to": "route:GET /tasks/:taskId"
-     },
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/web/__tests__/kanban-board.test.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/web/lib/api/tasks.ts",
-      "via": "tsconfig-paths"
-     }
-    ],
-    "revisions": [
-     "base",
-     "head"
-    ],
-    "verifier_hint": "type-check / compile of the importer"
-   },
-   {
-    "boundary": "service",
-    "depth": 3,
-    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
-    "node_type": "code_unit",
-    "path": [
-     {
-      "boundary": "service",
-      "edge_type": "consumes_contract",
-      "from": "code_unit:apps/web/lib/api/tasks.ts",
-      "inferred_by": "http-client-url-match",
-      "provenance": "inferred",
-      "to": "route:GET /tasks/:taskId"
-     },
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/web/components/dashboard/BlockersList.tsx",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/web/lib/api/tasks.ts",
-      "via": "tsconfig-paths"
-     },
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/web/components/dashboard/BlockersList.tsx",
-      "via": "tsconfig-paths"
-     }
-    ],
-    "revisions": [
-     "base",
-     "head"
-    ],
-    "verifier_hint": "type-check / compile of the importer"
-   },
-   {
-    "boundary": "service",
-    "depth": 2,
-    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
-    "node_type": "code_unit",
-    "path": [
-     {
-      "boundary": "service",
-      "edge_type": "consumes_contract",
-      "from": "code_unit:apps/web/lib/api/tasks.ts",
-      "inferred_by": "http-client-url-match",
-      "provenance": "inferred",
-      "to": "route:GET /tasks/:taskId"
-     },
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/web/lib/api/tasks.ts",
-      "via": "tsconfig-paths"
-     }
-    ],
-    "revisions": [
-     "base",
-     "head"
-    ],
-    "verifier_hint": "type-check / compile of the importer"
-   },
-   {
-    "boundary": "service",
-    "depth": 2,
-    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
-    "node_type": "code_unit",
-    "path": [
-     {
-      "boundary": "service",
-      "edge_type": "consumes_contract",
-      "from": "code_unit:apps/web/lib/api/tasks.ts",
-      "inferred_by": "http-client-url-match",
-      "provenance": "inferred",
-      "to": "route:GET /tasks/:taskId"
-     },
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/web/lib/api/tasks.ts",
-      "via": "tsconfig-paths"
-     }
-    ],
-    "revisions": [
-     "base",
-     "head"
-    ],
-    "verifier_hint": "type-check / compile of the importer"
-   },
-   {
-    "boundary": "service",
-    "depth": 2,
-    "entity": "code_unit:apps/web/components/dashboard/BlockersList.tsx",
-    "node_type": "code_unit",
-    "path": [
-     {
-      "boundary": "service",
-      "edge_type": "consumes_contract",
-      "from": "code_unit:apps/web/lib/api/tasks.ts",
-      "inferred_by": "http-client-url-match",
-      "provenance": "inferred",
-      "to": "route:GET /tasks/:taskId"
-     },
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/web/components/dashboard/BlockersList.tsx",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/web/lib/api/tasks.ts",
-      "via": "tsconfig-paths"
-     }
-    ],
-    "revisions": [
-     "base",
-     "head"
-    ],
-    "verifier_hint": "type-check / compile of the importer"
-   },
-   {
-    "boundary": "service",
-    "depth": 2,
-    "entity": "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
-    "node_type": "code_unit",
-    "path": [
-     {
-      "boundary": "service",
-      "edge_type": "consumes_contract",
-      "from": "code_unit:apps/web/lib/api/tasks.ts",
-      "inferred_by": "http-client-url-match",
-      "provenance": "inferred",
-      "to": "route:GET /tasks/:taskId"
-     },
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/web/lib/api/tasks.ts",
-      "via": "tsconfig-paths"
-     }
-    ],
-    "revisions": [
-     "base",
-     "head"
-    ],
-    "verifier_hint": "type-check / compile of the importer"
-   },
-   {
-    "boundary": "service",
-    "depth": 2,
-    "entity": "code_unit:apps/web/components/kanban/KanbanCard.tsx",
-    "node_type": "code_unit",
-    "path": [
-     {
-      "boundary": "service",
-      "edge_type": "consumes_contract",
-      "from": "code_unit:apps/web/lib/api/tasks.ts",
-      "inferred_by": "http-client-url-match",
-      "provenance": "inferred",
-      "to": "route:GET /tasks/:taskId"
-     },
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/web/components/kanban/KanbanCard.tsx",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/web/lib/api/tasks.ts",
-      "via": "tsconfig-paths"
-     }
-    ],
-    "revisions": [
-     "base",
-     "head"
-    ],
-    "verifier_hint": "type-check / compile of the importer"
-   },
-   {
-    "boundary": "service",
-    "depth": 2,
-    "entity": "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
-    "node_type": "code_unit",
-    "path": [
-     {
-      "boundary": "service",
-      "edge_type": "consumes_contract",
-      "from": "code_unit:apps/web/lib/api/tasks.ts",
-      "inferred_by": "http-client-url-match",
-      "provenance": "inferred",
-      "to": "route:GET /tasks/:taskId"
-     },
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/web/lib/api/tasks.ts",
-      "via": "tsconfig-paths"
-     }
-    ],
-    "revisions": [
-     "base",
-     "head"
-    ],
-    "verifier_hint": "type-check / compile of the importer"
-   },
-   {
-    "boundary": "service",
-    "depth": 2,
-    "entity": "code_unit:apps/web/components/task/AuditLog.tsx",
-    "node_type": "code_unit",
-    "path": [
-     {
-      "boundary": "service",
-      "edge_type": "consumes_contract",
-      "from": "code_unit:apps/web/lib/api/tasks.ts",
-      "inferred_by": "http-client-url-match",
-      "provenance": "inferred",
-      "to": "route:GET /tasks/:taskId"
-     },
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/web/components/task/AuditLog.tsx",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/web/lib/api/tasks.ts",
-      "via": "tsconfig-paths"
-     }
-    ],
-    "revisions": [
-     "base",
-     "head"
-    ],
-    "verifier_hint": "type-check / compile of the importer"
-   },
-   {
-    "boundary": "service",
-    "depth": 2,
-    "entity": "code_unit:apps/web/components/task/TaskChecklist.tsx",
-    "node_type": "code_unit",
-    "path": [
-     {
-      "boundary": "service",
-      "edge_type": "consumes_contract",
-      "from": "code_unit:apps/web/lib/api/tasks.ts",
-      "inferred_by": "http-client-url-match",
-      "provenance": "inferred",
-      "to": "route:GET /tasks/:taskId"
-     },
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/web/components/task/TaskChecklist.tsx",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/web/lib/api/tasks.ts",
-      "via": "tsconfig-paths"
-     }
-    ],
-    "revisions": [
-     "base",
-     "head"
-    ],
-    "verifier_hint": "type-check / compile of the importer"
-   },
-   {
-    "boundary": "service",
-    "depth": 2,
-    "entity": "code_unit:apps/web/components/task/TaskDependencies.tsx",
-    "node_type": "code_unit",
-    "path": [
-     {
-      "boundary": "service",
-      "edge_type": "consumes_contract",
-      "from": "code_unit:apps/web/lib/api/tasks.ts",
-      "inferred_by": "http-client-url-match",
-      "provenance": "inferred",
-      "to": "route:GET /tasks/:taskId"
-     },
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/web/components/task/TaskDependencies.tsx",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/web/lib/api/tasks.ts",
-      "via": "tsconfig-paths"
-     }
-    ],
-    "revisions": [
-     "base",
-     "head"
-    ],
-    "verifier_hint": "type-check / compile of the importer"
-   },
-   {
-    "boundary": "service",
-    "depth": 2,
-    "entity": "code_unit:apps/web/components/task/TaskDetail.tsx",
-    "node_type": "code_unit",
-    "path": [
-     {
-      "boundary": "service",
-      "edge_type": "consumes_contract",
-      "from": "code_unit:apps/web/lib/api/tasks.ts",
-      "inferred_by": "http-client-url-match",
-      "provenance": "inferred",
-      "to": "route:GET /tasks/:taskId"
-     },
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/web/lib/api/tasks.ts",
-      "via": "tsconfig-paths"
-     }
-    ],
-    "revisions": [
-     "base",
-     "head"
-    ],
-    "verifier_hint": "type-check / compile of the importer"
-   },
-   {
-    "boundary": "service",
-    "depth": 1,
-    "entity": "code_unit:apps/web/lib/api/tasks.ts",
-    "node_type": "code_unit",
-    "path": [
-     {
-      "boundary": "service",
-      "edge_type": "consumes_contract",
-      "from": "code_unit:apps/web/lib/api/tasks.ts",
-      "inferred_by": "http-client-url-match",
-      "provenance": "inferred",
-      "to": "route:GET /tasks/:taskId"
-     }
-    ],
-    "revisions": [
-     "base",
-     "head"
-    ],
-    "verifier_hint": "consumer ⊆ provider check (contract-diff)"
-   },
-   {
-    "boundary": "service",
-    "depth": 2,
-    "entity": "deployable_unit:apps/web",
-    "node_type": "deployable_unit",
-    "path": [
-     {
-      "boundary": "service",
-      "edge_type": "consumes_contract",
-      "from": "code_unit:apps/web/lib/api/tasks.ts",
-      "inferred_by": "http-client-url-match",
-      "provenance": "inferred",
-      "to": "route:GET /tasks/:taskId"
-     },
-     {
-      "edge_type": "deploys_to",
-      "from": "code_unit:apps/web/lib/api/tasks.ts",
-      "provenance": "deterministic",
-      "to": "deployable_unit:apps/web",
-      "via": "containment"
-     }
-    ],
-    "revisions": [
-     "base",
-     "head"
-    ],
-    "verifier_hint": "can-i-deploy gate (GRAPH-008)"
-   }
-  ],
+  "inferred_tail": [],
   "max_depth": 3,
   "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
-  "total": 120
+  "total": 121
  },
  "notes": [
   "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
   "profile: (auto-detected); baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none",
-  "head tree ee200a6779e4 exported with git archive into /home/dev/aup/import-audit-work/runs/backend-only-packaging-verify-work/export-ee200a6779e4 (node_modules linked from the repository for ['.', 'apps/api', 'apps/web', 'packages/types']; workspace packages built: ['packages/types (tsc exit 0, 0.36s)']); the repository was not written",
   "A2-353: `canary` discharged for 1 test code_unit(s) — a canary lists live-contour entities and can never name a test file; their other verifiers (config_schema, type_check, fitness) still apply: code_unit:apps/api/test/human-task-read-isolation.e2e.spec.ts"
  ],
  "producer": {
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261008T024207Z-ee200a67",
- "receipt_path": "receipts/graph/backend-workspace-isolation-20261008.json",
+ "receipt_id": "car-verify-20261008T032931Z-11fed894",
  "repo": {
   "name": "Arcanada-one/muneral",
   "path": "/home/dev/aup/import-audit-work/mun-backend-isolation-only"
@@ -3235,18 +3362,28 @@
    "code_unit:apps/api/test/tasks.service.spec.ts",
    "code_unit:apps/api/test/workspace-digest.unit.spec.ts",
    "code_unit:apps/web/__tests__/kanban-board.test.ts",
+   "code_unit:apps/web/app/(app)/layout.tsx",
    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/milestones/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/page.tsx",
    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/sprints/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/page.tsx",
    "code_unit:apps/web/components/dashboard/BlockersList.tsx",
    "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
    "code_unit:apps/web/components/kanban/KanbanCard.tsx",
    "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
+   "code_unit:apps/web/components/layout/Sidebar.tsx",
+   "code_unit:apps/web/components/layout/WorkspaceSelector.tsx",
    "code_unit:apps/web/components/task/AuditLog.tsx",
    "code_unit:apps/web/components/task/TaskChecklist.tsx",
    "code_unit:apps/web/components/task/TaskDependencies.tsx",
    "code_unit:apps/web/components/task/TaskDetail.tsx",
+   "code_unit:apps/web/lib/api/projects.ts",
    "code_unit:apps/web/lib/api/tasks.ts",
+   "code_unit:apps/web/lib/api/workspaces.ts",
    "contract:apps/api/src/execution-authority/task-staleness.service.ts#StalenessVerdict",
    "deployable_unit:apps/api",
    "deployable_unit:apps/web",
@@ -3407,19 +3544,40 @@
    "code_unit:apps/api/test/tasks.service.spec.ts",
    "code_unit:apps/api/test/workspace-digest.unit.spec.ts",
    "code_unit:apps/web/__tests__/kanban-board.test.ts",
+   "code_unit:apps/web/__tests__/read-api-contract.test.ts",
+   "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
+   "code_unit:apps/web/app/(app)/layout.tsx",
    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/milestones/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/page.tsx",
    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/sprints/page.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/page.tsx",
    "code_unit:apps/web/components/dashboard/BlockersList.tsx",
    "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
    "code_unit:apps/web/components/kanban/KanbanCard.tsx",
    "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
+   "code_unit:apps/web/components/layout/Sidebar.tsx",
+   "code_unit:apps/web/components/layout/WorkspaceSelector.tsx",
    "code_unit:apps/web/components/task/AuditLog.tsx",
    "code_unit:apps/web/components/task/TaskChecklist.tsx",
    "code_unit:apps/web/components/task/TaskDependencies.tsx",
    "code_unit:apps/web/components/task/TaskDetail.tsx",
+   "code_unit:apps/web/lib/api/projects.ts",
+   "code_unit:apps/web/lib/api/read-contract.ts",
    "code_unit:apps/web/lib/api/tasks.ts",
+   "code_unit:apps/web/lib/api/workspaces.ts",
    "contract:apps/api/src/execution-authority/task-staleness.service.ts#StalenessVerdict",
+   "contract:apps/web/lib/api/read-contract.ts#activity",
+   "contract:apps/web/lib/api/read-contract.ts#checklist",
+   "contract:apps/web/lib/api/read-contract.ts#dependency",
+   "contract:apps/web/lib/api/read-contract.ts#id",
+   "contract:apps/web/lib/api/read-contract.ts#project",
+   "contract:apps/web/lib/api/read-contract.ts#task",
+   "contract:apps/web/lib/api/read-contract.ts#timestamp",
+   "contract:apps/web/lib/api/read-contract.ts#workspace",
    "deployable_unit:apps/api",
    "deployable_unit:apps/web",
    "document:README.md",
@@ -3442,6 +3600,7 @@
    "receipt:receipts/graph/A2-394-reinstate-digest-grant.json",
    "receipt:receipts/graph/a2-304-dependabot-group.json",
    "receipt:receipts/graph/a2-320-web-eslint10.json",
+   "receipt:receipts/graph/backend-workspace-isolation-20261008.json",
    "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json",
    "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
    "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
@@ -3526,7 +3685,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-08T02:42:24Z",
+  "checked_at_utc": "2026-10-08T03:29:45Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -3941,7 +4100,7 @@
   }
  ],
  "tree": {
-  "commit": "ee200a6779e42d60c31c86a5647bd5a7ed9f1e26",
+  "commit": "11fed894836a4766ab6f2e945520d2faaeb7a3de",
   "dirty": false
  },
  "verdicts": [
@@ -4088,7 +4247,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/projects/projects.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-1: canary backend-only-human-task-read-security (pre) on Owned disposable PostgreSQL and actual Nest HTTP, synthetic human principals only: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-1: canary backend-only-human-task-read-security-combined (pre) on Owned disposable PostgreSQL and actual Nest HTTP, synthetic human principals only: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
    "verdict": "verified",
    "verifier_ids": [
     "v-canary-1",
@@ -4118,7 +4277,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/sync/sync.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation; v-canary-1: canary backend-only-human-task-read-security (pre) on Owned disposable PostgreSQL and actual Nest HTTP, synthetic human principals only: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation; v-canary-1: canary backend-only-human-task-read-security-combined (pre) on Owned disposable PostgreSQL and actual Nest HTTP, synthetic human principals only: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
    "verdict": "verified",
    "verifier_ids": [
     "v-canary-1",
@@ -4187,7 +4346,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/tasks.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 9 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-1: canary backend-only-human-task-read-security (pre) on Owned disposable PostgreSQL and actual Nest HTTP, synthetic human principals only: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 9 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-1: canary backend-only-human-task-read-security-combined (pre) on Owned disposable PostgreSQL and actual Nest HTTP, synthetic human principals only: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
    "verdict": "verified",
    "verifier_ids": [
     "v-canary-1",
@@ -4470,131 +4629,218 @@
   },
   {
    "entity": "code_unit:apps/web/__tests__/kanban-board.test.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
-    "v-contract-diff",
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/__tests__/read-api-contract.test.ts",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/app/(app)/layout.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
    ]
   },
   {
    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
-    "v-contract-diff",
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/milestones/page.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/page.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
    ]
   },
   {
    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
-    "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
    ]
   },
   {
    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
-    "v-contract-diff",
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/page.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/sprints/page.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/app/(app)/workspaces/page.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
    ]
   },
   {
    "entity": "code_unit:apps/web/components/dashboard/BlockersList.tsx",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
-    "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
    ]
   },
   {
    "entity": "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
-    "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
    ]
   },
   {
    "entity": "code_unit:apps/web/components/kanban/KanbanCard.tsx",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
-    "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
    ]
   },
   {
    "entity": "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
-    "v-contract-diff",
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/layout/Sidebar.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/layout/WorkspaceSelector.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
    ]
   },
   {
    "entity": "code_unit:apps/web/components/task/AuditLog.tsx",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
-    "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
    ]
   },
   {
    "entity": "code_unit:apps/web/components/task/TaskChecklist.tsx",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
-    "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
    ]
   },
   {
    "entity": "code_unit:apps/web/components/task/TaskDependencies.tsx",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
-    "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
    ]
   },
   {
    "entity": "code_unit:apps/web/components/task/TaskDetail.tsx",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-contract-diff",
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/lib/api/projects.ts",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-contract-diff",
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/lib/api/read-contract.ts",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-contract-diff: 9 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
@@ -4602,10 +4848,19 @@
   },
   {
    "entity": "code_unit:apps/web/lib/api/tasks.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-contract-diff: 3 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-contract-diff",
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/lib/api/workspaces.ts",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
@@ -4614,6 +4869,70 @@
   {
    "entity": "contract:apps/api/src/execution-authority/task-staleness.service.ts#StalenessVerdict",
    "reason": "v-contract-diff: unchanged: no breaking change (0 change(s))",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-contract-diff"
+   ]
+  },
+  {
+   "entity": "contract:apps/web/lib/api/read-contract.ts#activity",
+   "reason": "v-contract-diff: added: no breaking change (1 change(s))",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-contract-diff"
+   ]
+  },
+  {
+   "entity": "contract:apps/web/lib/api/read-contract.ts#checklist",
+   "reason": "v-contract-diff: added: no breaking change (1 change(s))",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-contract-diff"
+   ]
+  },
+  {
+   "entity": "contract:apps/web/lib/api/read-contract.ts#dependency",
+   "reason": "v-contract-diff: added: no breaking change (1 change(s))",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-contract-diff"
+   ]
+  },
+  {
+   "entity": "contract:apps/web/lib/api/read-contract.ts#id",
+   "reason": "v-contract-diff: added: no breaking change (1 change(s))",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-contract-diff"
+   ]
+  },
+  {
+   "entity": "contract:apps/web/lib/api/read-contract.ts#project",
+   "reason": "v-contract-diff: added: no breaking change (1 change(s))",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-contract-diff"
+   ]
+  },
+  {
+   "entity": "contract:apps/web/lib/api/read-contract.ts#task",
+   "reason": "v-contract-diff: added: no breaking change (1 change(s))",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-contract-diff"
+   ]
+  },
+  {
+   "entity": "contract:apps/web/lib/api/read-contract.ts#timestamp",
+   "reason": "v-contract-diff: added: no breaking change (1 change(s))",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-contract-diff"
+   ]
+  },
+  {
+   "entity": "contract:apps/web/lib/api/read-contract.ts#workspace",
+   "reason": "v-contract-diff: added: no breaking change (1 change(s))",
    "verdict": "verified",
    "verifier_ids": [
     "v-contract-diff"
@@ -4630,10 +4949,9 @@
   },
   {
    "entity": "deployable_unit:apps/web",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: 0 errors; v-fitness: no new violation in apps/web",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
     "v-fitness",
     "v-type-check-apps-web-tsconfig"
    ]
@@ -4717,6 +5035,11 @@
    "verifier_ids": [
     "v-doc-reference"
    ]
+  },
+  {
+   "entity": "receipt:receipts/graph/backend-workspace-isolation-20261008.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "verdict": "not_measured"
   },
   {
    "entity": "route:DELETE /agents/keys/:keyId",
@@ -5288,8 +5611,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/aup/import-audit-work/runs/backend-only-packaging-verify-work/export-ee200a6779e4/apps/api/node_modules/.bin/tsc -p /home/dev/aup/import-audit-work/runs/backend-only-packaging-verify-work/export-ee200a6779e4/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/mun-backend-isolation-only/.github/graph-admission/receipts/canary/backend-workspace-isolation-20261008/verifier/type-check-j64az6qu/check.tsbuildinfo --listFiles",
-   "duration_s": 4.41,
+   "command": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/node_modules/.bin/tsc -p /home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/PR224-combined-verifier-out2/type-check-wypknrhl/check.tsbuildinfo --listFiles",
+   "duration_s": 4.05,
    "entities": [
     "code_unit:apps/api/src/activity/activity.module.ts",
     "code_unit:apps/api/src/activity/activity.service.ts",
@@ -5457,13 +5780,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "receipts/canary/backend-workspace-isolation-20261008/verifier/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-10-08T02:42:30Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR224-combined-verifier-out2/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-10-08T03:29:50Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1453 files listed"
   },
   {
-   "command": "/home/dev/aup/import-audit-work/runs/backend-only-packaging-verify-work/export-ee200a6779e4/apps/api/node_modules/.bin/tsc -p /home/dev/aup/import-audit-work/runs/backend-only-packaging-verify-work/export-ee200a6779e4/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/mun-backend-isolation-only/.github/graph-admission/receipts/canary/backend-workspace-isolation-20261008/verifier/type-check-nmz_n8hj/check.tsbuildinfo --listFiles",
-   "duration_s": 7.72,
+   "command": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/node_modules/.bin/tsc -p /home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/PR224-combined-verifier-out2/type-check-wxbuwr0q/check.tsbuildinfo --listFiles",
+   "duration_s": 6.77,
    "entities": [
     "code_unit:apps/api/test/activity.service.spec.ts",
     "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts",
@@ -5529,55 +5852,81 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
-   "output_ref": "receipts/canary/backend-workspace-isolation-20261008/verifier/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-10-08T02:42:35Z",
-   "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1611 files listed"
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR224-combined-verifier-out2/v-type-check-apps-api-tsconfig-test.txt",
+   "started_at_utc": "2026-10-08T03:29:54Z",
+   "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1615 files listed"
   },
   {
-   "command": "/home/dev/aup/import-audit-work/runs/backend-only-packaging-verify-work/export-ee200a6779e4/apps/web/node_modules/.bin/tsc -p /home/dev/aup/import-audit-work/runs/backend-only-packaging-verify-work/export-ee200a6779e4/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/mun-backend-isolation-only/.github/graph-admission/receipts/canary/backend-workspace-isolation-20261008/verifier/type-check-9hqli74t/check.tsbuildinfo --listFiles",
-   "duration_s": 5.58,
+   "command": "/home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/web/node_modules/.bin/tsc -p /home/dev/aup/import-audit-work/mun-backend-isolation-only/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/import-audit-work/runs/PR224-combined-verifier-out2/type-check-pwvfnfq8/check.tsbuildinfo --listFiles",
+   "duration_s": 5.39,
    "entities": [
     "code_unit:apps/web/__tests__/kanban-board.test.ts",
+    "code_unit:apps/web/__tests__/read-api-contract.test.ts",
+    "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
+    "code_unit:apps/web/app/(app)/layout.tsx",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/milestones/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/page.tsx",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/sprints/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/page.tsx",
     "code_unit:apps/web/components/dashboard/BlockersList.tsx",
     "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
     "code_unit:apps/web/components/kanban/KanbanCard.tsx",
     "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
+    "code_unit:apps/web/components/layout/Sidebar.tsx",
+    "code_unit:apps/web/components/layout/WorkspaceSelector.tsx",
     "code_unit:apps/web/components/task/AuditLog.tsx",
     "code_unit:apps/web/components/task/TaskChecklist.tsx",
     "code_unit:apps/web/components/task/TaskDependencies.tsx",
     "code_unit:apps/web/components/task/TaskDetail.tsx",
+    "code_unit:apps/web/lib/api/projects.ts",
+    "code_unit:apps/web/lib/api/read-contract.ts",
     "code_unit:apps/web/lib/api/tasks.ts",
+    "code_unit:apps/web/lib/api/workspaces.ts",
     "deployable_unit:apps/web"
    ],
    "entity_verdicts": {
     "code_unit:apps/web/__tests__/kanban-board.test.ts": "verified",
+    "code_unit:apps/web/__tests__/read-api-contract.test.ts": "verified",
+    "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx": "verified",
+    "code_unit:apps/web/app/(app)/layout.tsx": "verified",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/milestones/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/page.tsx": "verified",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx": "verified",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/sprints/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/page.tsx": "verified",
     "code_unit:apps/web/components/dashboard/BlockersList.tsx": "verified",
     "code_unit:apps/web/components/kanban/KanbanBoard.tsx": "verified",
     "code_unit:apps/web/components/kanban/KanbanCard.tsx": "verified",
     "code_unit:apps/web/components/kanban/KanbanColumn.tsx": "verified",
+    "code_unit:apps/web/components/layout/Sidebar.tsx": "verified",
+    "code_unit:apps/web/components/layout/WorkspaceSelector.tsx": "verified",
     "code_unit:apps/web/components/task/AuditLog.tsx": "verified",
     "code_unit:apps/web/components/task/TaskChecklist.tsx": "verified",
     "code_unit:apps/web/components/task/TaskDependencies.tsx": "verified",
     "code_unit:apps/web/components/task/TaskDetail.tsx": "verified",
+    "code_unit:apps/web/lib/api/projects.ts": "verified",
+    "code_unit:apps/web/lib/api/read-contract.ts": "verified",
     "code_unit:apps/web/lib/api/tasks.ts": "verified",
+    "code_unit:apps/web/lib/api/workspaces.ts": "verified",
     "deployable_unit:apps/web": "verified"
    },
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "receipts/canary/backend-workspace-isolation-20261008/verifier/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-10-08T02:42:43Z",
-   "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1296 files listed"
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR224-combined-verifier-out2/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-10-08T03:30:01Z",
+   "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1302 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=5b67dea437be, head=ee200a6779e4, graph=head graph)",
-   "duration_s": 5.68,
+   "command": "tools/graph/contract_diff.py.run_diff(base=5b67dea437be, head=11fed894836a, graph=head graph)",
+   "duration_s": 4.91,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/execution-authority/index.ts",
@@ -5591,20 +5940,20 @@
     "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts",
     "code_unit:apps/api/src/tasks/tasks.controller.ts",
     "code_unit:apps/api/src/tasks/tasks.service.ts",
-    "code_unit:apps/web/__tests__/kanban-board.test.ts",
-    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
-    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
-    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
-    "code_unit:apps/web/components/dashboard/BlockersList.tsx",
-    "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
-    "code_unit:apps/web/components/kanban/KanbanCard.tsx",
-    "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
-    "code_unit:apps/web/components/task/AuditLog.tsx",
-    "code_unit:apps/web/components/task/TaskChecklist.tsx",
-    "code_unit:apps/web/components/task/TaskDependencies.tsx",
     "code_unit:apps/web/components/task/TaskDetail.tsx",
+    "code_unit:apps/web/lib/api/projects.ts",
+    "code_unit:apps/web/lib/api/read-contract.ts",
     "code_unit:apps/web/lib/api/tasks.ts",
+    "code_unit:apps/web/lib/api/workspaces.ts",
     "contract:apps/api/src/execution-authority/task-staleness.service.ts#StalenessVerdict",
+    "contract:apps/web/lib/api/read-contract.ts#activity",
+    "contract:apps/web/lib/api/read-contract.ts#checklist",
+    "contract:apps/web/lib/api/read-contract.ts#dependency",
+    "contract:apps/web/lib/api/read-contract.ts#id",
+    "contract:apps/web/lib/api/read-contract.ts#project",
+    "contract:apps/web/lib/api/read-contract.ts#task",
+    "contract:apps/web/lib/api/read-contract.ts#timestamp",
+    "contract:apps/web/lib/api/read-contract.ts#workspace",
     "route:DELETE /agents/keys/:keyId",
     "route:DELETE /agents/tasks/:taskId/assign/:agentId",
     "route:DELETE /projects/:projectId",
@@ -5670,20 +6019,20 @@
     "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts": "verified",
     "code_unit:apps/api/src/tasks/tasks.controller.ts": "verified",
     "code_unit:apps/api/src/tasks/tasks.service.ts": "verified",
-    "code_unit:apps/web/__tests__/kanban-board.test.ts": "verified",
-    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx": "verified",
-    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx": "verified",
-    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx": "verified",
-    "code_unit:apps/web/components/dashboard/BlockersList.tsx": "verified",
-    "code_unit:apps/web/components/kanban/KanbanBoard.tsx": "verified",
-    "code_unit:apps/web/components/kanban/KanbanCard.tsx": "verified",
-    "code_unit:apps/web/components/kanban/KanbanColumn.tsx": "verified",
-    "code_unit:apps/web/components/task/AuditLog.tsx": "verified",
-    "code_unit:apps/web/components/task/TaskChecklist.tsx": "verified",
-    "code_unit:apps/web/components/task/TaskDependencies.tsx": "verified",
     "code_unit:apps/web/components/task/TaskDetail.tsx": "verified",
+    "code_unit:apps/web/lib/api/projects.ts": "verified",
+    "code_unit:apps/web/lib/api/read-contract.ts": "verified",
     "code_unit:apps/web/lib/api/tasks.ts": "verified",
+    "code_unit:apps/web/lib/api/workspaces.ts": "verified",
     "contract:apps/api/src/execution-authority/task-staleness.service.ts#StalenessVerdict": "verified",
+    "contract:apps/web/lib/api/read-contract.ts#activity": "verified",
+    "contract:apps/web/lib/api/read-contract.ts#checklist": "verified",
+    "contract:apps/web/lib/api/read-contract.ts#dependency": "verified",
+    "contract:apps/web/lib/api/read-contract.ts#id": "verified",
+    "contract:apps/web/lib/api/read-contract.ts#project": "verified",
+    "contract:apps/web/lib/api/read-contract.ts#task": "verified",
+    "contract:apps/web/lib/api/read-contract.ts#timestamp": "verified",
+    "contract:apps/web/lib/api/read-contract.ts#workspace": "verified",
     "route:DELETE /agents/keys/:keyId": "verified",
     "route:DELETE /agents/tasks/:taskId/assign/:agentId": "verified",
     "route:DELETE /projects/:projectId": "verified",
@@ -5739,13 +6088,13 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "receipts/canary/backend-workspace-isolation-20261008/verifier/v-contract-diff.json",
-   "started_at_utc": "2026-10-08T02:42:49Z",
-   "summary": "48→48 contracts, breaking 0, edges {'verified': 153}"
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR224-combined-verifier-out2/v-contract-diff.json",
+   "started_at_utc": "2026-10-08T03:30:07Z",
+   "summary": "48→56 contracts, breaking 0, edges {'verified': 162}"
   },
   {
    "command": "verify.py route_config_consistency RC-01 prefix / RC-02 registration / RC-03 served",
-   "duration_s": 0.1,
+   "duration_s": 0.06,
    "entities": [
     "route:DELETE /agents/keys/:keyId",
     "route:DELETE /agents/tasks/:taskId/assign/:agentId",
@@ -5855,13 +6204,13 @@
    "exit_code": 0,
    "id": "v-route-config",
    "kind": "config_schema",
-   "output_ref": "receipts/canary/backend-workspace-isolation-20261008/verifier/v-route-config.txt",
-   "started_at_utc": "2026-10-08T02:42:55Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR224-combined-verifier-out2/v-route-config.txt",
+   "started_at_utc": "2026-10-08T03:30:12Z",
    "summary": "51 route(s), 0 failed"
   },
   {
    "command": "verify.py config_schema: keys read at head ⊆ declared keys",
-   "duration_s": 0.64,
+   "duration_s": 0.52,
    "entities": [
     "code_unit:apps/api/test/human-task-read-isolation.e2e.spec.ts"
    ],
@@ -5871,13 +6220,13 @@
    "exit_code": 0,
    "id": "v-config-schema",
    "kind": "config_schema",
-   "output_ref": "receipts/canary/backend-workspace-isolation-20261008/verifier/v-config-schema.json",
-   "started_at_utc": "2026-10-08T02:42:55Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR224-combined-verifier-out2/v-config-schema.json",
+   "started_at_utc": "2026-10-08T03:30:12Z",
    "summary": "2 source(s), 0 new / 3 frozen undeclared reads, 0 failed; 4 vendored file(s) not attributed to this repository (Arcanada-one/arcanada-universal-program)"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.13,
+   "duration_s": 0.15,
    "entities": [
     "code_unit:apps/api/src/activity/activity.module.ts",
     "code_unit:apps/api/src/activity/activity.service.ts",
@@ -5936,18 +6285,31 @@
     "code_unit:apps/api/test/tasks.service.spec.ts",
     "code_unit:apps/api/test/workspace-digest.unit.spec.ts",
     "code_unit:apps/web/__tests__/kanban-board.test.ts",
+    "code_unit:apps/web/__tests__/read-api-contract.test.ts",
+    "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
+    "code_unit:apps/web/app/(app)/layout.tsx",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/milestones/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/page.tsx",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/sprints/page.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/page.tsx",
     "code_unit:apps/web/components/dashboard/BlockersList.tsx",
     "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
     "code_unit:apps/web/components/kanban/KanbanCard.tsx",
     "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
+    "code_unit:apps/web/components/layout/Sidebar.tsx",
+    "code_unit:apps/web/components/layout/WorkspaceSelector.tsx",
     "code_unit:apps/web/components/task/AuditLog.tsx",
     "code_unit:apps/web/components/task/TaskChecklist.tsx",
     "code_unit:apps/web/components/task/TaskDependencies.tsx",
     "code_unit:apps/web/components/task/TaskDetail.tsx",
+    "code_unit:apps/web/lib/api/projects.ts",
+    "code_unit:apps/web/lib/api/read-contract.ts",
     "code_unit:apps/web/lib/api/tasks.ts",
+    "code_unit:apps/web/lib/api/workspaces.ts",
     "deployable_unit:apps/api",
     "deployable_unit:apps/web"
    ],
@@ -6009,26 +6371,39 @@
     "code_unit:apps/api/test/tasks.service.spec.ts": "verified",
     "code_unit:apps/api/test/workspace-digest.unit.spec.ts": "verified",
     "code_unit:apps/web/__tests__/kanban-board.test.ts": "verified",
+    "code_unit:apps/web/__tests__/read-api-contract.test.ts": "verified",
+    "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx": "verified",
+    "code_unit:apps/web/app/(app)/layout.tsx": "verified",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/milestones/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/page.tsx": "verified",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx": "verified",
     "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/sprints/page.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/page.tsx": "verified",
     "code_unit:apps/web/components/dashboard/BlockersList.tsx": "verified",
     "code_unit:apps/web/components/kanban/KanbanBoard.tsx": "verified",
     "code_unit:apps/web/components/kanban/KanbanCard.tsx": "verified",
     "code_unit:apps/web/components/kanban/KanbanColumn.tsx": "verified",
+    "code_unit:apps/web/components/layout/Sidebar.tsx": "verified",
+    "code_unit:apps/web/components/layout/WorkspaceSelector.tsx": "verified",
     "code_unit:apps/web/components/task/AuditLog.tsx": "verified",
     "code_unit:apps/web/components/task/TaskChecklist.tsx": "verified",
     "code_unit:apps/web/components/task/TaskDependencies.tsx": "verified",
     "code_unit:apps/web/components/task/TaskDetail.tsx": "verified",
+    "code_unit:apps/web/lib/api/projects.ts": "verified",
+    "code_unit:apps/web/lib/api/read-contract.ts": "verified",
     "code_unit:apps/web/lib/api/tasks.ts": "verified",
+    "code_unit:apps/web/lib/api/workspaces.ts": "verified",
     "deployable_unit:apps/api": "verified",
     "deployable_unit:apps/web": "verified"
    },
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "receipts/canary/backend-workspace-isolation-20261008/verifier/v-fitness.json",
-   "started_at_utc": "2026-10-08T02:42:55Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR224-combined-verifier-out2/v-fitness.json",
+   "started_at_utc": "2026-10-08T03:30:12Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -6061,13 +6436,13 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "receipts/canary/backend-workspace-isolation-20261008/verifier/v-doc-reference.txt",
-   "started_at_utc": "2026-10-08T02:42:55Z",
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR224-combined-verifier-out2/v-doc-reference.txt",
+   "started_at_utc": "2026-10-08T03:30:13Z",
    "summary": "10 document(s), 0 failed"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.16,
+   "duration_s": 0.08,
    "entities": [
     "code_unit:apps/api/src/projects/projects.controller.ts",
     "code_unit:apps/api/src/sync/sync.controller.ts",
@@ -6081,13 +6456,13 @@
    "exit_code": 0,
    "id": "v-canary-1",
    "kind": "canary",
-   "output_ref": "receipts/canary/backend-workspace-isolation-20261008/positive/result.json",
-   "started_at_utc": "2026-10-08T02:42:55Z",
-   "summary": "receipts/canary/backend-workspace-isolation-20261008/positive/result.json: 3 verified / 0 failed / 0 not_measured"
+   "output_ref": "receipts/canary/backend-workspace-isolation-20261008-combined/positive/result.json",
+   "started_at_utc": "2026-10-08T03:30:13Z",
+   "summary": "receipts/canary/backend-workspace-isolation-20261008-combined/positive/result.json: 3 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.16,
+   "duration_s": 0.08,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/migration/migration.controller.ts",
@@ -6209,51 +6584,20 @@
    "exit_code": 0,
    "id": "v-canary-2",
    "kind": "canary",
-   "output_ref": "receipts/canary/backend-workspace-isolation-20261008/routes/route-result.json",
-   "started_at_utc": "2026-10-08T02:42:55Z",
-   "summary": "receipts/canary/backend-workspace-isolation-20261008/routes/route-result.json: 57 verified / 0 failed / 0 not_measured"
+   "output_ref": "receipts/canary/backend-workspace-isolation-20261008-combined/routes/route-result.json",
+   "started_at_utc": "2026-10-08T03:30:13Z",
+   "summary": "receipts/canary/backend-workspace-isolation-20261008-combined/routes/route-result.json: 57 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.16,
-   "entities": [
-    "code_unit:apps/web/__tests__/kanban-board.test.ts",
-    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx",
-    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx",
-    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
-    "code_unit:apps/web/components/dashboard/BlockersList.tsx",
-    "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
-    "code_unit:apps/web/components/kanban/KanbanCard.tsx",
-    "code_unit:apps/web/components/kanban/KanbanColumn.tsx",
-    "code_unit:apps/web/components/task/AuditLog.tsx",
-    "code_unit:apps/web/components/task/TaskChecklist.tsx",
-    "code_unit:apps/web/components/task/TaskDependencies.tsx",
-    "code_unit:apps/web/components/task/TaskDetail.tsx",
-    "code_unit:apps/web/lib/api/tasks.ts",
-    "deployable_unit:apps/web"
-   ],
-   "entity_verdicts": {
-    "code_unit:apps/web/__tests__/kanban-board.test.ts": "not_measured",
-    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx": "not_measured",
-    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx": "not_measured",
-    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx": "not_measured",
-    "code_unit:apps/web/components/dashboard/BlockersList.tsx": "not_measured",
-    "code_unit:apps/web/components/kanban/KanbanBoard.tsx": "not_measured",
-    "code_unit:apps/web/components/kanban/KanbanCard.tsx": "not_measured",
-    "code_unit:apps/web/components/kanban/KanbanColumn.tsx": "not_measured",
-    "code_unit:apps/web/components/task/AuditLog.tsx": "not_measured",
-    "code_unit:apps/web/components/task/TaskChecklist.tsx": "not_measured",
-    "code_unit:apps/web/components/task/TaskDependencies.tsx": "not_measured",
-    "code_unit:apps/web/components/task/TaskDetail.tsx": "not_measured",
-    "code_unit:apps/web/lib/api/tasks.ts": "not_measured",
-    "deployable_unit:apps/web": "not_measured"
-   },
+   "duration_s": 0.08,
+   "entities": [],
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "receipts/canary/backend-workspace-isolation-20261008/verifier/v-canary.json",
-   "started_at_utc": "2026-10-08T02:42:55Z",
-   "summary": "2 canary result(s), 2 committed at head; 57 verified / 0 failed / 14 not_measured of 71 entities"
+   "output_ref": "/home/dev/aup/import-audit-work/runs/PR224-combined-verifier-out2/v-canary.json",
+   "started_at_utc": "2026-10-08T03:30:13Z",
+   "summary": "2 canary result(s), 2 committed at head; 57 verified / 0 failed / 0 not_measured of 57 entities"
   }
  ],
  "verify": {
@@ -6509,61 +6853,100 @@
     "type_check"
    ],
    "code_unit:apps/web/__tests__/kanban-board.test.ts": [
-    "contract_diff",
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/__tests__/read-api-contract.test.ts": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/app/(app)/layout.tsx": [
     "fitness_rules",
     "type_check"
    ],
    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/dashboard/page.tsx": [
-    "contract_diff",
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/milestones/page.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/page.tsx": [
     "fitness_rules",
     "type_check"
    ],
    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page.tsx": [
-    "contract_diff",
     "fitness_rules",
     "type_check"
    ],
    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx": [
-    "contract_diff",
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/settings/page.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/sprints/page.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/app/(app)/workspaces/page.tsx": [
     "fitness_rules",
     "type_check"
    ],
    "code_unit:apps/web/components/dashboard/BlockersList.tsx": [
-    "contract_diff",
     "fitness_rules",
     "type_check"
    ],
    "code_unit:apps/web/components/kanban/KanbanBoard.tsx": [
-    "contract_diff",
     "fitness_rules",
     "type_check"
    ],
    "code_unit:apps/web/components/kanban/KanbanCard.tsx": [
-    "contract_diff",
     "fitness_rules",
     "type_check"
    ],
    "code_unit:apps/web/components/kanban/KanbanColumn.tsx": [
-    "contract_diff",
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/components/layout/Sidebar.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/components/layout/WorkspaceSelector.tsx": [
     "fitness_rules",
     "type_check"
    ],
    "code_unit:apps/web/components/task/AuditLog.tsx": [
-    "contract_diff",
     "fitness_rules",
     "type_check"
    ],
    "code_unit:apps/web/components/task/TaskChecklist.tsx": [
-    "contract_diff",
     "fitness_rules",
     "type_check"
    ],
    "code_unit:apps/web/components/task/TaskDependencies.tsx": [
-    "contract_diff",
     "fitness_rules",
     "type_check"
    ],
    "code_unit:apps/web/components/task/TaskDetail.tsx": [
+    "contract_diff",
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/lib/api/projects.ts": [
+    "contract_diff",
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/lib/api/read-contract.ts": [
     "contract_diff",
     "fitness_rules",
     "type_check"
@@ -6573,7 +6956,36 @@
     "fitness_rules",
     "type_check"
    ],
+   "code_unit:apps/web/lib/api/workspaces.ts": [
+    "contract_diff",
+    "fitness_rules",
+    "type_check"
+   ],
    "contract:apps/api/src/execution-authority/task-staleness.service.ts#StalenessVerdict": [
+    "contract_diff"
+   ],
+   "contract:apps/web/lib/api/read-contract.ts#activity": [
+    "contract_diff"
+   ],
+   "contract:apps/web/lib/api/read-contract.ts#checklist": [
+    "contract_diff"
+   ],
+   "contract:apps/web/lib/api/read-contract.ts#dependency": [
+    "contract_diff"
+   ],
+   "contract:apps/web/lib/api/read-contract.ts#id": [
+    "contract_diff"
+   ],
+   "contract:apps/web/lib/api/read-contract.ts#project": [
+    "contract_diff"
+   ],
+   "contract:apps/web/lib/api/read-contract.ts#task": [
+    "contract_diff"
+   ],
+   "contract:apps/web/lib/api/read-contract.ts#timestamp": [
+    "contract_diff"
+   ],
+   "contract:apps/web/lib/api/read-contract.ts#workspace": [
     "contract_diff"
    ],
    "deployable_unit:apps/api": [
@@ -6624,6 +7036,7 @@
    "receipt:receipts/graph/A2-394-reinstate-digest-grant.json": [],
    "receipt:receipts/graph/a2-304-dependabot-group.json": [],
    "receipt:receipts/graph/a2-320-web-eslint10.json": [],
+   "receipt:receipts/graph/backend-workspace-isolation-20261008.json": [],
    "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json": [],
    "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json": [],
    "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json": [],
@@ -6959,10 +7372,9 @@
    ]
   },
   "seconds": {
-   "prepare": 2.78,
-   "total": 49.21,
-   "verifiers": 24.75
+   "prepare": 1.74,
+   "total": 41.78,
+   "verifiers": 22.1
   }
- },
- "work_item": "7d2dadd3-8cf0-47fb-925e-71b9e2962bab"
+ }
 }
