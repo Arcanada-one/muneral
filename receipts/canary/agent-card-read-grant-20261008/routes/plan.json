@@ -1,20 +1,20 @@
 {
   "schema": "CanaryPlan/v2",
-  "id": "agent-card-read-grant-route-floor-successor",
+  "id": "agent-card-read-grant-route-floor-successor-security-residuals",
   "owner": "MUNERAL successor lane",
   "environment": "Owned disposable PostgreSQL and actual Nest HTTP, synthetic principals only; no production request",
   "read_only": false,
   "subject": {
     "schema": "GitCanarySubject/v1",
-    "commit": "782532c7e063b1effa1f6db0597cda7af247401b",
-    "tree": "f28a33c218653403c5c069b606f7e523caeedfc6",
+    "commit": "6c7fe908039ac651446e08df8fc619eccc565145",
+    "tree": "3e734f467aa57ccea43d8a6fcc83cb24eea24572",
     "evidence": {
       "path": "source-evidence.json",
-      "sha256": "06ddbbe91444cb4a20758d5b4352ba4f8302dabc8af07a06c9f6b2912ddc896a",
+      "sha256": "8059fd42e057faca158a5d039a6cc63995ff9fb31f48a5b815ef8fe806406f29",
       "source_field": "commit"
     }
   },
-  "purpose": "Actual unauthenticated/alias 401 dispatch floor for the existing 62 routes of the compiled app; authenticated business semantics are measured by the positive batteries, not here. Agent ACL widening is limited to GET /tasks/:taskId (DEC-AUP-0134); no identity or write capability added.",
+  "purpose": "Actual unauthenticated/alias 401 dispatch floor for the existing 62 routes of the compiled app; authenticated business semantics are measured by the positive batteries, not here. Agent ACL widening is limited to GET /tasks/:taskId (DEC-AUP-0134); no identity or write capability added. Refreshed source after independent security review. Kanban authorization uses actual handlers and PostgreSQL; WebSocket transport is not measured.",
   "probes": [
     {
       "kind": "process",
@@ -23,7 +23,7 @@
         "/home/dev/aup/import-audit-work/runs/m211c/node-v24.21.0-linux-x64/bin/node",
         "/home/dev/aup/import-audit-work/runs/PR225-successor-drivers/human-task-read-route-http-v2.mjs",
         "/home/dev/aup/import-audit-work/mun-card-grant",
-        "/home/dev/aup/import-audit-work/runs/PR225-successor-canary-20261008/routes"
+        "/home/dev/aup/import-audit-work/runs/PR225-security-canary-20261008/routes"
       ],
       "cwd": ".",
       "env_keys": [
@@ -55,7 +55,7 @@
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/dist/agents/agents.service.js",
-          "sha256": "e1a81df1ad8639e85e7a7a54db6f0aeb2415c4e7fd1719e2a0afb1c597bc16ca"
+          "sha256": "b3261e27aee6e9033f702b36402d66e2baa8b9bf618ab22c71a991e321bc7168"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/dist/agents/dto/assign-agent.dto.js",
@@ -439,7 +439,7 @@
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/dist/solution-log-head/solution-log-head.service.js",
-          "sha256": "1119721f990c99923aa508c455ba3fc1a1615573308da37b75b60473a63daa7c"
+          "sha256": "4b03968b1c150d72224d3d9c8cc662f54dd26113c893c3d1128c76398c4beccf"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/dist/solution-log-head/solution-log-head.types.js",
@@ -539,7 +539,7 @@
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/dist/tasks/tasks.controller.js",
-          "sha256": "286c18e3d2cb113ea0c1ce27c2cf92ae5e1cf4f78524eabd7c1a6ec27e5f2c87"
+          "sha256": "de3a4771e894e28ae78b1f4ed64552dc5e0080b98c92fdaf72ee3e492aed80db"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/dist/tasks/tasks.module.js",
@@ -547,7 +547,7 @@
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/dist/tasks/tasks.service.js",
-          "sha256": "4c5fe9502697169d43e9d9e721c41d3f9da849ced434b9950c4d7a7aaa080746"
+          "sha256": "3d1400dc8056d2ddfa227e89569a8d170387b5195a0f63cc0e2f3b775c4d1baa"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/dist/webhooks/dto/create-webhook.dto.js",
@@ -591,11 +591,11 @@
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/dist/ws/kanban.gateway.js",
-          "sha256": "7b4ef4b42bde723579178ed959b4af1df815a6b6637513b6a9c80b717eec6422"
+          "sha256": "fc434baccaf0af065ca15eb2e74b1fd397ea0bb4e80fdc0b85a249c2bfbd060f"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/dist/ws/kanban.service.js",
-          "sha256": "de73f3e6eb7d373a1c1c6f489e3cbf674c4f411661be999d096ac007d6f604d9"
+          "sha256": "cc82f25ebd1896ebac6a0957af12f528e067ddb78b57872062a9a7a7411a2ef3"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/dist/ws/ws.module.js",
@@ -612,6 +612,10 @@
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/activity/activity.service.ts",
           "sha256": "ce78618a5c1c5a1242e17853bdb80e6dba623c52a115ddca47d249d26ded9553"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/agents/agents.service.ts",
+          "sha256": "4b03dcfa3de4fbe7b66662cf04377de44d356ed06899cc9cc58387496494736d"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/auth/agent-scope.decorator.ts",
@@ -658,6 +662,10 @@
           "sha256": "60ba1dc8cd941dd8a8058b1ffd1bb1ee0b3362910bca3817e146d22df07cc557"
         },
         {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/solution-log-head/solution-log-head.service.ts",
+          "sha256": "e2f5f8127b78cc62e72d634d3f79a205d1ae88c2996c9169c790ba3c15605fbc"
+        },
+        {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/sync/sync.controller.ts",
           "sha256": "c1e61ec0697e0281fe4a38853d95f60a44fac7f553931c7d724a075c63c34d5c"
         },
@@ -679,7 +687,7 @@
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/tasks.controller.ts",
-          "sha256": "153c9badaec891b8484ae8b5ee084d07333181e9e5b9a883a9c88fd720b6df21"
+          "sha256": "6b3f2ff7f25b15d9e95e778acf82ba150c753adbc66432b161c50a32b4c0bb3d"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/tasks.module.ts",
@@ -687,7 +695,15 @@
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/tasks/tasks.service.ts",
-          "sha256": "a85899aa014136a9bbbba81aeee3da85e21cdab894f32c7c109c77a82f0d6d9c"
+          "sha256": "63df69e840b778c8d4d4512755ad27abdafd4236bdaea4c8afe049866415f456"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/kanban.gateway.ts",
+          "sha256": "87aafbcf85d7e7965b0ef46fc2f69d28813d8283a6dbcfb985c4f03e87797857"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/src/ws/kanban.service.ts",
+          "sha256": "dd89586ed31f5bf2c2daaa5f5a185964b9fd1b590d77356f78e93835c13d9686"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/agent-project-index.e2e.spec.ts",
@@ -695,15 +711,27 @@
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/assembly/mutation-results.json",
-          "sha256": "e4a8a91c6cc67fd6c3004a70faa2ac0514c2d3cba22b2cf3304cbb39b5de47de"
+          "sha256": "3dbf0f4d09e0145dc5ba7bfc58b8767f7fd451a0aca86c5dfef8b6e813d73a68"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/human-task-read-isolation.e2e.spec.ts",
-          "sha256": "722849332bdb240d348cf130df75f0d355cf76df8dcd268eb86aa7e687d29f95"
+          "sha256": "d696274362479cfbca80c1a4aa52ff03d677419cac6634a011caf0a5bfe694da"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/solution-log-head.postgres.spec.ts",
+          "sha256": "50e0644617383fa9fb616c2acf3999fe60f5a46736137b85ead369b757c0498c"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/solution-log-head.service.spec.ts",
+          "sha256": "e64159af8ec3a30db9d40f05657bc187ce25d8d0c86d03b67ca57805478a7a87"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/support/disposable-postgres.ts",
           "sha256": "6644ee5e273b9bc866254288f8e4c426800da68875f485c932f28dc1e8576e3b"
+        },
+        {
+          "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/task-contract-binding.e2e.spec.ts",
+          "sha256": "e108295d4ad90d9c2d139e43394ea40c7fcef396c0dccda0fcfb485a0cd984f6"
         },
         {
           "path": "/home/dev/aup/import-audit-work/mun-card-grant/apps/api/test/task-contract-digest.e2e.spec.ts",
