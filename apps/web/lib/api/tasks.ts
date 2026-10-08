@@ -12,6 +12,7 @@ export interface Task {
   id: string;
   title: string;
   description?: string | null;
+  transcriptionLink?: {jobId: string; producerRoute: string};
   status: TaskStatus;
   priority: TaskPriority;
   projectId: string;

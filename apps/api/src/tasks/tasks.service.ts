@@ -1,3 +1,4 @@
+import { readTranscriptionLink } from './dto/transcription-link.dto.js';
 import { humanTaskWhere } from '../auth/human-task-visibility.js';
 import {
   Injectable,
@@ -99,6 +100,7 @@ export class TasksService {
   ) {}
 
   async create(actor: Actor, dto: CreateTaskDto) {
+    const transcriptionLink = dto.transcriptionLink === undefined ? undefined : readTranscriptionLink(dto.transcriptionLink);
     const project = await this.prisma.project.findUnique({
       where: { id: dto.projectId },
     });
@@ -151,6 +153,10 @@ export class TasksService {
           },
         });
 
+        if (transcriptionLink) {
+          await this.activityService.log({workspaceId: project.workspaceId, taskId: created.id,
+            actor, action: 'task:transcription_linked', payload: {...transcriptionLink}}, tx);
+        }
         return created;
       },
       { timeout: 10_000, isolationLevel: 'ReadCommitted' },
@@ -173,12 +179,15 @@ export class TasksService {
 
   async findOne(taskId: string, humanUserId?: string) {
     const task = humanUserId
-      ? await this.prisma.task.findFirst({ where: { id: taskId, ...humanTaskWhere(humanUserId) } })
-      : await this.prisma.task.findUnique({ where: { id: taskId } });
+      ? await this.prisma.task.findFirst({ where: { id: taskId, ...humanTaskWhere(humanUserId) },
+          include: { activityLogs: { where: {action: 'task:transcription_linked'}, orderBy: {createdAt: 'desc'}, take: 1 } } })
+      : await this.prisma.task.findUnique({ where: { id: taskId },
+          include: { activityLogs: { where: {action: 'task:transcription_linked'}, orderBy: {createdAt: 'desc'}, take: 1 } } });
     if (!task) {
       throw new NotFoundException('Task not found');
     }
-    return task;
+    const {activityLogs = [], ...result} = task;
+    return {...result, ...(activityLogs.length ? {transcriptionLink: readTranscriptionLink(activityLogs[0].payload)} : {})};
   }
 
   /**
