@@ -589,63 +589,94 @@ export class TasksService {
     // protecting the execution audit trail from disappearing under a task
     // delete, not something to route around. Surface it as a clear 409
     // instead of letting the raw Prisma P2003 through as an opaque 500.
-    try {
-      await this.prisma.task.delete({ where: { id: taskId } });
-    } catch (err) {
-      if (isForeignKeyRestrictViolation(err)) {
-        throw new ConflictException(
-          'Task has recorded execution history and cannot be deleted',
+    await this.prisma.$transaction(async (tx) => {
+      try {
+        await tx.task.delete({ where: { id: taskId } });
+      } catch (err) {
+        if (isForeignKeyRestrictViolation(err)) {
+          throw new ConflictException(
+            'Task has recorded execution history and cannot be deleted',
+          );
+        }
+        throw err;
+      }
+
+      if (project) {
+        // The audit row commits with the delete or not at all. It cannot name the task in its
+        // `task_id` column: that FK has just lost its target, and writing the id there answered
+        // every DELETE with a 500 after the row was already gone. The deleted task is recorded
+        // in the payload instead.
+        await this.activityService.log(
+          {
+            workspaceId: project.workspaceId,
+            actor,
+            action: 'task:deleted',
+            payload: { taskId, title: task.title },
+          },
+          tx,
         );
       }
-      throw err;
-    }
+    });
 
-    if (project) {
-      await this.activityService.log({
-        workspaceId: project.workspaceId,
-        taskId,
-        actor,
-        action: 'task:deleted',
-        payload: { title: task.title },
-      });
-      this.kanbanService.notify(project.id, 'task:deleted', { taskId });
-    }
+    if (project) this.kanbanService.notify(project.id, 'task:deleted', { taskId });
   }
 
   // --- Checklist ---
 
-  async addChecklistItem(taskId: string, dto: CreateChecklistItemDto) {
-    await this.findOne(taskId); // verify task exists
-    return this.prisma.taskChecklist.create({
-      data: {
-        taskId,
-        text: dto.text,
-        position: dto.position ?? null,
-      },
+  async addChecklistItem(taskId: string, dto: CreateChecklistItemDto, actor: Actor) {
+    await this.findOne(taskId);
+    return this.prisma.$transaction(async (tx) => {
+      const { task, ...item } = await tx.taskChecklist.create({
+        data: { taskId, text: dto.text, position: dto.position ?? null },
+        include: { task: { select: { project: { select: { workspaceId: true } } } } },
+      });
+      await this.activityService.log({
+        workspaceId: task.project.workspaceId, taskId, actor,
+        action: 'task:checklist_added',
+        payload: { itemId: item.id, text: item.text, checked: item.checked, position: item.position },
+      }, tx);
+      return item;
     });
   }
 
-  async toggleChecklistItem(taskId: string, itemId: string, checked: boolean) {
-    const item = await this.prisma.taskChecklist.findFirst({
-      where: { id: itemId, taskId },
-    });
-    if (!item) {
-      throw new NotFoundException('Checklist item not found');
-    }
-    return this.prisma.taskChecklist.update({
-      where: { id: itemId },
-      data: { checked },
+  async toggleChecklistItem(taskId: string, itemId: string, checked: boolean, actor: Actor) {
+    const existing = await this.prisma.taskChecklist.findFirst({ where: { id: itemId, taskId } });
+    if (!existing) throw new NotFoundException('Checklist item not found');
+    return this.prisma.$transaction(async (tx) => {
+      const { task, ...item } = await tx.taskChecklist.update({
+        where: { id: itemId, taskId }, data: { checked },
+        include: { task: { select: { project: { select: { workspaceId: true } } } } },
+      });
+      await this.activityService.log({
+        workspaceId: task.project.workspaceId, taskId, actor,
+        action: 'task:checklist_updated',
+        payload: { itemId: item.id, checked: item.checked },
+      }, tx);
+      return item;
     });
   }
 
-  async deleteChecklistItem(taskId: string, itemId: string): Promise<void> {
-    const item = await this.prisma.taskChecklist.findFirst({
-      where: { id: itemId, taskId },
+  async deleteChecklistItem(taskId: string, itemId: string, actor: Actor): Promise<void> {
+    const existing = await this.prisma.taskChecklist.findFirst({ where: { id: itemId, taskId } });
+    if (!existing) throw new NotFoundException('Checklist item not found');
+    await this.prisma.$transaction(async (tx) => {
+      // Prisma's relation include prefetches before DELETE. RETURNING binds the
+      // audit to the row PostgreSQL actually removes after competing updates.
+      const [item] = await tx.$queryRaw<Array<{
+        id: string; text: string; checked: boolean; position: number | null;
+      }>>`DELETE FROM "task_checklists"
+          WHERE "id" = ${itemId}::uuid AND "task_id" = ${taskId}::uuid
+          RETURNING "id", "text", "checked", "position"`;
+      if (!item) throw new NotFoundException('Checklist item not found');
+      const task = await tx.task.findUniqueOrThrow({
+        where: { id: taskId }, select: { project: { select: { workspaceId: true } } },
+      });
+      await this.activityService.log({
+        workspaceId: task.project.workspaceId, taskId, actor,
+        action: 'task:checklist_removed',
+        payload: { itemId: item.id, text: item.text, checked: item.checked, position: item.position },
+      }, tx);
     });
-    if (!item) {
-      throw new NotFoundException('Checklist item not found');
-    }
-    await this.prisma.taskChecklist.delete({ where: { id: itemId } });
   }
 
   async getChecklist(taskId: string, humanUserId?: string) {
