@@ -499,4 +499,38 @@ describe('PATCH /tasks/:taskId/status with an agent key — creator or executor 
     } finally { release(); await pending; querySpy.mockRestore(); }
   });
 
+  it('MUN-0005: DELETE /tasks/:id removes the task and records who deleted it', async () => {
+    await prisma.workspaceMember.create({ data: { workspaceId, userId, role: 'owner' } });
+    const task = await humanTask();
+    const bearer = authSvc.signAccess(userId);
+    await supertest(app.getHttpServer()).delete(`/tasks/${task.id}`)
+      .set('Authorization', `Bearer ${bearer}`).expect(204);
+    expect(await prisma.task.findUnique({ where: { id: task.id } })).toBeNull();
+    // The task row is gone, so the audit row cannot reference it: it is workspace-scoped and
+    // names the deleted task in its payload.
+    const rows = await prisma.activityLog.findMany({
+      where: { workspaceId, action: 'task:deleted', payload: { path: ['taskId'], equals: task.id } },
+    });
+    expect(rows).toHaveLength(1);
+    expect(rows[0].taskId).toBeNull();
+    expect(rows[0].actorType).toBe('human');
+    expect(rows[0].actorId).toBe(userId);
+    expect((rows[0].payload as { title: string }).title).toBe(task.title);
+  });
+
+  it('MUN-0005: DELETE /tasks/:id keeps the task when its audit row cannot be written', async () => {
+    const task = await humanTask();
+    const bearer = authSvc.signAccess(userId);
+    const writer = app.get(ActivityService);
+    const spy = jest.spyOn(writer, 'log').mockRejectedValueOnce(new Error('Synthetic audit failure'));
+    try {
+      await supertest(app.getHttpServer()).delete(`/tasks/${task.id}`)
+        .set('Authorization', `Bearer ${bearer}`).expect(500);
+      expect(await prisma.task.findUnique({ where: { id: task.id } })).not.toBeNull();
+      expect(await prisma.activityLog.count({
+        where: { workspaceId, action: 'task:deleted', payload: { path: ['taskId'], equals: task.id } },
+      })).toBe(0);
+    } finally { spy.mockRestore(); }
+  });
+
 });
