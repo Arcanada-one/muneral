@@ -5,6 +5,7 @@ import {
   ForbiddenException,
   BadRequestException,
   ConflictException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -16,7 +17,8 @@ import { CreateChecklistItemDto } from './dto/create-checklist-item.dto.js';
 import { ActivityService } from '../activity/activity.service.js';
 import { KanbanService } from '../ws/kanban.service.js';
 import { createHash, randomUUID } from 'node:crypto';
-import { isValidTransition } from '@muneral/types';
+import { isUUID } from 'class-validator';
+import { isValidTransition, TASK_STATUSES } from '@muneral/types';
 import type { Actor, TaskStatus } from '@muneral/types';
 import { TaskFieldStateService } from './field-state/task-field-state.service.js';
 import { TaskExecutionRecorderService } from '../execution-authority/task-execution-recorder.service.js';
@@ -73,6 +75,22 @@ const WORKSPACE_DIGEST_SELECT = {
   createdAt: true,
   updatedAt: true,
 } satisfies Prisma.TaskSelect;
+
+type DigestMetadata = { id: string; projectId: string; status: TaskStatus;
+  priority: 'critical' | 'high' | 'medium' | 'low'; createdAt: Date; updatedAt: Date };
+const DIGEST_METADATA_KEYS = ['id', 'projectId', 'status', 'priority', 'createdAt', 'updatedAt'];
+function isDigestMetadata(value: unknown): value is DigestMetadata {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const row = value as Record<string, unknown>;
+  if (Object.keys(row).length !== 6 || !DIGEST_METADATA_KEYS.every(k => Object.hasOwn(row, k))) return false;
+  return typeof row.id === 'string' && isUUID(row.id) &&
+    typeof row.projectId === 'string' && isUUID(row.projectId) &&
+    typeof row.status === 'string' && TASK_STATUSES.includes(row.status as TaskStatus) &&
+    typeof row.priority === 'string' && ['critical', 'high', 'medium', 'low'].includes(row.priority) &&
+    row.createdAt instanceof Date && Number.isFinite(row.createdAt.getTime()) &&
+    row.updatedAt instanceof Date && Number.isFinite(row.updatedAt.getTime());
+}
+export const EMERGENCY_DIGEST_TITLE = '[Title withheld: emergency metadata-only digest]';
 
 /** MUN-0052: the only task columns the index returns (DEC-AUP-0029 R3). The
  *  title leaves as a hash; description, bootstrap stamp, creator id, import
@@ -315,6 +333,10 @@ export class TasksService {
   ) {
     const limit = dto.limit ?? 50;
     const offset = dto.offset ?? 0;
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 200 ||
+        !Number.isSafeInteger(offset) || offset < 0) {
+      throw new BadRequestException('Invalid digest paging');
+    }
 
     // The workspace filter is written FIRST and never from the dto: the caller
     // supplies filters, not scope. `projectId` below can only narrow inside it
@@ -330,7 +352,7 @@ export class TasksService {
       };
     }
 
-    const { rows, total, audit } = await this.prisma.$transaction(async (tx) => {
+    const { items, total, audit } = await this.prisma.$transaction(async (tx) => {
       const [rows, total] = await Promise.all([
       tx.task.findMany({
         where,
@@ -341,6 +363,17 @@ export class TasksService {
       }),
       tx.task.count({ where }),
       ]);
+
+      // Validate BEFORE the success audit. Invalid values never enter errors/logs.
+      if (!Array.isArray(rows) || !rows.every(isDigestMetadata) || !Number.isSafeInteger(total) || total < 0 ||
+          rows.length > limit || rows.length !== Math.min(limit, Math.max(0, total - offset))) {
+        throw new ServiceUnavailableException('Digest metadata refused');
+      }
+      const items = rows.map((row) => ({
+        id: row.id, projectId: row.projectId, title: EMERGENCY_DIGEST_TITLE,
+        status: row.status, priority: row.priority,
+        createdAt: row.createdAt, updatedAt: row.updatedAt,
+      }));
 
     const audit = await tx.activityLog.create({
       data: {
@@ -369,9 +402,8 @@ export class TasksService {
       select: { id: true, createdAt: true },
     });
 
-      return { rows, total, audit };
+      return { items, total, audit };
     }, { isolationLevel: 'RepeatableRead' });
-    const items = rows.map(row => ({ ...row, title: '[Task text withheld: metadata-only digest]' }));
 
     return {
       // The first four keys, in this order, are the envelope `GET /tasks`
