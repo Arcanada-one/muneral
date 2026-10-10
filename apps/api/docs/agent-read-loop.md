@@ -43,6 +43,11 @@ Response:
 
 `changed: true` means this field has a newer version than the agent last acknowledged.
 
+For a task this key does not own, title/description values are withheld
+(`value: null`, `valueWithheld: true`); versions and hashes remain change
+signals. The example above is an owned-task value read, not a workspace-wide
+free-text capability. See the current guard and task-read contract.
+
 ## 2. POST /tasks/:taskId/field-ack
 
 Mark fields as read. The agent advances its watermark to the current version.
@@ -100,14 +105,14 @@ answered `401` even for the task the agent had just been assigned. An unattended
 executor had to borrow a human's 15-minute access token to read its own card or
 to move it along.
 
-Three routes now accept either credential, **scoped to the agent's own
-assignments**:
+The current routes accept an API key with the authority shown below; status
+uses a different scope from assignment-based task reads:
 
 | route | an agent key gets |
 |---|---|
-| `GET /tasks/:taskId` | the task, if the agent is assigned to it (`task_agents`) — otherwise `403` |
-| `GET /tasks/project/:projectId` | only the tasks in that project the agent is assigned to; `404` if the project is not in the agent's workspace |
-| `PATCH /tasks/:taskId/status` | the transition, if the agent is assigned to the task — otherwise `403` |
+| `GET /tasks/:taskId` | the task, if the agent is its agent creator or is assigned to it — otherwise `403` |
+| `GET /tasks/project/:projectId` | only the tasks in that project the agent created or is assigned to; `404` if the project is not in the agent's workspace |
+| `PATCH /tasks/:taskId/status` | own-workspace creator (agent actor) or executor assignment only; lead/reviewer alone is refused (`task-status`, MUN-0050) |
 
 ## Creating a task with the agent key (MUN-0045)
 
@@ -143,7 +148,7 @@ The comment is attributed to the calling agent regardless of what the request
 body claims: `AddCommentDto` carries only `body`, and the actor comes from the
 credential (`req.actor`, via `ActorInterceptor`), never from the request.
 
-Remaining unmarked routes on `/tasks` — delete, checklists, dependencies —
+Remaining unmarked routes on `/tasks` — delete and checklists —
 stay JWT-only, refused with `403` for a valid key rather than granted. This is
 not a claim that every write an agent needs is now open; see
 `universal-program/cards/MUN-0046-*.md` for the full route sweep this card
@@ -203,7 +208,11 @@ with `until` still ahead, may read that project's task **index**:
 - A grant is a reviewed code change naming its decision, and it lapses at `until`
   by itself.
 
-The rest of `/tasks` stays JWT-only. It is an **allowlist**: a route with
+Other task routes must be checked against their current scope. Dependency
+WRITE routes (`POST /tasks/:id/dependencies` and
+`DELETE /tasks/:id/dependencies/:depId`) use `task-dependency`; dependency GET
+routes (`dependencies`, `dependency-graph` and `readiness`) retain `task`.
+Evidence POST and GET use `task-evidence`. It is an **allowlist**: a route with
 no `@AgentScope(...)` marker refuses an API key by default, so a route added
 later is closed the day it merges rather than open until somebody remembers to
 close it. The only visible change on those routes is `403` (valid key, out of
@@ -232,3 +241,13 @@ keys are untouched. A JWT gets `401`: users revoke keys with
 `DELETE /agents/keys/:keyId`.
 
 Use it when a key may have leaked and nobody holding a user credential is at hand.
+
+## Current onboarding
+
+Use [agent-onboarding.md](agent-onboarding.md) for protected key loading, scoped
+discovery, MUN-0051 assignment and refusal diagnosis. `GET /agents/tasks` lists
+assignments across all task states; it is not an execution queue.
+
+MUN-0051 supersedes the historical assignment-only task read/comment/activity
+paragraphs above: the own-workspace agent creator is also admitted. Redaction
+keeps its separate assignment scope. No historical paragraph grants a capability.

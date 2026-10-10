@@ -154,14 +154,18 @@ secondary data source.
 
 | Route | Agent key | Scope |
 |---|---|---|
-| `GET /tasks/:id` | yes | `task` (assigned) |
+| `GET /agents/tasks` | yes; authenticated agent assignments, all states | API-key authentication |
+| `POST /agents/tasks/:id/assign` | creator or executor, own workspace and bounded role | `task-assign` (MUN-0051) |
+| `POST /tasks/:id/evidence` | creator or assigned agent; agent key required | `task-evidence` |
+| `GET /tasks/:id/evidence` | creator or assigned agent | `task-evidence` |
+| `GET /tasks/:id` | yes | `task` (creator or assigned) |
 | `GET /tasks/:id/readiness` | yes | `task` |
 | `GET /tasks/:id/dependency-graph` | yes | `task` |
 | `GET /tasks/:id/dependencies` | yes | `task` |
 | `GET /tasks/:id/activity` | yes | `task` |
 | `POST /tasks/:id/comments` | yes | `task` |
-| `PATCH /tasks/:id/status` | yes | `task` |
-| `GET /tasks/project/:projectId` | yes, narrowed to own assignments | `project` |
+| `PATCH /tasks/:id/status` | own-workspace agent creator or executor | `task-status` |
+| `GET /tasks/project/:projectId` | yes, narrowed to own creator/assignment slice | `project` |
 | `POST /tasks` | yes | `project-write` |
 | `GET /tasks/:id/field-changes`, `POST /tasks/:id/field-ack` | yes | `task-workspace` |
 | `GET /tasks` (filtered query) | **no — 403** | unscoped |
@@ -249,3 +253,9 @@ Always pair the status with `/readiness`.
   served". Added `/readiness` and `/dependency-graph`, scoped the existing
   dependency read, added the `X-Muneral-Dependencies` header, and published this
   contract.
+
+## Agent onboarding
+
+See [agent-onboarding.md](agent-onboarding.md) for protected key loading and the
+read/assign/status/evidence sequence. Assignment authority does not imply status
+authority; failed discovery does not prove a status transition was refused.
