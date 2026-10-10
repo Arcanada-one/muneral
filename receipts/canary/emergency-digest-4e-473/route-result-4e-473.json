@@ -1,0 +1,642 @@
+{
+ "base_url": "http://127.0.0.1:35805",
+ "captured_at_utc": "2026-10-10T19:58:49Z",
+ "card": "A2-330",
+ "counters": {
+  "failed": 0,
+  "not_measured": 0,
+  "verified": 25
+ },
+ "entity_verdicts": [
+  {
+   "entity": "route:DELETE /tasks/:taskId",
+   "probe_ids": [
+    "resident-0"
+   ],
+   "reason": "resident-0: DELETE /api/v1/tasks/:taskId is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:DELETE /tasks/:taskId/checklist/:itemId",
+   "probe_ids": [
+    "resident-1"
+   ],
+   "reason": "resident-1: DELETE /api/v1/tasks/:taskId/checklist/:itemId is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:DELETE /tasks/:taskId/dependencies/:depId",
+   "probe_ids": [
+    "resident-2"
+   ],
+   "reason": "resident-2: DELETE /api/v1/tasks/:taskId/dependencies/:depId is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /sync/datarim/:projectId",
+   "probe_ids": [
+    "resident-3"
+   ],
+   "reason": "resident-3: status 401 (not 404/405/5xx) and GET /api/v1/sync/datarim/:projectId is in the resident route table",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks",
+   "probe_ids": [
+    "resident-4"
+   ],
+   "reason": "resident-4: status 401 (not 404/405/5xx) and GET /api/v1/tasks is in the resident route table",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId",
+   "probe_ids": [
+    "resident-5"
+   ],
+   "reason": "resident-5: status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId is in the resident route table",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/activity",
+   "probe_ids": [
+    "resident-6"
+   ],
+   "reason": "resident-6: status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/activity is in the resident route table",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/checklist",
+   "probe_ids": [
+    "resident-7"
+   ],
+   "reason": "resident-7: status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/checklist is in the resident route table",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/dependencies",
+   "probe_ids": [
+    "resident-8"
+   ],
+   "reason": "resident-8: status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/dependencies is in the resident route table",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/dependency-graph",
+   "probe_ids": [
+    "resident-9"
+   ],
+   "reason": "resident-9: status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/dependency-graph is in the resident route table",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/evidence",
+   "probe_ids": [
+    "resident-10"
+   ],
+   "reason": "resident-10: status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/evidence is in the resident route table",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/readiness",
+   "probe_ids": [
+    "resident-11"
+   ],
+   "reason": "resident-11: status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/readiness is in the resident route table",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/digest",
+   "probe_ids": [
+    "resident-12"
+   ],
+   "reason": "resident-12: status 401 (not 404/405/5xx) and GET /api/v1/tasks/digest is in the resident route table",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/project/:projectId",
+   "probe_ids": [
+    "resident-13"
+   ],
+   "reason": "resident-13: status 401 (not 404/405/5xx) and GET /api/v1/tasks/project/:projectId is in the resident route table",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/project/:projectId/index",
+   "probe_ids": [
+    "resident-14"
+   ],
+   "reason": "resident-14: status 401 (not 404/405/5xx) and GET /api/v1/tasks/project/:projectId/index is in the resident route table",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/project/:projectId/staleness",
+   "probe_ids": [
+    "resident-15"
+   ],
+   "reason": "resident-15: status 401 (not 404/405/5xx) and GET /api/v1/tasks/project/:projectId/staleness is in the resident route table",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:PATCH /tasks/:taskId/checklist/:itemId",
+   "probe_ids": [
+    "resident-16"
+   ],
+   "reason": "resident-16: PATCH /api/v1/tasks/:taskId/checklist/:itemId is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:PATCH /tasks/:taskId/status",
+   "probe_ids": [
+    "resident-17"
+   ],
+   "reason": "resident-17: PATCH /api/v1/tasks/:taskId/status is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /sync/datarim/:projectId/import",
+   "probe_ids": [
+    "resident-18"
+   ],
+   "reason": "resident-18: POST /api/v1/sync/datarim/:projectId/import is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /tasks",
+   "probe_ids": [
+    "resident-19"
+   ],
+   "reason": "resident-19: POST /api/v1/tasks is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /tasks/:taskId/checklist",
+   "probe_ids": [
+    "resident-20"
+   ],
+   "reason": "resident-20: POST /api/v1/tasks/:taskId/checklist is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /tasks/:taskId/comments",
+   "probe_ids": [
+    "resident-21"
+   ],
+   "reason": "resident-21: POST /api/v1/tasks/:taskId/comments is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /tasks/:taskId/dependencies",
+   "probe_ids": [
+    "resident-22"
+   ],
+   "reason": "resident-22: POST /api/v1/tasks/:taskId/dependencies is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /tasks/:taskId/evidence",
+   "probe_ids": [
+    "resident-23"
+   ],
+   "reason": "resident-23: POST /api/v1/tasks/:taskId/evidence is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /tasks/:taskId/redactions",
+   "probe_ids": [
+    "resident-24"
+   ],
+   "reason": "resident-24: POST /api/v1/tasks/:taskId/redactions is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified"
+  }
+ ],
+ "environment": "own loopback synthetic app/Unix PG",
+ "model": "none: deterministic HTTP producer",
+ "phase": "pre",
+ "plan": {
+  "digest": "sha256:a7d08ec4273d825571f1318001c1d2a748d9c87631f73bc7631aecf976b89471",
+  "id": "emergency-digest-native-resident-routes",
+  "path": "route-plan.json"
+ },
+ "probes": [
+  {
+   "declared_by_resident_route_table": true,
+   "declared_method": "DELETE",
+   "elapsed_ms": 0,
+   "evidence_kind": "resident_route_table",
+   "executed": true,
+   "id": "resident-0",
+   "kind": "http",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "DELETE /api/v1/tasks/:taskId is in the resident route table (not called: not a safe verb)",
+   "route": "/api/v1/tasks/:taskId",
+   "status": 200,
+   "url": "http://127.0.0.1:35805/api/v1/health/routes"
+  },
+  {
+   "declared_by_resident_route_table": true,
+   "declared_method": "DELETE",
+   "elapsed_ms": 0,
+   "evidence_kind": "resident_route_table",
+   "executed": true,
+   "id": "resident-1",
+   "kind": "http",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "DELETE /api/v1/tasks/:taskId/checklist/:itemId is in the resident route table (not called: not a safe verb)",
+   "route": "/api/v1/tasks/:taskId/checklist/:itemId",
+   "status": 200,
+   "url": "http://127.0.0.1:35805/api/v1/health/routes"
+  },
+  {
+   "declared_by_resident_route_table": true,
+   "declared_method": "DELETE",
+   "elapsed_ms": 0,
+   "evidence_kind": "resident_route_table",
+   "executed": true,
+   "id": "resident-2",
+   "kind": "http",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "DELETE /api/v1/tasks/:taskId/dependencies/:depId is in the resident route table (not called: not a safe verb)",
+   "route": "/api/v1/tasks/:taskId/dependencies/:depId",
+   "status": 200,
+   "url": "http://127.0.0.1:35805/api/v1/health/routes"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "declared_by_resident_route_table": true,
+   "elapsed_ms": 1,
+   "evidence_kind": "resident_route_table+no_match_fingerprint",
+   "executed": true,
+   "id": "resident-3",
+   "kind": "http",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 (not 404/405/5xx) and GET /api/v1/sync/datarim/:projectId is in the resident route table",
+   "route": "/api/v1/sync/datarim/:projectId",
+   "status": 401,
+   "url": "http://127.0.0.1:35805/api/v1/sync/datarim/00000000-0000-0000-0000-000000000000"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "declared_by_resident_route_table": true,
+   "elapsed_ms": 0,
+   "evidence_kind": "resident_route_table+no_match_fingerprint",
+   "executed": true,
+   "id": "resident-4",
+   "kind": "http",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 (not 404/405/5xx) and GET /api/v1/tasks is in the resident route table",
+   "route": "/api/v1/tasks",
+   "status": 401,
+   "url": "http://127.0.0.1:35805/api/v1/tasks"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "declared_by_resident_route_table": true,
+   "elapsed_ms": 0,
+   "evidence_kind": "resident_route_table+no_match_fingerprint",
+   "executed": true,
+   "id": "resident-5",
+   "kind": "http",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId is in the resident route table",
+   "route": "/api/v1/tasks/:taskId",
+   "status": 401,
+   "url": "http://127.0.0.1:35805/api/v1/tasks/00000000-0000-0000-0000-000000000000"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "declared_by_resident_route_table": true,
+   "elapsed_ms": 0,
+   "evidence_kind": "resident_route_table+no_match_fingerprint",
+   "executed": true,
+   "id": "resident-6",
+   "kind": "http",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/activity is in the resident route table",
+   "route": "/api/v1/tasks/:taskId/activity",
+   "status": 401,
+   "url": "http://127.0.0.1:35805/api/v1/tasks/00000000-0000-0000-0000-000000000000/activity"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "declared_by_resident_route_table": true,
+   "elapsed_ms": 0,
+   "evidence_kind": "resident_route_table+no_match_fingerprint",
+   "executed": true,
+   "id": "resident-7",
+   "kind": "http",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/checklist is in the resident route table",
+   "route": "/api/v1/tasks/:taskId/checklist",
+   "status": 401,
+   "url": "http://127.0.0.1:35805/api/v1/tasks/00000000-0000-0000-0000-000000000000/checklist"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "declared_by_resident_route_table": true,
+   "elapsed_ms": 0,
+   "evidence_kind": "resident_route_table+no_match_fingerprint",
+   "executed": true,
+   "id": "resident-8",
+   "kind": "http",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/dependencies is in the resident route table",
+   "route": "/api/v1/tasks/:taskId/dependencies",
+   "status": 401,
+   "url": "http://127.0.0.1:35805/api/v1/tasks/00000000-0000-0000-0000-000000000000/dependencies"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "declared_by_resident_route_table": true,
+   "elapsed_ms": 0,
+   "evidence_kind": "resident_route_table+no_match_fingerprint",
+   "executed": true,
+   "id": "resident-9",
+   "kind": "http",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/dependency-graph is in the resident route table",
+   "route": "/api/v1/tasks/:taskId/dependency-graph",
+   "status": 401,
+   "url": "http://127.0.0.1:35805/api/v1/tasks/00000000-0000-0000-0000-000000000000/dependency-graph"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "declared_by_resident_route_table": true,
+   "elapsed_ms": 0,
+   "evidence_kind": "resident_route_table+no_match_fingerprint",
+   "executed": true,
+   "id": "resident-10",
+   "kind": "http",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/evidence is in the resident route table",
+   "route": "/api/v1/tasks/:taskId/evidence",
+   "status": 401,
+   "url": "http://127.0.0.1:35805/api/v1/tasks/00000000-0000-0000-0000-000000000000/evidence"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "declared_by_resident_route_table": true,
+   "elapsed_ms": 0,
+   "evidence_kind": "resident_route_table+no_match_fingerprint",
+   "executed": true,
+   "id": "resident-11",
+   "kind": "http",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/readiness is in the resident route table",
+   "route": "/api/v1/tasks/:taskId/readiness",
+   "status": 401,
+   "url": "http://127.0.0.1:35805/api/v1/tasks/00000000-0000-0000-0000-000000000000/readiness"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "declared_by_resident_route_table": true,
+   "elapsed_ms": 0,
+   "evidence_kind": "resident_route_table+no_match_fingerprint",
+   "executed": true,
+   "id": "resident-12",
+   "kind": "http",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 (not 404/405/5xx) and GET /api/v1/tasks/digest is in the resident route table",
+   "route": "/api/v1/tasks/digest",
+   "status": 401,
+   "url": "http://127.0.0.1:35805/api/v1/tasks/digest"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "declared_by_resident_route_table": true,
+   "elapsed_ms": 0,
+   "evidence_kind": "resident_route_table+no_match_fingerprint",
+   "executed": true,
+   "id": "resident-13",
+   "kind": "http",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 (not 404/405/5xx) and GET /api/v1/tasks/project/:projectId is in the resident route table",
+   "route": "/api/v1/tasks/project/:projectId",
+   "status": 401,
+   "url": "http://127.0.0.1:35805/api/v1/tasks/project/00000000-0000-0000-0000-000000000000"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "declared_by_resident_route_table": true,
+   "elapsed_ms": 0,
+   "evidence_kind": "resident_route_table+no_match_fingerprint",
+   "executed": true,
+   "id": "resident-14",
+   "kind": "http",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 (not 404/405/5xx) and GET /api/v1/tasks/project/:projectId/index is in the resident route table",
+   "route": "/api/v1/tasks/project/:projectId/index",
+   "status": 401,
+   "url": "http://127.0.0.1:35805/api/v1/tasks/project/00000000-0000-0000-0000-000000000000/index"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "declared_by_resident_route_table": true,
+   "elapsed_ms": 0,
+   "evidence_kind": "resident_route_table+no_match_fingerprint",
+   "executed": true,
+   "id": "resident-15",
+   "kind": "http",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 (not 404/405/5xx) and GET /api/v1/tasks/project/:projectId/staleness is in the resident route table",
+   "route": "/api/v1/tasks/project/:projectId/staleness",
+   "status": 401,
+   "url": "http://127.0.0.1:35805/api/v1/tasks/project/00000000-0000-0000-0000-000000000000/staleness"
+  },
+  {
+   "declared_by_resident_route_table": true,
+   "declared_method": "PATCH",
+   "elapsed_ms": 0,
+   "evidence_kind": "resident_route_table",
+   "executed": true,
+   "id": "resident-16",
+   "kind": "http",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "PATCH /api/v1/tasks/:taskId/checklist/:itemId is in the resident route table (not called: not a safe verb)",
+   "route": "/api/v1/tasks/:taskId/checklist/:itemId",
+   "status": 200,
+   "url": "http://127.0.0.1:35805/api/v1/health/routes"
+  },
+  {
+   "declared_by_resident_route_table": true,
+   "declared_method": "PATCH",
+   "elapsed_ms": 0,
+   "evidence_kind": "resident_route_table",
+   "executed": true,
+   "id": "resident-17",
+   "kind": "http",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "PATCH /api/v1/tasks/:taskId/status is in the resident route table (not called: not a safe verb)",
+   "route": "/api/v1/tasks/:taskId/status",
+   "status": 200,
+   "url": "http://127.0.0.1:35805/api/v1/health/routes"
+  },
+  {
+   "declared_by_resident_route_table": true,
+   "declared_method": "POST",
+   "elapsed_ms": 0,
+   "evidence_kind": "resident_route_table",
+   "executed": true,
+   "id": "resident-18",
+   "kind": "http",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "POST /api/v1/sync/datarim/:projectId/import is in the resident route table (not called: not a safe verb)",
+   "route": "/api/v1/sync/datarim/:projectId/import",
+   "status": 200,
+   "url": "http://127.0.0.1:35805/api/v1/health/routes"
+  },
+  {
+   "declared_by_resident_route_table": true,
+   "declared_method": "POST",
+   "elapsed_ms": 0,
+   "evidence_kind": "resident_route_table",
+   "executed": true,
+   "id": "resident-19",
+   "kind": "http",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "POST /api/v1/tasks is in the resident route table (not called: not a safe verb)",
+   "route": "/api/v1/tasks",
+   "status": 200,
+   "url": "http://127.0.0.1:35805/api/v1/health/routes"
+  },
+  {
+   "declared_by_resident_route_table": true,
+   "declared_method": "POST",
+   "elapsed_ms": 0,
+   "evidence_kind": "resident_route_table",
+   "executed": true,
+   "id": "resident-20",
+   "kind": "http",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "POST /api/v1/tasks/:taskId/checklist is in the resident route table (not called: not a safe verb)",
+   "route": "/api/v1/tasks/:taskId/checklist",
+   "status": 200,
+   "url": "http://127.0.0.1:35805/api/v1/health/routes"
+  },
+  {
+   "declared_by_resident_route_table": true,
+   "declared_method": "POST",
+   "elapsed_ms": 0,
+   "evidence_kind": "resident_route_table",
+   "executed": true,
+   "id": "resident-21",
+   "kind": "http",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "POST /api/v1/tasks/:taskId/comments is in the resident route table (not called: not a safe verb)",
+   "route": "/api/v1/tasks/:taskId/comments",
+   "status": 200,
+   "url": "http://127.0.0.1:35805/api/v1/health/routes"
+  },
+  {
+   "declared_by_resident_route_table": true,
+   "declared_method": "POST",
+   "elapsed_ms": 0,
+   "evidence_kind": "resident_route_table",
+   "executed": true,
+   "id": "resident-22",
+   "kind": "http",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "POST /api/v1/tasks/:taskId/dependencies is in the resident route table (not called: not a safe verb)",
+   "route": "/api/v1/tasks/:taskId/dependencies",
+   "status": 200,
+   "url": "http://127.0.0.1:35805/api/v1/health/routes"
+  },
+  {
+   "declared_by_resident_route_table": true,
+   "declared_method": "POST",
+   "elapsed_ms": 0,
+   "evidence_kind": "resident_route_table",
+   "executed": true,
+   "id": "resident-23",
+   "kind": "http",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "POST /api/v1/tasks/:taskId/evidence is in the resident route table (not called: not a safe verb)",
+   "route": "/api/v1/tasks/:taskId/evidence",
+   "status": 200,
+   "url": "http://127.0.0.1:35805/api/v1/health/routes"
+  },
+  {
+   "declared_by_resident_route_table": true,
+   "declared_method": "POST",
+   "elapsed_ms": 0,
+   "evidence_kind": "resident_route_table",
+   "executed": true,
+   "id": "resident-24",
+   "kind": "http",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "POST /api/v1/tasks/:taskId/redactions is in the resident route table (not called: not a safe verb)",
+   "route": "/api/v1/tasks/:taskId/redactions",
+   "status": 200,
+   "url": "http://127.0.0.1:35805/api/v1/health/routes"
+  }
+ ],
+ "producer": {
+  "tool": "scripts/canary/canary_probe.py",
+  "version": "1.0.0"
+ },
+ "read_only": true,
+ "resident_route_table": {
+  "build": {
+   "problem": "MUNERAL_BUILD_SHA is not set, so this process cannot name the commit it was built from. It is baked into the image from the build arg fed by docker-compose.prod.yml; an instance started by hand from a working tree has no value to report. Read this as not_measured, never as a pass.",
+   "sha": null,
+   "source": null
+  },
+  "routes": 32,
+  "sha256": "6c96b3149c5ccbf685a08e5ed714c600bbc19f9eb1fa883e090a69466acf70e3",
+  "status": 200,
+  "url": "http://127.0.0.1:35805/api/v1/health/routes"
+ },
+ "resident_version": null,
+ "rules": [
+  "C3 a probe that could not run is not_measured, never verified",
+  "C4 read-only: GET only, no body, no credential; a non-GET route is judged by the resident route table and never called"
+ ],
+ "schema": "CanaryResult/v1",
+ "subject": {
+  "commit": "4e2beb7443cc6778889107803a72a9174c3e0452",
+  "evidence": {
+   "path": "route-result-4e-473.source-evidence.json",
+   "sha256": "e8aa9ba3f3aa0cebce201c986e8caa46cd855371be37ac2e8f436cb0ab1fc385",
+   "source_field": "commit"
+  },
+  "schema": "GitCanarySubject/v1",
+  "tree": "05efb83883a334edc2710edc0cf1fb3a04e7b962"
+ }
+}

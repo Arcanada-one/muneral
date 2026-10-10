@@ -1,0 +1,265 @@
+{
+  "schema": "CanaryPlan/v1",
+  "id": "emergency-digest-native-resident-routes",
+  "owner": "MUNERAL existing run_2fa4e1b7b6fc",
+  "environment": "own loopback synthetic app/Unix PG",
+  "base_url": "http://127.0.0.1:1",
+  "route_table_path": "/api/v1/health/routes",
+  "read_only_declared": true,
+  "executor": {
+    "repo": "Arcanada-one/muneral",
+    "path": "scripts/canary/canary_probe.py"
+  },
+  "probes": [
+    {
+      "id": "resident-0",
+      "kind": "route_presence",
+      "route": "/api/v1/tasks/:taskId",
+      "method": "DELETE",
+      "path": "/api/v1/tasks/00000000-0000-0000-0000-000000000000",
+      "entities": [
+        "route:DELETE /tasks/:taskId"
+      ]
+    },
+    {
+      "id": "resident-1",
+      "kind": "route_presence",
+      "route": "/api/v1/tasks/:taskId/checklist/:itemId",
+      "method": "DELETE",
+      "path": "/api/v1/tasks/00000000-0000-0000-0000-000000000000/checklist/00000000-0000-0000-0000-000000000000",
+      "entities": [
+        "route:DELETE /tasks/:taskId/checklist/:itemId"
+      ]
+    },
+    {
+      "id": "resident-2",
+      "kind": "route_presence",
+      "route": "/api/v1/tasks/:taskId/dependencies/:depId",
+      "method": "DELETE",
+      "path": "/api/v1/tasks/00000000-0000-0000-0000-000000000000/dependencies/00000000-0000-0000-0000-000000000000",
+      "entities": [
+        "route:DELETE /tasks/:taskId/dependencies/:depId"
+      ]
+    },
+    {
+      "id": "resident-3",
+      "kind": "route_presence",
+      "route": "/api/v1/sync/datarim/:projectId",
+      "method": "GET",
+      "path": "/api/v1/sync/datarim/00000000-0000-0000-0000-000000000000",
+      "entities": [
+        "route:GET /sync/datarim/:projectId"
+      ]
+    },
+    {
+      "id": "resident-4",
+      "kind": "route_presence",
+      "route": "/api/v1/tasks",
+      "method": "GET",
+      "path": "/api/v1/tasks",
+      "entities": [
+        "route:GET /tasks"
+      ]
+    },
+    {
+      "id": "resident-5",
+      "kind": "route_presence",
+      "route": "/api/v1/tasks/:taskId",
+      "method": "GET",
+      "path": "/api/v1/tasks/00000000-0000-0000-0000-000000000000",
+      "entities": [
+        "route:GET /tasks/:taskId"
+      ]
+    },
+    {
+      "id": "resident-6",
+      "kind": "route_presence",
+      "route": "/api/v1/tasks/:taskId/activity",
+      "method": "GET",
+      "path": "/api/v1/tasks/00000000-0000-0000-0000-000000000000/activity",
+      "entities": [
+        "route:GET /tasks/:taskId/activity"
+      ]
+    },
+    {
+      "id": "resident-7",
+      "kind": "route_presence",
+      "route": "/api/v1/tasks/:taskId/checklist",
+      "method": "GET",
+      "path": "/api/v1/tasks/00000000-0000-0000-0000-000000000000/checklist",
+      "entities": [
+        "route:GET /tasks/:taskId/checklist"
+      ]
+    },
+    {
+      "id": "resident-8",
+      "kind": "route_presence",
+      "route": "/api/v1/tasks/:taskId/dependencies",
+      "method": "GET",
+      "path": "/api/v1/tasks/00000000-0000-0000-0000-000000000000/dependencies",
+      "entities": [
+        "route:GET /tasks/:taskId/dependencies"
+      ]
+    },
+    {
+      "id": "resident-9",
+      "kind": "route_presence",
+      "route": "/api/v1/tasks/:taskId/dependency-graph",
+      "method": "GET",
+      "path": "/api/v1/tasks/00000000-0000-0000-0000-000000000000/dependency-graph",
+      "entities": [
+        "route:GET /tasks/:taskId/dependency-graph"
+      ]
+    },
+    {
+      "id": "resident-10",
+      "kind": "route_presence",
+      "route": "/api/v1/tasks/:taskId/evidence",
+      "method": "GET",
+      "path": "/api/v1/tasks/00000000-0000-0000-0000-000000000000/evidence",
+      "entities": [
+        "route:GET /tasks/:taskId/evidence"
+      ]
+    },
+    {
+      "id": "resident-11",
+      "kind": "route_presence",
+      "route": "/api/v1/tasks/:taskId/readiness",
+      "method": "GET",
+      "path": "/api/v1/tasks/00000000-0000-0000-0000-000000000000/readiness",
+      "entities": [
+        "route:GET /tasks/:taskId/readiness"
+      ]
+    },
+    {
+      "id": "resident-12",
+      "kind": "route_presence",
+      "route": "/api/v1/tasks/digest",
+      "method": "GET",
+      "path": "/api/v1/tasks/digest",
+      "entities": [
+        "route:GET /tasks/digest"
+      ]
+    },
+    {
+      "id": "resident-13",
+      "kind": "route_presence",
+      "route": "/api/v1/tasks/project/:projectId",
+      "method": "GET",
+      "path": "/api/v1/tasks/project/00000000-0000-0000-0000-000000000000",
+      "entities": [
+        "route:GET /tasks/project/:projectId"
+      ]
+    },
+    {
+      "id": "resident-14",
+      "kind": "route_presence",
+      "route": "/api/v1/tasks/project/:projectId/index",
+      "method": "GET",
+      "path": "/api/v1/tasks/project/00000000-0000-0000-0000-000000000000/index",
+      "entities": [
+        "route:GET /tasks/project/:projectId/index"
+      ]
+    },
+    {
+      "id": "resident-15",
+      "kind": "route_presence",
+      "route": "/api/v1/tasks/project/:projectId/staleness",
+      "method": "GET",
+      "path": "/api/v1/tasks/project/00000000-0000-0000-0000-000000000000/staleness",
+      "entities": [
+        "route:GET /tasks/project/:projectId/staleness"
+      ]
+    },
+    {
+      "id": "resident-16",
+      "kind": "route_presence",
+      "route": "/api/v1/tasks/:taskId/checklist/:itemId",
+      "method": "PATCH",
+      "path": "/api/v1/tasks/00000000-0000-0000-0000-000000000000/checklist/00000000-0000-0000-0000-000000000000",
+      "entities": [
+        "route:PATCH /tasks/:taskId/checklist/:itemId"
+      ]
+    },
+    {
+      "id": "resident-17",
+      "kind": "route_presence",
+      "route": "/api/v1/tasks/:taskId/status",
+      "method": "PATCH",
+      "path": "/api/v1/tasks/00000000-0000-0000-0000-000000000000/status",
+      "entities": [
+        "route:PATCH /tasks/:taskId/status"
+      ]
+    },
+    {
+      "id": "resident-18",
+      "kind": "route_presence",
+      "route": "/api/v1/sync/datarim/:projectId/import",
+      "method": "POST",
+      "path": "/api/v1/sync/datarim/00000000-0000-0000-0000-000000000000/import",
+      "entities": [
+        "route:POST /sync/datarim/:projectId/import"
+      ]
+    },
+    {
+      "id": "resident-19",
+      "kind": "route_presence",
+      "route": "/api/v1/tasks",
+      "method": "POST",
+      "path": "/api/v1/tasks",
+      "entities": [
+        "route:POST /tasks"
+      ]
+    },
+    {
+      "id": "resident-20",
+      "kind": "route_presence",
+      "route": "/api/v1/tasks/:taskId/checklist",
+      "method": "POST",
+      "path": "/api/v1/tasks/00000000-0000-0000-0000-000000000000/checklist",
+      "entities": [
+        "route:POST /tasks/:taskId/checklist"
+      ]
+    },
+    {
+      "id": "resident-21",
+      "kind": "route_presence",
+      "route": "/api/v1/tasks/:taskId/comments",
+      "method": "POST",
+      "path": "/api/v1/tasks/00000000-0000-0000-0000-000000000000/comments",
+      "entities": [
+        "route:POST /tasks/:taskId/comments"
+      ]
+    },
+    {
+      "id": "resident-22",
+      "kind": "route_presence",
+      "route": "/api/v1/tasks/:taskId/dependencies",
+      "method": "POST",
+      "path": "/api/v1/tasks/00000000-0000-0000-0000-000000000000/dependencies",
+      "entities": [
+        "route:POST /tasks/:taskId/dependencies"
+      ]
+    },
+    {
+      "id": "resident-23",
+      "kind": "route_presence",
+      "route": "/api/v1/tasks/:taskId/evidence",
+      "method": "POST",
+      "path": "/api/v1/tasks/00000000-0000-0000-0000-000000000000/evidence",
+      "entities": [
+        "route:POST /tasks/:taskId/evidence"
+      ]
+    },
+    {
+      "id": "resident-24",
+      "kind": "route_presence",
+      "route": "/api/v1/tasks/:taskId/redactions",
+      "method": "POST",
+      "path": "/api/v1/tasks/00000000-0000-0000-0000-000000000000/redactions",
+      "entities": [
+        "route:POST /tasks/:taskId/redactions"
+      ]
+    }
+  ]
+}
