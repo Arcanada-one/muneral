@@ -156,7 +156,8 @@ secondary data source.
 |---|---|---|
 | `GET /agents/tasks` | yes; authenticated agent assignments, all states | API-key authentication |
 | `POST /agents/tasks/:id/assign` | creator or executor, own workspace and bounded role | `task-assign` (MUN-0051) |
-| `POST|GET /tasks/:id/evidence` | creator or assigned agent; POST requires agent key | `task-evidence` |
+| `POST /tasks/:id/evidence` | creator or assigned agent; agent key required | `task-evidence` |
+| `GET /tasks/:id/evidence` | creator or assigned agent | `task-evidence` |
 | `GET /tasks/:id` | yes | `task` (creator or assigned) |
 | `GET /tasks/:id/readiness` | yes | `task` |
 | `GET /tasks/:id/dependency-graph` | yes | `task` |

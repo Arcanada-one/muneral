@@ -208,8 +208,11 @@ with `until` still ahead, may read that project's task **index**:
 - A grant is a reviewed code change naming its decision, and it lapses at `until`
   by itself.
 
-Other task routes must be checked against their current scope; dependencies
-now use `task-dependency` and evidence uses `task-evidence`. It is an **allowlist**: a route with
+Other task routes must be checked against their current scope. Dependency
+WRITE routes (`POST /tasks/:id/dependencies` and
+`DELETE /tasks/:id/dependencies/:depId`) use `task-dependency`; dependency GET
+routes (`dependencies`, `dependency-graph` and `readiness`) retain `task`.
+Evidence POST and GET use `task-evidence`. It is an **allowlist**: a route with
 no `@AgentScope(...)` marker refuses an API key by default, so a route added
 later is closed the day it merges rather than open until somebody remembers to
 close it. The only visible change on those routes is `403` (valid key, out of
