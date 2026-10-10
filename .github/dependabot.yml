@@ -6,19 +6,29 @@ updates:
       interval: weekly
     open-pull-requests-limit: 10
     ignore:
-      # eslint 10 in apps/web is not a version bump, it is impossible: measured on
-      # 2026-09-14, eslint-plugin-react@7.37.5 (which arrives through
-      # eslint-config-next) calls two APIs eslint 10 removed --
-      # `context.getFilename()` from resolveBasedir, and `scopeManager.addGlobals`
-      # -- so pinning past the first only reveals the second. Its peer range stops
-      # at ^9.7, and its only newer dist-tag is 7.8.0-rc.0, published 2014-12-16.
-      # PR #56 sat open 18 days as a signal nobody could act on.
+      # TypeScript 7 is DEFERRED, not forgotten. Decision A2-304c (2026-09-25), recorded
+      # here by A2-320 so the December review finds it instead of re-deriving it.
       #
-      # Scoped to the major deliberately: 9.x patches and minors still come through.
-      # REVERSE WHEN eslint-plugin-react ships an eslint-10 release, or apps/web
-      # stops taking its plugins from eslint-config-next. apps/api is unaffected --
-      # it is already on eslint v10.10.0 and green.
-      - dependency-name: eslint
+      # WHAT BREAKS (measured on main with TypeScript 7.0.2 actually installed, the
+      # pnpm-workspace.yaml `typescript: 5.9.3` override removed first):
+      #   - apps/web `tsc --noEmit`: 0 errors. packages/types build: rc 0.
+      #   - apps/api: `TS5102 Option 'baseUrl' has been removed` (tsconfig.json:13),
+      #     then 65 x TS2564 (no initializer) in src/**/dto/*.ts -- ours, mechanical.
+      #   - `pnpm lint`, BOTH apps: `TypeError: Cannot read properties of undefined
+      #     (reading 'Cjs')`, exit 2. That is typescript-eslint reading a TypeScript
+      #     internal TS 7 rebuilt, and only an upstream release fixes it. On
+      #     2026-09-25T10:25Z typescript-eslint@8.70.1 (latest; no 9.x line exists)
+      #     still declares `typescript: >=4.8.4 <6.1.0`.
+      # Waiting is cheap (A2-304c: no open advisory against 5.9.3 in this tree, and the
+      # 65 do not grow); migrating now means dropping type-aware lint or shipping a red
+      # linter. TypeScript 6 is covered by the same entry: it already
+      # makes `baseUrl` an error (TS5101, see the override in pnpm-workspace.yaml).
+      #
+      # REVIEW ON 2026-12-01, or earlier when this prints a ceiling that admits 7:
+      #   npm view typescript-eslint@latest peerDependencies.typescript
+      # If it does: remove the override, then this entry, then fix baseUrl + the 65
+      # TS2564 in one PR, and run `pnpm lint` -- the check that failed, not the peer range.
+      - dependency-name: typescript
         update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /

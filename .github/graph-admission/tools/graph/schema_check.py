@@ -85,6 +85,77 @@ def parse_iso(s):
             return None
 
 
+# ------------------------------------------------------------------- global-fallback selection
+# One implementation of one rule, in the module that imports nothing of ours, so that every site
+# which has to know it can import it: impact_pair.selected(), impact_pair.mandatory_by_entity(),
+# verify.py collect_entities(), verify.py --selftest, and check_receipt() below. Six sites; the
+# rule has already diverged twice across them (muneral #108, then A2-232), and each divergence was
+# a silence, not an error.
+def _deployable_dir(entity: str) -> str:
+    d = entity.split(":", 1)[1].strip("/")
+    return "" if d in ("", ".") else d + "/"
+
+
+def traversal_entities(rows) -> set[str]:
+    """Normal paths remain obligations even when synthetic fallback rows coexist."""
+    return {e["entity"] for e in rows if isinstance(e, dict) and "entity" in e
+            if any(p.get("path") and not all(h.get("via") == "global-fallback" for h in p["path"])
+                   for p in e.get("revision_paths", [e]))}
+
+
+def fallback_evidence_problems(doc: dict, units: set[str]) -> list[str]:
+    """A targeted spec row cannot discharge the repository-wide fallback measurement."""
+    if (doc.get("admission") or {}).get("verdict") not in {"admitted", "admitted_with_exemptions"}:
+        return []
+    records = {v.get("entity"): v for v in doc.get("verdicts", [])}
+    rows = {v.get("id"): v for v in doc.get("verifiers", [])}
+    problems = []
+    for eid in sorted(units):
+        referenced = [rows.get(i, {}) for i in records.get(eid, {}).get("verifier_ids", [])]
+        if not any(v.get("scope") == "global_fallback_full_suite" and v.get("kind") == "targeted_test"
+                   and eid in v.get("entities", []) and v.get("exit_code") == 0
+                   and v.get("entity_verdicts", {}).get(eid) == "verified" and v.get("output_ref")
+                   for v in referenced):
+            problems.append("missing measured full fallback test evidence: " + eid)
+    return problems
+
+
+def fallback_units(rows) -> set[str]:
+    """The entities a triggered global fallback collapses onto, from impact-set rows.
+
+    A fallback (lockfile / root manifest / global config) makes the impact the WHOLE REPOSITORY as
+    ONE entity - the Bazel/Nx rule of DEC-AUP-0008 - verified by the repository's own build. The
+    rows impact.py lists ARE the blast radius, not N separate measurements; demanding a verdict per
+    row is what paused a receipt over 464 nodes it had itself collapsed into one (muneral #108).
+
+    But the ONE entity has to EXIST, and until A2-235 it did not: the selection was the change's
+    seeds, and a manifest has none. `deployable_unit` is that entity, and it sits right there among
+    the rows. One rule:
+
+        every deployable unit in the radius, plus every code unit no deployable unit contains.
+
+    The second half is not a second tier, it is the same sentence: a code unit inside a deployable
+    is covered when that deployable is built, and a code unit inside none is covered by nothing, so
+    it answers for itself. In a repository with no manifest at all (no package.json / Cargo.toml /
+    pyproject.toml) the graph holds no deployable and EVERY code unit is uncovered — which is why
+    that case needs no special branch.
+
+    A fallback that reaches neither (documents, receipts, work items only) weighs nothing. The
+    caller must NAME that rather than return a quiet `paused_safe` over an empty verdict list
+    (A2-232: talomnia-backend, core=14, verdicts=0, verifiers=0, admission paused_safe).
+    """
+    by_type: dict[str, set[str]] = {}
+    for e in rows:
+        if not isinstance(e, dict) or not isinstance(e.get("entity"), str):
+            continue
+        by_type.setdefault(e.get("node_type") or e["entity"].split(":", 1)[0], set()).add(e["entity"])
+    units = by_type.get("deployable_unit", set())
+    dirs = sorted(_deployable_dir(u) for u in units)
+    uncovered = {c for c in by_type.get("code_unit", set())
+                 if not any(c.split(":", 1)[1].startswith(d) for d in dirs)}
+    return units | uncovered
+
+
 # --------------------------------------------------------------------------- rule registry
 class Ctx:
     def __init__(self, doc, schema, disabled):
@@ -166,6 +237,84 @@ def check_graph(doc: dict, schema: dict, disabled=frozenset()) -> list[dict]:
 
 # --------------------------------------------------------------------------------- receipt
 DOC_KINDS = {"doc", "receipt"}
+
+
+SELECTED_NOTE_RE = re.compile(r"selected: (\[[^\]]*\]|none)")
+
+
+def _version(v) -> tuple:
+    try:
+        return tuple(int(x) for x in str(v).split(".")[:3])
+    except ValueError:
+        return ()
+
+
+def check_verifier_selection(c: Ctx, doc: dict, F: dict) -> None:
+    """A2-413 — the selection as a checked record. See fields.verifier_selection.rule.
+
+    Absence is a finding only where the producer is one that writes the field: receipts from earlier
+    producers are dated records whose silence is itself measured (A2-411 § 2) and is never backfilled.
+    """
+    spec = F["verifier_selection"]
+    prod = doc.get("producer") if isinstance(doc.get("producer"), dict) else {}
+    need = spec["required_from_producer"]
+    knows = prod.get("tool") == need["tool"] and _version(prod.get("version")) >= _version(need["min_version"])
+    if "verifier_selection" not in doc:
+        if knows:
+            c.add("VERIFIER_SELECTION_MISSING", f"{prod.get('tool')} {prod.get('version')} writes verifier_selection; this receipt has none")
+        return
+    vs = doc["verifier_selection"]
+    bad = []
+    if not isinstance(vs, dict) or any(k not in vs for k in spec["required"]):
+        c.add("VERIFIER_SELECTION_INVALID", f"missing {[k for k in spec['required'] if not isinstance(vs, dict) or k not in vs]}")
+        return
+    req, app, na = vs["requested"], vs["applied"], vs["not_applied"]
+    if vs["schema"] != spec["schema"]:
+        bad.append(f"schema {vs['schema']!r}")
+    if not (isinstance(req, list) and all(isinstance(x, str) for x in req) and len(set(req)) == len(req)):
+        bad.append("requested is not a list of distinct strings"); req = []
+    unknown = [x for x in req if x not in spec["selectable_values"]]
+    if unknown:
+        bad.append(f"requested names non-selectable {unknown}")
+    if not (isinstance(app, dict) and all(isinstance(v, list) and v and all(isinstance(e, str) for e in v) for v in app.values())):
+        bad.append("applied is not verifier → non-empty entity list"); app = {}
+    if not (isinstance(na, list) and all(isinstance(x, dict) and isinstance(x.get("entities"), list) for x in na)):
+        bad.append("not_applied is not a list of rows with entities"); na = []
+    for v in app:
+        if v not in req:
+            bad.append(f"applied {v!r} was not requested")
+    for x in na:
+        if x.get("verifier") not in req:
+            bad.append(f"not_applied {x.get('verifier')!r} was not requested")
+        if x.get("reason") not in spec["not_applied_reasons"]:
+            bad.append(f"not_applied reason {x.get('reason')!r}")
+        elif (x["reason"] == "NO_ENTITY_OF_APPLICABLE_TYPE") != (not x["entities"]):
+            bad.append(f"not_applied {x.get('verifier')!r}: entities must be empty exactly for NO_ENTITY_OF_APPLICABLE_TYPE")
+    accounted = set(app) | {x.get("verifier") for x in na}
+    for v in req:
+        if v not in accounted:
+            bad.append(f"requested {v!r} is accounted for nowhere")
+    # Against the per-entity required sets the producer also records: a record of what applied that
+    # disagrees with what was demanded is a record of nothing.
+    vd = doc.get("verify") if isinstance(doc.get("verify"), dict) else {}
+    rbe = vd.get("required_by_entity")
+    if isinstance(rbe, dict):
+        for v in spec["selectable_values"]:
+            demanded = {e for e, r in rbe.items() if isinstance(r, list) and v in r}
+            listed = set(app.get(v, []))
+            if demanded != listed:
+                bad.append(f"applied[{v}] lists {len(listed)} entities, required_by_entity demands {len(demanded)}")
+    if bad:
+        c.add("VERIFIER_SELECTION_INVALID", "; ".join(bad)[:400])
+    # The prose line stays until this field is the only record; while both exist they must agree.
+    notes = doc.get("notes") if isinstance(doc.get("notes"), list) else []
+    for n in notes:
+        m = SELECTED_NOTE_RE.search(n) if isinstance(n, str) else None
+        if not m:
+            continue
+        said = [] if m.group(1) == "none" else re.findall(r"'([^']*)'", m.group(1))
+        if sorted(said) != sorted(req):
+            c.add("VERIFIER_SELECTION_CONTRADICTS_NOTES", f"notes say {sorted(said)}, verifier_selection.requested {sorted(req)}")
 
 
 def check_receipt(doc: dict, schema: dict, disabled=frozenset()) -> list[dict]:
@@ -307,6 +456,7 @@ def check_receipt(doc: dict, schema: dict, disabled=frozenset()) -> list[dict]:
                 c.add("REVISION_SELECTION_INCOMPLETE", "selected entity lacks verdict or required verifier selection")
             if rs["unmeasured_head_files"] and (doc.get("admission") or {}).get("verdict") in {"admitted", "admitted_with_exemptions"}:
                 c.add("REVISION_SELECTION_INCOMPLETE", "unmeasured head code cannot be admitted")
+    check_verifier_selection(c, doc, F)
     # impact set
     imp = sub("impact_set")
     for f in F["impact_set"]["required"]:
@@ -334,15 +484,28 @@ def check_receipt(doc: dict, schema: dict, disabled=frozenset()) -> list[dict]:
     # something else would be the worse defect.
     fallback_selection = None
     if gf.get("triggered") is True:
+        # The demand is the seeds plus the repository's own unit(s) — `fallback_units` above. It
+        # used to fall back to "what the receipt actually judged" whenever `impact_set.seeds` was
+        # absent, which impact.py never emits: a receipt with ZERO verdicts therefore demanded
+        # zero, and passed as conformant. That is the receipt grading its own homework, and it is
+        # the same silence A2-232 measured in the producer (talomnia-backend: core=14, verdicts=0).
+        # Derive the demand from the rows instead — they are in the receipt, independent of it.
         seeds = imp.get("seeds")
-        if isinstance(seeds, list) and seeds:
-            fallback_selection = set(seeds)
-        else:
-            # No seeds recorded: hold the receipt to what it actually judged, so a correct
-            # receipt is not refused over a field impact.py did not emit. On a NON-fallback
-            # change this stays None and the rule is unchanged.
-            fallback_selection = {v["entity"] for v in (doc.get("verdicts") or [])
-                                  if isinstance(v, dict) and "entity" in v}
+        fallback_selection = fallback_units(core + tail) | traversal_entities(core + tail)
+        # Historical receipts remain readable under their producer's format; live admission
+        # always re-derives the full-suite obligation from Git in impact_pair.receipt_problems.
+        producer = doc.get("producer") or {}
+        modern = producer.get("tool") == "tools/graph/verify.py" and _version(producer.get("version")) >= (1, 3, 0)
+        scoped = any(v.get("scope") == "global_fallback_full_suite" for v in doc.get("verifiers", []))
+        if modern or scoped:
+            for problem in fallback_evidence_problems(doc, fallback_units(core + tail)):
+                c.add("FULL_FALLBACK_TEST_NOT_MEASURED", problem)
+        if isinstance(seeds, list):
+            fallback_selection |= {s for s in seeds if isinstance(s, str)}
+        fallback_selection |= {n for f in ((doc.get("change_set") or {}).get("files") or [])
+                               if isinstance(f, dict)
+                               for n in (f.get("node_ids") or ([f["node_id"]] if f.get("node_id") else []))
+                               if isinstance(n, str)}
     entities = []
     boundary_inferred = []
     for section, entries in (("deterministic_core", core), ("inferred_tail", tail)):
@@ -371,6 +534,28 @@ def check_receipt(doc: dict, schema: dict, disabled=frozenset()) -> list[dict]:
         exp = doc.get("empty_impact_explanation")
         if not (isinstance(exp, dict) and exp.get("reason") and isinstance(exp.get("graph_metadata"), dict) and exp["graph_metadata"]):
             c.add("EMPTY_IMPACT_WITHOUT_EXPLANATION", "non-doc change, empty impact set, no explanation with graph_metadata")
+    exp = doc.get("empty_impact_explanation")
+    if isinstance(exp, dict) and ("binding" in exp or exp.get("schema") == "BoundEmptyImpactExplanation/v1"):
+        binding = exp.get("binding")
+        claim = binding.get("input") if isinstance(binding, dict) else None
+        keys = {"schema", "base", "head", "base_graph_digest", "head_graph_digest", "scope", "reason"}
+        valid = isinstance(binding, dict) and set(binding) == {"schema", "input", "input_sha256"} and binding.get("schema") == "BoundEmptyImpactExplanation/v1" and isinstance(claim, dict) and set(claim) == keys
+        if valid:
+            encoded = (json.dumps(claim, indent=1, sort_keys=True, ensure_ascii=False) + "\n").encode("utf-8")
+            valid = (exp.get("schema") == "BoundEmptyImpactExplanation/v1" and claim["schema"] == "EmptyImpactExplanation/v1" and claim["scope"] == "graph_non_seed_dependents"
+                     and binding["input_sha256"] == "sha256:" + hashlib.sha256(encoded).hexdigest()
+                     and isinstance(claim["reason"], str) and len(claim["reason"].strip()) >= 40
+                     and exp.get("reason") == claim["reason"].strip()
+                     and all(claim[k] == (doc.get("change_set") or {}).get(k) for k in ("base", "head"))
+                     and claim["base_graph_digest"] == (doc.get("graph") or {}).get("graph_digest")
+                     and claim["head_graph_digest"] == (doc.get("head_graph") or {}).get("graph_digest")
+                     and isinstance(exp.get("graph_metadata"), dict)
+                     and exp["graph_metadata"].get("scope") == "graph_non_seed_dependents"
+                     and isinstance(exp["graph_metadata"].get("revisions"), dict)
+                     and set(exp["graph_metadata"].get("revisions", {})) == {"base", "head"}
+                     and not core and not tail and gf.get("triggered") is not True)
+        if not valid:
+            c.add("EMPTY_IMPACT_WITHOUT_EXPLANATION", "invalid exact paired author explanation binding")
     # verifiers
     vers = doc.get("verifiers") if isinstance(doc.get("verifiers"), list) else []
     vspec = F["verifier"]
@@ -390,7 +575,7 @@ def check_receipt(doc: dict, schema: dict, disabled=frozenset()) -> list[dict]:
         for f in vspec["required"]:
             if f not in v and f not in ("output_ref", "exit_code"):
                 c.add("RECEIPT_MISSING_FIELD", f"verifier {v.get('id')}: {f}")
-        if v.get("kind") == "canary":
+        if v.get("kind") in {"canary", "shell_behavior"}:
             canary_entities.update(v.get("entities") or [])
             canary_rows.append(v)
         if v.get("kind") == "endpoint_probe":
@@ -601,7 +786,8 @@ ALL_RECEIPT_RULES = ("RECEIPT_SCHEMA_MISMATCH", "RECEIPT_MISSING_FIELD", "RECEIP
                      "NOT_MEASURED_WITHOUT_REASON", "EXEMPTION_WITHOUT_OWNER", "EXEMPTION_WITHOUT_EXPIRY", "EXEMPTION_EXPIRED",
                      "ADMISSION_CONTRADICTS_VERDICTS", "ADMISSION_VERDICT_INVALID", "HEAD_GRAPH_BINDING_INVALID", "REVISION_SELECTION_INCOMPLETE",
                      "STRUCTURAL_EXCLUSION_INVALID", "CANARY_CLAIM_WITHOUT_COMMITTED_EVIDENCE",
-                     "OBSERVED_ENTRY_INVALID", "ENDPOINT_PROBE_WITHOUT_OBSERVATION", "PROBE_CLAIM_CONTRADICTS_OBSERVATION")
+                     "OBSERVED_ENTRY_INVALID", "ENDPOINT_PROBE_WITHOUT_OBSERVATION", "PROBE_CLAIM_CONTRADICTS_OBSERVATION",
+                     "VERIFIER_SELECTION_INVALID", "VERIFIER_SELECTION_MISSING", "VERIFIER_SELECTION_CONTRADICTS_NOTES")
 
 
 # -------------------------------------------------------------------------------- selftest

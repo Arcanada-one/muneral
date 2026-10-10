@@ -1,0 +1,11 @@
+{
+ "captured_at_utc": "2026-10-07T06:27:34Z",
+ "commit": "df82aba3b1d25de78df845e9b2cd7c979a507635",
+ "dirty": false,
+ "producer": {
+  "tool": "mun-0043 index-grant make_plan (A2-455c shape)",
+  "version": "1.0.0"
+ },
+ "schema": "MeasuredGitSource/v1",
+ "tree": "dfaac0342262f11d0f2ba13a76a4b45b35e75ec8"
+}

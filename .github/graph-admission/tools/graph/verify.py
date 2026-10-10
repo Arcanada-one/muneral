@@ -32,7 +32,7 @@ Semantics (the graph SELECTS verification, it never replaces it — consilium 20
   admission   admitted only when every verdict is verified; a failed verdict ⇒ refused; not_measured ⇒ paused_safe;
               exemptions are attached by the admitting agent (GRAPH-006), never invented here — the output is a DRAFT
   head tree   worktree mode runs the tool-chain verifiers in the repository itself (nothing is emitted: --noEmit,
-              --incremental false); diff mode with head ≠ HEAD exports the head tree with `git archive` into --workdir,
+              scratch buildinfo removed after each check); diff mode with head ≠ HEAD exports the head tree with `git archive` into --workdir,
               links the repository's node_modules into it and builds workspace packages there — the repository is
               never written (the pilot clone stays untouched)
 Exit codes: 0 draft admitted · 1 draft paused_safe / refused · 2 refusal (impact refusal, STALE_GRAPH, …) · 3 draft
@@ -44,16 +44,23 @@ profile, or discovery; an absent tool yields not_measured, never verified.
 from __future__ import annotations
 
 import workflow_config
+import nest_bootstrap
 import canary_evidence
 import argparse
+import ast
 import hashlib
 import json
 import os
 import re
 import shutil
+import shlex
+import signal
 import subprocess
 import sys
 import time
+import tempfile
+from contextlib import contextmanager
+from contextvars import ContextVar
 from types import SimpleNamespace
 import traceback
 from datetime import datetime, timedelta, timezone
@@ -67,9 +74,172 @@ import build_graph  # noqa: E402
 import impact  # noqa: E402
 import impact_pair  # noqa: E402
 import contract_diff  # noqa: E402
+import native_projection  # noqa: E402
+import full_suite_ci
+import shell_source
 
-VERSION = "1.0.1"
+VERSION = "1.4.1"   # workflow shell unknown cannot discharge mandatory caller closure
 TOOL = "tools/graph/verify.py"
+
+
+_COMPILER_SDK_TYPE_ROOTS = ContextVar("compiler_sdk_type_roots", default=None)
+
+
+def compiler_sdk_type_check_args(tsc=None):
+    """Only the live byte-bound context can select an external type root."""
+    selection = _COMPILER_SDK_TYPE_ROOTS.get()
+    if not selection:
+        return []
+    compiler, root = selection
+    # The project's locked compiler still wins discovery; do not mix that
+    # compiler with external ambient types from a fallback SDK.
+    if tsc is not None and Path(tsc).resolve() != Path(compiler).resolve():
+        return []
+    return ["--typeRoots", root]
+
+
+def compiler_sdk_arguments(parser):
+    """Explicit tool inputs, never an imported verdict or exemption."""
+    parser.add_argument("--compiler-sdk-root", type=Path)
+    parser.add_argument("--compiler-sdk-declaration", type=Path)
+    parser.add_argument("--compiler-sdk-declaration-sha256")
+    parser.add_argument("--compiler-sdk-evidence", type=Path,
+                        help="new diagnostic input-binding record; not admission evidence")
+
+
+@contextmanager
+def compiler_sdk_input(a, repo, base, head):
+    """Expose byte-bound tsc to this invocation and its real children only.
+
+    C16 still evaluates every structural obligation live. No receipt/result is
+    accepted here, and the declaration's historical source/config fields grant
+    no approval for the receiving tree.
+    """
+    values = [getattr(a, name, None) for name in (
+        "compiler_sdk_root", "compiler_sdk_declaration",
+        "compiler_sdk_declaration_sha256", "compiler_sdk_evidence")]
+    if not any(values):
+        yield
+        return
+    if not all(values):
+        raise ValueError("compiler SDK needs root, declaration, exact SHA256 and new evidence path")
+    root, declaration, expected, evidence = values
+    root, declaration, evidence = Path(root), Path(declaration), Path(evidence)
+    if (not re.fullmatch(r"[0-9a-f]{64}", expected) or declaration.is_symlink()
+            or not declaration.is_file() or declaration.stat().st_size > 4 * 1024 * 1024):
+        raise ValueError("compiler SDK declaration must be a bounded regular byte-pinned file")
+    raw = declaration.read_bytes()
+    if hashlib.sha256(raw).hexdigest() != expected:
+        raise ValueError("compiler SDK declaration digest mismatch")
+    doc = json.loads(raw)
+    members = doc.get("sdk_files")
+    if (doc.get("schema") != "GraphToolsCompilerSDKByteBinding/v1"
+            or not isinstance(members, list) or not 1 <= len(members) <= 10000
+            or root.is_symlink() or not root.is_dir()):
+        raise ValueError("unsupported compiler SDK byte declaration/root")
+    paths = {}
+    for member in members:
+        if not isinstance(member, dict):
+            raise ValueError("compiler SDK member must be a path/digest object")
+        name, digest = member.get("path"), member.get("sha256")
+        if (not isinstance(name, str) or not re.fullmatch(r"[a-zA-Z0-9@._/-]+", name)
+                or Path(name).is_absolute() or any(p in (".", "..") for p in name.split("/"))
+                or name in paths or not isinstance(digest, str)
+                or not re.fullmatch(r"[0-9a-f]{64}", digest)):
+            raise ValueError("compiler SDK member is ambiguous or escapes its declared root")
+        paths[name] = digest
+    if "typescript/bin/tsc" not in paths:
+        raise ValueError("compiler SDK declaration lacks the actual tsc executable")
+
+    # A Node declaration is a resolution input, not merely executable discovery.
+    # Keep legacy tsc-only inputs unchanged; never infer types from PATH or a host SDK.
+    node_types = any(name.startswith("@types/node/") for name in paths)
+    type_roots = str((root / "@types").resolve()) if node_types else None
+
+    def check_resolution():
+        if not node_types:
+            return
+        for package in ("typescript", "@types/node", "undici-types"):
+            metadata = package + "/package.json"
+            if metadata not in paths:
+                raise ValueError("compiler SDK resolution metadata undeclared: " + metadata)
+        for package in ("@types/node", "undici-types"):
+            metadata = json.loads((root / package / "package.json").read_text())
+            target = metadata.get("typings", metadata.get("types"))
+            if (not isinstance(target, str) or Path(target).is_absolute()
+                    or any(part in ("", ".", "..") for part in target.split("/"))
+                    or package + "/" + target not in paths):
+                raise ValueError("compiler SDK type entry is not byte-bound: " + package)
+            for directory, dirs, files in os.walk(root / package, followlinks=False):
+                for name in dirs + files:
+                    member = Path(directory) / name
+                    if member.is_symlink():
+                        raise ValueError("compiler SDK resolution alias refused: " + str(member))
+                    if member.is_file() and (member.name == "package.json" or member.name.endswith((".d.ts", ".d.cts", ".d.mts"))):
+                        relative = member.relative_to(root).as_posix()
+                        if relative not in paths:
+                            raise ValueError("compiler SDK resolution member undeclared: " + relative)
+        if sorted(p.name for p in (root / "@types").iterdir()) != ["node"]:
+            raise ValueError("compiler SDK type root contains an undeclared ambient package")
+
+    def check_bytes():
+        if declaration.read_bytes() != raw:
+            raise ValueError("compiler SDK declaration changed during invocation")
+        for name, digest in paths.items():
+            path = root / name
+            if (any(p.is_symlink() for p in [path, *path.parents]) or not path.is_file()
+                    or hashlib.sha256(path.read_bytes()).hexdigest() != digest):
+                raise ValueError("compiler SDK declared bytes differ: " + name)
+
+    check_bytes()
+    check_resolution()
+    tsc = root / "typescript/bin/tsc"
+    node = shutil.which("node")
+    if not os.access(tsc, os.X_OK) or not node:
+        raise ValueError("compiler SDK executable or native node unavailable")
+    if getattr(a, "tsc", None) and Path(a.tsc).resolve() != tsc.resolve():
+        raise ValueError("explicit tsc conflicts with the declared compiler SDK")
+    def oid(ref):
+        return subprocess.check_output(["git", "-C", str(repo), "rev-parse", ref], text=True).strip()
+    binding = {"schema": "CompilerSDKInvocationBinding/v1", "declaration_sha256": expected,
+               "members": paths, "base": oid(base), "head": oid(head), "tree": oid(head + "^{tree}"),
+               "node_sha256": hashlib.sha256(Path(node).read_bytes()).hexdigest(),
+               "tool_sha256": {p.name: hashlib.sha256(p.read_bytes()).hexdigest()
+                               for p in HERE.iterdir() if p.is_file() and p.suffix in (".py", ".cjs")},
+               "scope": "tool discovery for one live invocation; no imported verdict, cache or authority",
+               "type_roots": type_roots,
+               "complete": False}
+    evidence.parent.mkdir(parents=True, exist_ok=True)
+    with evidence.open("x") as output:
+        output.write(json.dumps(binding, indent=2) + "\n")
+    old_path = os.environ.get("PATH")
+    old_tsc = getattr(a, "tsc", None)
+    os.environ["PATH"] = str(tsc.parent.resolve()) + os.pathsep + (old_path or os.defpath)
+    resolution_token = _COMPILER_SDK_TYPE_ROOTS.set((str(tsc.resolve()), type_roots) if type_roots else None)
+    try:
+        a.tsc = str(tsc.resolve())
+        if Path(shutil.which("tsc") or "").resolve() != tsc.resolve():
+            raise ValueError("compiler SDK discovery differs from declared tsc")
+        yield
+        check_bytes()
+        check_resolution()
+        if (oid(base) != binding["base"] or oid(head) != binding["head"]
+                or oid(head + "^{tree}") != binding["tree"]):
+            raise ValueError("receiving source tree changed during invocation")
+        if hashlib.sha256(Path(node).read_bytes()).hexdigest() != binding["node_sha256"]:
+            raise ValueError("native node bytes changed during invocation")
+        if any(hashlib.sha256((HERE / name).read_bytes()).hexdigest() != digest
+               for name, digest in binding["tool_sha256"].items()):
+            raise ValueError("verifier tool bytes changed during invocation")
+        binding["complete"] = True
+    finally:
+        _COMPILER_SDK_TYPE_ROOTS.reset(resolution_token)
+        a.tsc = old_tsc
+        if old_path is None:
+            os.environ.pop("PATH", None)
+        else:
+            os.environ["PATH"] = old_path
+        evidence.write_text(json.dumps(binding, indent=2) + "\n")
 MATRIX_PATH = ROOT / "contracts" / "graph-verified-change" / "verifier-matrix.v1.json"
 GATE_POLICY_PATH = ROOT / "contracts" / "graph-verified-change" / "admission-gate.v1.json"
 # The codes only the GATE may issue (admission-gate.v1.json → structural_exemptions.issued_by:
@@ -117,6 +287,7 @@ SPEC_JS_RE = re.compile(r"\.(spec|test)\.[cm]?[jt]sx?$")
 SPEC_PY_RE = re.compile(r"(^|/)(test_\w+|\w+_test)\.py$")
 PYTEST_VERBOSE_RE = re.compile(r"^(\S+?\.py)::\S+\s+(PASSED|FAILED|ERROR|SKIPPED|XFAIL|XPASS)")
 PYTEST_SUMMARY_RE = re.compile(r"^(FAILED|ERROR)\s+(\S+?\.py)(?:::|\s|$)")
+POSTBUILD = "postbuild:"   # A2-444: group-key prefix of a config compiled against this run's own build
 VERDICT_RANK = {"verified": 0, "not_measured": 1, "failed": 2}
 PERSISTENCE_RE = re.compile(r"(^|/)prisma\.service\.[cm]?[jt]s$|\.repository\.[cm]?[jt]s$")
 PERSISTENCE_PKGS = {"@prisma/client", "typeorm"}
@@ -130,11 +301,12 @@ TS_ERR_RE = re.compile(r"^(.+?)\((\d+),(\d+)\): error (TS\d+): (.*)$")
 UNRESOLVED_MODULE_CODES = {"TS2307", "TS2688", "TS7016"}
 SHARED_KINDS = {"library", "shared_package"}
 MANDATORY_IDS = ["type_check", "contract_diff", "route_config_consistency", "schema_diff", "config_schema", "fitness_rules", "doc_reference",
-                 "canary"]
+                 "canary", "shell_syntax", "shell_behavior"]
 SELECTABLE_IDS = ["targeted_test", "property_check"]
 # internal rules the mutation battery disables one at a time
 RULES = ["aggregate_failed_wins", "missing_required_not_measured", "disabled_mandatory_event", "inferred_boundary_hold",
-         "baseline_expiry", "admission_rule", "every_entity_verdict", "changed_node_outgoing"]
+         "baseline_expiry", "admission_rule", "every_entity_verdict", "changed_node_outgoing",
+         "impact_without_verdicts_event"]
 
 
 # ----------------------------------------------------------------------------------------------- helpers
@@ -164,11 +336,23 @@ def run_cmd(cmd: list[str], cwd: Path, env: dict | None = None, timeout: int = 9
     if env:
         e.update(env)
     try:
-        p = subprocess.run(cmd, cwd=cwd, env=e, capture_output=True, text=True, timeout=timeout)
-        out = p.stdout + (("\n[stderr]\n" + p.stderr) if p.stderr.strip() else "")
+        p = subprocess.Popen(cmd, cwd=cwd, env=e, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                             text=True, start_new_session=True)
+        try:
+            stdout, stderr = p.communicate(timeout=timeout)
+        except subprocess.TimeoutExpired as ex:
+            # This process owns a fresh session/group. Kill its whole job, including
+            # grandchildren that keep pipes open, then drain output and reap the leader.
+            # Never signal the caller's (possibly shared server/worker) process group.
+            try:
+                os.killpg(p.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            stdout, stderr = p.communicate()
+            out = stdout + (("\n[stderr]\n" + stderr) if stderr.strip() else "")
+            return 124, f"TIMEOUT after {timeout}s: {ex}\n{out}", round(time.monotonic() - t0, 2)
+        out = stdout + (("\n[stderr]\n" + stderr) if stderr.strip() else "")
         return p.returncode, out, round(time.monotonic() - t0, 2)
-    except subprocess.TimeoutExpired as ex:
-        return 124, f"TIMEOUT after {timeout}s: {ex}", round(time.monotonic() - t0, 2)
     except FileNotFoundError as ex:
         return 127, f"NOT FOUND: {ex}", round(time.monotonic() - t0, 2)
 
@@ -266,6 +450,110 @@ def config_keys_read(code: str, lang: str = "ts") -> set[str]:
     return keys
 
 
+# A2-311. A repository does not have to declare its configuration in a dotfile. A Python service
+# on pydantic-settings declares it in CODE — a `Settings(BaseSettings)` class whose annotated
+# fields ARE the keys and whose `env_prefix` says how they are spelled in the environment. Read
+# only `.env.example`-style files, `config_schema` called every such key UNDECLARED, and the author
+# was pushed to write the same list down twice so the verifier would agree with a declaration that
+# was already there. Measured on Arcanada-one/scrutator: `SCRUTATOR_TEST_DSN` is declared at
+# `src/scrutator/config.py:143` and A2-308's first receipt reported it undeclared (A2-308 §9.1).
+#
+# WHAT IS MEASURED: annotated class-level fields of a class deriving from `BaseSettings`, directly
+# or through another settings class in the same module, and the `env_prefix` of its
+# `model_config` (a dict literal or a `SettingsConfigDict(...)` call) or of a legacy
+# `class Config:`. Key = (prefix + field name), upper-cased, which is pydantic-settings' own rule
+# for a case-insensitive environment.
+#
+# WHAT IS NOT, and is never claimed: `Field(alias=…)` / `validation_alias` / `AliasChoices`, which
+# rename a key at the field level; a prefix computed rather than written; and any settings class
+# assembled at runtime. Those keys stay undeclared, which is the safe direction — this function may
+# only ever ADD to the declared set, so a bound of the reader can produce a false UNDECLARED_CONFIG_KEY
+# (visible, arguable) and never a false pass.
+PY_SETTINGS_BASE = "BaseSettings"
+
+
+def _py_str(node) -> str | None:
+    return node.value if isinstance(node, ast.Constant) and isinstance(node.value, str) else None
+
+
+def _py_base_names(node: ast.ClassDef) -> set[str]:
+    names = set()
+    for base in node.bases:
+        if isinstance(base, ast.Name):
+            names.add(base.id)
+        elif isinstance(base, ast.Attribute):
+            names.add(base.attr)
+    return names
+
+
+def _py_env_prefix(node: ast.ClassDef) -> str:
+    """The `env_prefix` this settings class declares, or "" when it declares none."""
+    for stmt in node.body:
+        if isinstance(stmt, ast.ClassDef) and stmt.name == "Config":       # pydantic v1 idiom
+            for inner in stmt.body:
+                if isinstance(inner, ast.Assign) and any(
+                        isinstance(t, ast.Name) and t.id == "env_prefix" for t in inner.targets):
+                    return _py_str(inner.value) or ""
+            continue
+        if not isinstance(stmt, (ast.Assign, ast.AnnAssign)):
+            continue
+        targets = stmt.targets if isinstance(stmt, ast.Assign) else [stmt.target]
+        if not any(isinstance(t, ast.Name) and t.id == "model_config" for t in targets):
+            continue
+        value = stmt.value
+        if isinstance(value, ast.Dict):
+            for key, item in zip(value.keys, value.values):
+                if _py_str(key) == "env_prefix":
+                    return _py_str(item) or ""
+        elif isinstance(value, ast.Call):                                   # SettingsConfigDict(...)
+            for kw in value.keywords:
+                if kw.arg == "env_prefix":
+                    return _py_str(kw.value) or ""
+    return ""
+
+
+def _py_settings_classes(module: ast.Module) -> list[ast.ClassDef]:
+    """Classes deriving from BaseSettings, directly or via another settings class in this module."""
+    classes = [n for n in module.body if isinstance(n, ast.ClassDef)]
+    by_name = {c.name: c for c in classes}
+    settings, changed = set(), True
+    while changed:
+        changed = False
+        for cls in classes:
+            if cls.name in settings:
+                continue
+            bases = _py_base_names(cls)
+            if PY_SETTINGS_BASE in bases or bases & settings:
+                settings.add(cls.name)
+                changed = True
+    return [by_name[name] for name in sorted(settings)]
+
+
+def pydantic_settings_keys(tree: build_graph.Tree) -> tuple[set[str], list[str]]:
+    keys, sources = set(), []
+    for path in sorted(tree.paths):
+        if not path.endswith(".py") or PY_SETTINGS_BASE not in tree.text(path):
+            continue
+        try:
+            module = ast.parse(tree.text(path))
+        except (SyntaxError, ValueError):
+            continue        # an unparseable file declares nothing; it is not a finding of this verifier
+        found = set()
+        for cls in _py_settings_classes(module):
+            prefix = _py_env_prefix(cls)
+            for stmt in cls.body:
+                if not isinstance(stmt, ast.AnnAssign) or not isinstance(stmt.target, ast.Name):
+                    continue
+                field = stmt.target.id
+                if field.startswith("_") or field == "model_config":
+                    continue
+                found.add((prefix + field).upper())
+        if found:
+            keys |= found
+            sources.append(path)
+    return keys, sources
+
+
 def declared_config_keys(tree: build_graph.Tree, deployable_dirs: list[str], extra_files: list[str]) -> tuple[set[str], list[str]]:
     keys, sources = set(), []
     candidates = list(ENV_DECL_FILES) + list(extra_files)
@@ -289,6 +577,9 @@ def declared_config_keys(tree: build_graph.Tree, deployable_dirs: list[str], ext
         if re.match(r"^(docker-compose[\w.-]*\.ya?ml|compose[\w.-]*\.ya?ml)$", os.path.basename(p)) and p.count("/") <= 1:
             sources.append(p)
             keys |= set(re.findall(r"^\s*-?\s*([A-Z_][A-Z0-9_]*)\s*[:=]", tree.text(p), re.M))
+    settings_keys, settings_sources = pydantic_settings_keys(tree)
+    keys |= settings_keys
+    sources += settings_sources
     return keys, sorted(set(sources))
 
 
@@ -459,14 +750,7 @@ def pytest_file_status(outcomes: set[str]) -> str | None:
 
 
 def deployable_of(path: str, deployables: dict[str, dict]) -> str | None:
-    best = None
-    for d in deployables:
-        dd = d.rstrip("/")
-        rank = 0 if dd in ("", ".") else len(dd)
-        best_rank = 0 if best in ("", ".") else len(best or "")
-        if (dd in ("", ".") or path.startswith(dd + "/")) and (best is None or rank > best_rank):
-            best = dd
-    return best
+    return nest_bootstrap.deployable_of(path, [d.rstrip("/") for d in deployables])
 
 
 def module_of(path: str, dep: str | None) -> str | None:
@@ -477,14 +761,109 @@ def module_of(path: str, dep: str | None) -> str | None:
     return m.group(1) if m else None
 
 
+# A2-452. A fixture is test DATA laid out as a tree, not a program anyone compiles: 430 of the 436
+# program entities that no tsconfig covers live under contracts/graph-verified-change/fixtures/**,
+# and the fixture that must compile (ts-mini) is compiled by the selftest under its own profile.
+# The discriminator is a DIRECTORY NAME in the path — something a file created tomorrow either sits
+# under or does not — never a list of today's files. The file name itself does not count, so
+# `src/fixtures.ts` stays live code.
+FIXTURE_DIR_NAMES = frozenset({"fixtures", "__fixtures__", "testdata"})
+
+
+def is_fixture_path(path: str) -> bool:
+    return any(part in FIXTURE_DIR_NAMES for part in (path or "").split("/")[:-1])
+
+
+def is_test_path(path: str) -> bool:
+    """The TypeScript/JavaScript test-file rule build_graph applies (TsFile.is_test). Defined once in impact_pair."""
+    return impact_pair.is_test_path(path)
+
+
+def tsconfig_names(tree, cfg: str, rel: str) -> bool:
+    """Does `cfg` (a repository path) name `rel` (a path relative to that config) in `files` or
+    `include`? Only an EXPLICIT listing counts: a config that inherits its include through
+    `extends`, or that cannot be read, answers False, so an unreadable config never moves a file.
+    A config with neither `files` nor `include` nor `extends` covers everything (tsc's `**/*`)."""
+    try:
+        doc = build_graph.load_jsonc(tree.text(cfg) or "")
+    except Exception:  # noqa: BLE001
+        return False
+    if not isinstance(doc, dict):
+        # A2-353, found by control on the rebase. The `or {}` this replaced put «unreadable» into the
+        # SAME branch as «an object with neither files nor include nor extends», which returns True —
+        # so a config parsing to `[]`, or to nothing at all, answered «I name every file you ask me
+        # about». That is the one direction this routing can move a verdict onto a project that never
+        # compiled the code. Only a real object may make the tsc `**/*` claim.
+        return False
+    files, inc = doc.get("files"), doc.get("include")
+    if files is None and inc is None:
+        return "extends" not in doc
+    norm = lambda x: str(x).strip().removeprefix("./")  # noqa: E731
+    if rel in {norm(f) for f in (files or [])}:
+        return True
+    for pat in (norm(x) for x in (inc or [])):
+        if not any(ch in pat for ch in "*?"):
+            if rel == pat or rel.startswith(pat.rstrip("/") + "/"):
+                return True
+            continue
+        rx = re.escape(pat).replace(r"\*\*/", "(?:.*/)?").replace(r"\*", "[^/]*").replace(r"\?", "[^/]")
+        if re.fullmatch(rx, rel):
+            return True
+    return False
+
+
+
+def canary_unreachable_test(ntype: str, path: str, inferred_boundary: bool | None) -> bool:
+    """A2-353. Defined ONCE in impact_pair, which the gate's mandatory_by_entity also calls — two copies of this rule
+    are how the producer and the gate came to disagree (talomnia-site #211)."""
+    return impact_pair.canary_unreachable_test(ntype, path, inferred_boundary)
+
+
 def type_project_of(path: str, deployables: dict[str, dict], tree: build_graph.Tree) -> str | None:
     """A root tooling tsconfig can own checks without being a runtime deployable.
 
     This selects a compiler project, not a graph owner or a verified verdict:
     v_type_check still requires the compiler's actual --listFiles membership.
+
+    Muneral d2c3de8c. Graph deployables come only from a ROOT pnpm workspace, so a repository that holds
+    self-contained packages with no workspace file around them (the Arcanada workspace: Agent Dreamer,
+    backtest-db-api, the LTM harnesses — each with its own package.json and tsconfig.json) had every
+    one of their files answer «lies in no deployable with a TypeScript project»: 219 COVERAGE_GAP
+    verdicts, although `tsc -p <dir>/tsconfig.json` checks them. Outside every deployable, the NEAREST
+    directory holding a tsconfig.json is the compiler project, which is also what tsc itself would pick
+    up from that file's directory. The root tsconfig stays the last step, so a repository without
+    nested configs answers exactly as before.
     """
     dep = deployable_of(path, deployables)
-    return "." if dep is None and tree.exists("tsconfig.json") else dep
+    if dep is not None:
+        return dep
+    nested = nested_type_project(path, tree)
+    if nested is not None:
+        return nested
+    return "." if tree.exists("tsconfig.json") else None
+
+
+def nested_type_project(path: str, tree: build_graph.Tree) -> str | None:
+    """The nearest proper ancestor directory of `path` (not the root) that holds a tsconfig.json.
+
+    Three kinds of path never get one, each on purpose:
+      - a fixture (FIXTURE_DIR_NAMES): its tsconfig describes TEST DATA that a selftest compiles under its
+        own profile (ts-mini). Picking it up here would turn A2-452's discharge of uncovered fixtures into
+        a type check of a fixture tree with no install;
+      - the vendored gate bundle `.github/graph-admission/**`, which deployable_has_ts skips for the same
+        reason — a caller does not type-check someone else's shipped code;
+      - anything under node_modules/.
+    """
+    if (is_fixture_path(path) or path.startswith(".github/graph-admission/") or "node_modules/" in path
+            or "/" not in path):
+        return None
+    parts = path.split("/")[:-1]
+    while parts:
+        d = "/".join(parts)
+        if tree.exists(d + "/tsconfig.json"):
+            return d
+        parts.pop()
+    return None
 
 
 def tarjan_scc(nodes: list[str], adj: dict[str, list[str]]) -> list[list[str]]:
@@ -702,23 +1081,66 @@ def load_profile(a, repo_top: Path) -> tuple[dict, str]:
 
 
 def find_bin(name: str, explicit: str | None, exec_root: Path, repo_top: Path, deployable_dirs: list[str]) -> str | None:
+    # A project compiler is part of its locked dependency graph. --tsc is only
+    # a fallback; preserve explicit-first behavior for every other tool.
+    if explicit and name != "tsc":
+        return explicit if Path(explicit).is_file() else None
+    # Compare project depth across both trees before falling back to ancestors;
+    # an export may link root dependencies without linking a deeper project.
+    if name == "tsc":
+        candidates = ((base, d) for d in dict.fromkeys(deployable_dirs + [""])
+                      for base in (exec_root, repo_top))
+    else:
+        candidates = ((base, d) for base in (exec_root, repo_top) for d in [""] + deployable_dirs)
+    for base, d in candidates:
+        p = base / d / "node_modules" / ".bin" / name
+        if p.is_file():
+            return str(p)
     if explicit:
         return explicit if Path(explicit).is_file() else None
-    for base in (exec_root, repo_top):
-        for d in [""] + deployable_dirs:
-            p = base / d / "node_modules" / ".bin" / name
-            if p.is_file():
-                return str(p)
     return shutil.which(name)
 
 
+def config_dirs(dep: str, cfg: str) -> list[str]:
+    """A2-446: the directories of a tsconfig's own project, nearest first, strictly below `dep`.
+
+    `contracts/http/tsconfig.json` under deployable `.` gives `["contracts/http", "contracts"]`; a
+    config at the deployable's root, or a synthetic one, gives `[]` (find_bin already searches `dep`).
+    """
+    if cfg.startswith("synthetic:"):
+        return []
+    stop = "" if dep in ("", ".") else dep.rstrip("/")
+    out, d = [], os.path.dirname(cfg)
+    while d and d != stop:
+        out.append(d)
+        d = os.path.dirname(d)
+    return out
+
+
 # ----------------------------------------------------------------------------------------------- the runner
+def type_check_incremental_args(config: Path, cache: Path) -> list[str]:
+    """Honor explicit standalone nonincremental projects; retain isolated composite/unknown caches."""
+    try:
+        declared = build_graph.load_jsonc(config.read_text(encoding="utf-8"))
+        options = declared.get("compilerOptions", {})
+        standalone_false = (not declared.get("extends") and isinstance(options, dict)
+                            and options.get("incremental") is False
+                            and options.get("composite") is not True)
+    except (OSError, ValueError, TypeError, AttributeError):
+        standalone_false = False
+    if standalone_false:
+        return []
+    return ["--incremental", "true", "--tsBuildInfoFile", str((cache / "check.tsbuildinfo").resolve())]
+
+
 class Verify:
     def __init__(self, a, matrix: dict):
         self.a = a
         self.matrix = matrix
         self.disabled = {x.strip() for x in (getattr(a, "disable", "") or "").split(",") if x.strip()}
         self.selected = {x.strip() for x in (getattr(a, "select", "") or "").split(",") if x.strip()}
+        self.sel_applied: dict[str, set[str]] = {}                  # A2-413: verifier → entities it applied to
+        self.sel_not_applied: dict[tuple[str, str], set[str]] = {}  # A2-413: (verifier, reason) → entities
         self.rules = set(RULES) - {x.strip() for x in (getattr(a, "disable_rule", "") or "").split(",") if x.strip()}
         self.fr_rules = {"fr01", "fr02", "fr03", "fr04", "fr05", "rc01", "rc02", "rc03"} - \
             {x.strip() for x in (getattr(a, "disable_rule", "") or "").split(",") if x.strip()}
@@ -744,6 +1166,8 @@ class Verify:
         self.ev: dict[str, dict[str, tuple[str, str]]] = {}   # verifier id → entity → (verdict, reason)
         self.canary_paths = list(getattr(a, "canary", None) or [])   # CanaryResult/v1 documents (AUP-GRAPH-008)
         self.canary_verified: set[str] = set()
+        self.canary_discharged_tests: list[str] = []   # A2-353: test code_units whose `canary` was discharged
+        self.type_check_discharged_fixtures: list[str] = []   # A2-452: uncovered fixture files, type_check discharged
         self.prep_seconds = 0.0
         # DEC-AUP-0035. WHERE this run's receipt is going, expressed relative to the repository, and
         # for which work item. Both are needed to recognise the one entity a receipt can never
@@ -772,24 +1196,45 @@ class Verify:
         else:
             files = self.repo.worktree_files()
         self.mode, self.base, self.head = mode, base, head
-        if not build_graph.graph_is_auto(a.graph):   # one definition of the word, shared with contract_diff
+        compatibility = getattr(a, "caller_graph_bundle", None)
+        if compatibility:
+            if mode != "diff" or not build_graph.graph_is_auto(a.graph):
+                raise impact.Refusal("CALLER_GRAPH_MODE", "caller compatibility requires --diff and --graph auto")
+            self.idx, self.pair_head_idx, self.caller_graph_compatibility = impact_pair.caller_graph_pair(
+                self.repo, base, head, compatibility)
+            gp = self.out_dir / f"graph-{base[:12]}.json"
+            gp.write_bytes(build_graph.dump_graph(self.idx.doc))
+            self.graph_path = rel_ref(gp)
+        elif not build_graph.graph_is_auto(a.graph):   # one definition of the word, shared with contract_diff
             self.graph_path = str(a.graph)
             self.idx = impact.load_graph(Path(a.graph), set(impact.RULES))
         else:
             rev = base if mode == "diff" else tree_commit
-            doc = build_graph.build(self.top, rev=rev, built_at=build_graph.FIXED_BUILT_AT)
+            with impact_pair.trace_phase("base-graph-build"):
+                doc = build_graph.build(self.top, rev=rev, built_at=build_graph.FIXED_BUILT_AT)
             gp = self.out_dir / f"graph-{rev[:12]}.json"
             gp.write_bytes(build_graph.dump_graph(doc))
             self.graph_path = rel_ref(gp)
-            self.idx = impact.load_graph(gp, set(impact.RULES))
+            with impact_pair.trace_phase("base-graph-schema-and-index"):
+                self.idx = impact.load_graph(gp, set(impact.RULES))
         if mode == "diff":
-            self.pair_head_idx = impact_pair.index_at(self.repo, head)
+            if not compatibility:
+                self.pair_head_idx = impact_pair.index_at(self.repo, head)
             hp = self.out_dir / f"graph-head-{head[:12]}.json"
             hp.write_bytes(build_graph.dump_graph(self.pair_head_idx.doc))
-            return impact_pair.query(self.idx, self.pair_head_idx, files, repo=self.repo, base=base, head=head,
+            q = impact_pair.query(self.idx, self.pair_head_idx, files, repo=self.repo, base=base, head=head,
                                      tree_commit=tree_commit, tree_dirty=tree_dirty, graph_path=self.graph_path,
                                      head_graph_path=rel_ref(hp),
                                      max_depth=None if a.max_depth is not None and a.max_depth < 0 else (a.max_depth if a.max_depth is not None else impact.DEFAULT_MAX_DEPTH))
+            if getattr(a, "empty_impact_explanation", None):
+                try:
+                    claim = json.loads(Path(a.empty_impact_explanation).read_text())
+                except (OSError, ValueError):
+                    raise impact.Refusal("EMPTY_IMPACT_EXPLANATION_INVALID", "explanation input cannot be read") from None
+                q["empty_impact_explanation"] = impact_pair.bind_empty_explanation(q, claim)
+            return q
+        if getattr(a, "empty_impact_explanation", None):
+            raise impact.Refusal("EMPTY_IMPACT_EXPLANATION_INAPPLICABLE", "explanation requires a committed paired diff")
         q = impact.query(self.idx, files, mode=mode, base=base, head=head, tree_commit=tree_commit, tree_dirty=tree_dirty,
                          repo=self.repo, max_depth=None if a.max_depth is not None and a.max_depth < 0 else (a.max_depth if a.max_depth is not None else impact.DEFAULT_MAX_DEPTH),
                          rules=set(impact.RULES), graph_path=self.graph_path)
@@ -812,8 +1257,30 @@ class Verify:
                 self.exported = True
         self.tree_base = build_graph.load_tree_git(self.top, self.base, "") if self.mode == "diff" else \
             build_graph.load_tree_git(self.top, self.repo.head(), "")
-        self.graph_head = build_graph.build(self.top, worktree=True, built_at=build_graph.FIXED_BUILT_AT) if self.mode == "worktree" \
-            else build_graph.build(self.top, rev=self.head, built_at=build_graph.FIXED_BUILT_AT)
+        # Bootstrap selection is revision-bound. A dirty/other-head local profile
+        # must not override the tracked profile of the head we are verifying.
+        if not getattr(self.a, 'profile', None):
+            if self.tree_head.exists('.arcana/verify.json'):
+                try:
+                    self.profile = json.loads(self.tree_head.text('.arcana/verify.json'))
+                except (ValueError, TypeError):
+                    self.profile = {'deployables': None, '_invalid_bootstrap_profile': True}
+                self.profile_ref = '.arcana/verify.json at verified head'
+            else:
+                self.profile = {"schema": "VerifyProfile/v1", "deployables": {}, "auto": True}
+        with impact_pair.trace_phase("prepare-head-graph-build"):
+            # Every ordinary diff builds and checks the exact current head graph
+            # in impact_query, including when only BASE is supplied. Reuse that
+            # in-process HEAD, never supplied BASE, installed caller graphs,
+            # verdicts, or cross-invocation caches.
+            if (self.mode == "diff" and not getattr(self.a, "caller_graph_bundle", None)):
+                manifest = self.pair_head_idx.doc["manifest"]
+                if manifest.get("source_commit") != self.head or manifest.get("dirty") is not False:
+                    raise impact.Refusal("STALE_GRAPH", "prepared head graph is not bound to the verified head")
+                self.graph_head = json.loads(json.dumps(self.pair_head_idx.doc))
+            else:
+                self.graph_head = build_graph.build(self.top, worktree=True, built_at=build_graph.FIXED_BUILT_AT) if self.mode == "worktree" \
+                    else build_graph.build(self.top, rev=self.head, built_at=build_graph.FIXED_BUILT_AT)
         self.scan_head = TreeScan(self.tree_head)
         self.head_nodes = {n["id"]: n for n in self.graph_head["nodes"]}
         self.head_rev: dict[str, list[dict]] = {}
@@ -849,7 +1316,7 @@ class Verify:
                     pdir = dest / os.path.dirname(d)
                     tsc = find_bin("tsc", self.a.tsc, dest, self.top, [os.path.dirname(d)])
                     if tsc:
-                        rc, out, secs = run_cmd([tsc, "-p", "tsconfig.json"], pdir)
+                        rc, out, secs = run_cmd([tsc, "-p", "tsconfig.json", *compiler_sdk_type_check_args(tsc)], pdir)
                         built.append(f"{os.path.dirname(d)} (tsc exit {rc}, {secs}s)")
             (dest / ".arcana-export-ok").write_text(json.dumps({"head": self.head, "node_modules_linked": linked, "packages_built": built}))
         info = json.loads((dest / ".arcana-export-ok").read_text())
@@ -861,18 +1328,8 @@ class Verify:
     def collect_entities(self, q: dict):
         imp = q["impact_set"]
         self.entities: dict[str, dict] = {}
-        # A global fallback (lockfile / global config) makes the impact the WHOLE REPOSITORY as ONE
-        # entity - the Bazel/Nx rule of DEC-AUP-0008 - and its verifier is the repository's own test
-        # job. impact.py still lists every node in deterministic_core so a reader can see the blast
-        # radius, and the receipt keeps that listing; but those rows ARE the radius, not N separate
-        # measurements. Enumerating them here creates one entity, and therefore one demanded
-        # verdict, per row - which is how the gate came to pause a receipt it had issued itself
-        # (measured on muneral #108: selected() 8 entities against 466 verdicts, 151 of them
-        # not_measured, PAUSED_SAFE). selected() and mandatory_by_entity() already honour the flag;
-        # this is the same disagreement at its source.
-        # `q["seeds"]` is exactly what impact_pair.selected() returns under a triggered fallback;
-        # read it directly rather than importing that module for one predicate.
-        selection = set(q["seeds"]) if imp.get("global_fallback", {}).get("triggered") else None
+        self.fallback_entities = impact_pair.fallback_units(q) if imp.get("global_fallback", {}).get("triggered") else set()
+        selection = impact_pair.selected(q)
         for section in ("deterministic_core", "inferred_tail"):
             for e in imp[section]:
                 if selection is not None and e["entity"] not in selection:
@@ -914,6 +1371,19 @@ class Verify:
                 for e in self.head_fwd.get(ent["id"], []) + [x for x in self.idx.doc["edges"] if x["from"] == ent["id"]]:
                     req |= set(m["edge_types"].get(e["type"], {}).get("mandatory", []))
             req = {v for v in req if ntype in m["verifiers"][v]["applies_to_nodes"]}
+            if ent["id"] in self.fallback_entities:
+                req.add("full_fallback_test")
+            # A2-353. A canary lists entities of the LIVE contour (routes, config keys, deployables); a
+            # test file is never on it, so no canary plan can ever name one and the obligation is
+            # permanently unsatisfiable — the same trap polyglot2 removed from `type_check`. Measured on
+            # muneral #177: `delete process.env.TELEGRAM_BOT_TOKEN` in test/auth.service.spec.ts gave the
+            # spec a `reads_config` edge, whose mandatory `canary` pinned the change at paused_safe
+            # while the canary itself (76 verified) could not list the file. The discharge is only for a
+            # test code_unit reached without an inferred boundary: `config_schema` stays mandatory, and
+            # an inferred-boundary entity keeps the P6 hold below. It is recorded, never silent.
+            if "canary" in req and canary_unreachable_test(ntype, ent["node"].get("path", ""), ent.get("inferred_boundary")):
+                req.discard("canary")
+                self.canary_discharged_tests.append(ent["id"])
             # AUP-GRAPH-009 polyglot2. `type_check` applies to three node types (code_unit,
             # deployable_unit, route) but the "this file is not TypeScript" discharge existed for ONE
             # of them. The same fact was answered two different ways: a non-TS code_unit had the
@@ -932,6 +1402,17 @@ class Verify:
                 req.discard("type_check")
             if ntype == "deployable_unit" and not self.deployable_has_ts(ent["node"].get("path", "")):
                 req.discard("type_check")
+            # A2-452. A TypeScript/JavaScript file that NO compiler project covers could only ever record
+            # not_measured, and two different facts produced it: a fixture (test data, not a program —
+            # the obligation is not owed) and live code that fell out of every tsconfig (a real coverage
+            # gap). Mixed together, the gap was invisible: every fixture edit paused the change, so the
+            # pause was cleared by exemption, and a live file would have been cleared with it. The
+            # fixture half is discharged here and RECORDED (notes); a covered fixture keeps its check,
+            # and uncovered live code keeps not_measured with a COVERAGE_GAP reason in v_type_check.
+            if ("type_check" in req and ntype in ("code_unit", "route")
+                    and is_fixture_path(ent["node"].get("path", "")) and not self.type_project_covers(ent["node"].get("path", ""))):
+                req.discard("type_check")
+                self.type_check_discharged_fixtures.append(ent["id"])
             # AUP-GRAPH-010 polyglot3. A SELECTED verifier used to be demanded of every entity of a
             # node type it applies to, whether or not anything could ever produce a verdict for that
             # entity — and a demanded verifier that produces no verdict is `not_measured` (:1989).
@@ -944,13 +1425,41 @@ class Verify:
             # that spec's language exists on this host. Everything else keeps the verdict its own
             # verifiers gave it, and the inapplicable runner is recorded as INAPPLICABLE_RUNNER —
             # visible, never a pass, and never a demotion.
+            # A2-413: every decision below is RECORDED (receipt `verifier_selection`), not only taken.
+            # Before this the receipt said what was asked for (a prose `selected:` note) and never what
+            # applied: five receipts asked for targeted_test, applied it to nothing, and are
+            # indistinguishable from a run where the verifier was never reached. Recording changes no
+            # decision — the branches are the same three as before.
             for s in self.selected:
                 if ntype not in m["verifiers"][s]["applies_to_nodes"]:
                     continue
                 if s == "targeted_test" and ent["id"] not in self.targeted_test_runnable():
+                    planned = any(ent["id"] in g["entities"] for g in self.targeted_test_plan())
+                    self.sel_not_applied.setdefault((s, "NO_RUNNER_ON_HOST" if planned else "NO_SPEC_REACHES_ENTITY"), set()).add(ent["id"])
+                    continue
+                # A2-418. The same rule for the other selectable verifier. `property_check` is answered
+                # only for entities the profile declares a property for (`profile.property_checks`,
+                # v_property_check); demanding it of every entity of an applicable node type turned the
+                # flag into a demotion — every earlier `verified` became «required verifier
+                # property_check produced no verdict» (A2-417 § 2: 4 of 7 verified entities in the
+                # battery's S00 scenario). A selected verifier may add a measurement; it may never
+                # remove one. Where nothing is declared it is recorded, not demanded.
+                if s == "property_check" and not (self.profile.get("property_checks") or {}).get(ent["id"]):
+                    self.sel_not_applied.setdefault((s, "NO_PROPERTY_DECLARED"), set()).add(ent["id"])
                     continue
                 req.add(s)
+                self.sel_applied.setdefault(s, set()).add(ent["id"])
             ent["required"] = sorted(req)
+        if self.canary_discharged_tests:
+            self.notes.append(f"A2-353: `canary` discharged for {len(self.canary_discharged_tests)} test code_unit(s) — a "
+                              f"canary lists live-contour entities and can never name a test file; their other "
+                              f"verifiers (config_schema, type_check, fitness) still apply: "
+                              + ", ".join(sorted(self.canary_discharged_tests)[:10]))
+        if self.type_check_discharged_fixtures:
+            self.notes.append(f"A2-452: `type_check` discharged for {len(self.type_check_discharged_fixtures)} fixture file(s) no "
+                              f"tsconfig covers (a directory named {'/'.join(sorted(FIXTURE_DIR_NAMES))} in the path): test "
+                              f"data, not a compiled project; their other verifiers still apply: "
+                              + ", ".join(sorted(self.type_check_discharged_fixtures)[:10]))
         self.disabled_hits = sorted(v for v in self.disabled if any(v in e["required"] for e in self.entities.values()))
         if self.disabled_hits and "disabled_mandatory_event" in self.rules:
             self.events.append({"code": "MANDATORY_VERIFIER_DISABLED", "verifiers": self.disabled_hits,
@@ -959,6 +1468,11 @@ class Verify:
     @staticmethod
     def is_ts(path: str) -> bool:
         return os.path.splitext(path)[1] in CODE_EXTS or path.endswith((".js", ".mjs", ".cjs", ".jsx"))
+
+    def type_project_covers(self, path: str) -> bool:
+        """Is some compiler project attributed to this file — the same two steps v_type_check takes?"""
+        dep = type_project_of(path, self.deployables, self.tree_head)
+        return dep is not None and bool(self.tsconfigs_for(dep, path))
 
     def deployable_has_ts(self, dep_path: str) -> bool:
         """Does this deployable actually contain TypeScript the compiler could check?
@@ -1008,6 +1522,23 @@ class Verify:
             self._has_nest = found
         return self._has_nest
 
+    def verifier_selection(self) -> dict:
+        """A2-413 — what was asked for, what applied to which entity, and why the rest did not.
+
+        Written on EVERY receipt, `[]`/`{}` when nothing was requested: an absent field is exactly what
+        could not be told apart from «nobody asked». A requested verifier that no entity's node type
+        admits is recorded as NO_ENTITY_OF_APPLICABLE_TYPE with no entities, so every requested
+        verifier is accounted for in `applied` or `not_applied`. The prose `selected:` note stays.
+        """
+        applied = {v: sorted(es) for v, es in sorted(self.sel_applied.items()) if es}
+        not_applied = [{"verifier": v, "reason": r, "entities": sorted(es)}
+                       for (v, r), es in sorted(self.sel_not_applied.items()) if es]
+        seen = set(applied) | {x["verifier"] for x in not_applied}
+        for v in sorted(self.selected - seen):
+            not_applied.append({"verifier": v, "reason": "NO_ENTITY_OF_APPLICABLE_TYPE", "entities": []})
+        return {"schema": "VerifierSelection/v1", "requested": sorted(self.selected), "applied": applied,
+                "not_applied": not_applied}
+
     def needing(self, verifier: str) -> list[str]:
         return sorted(e for e, ent in self.entities.items() if verifier in ent["required"] and verifier not in self.disabled)
 
@@ -1016,7 +1547,19 @@ class Verify:
         return n.get("path")
 
     def record(self, vid: str, kind: str, command: str, entities: list[str], exit_code: int, output: str, started: str,
-               secs: float, summary: str, verdicts: dict[str, tuple[str, str]], ext: str = "txt"):
+               secs: float, summary: str, verdicts: dict[str, tuple[str, str]], ext: str = "txt",
+               evidence_ref: str | None = None):
+        # `evidence_ref` — the row's output is a COMMITTED document of the repository under test, not
+        # this run's log. A2-312: a canary row's output_ref is opened by the gate
+        # (admit_change.canary_coverage) out of git objects at head and must be that CanaryResult;
+        # pointing it at the log made every receipt that actually cashed a canary unadmittable.
+        if evidence_ref is not None:
+            self.verifiers.append({"id": vid, "kind": kind, "command": command, "entities": sorted(entities),
+                                   "exit_code": int(exit_code), "output_ref": evidence_ref, "started_at_utc": started,
+                                   "duration_s": secs, "summary": summary,
+                                   **({"entity_verdicts": {e: v[0] for e, v in sorted(verdicts.items())}} if verdicts else {})})
+            self.ev.setdefault(vid, {}).update(verdicts)
+            return
         # A `.json` path must hold JSON. Callers that pass ext="json" hand us a JSON blob with a
         # human-readable log appended after it, which no parser can read: 23 such files are committed
         # under receipts/ and carried in tools/ci/self-check-baseline.json as `Extra data` debt. The
@@ -1061,28 +1604,64 @@ class Verify:
                 for cfg in self.tsconfigs_for(dep, None):
                     groups.setdefault((dep, cfg), []).append(eid)
                 if not self.tsconfigs_for(dep, None):
-                    unattributed[eid] = ("not_measured", f"no tsconfig for deployable {dep}")
+                    unattributed[eid] = ("not_measured", f"COVERAGE_GAP: no tsconfig for deployable {dep}")
                 continue
             dep = type_project_of(path, self.deployables, self.tree_head)
             if dep is None:
-                unattributed[eid] = ("not_measured", f"{path} lies in no deployable with a TypeScript project and no root tsconfig exists")
+                unattributed[eid] = ("not_measured", f"COVERAGE_GAP: {path} lies in no deployable with a TypeScript project and no tsconfig.json exists in its directory, any directory above it, or the root")
                 continue
-            cfgs = self.tsconfigs_for(dep, path)
+            cfgs = self.tsconfigs_for(dep, path) + [POSTBUILD + c for c in self.postbuild_tsconfigs_for(dep, path)]
             if not cfgs:
-                unattributed[eid] = ("not_measured", f"no tsconfig covers {path}")
+                unattributed[eid] = ("not_measured", f"COVERAGE_GAP: no tsconfig covers {path}")
                 continue
             for cfg in cfgs:
                 groups.setdefault((dep, cfg), []).append(eid)
+        # A2-452. These reasons were computed and then dropped: nothing recorded them, so the entity
+        # read «required verifier type_check produced no verdict» — 2 090 such verdicts on fixture and
+        # JS entities across the committed program receipts — and the WHY (no project covers it) was
+        # never visible to the reader who had to decide whether that was a gap or test data.
+        if unattributed:
+            self.record("v-type-check-uncovered", "type_check", "(none: no compiler project is attributed to these entities)",
+                        list(unattributed), 127, "\n".join(f"{e}: {r[1]}" for e, r in sorted(unattributed.items())),
+                        now_iso(), 0.0, f"not_measured: {len(unattributed)} entity(ies) no tsconfig covers", unattributed)
+        ran = []   # compilations that completed, judged below once every config has been listed
         for (dep, cfg), eids in sorted(groups.items()):
             started = now_iso()
-            gen = self.generated_tsconfig(dep, cfg)
-            tsc = find_bin("tsc", self.a.tsc, self.exec_root, self.top, [dep])
-            vid = "v-type-check-" + re.sub(r"[^a-z0-9]+", "-", (dep + "-" + os.path.basename(cfg).replace(".json", "")).lower()).strip("-")
+            root = self.exec_root
+            if cfg.startswith(POSTBUILD):
+                # A2-444. A config that checks BUILD OUTPUT is compiled inside a tree this run built
+                # from the measured revision, never inside the repository: a `dist/` lying in the
+                # worktree came from whatever was built last, and checking against it would be a
+                # verdict about another revision. No build of our own → not_measured, never verified.
+                cfg = cfg[len(POSTBUILD):]
+                vid = "v-type-check-postbuild-" + re.sub(r"[^a-z0-9]+", "-", (dep + "-" + os.path.basename(cfg).replace(".json", "")).lower()).strip("-")
+                pb = self.postbuild(dep)
+                if pb["why"]:
+                    self.record(vid, "type_check", f"post-build {cfg}: {' '.join(pb['build'] or []) or '(no build)'} (not run to completion)",
+                                eids, 125, pb["log"], started, pb["seconds"], f"not_measured: {pb['why'][:160]}",
+                                {e: ("not_measured", f"{cfg} (post-build): {pb['why']}") for e in eids})
+                    continue
+                root = pb["root"]
+                gen = root / cfg
+            else:
+                gen = self.generated_tsconfig(dep, cfg)
+                vid = "v-type-check-" + re.sub(r"[^a-z0-9]+", "-", (dep + "-" + os.path.basename(cfg).replace(".json", "")).lower()).strip("-")
+            # The nearest config project owns its compiler before ancestors and fallback.
+            tsc = find_bin("tsc", self.a.tsc, root, self.top, config_dirs(dep, cfg) + [dep])
             if not tsc:
                 self.record(vid, "type_check", f"tsc -p {gen} (tsc not found)", eids, 127, "tsc binary not found (node_modules/.bin/tsc, --tsc, PATH)",
                             started, 0.0, "not_measured: tsc unavailable", {e: ("not_measured", "tsc unavailable on this host") for e in eids})
                 continue
-            rc, out, secs = run_cmd([tsc, "-p", str(gen.resolve()), "--noEmit", "--incremental", "false", "--listFiles"], self.exec_root / dep)
+            # Explicit nonincremental standalone projects retain their declared mode.
+            # Composite/extended/unknown projects keep the existing isolated cache.
+            with tempfile.TemporaryDirectory(prefix="type-check-", dir=self.out_dir) as cache:
+                command = [tsc, "-p", str(gen.resolve()), "--noEmit",
+                           *type_check_incremental_args(gen, Path(cache)),
+                           *compiler_sdk_type_check_args(tsc), "--listFiles"]
+                rc, out, secs = run_cmd(command, root / dep)
+            command_text = shlex.join(command)
+            if root is not self.exec_root:
+                cfg = f"{cfg} (post-build of {pb['rev'][:12]}, build {pb['seconds']}s, output {pb['digest'][:19]})"
             listed, errors_by_file, n_err, global_errors = set(), {}, 0, []
             unresolved = 0
             for line in out.splitlines():
@@ -1090,12 +1669,12 @@ class Verify:
                 if m:
                     n_err += 1
                     unresolved += m.group(4) in UNRESOLVED_MODULE_CODES
-                    errors_by_file.setdefault(self.norm_tsc_path(m.group(1), dep), []).append(f"{m.group(4)} L{m.group(2)}: {m.group(5)[:160]}")
+                    errors_by_file.setdefault(self.norm_tsc_path(m.group(1), dep, root), []).append(f"{m.group(4)} L{m.group(2)}: {m.group(5)[:160]}")
                 elif re.match(r"^error TS\d+:", line.strip()):
                     n_err += 1
                     global_errors.append(line.strip()[:240])
                 elif line.startswith("/") and not line.strip().endswith(":"):
-                    listed.add(self.norm_tsc_path(line.strip(), dep))
+                    listed.add(self.norm_tsc_path(line.strip(), dep, root))
             # The compiler RAN and exited normally, so the run looks complete — which is exactly why
             # this has to be caught here. With no dependency install, every import answers TS2307 and
             # the flood is attributed to the changed files: 1320 errors on auth-arcana, not one of
@@ -1104,15 +1683,27 @@ class Verify:
             # the compiler actually emitted unresolved-module diagnostics. The second half is what the
             # first alone got wrong — the ts-mini fixture declares dependencies it never installs and
             # resolves them through generated `paths`, so it compiles clean and is measured as before.
-            uninstalled = self.dependency_install_missing(dep) if unresolved else None
+            # A2-446: the config's own package is asked too — a nested project declares its dependencies
+            # in its own manifest, which the deployable's (scrutator: none at the root) does not show.
+            uninstalled = (next((u for u in (self.dependency_install_missing(d, root) for d in [dep] + config_dirs(dep, cfg)) if u), None)
+                           if unresolved else None)
             if uninstalled:
                 why = (f"{unresolved} of {n_err} diagnostic(s) are unresolved modules and {uninstalled}; "
                        f"a type check over an unresolved module graph measures the absent install, not this change")
-                self.record(vid, "type_check", f"{tsc} -p {gen} --noEmit --incremental false --listFiles", eids, rc, out,
+                self.record(vid, "type_check", command_text, eids, rc, out,
                             started, secs, f"{cfg}: exit {rc}, {n_err} error(s), {unresolved} unresolved-module — "
                                            f"not_measured: dependencies not installed",
                             {e: ("not_measured", why) for e in eids})
                 continue
+            ran.append((cfg, eids, gen, tsc, vid, rc, out, secs, started, listed, errors_by_file, n_err, global_errors, command_text))
+        # A2-334. A deployable can carry several projects that partition its files — auth-arcana
+        # checks `src/` under `tsconfig.json` (commonjs) and `scripts/` under `tsconfig.scripts.json`
+        # (ESM, `import.meta`). Aggregation lets a `not_measured` from one verifier beat a `verified`
+        # from another of the same kind, so "tsconfig.json does not include scripts/x.ts" used to
+        # erase the verdict of the project that did compile it. Non-membership is a verdict only
+        # when NO project of the run listed the file; otherwise the owning project speaks.
+        listed_anywhere = set().union(*(r[9] for r in ran)) if ran else set()
+        for cfg, eids, gen, tsc, vid, rc, out, secs, started, listed, errors_by_file, n_err, global_errors, command_text in ran:
             verdicts = {}
             for eid in eids:
                 n = self.entities[eid]["node"]
@@ -1134,15 +1725,17 @@ class Verify:
                 if path in errors_by_file:
                     verdicts[eid] = ("failed", f"{cfg}: " + "; ".join(errors_by_file[path][:3]))
                 elif path not in listed:
+                    if path in listed_anywhere:
+                        continue   # another project of this run compiled it; its verdict stands
                     verdicts[eid] = ("not_measured", f"{cfg} does not include {path}")
                 elif n_err == 0:
                     verdicts[eid] = ("verified", f"{cfg}: project compiles, 0 errors")
                 else:
                     verdicts[eid] = ("not_measured", f"{cfg}: {n_err} error(s) in other files ({', '.join(sorted(errors_by_file)[:3])}); not attributable to {path}")
             summary = f"{cfg}: exit {rc}, {n_err} error(s), {len(listed)} files listed"
-            self.record(vid, "type_check", f"{tsc} -p {gen} --noEmit --incremental false --listFiles", eids, rc, out, started, secs, summary, verdicts)
+            self.record(vid, "type_check", command_text, eids, rc, out, started, secs, summary, verdicts)
 
-    def dependency_install_missing(self, dep: str) -> str | None:
+    def dependency_install_missing(self, dep: str, root: Path | None = None) -> str | None:
         """Why module resolution cannot work in this tree — or None, meaning the compiler is believed.
 
         `tsc` in a tree whose dependencies were never installed answers TS2307 for every import, and
@@ -1181,7 +1774,7 @@ class Verify:
         if not declared:
             return None
         # node_modules is never in the Git tree: probe the filesystem the compiler will actually read.
-        root = self.exec_root.resolve()
+        root = (root or self.exec_root).resolve()
         probe = (root / dep).resolve() if dep not in ("", ".") else root
         while True:
             if (probe / "node_modules").is_dir():
@@ -1192,11 +1785,12 @@ class Verify:
                         f"absent install, not this change")
             probe = probe.parent
 
-    def norm_tsc_path(self, p: str, dep: str) -> str:
+    def norm_tsc_path(self, p: str, dep: str, root: Path | None = None) -> str:
         p = p.strip()
+        root = root or self.exec_root
         try:
-            rp = Path(p) if Path(p).is_absolute() else (self.exec_root / dep / p)
-            return rp.resolve().relative_to(self.exec_root.resolve()).as_posix()
+            rp = Path(p) if Path(p).is_absolute() else (root / dep / p)
+            return rp.resolve().relative_to(root.resolve()).as_posix()
         except ValueError:
             return p
 
@@ -1207,15 +1801,151 @@ class Verify:
         if "tsconfig" not in prof:
             if self.tree_head.exists(prefix + "tsconfig.json"):
                 cfgs.append(prefix + "tsconfig.json")
+            # Check genuine sibling projects as well: build-only configs commonly exclude
+            # tests and checkJs tooling. A declared profile remains authoritative.
+            siblings = sorted(p for p in getattr(self.tree_head, "paths", [])
+                              if os.path.dirname(p) == prefix.rstrip("/")
+                              and re.fullmatch(r"tsconfig\.[^.]+\.json", os.path.basename(p))
+                              and os.path.basename(p) != "tsconfig.base.json")
+            cfgs.extend(c for c in siblings if c not in cfgs)
         if path is not None:
             test_cfg = prof.get("tsconfig_test") or (prefix + "tsconfig.test.json" if self.tree_head.exists(prefix + "tsconfig.test.json") else None)
             rel = path[len(prefix):]
             is_test = bool(re.search(r"\.(spec|test)\.[cm]?[jt]sx?$", rel) or rel.startswith(("test/", "__tests__/", "e2e/")))
             if test_cfg and is_test:
                 cfgs = [test_cfg]
+            # A2-353. The name heuristic above sends a root-level runner config (vitest.config.ts,
+            # jest.config.mjs) to the BUILD config, which by design does not include it — it emits to
+            # the image — and the verdict was a permanent `does not include`, although the test config
+            # names the file explicitly and `tsc -p tsconfig.test.json` checks it. Measured on muneral
+            # #177. A file the build configs do not name but the test config does is checked there.
+            elif (test_cfg and cfgs and test_cfg not in cfgs
+                  and not any(tsconfig_names(self.tree_head, c, rel) for c in cfgs) and tsconfig_names(self.tree_head, test_cfg, rel)):
+                cfgs = [test_cfg]
+            elif "tsconfig" not in prof:
+                covering = [c for c in cfgs if tsconfig_names(self.tree_head, c,
+                            os.path.relpath(path, os.path.dirname(c) or "."))]
+                if covering:
+                    cfgs = [covering[0]]
+                elif prefix + "tsconfig.json" in cfgs:
+                    cfgs = [prefix + "tsconfig.json"]
         if prof.get("synthetic_tsconfig") is not None and not cfgs:
             cfgs.append(f"synthetic:{dep}")
         return cfgs
+
+    def postbuild_spec(self, dep: str) -> dict | None:
+        spec = ((self.profile.get("deployables") or {}).get(dep) or {}).get("tsconfig_postbuild")
+        return spec if isinstance(spec, dict) else None
+
+    def postbuild_tsconfigs_for(self, dep: str, path: str) -> list[str]:
+        """A2-444. The post-build configs of `dep` that NAME `path` (files / include, tsconfig_names).
+
+        Membership is decided statically so that a change which reaches no such file costs no build;
+        the compiler's --listFiles still decides the verdict. A config that inherits its include via
+        `extends` names nothing here — it keeps the entity with the other projects, never on a
+        verdict it did not earn."""
+        spec = self.postbuild_spec(dep)
+        if not spec:
+            return []
+        prefix = "" if dep in ("", ".") else dep.rstrip("/") + "/"
+        rel = path[len(prefix):] if path.startswith(prefix) else path
+        return [prefix + c for c in (spec.get("tsconfig") or []) if tsconfig_names(self.tree_head, prefix + c, rel)]
+
+    def postbuild(self, dep: str) -> dict:
+        """A2-444. Build `dep` from the MEASURED revision in a tree of its own; once per run.
+
+        Returns {root, rev, why, seconds, digest, build, log}. `why` set ⇒ nothing was built that a
+        type check may be charged to, and every entity of the group is not_measured with that reason.
+        The tree is a fresh `git archive` of the revision — never the worktree — with the declared
+        outputs removed BEFORE the build even when they are tracked, so the only `dist/` the compiler
+        can see is one this build wrote. After the build every output file must be a regular file
+        inside that tree whose inode changed after the build started (st_ctime cannot be carried over
+        by a copy); anything else is refused as «not produced by this build»."""
+        cache = self.__dict__.setdefault("_postbuilt", {})
+        if dep in cache:
+            return cache[dep]
+        spec = self.postbuild_spec(dep) or {}
+        build = spec.get("build")
+        outputs = [str(o).strip("/") for o in (spec.get("outputs") or ["dist"])]
+        res = {"root": None, "rev": None, "why": None, "seconds": 0.0, "digest": None,
+               "build": build if isinstance(build, list) else None, "log": ""}
+        cache[dep] = res
+        if not (isinstance(build, list) and build and all(isinstance(x, str) for x in build)):
+            res["why"] = "build not performed: the profile declares no `build` command (a list of strings)"
+            return res
+        if self.mode == "diff":
+            rev = self.head
+        elif self.repo.dirty():
+            res["why"] = ("build not performed: the working tree is dirty, and a post-build type check measures a build "
+                          "of a COMMIT — commit the change or run in --diff mode")
+            return res
+        else:
+            rev = self.repo.head()
+        res["rev"] = rev
+        prefix = "" if dep in ("", ".") else dep.rstrip("/") + "/"
+        dest = self.workdir / f"postbuild-{rev[:12]}-{re.sub(r'[^a-z0-9]+', '-', (dep or 'root').lower()).strip('-') or 'root'}"
+        if dest.exists():
+            shutil.rmtree(dest)
+        dest.mkdir(parents=True)
+        tar = subprocess.run(["git", "archive", "--format=tar", rev], cwd=self.top, check=True, capture_output=True).stdout
+        subprocess.run(["tar", "-x", "-C", str(dest)], input=tar, check=True)
+        removed = []
+        for o in outputs:
+            tgt = dest / prefix / o
+            if tgt.is_symlink() or tgt.is_file():
+                tgt.unlink(); removed.append(o)
+            elif tgt.is_dir():
+                shutil.rmtree(tgt); removed.append(o)
+        # The install is hard-link COPIED, not symlinked as export_head does: a build that emits
+        # declarations through a symlinked node_modules resolves types to a path outside the tree and
+        # refuses with TS2742 «not portable» (measured on auth-arcana `nest build`: exit 1, every
+        # Prisma-typed method). `cp -al` keeps pnpm's relative links inside the copy (0.9s for 667M).
+        # Where hard links are impossible (another filesystem) it falls back to the symlink, and a
+        # build that then fails is `not_measured`, never a pass.
+        linked = []
+        for d in [""] + sorted(p[:-len("/package.json")] for p in self.tree_head.paths if p.endswith("/package.json") and p.count("/") <= 2):
+            src, tgt = self.top / d / "node_modules", dest / d / "node_modules"
+            if src.is_dir() and not tgt.exists():
+                if subprocess.run(["cp", "-al", str(src), str(tgt)], capture_output=True).returncode == 0:
+                    linked.append(f"{d or '.'} (hard-link copy)")
+                else:
+                    shutil.rmtree(tgt, ignore_errors=True)
+                    tgt.symlink_to(src, target_is_directory=True)
+                    linked.append(f"{d or '.'} (symlink)")
+        t_start = time.time()
+        rc, out, secs = run_cmd(list(build), dest / prefix, timeout=int(spec.get("timeout_s") or 900))
+        res["seconds"] = secs
+        res["log"] = (f"post-build of {rev} in {dest}\ncommand: {build}\nremoved before build (tracked outputs): {removed or 'none'}\n"
+                      f"node_modules linked from the repository: {linked or 'none'}\nexit: {rc} after {secs}s\n\n{out}")
+        if rc != 0:
+            res["why"] = f"build not performed: `{' '.join(build)}` exited {rc} at {rev[:12]} after {secs}s"
+            return res
+        h = hashlib.sha256()
+        for o in outputs:
+            base = dest / prefix / o
+            files = sorted(q for q in base.rglob("*") if not q.is_dir()) if base.is_dir() and not base.is_symlink() else []
+            if not files:
+                res["why"] = (f"build exited 0 but wrote no {prefix}{o}/: nothing built from {rev[:12]} to check against "
+                              f"(an output found elsewhere is not a build of this revision)")
+                return res
+            for q in files:
+                st = q.lstat()
+                inside = q.resolve().is_relative_to(dest.resolve())
+                if q.is_symlink() or not inside or st.st_ctime < t_start - 1:
+                    res["why"] = (f"{q.relative_to(dest).as_posix()} was not produced by this build of {rev[:12]} "
+                                  f"({'a symlink' if q.is_symlink() else 'outside the build tree' if not inside else 'older than the build'}); "
+                                  f"a check against it would measure another revision")
+                    return res
+                h.update(q.relative_to(dest).as_posix().encode() + b"\0" + q.read_bytes() + b"\0")
+        res["digest"] = "sha256:" + h.hexdigest()
+        res["root"] = dest
+        (dest / ".arcana-postbuild.json").write_text(json.dumps({"rev": rev, "build": build, "exit": rc, "seconds": secs,
+                                                                   "outputs": outputs, "digest": res["digest"],
+                                                                   "removed_before_build": removed}, indent=1))
+        self.notes.append(f"A2-444 post-build: {prefix or './'} built from {rev[:12]} with `{' '.join(build)}` in {secs}s "
+                          f"(outputs {outputs}, {res['digest'][:19]}; tracked outputs removed first: {removed or 'none'}; "
+                          f"node_modules linked: {linked or 'none'}); post-build configs are compiled there, never in the worktree")
+        return res
 
     def generated_tsconfig(self, dep: str, cfg: str) -> Path:
         # A relocated extending config changes implicit @types discovery. For the
@@ -1227,7 +1957,7 @@ class Verify:
         name = re.sub(r"[^a-z0-9]+", "-", f"{dep}-{cfg}".lower()).strip("-") + ".json"
         gen = gen_dir / name
         overlay = self.profile.get("tsconfig_overlay") or {}
-        co = {"noEmit": True, "incremental": False}
+        co = {"noEmit": True}
         doc = {"compilerOptions": co}
         if cfg.startswith("synthetic:"):
             syn = (self.profile["deployables"][dep].get("synthetic_tsconfig") or {})
@@ -1269,7 +1999,8 @@ class Verify:
         t0 = time.monotonic()
         cmd = f"{contract_diff.TOOL}.run_diff(base={self.tree_base.meta.get('source_commit', '?')[:12]}, head={'worktree' if self.mode == 'worktree' else self.head[:12]}, graph=head graph)"
         try:
-            res = contract_diff.run_diff(self.tree_base, self.tree_head, graph=self.graph_head, repo_name=self.repo.name)
+            res = contract_diff.run_diff(self.tree_base, self.tree_head, graph=self.graph_head, repo_name=self.repo.name,
+                                         metadata_root=self.exec_root, metadata_git_repo=self.top)
         except contract_diff.Refusal as r:
             self.record("v-contract-diff", "contract_diff", cmd, ents, 2, f"REFUSAL {r.code}: {r.detail}", started, round(time.monotonic() - t0, 2),
                         f"refusal {r.code}", {e: ("not_measured", f"contract_diff refused: {r.code}") for e in ents}, "txt")
@@ -1318,15 +2049,15 @@ class Verify:
             return
         started = now_iso()
         t0 = time.monotonic()
-        prefixes: dict[str, str | None] = {}
+        bootstraps: dict[str, nest_bootstrap.Bootstrap] = {}
         registered: dict[str, tuple[set[str], list[str]]] = {}
         log, verdicts = [], {}
         # A2-277 defect 2. RC-01/RC-02 are NestJS rules; RC-03 (is the served route still there, and
         # does anything consume it) is a statement about the graph and holds in any language. So the
         # applicability is per RULE, not per verifier: on a non-Nest tree the route keeps the verdict
         # RC-03 can honestly produce, and the reason says which rules ran and which never applied.
-        nest = self.repo_has_nest()
-        if not nest and ents:
+        repo_nest = self.repo_has_nest()
+        if not repo_nest and ents:
             log.append(f"INAPPLICABLE_FRAMEWORK: no package.json in this tree names an @nestjs/ package, so "
                        f"RC-01 (setGlobalPrefix) and RC-02 (@Module registration) state nothing about these "
                        f"{len(ents)} route(s). They are NOT measured and NOT counted against them; RC-03 still is.")
@@ -1338,6 +2069,11 @@ class Verify:
             n = self.entities[eid]["node"]
             path = n.get("path") or ""
             dep = deployable_of(path, self.deployables)
+            # Nest elsewhere in a polyglot tree is not evidence that a Python
+            # route has a Nest bootstrap. The route extractor/source determines
+            # applicability; RC-03 remains applicable to every served route.
+            framework = nest_bootstrap.route_framework(self.tree_head, dep, path, repo_nest=repo_nest)
+            nest = framework == 'nest'
             problems, notes = [], []
             if "rc03" in self.fr_rules:
                 if eid not in self.head_nodes:
@@ -1352,25 +2088,35 @@ class Verify:
             if dep is None:
                 verdicts[eid] = ("not_measured", f"controller {path} lies in no deployable")
                 continue
-            if dep not in prefixes:
-                pf = None
-                prof = (self.profile.get("deployables") or {}).get(dep, {})
-                prefix = "" if dep in ("", ".") else dep + "/"
-                candidates = [prefix + "src/main" + ext for ext in (".ts", ".mts")
-                              if self.tree_head.exists(prefix + "src/main" + ext)]
-                root_file = prof.get("root_module_file") or (candidates[0] if len(candidates) == 1 else None)
-                if root_file and deployable_of(root_file, self.deployables) == dep and self.tree_head.exists(root_file):
-                    m = re.search(r"""setGlobalPrefix\(\s*['"]([^'"]*)['"]""", build_graph.strip_comments(self.tree_head.text(root_file)))
-                    if m:
-                        pf = "/" + m.group(1).strip("/")
-                else:
-                    root_file = None
-                prefixes[dep] = pf
-                registered[dep] = nest_registered_files(self.scan_head, root_file) if root_file else (set(), ["no src/main.ts"])
+            if framework == 'unknown':
+                verdicts[eid] = ('not_measured', 'BOOTSTRAP_UNRESOLVED: route deployable framework metadata unreadable')
+                continue
+            owners = {deployable_of(p, self.deployables) for p in (n.get('attrs') or {}).get('nest_route_sources', [])}
+            if nest and len(owners) > 1:
+                verdicts[eid] = ('not_measured', 'BOOTSTRAP_UNRESOLVED: logical route has multiple deployable owners')
+                continue
+            if dep not in bootstraps:
+                bootstraps[dep] = nest_bootstrap.resolve(self.tree_head, dep, self.deployables, self.profile)
+                root_file = bootstraps[dep].root_file
+                registered[dep] = nest_registered_files(self.scan_head, root_file) if root_file else (set(), ["no resolved bootstrap"])
+            bootstrap = bootstraps[dep]
+            if nest and self.fr_rules & {"rc01", "rc02"} and not bootstrap.complete:
+                verdicts[eid] = ("not_measured", "BOOTSTRAP_UNRESOLVED: " + bootstrap.reason)
+                log.append(f"{eid}: not_measured {bootstrap.reason}")
+                continue
+            route_match = re.match(r"route:(\w+)\s+(.+)", eid)
+            # Legacy test/client IDs may use a colon instead of the canonical space.
+            if not route_match:
+                route_match = re.match(r"route:(\w+):(.+)", eid)
+            try:
+                effective = bootstrap.effective_prefix(*route_match.groups()) if route_match else bootstrap.prefix
+            except ValueError as exc:
+                verdicts[eid] = ('not_measured', 'BOOTSTRAP_UNRESOLVED: ' + str(exc))
+                continue
             want = (n.get("attrs") or {}).get("global_prefix")
             want = ("/" + want.strip("/")) if want else None
-            if nest and "rc01" in self.fr_rules and want is not None and want != prefixes[dep]:   # a route built without a prefix attr is excluded from it (e.g. health)
-                problems.append(f"PREFIX_MISMATCH: route built with prefix {want!r}, bootstrap at head sets {prefixes[dep]!r}")
+            if nest and "rc01" in self.fr_rules and want != effective:
+                problems.append(f"PREFIX_MISMATCH: route built with prefix {want!r}, selected bootstrap requires {effective!r}")
             reg, rnotes = registered[dep]
             if nest and "rc02" in self.fr_rules:
                 if not reg and rnotes and rnotes[0].startswith("no"):
@@ -1386,7 +2132,7 @@ class Verify:
                                              "INAPPLICABLE_FRAMEWORK — this tree declares no @nestjs/ package, so "
                                              "there is no bootstrap prefix and no @Module graph to check")
             else:
-                verdicts[eid] = ("verified", f"served at head, prefix {prefixes[dep]!r} consistent" + (" (route excluded from the prefix)" if want is None else "") + ", controller registered")
+                verdicts[eid] = ("verified", f"served at head, prefix {effective!r} consistent, selected bootstrap {bootstrap.root_file}, controller registered")
             log.append(f"{eid}: {verdicts[eid][0]} — {verdicts[eid][1]}")
         failed = sum(1 for v in verdicts.values() if v[0] == "failed")
         self.record("v-route-config", "config_schema", "verify.py route_config_consistency RC-01 prefix / RC-02 registration / RC-03 served", ents,
@@ -1474,6 +2220,9 @@ class Verify:
                 verdict = ("not_measured", "workflow source hash differs from selected graph node")
             else:
                 verdict = workflow_config.validate(raw)
+                unknown = self.entities[eid]["node"].get("attrs", {}).get("shell_unknown", [])
+                if unknown and verdict[0] == "verified":
+                    verdict = ("not_measured", "workflow shell caller closure not measured: " + "; ".join(unknown))
             vid = "v-workflow-config-" + hashlib.sha256(path.encode()).hexdigest()[:16]
             self.record(vid, "config_schema", "workflow_config.validate exact head bytes", [eid],
                         0 if verdict[0] == "verified" else 1, verdict[1], now_iso(), 0.0,
@@ -1481,8 +2230,10 @@ class Verify:
 
     def v_config_schema(self):
         self.v_workflow_config()
+        self.v_native_patch_binding()
         ents = [e for e in self.needing("config_schema")
-                if not workflow_config.is_workflow(self.entity_file(e) or "")]
+                if not workflow_config.is_workflow(self.entity_file(e) or "")
+                and self.entities[e]["node"].get("kind") not in native_projection.GRAPH_KINDS]
         if not ents:
             return
         started = now_iso()
@@ -1537,6 +2288,29 @@ class Verify:
                     f"{len(sources)} source(s), {len(new)} new / {len(frozen)} frozen undeclared reads, {failed} failed"
                     + (f"; {sum(len(r['files']) for r in vendored_report.values())} vendored file(s) not attributed to this repository "
                        f"({', '.join(sorted(vendored_report))})" if vendored_report else ""), verdicts, "json")
+
+    def v_native_patch_binding(self):
+        ents = [e for e in self.needing("config_schema")
+                if self.entities[e]["node"].get("kind") in native_projection.GRAPH_KINDS]
+        if not ents:
+            return
+        started, t0 = now_iso(), time.monotonic()
+        try:
+            result = native_projection.verify_graph_binding(
+                self.top, self.head, self.tree_head, [self.entities[e]["node"] for e in ents],
+                self.profile.get("native_physical_binding"), self.workdir,
+                os.environ.get("MUNERAL_API_KEY"))
+            verdict = "verified" if result is not None else "not_measured"
+            detail = ("independent physical patch/manifest/native binding; compiler other files NOT_MEASURED"
+                      if result is not None else "native physical declaration or authenticated GET credential absent")
+            output = result or {"reason": detail, "compiler": "not_measured"}
+        except Exception as error:
+            verdict, detail = "failed", "native physical binding refused: " + type(error).__name__
+            output = {"reason": detail, "graph_admission": "not_measured", "runtime_admission": False}
+        self.record("v-native-physical-binding", "config_schema",
+                    "native_projection.verify_graph_binding: independent Git/physical/authenticated native GET",
+                    ents, 0 if verdict == "verified" else 1, output, started,
+                    round(time.monotonic() - t0, 2), detail, {e: (verdict, detail) for e in ents}, "json")
 
     def v_fitness(self):
         ents = self.needing("fitness_rules")
@@ -1638,14 +2412,33 @@ class Verify:
             return
         started, t0 = now_iso(), time.monotonic()
         self.canary_verified.difference_update(ents)
+        # A2-312. A verdict read from a CanaryResult that is committed at the candidate head is
+        # attributed to a row of its own whose output_ref IS that document (repository-relative),
+        # consumed here out of git objects exactly as admit_change.canary_coverage re-reads it. The
+        # single `v-canary` row used to cite this run's LOG for every verdict, so a receipt whose
+        # canary actually measured something was refused CANARY_CLAIM_WITHOUT_COMMITTED_EVIDENCE by
+        # both the validator and the gate (arcanada-universal-program#146, A2-311). Evidence that is
+        # NOT committed keeps the previous path onto `v-canary` unchanged: the gate refuses it there
+        # by name, which is right — this change adds no way to cash what the gate cannot open.
         listed: dict[str, dict] = {}
-        sources = []
+        sources, doc_rows = [], []
         rank = {"failed": 2, "not_measured": 1, "verified": 0}
+        top = Path(self.top).resolve()
         for path in self.canary_paths:
             candidate = self.head if self.mode == "diff" else self.repo.head()
-            rows, errors, doc = canary_evidence.consume(path, self.top, candidate,
-                dirty=self.mode != "diff" and self.repo.dirty())
-            sources.append({"path": rel_ref(Path(path)), "errors": errors,
+            try:
+                rel = Path(path).resolve().relative_to(top).as_posix()
+            except ValueError:
+                rel = None
+            committed = bool(rel) and schema_check.repo_relative(rel) and subprocess.run(
+                ["git", "-C", str(top), "cat-file", "-e", f"{candidate}:{rel}"], capture_output=True).returncode == 0
+            if committed:
+                rows, errors, doc = canary_evidence.consume(path, self.top, candidate, at_head=rel)
+            else:
+                rows, errors, doc = canary_evidence.consume(path, self.top, candidate,
+                    dirty=self.mode != "diff" and self.repo.dirty())
+            sources.append({"path": rel if committed else rel_ref(Path(path)), "committed_at_head": bool(committed),
+                            "errors": errors,
                             "subject": doc.get("subject"), "environment": doc.get("environment"),
                             "captured_at_utc": doc.get("captured_at_utc"),
                             # A2-263: a freshness re-read the consuming host could not perform is a
@@ -1654,11 +2447,23 @@ class Verify:
             if errors:
                 rows = {e: {"entity": e, "verdict": "not_measured",
                             "reason": "CANARY_EVIDENCE_UNVERIFIABLE: " + "; ".join(errors)} for e in ents}
+            meta = {"plan": (doc.get("plan") or {}).get("id") if isinstance(doc.get("plan"), dict) else None,
+                    "phase": doc.get("phase"), "environment": doc.get("environment")}
+            row_id = None
+            if committed and not errors:
+                mine = {eid: v for eid, v in rows.items() if eid in ents}
+                if mine:
+                    row_id = f"v-canary-{len(doc_rows) + 1}"
+                    doc_rows.append((row_id, rel, mine, meta))
             for eid, v in rows.items():
                 cur = listed.get(eid)
-                if cur is None or rank[v["verdict"]] > rank[cur["verdict"]]:
-                    listed[eid] = {**v, "plan": (doc.get("plan") or {}).get("id") if isinstance(doc.get("plan"), dict) else None,
-                                   "phase": doc.get("phase"), "environment": doc.get("environment")}
+                if cur is None or rank[v["verdict"]] > rank[cur["verdict"]] or \
+                        (rank[v["verdict"]] == rank[cur["verdict"]] and cur["row"] is None and row_id is not None):
+                    listed[eid] = {**v, **meta, "row": row_id}
+
+        def why(cv: dict) -> str:
+            return f"canary {cv['plan']} ({cv['phase']}) on {cv['environment']}: {(cv.get('reason') or '')[:200]}"
+
         verdicts, lines = {}, []
         for eid in sorted(ents):
             cv = listed.get(eid)
@@ -1667,20 +2472,32 @@ class Verify:
                                  "INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity "
                                  "(matrix P6, observed-edges-and-deploy-gate.v1 rule C1)")
             else:
-                verdicts[eid] = (cv["verdict"], f"canary {cv['plan']} ({cv['phase']}) on {cv['environment']}: "
-                                                f"{(cv.get('reason') or '')[:200]}")
+                verdicts[eid] = (cv["verdict"], why(cv))
                 if cv["verdict"] == "verified":
                     self.canary_verified.add(eid)
             lines.append(f"{verdicts[eid][0]:12} {eid}  {verdicts[eid][1][:160]}")
-        summary = (f"{len(self.canary_paths)} canary result(s); "
+        secs = round(time.monotonic() - t0, 2)
+        cmd = "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)"
+        # One row per committed document, naming exactly the entities that document lists — the gate
+        # reports any entity a cashed row names that its document does not (canary_coverage surplus).
+        for row_id, rel, mine, meta in doc_rows:
+            vd = {eid: (v["verdict"], why({**v, **meta})) for eid, v in mine.items()}
+            self.record(row_id, "canary", cmd, sorted(mine), 1 if any(v[0] == "failed" for v in vd.values()) else 0,
+                        "", started, secs,
+                        f"{rel}: {sum(1 for v in vd.values() if v[0] == 'verified')} verified / "
+                        f"{sum(1 for v in vd.values() if v[0] == 'failed')} failed / "
+                        f"{sum(1 for v in vd.values() if v[0] == 'not_measured')} not_measured",
+                        vd, evidence_ref=rel)
+        # `v-canary` keeps the run's own log and every entity whose verdict no committed document decided.
+        rest = {eid: v for eid, v in verdicts.items() if (listed.get(eid) or {}).get("row") is None}
+        summary = (f"{len(self.canary_paths)} canary result(s), {len(doc_rows)} committed at head; "
                    f"{sum(1 for v in verdicts.values() if v[0] == 'verified')} verified / "
                    f"{sum(1 for v in verdicts.values() if v[0] == 'failed')} failed / "
                    f"{sum(1 for v in verdicts.values() if v[0] == 'not_measured')} not_measured of {len(ents)} entities")
-        self.record("v-canary", "canary",
-                    "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-                    sorted(ents), 0, json.dumps({"sources": sources, "verdicts": {k: v for k, v in verdicts.items()}},
+        self.record("v-canary", "canary", cmd,
+                    sorted(rest), 0, json.dumps({"sources": sources, "verdicts": {k: v for k, v in verdicts.items()}},
                                                 ensure_ascii=False, indent=1) + "\n\n" + "\n".join(lines),
-                    started, round(time.monotonic() - t0, 2), summary, verdicts, ext="json")
+                    started, secs, summary, rest, ext="json")
 
     # ---- targeted_test (selectable): plan, runner, run
     def targeted_test_plan(self) -> list[dict]:
@@ -1795,6 +2612,156 @@ class Verify:
             if m2 and runner == "vitest":
                 status[m2.group(2)] = "PASS" if m2.group(1) == "\u2713" else "FAIL"
         return status
+
+    def full_fallback_test_runner(self, dep: str) -> list[str] | None:
+        """Use a declared full job; a targeted-test profile command is not that declaration."""
+        prof = (self.profile.get("deployables") or {}).get(dep, {})
+        full = prof.get("full_test")
+        if isinstance(full, list) and full and all(isinstance(arg, str) for arg in full):
+            return list(full)
+        return None  # scripts.test is not an explicit full-suite declaration
+
+    def full_fallback_test_timeout(self, dep: str) -> int | None:
+        """A bounded explicit budget supports measured long full jobs without omitting gates."""
+        prof = (self.profile.get("deployables") or {}).get(dep, {})
+        budget = prof.get("full_test_timeout_seconds", 900)
+        return budget if type(budget) is int and 1 <= budget <= 7200 else None
+
+    def v_global_fallback_test(self):
+        """Run the repository's complete suite, independently of targeted spec selection."""
+        groups = {}
+        for eid in self.fallback_entities:
+            node = self.entities[eid]["node"]
+            dep = node.get("path", ".") if node["type"] == "deployable_unit" else "."
+            groups.setdefault(dep or ".", []).append(eid)
+        for dep, entities in sorted(groups.items()):
+            cmd = self.full_fallback_test_runner(dep)
+            timeout = self.full_fallback_test_timeout(dep)
+            started = now_iso()
+            if timeout is None:
+                rc, out, secs = 125, "FULL_FALLBACK_TEST_NOT_MEASURED: full_test_timeout_seconds must be an integer in 1..7200", 0.0
+                verdict = "not_measured"
+            elif "full_fallback_test" in self.disabled or not cmd:
+                rc, out, secs = 127, "FULL_FALLBACK_TEST_NOT_MEASURED: explicit full_test declaration/runner absent or disabled", 0.0
+                verdict = "not_measured"
+            else:
+                supplied = list(getattr(self.a, "full_test_ci", None) or [])
+                candidates = []
+                for path in supplied:
+                    try:
+                        raw = full_suite_ci._blob(self.top, self.head, path)
+                        if json.loads(raw).get("deployable") == dep:
+                            candidates.append(path)
+                    except (ValueError, OSError, TypeError, subprocess.SubprocessError):
+                        candidates.append(path)  # malformed supplied evidence must refuse, never replay FULL
+                if supplied:
+                    proof = (full_suite_ci.consume(self.top, self.head, self.repo.name, dep, cmd, candidates[0])
+                             if len(candidates) == 1 and self.mode == "diff" else
+                             {"verdict": "not_measured", "errors": ["one committed exact-deployable CI record required in diff mode"]})
+                    verdict = proof["verdict"]
+                    if proof.get("duration_s", 0) > timeout:
+                        verdict = "not_measured"
+                        proof.setdefault("errors", []).append("CI FULL duration exceeds the unchanged declared timeout")
+                        proof["verdict"] = verdict
+                    rc = 0 if verdict == "verified" else (1 if verdict == "failed" else 125)
+                    out = json.dumps(proof, indent=1)
+                    secs = proof.get("duration_s", 0.0)
+                    vid = "v-global-fallback-test-" + (re.sub(r"[^a-z0-9]+", "-", dep.lower()).strip("-") or "root")
+                    self.record(vid, "targeted_test", "authenticated committed CI: " + shlex.join(cmd), entities,
+                                rc, out, started, secs, "complete fallback suite CI: " + verdict,
+                                {eid: (verdict, "complete fallback suite CI: " + verdict) for eid in entities})
+                    self.verifiers[-1].update(scope="global_fallback_full_suite", timeout_seconds=timeout,
+                                             measurement_origin="authenticated_github_ci",
+                                             ci_evidence=candidates, ci_source_commit=proof.get("source_commit"))
+                    if "tests_executed_now" in proof:
+                        self.verifiers[-1].update(tests_executed_now=proof["tests_executed_now"],
+                                                 ci_reused_from=proof.get("reused_from"),
+                                                 ci_measurement=proof.get("measurement"))
+                    continue
+                rc, out, secs = run_cmd(cmd, self.exec_root / dep, env={"CI": "1", "PYTHONDONTWRITEBYTECODE": "1", "FORCE_COLOR": "0", "NO_COLOR": "1"}, timeout=timeout)
+                # Exit zero alone (including an empty or wholly skipped suite) measures nothing.
+                passed = bool(re.search(r"(?:\b[1-9]\d* passed\b|\b[1-9]\d* passing\b|# pass [1-9]\d*|Ran [1-9]\d* tests?\b)", out))
+                unittest_count = re.search(r"Ran (\d+) tests?", out)
+                skipped = re.search(r"OK \(skipped=(\d+)\)", out)
+                if unittest_count and skipped and int(skipped[1]) >= int(unittest_count[1]):
+                    passed = False
+                verdict = "not_measured" if rc in (124, 127) else ("failed" if rc else ("verified" if passed else "not_measured"))
+            vid = "v-global-fallback-test-" + (re.sub(r"[^a-z0-9]+", "-", dep.lower()).strip("-") or "root")
+            logical_cmd = [Path(cmd[0]).name if Path(cmd[0]).is_absolute() else cmd[0], *cmd[1:]] if cmd else []
+            self.record(vid, "targeted_test", shlex.join(logical_cmd), entities, rc, out, started, secs,
+                        "complete fallback suite: " + verdict,
+                        {eid: (verdict, "complete fallback suite: " + verdict) for eid in entities})
+            self.verifiers[-1]["scope"] = "global_fallback_full_suite"
+            self.verifiers[-1]["timeout_seconds"] = timeout
+
+    def v_shell_syntax(self):
+        for eid in self.needing("shell_syntax"):
+            path = self.entity_file(eid)
+            raw = self.tree_head.files.get(path)
+            if "shell_syntax" in self.disabled or raw is None:
+                verdict, proof = "not_measured", {"reason": "shell source missing/removed or mandatory syntax disabled"}
+            else:
+                verdict, proof = shell_source.syntax(path, raw, self.tree_head.paths)
+                if sha_bytes(raw) != self.entities[eid]["node"].get("content_hash"):
+                    verdict = "not_measured"
+                    proof["reason"] = "shell head bytes differ from selected graph node"
+            self.record("v-shell-syntax-" + hashlib.sha256(eid.encode()).hexdigest()[:16], "shell_syntax",
+                        "bash --noprofile --norc -n <exact bytes; Bats declarations translated, never executed>",
+                        [eid], proof.get("exit_code", 125), json.dumps(proof), now_iso(), 0.0,
+                        "shell syntax/closure: " + verdict, {eid: (verdict, "shell syntax/closure: " + verdict)})
+            self.verifiers[-1]["scope"] = "shell_source_validation"
+
+    def v_shell_behavior(self):
+        """Consume native process fixture evidence only; never execute caller shell/Bats here."""
+        for eid in self.needing("shell_behavior"):
+            path = self.entity_file(eid)
+            unknown = self.entities[eid]["node"].get("attrs", {}).get("shell_unknown", [])
+            choices = []
+            for supplied in self.canary_paths:
+                try:
+                    rel = Path(supplied).resolve().relative_to(self.top.resolve()).as_posix()
+                    rows, errors, doc = canary_evidence.consume(supplied, self.top, self.head, at_head=rel)
+                    row = rows.get(eid)
+                    probes = [p for p in doc.get("probes", []) if p.get("id") in (row or {}).get("probe_ids", [])]
+                    if (not errors and doc.get("schema") == "CanaryResult/v2" and row
+                            and probes and all(p.get("kind") == "process" and p.get("executed")
+                                               and p.get("capture_complete") for p in probes)):
+                        checks = [c for p in probes for c in p.get("output_checks", [])]
+                        measured = any(c.get("matched") and re.search(
+                            r"\b[1-9]\d* (?:passed|passing|tests?)\b|Ran [1-9]\d* tests?|1\.\.[1-9]\d*",
+                            c.get("expected", "")) for c in checks)
+                        if measured and all(c.get("matched") for c in checks):
+                            choices.append((rel, row, probes))
+                except (ValueError, OSError, TypeError, subprocess.SubprocessError):
+                    pass  # no measurement from invalid/uncommitted documents
+            verdict, reason, evidence = "not_measured", "SHELL_BEHAVIOR_NOT_MEASURED: no exact committed native process fixture row", None
+            if unknown:
+                reason = "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: " + "; ".join(unknown)
+            elif "shell_behavior" in self.disabled:
+                reason = "mandatory shell behavior disabled"
+            elif len(choices) == 1:
+                evidence, row, probes = choices[0]
+                verdict, reason = row["verdict"], "exact source-bound native process fixture"
+                if path.endswith(".bats"):
+                    # Pinning a .bats file as an input is NOT proof its test bodies executed.
+                    # Native producer must retain the complete TAP inventory, not only an exit code.
+                    inventory = self.entities[eid]["node"].get("attrs", {}).get("shell_test_inventory", [])
+                    tap_path = (self.profile.get("shell_fixture_tap") or {}).get(eid)
+                    try:
+                        tap = full_suite_ci._blob(self.top, self.head, tap_path) if isinstance(tap_path, str) else b""
+                        streams = [p.get("streams", {}).get("stdout", {}) for p in probes]
+                        tap_verified = (len(streams) == 1 and streams[0].get("sha256") == full_suite_ci._digest(tap)
+                                        and streams[0].get("captured_bytes") == len(tap)
+                                        and not streams[0].get("truncated") and shell_source.tap_membership(tap, inventory))
+                    except (ValueError, OSError, TypeError, subprocess.SubprocessError):
+                        tap_verified = False
+                    if not tap_verified:
+                        verdict, reason = "not_measured", "BATS_EXECUTION_MEMBERSHIP_NOT_MEASURED: full non-skipped TAP inventory required"
+            self.record("v-shell-behavior-" + hashlib.sha256(eid.encode()).hexdigest()[:16], "shell_behavior",
+                        "consume source-bound native process fixture; no local execution", [eid],
+                        1 if verdict == "failed" else 0, reason, now_iso(), 0.0, reason,
+                        {eid: (verdict, reason)}, evidence_ref=evidence if evidence and verdict == "verified" else None)
+            self.verifiers[-1]["scope"] = "shell_fixture_behavior"
 
     def v_targeted_test(self):
         if "targeted_test" not in self.selected or "targeted_test" in self.disabled:
@@ -2226,6 +3193,32 @@ class Verify:
             verdicts.append(rec)
         if "every_entity_verdict" not in self.rules and verdicts:
             verdicts = verdicts[:-1]   # mutant: drop one verdict
+        # A2-235. An impact set that weighs nothing is a finding, never silence. The inline
+        # admission computation this commit also carried is NOT kept: `admission_verdict(verdicts,
+        # exemptions)` on main states the same rule in one place, including «an empty verdict list
+        # pauses», and stating it twice is how the two copies drift.
+        rows = q["impact_set"]["deterministic_core"] + q["impact_set"]["inferred_tail"]
+        if not verdicts and rows and "impact_without_verdicts_event" in self.rules:
+            # An impact set that weighs nothing is a finding, never silence. `paused_safe` over an
+            # empty verdict list is byte-for-byte the same admission as a pause somebody measured,
+            # and that is how a 14-row impact set on talomnia-backend read as "the third verdict was
+            # applied" when not one entity had been weighed (A2-232). Name what the radius held, so
+            # the difference is legible to a reader and to the CI gate.
+            by_type: dict[str, int] = {}
+            for e in rows:
+                t = e.get("node_type") or e["entity"].split(":", 1)[0]
+                by_type[t] = by_type.get(t, 0) + 1
+            held = ", ".join(f"{k}: {v}" for k, v in sorted(by_type.items()))
+            self.events.append({
+                "code": "IMPACT_SET_WITHOUT_VERDICTS",
+                "text": f"{len(rows)} affected entity(ies) ({held}) and not one verdict"
+                        + (f"; {len(self.excluded)} structurally excluded (DEC-AUP-0034)" if self.excluded else "")
+                        + (f"; the global fallback over {q['impact_set']['global_fallback'].get('files') or 'a global config'} "
+                           f"reached no deployable unit and no code unit"
+                           if q["impact_set"].get("global_fallback", {}).get("triggered") else "")
+                        + " — nothing was measured, so this admission records the ABSENCE of a "
+                          "measurement, not a measured pause (DEC-AUP-0008: not_measured is a third "
+                          "verdict, never a pass)"})
         # A2-277 defect 3. The admission verdict used to be computed with `exemptions: []` no matter
         # what, because the agent could only attach exemptions AFTER reading the receipt — and there
         # was no way to recompute it, so the field had to be hand-edited into agreement with a rule
@@ -2237,7 +3230,10 @@ class Verify:
         exemptions, exemption_notes = self.load_exemptions(verdicts)
         adm = (admission_verdict(verdicts, exemptions) if "admission_rule" in self.rules else "admitted")
         rec = {"schema": "ChangeAdmissionReceipt/v1", "receipt_id": f"car-verify-{self.captured_at.replace('-', '').replace(':', '')}-{(self.head or self.repo.head())[:8]}",
-               "captured_at_utc": self.captured_at, "host": os.uname().nodename, "producer": {"tool": TOOL, "version": VERSION},
+               "captured_at_utc": self.captured_at,
+               **host_fields(getattr(self.a, "host_label", None),
+                             self.head or self.repo.head()),
+               "producer": {"tool": TOOL, "version": VERSION},
                "decision_ref": "DEC-AUP-0008", "repo": q["repo"],
                "graph": {k: q["graph"][k] for k in ("path", "source_commit", "graph_digest", "builder_version", "built_at_utc")},
                "tree": q["tree"], "staleness": {k: v for k, v in q["staleness"].items() if k != "checked_nodes"},
@@ -2254,6 +3250,23 @@ class Verify:
                          *exemption_notes, *self.notes],
                "verify": {"events": self.events, "required_by_entity": {e: ent["required"] for e, ent in sorted(self.entities.items())},
                           "seconds": {"prepare": self.prep_seconds, "verifiers": round(sum(v.get("duration_s", 0) for v in self.verifiers), 2)}}}
+        rec["verifier_selection"] = self.verifier_selection()
+        # A2-418. A selected verifier that applied to nothing leaves the REQUEST unanswered, and the
+        # change holds for that reason — workflow-configuration.md: «missing selected checks retain
+        # not_measured». What holds is the ADMISSION, under a code that names the request. The entity
+        # verdicts are not touched: each keeps what its own verifiers earned (A2-275: a flag may add a
+        # measurement, never remove one). Before this the pause was produced by demoting every entity
+        # to not_measured, which conflated «the check was not measured» with «the entity was not».
+        # Computed from the selection itself, not read back from the receipt: the pause must not depend on
+        # the record being written (test_verifier_selection's producer mutant removes exactly that line).
+        sel = self.verifier_selection()
+        unanswered = sorted(v for v in sel["requested"] if not sel["applied"].get(v))
+        if unanswered:
+            self.events.append({"code": "SELECTED_VERIFIER_APPLIED_TO_NOTHING", "verifiers": unanswered,
+                                "reason": "a verifier was requested with --select and applied to no entity (see verifier_selection.not_applied); "
+                                          "the request went unanswered, so the change holds — no entity verdict is demoted for it"})
+            if adm != "refused":
+                rec["admission"]["verdict"] = "paused_safe"
         if "head_graph" in q:
             rec["head_graph"] = q["head_graph"]
             rec["revision_selection"] = q["revision_selection"]
@@ -2261,6 +3274,8 @@ class Verify:
                 rec["admission"]["verdict"] = "paused_safe"
         if "empty_impact_explanation" in q:
             rec["empty_impact_explanation"] = q["empty_impact_explanation"]
+        if getattr(self, "caller_graph_compatibility", None):
+            rec["caller_graph_compatibility"] = self.caller_graph_compatibility
         if self.a.work_item:
             rec["work_item"] = self.a.work_item
         if self.self_receipt_rel:
@@ -2268,6 +3283,8 @@ class Verify:
             # is checkable only against the path this document was actually written to, and
             # admit_change compares this field with where it FOUND the receipt.
             rec["receipt_path"] = self.self_receipt_rel
+        if rec.get("host_redacted"):
+            rec = redact_host_in_local_paths(rec, os.uname().nodename, rec["host"])
         return rec
 
     def load_exemptions(self, verdicts: list[dict]) -> tuple[list[dict], list[str]]:
@@ -2331,6 +3348,8 @@ class Verify:
 
     def matrix_id_of(self, v: dict) -> str:
         vid = v["id"]
+        if v.get("scope") == "global_fallback_full_suite":
+            return "full_fallback_test"
         if vid.startswith("v-type-check"):
             return "type_check"
         if vid.startswith("v-route-config"):
@@ -2375,26 +3394,33 @@ class Verify:
     def run(self) -> tuple[dict, int]:
         t_all = time.monotonic()
         try:
-            q = self.impact_query()
+            with impact_pair.trace_phase("impact-query"):
+                q = self.impact_query()
         except impact.Refusal as r:
             doc = impact.refusal_doc(getattr(self, "idx", None), r, mode="diff" if self.a.diff else "worktree", tree_commit=None, tree_dirty=None,
                                      repo=self.repo, graph_path=getattr(self, "graph_path", None), files=[])
             return doc, 2
         self.change_files = q["change_set"]["files"]
-        self.prepare_head()
-        self.load_baseline()
-        self.collect_entities(q)
+        with impact_pair.trace_phase("prepare-head"):
+            self.prepare_head()
+        with impact_pair.trace_phase("fitness-baseline"):
+            self.load_baseline()
+        with impact_pair.trace_phase("collect-entities"):
+            self.collect_entities(q)
         for mid, fn in (("type_check", self.v_type_check), ("contract_diff", self.v_contract_diff),
                         ("route_config_consistency", self.v_route_config), ("schema_diff", self.v_schema_diff),
                         ("config_schema", self.v_config_schema), ("fitness_rules", self.v_fitness),
                         ("doc_reference", self.v_doc_reference), ("canary", self.v_canary),
-                        ("targeted_test", self.v_targeted_test), ("property_check", self.v_property_check)):
-            self.run_verifier(mid, fn)
-        rec = self.aggregate(q)
+                        ("shell_syntax", self.v_shell_syntax), ("shell_behavior", self.v_shell_behavior),
+                        ("full_fallback_test", self.v_global_fallback_test), ("targeted_test", self.v_targeted_test), ("property_check", self.v_property_check)):
+            with impact_pair.trace_phase("verifier-" + mid):
+                self.run_verifier(mid, fn)
+        with impact_pair.trace_phase("aggregate-receipt"):
+            rec = self.aggregate(q)
         rec["verify"]["seconds"]["total"] = round(time.monotonic() - t_all, 2)
         rec["verify"]["events"] = self.events + [{"code": e} for e in q.get("events", [])]
         code = 0 if rec["admission"]["verdict"] == "admitted" else 1
-        if q.get("events"):
+        if impact_pair.blocking_query_events(q):
             code = 3
         return rec, code
 
@@ -2770,6 +3796,16 @@ def selftest(a) -> int:
                                   "survived_when_disabled": survived, "other_verifiers_failed_when_disabled": others_failed})
     # per-verifier summary: every mandatory verifier is load-bearing
     for vid in MANDATORY_IDS:
+        if vid in {"shell_syntax", "shell_behavior"}:
+            # The historical ts-mini fault catalog contains no Bash/Bats nodes. Exercise
+            # these additive mandatory verifiers against actual shell/native-process
+            # fixtures instead of asserting on an empty set (or dropping the obligation).
+            result = subprocess.run([sys.executable, "-m", "unittest",
+                                     "test_shell_source.ShellVerifierCalibration.test_" + vid],
+                                    cwd=Path(__file__).parent, capture_output=True, text=True)
+            check(f"mandatory verifier {vid}: actual fault and disabled-verifier controls",
+                  result.returncode == 0, output=(result.stdout + result.stderr)[-2000:])
+            continue
         if vid == "canary":
             result = subprocess.run([sys.executable, "-m", "unittest", "discover", "-s", str(Path(__file__).parent),
                                      "-p", "test_canary_evidence.py"], capture_output=True, text=True)
@@ -2877,7 +3913,12 @@ def selftest(a) -> int:
     before = {v["entity"]: v["verdict"] for v in nrec["verdicts"]}
     after = {v["entity"]: v["verdict"] for v in srec["verdicts"]}
     demoted = sorted(e for e, v in before.items() if v == "verified" and after.get(e) != "verified")
-    check("selecting targeted_test never demotes a verdict the flagless run produced (A2-275)", not demoted,
+    # A2-418: renamed. For two weeks this row was called «selecting targeted_test never demotes …» while
+    # the demotion it would have caught was property_check's (A2-417 § 2) — a name pointing at the wrong
+    # cause steers the next reader away from the right one. It states the PROPERTY, of every selected
+    # verifier. It is still blind on a host without tsc (the entities it compares are not_measured on
+    # both sides there); the twins below state the MECHANISM and go red on any host.
+    check("no selected verifier demotes a verdict the flagless run produced (A2-275, A2-418)", not demoted,
           demoted=demoted[:5], verified_before=sum(1 for v in before.values() if v == "verified"),
           verified_after=sum(1 for v in after.values() if v == "verified"))
     # The check above states the PROPERTY, and on a host whose tsc is missing it cannot go red — the
@@ -2889,6 +3930,11 @@ def selftest(a) -> int:
                 if "targeted_test" in req and e not in ran]
     check("targeted_test is demanded only of entities a targeted test actually ran for (A2-275)", not demanded,
           demanded=demanded[:5], count=len(demanded), ran=len(ran))
+    # A2-418 — the same mechanism for property_check: demanded only where the profile declares a property.
+    declared = set(json.loads((VFIX / "profile.ts-mini.json").read_text(encoding="utf-8")).get("property_checks") or {})
+    pc_demanded = [e for e, req in srec["verify"]["required_by_entity"].items() if "property_check" in req and e not in declared]
+    check("property_check is demanded only of entities the profile declares a property for (A2-418)", not pc_demanded,
+          demanded=pc_demanded[:5], count=len(pc_demanded), declared=len(declared))
     check("selectable property_check: none declared ⇒ note, no verifier row", any("property_check selected" in n for n in srec["notes"]) and not any(v["kind"] == "property_check" for v in srec["verifiers"]))
 
     # AUP-GRAPH-006:gate3b (hole H7) — config_schema must not attribute a VENDORED bundle's config keys to the caller.
@@ -3054,6 +4100,60 @@ def run_pilot(a, check, tsc, prisma) -> dict:
 
 
 # ----------------------------------------------------------------------------------------------- CLI
+HOST_LABEL_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}\Z")
+
+
+def host_fields(label: str | None, salt: str) -> dict:
+    """The receipt's `host` stamp, optionally replaced by a public label.
+
+    A receipt committed into a PUBLIC repository must not carry the producing machine's name (the
+    consumer repo's personal-id gate refuses it). With `--host-label` the receipt
+    says `host: <label>`, `host_redacted: true` and `host_sha256 = sha256(<salt> NUL <real host>)`,
+    the salt being the change's head commit: receipts of one change stay linkable to one machine,
+    while a dictionary of host names cannot be reused across changes. Without a label the stamp is
+    the real node name, exactly as before.
+    """
+    real = os.uname().nodename
+    if not label:
+        return {"host": real}
+    if not HOST_LABEL_RE.match(label):
+        raise ValueError(f"host label {label!r} must match {HOST_LABEL_RE.pattern}")
+    if real and real.lower() in label.lower():
+        raise ValueError("host label must not contain the real host name")
+    return {"host": label, "host_redacted": True,
+            "host_sha256": hashlib.sha256(f"{salt}\0{real}".encode()).hexdigest()}
+
+
+# An ABSOLUTE path token: a `/` at the start of the string or right after a delimiter. A `/` inside a
+# repository-relative path (`receipts/<x>/result.json`) is not a token start and is never touched.
+LOCAL_PATH_TOKEN = re.compile(r"(?<![^\s\"'`(=,])/[^\s\"'`,)]*")
+
+
+def redact_host_in_local_paths(value, real: str, label: str):
+    """With a host label, the machine name must not survive inside ABSOLUTE local paths either.
+
+    Measured on the program's own CI (#229 on main): a runner whose work tree lives under
+    /opt/arcanada-runners/<host>-general-2/ wrote that host name into repo.path, graph.path,
+    head_graph.path and every verifier output_ref, while `host` said the label. Only absolute
+    path tokens are rewritten (the real name inside them becomes the label); repository-relative
+    paths, entity ids and digests are left byte-for-byte, because the gate re-derives them from Git.
+    """
+    if not real:
+        return value
+    pattern = re.compile(re.escape(real), re.IGNORECASE)
+
+    def fix(text: str) -> str:
+        return LOCAL_PATH_TOKEN.sub(lambda m: pattern.sub(label, m.group(0)), text)
+
+    if isinstance(value, str):
+        return fix(value)
+    if isinstance(value, list):
+        return [redact_host_in_local_paths(v, real, label) for v in value]
+    if isinstance(value, dict):
+        return {k: redact_host_in_local_paths(v, real, label) for k, v in value.items()}
+    return value
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0], formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--repo", type=Path)
@@ -3061,6 +4161,8 @@ def main(argv=None) -> int:
     ap.add_argument("--worktree", action="store_true")
     ap.add_argument("--files", nargs="*")
     ap.add_argument("--graph", default="auto", help="RelationshipGraph/v1 at base/HEAD, or 'auto' to build it from git objects")
+    ap.add_argument("--empty-impact-explanation", help="EmptyImpactExplanation/v1 JSON bound to the exact paired revisions and graph digests; retains raw events and all verifier obligations")
+    ap.add_argument("--caller-graph-bundle", help="unchanged canonical signed BASE bundle; both installed/current graphs must fully agree")
     ap.add_argument("--exemptions", help="a JSON list (or {\"exemptions\": [...]}) of NON-structural exemptions "
                                          "to attach BEFORE the admission verdict is computed. Each needs entity, "
                                          "code, owner, expires_at_utc, reason. Run once to see the verdicts, write "
@@ -3072,15 +4174,21 @@ def main(argv=None) -> int:
     ap.add_argument("--profile", help="VerifyProfile/v1 (default <repo>/.arcana/verify.json or auto-detection)")
     ap.add_argument("--baseline", help="FitnessBaseline/v1 (default <repo>/.arcana/fitness-baseline.json, then the program registry, then auto-freeze at base; 'auto' forces the freeze at base)")
     ap.add_argument("--tsc")
+    compiler_sdk_arguments(ap)
     ap.add_argument("--prisma")
     ap.add_argument("--workdir", help="scratch directory for exports / generated tsconfigs")
+    ap.add_argument("--phase-log", type=Path, help="new private JSONL phase log; diagnostics only, never receipt evidence")
     ap.add_argument("--out", type=Path, help="write the ChangeAdmissionReceipt/v1 draft here")
     ap.add_argument("--verifier-out", help="directory for captured verifier outputs (default <workdir>/verifier-out; never beside --out)")
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--work-item")
+    ap.add_argument("--host-label", help="public label stamped as the receipt's `host` instead of the machine name "
+                                         "; adds host_redacted and a head-salted host_sha256")
     ap.add_argument("--canary", action="append",
                     help="CanaryResult/v1 (tools/graph/deploy_gate.py canary): live-contour evidence for inferred/observed "
                          "boundary entities and canary_required edge types (AUP-GRAPH-008)")
+    ap.add_argument("--full-test-ci", action="append", metavar="COMMITTED_PATH",
+                    help="committed GitHubFullSuiteEvidence/v1 for explicit full_test; authenticate exact run/job/log/tree, never replay on refusal")
     ap.add_argument("--freeze-baseline", help="write a FitnessBaseline/v1 of the findings at --rev and exit")
     ap.add_argument("--rev", default="HEAD")
     ap.add_argument("--owner", default="")
@@ -3092,6 +4200,16 @@ def main(argv=None) -> int:
     ap.add_argument("--pilot-out", help="with --pilot: directory for the per-commit drafts")
     ap.add_argument("--pilot-commits", type=int, default=12)
     a = ap.parse_args(argv)
+    if any(getattr(a, name, None) for name in (
+            "compiler_sdk_root", "compiler_sdk_declaration",
+            "compiler_sdk_declaration_sha256", "compiler_sdk_evidence")) and (a.selftest or a.freeze_baseline):
+        ap.error("compiler SDK binding is supported only for committed ordinary verification")
+    label = getattr(a, "host_label", None)
+    if label:
+        try:
+            host_fields(label, "")
+        except ValueError as exc:
+            ap.error(str(exc))
     if a.selftest:
         return selftest(a)
     if a.freeze_baseline:
@@ -3100,7 +4218,13 @@ def main(argv=None) -> int:
         return freeze_baseline(a)
     if not a.repo or not (a.diff or a.worktree or a.files):
         ap.error("--repo and one of --diff / --worktree / --files are required")
-    rec, code = Verify(a, load_matrix()).run()
+    if a.compiler_sdk_root and not a.diff:
+        ap.error("compiler SDK binding requires an exact committed --diff range")
+    base, head = a.diff.split("..", 1) if a.diff else ("HEAD", "HEAD")
+    with impact_pair.phase_trace_to(a.phase_log):
+        with impact_pair.trace_phase("verification-command"):
+            with compiler_sdk_input(a, a.repo, base, head):
+                rec, code = Verify(a, load_matrix()).run()
     if a.out:
         a.out.parent.mkdir(parents=True, exist_ok=True)
         a.out.write_bytes(dump(rec))

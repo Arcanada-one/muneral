@@ -27,6 +27,7 @@ import { CreateChecklistItemDto } from './dto/create-checklist-item.dto.js';
 import { AddCommentDto } from './dto/add-comment.dto.js';
 import { JwtOrApiKeyGuard } from '../auth/guards/jwt-or-api-key.guard.js';
 import { AgentTaskScopeGuard } from '../auth/guards/agent-task-scope.guard.js';
+import { HumanTaskReadGuard } from '../auth/guards/human-task-read.guard.js';
 import type { AgentScopeContext } from '../auth/guards/agent-task-scope.guard.js';
 import { AgentScope } from '../auth/agent-scope.decorator.js';
 import { ActorInterceptor } from '../common/interceptors/actor.interceptor.js';
@@ -54,7 +55,7 @@ type AuthRequest = Request & { actor: Actor; agentScope?: AgentScopeContext };
  * accepts either credential, and `AgentTaskScopeGuard` then refuses an API key
  * on every route that is not explicitly marked `@AgentScope(...)`, and on every
  * marked route whose task the key's agent is not assigned to. Routes with no
- * marker — delete, checklists, dependencies — stay exactly as JWT-only as they
+ * marker — delete, checklists — stay exactly as JWT-only as they
  * were; the only visible difference is that a valid key is now told 403
  * instead of 401.
  *
@@ -104,7 +105,7 @@ type AuthRequest = Request & { actor: Actor; agentScope?: AgentScopeContext };
  * see `TaskRedactionService`.
  */
 @Controller('tasks')
-@UseGuards(JwtOrApiKeyGuard, AgentTaskScopeGuard)
+@UseGuards(JwtOrApiKeyGuard, AgentTaskScopeGuard, HumanTaskReadGuard)
 @UseInterceptors(ActorInterceptor)
 export class TasksController {
   constructor(
@@ -130,8 +131,8 @@ export class TasksController {
   // the parameterised route would otherwise swallow this one and treat the
   // empty path segment as a task id.
   @Get()
-  query(@Query() dto: QueryTasksDto) {
-    return this.tasksService.query(dto);
+  query(@Query() dto: QueryTasksDto, @Req() req: AuthRequest) {
+    return this.tasksService.query(dto, req.actor.id);
   }
 
   /**
@@ -144,7 +145,7 @@ export class TasksController {
    * Agent keys only, by the same shape `indexForProject` uses: a JWT passes the
    * scope guard untouched (it is not what that guard bounds) and therefore
    * arrives here with no `agentScope`, which is refused. A human has
-   * `GET /tasks`, which is cross-workspace and unnarrowed; serving both
+   * `GET /tasks`, narrowed to its current workspace memberships; serving both
    * credentials from one handler would mean one route with two answers, and the
    * narrow one would be the one easiest to lose in a later edit.
    */
@@ -195,10 +196,11 @@ export class TasksController {
   @AgentScope('task')
   async findOne(
     @Param('taskId') taskId: string,
+    @Req() req: AuthRequest,
     @Headers('if-none-match') ifNoneMatch: string | undefined,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const task = await this.tasksService.findOne(taskId);
+    const task = await this.tasksService.findOne(taskId, req.actor.type === 'human' ? req.actor.id : undefined);
 
     // MUN-0054: set before the 304 branch, so a conditional request that gets
     // no body is told this too — a poller on the ETag loop is exactly the
@@ -208,8 +210,9 @@ export class TasksController {
       `not-in-body; see /tasks/${taskId}/readiness`,
     );
 
-    // Strong ETag: SHA-256 of sorted field:version pairs
-    const etag = await this.fieldChangesService.computeTaskEtag(taskId);
+    // Bind the validator to contract/project custody in this exact response row.
+    // Pointer CAS does not update the ordinary field-state versions.
+    const etag = await this.fieldChangesService.computeTaskEtag(taskId, task.contractDigest, task.projectId);
     if (etag) {
       const etagValue = `"${etag}"`;
       res.setHeader('ETag', etagValue);
@@ -243,7 +246,7 @@ export class TasksController {
     @Param('projectId') projectId: string,
     @Req() req: AuthRequest,
   ) {
-    return this.tasksService.findByProject(projectId, req.agentScope?.agentId);
+    return this.tasksService.findByProject(projectId, req.agentScope?.agentId, req.actor.type === 'human' ? req.actor.id : undefined);
   }
 
   /**
@@ -291,6 +294,8 @@ export class TasksController {
       projectId,
       thresholdMs,
       req.agentScope?.agentId,
+      undefined,
+      req.actor.type === 'human' ? req.actor.id : undefined,
     );
   }
 
@@ -368,8 +373,8 @@ export class TasksController {
    *  (`'task-evidence'`) and by a JWT, which is what the dashboard uses. */
   @Get(':taskId/evidence')
   @AgentScope('task-evidence')
-  listEvidence(@Param('taskId') taskId: string) {
-    return this.evidenceService.list(taskId);
+  listEvidence(@Param('taskId') taskId: string, @Req() req: AuthRequest) {
+    return this.evidenceService.list(taskId, req.actor.type === 'human' ? req.actor.id : undefined);
   }
 
   @Delete(':taskId')
@@ -381,8 +386,8 @@ export class TasksController {
   // --- Checklist ---
 
   @Get(':taskId/checklist')
-  getChecklist(@Param('taskId') taskId: string) {
-    return this.tasksService.getChecklist(taskId);
+  getChecklist(@Param('taskId') taskId: string, @Req() req: AuthRequest) {
+    return this.tasksService.getChecklist(taskId, req.actor.type === 'human' ? req.actor.id : undefined);
   }
 
   @Post(':taskId/checklist')
@@ -416,11 +421,11 @@ export class TasksController {
   /** Readable by the assigned agent's API key (MUN-0054) or by a JWT.
    *  Scoped `'task'` — the same assignment `findOne` and `updateStatus` already
    *  require; reading which tasks block the one you are assigned to is part of
-   *  reading that task, not a wider grant. Unchanged for JWT callers. */
+   *  reading that task, not a wider grant. Human JWT reads require workspace membership. */
   @Get(':taskId/dependencies')
   @AgentScope('task')
-  getDependencies(@Param('taskId') taskId: string) {
-    return this.tasksService.getDependencies(taskId);
+  getDependencies(@Param('taskId') taskId: string, @Req() req: AuthRequest) {
+    return this.tasksService.getDependencies(taskId, req.actor.type === 'human' ? req.actor.id : undefined);
   }
 
   /** MUN-0054 — both directions plus the counterpart's status. See
@@ -430,8 +435,8 @@ export class TasksController {
   @AgentScope('task')
   getDependencyGraph(@Param('taskId') taskId: string, @Req() req: AuthRequest) {
     // MUN-0055: the agent id narrows the COUNTERPART's free text, not the edge
-    // list. Absent for a JWT, which is not narrowed.
-    return this.tasksService.getDependencyGraph(taskId, req.agentScope?.agentId);
+    // list. Human workspace membership is checked separately.
+    return this.tasksService.getDependencyGraph(taskId, req.agentScope?.agentId, req.actor.type === 'human' ? req.actor.id : undefined);
   }
 
   /** MUN-0054 — the readiness verdict, computed server-side.
@@ -445,10 +450,11 @@ export class TasksController {
   @Get(':taskId/readiness')
   @AgentScope('task')
   getReadiness(@Param('taskId') taskId: string, @Req() req: AuthRequest) {
-    return this.tasksService.getReadiness(taskId, req.agentScope?.agentId);
+    return this.tasksService.getReadiness(taskId, req.agentScope?.agentId, req.actor.type === 'human' ? req.actor.id : undefined);
   }
 
   @Post(':taskId/dependencies')
+  @AgentScope('task-dependency')
   addDependency(
     @Param('taskId') taskId: string,
     @Body() dto: AddDependencyDto,
@@ -457,9 +463,10 @@ export class TasksController {
   }
 
   @Delete(':taskId/dependencies/:depId')
+  @AgentScope('task-dependency')
   @HttpCode(HttpStatus.NO_CONTENT)
-  removeDependency(@Param('depId') depId: string) {
-    return this.tasksService.removeDependency(depId);
+  removeDependency(@Param('taskId') taskId: string, @Param('depId') depId: string) {
+    return this.tasksService.removeDependency(depId, taskId);
   }
 
   // --- Comments (activity log entries) ---
@@ -485,6 +492,7 @@ export class TasksController {
   @AgentScope('task')
   getActivity(
     @Param('taskId') taskId: string,
+    @Req() req: AuthRequest,
     @Query('page') page = '1',
     @Query('limit') limit = '20',
   ) {
@@ -492,6 +500,7 @@ export class TasksController {
       taskId,
       parseInt(page, 10),
       parseInt(limit, 10),
+      req.actor.type === 'human' ? req.actor.id : undefined,
     );
   }
 }

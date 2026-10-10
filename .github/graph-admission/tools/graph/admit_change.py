@@ -6,8 +6,8 @@ Subcommands
                  ChangeAdmissionReceipt/v1 documents that are bound to it (contract
                  contracts/graph-verified-change/admission-gate.v1.json).
   attach         build a WorkItemEvidenceAttachment/v1 for a receipt and append it to the program-side
-                 evidence ledger; with --post, deliver it to Muneral when a work-item evidence route
-                 exists (probe recorded, never a status write).
+                 evidence ledger; with --post, POST it to Muneral's work-item evidence route and record
+                 the outcome as the delivery (never a status write).
   charter-scan   scan the live charter surfaces of a host for TDD / test-first and classify every hit
                  (mandate_default | opt_in_reference | neutral_mention | historical).
   pr-coverage    measure which merges of a pilot repository carry a receipt (AM1 baseline / window).
@@ -21,6 +21,9 @@ import argparse
 import fnmatch
 import hashlib
 import json
+import io
+from contextlib import redirect_stdout
+import full_suite_ci
 import os
 import re
 import shutil
@@ -41,6 +44,7 @@ sys.dont_write_bytecode = True
 import schema_check  # noqa: E402  (sibling tool, reused as a library)
 import impact_pair  # noqa: E402
 import canary_evidence  # noqa: E402  (DEC-AUP-0037: the gate reads the canary document, not the claim)
+import sshsig  # noqa: E402  (A2-314: the decision exemption is verified with the bundle's own verifier)
 
 TOOL = "tools/graph/admit_change.py"
 VERSION = "1.0.0"
@@ -48,7 +52,15 @@ MODEL = "claude-opus-5"
 PROGRAM_ROOT = Path(__file__).resolve().parents[2]
 POLICY_PATH = PROGRAM_ROOT / "contracts/graph-verified-change/admission-gate.v1.json"
 FIXTURE_DIR = PROGRAM_ROOT / "contracts/graph-verified-change/fixtures/admission"
-LEDGER_DIR = PROGRAM_ROOT / "receipts/graph/work-item-evidence"
+# The ledger's location INSIDE the repository that owns it. Kept as a repository-relative constant
+# because the two questions are different: `--ledger-dir` says where this gate RUN reads the ledger
+# (C13), while C06 clause (c) asks which PATH OF THE GATED TREE can be the ledger. Deriving the second
+# from the first was measured wrong on #141's second CI run: the program repository's own workflow runs
+# the gate from a bundle built into the runner's temp directory, so PROGRAM_ROOT — and with it the
+# default --ledger-dir — is outside the checkout, `relative_to` raised, and clause (c) switched itself
+# off in CI while the local run admitted the same bytes.
+LEDGER_REL = "receipts/graph/work-item-evidence"
+LEDGER_DIR = PROGRAM_ROOT / LEDGER_REL
 
 # The BLOCKING checks: the mutation battery disables each one and demands that at least one blocked
 # fixture then gets through — a check that cannot be killed that way is a check that never blocked.
@@ -59,7 +71,10 @@ CHECK_IDS = ["C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09", "C10
              # DEC-AUP-0039 — C19 REFUSES a `verified` claim its own probe evidence contradicts, and it
              # is what LOWERS that entity's verdict to what was observed, so disabling it must (and does)
              # let a blocked fixture through: it belongs in the disable battery.
-             "C19"]
+             "C19",
+             # A2-314 — C21 REFUSES a decision exemption whose signature, binding, expiry or eligibility
+             # the gate does not confirm, so disabling it lets the forged fixture through.
+             "C21"]
 # AUP-GRAPH-006:gate2a. C14/C15 are INFORMATIONAL: they name why the gate did or did not author a
 # receipt on the automated-author path, and they never raise the verdict (their policy verdict is
 # `admit`, rank 0). Disabling one therefore cannot let anything through, so the disabled-check battery
@@ -268,6 +283,20 @@ def build_graph_at(repo: Path, rev: str, out: Path) -> dict | None:
         return None
 
 
+def measured_change_receipt(repo: Path, base: str, head: str, workdir: Path) -> dict | None:
+    """Execute canonical verification; no synthetic verdicts or narrowed impact set."""
+    import verify as verify_mod
+    args = argparse.Namespace(repo=repo, diff=f"{base}..{head}", worktree=False,
+        files=None, graph="auto", max_depth=None, profile=None, baseline=None,
+        tsc=None, prisma=None, workdir=str(workdir), verifier_out=None, out=None,
+        work_item=None, host_label=None)
+    try:
+        receipt, _ = verify_mod.Verify(args, verify_mod.load_matrix()).run()
+    except (Exception, SystemExit):
+        return None
+    return receipt if receipt.get("schema") == "ChangeAdmissionReceipt/v1" else None
+
+
 def synthesize_automated_receipt(repo: Path, base: str, head: str, files: list[dict], author: dict,
                                  policy: dict, *, repo_name: str, verifier_job: str | None,
                                  verifier_conclusion: str | None, verifier_output_ref: str | None,
@@ -279,123 +308,59 @@ def synthesize_automated_receipt(repo: Path, base: str, head: str, files: list[d
     graph = build_graph_at(repo, base, gp)
     if graph is None:
         return None, f"the graph could not be built at {base[:12]} — nothing to compute an impact set from"
-    man = graph["manifest"]
-
-    cs_files, fallback_files = [], []
+    fallback_files = []
     for f in files:
         kind = impact_mod.classify_file(f["path"], None)
-        cs_files.append({"path": f["path"], "status": f["status"], "kind": kind, "node_id": None})
         if kind in impact_mod.FALLBACK_KINDS:
             fallback_files.append(f["path"])
     if not fallback_files:
         return None, ("no changed path classifies as a lockfile or a global config, so the whole-repository "
                       "fallback does not apply and this path has no impact set to stand on")
 
-    total_nodes = len(graph.get("nodes") or [])
-    captured = datetime.now(timezone.utc)
-    ttl = int(author.get("exemption_ttl_days") or 30)
-    expires = (captured + timedelta(days=ttl)).strftime("%Y-%m-%dT%H:%M:%SZ")
-    repo_entity = f"repository:{repo_name}"
-    authorship_entity = f"receipt_authorship:{repo_name}@{head[:12]}"
+    # Author identity cannot replace any source measurement. Use the same paired
+    # producer as agent changes: global fallback adds a full-suite obligation and
+    # preserves ordinary base/head verifier obligations.
+    receipt = measured_change_receipt(repo, base, head, workdir / "canonical-verification")
+    if receipt is None:
+        return None, "canonical source verification did not produce a measured receipt"
 
-    concl = (verifier_conclusion or "").strip().lower()
-    repo_verdict = CONCLUSION_TO_VERDICT.get(concl, "not_measured")
-    exit_code = 0 if repo_verdict == "verified" else (1 if repo_verdict == "failed" else None)
-    verifier = {
-        "id": "repo-own-test-job",
-        "kind": "other",
-        "command": (f"GitHub Actions job {verifier_job!r} on {head[:12]} — the repository's OWN suite"
-                    if verifier_job else "the repository's own test job — NOT NAMED by the caller"),
-        "entities": [repo_entity],
-        "exit_code": exit_code if exit_code is not None else 125,
-        "output_ref": verifier_output_ref or f"github-actions:{repo_name}@{head[:12]}:{verifier_job or 'unnamed'}",
-        "conclusion": concl or None,
-        "note": ("verifier-matrix.v1.json defines `targeted_test` as tests covering the affected node, «never the "
-                 "whole suite» — this is the whole suite, so it is recorded as kind `other`, which is what it is. "
-                 "It is the verifier DEC-AUP-0008 prescribes for a global fallback (the Bazel/Nx rule): the "
-                 "blast radius is the repository, so the repository's own suite is what must be green."),
-    }
-    verdicts = [
-        {"entity": repo_entity, "verdict": repo_verdict,
-         **({"verifier_ids": ["repo-own-test-job"]} if repo_verdict == "verified" else {}),
-         "reason": (f"the repository's own test job {verifier_job!r} concluded {concl!r}"
-                    if concl else
-                    "the caller named no required verifier job, or its conclusion was not reported to the gate — "
-                    "an unreported job is not a green one (DEC-AUP-0008 I4)")},
-        {"entity": authorship_entity, "verdict": "not_measured",
-         "reason": ("no agent-authored ChangeAdmissionReceipt/v1 exists for this change: it was opened by a "
-                    f"registered automated author ({author.get('login')}), which cannot run the graph tooling. "
-                    "This entity is the MISSING AUTHOR, not a missing measurement of the code.")},
-    ]
-    exemptions = [{
-        "entity": authorship_entity,
+    captured = datetime.now(timezone.utc)
+    authorship_entity = f"receipt_authorship:{repo_name}@{head[:12]}"
+    receipt["authored_by"] = {"path": "automated_author", **event_evidence}
+    receipt["verdicts"].append({"entity": authorship_entity, "verdict": "not_measured",
+        "reason": "registered automated author; canonical source verification is measured separately"})
+    receipt["exemptions"].append({"entity": authorship_entity,
         "code": author.get("exemption_code") or "AUTOMATED_DEPENDENCY_UPDATE",
-        "owner": (policy.get("automated_authors") or {}).get("authors", [{}])[0].get("exemption_owner")
-                 or author.get("exemption_owner") or "",
-        "expires_at_utc": expires,
-        "reason": ((policy.get("automated_authors") or {}).get("what_the_exemption_is_about") or "")
-                  or "the receipt author is typed; verification is not exempted",
-        "scope": ("receipt AUTHORSHIP only. It does not carry, and must never be extended to carry, "
-                  f"{repo_entity} — if the repository's own test job is not green that entity is failed or "
-                  "not_measured on its own and the change is refused or paused."),
-        "evidence": event_evidence,
-    }]
-    adm = "admitted_with_exemptions" if repo_verdict == "verified" else (
-        "refused" if repo_verdict == "failed" else "paused_safe")
-    receipt = {
-        "schema": "ChangeAdmissionReceipt/v1",
-        "receipt_id": f"car-automated-{head[:12]}-{captured.strftime('%Y%m%dT%H%M%SZ')}",
-        "captured_at_utc": captured.strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "producer": {"tool": TOOL, "version": VERSION, "path": "automated_author"},
-        "model": MODEL,
-        "provisional_until_fable_review": True,
-        "decision_ref": "DEC-AUP-0008",
-        "portion_id": "AUP-GRAPH-006:gate2a",
-        "work_item": None,
-        "authored_by": {
-            "path": "automated_author",
-            "rule": (policy.get("automated_authors") or {}).get("identity_rule", ""),
-            **event_evidence,
-        },
-        "repo": {"name": repo_name, "path": str(repo)},
-        "graph": {"source_commit": base, "graph_digest": man["graph_digest"],
-                  "builder_version": man.get("builder_version") or man.get("version") or "unknown",
-                  "built_at_utc": man.get("built_at_utc") or captured.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                  "nodes": total_nodes, "edges": len(graph.get("edges") or [])},
-        "tree": {"commit": head, "dirty": False},
-        "staleness": {"method": "the graph is built here, from git objects, at change_set.base",
-                      "verdict": "fresh", "mismatched_nodes": []},
-        "change_set": {"mode": "diff", "base": base, "head": head, "files": cs_files},
-        "impact_set": {
-            "method": ("global fallback: a lockfile / global-config change makes every node of the graph affected "
-                       "(DEC-AUP-0008, the Bazel/Nx rule). The entities are NOT enumerated here: the verifier for "
-                       "this impact is the repository's own test job, which makes one statement about the whole "
-                       "repository, not one statement per node — enumerating would dress a single measurement up "
-                       f"as {total_nodes} of them."),
-            "scope": "whole_repository",
-            "enumerated": False,
-            "deterministic_core": [],
-            "inferred_tail": [],
-            "global_fallback": {"triggered": True, "files": fallback_files, "scope": "whole_repository",
-                                "total_nodes": total_nodes,
-                                "reason": (f"{', '.join(fallback_files)} changed ⇒ every node affected "
-                                           f"(lockfile / global config: safe fallback, Bazel/Nx practice); "
-                                           f"{total_nodes} nodes in the graph at {base[:12]}")},
-            "total": total_nodes,
-        },
-        "verifiers": [verifier],
-        "verdicts": verdicts,
-        "exemptions": exemptions,
-        "admission": {
-            "verdict": adm,
-            "rule": ("admitted_with_exemptions requires every non-verified entity to carry a valid exemption "
-                     "(owner + expiry). Here exactly one entity is exempted — the missing agent-authored receipt. "
-                     "The repository entity is never exempted: it is verified by the repository's own test job, "
-                     "or it is failed / not_measured and this receipt refuses or pauses the change itself."),
-        },
-    }
-    return receipt, (f"authored for {author.get('login')}: {len(cs_files)} allowlisted path(s), "
-                     f"global fallback over {total_nodes} nodes, repository entity {repo_verdict}")
+        "owner": author.get("exemption_owner") or "",
+        "expires_at_utc": (captured + timedelta(days=int(author.get("exemption_ttl_days") or 30))).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "reason": "typed receipt authorship only; no source or verifier obligation is exempted",
+        "scope": "receipt AUTHORSHIP only", "evidence": event_evidence})
+
+    # The required CI job remains an additional gate. A successful arbitrary job
+    # does not become the declared full suite, nor does it verify source entities.
+    conclusion = (verifier_conclusion or "").strip().lower()
+    job_verdict = CONCLUSION_TO_VERDICT.get(conclusion, "not_measured")
+    units = sorted(impact_pair.fallback_units(receipt))
+    if not verifier_job:
+        job_verdict = "not_measured"
+    receipt["verifiers"].append({"id": "repo-own-test-job", "kind": "other",
+        "command": f"GitHub Actions job {verifier_job!r} on {head[:12]}",
+        "entities": units, "exit_code": 0 if job_verdict == "verified" else 1 if job_verdict == "failed" else 125,
+        "output_ref": verifier_output_ref or f"github-actions:{repo_name}@{head[:12]}:{verifier_job or 'unnamed'}",
+        "entity_verdicts": {e: job_verdict for e in units}})
+    for row in receipt["verdicts"]:
+        if row["entity"] in units:
+            row.setdefault("verifier_ids", []).append("repo-own-test-job")
+    if job_verdict != "verified":
+        for row in receipt["verdicts"]:
+            if row["entity"] in units and row["verdict"] != "failed":
+                row["verdict"] = job_verdict
+                row["reason"] = "required repository CI job is " + job_verdict
+    ordinary = [v["verdict"] for v in receipt["verdicts"] if v["entity"] != authorship_entity]
+    receipt["admission"] = {"verdict": "refused" if "failed" in ordinary else
+        "paused_safe" if not ordinary or "not_measured" in ordinary else "admitted_with_exemptions",
+        "rule": "canonical source obligations and required CI job must be measured; authorship alone is typed"}
+    return receipt, f"authored for {author.get('login')}: canonical source verification + required CI job"
 
 
 # ------------------------------------------------------------------ AUP-GRAPH-006:gate4b
@@ -417,6 +382,10 @@ DEFAULT_BUNDLE_DIR = ".github/graph-admission"
 BUNDLE_MANIFEST_NAME = "BUNDLE.json"
 BUNDLE_SIG_NAME = "BUNDLE.json.sig"
 BUNDLE_PUBKEY_NAME = "SIGNING-KEY.pub"
+# A2-455 — must equal ci_gate.EXTRA_SIGNATURE_FMT / EXTRA_PUBKEY_FMT / MAX_BUNDLE_SIGNERS.
+BUNDLE_EXTRA_SIG_FMT = "BUNDLE.json.{n}.sig"
+BUNDLE_EXTRA_PUBKEY_FMT = "SIGNING-KEY.{n}.pub"
+BUNDLE_MAX_SIGNERS = 4
 BUNDLE_SIGNING_NAMESPACE = "graph-admission-bundle"
 STRUCTURAL_EXEMPTION_TTL_HOURS = 24
 STRUCTURAL_EXEMPTION_OWNER = "AUP-E29/AUP-GRAPH-006 — issued by tools/graph/admit_change.py exempt, re-measured by the gate (C16)"
@@ -457,6 +426,10 @@ def bundle_paths_at(repo: Path, ref: str, bundle_rel: str) -> tuple[set[str], di
     except json.JSONDecodeError:
         return set(), None
     paths = {f"{rel}/{BUNDLE_MANIFEST_NAME}", f"{rel}/{BUNDLE_SIG_NAME}", f"{rel}/{BUNDLE_PUBKEY_NAME}"}
+    # A2-455 — the extra signature pairs of a dual-signed bundle (key rotation) are bundle-managed too.
+    signers = man.get("signing_keys") if isinstance(man, dict) else None
+    for n in range(2, (len(signers) if isinstance(signers, list) else 1) + 1):
+        paths |= {f"{rel}/{BUNDLE_EXTRA_SIG_FMT.format(n=n)}", f"{rel}/{BUNDLE_EXTRA_PUBKEY_FMT.format(n=n)}"}
     for f in man.get("files") or []:
         p = f.get("path") if isinstance(f, dict) else None
         if isinstance(p, str) and p:
@@ -550,33 +523,57 @@ def corrupt_one_byte(data: bytes) -> tuple[bytes, int, str]:
     return data + b"\n", len(data), "appended a newline (no alphanumeric byte to flip)"
 
 
-PROGRAM_REF_PIN_RE = re.compile(r"^\s*program_ref:\s*['\"]?([0-9a-f]{40})['\"]?\s*(?:#.*)?$")
+PROGRAM_REF_PIN_RE = re.compile(
+    r"^[ \t]*program_ref:[ \t]*(?P<quote>['\"]?)(?P<ref>[0-9a-f]{40})(?P=quote)[ \t]*(?:#.*)?$")
+CANONICAL_WORKFLOW_PIN_RE = re.compile(
+    r"^[ \t]*uses:[ \t]*(?P<quote>['\"]?)"
+    r"Arcanada-one/arcanada-universal-program/\.github/workflows/graph-admission\.yml@"
+    r"(?P<ref>[0-9a-f]{40})(?P=quote)[ \t]*(?:#.*)?$")
 
 
 def pin_only_edit(repo: Path, base: str, head: str, path: str, expect_ref: str | None) -> tuple[bool, str]:
-    """→ (is a program_ref pin update and nothing else, why). Blobs are read from git, never the tree."""
-    import difflib
+    """→ (only paired canonical pin replacements, why). Read exact Git blobs, never the tree.
+
+    Both the caller input and its canonical reusable-workflow ref must follow the authenticated
+    head bundle. Compare lines in place and preserve every byte outside the replaced SHA: a new,
+    removed, moved or differently indented pin must not conceal a job/context/trust change.
+    """
     old = git_text_or_none(repo, "show", f"{base}:{path}")
     new = git_text_or_none(repo, "show", f"{head}:{path}")
     if old is None or new is None:
         side = "base" if old is None else "head"
-        return False, (f"the file is not UTF-8 text at {side}, so it cannot be a `program_ref:` pin line "
+        return False, (f"the file is not UTF-8 text at {side}, so it cannot be a canonical pin line "
                        f"— a binary path outside the bundle makes this an ordinary change, which is a "
                        f"verdict, not a traceback (A2-243 defect 3)")
     if not old or not new:
         return False, "the file is added or removed by this change, which is not an in-place pin update"
-    diff = [l for l in difflib.unified_diff(old.splitlines(), new.splitlines(), n=0, lineterm="")
-            if l[:1] in "+-" and not l.startswith(("---", "+++"))]
-    if not diff:
+    if old == new:
         return True, "no textual change"
-    for l in diff:
-        m = PROGRAM_REF_PIN_RE.match(l[1:])
-        if not m:
-            return False, f"a changed line is not a program_ref pin: {l[:90]!r}"
-        if l[0] == "+" and expect_ref and m.group(1) != expect_ref:
-            return False, (f"the new pin {m.group(1)[:12]} is not the head bundle's program_ref "
-                           f"{str(expect_ref)[:12]} — a caller that pins one SHA and vendors another")
-    return True, (f"{len(diff)} changed line(s), every one a program_ref pin, every new value equal to the "
+    if not isinstance(expect_ref, str) or not re.fullmatch(r"[0-9a-f]{40}", expect_ref):
+        return False, "no full40 program_ref from the head bundle — canonical pin replacements are unbound"
+    before, after = old.splitlines(keepends=True), new.splitlines(keepends=True)
+    if len(before) != len(after):
+        return False, "a pin or context line was added or removed, not replaced in place"
+    replacements = 0
+    for previous, current in zip(before, after):
+        if previous == current:
+            continue
+        for pattern in (PROGRAM_REF_PIN_RE, CANONICAL_WORKFLOW_PIN_RE):
+            was = pattern.fullmatch(previous.rstrip("\r\n"))
+            now = pattern.fullmatch(current.rstrip("\r\n"))
+            if was and now:
+                break
+        else:
+            return False, f"a changed line is not a paired canonical pin: {current[:90]!r}"
+        old_context = previous[:was.start("ref")] + previous[was.end("ref"):]
+        new_context = current[:now.start("ref")] + current[now.end("ref"):]
+        if old_context != new_context:
+            return False, "a pin's indentation, quoting, comment or line context changed"
+        if now.group("ref") != expect_ref:
+            return False, (f"the new pin {now.group('ref')[:12]} is not the head bundle's program_ref "
+                           f"{expect_ref[:12]} — a caller that pins one SHA and vendors another")
+        replacements += 1
+    return True, (f"{replacements} paired canonical pin replacement(s), every new value equal to the "
                   f"head bundle's program_ref {str(expect_ref)[:12]}")
 
 
@@ -758,6 +755,96 @@ def record_path_refusal(repo: Path, base: str, head: str, path: str, entries: di
         return (f"{path} is itself named by a declared setup/verify argv — an artefact that IS the verifier "
                 f"would vouch for its own replacement")
     return None
+
+
+LEDGER_SCHEMA = "WorkItemEvidenceLedger/v1"
+
+
+def ledger_record_path_refusal(repo: Path, base: str, head: str, path: str, bound: list[dict],
+                               ledger_rel: str | None) -> str | None:
+    """→ the reason `path` may NOT be the work-item evidence ledger of a trailing commit, or None.
+
+    C06 clause (c), A2-309. C13 binds the ledger's `evidence_ref.digest` to the receipt's BYTES, so
+    `attach` can only run once those bytes are final — after which the ledger it writes has nowhere
+    legal to go: a trailing commit was not a record path, and the content range forces a re-issue that
+    changes the very bytes the ledger names. The receipt's bytes depended on the ledger and the
+    ledger's digest depended on the receipt's bytes (trailing-record-commits.v1.md, clause (c)).
+
+    What makes this admissible rather than a hole: everything the record commit may add to the ledger
+    is a digest THIS GATE RUN computed itself from a receipt it bound. Anything else in the file — a
+    new key, an edited older attachment, a dropped one, a digest of bytes the gate never saw — is
+    content, and stays refused. Read from git at base and head; the receipt contributes only the
+    digests the gate already holds."""
+    if not ledger_rel:
+        return (f"{path}: the work-item evidence ledger is not inside this repository, so no path of "
+                f"this change can be it")
+    prefix = ledger_rel.rstrip("/") + "/"
+    if not path.startswith(prefix) or not path.endswith(".json") or "/" in path[len(prefix):]:
+        return f"{path} is not a {prefix}<work-item>.json path"
+    wanted = path[len(prefix):-len(".json")]
+    if not any(work_item_id(r["_doc"].get("work_item")) == wanted for r in bound):
+        return (f"{path} is the ledger of work item {wanted!r}, which is not the work item of any "
+                f"receipt this gate bound")
+    mode_h = blob_mode(repo, head, path)
+    if mode_h is None:
+        return f"{path} does not exist at head {head[:12]}"
+    if mode_h not in REGULAR_MODES:
+        return (f"{path} is mode {mode_h} at head {head[:12]}, not a regular file — the bytes the gate "
+                f"would read as this repository's own record are somewhere else")
+    doc_h = _ledger_doc(repo, head, path)
+    if doc_h is None:
+        return f"{path} does not parse as a {LEDGER_SCHEMA} object at head {head[:12]}"
+    if work_item_id(doc_h.get("work_item")) != wanted:
+        return (f"{path} is named for work item {wanted!r} but carries "
+                f"{work_item_id(doc_h.get('work_item'))!r}")
+    doc_b = _ledger_doc(repo, base, path)
+    if doc_b is None and blob_mode(repo, base, path) is not None:
+        return f"{path} does not parse as a {LEDGER_SCHEMA} object at base {base[:12]}"
+    doc_b = doc_b if doc_b is not None else {"schema": LEDGER_SCHEMA, "work_item": doc_h.get("work_item"),
+                                             "system": doc_h.get("system"), "attachments": []}
+    skel_h = {k: v for k, v in doc_h.items() if k not in ("attachments", "updated_at_utc")}
+    skel_b = {k: v for k, v in doc_b.items() if k not in ("attachments", "updated_at_utc")}
+    if canonical(skel_h) != canonical(skel_b):
+        changed = sorted(set(skel_h) ^ set(skel_b)) or sorted(k for k in skel_h if skel_h[k] != skel_b.get(k))
+        return (f"{path} changes {', '.join(changed) or 'a key'} outside `attachments` — a record commit "
+                f"may add the evidence of this change, not rewrite the ledger around it")
+    mine = {r["digest"] for r in bound if r.get("digest")}
+    at_base = {}
+    for a in doc_b.get("attachments", []) or []:
+        at_base.setdefault(_att_digest(a), canonical(a))
+    seen = set()
+    for a in doc_h.get("attachments", []) or []:
+        d = _att_digest(a)
+        seen.add(d)
+        if d in mine:
+            continue                       # the gate computed this digest itself from a receipt it bound
+        if d in at_base and canonical(a) == at_base[d]:
+            continue                       # untouched since base
+        if d in at_base:
+            return (f"{path} rewrites the attachment for {str(d)[:19]}…, which this change did not "
+                    f"produce")
+        return (f"{path} adds an attachment whose evidence_ref.digest {str(d)[:19]}… is not the bytes of "
+                f"any receipt this gate bound — an unverified fact riding in on a record path")
+    lost = sorted(d for d in at_base if d not in seen)
+    if lost:
+        return (f"{path} drops {len(lost)} attachment(s) present at base ({', '.join(str(x)[:19] for x in lost[:3])}…) "
+                f"— a record commit may add this change's evidence, never erase an earlier card's")
+    return None
+
+
+def _ledger_doc(repo: Path, ref: str, path: str) -> dict | None:
+    r = subprocess.run(["git", "-C", str(repo), "show", f"{ref}:{path}"], capture_output=True)
+    if r.returncode != 0:
+        return None
+    try:
+        doc = json.loads(r.stdout)
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return None
+    return doc if isinstance(doc, dict) and doc.get("schema") == LEDGER_SCHEMA else None
+
+
+def _att_digest(a) -> str | None:
+    return (a.get("evidence_ref") or {}).get("digest") if isinstance(a, dict) else None
 
 
 def admissible_ranges_invariant(admissible: set, head: str, record_head: str | None) -> str | None:
@@ -1649,27 +1736,177 @@ print(json.dumps({"ok": bool(ok), "reason": reason, "detail": det}))
 """
 
 
-def _bundle_selftest(bundle_root: Path) -> tuple[int | None, int | None, str]:
-    """→ (exit code, arm count, tail). `ci_gate.py --selftest` is the battery that runs from inside a
-    vendored bundle; `admit_change.py --selftest` does NOT (its fixture set is not bundled — measured,
-    `fixture-drift`), which is recorded as non-coverage rather than silently skipped."""
+def _bundle_pairs(bundle: Path) -> list[tuple[Path, Path]]:
+    pairs = [(bundle / BUNDLE_SIG_NAME, bundle / BUNDLE_PUBKEY_NAME)]
+    for n in range(2, BUNDLE_MAX_SIGNERS + 1):
+        sp, kp = bundle / BUNDLE_EXTRA_SIG_FMT.format(n=n), bundle / BUNDLE_EXTRA_PUBKEY_FMT.format(n=n)
+        if sp.exists() or kp.exists():
+            pairs.append((sp, kp))
+    return pairs
+
+
+def key_continuity(base_bundle: Path, head_bundle: Path | None, wd: Path) -> tuple[bool | None, str, dict]:
+    """B2's measurement → (verdict, reason, record). A2-455 (DEC-AUP-0036 C4): the head manifest must
+    verify, with the BASE tree's sshsig.py, against AT LEAST ONE public key the BASE bundle carries
+    (primary or an extra pair of a dual-signed bundle). That is what lets a rotation proceed without a
+    moment of no trust: base {K1} → head {K1,K2} passes on K1, base {K1,K2} → head {K2} passes on K2, and
+    base {K1} → head {K2} (skipping the dual-signed step) is still refused, as is any key base never held."""
+    base_pubs = [kp for _, kp in _bundle_pairs(base_bundle) if kp.exists()]
+    man_p = head_bundle / BUNDLE_MANIFEST_NAME if head_bundle else None
+    head_sigs = [sp for sp, _ in _bundle_pairs(head_bundle) if sp.exists()] if head_bundle else []
+    missing = [n for n, e in (("a public key in the base bundle", bool(base_pubs)),
+                              (f"head {BUNDLE_MANIFEST_NAME}", bool(man_p) and man_p.exists()),
+                              ("a signature in the head bundle", bool(head_sigs))) if not e]
+    if missing:
+        return None, "missing " + ", ".join(missing), {}
+    drv = wd / "verify_with_base_sshsig.py"
+    wd.mkdir(parents=True, exist_ok=True)
+    drv.write_text(_SIG_DRIVER)
+    tried = []
+    for sp in head_sigs:
+        for kp in base_pubs:
+            r = subprocess.run([sys.executable, str(drv), str(base_bundle / "tools/graph"), str(man_p),
+                                str(sp), str(kp), BUNDLE_SIGNING_NAMESPACE],
+                               capture_output=True, text=True,
+                               env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
+            try:
+                res = json.loads(r.stdout)
+            except json.JSONDecodeError:
+                res = {"ok": False, "reason": f"the base tree's sshsig.py could not be run: "
+                                              f"{(r.stderr or r.stdout).strip()[:200]}", "detail": {}}
+            fp = (res.get("detail") or {}).get("public_key_fingerprint")
+            tried.append({"head_signature": sp.name, "base_key": kp.name, "base_key_fingerprint": fp,
+                          "ok": bool(res.get("ok")), "reason": res.get("reason")})
+            if res.get("ok"):
+                return True, f"{sp.name} verifies against base {kp.name} ({fp})", {
+                    "verified": True, "reason": res.get("reason"), "key_from": kp.name,
+                    "key_fingerprint": fp, "tried": tried}
+    return False, "; ".join(f"{t['head_signature']} vs base {t['base_key']}: {t['reason']}" for t in tried), {
+        "verified": False, "reason": tried[-1]["reason"] if tried else None, "tried": tried,
+        "key_fingerprint": None}
+
+
+def _selftest_output(raw: bytes) -> dict:
+    """Keep the complete captured stream, including undecodable bytes, in structural evidence."""
+    out = {"text": raw.decode("utf-8", errors="replace"), "bytes": len(raw),
+           "sha256": sha256_bytes(raw)}
+    try:
+        raw.decode("utf-8")
+    except UnicodeDecodeError:
+        import base64
+        out["raw_base64"] = base64.b64encode(raw).decode("ascii")
+    return out
+
+
+def _bundle_selftest(bundle_root: Path, *, evidence: dict | None = None) -> tuple[int | None, int | None, str]:
+    """→ (exit code, measured arm count, tail); retain full stdout/stderr in `evidence`.
+
+    A FAIL summary measures a count, not a success. Missing, ambiguous, malformed or unfinished
+    summaries do not measure a count. `admit_change.py --selftest` is not runnable in a bundle
+    (its fixture set is not bundled); this remains explicit non-coverage.
+    """
+    report = evidence if evidence is not None else {}
+    report.update({"exit_code": None, "arms": None, "complete": False, "summary": None})
     script = bundle_root / "tools/graph/ci_gate.py"
     if not script.exists():
-        return None, None, "no tools/graph/ci_gate.py in this bundle"
-    # HOST SAFETY (retrofit4's incident, recorded in REPORT-GRAPH-RETROFIT4 §"Honest accounting"): this is
-    # the call that recursed without bound before the AUP_GATE4B_NESTED marker existed, and the harness
-    # killing the parent did NOT stop the children — they were reparented to init and kept spawning. The
-    # marker is the primary guard; this timeout is the second one, so an unguarded future battery cannot
-    # spawn for longer than a bounded time under one parent.
+        report["reason"] = "no tools/graph/ci_gate.py in this bundle"
+        return None, None, report["reason"]
+    # Preserve the existing recursion guard and time bound. No new signer, environment authority,
+    # retry, or alternate battery is introduced by retaining the output.
     try:
-        r = subprocess.run([sys.executable, str(script), "--selftest"], capture_output=True, text=True,
+        r = subprocess.run([sys.executable, str(script), "--selftest"], capture_output=True,
                            timeout=1800,
                            env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1", "AUP_GATE4B_NESTED": "1"})
-    except subprocess.TimeoutExpired:
-        return None, None, "the bundle's ci_gate.py --selftest did not finish within 1800 s"
-    m = re.search(r"TOTAL PASS: (\d+)/(\d+)", r.stdout)
-    arms = int(m.group(2)) if m else None
-    return r.returncode, arms, ((r.stdout or "") + (r.stderr or ""))[-400:]
+        stdout, stderr = r.stdout or b"", r.stderr or b""
+        report.update({"exit_code": r.returncode, "complete": True})
+    except subprocess.TimeoutExpired as exc:
+        stdout, stderr = exc.stdout or b"", exc.stderr or b""
+        report["reason"] = "the bundle's ci_gate.py --selftest did not finish within 1800 s"
+    except OSError as exc:
+        report["reason"] = f"the bundle's ci_gate.py --selftest could not start: {exc}"
+        stdout, stderr = b"", b""
+    report["stdout"] = _selftest_output(stdout)
+    report["stderr"] = _selftest_output(stderr)
+    text = report["stdout"]["text"]
+    # Only the single final aggregate is comparable. Per-battery totals, a duplicate aggregate,
+    # zero measured arms, truncated output and contradictory totals cannot prove monotonicity.
+    summaries = re.findall(r"^TOTAL (PASS|FAIL): (\d+)/(\d+) checks across eight batteries "
+                           r"\((\d+) not_measured\)$", text, re.M)
+    if report["complete"] and len(summaries) == 1:
+        status, passed, total, nm = summaries[0]
+        passed, total, nm = int(passed), int(total), int(nm)
+        if (total > 0 and 0 <= passed <= total
+                and ((status == "PASS" and passed == total) or (status == "FAIL" and passed < total))
+                and re.fullmatch(r"TOTAL (PASS|FAIL): (\d+)/(\d+) checks across eight batteries "
+                                 r"\((\d+) not_measured\)", text.rstrip().splitlines()[-1])):
+            report["summary"] = {"status": status, "passed": passed, "measured": total,
+                                 "not_measured": nm}
+            report["arms"] = total
+    # Legacy signed batteries may supply a genuine aggregate without names.
+    # Keep that absence explicit. If the current root supplies structured
+    # checks, contradictory/malformed/duplicate records cannot measure a count.
+    report["arm_identities"] = None
+    records = [line.removeprefix("SELFTEST_ARMS_JSON: ") for line in text.splitlines()
+               if line.startswith("SELFTEST_ARMS_JSON: ")]
+    if records:
+        try:
+            if len(records) != 1 or report["summary"] is None:
+                raise ValueError("one complete root aggregate and one arm record required")
+            doc = json.loads(records[0])
+            rows = doc["checks"]
+            if doc.get("schema") != "GraphGateSelftestArms/v1" or not isinstance(rows, list):
+                raise ValueError("unknown root arm record schema")
+            if any(not isinstance(row, dict) or not isinstance(row.get("name"), str)
+                   or not row["name"].strip() or (row.get("ok") is not None
+                                                and type(row["ok"]) is not bool)
+                   or "ok" not in row for row in rows):
+                raise ValueError("each actual check needs a name and boolean/None outcome")
+            summary = report["summary"]
+            if (sum(row["ok"] is not None for row in rows) != summary["measured"]
+                    or sum(row["ok"] is True for row in rows) != summary["passed"]
+                    or sum(row["ok"] is None for row in rows) != summary["not_measured"]):
+                raise ValueError("root arm record contradicts actual final aggregate")
+            report["arm_identities"] = rows
+        except (ValueError, TypeError, KeyError) as exc:
+            report.update(summary=None, arms=None,
+                          reason="unmeasured root arm identities/count: " + str(exc))
+    tail = (text + report["stderr"]["text"])[-400:]
+    return report["exit_code"], report["arms"], report.get("reason", tail)
+
+
+def _self_update_selftest(ev: dict, report: dict, tail: str) -> bool:
+    rc, summary = report["exit_code"], report["summary"]
+    ok = (False if rc is not None and rc != 0 else
+          None if rc is None or summary is None else summary["status"] == "PASS")
+    return _chk(ev, "B3", "SELF_UPDATE_SELFTEST", ok,
+                (f"the head bundle's ci_gate.py --selftest passes, {report['arms']} measured arm(s), "
+                 f"{summary['not_measured']} not_measured. Self-consistency anchored only by B2; "
+                 "admit_change.py --selftest remains unbundled fixture non-coverage"
+                 if ok else
+                 f"the head bundle's ci_gate.py --selftest exits {rc}; "
+                 f"summary={summary}; complete stdout/stderr retained in selftest.head: {tail.strip()[-200:]}"))
+
+
+def _self_update_monotonic(ev: dict, ids_b: list[str] | None, ids_h: list[str] | None,
+                           arms_b: int | None, arms_h: int | None) -> bool:
+    if ids_b is None or ids_h is None:
+        return _chk(ev, "B4", "SELF_UPDATE_MONOTONIC", None,
+                    "one of the two bundles carries no readable admission-gate.v1.json — "
+                    "monotonicity cannot be measured")
+    dropped = sorted(set(ids_b) - set(ids_h))
+    shrank = arms_b is not None and arms_h is not None and arms_h < arms_b
+    if dropped or shrank:
+        return _chk(ev, "B4", "SELF_UPDATE_MONOTONIC", False,
+                    "; ".join(([f"the update DROPS check(s) {', '.join(dropped)}"] if dropped else []) +
+                              ([f"the battery SHRINKS from {arms_b} to {arms_h} arm(s)"] if shrank else [])))
+    if arms_b is None or arms_h is None:
+        return _chk(ev, "B4", "SELF_UPDATE_MONOTONIC", None,
+                    f"no policy check id is dropped ({len(ids_b)} → {len(ids_h)}), but measured "
+                    f"battery counts are unavailable ({arms_b} → {arms_h}); monotonicity is not measured")
+    return _chk(ev, "B4", "SELF_UPDATE_MONOTONIC", True,
+                f"no policy check id is dropped ({len(ids_b)} → {len(ids_h)}) and the measured battery "
+                f"does not shrink ({arms_b} → {arms_h} arm(s)); a FAIL summary counts arms but never "
+                "passes B3. This is a numeric proxy, never a comparison of semantics")
 
 
 def _bundle_policy_check_ids(bundle_root: Path) -> list[str] | None:
@@ -2085,67 +2322,37 @@ def evaluate_self_update(repo: Path, base: str, head: str, files: list[dict], wo
                   f"has no signature code, so the only non-circular anchor cannot be evaluated. not_measured is "
                   f"not a pass: no exemption, the change pauses")
     else:
-        base_pub = base_bundle / BUNDLE_PUBKEY_NAME
-        man_p, sig_p = head_bundle and (head_bundle / BUNDLE_MANIFEST_NAME), head_bundle and (head_bundle / BUNDLE_SIG_NAME)
-        if not base_pub.exists() or not head_bundle or not man_p.exists() or not sig_p.exists():
-            b2 = _chk(ev, "B2", "SELF_UPDATE_KEY_CONTINUITY", None,
-                      f"missing " + ", ".join(n for n, e in ((f"{base}:{rel}/{BUNDLE_PUBKEY_NAME}", base_pub.exists()),
-                                                             (f"{head}:{rel}/{BUNDLE_MANIFEST_NAME}", bool(head_bundle) and man_p.exists()),
-                                                             (f"{head}:{rel}/{BUNDLE_SIG_NAME}", bool(head_bundle) and sig_p.exists())) if not e))
-        else:
-            drv = wd / "verify_with_base_sshsig.py"
-            drv.write_text(_SIG_DRIVER)
-            r = subprocess.run([sys.executable, str(drv), str(base_bundle / "tools/graph"), str(man_p),
-                                str(sig_p), str(base_pub), BUNDLE_SIGNING_NAMESPACE],
-                               capture_output=True, text=True,
-                               env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
-            try:
-                res = json.loads(r.stdout)
-            except json.JSONDecodeError:
-                res = {"ok": False, "reason": f"the base tree's sshsig.py could not be run: "
-                                              f"{(r.stderr or r.stdout).strip()[:200]}", "detail": {}}
-            ev["signature"] = {"verified": bool(res.get("ok")), "reason": res.get("reason"),
-                               "verifier_from": f"{base[:12]}:{rel}/tools/graph/sshsig.py",
-                               "key_from": f"{base[:12]}:{rel}/{BUNDLE_PUBKEY_NAME}",
-                               "key_fingerprint": (res.get("detail") or {}).get("public_key_fingerprint")}
-            b2 = _chk(ev, "B2", "SELF_UPDATE_KEY_CONTINUITY", bool(res.get("ok")),
-                      (f"the head bundle's {BUNDLE_MANIFEST_NAME} verifies with the sshsig.py of base {base[:12]} "
-                       f"against the {BUNDLE_PUBKEY_NAME} of base {base[:12]} "
-                       f"({(res.get('detail') or {}).get('public_key_fingerprint')}) — the key the repository "
-                       f"already trusted, in a tree this pull request did not write"
-                       if res.get("ok") else
-                       f"the head bundle does NOT verify against the key of base {base[:12]}: {res.get('reason')}"))
+        ok2, why2, rec2 = key_continuity(base_bundle, head_bundle, wd)
+        if rec2:
+            ev["signature"] = {**rec2, "verifier_from": f"{base[:12]}:{rel}/tools/graph/sshsig.py",
+                               "key_from": f"{base[:12]}:{rel}/{rec2.get('key_from') or BUNDLE_PUBKEY_NAME}"}
+        b2 = _chk(ev, "B2", "SELF_UPDATE_KEY_CONTINUITY", ok2,
+                  (f"the head bundle's {BUNDLE_MANIFEST_NAME} verifies with the sshsig.py of base {base[:12]}: "
+                   f"{why2} — a key the repository already trusted, in a tree this pull request did not write"
+                   if ok2 else
+                   f"missing at {base[:12]}/{head[:12]}: {why2}" if ok2 is None else
+                   f"the head bundle does NOT verify against any key of base {base[:12]}: {why2}"))
 
     if not head_bundle:
         b3 = _chk(ev, "B3", "SELF_UPDATE_SELFTEST", None, f"no bundle directory at head {head[:12]}")
         b4 = _chk(ev, "B4", "SELF_UPDATE_MONOTONIC", None, "no head bundle to compare against")
     else:
-        rc_h, arms_h, tail_h = _bundle_selftest(head_bundle)
-        ev["selftest"] = {"head": {"exit_code": rc_h, "arms": arms_h}}
-        b3 = _chk(ev, "B3", "SELF_UPDATE_SELFTEST", rc_h == 0,
-                  (f"the head bundle's ci_gate.py --selftest passes, {arms_h} arm(s). Self-consistency, made "
-                   f"meaningful only by B2 — admit_change.py --selftest is NOT runnable from a vendored bundle "
-                   f"(its fixture set is not bundled: `fixture-drift`), which is non-coverage, not a pass"
-                   if rc_h == 0 else
-                   f"the head bundle's ci_gate.py --selftest exits {rc_h}: {tail_h.strip()[-200:]}"))
+        head_test: dict = {}
+        rc_h, arms_h, tail_h = _bundle_selftest(head_bundle, evidence=head_test)
+        ev["selftest"] = {"head": head_test}
+        b3 = _self_update_selftest(ev, head_test, tail_h)
         ids_h = _bundle_policy_check_ids(head_bundle)
         ids_b = _bundle_policy_check_ids(base_bundle) if base_bundle else None
-        rc_b, arms_b, _ = _bundle_selftest(base_bundle) if base_bundle else (None, None, "")
-        ev["selftest"]["base"] = {"exit_code": rc_b, "arms": arms_b}
-        ev["policy_check_ids"] = {"base": ids_b, "head": ids_h}
-        if ids_b is None or ids_h is None:
-            b4 = _chk(ev, "B4", "SELF_UPDATE_MONOTONIC", None,
-                      "one of the two bundles carries no readable admission-gate.v1.json — monotonicity cannot be measured")
+        base_test: dict = {}
+        if base_bundle:
+            rc_b, arms_b, _ = _bundle_selftest(base_bundle, evidence=base_test)
         else:
-            dropped = sorted(set(ids_b) - set(ids_h))
-            shrank = (arms_b is not None and arms_h is not None and arms_h < arms_b)
-            b4 = _chk(ev, "B4", "SELF_UPDATE_MONOTONIC", not dropped and not shrank,
-                      (f"the update DROPS check(s) {', '.join(dropped)}" if dropped else "") +
-                      ("; " if dropped and shrank else "") +
-                      (f"the battery SHRINKS from {arms_b} to {arms_h} arm(s)" if shrank else "") or
-                      (f"no policy check id is dropped ({len(ids_b)} → {len(ids_h)}) and the battery does not "
-                       f"shrink ({arms_b} → {arms_h} arm(s)) — a proxy for «the update does not weaken the gate», "
-                       f"never a comparison of semantics"))
+            rc_b, arms_b = None, None
+            base_test = {"exit_code": None, "arms": None, "complete": False, "summary": None,
+                         "reason": "no base bundle to measure"}
+        ev["selftest"]["base"] = base_test
+        ev["policy_check_ids"] = {"base": ids_b, "head": ids_h}
+        b4 = _self_update_monotonic(ev, ids_b, ids_h, arms_b, arms_h)
     _chk(ev, "B5", "SELF_UPDATE_PROVENANCE", None,
          f"program_ref {str((man_b or {}).get('program_ref'))[:12]} → {str((man_h or {}).get('program_ref'))[:12]}; "
          f"a caller's CI cannot read the private program repository, so this is the pointer an auditor follows, "
@@ -2444,7 +2651,7 @@ def recheck_structural(repo: Path, base: str, head: str, files: list[dict], poli
                              declaration_rel=declaration_rel, verifier_job=verifier_job,
                              verifier_conclusion=verifier_conclusion,
                              candidate_range=b7meta.get("candidate_range"), authority_id=b7meta.get("authority_id"),
-                             second_opinion=b7meta.get("second_opinion"))
+                             second_opinion=b7meta.get("second_opinion"), base_branch=base_branch)
     # The binding evidence was computed above and then overwritten by the battery's own dictionary, so no
     # receipt ever carried it. It is the one place a reader can see WHICH range the exemption bound.
     ev["binding"] = binding_ev
@@ -2518,8 +2725,40 @@ def _names(repo: Path, *args: str) -> set[str]:
     return {p for p in git(repo, *args, "-z", check=False).split("\0") if p}
 
 
+def _covered_ledger_anchor(repo: Path, base: str, head: str, path: str,
+                           bound: list[dict]) -> str:
+    """The already-covered content version of this ledger, never a union of old facts.
+
+    Clause (c) judges a TRAILING delta. When a current receipt has covered an older
+    ledger attachment as content, comparing that delta to the overall base would
+    demand that this run bind the older receipt again. Use a unique latest covered
+    ancestor; missing coverage or divergent heads retain the strict base comparison.
+    Other checks still judge the content range and the receipt's actual verdicts.
+    """
+    wanted = Path(path).stem
+    candidates = set()
+    for r in bound:
+        doc = r["_doc"]
+        cs = doc.get("change_set") or {}
+        h = _receipt_head(doc)
+        files = cs.get("files") or []
+        if (cs.get("mode") != "diff" or cs.get("base") != base or not h
+                or work_item_id(doc.get("work_item")) != wanted
+                or not any(isinstance(f, dict) and f.get("path") == path for f in files)
+                or not git_ok(repo, "merge-base", "--is-ancestor", base, h)
+                or not git_ok(repo, "merge-base", "--is-ancestor", h, head)
+                or blob_mode(repo, h, path) not in REGULAR_MODES
+                or path not in _names(repo, "diff", "--name-only", "--no-renames", base, h)):
+            continue
+        candidates.add(h)
+    latest = [h for h in candidates
+              if all(git_ok(repo, "merge-base", "--is-ancestor", other, h)
+                     for other in candidates)]
+    return latest[0] if len(latest) == 1 else base
+
+
 def trailing_record_commits(repo: Path, base: str, head: str, bound: list[dict], changed: set[str],
-                            workdir: Path) -> dict:
+                            workdir: Path, ledger_rel: str | None = None) -> dict:
     """GATEORDER-0 — the commits after every bound receipt's head, and which of their paths are record paths.
 
     The rule and its residuals: contracts/graph-verified-change/trailing-record-commits.v1.md. Everything here
@@ -2528,8 +2767,9 @@ def trailing_record_commits(repo: Path, base: str, head: str, bound: list[dict],
     heads = sorted({h for h in (_receipt_head(r["_doc"]) for r in bound)
                     if h and git_ok(repo, "cat-file", "-e", f"{h}^{{commit}}")})
     out = {"rule": "contracts/graph-verified-change/trailing-record-commits.v1.md", "receipt_heads": heads,
-           "trailing_commits": [], "admitted_paths": {"receipts": [], "derived": []},
-           "edited_after_receipt_head": [], "derived_verification": {"verdict": None, "why": "no declared path"}}
+           "trailing_commits": [], "admitted_paths": {"receipts": [], "derived": [], "work_item_evidence": []},
+           "edited_after_receipt_head": [], "derived_verification": {"verdict": None, "why": "no declared path"},
+           "work_item_evidence_ledger": {"dir": ledger_rel, "paths": [], "comparison_anchors": {}}}
     if not heads:
         return out
     trailing = [c for c in git(repo, "rev-list", head, f"^{base}", *[f"^{h}" for h in heads]).split() if c]
@@ -2572,9 +2812,23 @@ def trailing_record_commits(repo: Path, base: str, head: str, bound: list[dict],
     # by the mutation test, and a path that is itself a declared verifier would vouch for its replacement.
     decl, why_decl = read_declaration(repo, base)
     declared, _bad = declared_artefacts(decl)
-    refused = {p: r for p in trailing_paths if p not in receipt_paths
-               for r in [record_path_refusal(repo, base, head, p, declared)] if r}
-    derived = [p for p in trailing_paths if p not in receipt_paths and p not in refused]
+    # (c) A2-309 — the work-item evidence ledger `attach` wrote from the receipt's final bytes. Tried
+    # BEFORE (b): a path under the ledger directory is never a declared derived artefact, and trying
+    # (b) first would report the declaration's refusal for a file the declaration says nothing about.
+    ledger_paths, ledger_refused = [], {}
+    for p in trailing_paths:
+        if p in receipt_paths or not ledger_rel or not p.startswith(ledger_rel.rstrip("/") + "/"):
+            continue
+        anchor = _covered_ledger_anchor(repo, base, head, p, bound)
+        out["work_item_evidence_ledger"]["comparison_anchors"][p] = anchor
+        why = ledger_record_path_refusal(repo, anchor, head, p, bound, ledger_rel)
+        (ledger_refused.update({p: why}) if why else ledger_paths.append(p))
+    out["work_item_evidence_ledger"]["paths"] = sorted(ledger_paths)
+
+    refused = {p: r for p in trailing_paths if p not in receipt_paths and p not in ledger_paths
+               for r in [ledger_refused.get(p) or record_path_refusal(repo, base, head, p, declared)] if r}
+    derived = [p for p in trailing_paths if p not in receipt_paths and p not in ledger_paths
+               and p not in refused]
     out["not_record_paths"] = refused
     derived_ok: set[str] = set()
     if derived:
@@ -2586,12 +2840,14 @@ def trailing_record_commits(repo: Path, base: str, head: str, bound: list[dict],
     elif decl is None:
         out["derived_verification"]["why"] = why_decl
 
-    record = receipt_paths | derived_ok
+    record = receipt_paths | derived_ok | set(ledger_paths)
     out["edited_after_receipt_head"] = [p for p in trailing_paths if p not in record]
     out["admitted_paths"] = {"receipts": sorted(p for p in trailing_paths if p in receipt_paths
                                                 and p not in in_receipt_ranges),
                              "derived": sorted(p for p in trailing_paths if p in derived_ok
-                                               and p not in in_receipt_ranges)}
+                                               and p not in in_receipt_ranges),
+                             "work_item_evidence": sorted(p for p in ledger_paths
+                                                          if p not in in_receipt_ranges)}
     return out
 
 
@@ -2622,7 +2878,7 @@ def cashed_canary_ids(doc: dict, boundary_inferred: set[str]) -> set[str]:
              for vid in (rec.get("verifier_ids") or []) if isinstance(vid, str)}
     out = set()
     for v in doc.get("verifiers") or []:
-        if not isinstance(v, dict) or v.get("kind") != "canary":
+        if not isinstance(v, dict) or v.get("kind") not in {"canary", "shell_behavior"}:
             continue
         vid = v.get("id")
         if vid in cited or (set(v.get("entities") or []) & boundary_inferred):
@@ -2674,7 +2930,7 @@ def canary_coverage(repo: Path, rows: list[dict], cashed: set[str] | None = None
             problems.append(f"{vid}: {text}")
 
     for v in rows:
-        if not isinstance(v, dict) or v.get("kind") != "canary":
+        if not isinstance(v, dict) or v.get("kind") not in {"canary", "shell_behavior"}:
             continue
         vid, ref = v.get("id"), v.get("output_ref")
         if not isinstance(ref, str) or not schema_check.repo_relative(ref):
@@ -2699,6 +2955,25 @@ def canary_coverage(repo: Path, rows: list[dict], cashed: set[str] | None = None
             report(vid, f"{ref} is not a CanaryResult document (schema="
                         f"{doc.get('schema') if isinstance(doc, dict) else type(doc).__name__!r})")
             continue
+        # Shell behavior is a distinct mandatory codec, not a generic canary alias.
+        # Preserve committed/source/plan checks below, and require actual counted
+        # native process evidence rather than HTTP/v1 testimony for this new kind.
+        if v.get("kind") == "shell_behavior":
+            probes = doc.get("probes") or []
+            if not isinstance(probes, list):
+                probes = []
+            measured = (doc.get("schema") == "CanaryResult/v2" and probes
+                        and all(isinstance(p, dict) and p.get("kind") == "process" and p.get("executed")
+                                and p.get("capture_complete") and isinstance(p.get("output_checks"), list)
+                                for p in probes)
+                        and any(isinstance(c, dict) and c.get("matched")
+                                and isinstance(c.get("expected"), str) and re.search(
+                            r"\b[1-9]\d* (?:passed|passing|tests?)\b|Ran [1-9]\d* tests?|1\.\.[1-9]\d*",
+                            c.get("expected", ""))
+                            for p in probes for c in p.get("output_checks", [])))
+            if not measured:
+                report(vid, f"{ref} is not counted native shell process evidence")
+                continue
         rows_ok, binding, _doc = canary_evidence.consume(path, root, head, at_head=ref)
         if binding:
             report(vid, f"{ref} does not bind {str(head)[:12]}: " + "; ".join(binding[:3]))
@@ -2764,6 +3039,17 @@ def probe_effective_verdicts(doc: dict, verdict_of: dict[str, str]) -> tuple[dic
     return {e: v for e, v in downgrades.items() if verdict_of.get(e) == "verified"}, problems
 
 
+def origin_binding_at_base(repo: Path, base: str, bundle_rel: str, path: Path,
+                           receipt_digest: str, enforcement: str) -> dict:
+    if enforcement != "muneral":
+        raise ValueError("origin association requires authentic Muneral evidence enforcement")
+    key = git_text_or_none(repo, "show", base + ":" + bundle_rel.rstrip("/") + "/" + BUNDLE_PUBKEY_NAME)
+    if not key or key.split()[:2] != impact_pair._canonical_bundle_key().split()[:2]:
+        raise ValueError("origin association signing key is not the canonical key already trusted at BASE")
+    return {"raw": path.read_bytes(), "signature": Path(str(path) + ".sig").read_text(),
+            "trusted_base_key": key, "receipt_digest": receipt_digest}
+
+
 def gate(repo: Path, base: str, head: str, receipt_paths: list[Path], policy: dict, *,
          description: str = "", bypass_flag: bool = False, disabled: frozenset[str] = frozenset(),
          work_item_enforcement: str | None = None, ledger_dir: Path = LEDGER_DIR,
@@ -2773,7 +3059,8 @@ def gate(repo: Path, base: str, head: str, receipt_paths: list[Path], policy: di
          automated_workdir: Path | None = None,
          bundle_rel: str = DEFAULT_BUNDLE_DIR,
          structural_workdir: Path | None = None,
-         base_branch: str | None = None) -> dict:
+         base_branch: str | None = None,
+         origin_association_path: Path | None = None) -> dict:
     checks: list[dict] = []
     # A2-238. The policy's own words: `off` means "the attachment is not required (never used in a
     # PROGRAM-OWNED repository)", and `.github/workflows/graph-admission.yml` therefore defaults its
@@ -2937,7 +3224,16 @@ def gate(repo: Path, base: str, head: str, receipt_paths: list[Path], policy: di
 
         # Revision selections are remeasured from Git, not trusted from receipt node_ids.
         try:
-            coverage_problems = impact_pair.receipt_problems(repo, doc)
+            origin_binding = None
+            if origin_association_path is not None:
+                origin_binding = origin_binding_at_base(repo, base, bundle_rel, origin_association_path,
+                                                       rec["digest"], enforcement)
+            with impact_pair.trace_phase("admission-C18-paired-coverage"):
+                coverage_problems = impact_pair.receipt_problems(repo, doc, origin_binding=origin_binding)
+                coverage_problems += full_suite_ci.receipt_errors(
+                    repo, head, impact_pair.build_graph.source_repo_name(repo), doc.get("verifiers", []))
+            if origin_binding is not None and "proof" in origin_binding:
+                rec["origin_association_proof"] = origin_binding["proof"]
         except Exception as exc:
             # The class name alone ("Refusal") hides the whole diagnosis: the reason a coverage
             # measurement refused (STALE_GRAPH, a dirty tree, a missing graph) is carried in the
@@ -2980,6 +3276,32 @@ def gate(repo: Path, base: str, head: str, receipt_paths: list[Path], policy: di
                 valid_exempt.add(x["entity"])
         if bad_exempt:
             add("C10", f"{Path(rec['path']).name}: " + "; ".join(bad_exempt[:6]))
+
+        # A2-314 — C21: a non-structural exemption is a DECISION, and a decision is signed by an
+        # admitting agent whose key the change did not enrol. A signed one is always verified (a bad
+        # signature is refused whatever the enforcement); under `signed`, an unsigned one exempts nothing.
+        d_enf = decision_policy(policy).get("enforcement") or "off"
+        d_problems = []
+        gate_issued = rec["path"] == automated.get("receipt_path")
+        for x in doc.get("exemptions") or []:
+            if not isinstance(x, dict) or x.get("code") in STRUCTURAL_CODES or gate_issued:
+                continue
+            if x.get("code") == DECISION_CODE or "decision" in x or "signature" in x:
+                probs = verify_decision_exemption(repo, doc, x, policy, base=base,
+                                                  repo_name=repo_name or repo_remote_name(repo),
+                                                  now=datetime.now(timezone.utc))
+            elif d_enf == "signed":
+                probs = [f"{x.get('entity')}: an unsigned {x.get('code') or 'uncoded'} exemption — under "
+                         f"decision_exemptions.enforcement=signed only `admit_change.py exempt-decision` issues one"]
+            else:
+                probs = []
+            if probs:
+                d_problems += probs
+                valid_exempt.discard(x.get("entity"))
+        rec["decision_exemptions"] = {"enforcement": d_enf, "problems": d_problems}
+        if d_problems:
+            add("C21", f"{Path(rec['path']).name}: {len(d_problems)} problem(s) [enforcement={d_enf}]: "
+                       + "; ".join(d_problems[:4]), decision_problems=d_problems)
 
         # --- AUP-GRAPH-006:gate4b — C16/C17: the receipt is never believed about its own structural
         # exemption. The gate re-measures A1-A4 / B1-B5 here, from git and from a graph rebuilt at
@@ -3086,9 +3408,18 @@ def gate(repo: Path, base: str, head: str, receipt_paths: list[Path], policy: di
     record = None
     if bound:
         wd_rc = Path(automated_workdir) if automated_workdir else Path(tempfile.mkdtemp(prefix="gateorder0-"))
-        record = trailing_record_commits(repo, base, head, bound, changed, wd_rc)
+        # Clause (c) is licensed by OWNING the ledger, not by the enforcement flag. Measured on this
+        # card's own pull request (#141): the program repository's `ci.yml` calls the reusable gate
+        # without setting `enforcement`, so CI runs with `off` — and an earlier version of this line,
+        # which read `enforcement != "off"`, made CI REFUSE (C06) the very record commit the local
+        # authoritative gate admitted. The flag says whether the gate CHECKS for an attachment;
+        # ownership says whether a file at that path can be anything but the artefact of that check.
+        # A caller repository owns no ledger, so there the path stays ordinary content.
+        ledger_rel = LEDGER_REL if is_program_repo(repo, repo_name) else None
+        record = trailing_record_commits(repo, base, head, bound, changed, wd_rc, ledger_rel)
         uncovered = sorted(changed - covered - set(record["admitted_paths"]["receipts"])
-                           - set(record["admitted_paths"]["derived"]))
+                           - set(record["admitted_paths"]["derived"])
+                           - set(record["admitted_paths"]["work_item_evidence"]))
         after = record["edited_after_receipt_head"]
         if uncovered or after:
             parts = []
@@ -3096,8 +3427,9 @@ def gate(repo: Path, base: str, head: str, receipt_paths: list[Path], policy: di
                 parts.append(f"{len(uncovered)}/{len(changed)} changed file(s) are absent from the receipt change_set")
             if after:
                 parts.append(f"{len(after)} path(s) changed AFTER the receipt head by a commit no receipt has seen "
-                             f"({', '.join(after[:4])}) — only the receipt file itself and a declared derived "
-                             f"artefact that its own verifier accepts are record commits; re-issue the receipt on "
+                             f"({', '.join(after[:4])}) — only the receipt file itself, a declared derived "
+                             f"artefact that its own verifier accepts, and the work-item evidence ledger this "
+                             f"gate run's own receipts produced are record commits; re-issue the receipt on "
                              f"the full range")
             if record["derived_verification"].get("verdict") not in (None, True):
                 parts.append("declared derived artefact(s) not admitted: " + str(record["derived_verification"]["why"]))
@@ -3221,13 +3553,28 @@ def ledger_lookup(ledger_dir: Path, work_item, digest: str | None) -> dict | Non
     return None
 
 
+class AttachRefusal(ValueError):
+    """`attach` will not write a ledger the gate is certain to refuse, or one that names bytes the
+    repository never holds. The message is the whole answer: what is wrong and the command that fixes it."""
+
+
 def build_attachment(receipt_path: Path, doc: dict, work_item: str, label: str, uri: str | None,
-                     muneral_task_id: str | None = None) -> dict:
-    digest = sha256_file(receipt_path)
+                     muneral_task_id: str | None = None, root: Path | None = None) -> dict:
+    """A2-331. `receipt_path` MUST lie inside `root` (the repository that commits the ledger; default the
+    program repository). The fallback this replaced recorded the ABSOLUTE path when it did not — 19 of
+    115 attachments on main name /tmp/claude-*/… or a sibling worktree, bytes no checkout of this
+    repository ever holds, and #148 already declared them ATTACHMENT_NOT_EXEMPTIBLE. A refusal at the
+    door is the only remedy that does not leave a dead entry behind."""
+    root = (root or PROGRAM_ROOT).resolve()
     try:
-        rel = str(receipt_path.resolve().relative_to(PROGRAM_ROOT))
+        rel = receipt_path.resolve().relative_to(root).as_posix()
     except ValueError:
-        rel = str(receipt_path)
+        raise AttachRefusal(
+            f"ATTACH_RECEIPT_OUTSIDE_REPOSITORY: {receipt_path} resolves outside {root}. An attachment records "
+            f"a repository-relative receipt_path whose bytes the gate reads back from git; a path outside the "
+            f"repository names bytes it never holds. Commit the receipt into {root} and attach that copy: "
+            f"admit_change.py attach --receipt {root}/receipts/<dir>/<name>.json --work-item {work_item}") from None
+    digest = sha256_file(receipt_path)
     return {
         "schema": "WorkItemEvidenceAttachment/v1",
         "attachment_kind": "evidence",
@@ -3245,40 +3592,100 @@ def build_attachment(receipt_path: Path, doc: dict, work_item: str, label: str, 
         "producer": {"tool": TOOL, "version": VERSION},
         "model": MODEL,
         "provisional_until_fable_review": True,
+        # A2-336. Nothing has been attempted yet, so the reason says exactly that. This line used to
+        # read MUNERAL_NO_WORK_ITEM_EVIDENCE_ROUTE — a finding about Muneral written without asking
+        # Muneral, which stayed in every ledger entry after the route shipped (A2-274; A2-332 got 201).
+        # `cmd_attach` replaces it with the outcome of a real POST when one is made.
         "delivery": {"target": "muneral", "status": "not_measured",
-                     "reason_code": "MUNERAL_NO_WORK_ITEM_EVIDENCE_ROUTE",
+                     "reason_code": "MUNERAL_POST_NOT_REQUESTED",
                      "checked_at_utc": now_iso(), "probe": []},
     }
 
 
-MUNERAL_CANDIDATE_ROUTES = [
-    ("POST", "/tasks/{id}/evidence"),
-    ("POST", "/tasks/{id}/attachments"),
-    ("POST", "/tasks/{id}/receipts"),
-    ("POST", "/work-items/{id}/evidence"),
-]
+UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", re.I)
 
 
-def muneral_probe(task_id: str, key: str, base_url: str, ua: str) -> list[dict]:
-    """Read-only discovery: does a work-item evidence route exist for an agent key?
+def _muneral_error_body(raw: bytes) -> tuple[dict | None, str]:
+    text = raw.decode("utf-8", "replace")
+    try:
+        body = json.loads(text)
+        return (body if isinstance(body, dict) else None), text
+    except json.JSONDecodeError:
+        return None, text
 
-    A 404 says the route does not exist; 401/403 says it exists but rejects an agent key.
-    Probes are GETs — this function never writes to Muneral and never touches a status route.
+
+def muneral_deliver(att: dict, task_id: str, key: str, base_url: str, ua: str, route: str,
+                    timeout: float = 20.0) -> dict:
+    """POST one ledger attachment to Muneral's work-item evidence route and say what happened.
+
+    A2-336. The delivery record is the OUTCOME of this call, never a default:
+      posted        201 (new) or 200 with `idempotent: true` (the same claim was already stored), and
+                    the answer names the digest that was sent;
+      failed        the server refused (its `code` when it gives one — EVIDENCE_DIGEST_CONFLICT,
+                    EVIDENCE_URI_MALFORMED … — else MUNERAL_HTTP_<n>), or nothing listened
+                    (MUNERAL_UNREACHABLE), or the answer did not describe what was sent;
+      not_measured  the route itself is missing (404 with the framework's «Cannot POST» page — the one
+                    case that earns MUNERAL_NO_WORK_ITEM_EVIDENCE_ROUTE), or the request was sent and no
+                    answer came back (MUNERAL_NO_ANSWER: it may have landed; a retry is idempotent).
+    The key goes only into the Authorization header of this one request; it is never recorded.
+    The route is the one the policy declares; it writes evidence, never a status or a transition.
     """
-    out = []
-    for _method, tmpl in MUNERAL_CANDIDATE_ROUTES:
-        path = tmpl.format(id=task_id)
-        req = urllib.request.Request(base_url + path, method="GET",
-                                     headers={"Authorization": f"Bearer {key}", "User-Agent": ua})
-        try:
-            with urllib.request.urlopen(req, timeout=20) as r:
-                code = r.status
-        except urllib.error.HTTPError as e:
-            code = e.code
-        except OSError as e:
-            code = f"error:{type(e).__name__}"
-        out.append({"probe": f"GET {path}", "status": code})
-    return out
+    method, tmpl = route.split(" ", 1)
+    path = tmpl.format(id=task_id)
+    ref = att["evidence_ref"]
+    sha_hex = ref["digest"].split(":", 1)[1] if ref["digest"].startswith("sha256:") else ref["digest"]
+    payload = {"uri": ref["uri"], "sha256": sha_hex, "contentType": ref["contentType"]}
+    req = urllib.request.Request(base_url.rstrip("/") + path, method=method,
+                                 data=json.dumps(payload).encode("utf-8"),
+                                 headers={"Authorization": f"Bearer {key}", "User-Agent": ua,
+                                          "Content-Type": "application/json"})
+    probe = {"probe": f"{method} {tmpl.format(id='<task>')}", "task_id": task_id}
+    d = {"target": "muneral", "route": route, "muneral_task_id": task_id}
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            code, raw = r.status, r.read()
+    except urllib.error.HTTPError as e:
+        code, raw = e.code, e.read()
+    except urllib.error.URLError as e:
+        reason = e.reason
+        probe["status"] = f"error:{type(reason).__name__}"
+        if isinstance(reason, TimeoutError):
+            return d | {"status": "not_measured", "reason_code": "MUNERAL_NO_ANSWER", "probe": [probe]}
+        return d | {"status": "failed", "reason_code": "MUNERAL_UNREACHABLE", "probe": [probe]}
+    except (TimeoutError, ConnectionError, OSError) as e:
+        probe["status"] = f"error:{type(e).__name__}"
+        if isinstance(e, TimeoutError):
+            return d | {"status": "not_measured", "reason_code": "MUNERAL_NO_ANSWER", "probe": [probe]}
+        return d | {"status": "failed", "reason_code": "MUNERAL_UNREACHABLE", "probe": [probe]}
+    probe["status"] = code
+    body, text = _muneral_error_body(raw)
+    d["http"] = code
+    if code in (200, 201):
+        ok = (body is not None and body.get("sha256") == sha_hex and body.get("evidence_id")
+              and (code == 201 or body.get("idempotent") is True))
+        if not ok:
+            return d | {"status": "failed", "reason_code": "MUNERAL_ANSWER_MISMATCH",
+                        "answer": text[:300], "probe": [probe]}
+        return d | {"status": "posted", "reason_code": "MUNERAL_EVIDENCE_CREATED" if code == 201
+                    else "MUNERAL_EVIDENCE_IDEMPOTENT",
+                    "evidence_id": body["evidence_id"], "idempotent": bool(body.get("idempotent")),
+                    "created_at": body.get("created_at"), "probe": [probe]}
+    server_code = (body or {}).get("code")
+    message = (body or {}).get("message") if body else text
+    if code == 404 and body is None and f"Cannot {method}" in text:
+        return d | {"status": "not_measured", "reason_code": "MUNERAL_NO_WORK_ITEM_EVIDENCE_ROUTE",
+                    "probe": [probe]}
+    return d | {"status": "failed", "reason_code": server_code or f"MUNERAL_HTTP_{code}",
+                "server_code": server_code, "message": str(message)[:300], "probe": [probe]}
+
+
+def _repo_root_of(d: Path) -> Path | None:
+    """The git work tree the ledger directory lives in (nearest existing ancestor), or None."""
+    q = d.resolve()
+    while not q.exists() and q != q.parent:
+        q = q.parent
+    r = subprocess.run(["git", "-C", str(q), "rev-parse", "--show-toplevel"], capture_output=True, text=True)
+    return Path(r.stdout.strip()).resolve() if r.returncode == 0 and r.stdout.strip() else None
 
 
 def cmd_attach(a) -> int:
@@ -3292,46 +3699,137 @@ def cmd_attach(a) -> int:
     if not wi:
         print("no work item: pass --work-item or set receipt.work_item", file=sys.stderr)
         return 2
-    att = build_attachment(receipt_path, doc, wi, a.label or f"ChangeAdmissionReceipt/v1 {doc.get('receipt_id')}",
-                           a.uri, a.muneral_task_id)
-
-    if a.post:
-        key = os.environ.get("MUNERAL_API_KEY")
-        m = policy["work_item_evidence"]["muneral"]
-        if not key:
-            att["delivery"]["reason_code"] = "NO_MUNERAL_API_KEY"
-        else:
-            att["delivery"]["probe"] = muneral_probe(a.muneral_task_id or wi, key, m["base_url"], m["user_agent"])
-            live = [p for p in att["delivery"]["probe"] if p["status"] not in (404,)]
-            att["delivery"]["checked_at_utc"] = now_iso()
-            if not live:
-                att["delivery"]["reason_code"] = "MUNERAL_NO_WORK_ITEM_EVIDENCE_ROUTE"
-            else:
-                att["delivery"]["reason_code"] = "MUNERAL_EVIDENCE_ROUTE_PRESENT_NOT_POSTED"
-                att["delivery"]["note"] = ("a candidate route answered; posting is enabled only after the route "
-                                           "is declared in admission-gate.v1.json work_item_evidence.muneral.evidence_route")
-
     ledger_dir = Path(a.ledger_dir) if a.ledger_dir else LEDGER_DIR
     p = ledger_path(ledger_dir, wi)
+    root = _repo_root_of(ledger_dir) or PROGRAM_ROOT
+    try:
+        att = build_attachment(receipt_path, doc, wi, a.label or f"ChangeAdmissionReceipt/v1 {doc.get('receipt_id')}",
+                               a.uri, a.muneral_task_id, root=root)
+    except AttachRefusal as e:
+        print(f"refuse {e}", file=sys.stderr)
+        return 2
+
+    if a.post:
+        # A2-336: the reason is what was tried. Missing inputs are named as missing inputs — not as
+        # a fact about Muneral that nobody measured.
+        m = policy["work_item_evidence"]["muneral"]
+        key = os.environ.get("MUNERAL_API_KEY")
+        task_id = a.muneral_task_id or (wi if UUID_RE.match(wi) else None)
+        route = m.get("evidence_route")
+        att["delivery"]["checked_at_utc"] = now_iso()
+        if not route:
+            att["delivery"]["reason_code"] = "NO_EVIDENCE_ROUTE_DECLARED"
+        elif not task_id:
+            att["delivery"]["reason_code"] = "NO_MUNERAL_TASK_ID"
+        elif not UUID_RE.match(task_id):
+            att["delivery"]["reason_code"] = "MUNERAL_TASK_ID_NOT_UUID"
+        elif not key:
+            att["delivery"]["reason_code"] = "NO_MUNERAL_API_KEY"
+        else:
+            base_url = os.environ.get("MUNERAL_BASE_URL") or m["base_url"]
+            att["delivery"] = muneral_deliver(att, task_id, key, base_url, m["user_agent"], route) | {
+                "checked_at_utc": now_iso()}
+            att["work_item"]["muneral_task_id"] = task_id
+
     ledger = {"schema": "WorkItemEvidenceLedger/v1", "work_item": wi, "system": "muneral", "attachments": []}
     if p.exists():
         try:
             ledger = json.loads(p.read_text(encoding="utf-8"))
         except json.JSONDecodeError:
             pass
-    existing = {(x.get("evidence_ref") or {}).get("digest") for x in ledger.get("attachments", [])}
-    if att["evidence_ref"]["digest"] in existing:
-        for i, x in enumerate(ledger["attachments"]):
-            if (x.get("evidence_ref") or {}).get("digest") == att["evidence_ref"]["digest"]:
-                ledger["attachments"][i] = att | {"attached_at_utc": x.get("attached_at_utc", att["attached_at_utc"])}
-    else:
-        ledger["attachments"].append(att)
+    try:
+        base_ledger, base_where = _attach_base_ledger(root, p, a.base) if _stale_for(ledger, att) else (None, None)
+        ledger, outcome = merge_attachment(ledger, att, base_ledger, base_where)
+    except AttachRefusal as e:
+        print(f"refuse {e}", file=sys.stderr)
+        return 2
     ledger["updated_at_utc"] = now_iso()
     write_json(p, ledger)
+    for s in outcome["superseded"]:
+        print(f"superseded {s['digest_old']} -> {s['digest_new']} ({s['receipt_path']}): not in the ledger at "
+              f"{base_where}, so the gate would refuse it (C06 CHANGE_SET_INCOMPLETE)", file=sys.stderr)
+    for k in outcome["kept_at_base"]:
+        print(f"kept {k['digest_old']} ({k['receipt_path']}): present in the ledger at {base_where}; the gate "
+              f"refuses dropping it, and admits it untouched beside {att['evidence_ref']['digest']}", file=sys.stderr)
     print(json.dumps({"ledger": str(p), "work_item": wi, "digest": att["evidence_ref"]["digest"],
+                      "action": outcome["action"], "superseded": outcome["superseded"],
+                      "kept_at_base": outcome["kept_at_base"],
                       "delivery": att["delivery"]["status"], "reason_code": att["delivery"].get("reason_code")},
                      ensure_ascii=False))
     return 0
+
+
+# A2-331. What the gate checks decides what `attach` must do with an older entry for the SAME receipt_path
+# whose digest is no longer the bytes at that path (the receipt was re-issued). C06 clause (c)
+# (`ledger_record_path_refusal`) admits a ledger entry only if its digest is a receipt the gate bound, or
+# it stands untouched since base; it refuses a dropped base entry. So:
+#   * the stale entry is NOT in the ledger at base → it can never be admitted (its bytes are gone and it
+#     is not history). Keeping it is certain CHANGE_SET_INCOMPLETE; removing it is exactly what the gate
+#     wants. `attach` supersedes it and says so, old and new digest.
+#   * the stale entry IS in the ledger at base → an earlier card's evidence. Dropping it is refused, and
+#     leaving it untouched is admitted. `attach` keeps it and says so.
+#   * base unknown → which of the two is unknowable here; refuse with the command that supplies it,
+#     rather than guess (a wrong guess is a gate refusal later, the defect this card exists for).
+# Supersede over refuse: in the first case a refusal would only make the author delete the entry by
+# hand — A2-328's workaround — for a result the tool can compute itself.
+def _stale_for(ledger: dict, att: dict) -> list[dict]:
+    d, rp = att["evidence_ref"]["digest"], att.get("receipt_path")
+    return [x for x in ledger.get("attachments", []) or []
+            if isinstance(x, dict) and x.get("receipt_path") == rp and _att_digest(x) != d]
+
+
+def _attach_base_ledger(root: Path, ledger_file: Path, base: str | None) -> tuple[dict, str]:
+    """→ (the ledger as it stands at base, a label naming base). Default base: merge-base of HEAD and
+    origin/main — the base the PR's gate will use. Raises AttachRefusal when it cannot be resolved."""
+    hint = (f"re-run with --base <the PR's base ref> (e.g. --base origin/main after `git fetch origin`)")
+    try:
+        rel = ledger_file.resolve().relative_to(root).as_posix()
+    except ValueError:
+        raise AttachRefusal(f"ATTACH_BASE_UNKNOWN: the ledger {ledger_file} is outside {root}; {hint}") from None
+    ref = base or "origin/main"
+    r = subprocess.run(["git", "-C", str(root), "merge-base", "HEAD", ref], capture_output=True, text=True)
+    if r.returncode != 0 or not r.stdout.strip():
+        raise AttachRefusal(f"ATTACH_BASE_UNKNOWN: the ledger holds an older entry for this receipt_path and "
+                            f"`git merge-base HEAD {ref}` did not resolve in {root}, so whether that entry is "
+                            f"history (keep) or dead (supersede) is unknown; {hint}")
+    sha = r.stdout.strip()
+    shown = subprocess.run(["git", "-C", str(root), "show", f"{sha}:{rel}"], capture_output=True)
+    if shown.returncode != 0:
+        return {"attachments": []}, f"base {sha[:12]} (no ledger there)"
+    try:
+        doc = json.loads(shown.stdout)
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        raise AttachRefusal(f"ATTACH_BASE_UNKNOWN: {rel} at base {sha[:12]} does not parse; {hint}") from None
+    return (doc if isinstance(doc, dict) else {"attachments": []}), f"base {sha[:12]}"
+
+
+def merge_attachment(ledger: dict, att: dict, base_ledger: dict | None, base_where: str | None) -> tuple[dict, dict]:
+    """Put `att` into `ledger` the way the gate will admit it → (ledger, outcome). Pure."""
+    d = att["evidence_ref"]["digest"]
+    atts = list(ledger.get("attachments", []) or [])
+    stale = _stale_for(ledger, att)
+    at_base = {_att_digest(x): canonical(x) for x in (base_ledger or {}).get("attachments", []) or []
+               if isinstance(x, dict)}
+    if stale and base_ledger is None:
+        raise AttachRefusal("ATTACH_BASE_UNKNOWN: an older entry for this receipt_path exists and base was not read")
+    superseded, kept = [], []
+    for x in stale:
+        row = {"receipt_path": x.get("receipt_path"), "digest_old": _att_digest(x), "digest_new": d}
+        if at_base.get(_att_digest(x)) == canonical(x):
+            kept.append(row)
+        else:
+            superseded.append(row)
+    gone = {r["digest_old"] for r in superseded}
+    atts = [x for x in atts if not (x in stale and _att_digest(x) in gone)]
+    action = "superseded" if superseded else "appended"
+    for i, x in enumerate(atts):
+        if _att_digest(x) == d:
+            atts[i] = att | {"attached_at_utc": x.get("attached_at_utc", att["attached_at_utc"])}
+            action = "refreshed"
+            break
+    else:
+        atts.append(att)
+    return dict(ledger, attachments=atts), {"action": action, "superseded": superseded, "kept_at_base": kept}
 
 
 # ------------------------------------------------------------------ charter scan
@@ -3801,6 +4299,31 @@ def make_fixtures(base: str, head: str, repo: Path | None = None) -> dict[str, d
         "probe like any other verifier, so the entity is failed and the overstated claim is named",
         probe_contradicted)
 
+    def forged_decision(r):
+        # A2-314 — C21's blocking fixture: a decision exemption over a real not_measured verdict, owner and
+        # expiry in order (C10 is satisfied), signed by a key no policy enrols. Disable C21 and it admits.
+        for v in r["verdicts"]:
+            if v["entity"] == "code_unit:src/c.ts":
+                v["verdict"] = "not_measured"
+                v["reason"] = ("v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity "
+                               "(matrix P6, observed-edges-and-deploy-gate.v1 rule C1)")
+        payload = {"schema": DECISION_SCHEMA, "entity": "code_unit:src/c.ts", "class": "no_live_contour",
+                   "verifier": "v-canary", "measured_reason": "forged", "why_unmeasurable": "forged",
+                   "decision_to_proceed": "a decision to proceed, forged", "evidence": "none",
+                   "reverse_if": "never", "repo": "Arcanada-one/fixture", "receipt_id": r["receipt_id"],
+                   "change_binding": {"base": base, "head": head, "digest": "sha256:" + "0" * 64},
+                   "issued_at_utc": "2026-09-05T12:00:00Z", "expires_at_utc": "2126-09-05T12:00:00Z",
+                   "signer": {"id": "fixture-self-enrolled", "fingerprint": None}}
+        r["exemptions"] = [{"entity": "code_unit:src/c.ts", "code": DECISION_CODE, "owner": "fixture-self-enrolled",
+                            "reason": payload["decision_to_proceed"], "expires_at_utc": payload["expires_at_utc"],
+                            "decision": payload,
+                            "signature": sshsig.make_detached(b"\x07" * 32, decision_payload_bytes(payload),
+                                                              "aup-decision-exemption")}]
+        r["admission"] = {"verdict": "admitted_with_exemptions", "rule": "fixture"}
+    add("violation-DECISION_EXEMPTION_INVALID", "refuse", ["DECISION_EXEMPTION_INVALID", "NOT_MEASURED_WITHOUT_EXEMPTION"],
+        "a non-structural exemption signed by a key the policy does not enrol exempts nothing (A2-314, C21)",
+        forged_decision)
+
     def no_wi(r):
         r["work_item"] = None
     add("violation-WORK_ITEM_EVIDENCE_MISSING", "paused_safe", ["WORK_ITEM_EVIDENCE_MISSING"],
@@ -3946,7 +4469,7 @@ def selftest(receipt_out: Path | None, keep: bool = False) -> int:
                 paths = [p] + paths
                 wi = work_item_id(doc.get("work_item"))
                 if wi:
-                    att = build_attachment(p, doc, wi, f"fixture {name}", None)
+                    att = build_attachment(p, doc, wi, f"fixture {name}", None, root=root)
                     lp = ledger_path(ledger_dir, wi)
                     led = json.loads(lp.read_text(encoding="utf-8")) if lp.exists() else \
                         {"schema": "WorkItemEvidenceLedger/v1", "work_item": wi, "system": "muneral", "attachments": []}
@@ -4042,7 +4565,7 @@ def selftest(receipt_out: Path | None, keep: bool = False) -> int:
         # 6. the attachment is evidence-shaped and never a status
         p = wd / "receipt.json"
         doc = json.loads(p.read_text(encoding="utf-8"))
-        att = build_attachment(p, doc, "AUP-GRAPH-006", "selftest", None)
+        att = build_attachment(p, doc, "AUP-GRAPH-006", "selftest", None, root=root)
         ok = (att["attachment_kind"] == "evidence" and att["evidence_ref"]["contentType"] == "application/json"
               and re.match(r"^sha256:[0-9a-f]{64}$", att["evidence_ref"]["digest"])
               and len(att["evidence_ref"]["uri"]) <= 512 and len(att["evidence_ref"]["label"]) <= 128
@@ -4051,10 +4574,15 @@ def selftest(receipt_out: Path | None, keep: bool = False) -> int:
         results.append({"case": "attachment-shape", "ok": ok})
         passed, failed = (passed + 1, failed) if ok else (passed, failed + 1)
 
-        # 7. no status/transition route is reachable from this tool
+        # 7. no status/transition route is reachable from this tool. A2-336: the tool now makes ONE
+        # write — the evidence POST of `attach --post` — so the invariant is stated as what it always
+        # meant: the only network call site is `muneral_deliver`, and the only route it can be given is
+        # the policy's evidence route, which is neither a status nor a transition.
         src = Path(__file__).read_text(encoding="utf-8")
         needles = ["/trans" + "itions", "/sta" + "tus", "method=" + "\"POST\""]
-        ok = not any(n in src for n in needles)
+        route = policy["work_item_evidence"]["muneral"].get("evidence_route")
+        ok = (not any(n in src for n in needles) and src.count("urlopen" + "(") == 1
+              and route == "POST /tasks/{id}/evidence")
         results.append({"case": "no-status-write-path", "ok": ok})
         passed, failed = (passed + 1, failed) if ok else (passed, failed + 1)
 
@@ -4138,6 +4666,40 @@ def repo_of(a) -> Path:
     return Path(a.repo).resolve()
 
 
+def command_output_json(a, path, doc):
+    """Delay authoritative CLI output until the declared-input postcheck passes."""
+    pending = getattr(a, "_compiler_output_json", None)
+    if pending is None:
+        write_json(path, doc)
+    else:
+        pending.append((Path(path), json.loads(json.dumps(doc))))
+
+
+def compiler_bound_command(a, repo, base, head):
+    import verify as canonical_verify
+    pending = []
+    output = io.StringIO()
+    a._compiler_output_json = pending
+    try:
+        with redirect_stdout(output):
+            with canonical_verify.compiler_sdk_input(a, repo, base, head):
+                code = a.fn(a)
+        # Nothing authoritative has escaped yet. This point is reachable only
+        # after all declared SDK/Node/source/tool postchecks succeeded.
+        for path, doc in pending:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent,
+                                             prefix=".compiler-output-", delete=False) as staged:
+                staged.write(json.dumps(doc, ensure_ascii=False, sort_keys=True, indent=1) + "\n")
+                staged.flush()
+                os.fsync(staged.fileno())
+            os.replace(staged.name, path)
+        sys.stdout.write(output.getvalue())
+        return code
+    finally:
+        del a._compiler_output_json
+
+
 def cmd_gate(a) -> int:
     policy = load_policy(a.policy)
     repo = Path(a.repo).resolve()
@@ -4157,15 +4719,27 @@ def cmd_gate(a) -> int:
                 event = {"_unparsable": str(e)}
     doc = gate(repo, base, head, paths, policy, description=desc, bypass_flag=a.skip_receipt,
                work_item_enforcement=a.enforcement, explicit_receipts=bool(a.receipt),
-               ledger_dir=Path(a.ledger_dir) if a.ledger_dir else LEDGER_DIR,
+               # A2-309b. NOT `LEDGER_DIR` (= PROGRAM_ROOT / LEDGER_REL). C13 asks whether the
+               # ledger of THE REPOSITORY UNDER TEST records the receipt this run binds, and that
+               # repository is `--repo`. `PROGRAM_ROOT` is where the TOOL lives, and in the program
+               # repository's own CI the tool lives in a bundle built into the runner temp — so the
+               # default pointed at a directory outside the checkout, `ledger_lookup` found nothing,
+               # and C13 answered WORK_ITEM_EVIDENCE_MISSING for every receipt no matter what the
+               # ledger said. Invisible until this card turned `enforcement: ledger` on, because
+               # until then the program repository called its own gate with `off`. This is the same
+               # defect #141 fixed for C06 clause (c) (see LEDGER_REL above); C13 was left on the
+               # old footing because nothing ran it. An explicit --ledger-dir still wins, which is
+               # what test_caller_enforcement_default.py exercises.
+               ledger_dir=Path(a.ledger_dir) if a.ledger_dir else (repo / LEDGER_REL),
                repo_name=a.repo_name, event=event, verifier_job=a.verifier_job,
                verifier_conclusion=a.verifier_conclusion, verifier_output_ref=a.verifier_output_ref,
                automated_workdir=Path(a.workdir) if a.workdir else None,
                bundle_rel=getattr(a, "bundle_dir", None) or DEFAULT_BUNDLE_DIR,
                structural_workdir=(Path(a.workdir) / "gate4b") if a.workdir else None,
-               base_branch=getattr(a, "base_branch", None))
+               base_branch=getattr(a, "base_branch", None),
+               origin_association_path=Path(a.origin_association) if getattr(a, "origin_association", None) else None)
     if a.out:
-        write_json(Path(a.out), doc)
+        command_output_json(a, Path(a.out), doc)
     if a.json:
         print(json.dumps(doc, ensure_ascii=False, indent=1))
     else:
@@ -4304,7 +4878,7 @@ def cmd_exempt(a) -> int:
               "case": ev.get("case"), "eligible": bool(exemptions), "evidence": ev,
               "exemptions": exemptions}
     if a.evidence_out:
-        write_json(Path(a.evidence_out), report)
+        command_output_json(a, Path(a.evidence_out), report)
     for c in ev.get("checks") or []:
         print(f"  [{c['verdict']}] {c['id']} {c['code']}: {c['detail']}")
     if not exemptions:
@@ -4341,9 +4915,339 @@ def cmd_exempt(a) -> int:
         f"{len(exemptions)} entity(ies), bound to {ev['change_binding']['digest'][:23]}… "
         f"({base[:12]}..{head[:12]}); the digest, not the clock, is the expiry.")
     out = Path(a.out) if a.out else rp
-    write_json(out, doc)
+    command_output_json(a, out, doc)
     print(f"{adm.upper()}  {CODE_OF_CASE[ev['case']]}  {len(exemptions)} exemption(s)  "
           f"binding {ev['change_binding']['digest'][:23]}…  → {out}")
+    return 0 if adm == "admitted_with_exemptions" else 3
+
+
+# ------------------------------------------------------------------ A2-314: the decision exemption
+# DEC-AUP-0037 R3 already names the ONE honest way past a not_measured that no verifier can discharge:
+# «an exemption attached for that reason records a decision to proceed, and MUST say so in its reason
+# field in those words». What it never named is who may record it, and the gate never checked: C10
+# admits ANY exemption with an owner and an expiry, and it measures that expiry against the receipt's
+# own `captured_at_utc` — so a hand-written exemption never expires once written. Control therefore
+# signed forty of them by hand on scrutator #107, while `exempt` (structural only) answered NOT
+# ELIGIBLE on every live case (I14 historical receipts; v-canary on tools with no live contour).
+#
+# DecisionExemption/v1 turns the de-facto form into an instrument:
+#   * issued by `admit_change.py exempt-decision`, signed with an Ed25519 SSH key of an ADMITTING
+#     agent. The key never enters a repository; the gate trusts only the public keys listed in the
+#     admission policy AS IT STOOD AT BASE (program repository) or in the pinned bundle (caller), so a
+#     change can never add the signer that admits it;
+#   * the signed payload names the entity, its verifier, the verdict reason as measured, WHY it cannot
+#     be measured, the decision to proceed (DEC-AUP-0037 R3 wording), the evidence, `reverse_if`, and
+#     the diff it is bound to — void for any other diff, and void after `max_ttl_days` by the GATE's
+#     clock, never the receipt's. An eternal exemption is a disabled gate;
+#   * only two classes exist, each re-checked by the gate against the receipt it is shown: a
+#     historical receipt ADDED by the range (I14), and a v-canary pause in a repository with no declared
+#     live contour. A `failed` verdict is never decision-exempted, nor is the work-item evidence ledger
+#     (its 19 out-of-repository attachments are a `build_attachment` defect, not an unmeasurable thing).
+# Under `decision_exemptions.enforcement: off` (main's behaviour) an unsigned exemption is still judged
+# by C10 alone; a signed one is always checked. Under `signed`, an unsigned non-structural exemption
+# exempts nothing (C21). Which setting is in force is control's decision, not this tool's.
+DECISION_CODE = "DECISION_TO_PROCEED"
+DECISION_SCHEMA = "DecisionExemption/v1"
+DECISION_PHRASE = "decision to proceed"
+
+
+def decision_policy(policy: dict) -> dict:
+    return policy.get("decision_exemptions") or {}
+
+
+def decision_signers(repo: Path, base: str, policy: dict, repo_name: str | None) -> tuple[list[dict], str]:
+    """The trusted signers → (signers, where they were read). Never the head the change wrote.
+
+    Program repository: the policy file at BASE — its CI builds the gate from the head under test, so
+    the head's own policy would let a pull request enrol the key that admits it. Caller repository: the
+    policy the pinned bundle carries (a bundle edit is BUNDLE_MODIFIED_BY_PR)."""
+    if is_program_repo(repo, repo_name):
+        raw = git_text_or_none(repo, "show", f"{base}:{POLICY_PATH.relative_to(PROGRAM_ROOT)}")
+        if raw is None:
+            return [], f"no admission policy at base {base[:12]}"
+        try:
+            pol = json.loads(raw)
+        except ValueError as e:
+            return [], f"admission policy at base {base[:12]} unreadable: {e}"
+        return list(decision_policy(pol).get("signers") or []), f"admission policy at base {base[:12]}"
+    return list(decision_policy(policy).get("signers") or []), "admission policy of the pinned bundle"
+
+
+def decision_payload_bytes(payload: dict) -> bytes:
+    return canonical(payload).encode("utf-8")
+
+
+def _range_status(repo: Path, base: str, head: str) -> dict[str, str]:
+    return {f["path"]: f["status"] for f in range_files(repo, base, head)}
+
+
+def decision_eligibility(repo: Path, doc: dict, entity: str, klass: str, policy: dict,
+                         repo_name: str) -> tuple[bool, str, dict]:
+    """Is `entity` of this receipt a thing a decision may cover? → (ok, reason, facts).
+
+    Called by the issuer AND by the gate on every evaluation: the receipt is never believed about its
+    own eligibility. Refusals name the reason, because each is a different action for the author."""
+    dp = decision_policy(policy)
+    classes = dp.get("classes") or {}
+    facts: dict = {"entity": entity, "class": klass}
+    if klass not in classes:
+        return False, f"class {klass!r} is not one of {sorted(classes)}", facts
+    v = next((x for x in doc.get("verdicts") or [] if isinstance(x, dict) and x.get("entity") == entity), None)
+    if v is None:
+        return False, "the receipt carries no verdict for this entity — nothing to exempt", facts
+    facts["verdict"], facts["measured_reason"] = v.get("verdict"), v.get("reason") or ""
+    if v.get("verdict") != "not_measured":
+        return False, (f"verdict is {v.get('verdict')!r}: only a not_measured verdict can be decided past — a "
+                       f"failed verdict is a defect to fix, a verified one needs nothing"), facts
+    path = entity.split(":", 1)[1] if ":" in entity else entity
+    if path.startswith(LEDGER_REL + "/") or path == LEDGER_REL:
+        return False, ("ATTACHMENT_NOT_EXEMPTIBLE: the work-item evidence ledger is not an unmeasurable thing. "
+                       "Its out-of-repository attachments (receipt_path under /tmp or a sibling worktree) come "
+                       "from build_attachment falling back to an absolute path instead of refusing "
+                       "(tools/graph/admit_change.py build_attachment, the `except ValueError` branch); the "
+                       "remedy is to re-attach from the committed receipt, not a decision"), facts
+    spec = classes[klass]
+    prefix = spec.get("entity_prefix")
+    if prefix and not entity.startswith(prefix):
+        return False, f"class {klass} covers only entities named {prefix}…", facts
+    marker = spec.get("reason_marker") or ""
+    if marker not in facts["measured_reason"]:
+        return False, (f"class {klass} covers a verdict whose reason carries {marker!r}; this one says "
+                       f"{facts['measured_reason'][:120]!r}"), facts
+    if spec.get("requires_added_in_range"):
+        cs = doc.get("change_set") or {}
+        st = _range_status(repo, cs.get("base") or "", cs.get("head") or "") if cs.get("base") and cs.get("head") else {}
+        facts["status_in_range"] = st.get(path)
+        if st.get(path) != "A":
+            return False, (f"a historical receipt is a record: the class covers one ADDED by the receipt's range; "
+                           f"{path} has status {st.get(path)!r} there — an edited record is a rewritten one"), facts
+    contours = spec.get("live_contours") or {}
+    if klass == "no_live_contour" and repo_name in contours:
+        return False, (f"a live contour IS declared for {repo_name} ({contours[repo_name]}): run the canary there. "
+                       f"A decision covers only a pause no measurement can clear"), facts
+    return True, "eligible", facts
+
+
+def verify_decision_exemption(repo: Path, doc: dict, x: dict, policy: dict, *, base: str,
+                              repo_name: str, now: datetime) -> list[str]:
+    """Every problem with one signed exemption; [] means it exempts its entity."""
+    dp = decision_policy(policy)
+    ent = x.get("entity")
+    p = x.get("decision")
+    sig = x.get("signature")
+    if not isinstance(p, dict) or not isinstance(sig, str):
+        return [f"{ent}: a {DECISION_CODE} exemption carries no signed `decision` payload"]
+    probs = []
+    if p.get("schema") != DECISION_SCHEMA:
+        probs.append(f"{ent}: payload schema {p.get('schema')!r}")
+    for k in ("entity", "class", "verifier", "measured_reason", "why_unmeasurable", "decision_to_proceed",
+              "evidence", "reverse_if", "issued_at_utc", "expires_at_utc", "signer", "change_binding"):
+        if not p.get(k):
+            probs.append(f"{ent}: payload field {k!r} is empty — a decision without it is not a decision")
+    if probs:
+        return probs
+    if p["entity"] != ent or x.get("expires_at_utc") != p["expires_at_utc"] or x.get("code") != DECISION_CODE:
+        probs.append(f"{ent}: the exemption's entity/expiry/code differ from what was signed")
+    if DECISION_PHRASE not in str(p["decision_to_proceed"]).lower():
+        probs.append(f"{ent}: DEC-AUP-0037 R3 — the decision must say «{DECISION_PHRASE}» in those words")
+    # the signer is a key the change did not write
+    signers, where = decision_signers(repo, base, policy, repo_name)
+    sid = (p.get("signer") or {}).get("id")
+    key = next((s for s in signers if s.get("id") == sid), None)
+    if key is None:
+        probs.append(f"{ent}: signer {sid!r} is not a trusted signer in the {where} "
+                     f"({len(signers)} trusted) — a key a change can enrol is not a signature")
+    else:
+        ok, why, det = sshsig.verify_detached(decision_payload_bytes(p), sig, key.get("public_key") or "",
+                                              dp.get("namespace") or "")
+        if not ok:
+            probs.append(f"{ent}: {why}")
+        elif (p.get("signer") or {}).get("fingerprint") != det.get("public_key_fingerprint"):
+            probs.append(f"{ent}: signed fingerprint {p['signer'].get('fingerprint')} is not {sid}'s key")
+    # expiry, by the GATE's clock
+    def _aware(d):
+        return d.replace(tzinfo=timezone.utc) if d is not None and d.tzinfo is None else d
+    iss, exp = _aware(parse_iso(p["issued_at_utc"])), _aware(parse_iso(p["expires_at_utc"]))
+    now = _aware(now)
+    ttl = int(dp.get("max_ttl_days") or 14)
+    if iss is None or exp is None:
+        probs.append(f"{ent}: issued/expires not ISO-8601")
+    else:
+        if exp <= now:
+            probs.append(f"{ent}: expired {p['expires_at_utc']} (gate clock {now.isoformat()})")
+        if exp - iss > timedelta(days=ttl):
+            probs.append(f"{ent}: lifetime {(exp - iss).days}d exceeds max_ttl_days={ttl}")
+        if iss > now + timedelta(minutes=5):
+            probs.append(f"{ent}: issued in the future ({p['issued_at_utc']})")
+    # bound to the receipt's own diff
+    cs = doc.get("change_set") or {}
+    b = p["change_binding"]
+    if b.get("base") != cs.get("base") or b.get("head") != cs.get("head"):
+        probs.append(f"{ent}: bound to {str(b.get('base'))[:12]}..{str(b.get('head'))[:12]}, the receipt is "
+                     f"{str(cs.get('base'))[:12]}..{str(cs.get('head'))[:12]}")
+    else:
+        try:
+            dg = diff_digest(repo, cs["base"], cs["head"])
+        except Exception as e:  # an unreadable range is not a matching one
+            dg = f"unmeasurable: {e}"
+        if b.get("digest") != dg:
+            probs.append(f"{ent}: diff digest {str(b.get('digest'))[:23]}… is not this range's {dg[:23]}…")
+    if p.get("repo") != repo_name:
+        probs.append(f"{ent}: signed for repository {p.get('repo')!r}, this is {repo_name!r}")
+    if p.get("receipt_id") != doc.get("receipt_id"):
+        probs.append(f"{ent}: signed for receipt {p.get('receipt_id')!r}, this is {doc.get('receipt_id')!r}")
+    # the class is re-derived here, from the receipt and the policy in force — never read from the payload
+    ok, why, facts = decision_eligibility(repo, doc, ent, p["class"], policy, repo_name)
+    if not ok:
+        probs.append(f"{ent}: not eligible — {why}")
+    elif facts.get("measured_reason") != p["measured_reason"]:
+        probs.append(f"{ent}: the verdict reason changed since the decision was signed")
+    return probs
+
+
+def ssh_sign(key_path: Path, message: bytes, namespace: str, workdir: Path) -> str:
+    """`ssh-keygen -Y sign` — the production signature, from a key file that is never in a repository."""
+    workdir.mkdir(parents=True, exist_ok=True)
+    msg = workdir / "decision-payload.json"
+    msg.write_bytes(message)
+    sigp = Path(str(msg) + ".sig")
+    if sigp.exists():
+        sigp.unlink()
+    r = subprocess.run(["ssh-keygen", "-Y", "sign", "-q", "-f", str(key_path), "-n", namespace, str(msg)],
+                       capture_output=True, text=True, stdin=subprocess.DEVNULL)
+    if r.returncode != 0 or not sigp.exists():
+        raise UsageError(f"ssh-keygen -Y sign failed (rc {r.returncode}): {r.stderr.strip()[:200]}")
+    return sigp.read_text(encoding="utf-8")
+
+
+def _path_inside(p: Path, root: Path) -> bool:
+    try:
+        p.resolve().relative_to(root.resolve())
+        return True
+    except ValueError:
+        return False
+
+
+def cmd_exempt_decision(a) -> int:
+    """A2-314 — an ADMITTING agent records a signed decision to proceed past named not_measured entities.
+
+    Refuses (exit 3, nothing written) when a reason, the evidence, reverse_if or the key is missing,
+    when the key file lives inside a repository, when the lifetime exceeds policy, or when any entity is
+    not eligible — naming the reason per entity. Never touches a verdict: the entity stays not_measured."""
+    policy = load_policy(a.policy)
+    dp = decision_policy(policy)
+    repo = Path(a.repo).resolve()
+    rp = Path(a.receipt)
+    doc = json.loads(rp.read_text(encoding="utf-8"))
+    repo_name = a.repo_name or (doc.get("repo") or {}).get("name") or repo_remote_name(repo)
+    cs = doc.get("change_set") or {}
+    refusals = []
+    for k in ("why_unmeasurable", "decision", "evidence", "reverse_if", "signer_id"):
+        if not (getattr(a, k, None) or "").strip():
+            refusals.append(f"--{k.replace('_', '-')} is empty: an unexplained exemption is a disabled gate")
+    if a.decision and DECISION_PHRASE not in a.decision.lower():
+        refusals.append(f"--decision must say «{DECISION_PHRASE}» in those words (DEC-AUP-0037 R3)")
+    key = Path(a.signing_key) if a.signing_key else None
+    if key is None or not key.exists():
+        refusals.append("--signing-key: no private key file — the decision is unsigned and is not issued")
+    elif _path_inside(key, repo) or _path_inside(key, PROGRAM_ROOT):
+        refusals.append(f"--signing-key {key} is inside a repository: a key anyone with the tree holds signs "
+                        f"nothing")
+    ttl = int(dp.get("max_ttl_days") or 14)
+    days = a.ttl_days if a.ttl_days is not None else ttl
+    if days <= 0 or days > ttl:
+        refusals.append(f"--ttl-days {days}: the policy allows 1..{ttl}; an exemption must expire")
+    if not dp.get("namespace"):
+        refusals.append("the admission policy declares no decision_exemptions.namespace")
+    if not cs.get("base") or not cs.get("head"):
+        refusals.append("the receipt has no change_set.base/head to bind to")
+    me = None
+    if cs.get("base") and a.signer_id:
+        signers, where = decision_signers(repo, cs["base"], policy, repo_name)
+        me = next((s for s in signers if s.get("id") == a.signer_id), None)
+        if me is None:
+            refusals.append(f"signer {a.signer_id!r} is not enrolled in the {where} ({len(signers)} enrolled): "
+                            f"the gate would refuse it (C21). Enrolment is its own reviewed change")
+        elif key is not None and key.exists():
+            pubp = Path(str(key) + ".pub")
+            mine = pubp.read_text().split()[:2] if pubp.exists() else []
+            if mine != (me.get("public_key") or "").split()[:2]:
+                refusals.append(f"--signing-key is not the key enrolled for {a.signer_id!r} (or its .pub is "
+                                f"missing beside it)")
+    ents = list(a.entity or [])
+    if a.all_eligible:
+        ents += [v["entity"] for v in doc.get("verdicts") or []
+                 if isinstance(v, dict) and v.get("verdict") == "not_measured" and v["entity"] not in ents]
+    if not ents:
+        refusals.append("no --entity and no --all-eligible: nothing to decide")
+    report = {"schema": "DecisionExemptionIssuance/v1", "producer": {"tool": TOOL, "version": VERSION},
+              "repo": repo_name, "receipt": str(rp), "class": a.klass, "issued": [], "refused": []}
+    elig = []
+    for e in ents:
+        ok, why, facts = decision_eligibility(repo, doc, e, a.klass, policy, repo_name)
+        (elig if ok else report["refused"]).append(facts if ok else {"entity": e, "reason": why})
+    if a.all_eligible:  # an --all-eligible sweep reports what it did not take; only named entities refuse
+        named = set(a.entity or [])
+        blocking = [r for r in report["refused"] if r["entity"] in named]
+    else:
+        blocking = report["refused"]
+    if refusals or blocking or not elig:
+        for r in refusals:
+            print(f"REFUSED: {r}")
+        for r in report["refused"]:
+            print(f"NOT ELIGIBLE {r['entity']}: {r['reason']}")
+        if not refusals and not blocking and not elig:
+            print("REFUSED: no entity is eligible")
+        report["verdict"] = "refused"
+        report["refusals"] = refusals
+        if a.evidence_out:
+            write_json(Path(a.evidence_out), report)
+        return 3
+    now = datetime.now(timezone.utc).replace(microsecond=0)
+    issued_at = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+    expires = (now + timedelta(days=days)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    fp = sshsig.fingerprint(*sshsig.parse_public_key(me["public_key"]))
+    binding = {"base": cs["base"], "head": cs["head"], "digest": diff_digest(repo, cs["base"], cs["head"])}
+    wd = Path(a.workdir) if a.workdir else Path(tempfile.mkdtemp(prefix="a2-314-decision-"))
+    new = []
+    for facts in elig:
+        e = facts["entity"]
+        verifier = "I14" if a.klass == "historical_receipt" else "v-canary"
+        payload = {"schema": DECISION_SCHEMA, "entity": e, "class": a.klass, "verifier": verifier,
+                   "measured_reason": facts["measured_reason"], "why_unmeasurable": a.why_unmeasurable.strip(),
+                   "decision_to_proceed": a.decision.strip(), "evidence": a.evidence.strip(),
+                   "reverse_if": a.reverse_if.strip(), "repo": repo_name, "receipt_id": doc.get("receipt_id"),
+                   "work_item": (doc.get("work_item") or {}).get("id") if isinstance(doc.get("work_item"), dict) else None,
+                   "change_binding": binding, "issued_at_utc": issued_at, "expires_at_utc": expires,
+                   "signer": {"id": a.signer_id, "fingerprint": fp},
+                   "decision_ref": "DEC-AUP-0037 R3; A2-314"}
+        sig = ssh_sign(key, decision_payload_bytes(payload), dp["namespace"], wd)
+        new.append({"entity": e, "code": DECISION_CODE, "owner": a.signer_id,
+                    "reason": a.decision.strip(), "expires_at_utc": expires,
+                    "decision": payload, "signature": sig})
+        report["issued"].append({"entity": e, "expires_at_utc": expires})
+    covered = {x["entity"] for x in new}
+    doc["exemptions"] = [x for x in (doc.get("exemptions") or [])
+                         if not (isinstance(x, dict) and x.get("entity") in covered)] + new
+    verdict_of = {v["entity"]: v.get("verdict") for v in doc.get("verdicts") or [] if isinstance(v, dict)}
+    exempted = {x.get("entity") for x in doc["exemptions"] if isinstance(x, dict)}
+    left = sorted(e for e, v in verdict_of.items() if v != "verified" and e not in exempted)
+    adm = ("refused" if any(verdict_of[e] == "failed" for e in left) else
+           ("paused_safe" if left else "admitted_with_exemptions"))
+    doc["admission"] = {"verdict": adm, "rule": (
+        "admitted_with_exemptions requires every non-verified entity to carry a valid exemption. "
+        f"{len(new)} {DECISION_CODE} exemption(s) were signed by {a.signer_id} (DEC-AUP-0037 R3: a decision to "
+        f"proceed recorded by the admitting agent); the gate re-verifies each signature, binding, expiry and "
+        f"eligibility (C21). The verdicts are unchanged: those entities are still not_measured.")}
+    out = Path(a.out) if a.out else rp
+    write_json(out, doc)
+    report["verdict"] = adm
+    if a.evidence_out:
+        write_json(Path(a.evidence_out), report)
+    for r in report["refused"]:
+        print(f"NOT ELIGIBLE {r['entity']}: {r['reason']}")
+    print(f"{adm.upper()}  {DECISION_CODE}  {len(new)} signed by {a.signer_id}  expires {expires}  "
+          f"binding {binding['digest'][:23]}…  left {len(left)}  → {out}")
     return 0 if adm == "admitted_with_exemptions" else 3
 
 
@@ -4403,6 +5307,7 @@ def main(argv=None) -> int:
     g.add_argument("--skip-receipt", action="store_true", help="bypass attempt — always refused (negative control)")
     g.add_argument("--enforcement", choices=["off", "ledger", "muneral"])
     g.add_argument("--ledger-dir")
+    g.add_argument("--origin-association", help="signed GraphOriginAssociation/v1 plus adjacent .sig; requires BASE-trusted canonical key, exact raw receipt and full graph equality, and Muneral enforcement")
     g.add_argument("--policy", type=Path)
     g.add_argument("--out")
     g.add_argument("--json", action="store_true")
@@ -4415,12 +5320,15 @@ def main(argv=None) -> int:
                                                  "anything else, or absent, is not_measured — never an assumed pass")
     g.add_argument("--verifier-output-ref", help="a URL or id the verdict can be traced to (the workflow run)")
     g.add_argument("--workdir", help="scratch directory for the graph build and an authored receipt")
+    g.add_argument("--phase-log", type=Path, help="new private JSONL phase log; diagnostics only, never receipt evidence")
     g.add_argument("--bundle-dir", default=DEFAULT_BUNDLE_DIR, help="the vendored gate bundle directory, for the gate4b self-update classification")
     g.add_argument("--base-branch", help="DEC-AUP-0051: the ref of the branch this change targets (origin/main). A bundle refresh whose branch was UPDATED from its base branch carries the base "
                                          "branch's own commits in its range; paths whose head blob is byte-identical to that branch's are not this change's paths. Default: refs/remotes/origin/HEAD, "
                                          "read from the clone — never a guessed branch name; unresolvable means not_measured, which pauses, never admits")
 
     g.set_defaults(fn=cmd_gate)
+    import verify as canonical_verify
+    canonical_verify.compiler_sdk_arguments(g)
 
     ri = sub.add_parser("reissue", help="re-issue a ChangeAdmissionReceipt at the path it already occupies "
                                         "(DEC-AUP-0035 supersedes the previous draft only at the SAME path)")
@@ -4467,6 +5375,30 @@ def main(argv=None) -> int:
     ex.add_argument("--b7-second-opinion", help="B7 rule 7: a B7SecondOpinion/v1 file from `b7-opine`, produced "
                                                 "by a DIFFERENT authority-id")
     ex.set_defaults(fn=cmd_exempt)
+    canonical_verify.compiler_sdk_arguments(ex)
+
+    xd = sub.add_parser("exempt-decision", help="A2-314 — an ADMITTING agent signs a decision to proceed "
+                                                "(DEC-AUP-0037 R3) past named not_measured entities; the gate "
+                                                "re-verifies it (C21). Never the change author, never by hand")
+    xd.add_argument("--repo", required=True)
+    xd.add_argument("--receipt", required=True, help="the ChangeAdmissionReceipt/v1 to issue into")
+    xd.add_argument("--class", dest="klass", required=True, choices=["historical_receipt", "no_live_contour"])
+    xd.add_argument("--entity", action="append", help="an entity to decide past (repeatable)")
+    xd.add_argument("--all-eligible", action="store_true",
+                    help="every not_measured entity of the receipt that this class covers; the rest are listed")
+    xd.add_argument("--why-unmeasurable", help="WHY no verifier can measure it — required")
+    xd.add_argument("--decision", help="the decision to proceed, in those words (DEC-AUP-0037 R3) — required")
+    xd.add_argument("--evidence", help="what WAS measured that the decision rests on — required")
+    xd.add_argument("--reverse-if", help="the observation that voids this decision — required")
+    xd.add_argument("--signer-id", help="the admitting agent's id as enrolled in decision_exemptions.signers")
+    xd.add_argument("--signing-key", help="the admitting agent's private Ed25519 key file (never in a repository)")
+    xd.add_argument("--ttl-days", type=int, help="lifetime in days, 1..decision_exemptions.max_ttl_days")
+    xd.add_argument("--out", help="write the amended receipt here (default: in place)")
+    xd.add_argument("--evidence-out", help="write the DecisionExemptionIssuance/v1 report here")
+    xd.add_argument("--policy", type=Path)
+    xd.add_argument("--repo-name")
+    xd.add_argument("--workdir")
+    xd.set_defaults(fn=cmd_exempt_decision)
 
     bo = sub.add_parser("b7-opine", help="DEC-AUP-0020 rule 7 — an independent authority's own recomputed "
                                          "verdict on a declaration amendment, for --b7-second-opinion")
@@ -4489,7 +5421,12 @@ def main(argv=None) -> int:
     at.add_argument("--uri")
     at.add_argument("--ledger-dir")
     at.add_argument("--policy", type=Path)
-    at.add_argument("--post", action="store_true", help="probe Muneral for a work-item evidence route and record it")
+    at.add_argument("--post", action="store_true",
+                    help="POST the attachment to Muneral's evidence route (policy work_item_evidence.muneral."
+                         "evidence_route) for --muneral-task-id with $MUNERAL_API_KEY, and record the outcome "
+                         "(posted / failed / not_measured with its reason); $MUNERAL_BASE_URL overrides the base URL")
+    at.add_argument("--base", help="the PR's base ref; decides whether an older entry for the same receipt_path is "
+                                   "history (kept) or dead (superseded). Default: merge-base of HEAD and origin/main")
     at.set_defaults(fn=cmd_attach)
 
     cs = sub.add_parser("charter-scan", help="classify TDD / test-first hits across the live charter surfaces")
@@ -4521,7 +5458,15 @@ def main(argv=None) -> int:
         ap.print_help()
         return 2
     try:
-        return a.fn(a)
+        with impact_pair.phase_trace_to(getattr(a, "phase_log", None)):
+            with impact_pair.trace_phase("admission-command"):
+                if getattr(a, "compiler_sdk_root", None):
+                    base, head = resolve_range(a)
+                    return compiler_bound_command(a, repo_of(a), base, head)
+                if any(getattr(a, name, None) for name in (
+                        "compiler_sdk_declaration", "compiler_sdk_declaration_sha256", "compiler_sdk_evidence")):
+                    raise UsageError("compiler SDK inputs require --compiler-sdk-root")
+                return a.fn(a)
     except UsageError as e:
         (getattr(a, "parser", None) or ap).error(str(e))   # usage + message on stderr, exit 2
 

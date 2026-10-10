@@ -1,0 +1,114 @@
+{
+ "base_url": "http://127.0.0.1:35582",
+ "captured_at_utc": "2026-09-25T23:09:52Z",
+ "card": "A2-382",
+ "counters": {
+  "failed": 0,
+  "not_measured": 0,
+  "verified": 2
+ },
+ "entity_verdicts": [
+  {
+   "entity": "code_unit:apps/api/src/main.ts",
+   "probe_ids": [
+    "health-version"
+   ],
+   "reason": "health-version: status 200, status ok, resident version 0.4.6",
+   "verdict": "verified"
+  },
+  {
+   "entity": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+   "probe_ids": [
+    "route-patch-tasks-taskid-status"
+   ],
+   "reason": "route-patch-tasks-taskid-status: PATCH /api/v1/tasks/:taskId/status is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified"
+  },
+  {
+   "entity": "code_unit:apps/api/test/outbox-relay-probe.postgres.spec.ts",
+   "probe_ids": [
+    "route-patch-tasks-taskid-status"
+   ],
+   "reason": "route-patch-tasks-taskid-status: PATCH /api/v1/tasks/:taskId/status is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:PATCH /tasks/:taskId/status",
+   "probe_ids": [
+    "route-patch-tasks-taskid-status"
+   ],
+   "reason": "route-patch-tasks-taskid-status: PATCH /api/v1/tasks/:taskId/status is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified"
+  }
+ ],
+ "environment": "a2-382-candidate-local",
+ "model": "none: deterministic HTTP producer",
+ "phase": "pre",
+ "plan": {
+  "digest": "sha256:b94516a0618bc987276cd792f9ad3d1957ec5b10070cf3d3ab30558ec8602d73",
+  "id": "a2-382-relay-probe-candidate",
+  "path": "canary-plan.json"
+ },
+ "probes": [
+  {
+   "body_bytes": 362,
+   "body_sha256": "d32a53597eab1c45f9e855375ce789abb5a984c3376c0eec13188296d3275bfd",
+   "executed": true,
+   "id": "health-version",
+   "kind": "http",
+   "method": "GET",
+   "observed_version": "0.4.6",
+   "outcome": "verified",
+   "reason": "status 200, status ok, resident version 0.4.6",
+   "status": 200,
+   "url": "http://127.0.0.1:35582/health"
+  },
+  {
+   "declared_by_resident_route_table": true,
+   "declared_method": "PATCH",
+   "elapsed_ms": 0,
+   "evidence_kind": "resident_route_table",
+   "executed": true,
+   "id": "route-patch-tasks-taskid-status",
+   "kind": "http",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "PATCH /api/v1/tasks/:taskId/status is in the resident route table (not called: not a safe verb)",
+   "route": "/api/v1/tasks/:taskId/status",
+   "status": 200,
+   "url": "http://127.0.0.1:35582/health/routes"
+  }
+ ],
+ "producer": {
+  "tool": "scripts/canary/canary_probe.py",
+  "version": "1.0.0"
+ },
+ "read_only": true,
+ "resident_route_table": {
+  "build": {
+   "problem": "MUNERAL_BUILD_SHA is not set, so this process cannot name the commit it was built from. It is baked into the image from the build arg fed by docker-compose.prod.yml; an instance started by hand from a working tree has no value to report. Read this as not_measured, never as a pass.",
+   "sha": null,
+   "source": null
+  },
+  "routes": 77,
+  "sha256": "d1afc51ea84f88fa51757a9e0cdbb7447d594e9965677ef30d005d05b615a281",
+  "status": 200,
+  "url": "http://127.0.0.1:35582/health/routes"
+ },
+ "resident_version": "0.4.6",
+ "rules": [
+  "C3 a probe that could not run is not_measured, never verified",
+  "C4 read-only: GET only, no body, no credential; a non-GET route is judged by the resident route table and never called"
+ ],
+ "schema": "CanaryResult/v1",
+ "subject": {
+  "commit": "12c3e4d188adbac6db0eaea261b9284f451225ac",
+  "evidence": {
+   "path": "A2-382-relay-probe-candidate-12c3e4d.source-evidence.json",
+   "sha256": "3f4bcc9de17fc477314a15a2999d21d7e9498667306b8f8d1384f28a1b69fc61",
+   "source_field": "commit"
+  },
+  "schema": "GitCanarySubject/v1",
+  "tree": "b8c7c3f448af266a82468fa50d605534a8871ffa"
+ }
+}

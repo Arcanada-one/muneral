@@ -166,12 +166,59 @@ secondary data source.
 | `GET /tasks/:id/field-changes`, `POST /tasks/:id/field-ack` | yes | `task-workspace` |
 | `GET /tasks` (filtered query) | **no — 403** | unscoped |
 | `DELETE /tasks/:id` | **no — 403** | unscoped |
-| `POST`/`DELETE` `/tasks/:id/dependencies` | **no — 403** | unscoped |
+| `POST /tasks/:id/dependencies`, `DELETE /tasks/:id/dependencies/:depId` | yes, creator or executor of both endpoints in own workspace | `task-dependency` |
 | checklist routes | **no — 403** | unscoped |
 
 `403` does not distinguish "not assigned" from "does not exist" — deliberate, so
 a key cannot enumerate real task ids. **Do not read a `403` as "no such task"
 and do not read it as "empty".**
+
+## Discovering and creating projects with an agent key
+
+The paths below are relative to `/api/v1`. An agent key is bound to one
+workspace; request parameters cannot select another workspace for that key.
+
+| Route | Agent response | Scope |
+|---|---|---|
+| `GET /workspaces` | Array containing only the key's workspace, with `id`, `slug`, `name` | `workspace-metadata` |
+| `GET /projects/workspace/:workspaceId` | All projects in that workspace, with `id`, `workspaceId`, `slug`, `name`; no pagination | `workspace-metadata` |
+| `GET /projects/:projectId` | The same project identity fields | `project-metadata` |
+| `POST /projects` | Created or matching existing project, HTTP `201` | `project-create` |
+
+Project discovery does not expose descriptions, repository URLs, tasks, member
+lists or credentials. Foreign and unknown project/workspace IDs return `404`.
+Use the workspace ID returned by `GET /workspaces`, then discover projects
+before creating one. A successful empty array is different from a failed read.
+
+Project creation requires `workspaceId`, `slug` and `name`; `description` and
+`repoUrl` are optional. The workspace ID must match the credential's workspace.
+The slug uses lowercase letters, digits and hyphens, with at most 50 characters;
+the name must be nonempty and at most 200 characters. Concurrent requests with
+the same workspace, slug and properties return the same project. Conflicting
+properties or an ambiguous existing slug return `409`. Project deletion, Git
+reference writes, workspace creation and membership writes remain unscoped for
+agent keys and return `403`.
+
+## Writing task dependencies with an agent key
+
+`POST /tasks/:taskId/dependencies` accepts `toTaskId` (UUID) and `type`
+(`depends_on`, `blocks`, `related_to` or `duplicates`). It returns the dependency
+row with HTTP `201`. The key must be the creator or an assigned executor of
+**both** the source and target task, and both tasks must belong to the key's
+workspace. A reviewer-only assignment or a read grant does not authorize a
+dependency write. Missing, malformed, unknown or unauthorized task IDs return
+`403` without confirming task existence.
+
+`DELETE /tasks/:taskId/dependencies/:depId` returns HTTP `204` after removal.
+The stored edge must start at the task in the path; the same workspace and
+creator/executor checks apply to both stored endpoints. A forged source path,
+unknown edge or unauthorized endpoint returns `403` and preserves the edge.
+
+Self-dependencies return `400`. A `depends_on` or `blocks` edge that introduces
+a directed cycle returns `409`; duplicate and concurrent matching edge requests
+return the existing edge. Read the dependency or readiness routes after writes;
+`GET /tasks/:id` still carries no dependency field. Treat a failed read as
+unknown rather than an empty graph or readiness proof.
 
 ## Reading the status field
 

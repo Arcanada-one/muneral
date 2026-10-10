@@ -1,0 +1,11 @@
+{
+ "captured_at_utc": "2026-10-03T04:24:47Z",
+ "commit": "346dd5a9825f53d64549de6c581debae15de286f",
+ "dirty": false,
+ "producer": {
+  "tool": "scripts/canary/canary_probe.py",
+  "version": "1.0.0"
+ },
+ "schema": "MeasuredGitSource/v1",
+ "tree": "893410aeaae60aa29a7c1446980a3d8ab54700ac"
+}

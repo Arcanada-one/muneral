@@ -40,6 +40,7 @@ import re
 import shutil
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 TOOL = "tools/graph/ci_gate.py"
@@ -47,9 +48,13 @@ VERSION = "1.0.0"
 MODEL = "claude-opus-5"
 PROGRAM_ROOT = Path(__file__).resolve().parents[2]
 BUNDLE_FILES = [
+    "tools/graph/full_suite_ci.py",
+    "tools/graph/shell_source.py",
     "tools/graph/admit_change.py",
     "tools/graph/schema_check.py",
     "tools/graph/build_graph.py",
+    "tools/graph/native_projection.py",
+    "tools/graph/nest_bootstrap.py",
     # build_graph.py imports this at module scope to classify .github/workflows/* paths, so a bundle
     # without it is not merely reduced — the vendored builder raises ModuleNotFoundError on import
     # and the caller's gate cannot build a graph at all. Measured: the pre-1.0.1 builder carried no
@@ -65,8 +70,15 @@ BUNDLE_FILES = [
     # verification path: absent, they do not fail at import time, they fail when the gate reaches
     # the work they do, which is worse — a bundle that starts and then cannot finish.
     "tools/graph/impact_pair.py",
+    # The executable CI handoff consumes the same paired graph and mandatory
+    # matrix. Ship it in the canonical bundle rather than asking private-repo
+    # callers to copy a second producer or fetch with a new credential.
+    "tools/graph/ci_selection.py",
+    "tools/graph/origin_association.py",
     "tools/graph/verify.py",
     "tools/graph/contract_diff.py",
+    "tools/graph/metadata_contract_proof.py",
+    "tools/graph/metadata_contract_observer.cjs",
     # verify.py's own chain: canary_evidence at module scope, process_observation from there.
     # Found by importing every bundled module from a directory that contains nothing else — a
     # static import scan missed it, and so did testing one entry point by hand.
@@ -86,6 +98,9 @@ BUNDLE_FILES = [
     "contracts/graph-verified-change/relationship-graph.v1.json",
     "contracts/graph-verified-change/change-admission-receipt.v1.json",
     "contracts/graph-verified-change/verifier-matrix.v1.json",
+    # Caller graph compatibility trusts the current producer's committed public
+    # key, never a key supplied by an author receipt or the legacy bundle itself.
+    "contracts/graph-verified-change/bundle-signing-key.pub",
     "contracts/readiness-receipt-v1.schema.json",
 ]
 DEFAULT_RECEIPT_GLOBS = ["receipts/graph/**/*.json", "receipts/**/change-admission-*.json"]
@@ -96,6 +111,33 @@ SIGNATURE_NAME = "BUNDLE.json.sig"
 PUBKEY_NAME = "SIGNING-KEY.pub"
 SIGNING_NAMESPACE = "graph-admission-bundle"
 PROGRAM_PUBKEY_PATH = "contracts/graph-verified-change/bundle-signing-key.pub"
+# A2-455 (DEC-AUP-0036 C4) — the rotation path. One pinned key and one signature meant that changing the
+# key left every caller's gate without a trusted key until all four callers had moved, and B2 (the
+# self-update continuity arm) refused the first refresh signed by the new key outright. A bundle may now
+# carry ADDITIONAL signatures over the same BUNDLE.json, key i ≥ 2 in `BUNDLE.json.<i>.sig` +
+# `SIGNING-KEY.<i>.pub`, and BUNDLE.json itself lists every signer's fingerprint in `signing_keys` — so
+# the key set is signed by each key in it, and a signature pair nobody attested is refused. A caller's
+# pin may be a SET (`'SHA256:old SHA256:new'`). The ordered procedure and its drill are
+# `selftest_key_rotation` below and contracts/graph-verified-change/bundle-key-rotation.md.
+EXTRA_SIGNATURE_FMT = "BUNDLE.json.{n}.sig"
+EXTRA_PUBKEY_FMT = "SIGNING-KEY.{n}.pub"
+MAX_BUNDLE_SIGNERS = 4
+
+
+def signature_pairs(tools: Path) -> list[tuple[Path, Path]]:
+    """Every (signature, public key) pair a bundle directory carries, primary first. A half-present
+    extra pair is still returned, so that verify_bundle refuses it instead of never seeing it."""
+    pairs = [(tools / SIGNATURE_NAME, tools / PUBKEY_NAME)]
+    for n in range(2, MAX_BUNDLE_SIGNERS + 1):
+        sp, kp = tools / EXTRA_SIGNATURE_FMT.format(n=n), tools / EXTRA_PUBKEY_FMT.format(n=n)
+        if sp.exists() or kp.exists():
+            pairs.append((sp, kp))
+    return pairs
+
+
+def parse_pins(value: str | None) -> list[str]:
+    """`'SHA256:a SHA256:b'` / `'SHA256:a,SHA256:b'` → ['SHA256:a', 'SHA256:b']; empty → []."""
+    return [x for x in re.split(r"[\s,]+", (value or "").strip()) if x]
 # KB-039 / A2-243 defect 4. This import writes tools/graph/__pycache__/sshsig.*.pyc INTO THE VENDORED
 # BUNDLE DIRECTORY unless bytecode is off — a file the manifest does not list, created by the gate
 # itself, before verify_bundle has walked the directory and now refuses it (BUNDLE_UNLISTED_FILE).
@@ -253,6 +295,18 @@ def cmd_bundle(a) -> int:
     }
     manifest["bundle_digest"] = "sha256:" + hashlib.sha256(
         json.dumps(files, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    raw_keys = getattr(a, "sign_key", None)
+    keys = [Path(k) for k in ([raw_keys] if isinstance(raw_keys, str) else (raw_keys or []))]
+    if len(keys) > MAX_BUNDLE_SIGNERS:
+        print(f"at most {MAX_BUNDLE_SIGNERS} signing keys", file=sys.stderr)
+        return 4
+    for n in range(2, MAX_BUNDLE_SIGNERS + 1):  # a refresh that drops a signer must not leave its pair behind
+        (out / EXTRA_SIGNATURE_FMT.format(n=n)).unlink(missing_ok=True)
+        (out / EXTRA_PUBKEY_FMT.format(n=n)).unlink(missing_ok=True)
+    pubs = [k.with_suffix(".pub") if k.suffix != ".pub" else k for k in keys]
+    if keys:
+        # A2-455 — signed by every key it lists: the key set is part of the signed bytes.
+        manifest["signing_keys"] = [sshsig.fingerprint(*sshsig.parse_public_key(p.read_text())) for p in pubs]
     mp = out / "BUNDLE.json"
     mp.write_text(json.dumps(manifest, indent=1, sort_keys=True) + "\n")
 
@@ -260,10 +314,13 @@ def cmd_bundle(a) -> int:
     # over it binds the whole vendored set. The PRIVATE key never enters a repository (it lives outside
     # git on the signing host); the PUBLIC key travels with the bundle AND is committed in the program
     # repository, so the two copies can be compared by anyone who can read both.
-    signed = None
-    if getattr(a, "sign_key", None):
-        key = Path(a.sign_key)
-        sig = out / SIGNATURE_NAME
+    signed = []
+    # Extra keys FIRST, primary LAST: `ssh-keygen -Y sign` always writes BUNDLE.json.sig, so signing the
+    # primary first and then clearing that path for the next key deleted the primary signature (the
+    # rotation drill's producer arm caught exactly this).
+    for i, key in sorted(enumerate(keys, start=1), key=lambda t: t[0] == 1):
+        sig = out / (SIGNATURE_NAME if i == 1 else EXTRA_SIGNATURE_FMT.format(n=i))
+        pubname = PUBKEY_NAME if i == 1 else EXTRA_PUBKEY_FMT.format(n=i)
         produced = mp.with_suffix(mp.suffix + ".sig")
         # AUP-GRAPH-006:gate3a — `ssh-keygen -Y sign` PROMPTS «Overwrite (y/n)?» when its output file already
         # exists and, with no tty to answer it, exits **0** while leaving the OLD signature on disk. Refreshing a
@@ -280,21 +337,22 @@ def cmd_bundle(a) -> int:
             return 4
         if produced != sig:
             shutil.move(str(produced), str(sig))
-        pub = key.with_suffix(".pub") if key.suffix != ".pub" else key
-        shutil.copyfile(pub, out / PUBKEY_NAME)
-        # the same public key is committed in the program repository, so a caller's copy is comparable
-        (program_root / PROGRAM_PUBKEY_PATH).parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(pub, program_root / PROGRAM_PUBKEY_PATH)
-        kt, aa = sshsig.parse_public_key((out / PUBKEY_NAME).read_text())
+        pub = pubs[i - 1]
+        shutil.copyfile(pub, out / pubname)
+        if i == 1:
+            # the same (primary) public key is committed in the program repository, so a caller's copy is comparable
+            (program_root / PROGRAM_PUBKEY_PATH).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(pub, program_root / PROGRAM_PUBKEY_PATH)
+        kt, aa = sshsig.parse_public_key((out / pubname).read_text())
         fp = sshsig.fingerprint(kt, aa)
         ok, reason, _ = sshsig.verify_detached(mp.read_bytes(), sig.read_text(),
-                                               (out / PUBKEY_NAME).read_text(), SIGNING_NAMESPACE)
+                                               (out / pubname).read_text(), SIGNING_NAMESPACE)
         if not ok:
             print(f"SIGNING PRODUCED AN UNVERIFIABLE SIGNATURE: {reason}", file=sys.stderr)
             return 4
-        signed = fp
+        signed.insert(0, fp) if i == 1 else signed.append(fp)
     print(f"{out}: {len(files)} files, program_ref {ref[:12]}, bundle_digest {manifest['bundle_digest'][:23]}…"
-          + (f", signed by {signed}" if signed else ", UNSIGNED"))
+          + (f", signed by {' + '.join(signed)}" if signed else ", UNSIGNED"))
     return 0
 
 
@@ -309,9 +367,11 @@ def verify_bundle(tools: Path, program_ref: str | None,
     caught there by a diff-shape rule, `BUNDLE_MODIFIED_BY_PR`, never by verification). Here the
     manifest must additionally verify against an Ed25519 key the program repository holds.
     """
+    pins = parse_pins(key_fingerprint)
     sigrec = {"required": True, "namespace": SIGNING_NAMESPACE, "verified": False,
               "key_fingerprint": None, "pinned_fingerprint": key_fingerprint or None,
-              "fingerprint_pinned": bool(key_fingerprint), "reason": None}
+              "pinned_fingerprints": pins, "key_fingerprints": [],
+              "fingerprint_pinned": bool(pins), "reason": None}
     mp = tools / "BUNDLE.json"
     if not mp.exists():
         return None, [f"BUNDLE_MISSING: no {mp.name} under {tools}"], sigrec
@@ -321,22 +381,48 @@ def verify_bundle(tools: Path, program_ref: str | None,
         sigrec["reason"] = f"missing {missing}"
         return None, [f"BUNDLE_SIGNATURE_MISSING: {missing} is absent under {tools} — an unsigned bundle is "
                       f"refused, never trusted on its own hashes (a manifest signs nothing for itself)"], sigrec
-    ok, reason, det = sshsig.verify_detached(mp.read_bytes(), sp.read_text(), kp.read_text(), SIGNING_NAMESPACE)
-    sigrec.update({"verified": ok, "reason": reason, "key_fingerprint": det.get("public_key_fingerprint"),
-                   "hash_algorithm": det.get("hash_algorithm"), "key_type": det.get("key_type")})
-    if not ok:
-        return None, [f"BUNDLE_SIGNATURE_INVALID: {reason}"], sigrec
-    if key_fingerprint:
-        if det.get("public_key_fingerprint") != key_fingerprint:
-            return None, [f"BUNDLE_SIGNATURE_UNTRUSTED_KEY: the bundle is signed by "
-                          f"{det.get('public_key_fingerprint')} but the caller pins {key_fingerprint} — a "
-                          f"valid signature by an unpinned key is not a trusted signature"], sigrec
+    pairs = signature_pairs(tools)
+    fps: list[str] = []
+    for sp_i, kp_i in pairs:
+        if not sp_i.exists() or not kp_i.exists():
+            sigrec["reason"] = f"half an extra signature pair: {sp_i.name} / {kp_i.name}"
+            return None, [f"BUNDLE_SIGNATURE_MISSING: {sp_i.name} and {kp_i.name} must both be present or both "
+                          f"absent under {tools}"], sigrec
+        # EVERY signature a bundle carries must verify: one bad signature beside a good one is a bundle
+        # somebody edited, not a bundle with a spare.
+        ok, reason, det = sshsig.verify_detached(mp.read_bytes(), sp_i.read_text(), kp_i.read_text(),
+                                                 SIGNING_NAMESPACE)
+        if not fps:
+            sigrec.update({"verified": ok, "reason": reason, "key_fingerprint": det.get("public_key_fingerprint"),
+                           "hash_algorithm": det.get("hash_algorithm"), "key_type": det.get("key_type")})
+        if not ok:
+            sigrec.update({"verified": False, "reason": reason})
+            return None, [f"BUNDLE_SIGNATURE_INVALID: {sp_i.name}: {reason}"], sigrec
+        fps.append(det.get("public_key_fingerprint"))
+    sigrec["key_fingerprints"] = fps
     try:
         man = json.loads(mp.read_text())
     except json.JSONDecodeError as e:
         return None, [f"BUNDLE_MALFORMED: {e}"], sigrec
+    attested = man.get("signing_keys") if isinstance(man, dict) else None
+    if attested is None and len(fps) > 1:
+        return None, [f"BUNDLE_SIGNING_KEYS_UNATTESTED: {len(fps)} signatures but BUNDLE.json lists no "
+                      f"`signing_keys` — an extra signer the signed bytes do not name is refused"], sigrec
+    if attested is not None and sorted(attested) != sorted(fps):
+        return None, [f"BUNDLE_SIGNING_KEYS_UNATTESTED: the bundle carries signatures by {sorted(fps)} but the "
+                      f"signed BUNDLE.json attests {sorted(attested) if isinstance(attested, list) else attested!r}"
+                      f" — a signature pair added (or removed) after signing is refused"], sigrec
+    if pins:
+        trusted = [fp for fp in fps if fp in pins]
+        if not trusted:
+            return None, [f"BUNDLE_SIGNATURE_UNTRUSTED_KEY: the bundle is signed by {', '.join(fps)} but the "
+                          f"caller pins {', '.join(pins)} — a valid signature by an unpinned key is not a "
+                          f"trusted signature"], sigrec
+        sigrec["key_fingerprint"] = trusted[0]
     problems = []
-    listed: set[Path] = {tools / BUNDLE_MANIFEST_FILE, tools / SIGNATURE_NAME, tools / PUBKEY_NAME}
+    listed: set[Path] = {tools / BUNDLE_MANIFEST_FILE}
+    for sp_i, kp_i in pairs:
+        listed.update({sp_i, kp_i})
     for f in man.get("files", []):
         if f.get("verified_by_the_job") is False:
             # KB-039, closed here. The entry is the vendored EXECUTING workflow, which lives at the
@@ -397,6 +483,27 @@ def verify_bundle(tools: Path, program_ref: str | None,
     return man, problems, sigrec
 
 
+def rebuild_compatible_receipt_graph(repo: Path, receipt: dict) -> dict:
+    """Rebuild the receipt's measured range, including a record-only descendant.
+
+    The ordinary gate binds the receipt to the requested PR range first (C06).
+    The PR record head can differ from the measured source head; rebuilding at
+    the record head would contradict the genuine source graph in its receipt.
+    This check reproduces the measured proof, never edits either graph digest.
+    """
+    import impact
+    import impact_pair
+    cs = receipt.get("change_set") or {}
+    compatibility = receipt.get("caller_graph_compatibility")
+    if cs.get("mode") != "diff" or not isinstance(compatibility, dict):
+        raise impact.Refusal("CALLER_GRAPH_BINDING", "compatibility requires a paired diff receipt")
+    before, _, proof = impact_pair.caller_graph_pair(impact.Repo(repo), cs.get("base"), cs.get("head"),
+                                                   compatibility.get("bundle_path"))
+    if proof != compatibility or (receipt.get("graph") or {}).get("source_commit") != before.manifest["source_commit"]:
+        raise impact.Refusal("CALLER_GRAPH_BINDING", "independently rebuilt measured proof differs")
+    return before.doc
+
+
 # --------------------------------------------------------------------------------------- run
 def changed_files(repo: Path, base: str, head: str) -> list[str]:
     out = git(repo, "diff", "--name-only", f"{base}..{head}")
@@ -421,8 +528,40 @@ def receipts_from_body(body: str, workdir: Path) -> list[Path]:
     return out
 
 
+READINESS_ABSENCE_DECISION = "DEC-AUP-0062"
+READINESS_ABSENCE_REVISIT_BY = datetime(2026, 10, 11, tzinfo=timezone.utc)
+
+
+def readiness_absence_row(now: datetime) -> dict:
+    """A2-445 / DEC-AUP-0062 — the row printed when a change presents no ReadinessReceipt/v1.
+
+    The contract binds a receipt only when it is PRESENTED (`contracts/readiness-receipt-v1.schema.json`
+    → status), and no decision, mandate or contract makes one owed by a change. Printed as `not_measured`,
+    the absence was 105 of the check's 135 outputs across the four callers (2026-09-25…27,
+    governance/consilium/2026-09-27-readiness-receipts-none/) — a `not_measured` nobody had to close and that
+    cannot move the verdict, which teaches the reader to skip the one word DEC-AUP-0008 I4 rests on.
+
+    So until the decision's revisit date the row says what it is: nothing presented, nothing owed. It is
+    never dropped — silence in place of a false `not_measured` would trade one untruth for another. And the
+    label is TIME-BOXED here, not only in the decision: from READINESS_ABSENCE_REVISIT_BY on, the row reads
+    `not_measured` again and names the lapsed decision, so an undesigned «when is a receipt owed» rule
+    brings its own pressure back instead of turning a recorded absence into a permanent one.
+    """
+    if now < READINESS_ABSENCE_REVISIT_BY:
+        return {"code": "READINESS_RECEIPTS_NONE", "verdict": "not_owed", "informational": True,
+                "detail": "this change presents no ReadinessReceipt/v1 — neither a ```json block in the pull-request "
+                          "body nor one added under receipts/ — and none is owed: the contract binds a receipt only "
+                          f"when it is presented ({READINESS_ABSENCE_DECISION}, revisit by "
+                          f"{READINESS_ABSENCE_REVISIT_BY:%Y-%m-%d}). Nothing about readiness was judged here."}
+    return {"code": "READINESS_RECEIPTS_NONE", "verdict": "not_measured",
+            "detail": "this change presents no ReadinessReceipt/v1 — neither a ```json block in the pull-request body "
+                      f"nor one added under receipts/. {READINESS_ABSENCE_DECISION} labelled this absence `not_owed` "
+                      f"until {READINESS_ABSENCE_REVISIT_BY:%Y-%m-%d}, pending a rule for when a receipt IS owed; that "
+                      "date has passed, so the absence is `not_measured` again, which is not a pass."}
+
+
 def check_readiness_receipts(result: dict, body: str, repo: Path, files: list[str], head: str,
-                             tools: Path) -> None:
+                             tools: Path, now_utc: datetime | None = None) -> None:
     """A2-289 — classify every ReadinessReceipt/v1 this change presents, and refuse a broken one.
 
     THE GATE COULD ALWAYS READ THEM. `--pr-body-file` has been an input since gate1 and
@@ -471,10 +610,7 @@ def check_readiness_receipts(result: dict, body: str, repo: Path, files: list[st
 
     result["readiness_receipts"] = {"count": len(docs), "sources": [n for n, _ in docs]}
     if not docs:
-        result["checks"].append({"code": "READINESS_RECEIPTS_NONE", "verdict": "not_measured",
-                                 "detail": "this change presents no ReadinessReceipt/v1 — neither a ```json "
-                                           "block in the pull-request body nor one added under receipts/. "
-                                           "Nothing was judged about readiness here; `not_measured` is not a pass."})
+        result["checks"].append(readiness_absence_row(now_utc or datetime.now(timezone.utc)))
         return
 
     bad = 0
@@ -609,7 +745,8 @@ def cmd_run(a) -> int:
         result["checks"].append({"code": "BUNDLE_SIGNATURE_VERIFIED", "verdict": "verified",
                                  "detail": (f"BUNDLE.json carries a valid Ed25519 SSHSIG detached signature in "
                                             f"namespace {SIGNING_NAMESPACE!r} by {sigrec['key_fingerprint']}, "
-                                            f"which is the key this caller pins. Every per-file sha256 below is "
+                                            f"which is a key this caller pins ({', '.join(sigrec.get('pinned_fingerprints') or [])}; "
+                                            f"all signers: {', '.join(sigrec.get('key_fingerprints') or [])}). Every per-file sha256 below is "
                                             f"therefore signed, not merely self-consistent.")})
     else:
         result["checks"].append({"code": "BUNDLE_SIGNATURE_UNPINNED", "verdict": "not_measured",
@@ -646,7 +783,8 @@ def cmd_run(a) -> int:
             # carrying a GATE_SELF_UPDATE exemption whose B1-B5 battery the gate itself re-measures.
             import admit_change as admit_mod  # sibling tool, reused as a library (bundled)
             files_status = [{"path": f, "status": status.get(f, "M")} for f in files]
-            su_case, su_ev = admit_mod.structural_case(repo, base, head, files_status, bundle_rel)
+            su_case, su_ev = admit_mod.structural_case(
+                repo, base, head, files_status, bundle_rel, getattr(a, "base_branch", None))
             if su_case != "gate_self_update":
                 return fail("BUNDLE_MODIFIED_BY_PR",
                             f"this pull request edits or removes {len(edited)} file(s) under the vendored gate bundle "
@@ -703,6 +841,10 @@ def cmd_run(a) -> int:
            "--repo-name", result["repo"]]
     if bundle_rel:
         cmd += ["--bundle-dir", bundle_rel]
+    # A hosted PR checkout can have named remote refs without origin/HEAD.
+    # Preserve the supplied PR target; the maintained gate validates/resolves it.
+    if getattr(a, "base_branch", None):
+        cmd += ["--base-branch", a.base_branch]
     # AUP-GRAPH-006:gate2a — the automated-author path. The event payload is the ONLY source of author
     # identity; the head branch name is attacker-controllable and is never consulted.
     if getattr(a, "event_file", None) and Path(a.event_file).exists():
@@ -770,13 +912,24 @@ def cmd_run(a) -> int:
                                                    "source_commit/digest to rebuild against"})
                 continue
             gp = work / f"graph-{g['source_commit'][:12]}.json"
-            b = subprocess.run([sys.executable, str(tools / "tools/graph/build_graph.py"), str(repo),
-                                "--rev", g["source_commit"], "--out", str(gp)], capture_output=True, text=True,
-                               env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
-            if b.returncode != 0:
-                result["checks"].append({"code": "GRAPH_BUILD_FAILED", "verdict": "not_measured",
-                                         "detail": (b.stderr or b.stdout).strip()[:300]})
-                continue
+            compatibility = (src or {}).get("caller_graph_compatibility")
+            if compatibility is not None:
+                import impact
+                try:
+                    gp.write_bytes(impact.dump(rebuild_compatible_receipt_graph(repo, src)))
+                except (impact.Refusal, ValueError, KeyError, TypeError, OSError, subprocess.SubprocessError) as exc:
+                    result["checks"].append({"code": "CALLER_GRAPH_COMPATIBILITY_REFUSED", "verdict": "refuse",
+                                             "detail": str(exc)})
+                    result["reason_codes"] = sorted(set(result["reason_codes"] + ["CALLER_GRAPH_COMPATIBILITY_REFUSED"]))
+                    continue
+            else:
+                b = subprocess.run([sys.executable, str(tools / "tools/graph/build_graph.py"), str(repo),
+                                    "--rev", g["source_commit"], "--out", str(gp)], capture_output=True, text=True,
+                                   env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
+                if b.returncode != 0:
+                    result["checks"].append({"code": "GRAPH_BUILD_FAILED", "verdict": "not_measured",
+                                             "detail": (b.stderr or b.stdout).strip()[:300]})
+                    continue
             built = json.loads(gp.read_text())["manifest"]["graph_digest"]
             same = built == g["graph_digest"]
             result["checks"].append({"code": "GRAPH_REBUILT_MATCHES" if same else "GRAPH_DIGEST_MISMATCH",
@@ -812,6 +965,14 @@ def cmd_run(a) -> int:
 
 
 # --------------------------------------------------------------------------------------- selftest
+def _selftest_arm_record(checks: list[dict]) -> str:
+    """Lossless diagnostic identity/outcome projection of collected root checks."""
+    return "SELFTEST_ARMS_JSON: " + json.dumps({
+        "schema": "GraphGateSelftestArms/v1",
+        "checks": [{"name": c.get("name"), "ok": c.get("ok")} for c in checks],
+    }, sort_keys=True)
+
+
 def selftest() -> int:
     """The mutation battery of the CI job: every mutant must FLIP the verdict of the conformant control.
 
@@ -1024,9 +1185,18 @@ def selftest() -> int:
     b8_checks, b8_red = selftest_b8()
     red += b8_red
     checks += b8_checks
+    print("\n--- A2-455 / DEC-AUP-0036 C4 — the bundle-key rotation drill ---")
+    rot_checks, rot_red = selftest_key_rotation()
+    red += rot_red
+    checks += rot_checks
     measured = [c for c in checks if c.get("ok") is not None]
+    # Preserve the actual root check identities before the final aggregate.
+    # A historical count/tail cannot reconstruct which eight checks failed;
+    # this machine record comes from the real collected checks, never that
+    # arithmetic difference. None remains unmeasured rather than false/pass.
+    print(_selftest_arm_record(checks))
     print(f"\nTOTAL {'PASS' if not red else 'FAIL'}: {len(measured) - red}/{len(measured)} checks across "
-          f"seven batteries ({len(checks) - len(measured)} not_measured)")
+          f"eight batteries ({len(checks) - len(measured)} not_measured)")
     return 0 if not red else 1
 
 
@@ -1070,6 +1240,19 @@ def selftest_gate2a() -> tuple[list[dict], int]:
     (repo / "src/b.ts").write_text("import { a } from './a';\nexport const b = a + 1;\n")
     (repo / "package.json").write_text('{\n "name": "fixture",\n "dependencies": {"left-pad": "1.0.0"}\n}\n')
     (repo / "pnpm-lock.yaml").write_text("lockfileVersion: '9.0'\npackages:\n  left-pad@1.0.0: {}\n")
+    (repo / "tsconfig.json").write_text(json.dumps({"compilerOptions": {
+        "strict": True, "noEmit": True}, "include": ["src/**/*.ts"]}))
+    (repo / ".arcana").mkdir()
+    (repo / ".arcana/verify.json").write_text(json.dumps({"schema": "VerifyProfile/v1",
+        "deployables": {".": {"tsconfig": ["tsconfig.json"], "full_test":
+            [sys.executable, "-m", "unittest", "discover", "-s", "test", "-v"]}}}))
+    (repo / "test").mkdir()
+    (repo / "test/test_source.py").write_text(
+        "import pathlib, unittest\n"
+        "class Source(unittest.TestCase):\n"
+        " def test_export(self): self.assertEqual(pathlib.Path('src/a.ts').read_text(), 'export const a = 1;\\n')\n"
+        " def test_consumer(self): self.assertIn('export const b = a + 1;', pathlib.Path('src/b.ts').read_text())\n")
+
     g("add", "-A"); g("commit", "-q", "-m", "base")
     base = g("rev-parse", "HEAD").strip()
 
@@ -1201,15 +1384,16 @@ def _receipt_shape_ok(root: Path, receipt_path: str | None) -> bool:
     gf = r["impact_set"]["global_fallback"]
     verdict_of = {v["entity"]: v["verdict"] for v in r["verdicts"]}
     exempt = {x["entity"] for x in r["exemptions"]}
-    repo_ent = next((e for e in verdict_of if e.startswith("repository:")), None)
+    repo_ent = next((e for e in verdict_of if e.startswith("deployable_unit:")), None)
     auth_ent = next((e for e in verdict_of if e.startswith("receipt_authorship:")), None)
     return bool(
-        gf.get("triggered") is True and gf.get("scope") == "whole_repository" and gf.get("total_nodes")
-        and r["impact_set"]["scope"] == "whole_repository"
+        gf.get("triggered") is True and gf.get("files")
         and repo_ent and verdict_of[repo_ent] == "verified" and repo_ent not in exempt
         and auth_ent and verdict_of[auth_ent] == "not_measured" and auth_ent in exempt
         and r["exemptions"][0]["owner"] and r["exemptions"][0]["expires_at_utc"]
-        and r["verifiers"][0]["kind"] == "other"
+        and any(v.get("scope") == "global_fallback_full_suite" and repo_ent in v.get("entities", [])
+                and v.get("exit_code") == 0 for v in r["verifiers"])
+        and r.get("head_graph") and r.get("revision_selection") and r.get("verify", {}).get("required_by_entity")
         and r["admission"]["verdict"] == "admitted_with_exemptions"
         and r["authored_by"]["path"] == "automated_author"
     )
@@ -1232,6 +1416,200 @@ def sign_bundle(bundle: Path, seed: bytes = SELFTEST_SEED, namespace: str = SIGN
     (bundle / SIGNATURE_NAME).write_text(
         sshsig.make_detached(seed, mp.read_bytes(), namespace, hash_algorithm))
     return sshsig.fingerprint(sshsig.SUPPORTED_KEY_TYPE, pub)
+
+
+SELFTEST_NEW_SEED = bytes(range(64, 96))    # the rotation drill's "new" key K2 (throwaway)
+
+
+def sign_bundle_set(bundle: Path, seeds: list[bytes], attest: list[bytes] | None = None) -> list[str]:
+    """A2-455 — sign a bundle the way `--sign-key K1 --sign-key K2` does, in pure Python: write the
+    signer set into BUNDLE.json (`signing_keys`), then sign that manifest with every key. `attest`
+    lets a mutant claim a different set than the one that signs."""
+    mp = bundle / "BUNDLE.json"
+    man = json.loads(mp.read_text())
+    fp = lambda sd: sshsig.fingerprint(sshsig.SUPPORTED_KEY_TYPE, sshsig.ed25519_keypair(sd)[1])
+    man["signing_keys"] = [fp(sd) for sd in (attest if attest is not None else seeds)]
+    mp.write_text(json.dumps(man, indent=1, sort_keys=True) + "\n")
+    for n in range(2, MAX_BUNDLE_SIGNERS + 1):
+        (bundle / EXTRA_SIGNATURE_FMT.format(n=n)).unlink(missing_ok=True)
+        (bundle / EXTRA_PUBKEY_FMT.format(n=n)).unlink(missing_ok=True)
+    for i, sd in enumerate(seeds, start=1):
+        pub = sshsig.ed25519_keypair(sd)[1]
+        (bundle / (PUBKEY_NAME if i == 1 else EXTRA_PUBKEY_FMT.format(n=i))).write_text(
+            sshsig.public_key_line(pub, f"rotation-drill-{i}"))
+        (bundle / (SIGNATURE_NAME if i == 1 else EXTRA_SIGNATURE_FMT.format(n=i))).write_text(
+            sshsig.make_detached(sd, mp.read_bytes(), SIGNING_NAMESPACE, "sha512"))
+    return [fp(sd) for sd in seeds]
+
+
+def selftest_key_rotation() -> tuple[list[dict], int]:
+    """A2-455 (DEC-AUP-0036 C4) — the key-rotation drill.
+
+    One caller's trust in the bundle key rests on two anchors: the PIN in its own workflow (read by
+    verify_bundle on every pull request) and the key of its BASE bundle (read by B2 on a bundle-refresh
+    pull request). The planned rotation K1 → K2 is walked step by step, and at EVERY intermediate state
+    both anchors must accept a bundle a live key can sign. Callers are independent (each has its own pin
+    and its own base bundle), so a per-caller walk covers any interleaving of the four callers; the one
+    cross-caller rule is that K1 is retired only after the LAST caller reached the final state.
+    Every negative arm must be red: skipping the dual-signed step, dropping K1 from a pin early, an
+    unattested extra signature, a key base never held, and today's single-key rotation."""
+    import tempfile
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import admit_change  # noqa: E402
+    checks, red = [], 0
+
+    def check(name, ok, **kw):
+        nonlocal red
+        checks.append({"name": name, "ok": bool(ok), **kw})
+        if not ok:
+            red += 1
+        print(("ok   " if ok else "FAIL ") + name + ("" if ok else "  " + json.dumps(kw, ensure_ascii=False)[:300]))
+
+    root = Path(tempfile.mkdtemp(prefix="ci-gate-rotation-"))
+    K1, K2, K3 = SELFTEST_SEED, SELFTEST_NEW_SEED, SELFTEST_OTHER_SEED
+    fp = lambda sd: sshsig.fingerprint(sshsig.SUPPORTED_KEY_TYPE, sshsig.ed25519_keypair(sd)[1])
+    template = root / "template"
+    fixture_bundle(template, root / "fixture-program")
+    n = 0
+
+    def bundle(seeds, attest=None, legacy=False):
+        nonlocal n
+        n += 1
+        d = root / f"b{n}"
+        shutil.copytree(template, d)
+        if legacy:              # today's shape: one key, no signing_keys field
+            sign_bundle(d, seeds[0])
+        else:
+            sign_bundle_set(d, seeds, attest)
+        return d
+
+    def pin(*seeds):
+        return " ".join(fp(sd) for sd in seeds)
+
+    def pr(pins, head, base=None):
+        """→ (green?, reasons). A pull request is green when verify_bundle accepts the head bundle under
+        the head workflow's pin AND, if it refreshes the bundle, B2 accepts head against base."""
+        _, problems, _ = verify_bundle(head, None, pins)
+        why = [p.split(":")[0] for p in problems]
+        if base is not None:
+            ok2, reason2, _ = admit_change.key_continuity(base, head, root / f"wd{n}")
+            if ok2 is not True:
+                why.append("B2:" + str(reason2)[:120])
+        return not why, why
+
+    # ---- the planned path, both orders of steps 1 and 2 -------------------------------------------
+    b_k1_legacy = bundle([K1], legacy=True)          # S0: what every caller carries today
+    b_k1 = bundle([K1])                              # S1: same key, new-format manifest (the C4 code shipped)
+    b_k12 = bundle([K1, K2])                         # S3: dual-signed
+    b_k2 = bundle([K2])                              # S4: new key only
+    path = [
+        ("S0 today: pin {K1}, legacy bundle [K1] — steady-state PR", pin(K1), b_k1_legacy, None),
+        ("S1 refresh to the C4 code, still [K1]: legacy base [K1] → head [K1]", pin(K1), b_k1, b_k1_legacy),
+        ("S2 pin PR {K1,K2}, bundle [K1] unchanged", pin(K1, K2), b_k1, None),
+        ("S3 refresh to dual-signed [K1,K2] under pin {K1,K2}: base [K1] → head [K1,K2]", pin(K1, K2), b_k12, b_k1),
+        ("S3' same refresh BEFORE the pin PR (pin still {K1})", pin(K1), b_k12, b_k1),
+        ("S3'' pin PR {K1,K2} after that refresh", pin(K1, K2), b_k12, None),
+        ("S4 refresh to [K2] only: base [K1,K2] → head [K2], pin {K1,K2}", pin(K1, K2), b_k2, b_k12),
+        ("S5 pin PR {K2}, bundle [K2]", pin(K2), b_k2, None),
+        ("S6 steady state after K1 retired: pin {K2}, bundle [K2]", pin(K2), b_k2, None),
+        ("rollback during the window: base [K1,K2] → head [K1], pin {K1,K2}", pin(K1, K2), b_k1, b_k12),
+    ]
+    for name, pins, head, base in path:
+        ok, why = pr(pins, head, base)
+        check(f"rotation path — {name}: GREEN", ok, reasons=why)
+
+    # ---- negative arms: each must be RED ------------------------------------------------------------
+    b_k12_extra3 = bundle([K1, K2], attest=[K1])                 # K2 pair present, manifest attests only K1
+    b_k1_plus3 = bundle([K1, K3], attest=[K1])                   # attacker appends own pair to a good bundle
+    b_k3 = bundle([K3])
+    negatives = [
+        ("today's single-key rotation: pin {K1}, legacy base [K1] → head [K2] (verify + B2 both refuse)",
+         pin(K1), b_k2, b_k1_legacy, {"BUNDLE_SIGNATURE_UNTRUSTED_KEY", "B2"}),
+        ("skipping the dual-signed step: pin {K1,K2}, base [K1] → head [K2] (B2 refuses)",
+         pin(K1, K2), b_k2, b_k1, {"B2"}),
+        ("dropping K1 from the pin early: pin {K2}, bundle [K1]", pin(K2), b_k1, None,
+         {"BUNDLE_SIGNATURE_UNTRUSTED_KEY"}),
+        ("an extra signature pair the signed manifest does not attest", pin(K1, K2), b_k12_extra3, None,
+         {"BUNDLE_SIGNING_KEYS_UNATTESTED"}),
+        ("an attacker's pair appended to a good K1 bundle", pin(K1), b_k1_plus3, None,
+         {"BUNDLE_SIGNING_KEYS_UNATTESTED"}),
+        ("a key base never held: base [K1,K2] → head [K3], pin {K1,K2}", pin(K1, K2), b_k3, b_k12,
+         {"BUNDLE_SIGNATURE_UNTRUSTED_KEY", "B2"}),
+    ]
+    for name, pins, head, base, expect in negatives:
+        ok, why = pr(pins, head, base)
+        got = {w.split(":")[0] if not w.startswith("B2:") else "B2" for w in why}
+        check(f"rotation negative — {name}: RED with {sorted(expect)}", (not ok) and expect <= got, reasons=why)
+
+    # today's legacy manifest (no `signing_keys`) with an attacker's pair appended: nothing attests the extra key
+    b_legacy3 = bundle([K1], legacy=True)
+    (b_legacy3 / EXTRA_PUBKEY_FMT.format(n=2)).write_text(
+        sshsig.public_key_line(sshsig.ed25519_keypair(K3)[1], "attacker"))
+    (b_legacy3 / EXTRA_SIGNATURE_FMT.format(n=2)).write_text(
+        sshsig.make_detached(K3, (b_legacy3 / "BUNDLE.json").read_bytes(), SIGNING_NAMESPACE, "sha512"))
+    ok, why = pr(pin(K1, K3), b_legacy3)
+    check("rotation negative — a legacy manifest (no signing_keys) carrying a second, valid signature: RED "
+          "(BUNDLE_SIGNING_KEYS_UNATTESTED) even when the pin names that key",
+          (not ok) and "BUNDLE_SIGNING_KEYS_UNATTESTED" in why, reasons=why)
+
+    # a legitimately dual-signed bundle whose K2 signature is replaced after signing
+    b_bad = bundle([K1, K2])
+    s2 = b_bad / EXTRA_SIGNATURE_FMT.format(n=2)
+    s2.write_text((b_bad / SIGNATURE_NAME).read_text())       # K1's signature filed as K2's
+    ok, why = pr(pin(K1, K2), b_bad)
+    check("rotation negative — a dual-signed bundle with one signature that does not verify: RED "
+          "(BUNDLE_SIGNATURE_INVALID)", (not ok) and "BUNDLE_SIGNATURE_INVALID" in why, reasons=why)
+    (b_bad / EXTRA_PUBKEY_FMT.format(n=2)).unlink()
+    ok, why = pr(pin(K1, K2), b_bad)
+    check("rotation negative — half an extra pair (signature without key): RED (BUNDLE_SIGNATURE_MISSING)",
+          (not ok) and "BUNDLE_SIGNATURE_MISSING" in why, reasons=why)
+
+    # ---- the PRODUCTION producer, with the real ssh-keygen where it exists ---------------------------
+    if shutil.which("ssh-keygen"):
+        kd = root / "keys"
+        kd.mkdir()
+        keys = []
+        for name in ("old", "new"):
+            r = subprocess.run(["ssh-keygen", "-q", "-t", "ed25519", "-N", "", "-C", f"rotation-drill-{name}",
+                                "-f", str(kd / name)], capture_output=True, text=True)
+            keys.append(str(kd / name))
+        prog_root, ref = fixture_program_repo(root / "fixture-program-real")
+
+        def commit_primary_key(key: str) -> str:
+            # This public key is itself bundled. Prepare genuine fixture source
+            # before capturing the ref, just as the production drift guard requires.
+            shutil.copyfile(Path(key + ".pub"), prog_root / PROGRAM_PUBKEY_PATH)
+            env = {**os.environ, **FIXTURE_GIT_ENV}
+            for args in (["add", "--", PROGRAM_PUBKEY_PATH],
+                         ["commit", "-q", "-m", "fixture primary public key"]):
+                subprocess.run(["git", "-C", str(prog_root), *args], env=env,
+                               capture_output=True, text=True, check=True)
+            return git(prog_root, "rev-parse", "HEAD").strip()
+
+        ref = commit_primary_key(keys[0])
+        out = root / "real-dual"
+        rc = cmd_bundle(argparse.Namespace(out=str(out), program_ref=ref, program_root=str(prog_root),
+                                           workflow_out=None, sign_key=keys))
+        fps = [sshsig.fingerprint(*sshsig.parse_public_key(Path(k + ".pub").read_text())) for k in keys]
+        _, problems, rec = verify_bundle(out, ref, " ".join(fps[1:]))
+        check("rotation producer — `bundle --sign-key old --sign-key new` (real ssh-keygen) yields a bundle "
+              "that verifies under a pin of the NEW key alone and attests both",
+              rc == 0 and not problems and rec.get("key_fingerprints") == fps
+              and json.loads((out / "BUNDLE.json").read_text()).get("signing_keys") == fps,
+              rc=rc, problems=problems)
+        ref = commit_primary_key(keys[1])
+        rc2 = cmd_bundle(argparse.Namespace(out=str(out), program_ref=ref, program_root=str(prog_root),
+                                            workflow_out=None, sign_key=keys[1:]))
+        _, problems2, rec2 = verify_bundle(out, ref, fps[1])
+        check("rotation producer — refreshing the same directory with the new key alone leaves NO stale "
+              "extra pair behind", rc2 == 0 and not problems2 and rec2.get("key_fingerprints") == fps[1:]
+              and not (out / EXTRA_SIGNATURE_FMT.format(n=2)).exists(), rc=rc2, problems=problems2)
+    else:
+        checks.append({"name": "rotation producer (real ssh-keygen)", "ok": None,
+                       "detail": "ssh-keygen absent — not_measured, never a pass"})
+        print("n/m  rotation producer — ssh-keygen absent (not_measured)")
+    shutil.rmtree(root, ignore_errors=True)
+    return checks, red
 
 
 def reseal_bundle(bundle: Path, seed: bytes = SELFTEST_SEED, program_ref: str | None = None,
@@ -1368,6 +1746,9 @@ def selftest_gate4b() -> tuple[list[dict], int]:
         (repo / "src").mkdir()
         (repo / "src/a.ts").write_text("export const a = 1;\n")
         (repo / "src/b.ts").write_text("import { a } from './a';\nexport const b = a + 1;\n")
+        (repo / "tsconfig.json").write_text(json.dumps({"compilerOptions": {
+            "strict": True, "noEmit": True}, "include": ["src/**/*.ts"]}))
+
         if with_bundle:
             (repo / ".github").mkdir(exist_ok=True)
             shutil.copytree(pristine, repo / ".github/graph-admission")
@@ -1377,7 +1758,7 @@ def selftest_gate4b() -> tuple[list[dict], int]:
             # change it is meant to constrain.
             (repo / ".github/workflows").mkdir(parents=True, exist_ok=True)
             (repo / ".github/workflows/ci.yml").write_text(
-                "jobs:\n  graph-admission:\n    uses: ./.github/workflows/graph-admission.yml\n"
+                "on: [push]\njobs:\n  graph-admission:\n    uses: ./.github/workflows/graph-admission.yml\n"
                 "    with:\n      program_ref: '" + "0" * 40 + "'\n"
                 "      signing_key_fingerprint: 'SHA256:fixture'\n")
             if extra_under_bundle:
@@ -1427,7 +1808,7 @@ def selftest_gate4b() -> tuple[list[dict], int]:
         return rc, (json.loads(out.read_text()) if out.exists() else receipt)
 
     def run_ci(repo: Path, base: str, head: str, receipt: dict | None, *, pin: str | None = BASE_FP,
-               program_ref: str = "0" * 40, tag: str = "run") -> dict:
+               program_ref: str = "0" * 40, tag: str = "run", base_branch: str | None = None) -> dict:
         d = root / f"ci-{tag}-{head[:8]}"
         d.mkdir(parents=True, exist_ok=True)
         body = "" if receipt is None else "```json\n" + json.dumps(receipt, indent=1, sort_keys=True) + "\n```\n"
@@ -1437,7 +1818,8 @@ def selftest_gate4b() -> tuple[list[dict], int]:
             repo=str(repo), repo_name="Arcanada-one/fixture", tools=str(repo / ".github/graph-admission"),
             program_ref=program_ref, base=base, head=head, pr_body_file=str(d / "body.txt"),
             receipt_glob=["receipts/graph/*.json"], enforcement="off", build_graph=False,
-            workdir=str(d / "work"), out=str(out), summary=None, signing_key_fingerprint=pin))
+            workdir=str(d / "work"), out=str(out), summary=None, signing_key_fingerprint=pin,
+            base_branch=base_branch))
         doc = json.loads(out.read_text())
         doc["_rc"] = rc
         return doc
@@ -1452,7 +1834,10 @@ def selftest_gate4b() -> tuple[list[dict], int]:
     # built at base, where the file does not exist, so it has no node to name.
     files_a = [{"path": p, "status": "A", "kind": "code", "node_id": None}
                for p in ("src/new1.ts", "src/new2.ts")]
-    rc_ex, exempted = issue(repo, base, head_a, draft_receipt("Arcanada-one/fixture", base, head_a, files_a, [], True))
+    actual = admit_change.measured_change_receipt(repo, base, head_a, root / "measured-a")
+    if actual is None:
+        raise RuntimeError("the all-new fixture producer returned no measured receipt")
+    rc_ex, exempted = issue(repo, base, head_a, actual)
     check("(a) CONTROL: an all-new-files change is issued NO_IMPACT_BY_CONSTRUCTION by the gate "
           "(A1 all-added, A2 no pre-existing node references them at head, A3 no global fallback)",
           rc_ex == 0 and exempted["admission"]["verdict"] == "admitted_with_exemptions"
@@ -1531,18 +1916,11 @@ def selftest_gate4b() -> tuple[list[dict], int]:
         return repo_r, gr, base_r, gr("rev-parse", "HEAD").strip()
 
     def self_update_receipt(repo_r: Path, base_r: str, head_r: str) -> dict:
-        changed = [l.split("\t") for l in admit_change.git(repo_r, "diff", "--name-status", base_r, head_r).splitlines() if l]
-        files = [{"path": c[-1], "status": c[0][0], "kind": "config", "node_id": None} for c in changed]
-        tools_changed = [f["path"] for f in files if f["path"].endswith(".py")][:3]
-        verdicts = [{"entity": f"code_unit:{p}", "verdict": "not_measured",
-                     "reason": "vendored foreign code: this file is a byte-copy of the program repository at "
-                               "the bundle's program_ref, and it is the code that would do the measuring"}
-                    for p in tools_changed]
-        core = [{"entity": v["entity"], "depth": 1,
-                 "path": [{"from": v["entity"], "to": f"code_unit:{tools_changed[0]}",
-                           "edge_type": "imports", "provenance": "deterministic"}]}
-                for v in verdicts]
-        return draft_receipt("Arcanada-one/fixture", base_r, head_r, files, verdicts, False, core)
+        receipt = admit_change.measured_change_receipt(repo_r, base_r, head_r,
+                                                      root / f"measured-{head_r[:8]}")
+        if receipt is None:
+            raise RuntimeError("self-update fixture producer returned no measured receipt")
+        return receipt
 
     repo_c, gc, base_c, head_c = refresh("C-control")
     rc_su, su_receipt = issue(repo_c, base_c, head_c, self_update_receipt(repo_c, base_c, head_c))
@@ -1558,6 +1936,43 @@ def selftest_gate4b() -> tuple[list[dict], int]:
           and "BUNDLE_MODIFIED_BY_PR" not in ci_c["reason_codes"]
           and any(c["code"] == "SELF_UPDATE_CANDIDATE" for c in ci_c["checks"]),
           rc=ci_c["_rc"], verdict=ci_c["verdict"], codes=ci_c["reason_codes"])
+
+    # A hosted checkout fetches named remote refs but need not create origin/HEAD.
+    # Build the real Update-branch shape, issue through the maintained producer,
+    # then remove only the metadata the old wrapper mistakenly depended on.
+    gc("checkout", "-q", "-b", "refresh-hosted")
+    gc("checkout", "-q", "main")
+    (repo_c / "main-only.md").write_text("ordinary change brought in from the PR target\n")
+    gc("add", "-A"); gc("commit", "-q", "-m", "target moves")
+    gc("update-ref", "refs/remotes/origin/release", gc("rev-parse", "HEAD").strip())
+    gc("symbolic-ref", "refs/remotes/origin/HEAD", "refs/remotes/origin/release")
+    gc("checkout", "-q", "refresh-hosted")
+    gc("merge", "--no-edit", "--no-ff", "-q", "main")
+    hosted_head = gc("rev-parse", "HEAD").strip()
+    hosted_rc, hosted_receipt = issue(repo_c, base_c, hosted_head,
+                                     self_update_receipt(repo_c, base_c, hosted_head))
+    gc("symbolic-ref", "--delete", "refs/remotes/origin/HEAD")
+    old_hosted = run_ci(repo_c, base_c, hosted_head, hosted_receipt,
+                        program_ref="1" * 40, tag="hosted-missing")
+    check("(hosted) CONTROL: without origin/HEAD or an explicit PR target, B1M remains refused",
+          hosted_rc == 0 and old_hosted["_rc"] != 0
+          and {"BUNDLE_MODIFIED_BY_PR", "STRUCTURAL_EXEMPTION_UNSOUND"}
+          & set(old_hosted["reason_codes"]),
+          rc=old_hosted["_rc"], codes=old_hosted["reason_codes"])
+    named_hosted = run_ci(repo_c, base_c, hosted_head, hosted_receipt,
+                          program_ref="1" * 40, tag="hosted-named",
+                          base_branch="refs/remotes/origin/release")
+    check("(hosted) CONTROL: forwarding the fetched named PR target admits the genuine refresh",
+          named_hosted["_rc"] == 0 and named_hosted["verdict"] == "admitted_with_exemptions",
+          rc=named_hosted["_rc"], codes=named_hosted["reason_codes"])
+    missing_hosted = run_ci(repo_c, base_c, hosted_head, hosted_receipt,
+                            program_ref="1" * 40, tag="hosted-unknown",
+                            base_branch="refs/remotes/origin/unknown")
+    check("(hosted) MUTANT: an unknown explicit PR target stays refused; no guessed branch fallback",
+          missing_hosted["_rc"] != 0
+          and {"BUNDLE_MODIFIED_BY_PR", "STRUCTURAL_EXEMPTION_UNSOUND"}
+          & set(missing_hosted["reason_codes"]),
+          rc=missing_hosted["_rc"], codes=missing_hosted["reason_codes"])
 
     # ---- mutant (c): the refreshed bundle's own selftest FAILS
     def break_selftest(b: Path):
@@ -1771,13 +2186,18 @@ def selftest_gate5b() -> tuple[list[dict], int]:
         (repo / "src").mkdir()
         (repo / "src/a.ts").write_text("export const a = 1;\n")
         (repo / "src/b.ts").write_text("import { a } from './a';\nexport const b = a + 1;\n")
+        (repo / "tsconfig.json").write_text(json.dumps({"compilerOptions": {
+            "strict": True, "noEmit": True}, "include": ["src/**/*.ts"]}))
+
         (repo / "tools").mkdir()
         (repo / "tools/verify_derived.py").write_text(VERIFY_DERIVED_SRC)
         (repo / ".github").mkdir(exist_ok=True)
         shutil.copytree(pristine, repo / ".github/graph-admission")
         (repo / ".github/workflows").mkdir(parents=True, exist_ok=True)
         (repo / ".github/workflows/ci.yml").write_text(
-            "jobs:\n  graph-admission:\n    needs: lint-and-test\n"
+            "on: [push]\njobs:\n  lint-and-test:\n    runs-on: ubuntu-latest\n"
+            "    steps:\n      - run: python3 tools/verify_derived.py\n"
+            "  graph-admission:\n    needs: lint-and-test\n"
             "    uses: ./.github/workflows/graph-admission.yml\n"
             "    with:\n      program_ref: '" + "0" * 40 + "'\n"
             "      verifier_job: 'lint-and-test'\n"
@@ -1817,40 +2237,11 @@ def selftest_gate5b() -> tuple[list[dict], int]:
         return repo, g, base, g("rev-parse", "HEAD").strip()
 
     def receipt_for(repo: Path, base: str, head: str) -> dict:
-        changed = [l.split("\t") for l in admit_change.git(repo, "diff", "--name-status", base, head).splitlines() if l]
-        files = [{"path": c[-1], "status": c[0][0], "kind": "config", "node_id": None} for c in changed]
-        tools_changed = [f["path"] for f in files if f["path"].endswith(".py")][:2]
-        verdicts = [{"entity": f"code_unit:{p}", "verdict": "not_measured", "reason": "vendored foreign code"}
-                    for p in tools_changed]
-        # A receipt whose impact set is empty must EXPLAIN it (schema_check EMPTY_IMPACT_WITHOUT_EXPLANATION)
-        # — the rule that «an empty impact set is a prediction, never an approval». The fixture obeys it the
-        # same way a real receipt does, rather than being handed a core it did not measure.
-        core = [{"entity": v["entity"], "depth": 1,
-                 "path": [{"from": v["entity"], "to": f"code_unit:{tools_changed[0]}",
-                           "edge_type": "imports", "provenance": "deterministic"}]}
-                for v in verdicts]
-        empty_expl = {} if core else {"empty_impact_explanation": {
-            "reason": "every changed path is either a new file or a declared derived artefact whose bytes are a "
-                      "function of the rest of the tree; the graph in --diff mode is built at base, where the "
-                      "new files do not exist, so no seed and no dependent can exist",
-            "graph_metadata": {"extractors": ["imports"], "language_coverage": ["typescript"],
-                               "changed_node_known_to_graph": False, "reverse_edges_of_changed_nodes": 0}}}
-        return {**empty_expl, "schema": "ChangeAdmissionReceipt/v1", "receipt_id": f"car-gate5b-{head[:8]}",
-                "captured_at_utc": "2026-09-06T12:00:00Z",
-                "producer": {"tool": "tools/graph/verify.py", "version": "1.0.0"},
-                "decision_ref": "DEC-AUP-0008", "repo": {"name": "Arcanada-one/fixture"},
-                "graph": {"source_commit": base, "graph_digest": "sha256:" + "a" * 64,
-                          "builder_version": "1.0.0", "built_at_utc": "2026-09-06T11:00:00Z"},
-                "tree": {"commit": head, "dirty": False},
-                "staleness": {"method": "graph.source_commit == change_set.base; clean tree",
-                              "verdict": "fresh", "checked_at_utc": "2026-09-06T12:00:00Z"},
-                "change_set": {"mode": "diff", "base": base, "head": head, "files": files},
-                "impact_set": {"method": "reverse traversal (dependents; seeds excluded)", "max_depth": 3,
-                               "deterministic_core": core, "inferred_tail": [],
-                               "global_fallback": {"triggered": False}},
-                "verifiers": [], "verdicts": verdicts, "exemptions": [],
-                "admission": {"verdict": "paused_safe", "rule": "admitted requires every verdict = verified"},
-                "work_item": {"system": "muneral", "id": "AUP-GRAPH-006"}}
+        receipt = admit_change.measured_change_receipt(repo, base, head,
+                                                      root / f"measured-{head[:8]}")
+        if receipt is None:
+            raise RuntimeError("derived fixture producer returned no measured receipt")
+        return receipt
 
     def issue(repo: Path, base: str, head: str, *, job="lint-and-test", concl="success") -> tuple[int, dict]:
         d = root / f"issue-{repo.parent.name}-{head[:8]}"
@@ -2463,7 +2854,7 @@ def selftest_b8() -> tuple[list[dict], int]:
         (repo / ".github/workflows").mkdir(parents=True, exist_ok=True)
         shutil.copyfile(wf_src, repo / WF_REL)
         (repo / ".github/workflows/ci.yml").write_text(
-            "jobs:\n  graph-admission:\n    uses: ./.github/workflows/graph-admission.yml\n"
+            "on: [push]\njobs:\n  graph-admission:\n    uses: ./.github/workflows/graph-admission.yml\n"
             "    with:\n      program_ref: '" + "0" * 40 + "'\n"
             "      signing_key_fingerprint: 'SHA256:fixture'\n")
         if extra_under_bundle:
@@ -2964,7 +3355,7 @@ def selftest_gate2b() -> tuple[list[dict], int]:
         ok_stale, _, _ = sshsig.verify_detached(msg2.read_bytes(), (d / "m.sig").read_text(),
                                                 (d / "k.pub").read_text(), SIGNING_NAMESPACE)
         check("RE-SIGN TRAP: `ssh-keygen -Y sign` over an existing .sig exits 0 and keeps the STALE signature, "
-              "which then does NOT verify over the new bytes — the defect gate3a fixes", 
+              "which then does NOT verify over the new bytes — the defect gate3a fixes",
               r_noclean.returncode == 0 and kept_stale and not ok_stale,
               exit_code=r_noclean.returncode, kept_stale=kept_stale, stale_verifies=ok_stale)
         # (b) the fix: remove the target first, exactly as cmd_bundle now does
@@ -2995,9 +3386,11 @@ def main(argv=None) -> int:
     b.add_argument("--out", required=True)
     b.add_argument("--program-ref")
     b.add_argument("--workflow-out", help="also vendor .github/workflows/graph-admission.yml here (local `uses: ./…` calls)")
-    b.add_argument("--sign-key", help="AUP-GRAPH-006:gate2b — Ed25519 private key (ssh-keygen format) to sign "
-                                      "BUNDLE.json with. The key must live OUTSIDE any repository; its public "
-                                      "half is written into the bundle and into the program repository.")
+    b.add_argument("--sign-key", action="append",
+                   help="AUP-GRAPH-006:gate2b — Ed25519 private key (ssh-keygen format) to sign "
+                        "BUNDLE.json with. The key must live OUTSIDE any repository; its public "
+                        "half is written into the bundle and into the program repository. A2-455: repeat it "
+                        "to dual-sign during a key rotation; the first key is the primary.")
     b.set_defaults(fn=cmd_bundle)
 
     r = sub.add_parser("run", help="the pull-request check")
@@ -3007,6 +3400,8 @@ def main(argv=None) -> int:
     r.add_argument("--program-ref")
     r.add_argument("--base", required=True)
     r.add_argument("--head", required=True)
+    r.add_argument("--base-branch", help="named PR target ref for the maintained B1M merge-base check; "
+                                        "missing or unknown refs remain not_measured")
     r.add_argument("--pr-body-file")
     r.add_argument("--receipt-glob", action="append")
     r.add_argument("--enforcement", default="off", choices=["off", "ledger", "muneral"])
@@ -3022,7 +3417,8 @@ def main(argv=None) -> int:
     r.add_argument("--signing-key-fingerprint", help="AUP-GRAPH-006:gate2b — the SHA256:… fingerprint the caller "
                                                      "trusts, set in the caller's OWN workflow file, outside the "
                                                      "bundle. Without it the signature proves self-consistency "
-                                                     "only, and the check says so as not_measured.")
+                                                     "only, and the check says so as not_measured. A2-455: may be "
+                                                     "a whitespace/comma-separated SET during a key rotation.")
     r.set_defaults(fn=cmd_run)
     a = ap.parse_args(argv)
     if a.selftest:

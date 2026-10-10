@@ -91,4 +91,9 @@ overrides:
   # and left all 87 affected entities not_measured. main carries no typescript@6
   # at all (@nestjs/schematics@11.1.0 resolved 5.9.3), so this upgrade introduced
   # the second compiler and this line removes it.
+  #
+  # Also the TypeScript 7 hold: deferred until typescript-eslint supports it, review
+  # 2026-12-01 -- reason, measurements and the check command are in the `typescript`
+  # entry of .github/dependabot.yml. Remove this line FIRST when migrating, or every
+  # measurement is of 5.9.3 (A2-304b measured that trap).
   typescript: 5.9.3

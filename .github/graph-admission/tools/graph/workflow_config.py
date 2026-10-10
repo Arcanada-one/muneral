@@ -141,11 +141,17 @@ def validate(raw):
                                   yaml.tokens.TagToken, yaml.tokens.DirectiveToken)):
                 raise ValueError('aliases, anchors, tags and directives are unsupported')
         node = yaml.compose(text, Loader=yaml.BaseLoader)
+        class Literal(str):
+            # Preserve quoting without changing the existing scalar-shape checker.
+            def __new__(cls, n):
+                value = super().__new__(cls, n.value)
+                value.style = n.style
+                return value
         def convert(n, depth=0):
             if depth > 40:
                 raise ValueError('YAML nesting exceeds supported depth')
             if isinstance(n, yaml.ScalarNode):
-                return n.value
+                return Literal(n)
             if isinstance(n, yaml.SequenceNode):
                 return [convert(v, depth + 1) for v in n.value]
             if isinstance(n, yaml.MappingNode):
@@ -165,6 +171,65 @@ def validate(raw):
         def scalar(value):
             if not isinstance(value, str):
                 raise ValueError('expected scalar')
+        unmeasured = []
+        def expression(value, context):
+            scalar(value)
+            if '${{' in value:
+                unmeasured.append(context + ' expression value/type unresolved')
+                return True
+            return False
+        def literal_type(value):
+            scalar(value)
+            if getattr(value, 'style', None) is not None:
+                return 'string'
+            if value in ('true', 'True', 'TRUE', 'false', 'False', 'FALSE'):
+                return 'boolean'
+            if re.fullmatch(r'[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?', value):
+                return 'number'
+            if (re.fullmatch(r'0x[0-9a-fA-F]+|0o[0-7]+', value)
+                    or value in ('.inf', '.Inf', '.INF', '+.inf', '+.Inf', '+.INF',
+                                 '-.inf', '-.Inf', '-.INF', '.nan', '.NaN', '.NAN')):
+                return 'number'
+            if value in ('', 'null', 'Null', 'NULL', '~'):
+                return 'null'
+            return 'string'
+        def required_flag(spec):
+            if 'required' in spec and not expression(spec['required'], 'required'):
+                if literal_type(spec['required']) != 'boolean':
+                    raise ValueError('workflow_call required must be a boolean literal')
+        def workflow_call(cfg):
+            mapping(cfg, 'inputs secrets outputs')
+            for kind, declarations in cfg.items():
+                mapping(declarations)
+                for identifier, spec in declarations.items():
+                    if not re.fullmatch(r'[A-Za-z_][A-Za-z0-9_-]*', identifier):
+                        raise ValueError('unsupported workflow_call declaration id')
+                    if kind == 'secrets' and spec == '' and getattr(spec, 'style', None) is None:
+                        continue
+                    allowed = {'inputs': 'description type required default',
+                               'secrets': 'description required',
+                               'outputs': 'description value'}[kind]
+                    mapping(spec, allowed)
+                    if 'description' in spec:
+                        scalar(spec['description'])
+                    if kind == 'inputs':
+                        if 'type' not in spec:
+                            raise ValueError('workflow_call input type required')
+                        dynamic_type = expression(spec['type'], 'workflow_call input type')
+                        if not dynamic_type and spec['type'] not in ('boolean', 'number', 'string'):
+                            raise ValueError('workflow_call input requires boolean/number/string type')
+                        required_flag(spec)
+                        if 'default' in spec and not expression(spec['default'], 'workflow_call default'):
+                            if not dynamic_type and literal_type(spec['default']) != spec['type']:
+                                raise ValueError('workflow_call default does not match declared type')
+                    elif kind == 'secrets':
+                        required_flag(spec)
+                    else:
+                        if 'value' not in spec:
+                            raise ValueError('workflow_call output value required')
+                        scalar(spec['value'])
+                        if not re.fullmatch(r'\$\{\{\s*jobs\.[A-Za-z_][A-Za-z0-9_-]*\.outputs\.[A-Za-z_][A-Za-z0-9_-]*\s*\}\}', spec['value']):
+                            unmeasured.append('workflow_call output binding unresolved')
         def scalar_map(value):
             mapping(value)
             for v in value.values():
@@ -205,7 +270,7 @@ def validate(raw):
         if not doc.get('on') or not isinstance(doc['on'], (str, list, dict)):
             raise ValueError('nonempty on declaration required')
         trigger = doc['on']
-        events = {'push', 'pull_request', 'workflow_dispatch', 'workflow_run', 'schedule'}
+        events = {'push', 'pull_request', 'workflow_dispatch', 'workflow_run', 'schedule', 'workflow_call'}
         names = [trigger] if isinstance(trigger, str) else trigger
         if isinstance(trigger, list):
             string_list(trigger)
@@ -245,6 +310,9 @@ def validate(raw):
                     continue
                 if cfg == '':
                     continue
+                if event == 'workflow_call':
+                    workflow_call(cfg)
+                    continue
                 if event == 'workflow_dispatch':
                     # `inputs:` is ordinary GitHub syntax, and the allowed-key set was empty, so every
                     # workflow that declares one was reported `failed` — "malformed workflow" about 41
@@ -283,15 +351,74 @@ def validate(raw):
             # workflow: it has no `runs-on` and no `steps` — the called workflow supplies both.
             reusable = 'uses' in job
             if reusable:
-                mapping(job, 'name needs if permissions concurrency uses with secrets')
+                mapping(job, 'name needs if permissions concurrency uses with secrets strategy')
                 scalar(job['uses'])
+                if not expression(job['uses'], 'reusable workflow location'):
+                    if not re.fullmatch(r'(?:\./\.github/workflows/[^/@\s]+\.ya?ml|[^/\s]+/[^/\s]+/\.github/workflows/[^/@\s]+\.ya?ml@[^\s]+)', job['uses']):
+                        raise ValueError('unsupported reusable workflow location')
                 if 'with' in job:
                     mapping(job['with'])
                     for v in job['with'].values():
-                        if not isinstance(v, str):
-                            raise ValueError('reusable-workflow input must be a scalar')
-                if 'secrets' in job and not isinstance(job['secrets'], (str, dict)):
-                    raise ValueError('unsupported secrets shape')
+                        scalar(v)
+                        result_ref = re.fullmatch(r'\$\{\{\s*needs\.([A-Za-z_][A-Za-z0-9_-]*)\.result\s*\}\}', v)
+                        if result_ref:
+                            # GitHub declares needs.<job>.result as a string. This measures
+                            # the reference's type, never a successful job conclusion.
+                            needs = job.get('needs', [])
+                            needs = [needs] if isinstance(needs, str) else needs
+                            if result_ref[1] not in jobs or result_ref[1] not in needs:
+                                raise ValueError('reusable input result reference must name a declared needed job')
+                        elif not expression(v, 'reusable workflow input') and literal_type(v) == 'null':
+                            raise ValueError('reusable workflow input must be string, boolean or number')
+                if 'secrets' in job:
+                    secrets = job['secrets']
+                    if isinstance(secrets, str):
+                        if secrets != 'inherit':
+                            if not expression(secrets, 'reusable workflow secrets'):
+                                raise ValueError('reusable workflow secrets scalar must be inherit')
+                    else:
+                        scalar_map(secrets)
+                        for value in secrets.values():
+                            if '${{' in value and not re.fullmatch(r'\$\{\{\s*secrets\.[A-Za-z_][A-Za-z0-9_]*\s*\}\}', value):
+                                unmeasured.append('reusable workflow secret expression unresolved')
+                if 'strategy' in job:
+                    mapping(job['strategy'], 'matrix fail-fast max-parallel')
+                    if 'matrix' not in job['strategy']:
+                        raise ValueError('strategy requires matrix')
+                    matrix = job['strategy']['matrix']
+                    if isinstance(matrix, str):
+                        unmeasured.append('reusable workflow matrix unresolved')
+                    else:
+                        mapping(matrix)
+                        for axis, values in matrix.items():
+                            if axis in ('include', 'exclude'):
+                                if not isinstance(values, list) or any(not isinstance(row, dict) for row in values):
+                                    raise ValueError('matrix include/exclude must be mapping lists')
+                            elif not isinstance(values, list) or not values:
+                                if isinstance(values, str) and '${{' in values:
+                                    unmeasured.append('reusable workflow matrix axis unresolved')
+                                else:
+                                    raise ValueError('matrix axis must be a nonempty list')
+                        for key in ('fail-fast', 'max-parallel'):
+                            if key in job['strategy'] and not expression(job['strategy'][key], 'reusable workflow strategy'):
+                                value = job['strategy'][key]
+                                if key == 'fail-fast' and literal_type(value) != 'boolean':
+                                    raise ValueError('strategy fail-fast must be boolean')
+                                if key == 'max-parallel':
+                                    if literal_type(value) != 'number':
+                                        raise ValueError('strategy max-parallel must be a numeric literal')
+                                    from decimal import Decimal, InvalidOperation
+                                    try:
+                                        if value.startswith(('0x', '0o')):
+                                            number = Decimal(int(value, 16 if value.startswith('0x') else 8))
+                                        elif 'inf' in value.lower() or 'nan' in value.lower():
+                                            raise ValueError('strategy max-parallel must be a finite positive integer')
+                                        else:
+                                            number = Decimal(value)
+                                        if not number.is_finite() or number <= 0 or number != number.to_integral_value():
+                                            raise ValueError('strategy max-parallel must be a positive integer')
+                                    except InvalidOperation:
+                                        unmeasured.append('strategy max-parallel numeric literal exceeds supported range')
             else:
                 # MEASURED 2026-09-19. `environment:` made every change to a
                 # workflow using it REFUSED — reproduced on the already-merged
@@ -305,10 +432,36 @@ def validate(raw):
                 # It is raised OutOfScope rather than added to the allowed set,
                 # because allowing it would report `verified` — a claim that
                 # the field was checked, when nothing about it is.
+                # A2-311. The note above is right that `verified` must not be claimed for a
+                # field nothing looks at — and wrong that the only alternative is to measure
+                # nothing. `environment` has a bounded shape, documented by GitHub and no wider
+                # than `workflow_dispatch.inputs` or `schedule`: a string, or a mapping whose only
+                # keys are `name` and `url`, both scalars. That shape is measured here, the same
+                # way and for the same reason those two were taught.
+                #
+                # What stays NOT_MEASURED, and is never claimed: what the environment IS — its
+                # protection rules, its reviewers, its secrets, whether it exists at all. None of
+                # that is readable from the file, and all of it lives under the same blanket as
+                # hosted execution.
+                #
+                # The cost of the previous answer was measured: every change touching a deploy
+                # workflow came back not_measured, one not_measured without an exemption pauses the
+                # admission, and the pause reported a bound of this checker rather than anything
+                # about the change. A2-311 hit it on Arcanada-one/scrutator#108, where the deploy
+                # job has carried `environment: kb-production` since long before that branch.
                 if 'environment' in job:
-                    raise OutOfScope('job-level `environment` outside this bounded checker')
-                mapping(job, 'name needs if runs-on permissions env defaults concurrency outputs '
-                             'steps timeout-minutes continue-on-error services strategy')
+                    env = job['environment']
+                    if isinstance(env, dict):
+                        mapping(env, 'name url')
+                        if 'name' not in env:
+                            raise ValueError('environment mapping requires a name')
+                        for key in ('name', 'url'):
+                            if key in env:
+                                scalar(env[key])
+                    else:
+                        scalar(env)
+                mapping(job, 'name needs if runs-on permissions env environment defaults concurrency '
+                             'outputs steps timeout-minutes continue-on-error services strategy')
             common(job)
             if 'needs' in job:
                 if isinstance(job['needs'], list):
@@ -323,16 +476,32 @@ def validate(raw):
             # measured at all. A label set is a nonempty list of nonempty strings and nothing else,
             # which is the check `needs` already uses.
             runs_on = job.get('runs-on')
-            if isinstance(runs_on, list):
-                string_list(runs_on)
+            def label_set(labels):
+                string_list(labels)
                 # BaseLoader makes every scalar a str, so `[self-hosted, 5]` arrives as ['self-hosted',
                 # '5'] and a type check alone accepts it. Measured while counter-checking this very
                 # change: that mutation passed as `verified`. A runner label is not a number.
-                for label in runs_on:
+                for label in labels:
                     if re.fullmatch(r'[+-]?[0-9]+(\.[0-9]+)?', label):
                         raise ValueError(f'runs-on label is a number, not a label: {label!r}')
+            # A2-384: the third documented shape, `runs-on: {group: <runner group>, labels: <label |
+            # [labels]>}`. Rejecting it made scrutator's deploy.yml (`group: scrutator-prod`) FAILED for
+            # every change to the file once A2-311 stopped `environment:` from masking it as
+            # not_measured — a verdict about the checker, not about the change. Shape only: a nonempty
+            # group name and/or a label set, nothing else; which runners the group holds stays unmeasured.
+            if isinstance(runs_on, dict):
+                mapping(runs_on, 'group labels')
+                if not runs_on:
+                    raise ValueError('runs-on mapping needs group or labels')
+                if 'group' in runs_on and (not isinstance(runs_on['group'], str) or not runs_on['group']):
+                    raise ValueError('runs-on group must be a nonempty scalar')
+                if 'labels' in runs_on:
+                    labels = runs_on['labels']
+                    label_set([labels] if isinstance(labels, str) else labels)
+            elif isinstance(runs_on, list):
+                label_set(runs_on)
             elif not isinstance(runs_on, str) or not runs_on:
-                raise ValueError('literal/scalar runs-on or a label array required')
+                raise ValueError('literal/scalar runs-on, a label array or a {group, labels} mapping required')
             # `services` and `strategy` are validated for SHAPE, never interpreted: a service is a
             # named image with optional env/ports/options, a strategy is a matrix with optional
             # fail-fast. Accepting the shape is what lets the rest of the file be measured; the
@@ -342,6 +511,14 @@ def validate(raw):
                 scalar(svc.get('image', ''))
             if 'strategy' in job:
                 mapping(job['strategy'], 'matrix fail-fast max-parallel')
+                # A2-415. #40 (f7d986e4) made `strategy` a measured shape but left `matrix` optional, so
+                # `strategy: {}` — a shape GitHub rejects — came back `verified`. Green at f7d986e4~1, red
+                # at f7d986e4: test_unsupported_and_malformed_yaml_fail_closed caught it and nothing ran
+                # the test. Evidence that GitHub requires it: SchemaStore github-workflow.json,
+                # definitions.normalJob.properties.strategy.required = ["matrix"] — a community schema,
+                # the best evidence available, not GitHub's own.
+                if 'matrix' not in job['strategy']:
+                    raise ValueError('strategy requires a matrix')
             steps = job.get('steps')
             if not isinstance(steps, list) or not steps:
                 raise ValueError('nonempty steps required')
@@ -365,7 +542,9 @@ def validate(raw):
                         mapping(step[field])
                         if any(not isinstance(v, str) for v in step[field].values()):
                             raise ValueError('env/with values must be scalars')
-        return 'verified', 'bounded workflow configuration shape valid; expressions, shell, actions and hosted execution NOT_MEASURED'
+        if unmeasured:
+            raise OutOfScope('; '.join(sorted(set(unmeasured))))
+        return 'verified', 'bounded workflow configuration shape valid; expressions, shell, actions, callee interface compatibility and hosted execution NOT_MEASURED'
     except OutOfScope as ex:
         return 'not_measured', 'workflow configuration not measured: ' + str(ex)
     except (ValueError, UnicodeError, yaml.YAMLError, RecursionError) as ex:

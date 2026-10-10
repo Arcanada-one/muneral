@@ -57,17 +57,17 @@ export function TaskDetail({ task }: TaskDetailProps) {
               <Bot className="h-4 w-4" />
               Agent task
             </span>
-          ) : (
+          ) : task.actorType === 'human' ? (
             <span className="flex items-center gap-1 text-sm text-muted-foreground">
               <User className="h-4 w-4" />
               Human task
             </span>
-          )}
+          ) : <span className="text-sm text-muted-foreground">Actor not specified</span>}
 
           {task.dueDate && (
             <span className="flex items-center gap-1 text-sm text-muted-foreground">
               <Calendar className="h-4 w-4" />
-              Due {new Date(task.dueDate).toLocaleDateString()}
+              Due {Number.isNaN(Date.parse(task.dueDate)) ? task.dueDate : new Date(task.dueDate).toLocaleDateString()}
             </span>
           )}
         </div>
@@ -84,7 +84,7 @@ export function TaskDetail({ task }: TaskDetailProps) {
       )}
 
       {/* Tags */}
-      {task.tags.length > 0 && (
+      {task.tags && task.tags.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {task.tags.map((tag) => (
             <Badge key={tag} variant="outline" className="text-xs">
@@ -104,7 +104,7 @@ export function TaskDetail({ task }: TaskDetailProps) {
           <p className="text-xs text-muted-foreground">Updated</p>
           <p>{new Date(task.updatedAt).toLocaleString()}</p>
         </div>
-        {task.estimateHours !== undefined && (
+        {task.estimateHours !== undefined && task.estimateHours !== null && (
           <div>
             <p className="text-xs text-muted-foreground">Estimate</p>
             <p>{task.estimateHours}h</p>

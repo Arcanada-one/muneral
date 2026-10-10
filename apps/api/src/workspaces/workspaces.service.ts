@@ -32,6 +32,13 @@ export class WorkspacesService {
     return workspace;
   }
 
+  async findMetadataForAgent(workspaceId: string) {
+    return this.prisma.workspace.findMany({
+      where: { id: workspaceId },
+      select: { id: true, slug: true, name: true },
+    });
+  }
+
   async findAllForUser(userId: string) {
     const memberships = await this.prisma.workspaceMember.findMany({
       where: { userId },

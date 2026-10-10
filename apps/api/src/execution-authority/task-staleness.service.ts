@@ -1,3 +1,4 @@
+import { humanTaskWhere } from '../auth/human-task-visibility.js';
 // MUN-0040: "we know how long a task usually takes to solve — that should
 // already be a signal if a task is taking too long" (operator, verbatim, in
 // the card brief). This turns MUN-0020 execution-authority recordings into
@@ -43,11 +44,13 @@ export class TaskStalenessService {
     thresholdMs: number = DEFAULT_THRESHOLD_MS,
     scopedToAgentId?: string,
     now: Date = new Date(),
+    humanUserId?: string,
   ): Promise<TaskStalenessEntry[]> {
     const tasks = await this.prisma.task.findMany({
       where: {
         projectId,
         status: 'in_progress',
+        ...humanTaskWhere(humanUserId),
         ...(scopedToAgentId ? agentOwnTaskWhere(scopedToAgentId) : {}),
       },
       select: { id: true, priority: true },

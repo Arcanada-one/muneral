@@ -102,9 +102,19 @@ curl -X POST https://api.muneral.com/api/v1/migration/batches \
 ```
 
 `POST /sync/datarim/:projectId/import` is **legacy**. It still works and is not
-going away, but it answers with `{created, updated}` counts and matches tasks by
-title, so it loses identity, provenance and historical time. Prefer the
-migration import surface for anything that has to be audited or resumed.
+going away, but it answers with `{created, updated, unchanged}` counts and
+matches tasks by title, so it loses identity, provenance and historical time.
+Prefer the migration import surface for anything that has to be audited or
+resumed.
+
+Since A2-379 it is bounded like every other agent route: an agent API key only;
+the project must be in the key's workspace (404 otherwise); a line that matches
+an existing task needs the same authority as `PATCH /tasks/:id/status` — the
+key's agent created the task or is its executor (403 otherwise); every status
+move obeys the task state machine (400); a title that matches two tasks is
+refused (409). Any refused line refuses the whole import before anything is
+written. Created tasks are authored by the key's agent, and every write lands
+in the activity log.
 
 ## Links
 

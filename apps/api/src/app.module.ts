@@ -8,6 +8,7 @@ import { PrismaModule } from './prisma/prisma.module.js';
 
 // Health
 import { HealthController } from './health.controller.js';
+import { RouteTableController } from './route-table.controller.js';
 
 // Feature modules
 import { AuthModule } from './auth/auth.module.js';
@@ -22,9 +23,10 @@ import { WebhooksModule } from './webhooks/webhooks.module.js';
 import { WsModule } from './ws/ws.module.js';
 import { SolutionLogHeadModule } from './solution-log-head/solution-log-head.module.js';
 import { MigrationModule } from './migration/migration.module.js';
+import { OutboxModule } from './outbox/outbox.module.js';
 
 @Module({
-  controllers: [HealthController],
+  controllers: [HealthController, RouteTableController],
   imports: [
     PrismaModule,
     ThrottlerModule.forRoot([
@@ -60,6 +62,7 @@ import { MigrationModule } from './migration/migration.module.js';
     WsModule,
     SolutionLogHeadModule,
     MigrationModule,
+    OutboxModule,
   ],
   providers: [
     {

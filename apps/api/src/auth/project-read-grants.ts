@@ -74,6 +74,15 @@ export const PROJECT_READ_GRANT_LIST: readonly ProjectReadGrantEntry[] = [
     evidence:
       'DEC-AUP-0029 renewal: the first window (until 2026-09-21) was used — two live readings 886/887 rows an hour apart and the step-13 status parity re-run, receipts/mun0052/live-reading{1,2}-20260914T*.json and status-parity-20260914T111224Z.md — then lapsed silently. 2026-10-14 is the ceiling DEC-AUP-0029 R1 set for this entry.',
   },
+  {
+    agentId: '9437639a-5f7c-4fe4-be04-18112ba0bada',
+    agentName: 'aup-orchestrator',
+    projectId: 'a28ad0ac-c4ab-497b-b93c-4f576a06b9fb',
+    until: '2026-11-04T00:00:00Z',
+    decision: 'DEC-AUP-0096',
+    evidence:
+      'MUNERAL-IMPORT-AUDIT 2026-10-06: project datarim-history holds ~2,600 imported Datarim work items (DEC-AUP-0005) that no agent key can list — GET /tasks/project/:id answers the own slice only (12 rows, MUN-0043) and GET /tasks/:id is 403 — so lanes cannot see their historical backlog; measured in /home/dev/aup/import-audit/IMPORT-GAP.md and lookup-after.json. The index route answers ids, status and title hashes only (no free text), so the DEC-AUP-0029 R7 title precondition of the digest route does not arise; window 2026-10-06..2026-11-04 is within the 30-day ceiling.',
+  },
 ];
 
 /** Case-insensitive: `projects.id` is a PostgreSQL `uuid`, which is. */

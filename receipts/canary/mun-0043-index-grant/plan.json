@@ -1,0 +1,113 @@
+{
+ "schema": "CanaryPlan/v2",
+ "id": "mun-0043-index-grant-process-20261007",
+ "owner": "arc2 executor session (Arcanada, claude-sonnet-5-5) on arcana-devs",
+ "environment": "arcana-devs",
+ "read_only": false,
+ "subject": {
+  "schema": "GitCanarySubject/v1",
+  "commit": "df82aba3b1d25de78df845e9b2cd7c979a507635",
+  "tree": "dfaac0342262f11d0f2ba13a76a4b45b35e75ec8",
+  "evidence": {
+   "path": "source-evidence.json",
+   "sha256": "bf48a1bc92645352dbad5e1b715e9f10d139bf3078c621c968fb16e4b29f2792",
+   "source_field": "commit"
+  }
+ },
+ "purpose": "AUP-GRAPH-008 canary for the Muneral API route/controller entities behind an inferred boundary (v-canary INFERRED_BOUNDARY_WITHOUT_CANARY on PR #211, MUN-0043 index grant, DEC-AUP-0096). Probe 1 runs the project-read-grant jest battery of the shipped grant list (exit 0, test names asserted); probe 2 requires the new DEC-AUP-0096 entry in the shipped list, which the parent does not carry, so the pair is red there (negative control). The jest battery is property-based and passes on the parent too; the marker probe is the one that discriminates. Positive: subject = the branch head (code commit 930493b merged with main 60f0d75, re-admission after 215).",
+ "probes": [
+  {
+   "kind": "process",
+   "id": "grant-list-jest-battery",
+   "argv": [
+    "/usr/bin/node",
+    "--experimental-vm-modules",
+    "/home/dev/aup/import-audit-work/muneral-211c/apps/api/node_modules/jest/bin/jest.js",
+    "test/project-read-grants.spec.ts",
+    "--runInBand",
+    "--verbose"
+   ],
+   "cwd": "apps/api",
+   "env_keys": [
+    "PATH",
+    "HOME",
+    "TMPDIR"
+   ],
+   "timeout_seconds": 120,
+   "capture_limit_bytes": 524288,
+   "executable_sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+   "execution_files": [
+    {
+     "path": "/home/dev/aup/import-audit-work/muneral-211c/apps/api/src/auth/project-read-grants.ts",
+     "sha256": "56e2c663666077cbac19a70eff0f776b63d238b830e62bc17cebdca735e1b417"
+    },
+    {
+     "path": "/home/dev/aup/import-audit-work/muneral-211c/apps/api/test/project-read-grants.spec.ts",
+     "sha256": "69e449368ea672b887da0ca88495c6ec23a580e04bce9278ba07696f7d2acedb"
+    }
+   ],
+   "expect": {
+    "exit_codes": [
+     0
+    ],
+    "stderr_contains": [
+     "names at most one entry per (agentId, projectId)",
+     "carries a parseable, future-dated `until` no wider than the protocol allows",
+     "names a program decision and real uuids, and says what bought the window",
+     "Tests:"
+    ]
+   },
+   "entities": [
+    "code_unit:apps/api/src/agents/agents.controller.ts",
+    "code_unit:apps/api/src/projects/projects.controller.ts",
+    "code_unit:apps/api/src/sync/sync.controller.ts",
+    "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts",
+    "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+   ],
+   "mutating": true
+  },
+  {
+   "kind": "process",
+   "id": "grant-list-carries-new-entry",
+   "argv": [
+    "/usr/bin/grep",
+    "-n",
+    "decision: 'DEC-AUP-0096'",
+    "apps/api/src/auth/project-read-grants.ts"
+   ],
+   "cwd": ".",
+   "env_keys": [
+    "PATH",
+    "HOME",
+    "TMPDIR"
+   ],
+   "timeout_seconds": 30,
+   "capture_limit_bytes": 65536,
+   "executable_sha256": "20a35a4c18f2fe9e6305c1cbf866b9c0fcc3f957132ae66028c99ec353bb0a80",
+   "execution_files": [
+    {
+     "path": "/home/dev/aup/import-audit-work/muneral-211c/apps/api/src/auth/project-read-grants.ts",
+     "sha256": "56e2c663666077cbac19a70eff0f776b63d238b830e62bc17cebdca735e1b417"
+    }
+   ],
+   "expect": {
+    "exit_codes": [
+     0
+    ],
+    "stdout_contains": [
+     "decision: 'DEC-AUP-0096'"
+    ]
+   },
+   "entities": [
+    "code_unit:apps/api/src/agents/agents.controller.ts",
+    "code_unit:apps/api/src/projects/projects.controller.ts",
+    "code_unit:apps/api/src/sync/sync.controller.ts",
+    "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts",
+    "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+   ],
+   "mutating": true
+  }
+ ]
+}

@@ -24,7 +24,7 @@ import {
   UnknownStatusMapRevisionError,
 } from '../src/migration/migration.status.js';
 import {
-  STATUS_MAP,
+  STATUS_MAP as CURRENT_STATUS_MAP,
   STATUS_MAP_REVISION,
   STATUS_MAP_REVISIONS,
   SUPPORTED_STATUS_MAP_REVISIONS,
@@ -38,6 +38,8 @@ import * as path from 'node:path';
 
 // ESM has no __dirname, and declaring that NAME would mark the module CommonJS.
 const thisDir = path.dirname(url.fileURLToPath(import.meta.url));
+
+const STATUS_MAP = statusMapForRevision(3)!;
 
 const DIR = join(thisDir, '../src/migration/status-map');
 const REV2_FILE = join(DIR, 'status-map-v1-rev2.json');
@@ -108,14 +110,14 @@ const rev2OnDisk = JSON.parse(readFileSync(REV2_FILE, 'utf8')) as Record<string,
 const rev3OnDisk = JSON.parse(readFileSync(REV3_FILE, 'utf8')) as Record<string, unknown>;
 
 describe('the vendored revision set', () => {
-  it('carries revisions 2 and 3, and nothing else', () => {
-    expect(SUPPORTED_STATUS_MAP_REVISIONS).toEqual([2, 3]);
-    expect([...STATUS_MAP_REVISIONS.keys()].sort((a, b) => a - b)).toEqual([2, 3]);
+  it('retains revisions 2 and 3 alongside revision 4', () => {
+    expect(SUPPORTED_STATUS_MAP_REVISIONS).toEqual([2, 3, 4]);
+    expect([...STATUS_MAP_REVISIONS.keys()].sort((a, b) => a - b)).toEqual([2, 3, 4]);
   });
 
-  it('applies revision 3 by default', () => {
-    expect(STATUS_MAP_REVISION).toBe(3);
-    expect(STATUS_MAP.revision).toBe(3);
+  it('applies revision 4 by default while retaining revision 3', () => {
+    expect(STATUS_MAP_REVISION).toBe(4);
+    expect(CURRENT_STATUS_MAP.revision).toBe(4);
     expect(statusMapForRevision(3)).toBe(STATUS_MAP);
   });
 
@@ -132,7 +134,7 @@ describe('the vendored revision set', () => {
   });
 
   it('has no revision it does not carry', () => {
-    for (const missing of [0, 1, 4, 99, -3, 2.5]) {
+    for (const missing of [0, 1, 5, 99, -3, 2.5]) {
       expect(statusMapForRevision(missing)).toBeUndefined();
     }
   });
@@ -168,7 +170,7 @@ describe('revision 3 — archived is not done', () => {
   it.each(CONTRACT_ROWS_REV3)(
     'projects the raw status %s onto %s (asserted done: %s)',
     (raw, muneral, assertedDone) => {
-      expect(mapHistoricalStatus(raw)).toEqual({
+      expect(mapHistoricalStatus(raw, 3)).toEqual({
         taskStatus: muneral,
         historicalStatus: raw,
         historicalAssertedDone: assertedDone,
@@ -188,7 +190,7 @@ describe('revision 3 — archived is not done', () => {
 
   it('projects archived onto archived, never onto done', () => {
     for (const raw of ['archived', 'Archived', '  ARCHIVED  ']) {
-      const mapped = mapHistoricalStatus(raw);
+      const mapped = mapHistoricalStatus(raw, 3);
       expect(mapped.taskStatus).toBe('archived');
       expect(mapped.taskStatus).not.toBe('done');
       // The raw string still survives byte for byte.
@@ -201,7 +203,7 @@ describe('revision 3 — archived is not done', () => {
     // the archive card, and the projection refuses to restate that as a Muneral
     // `done`. Dropping the assertion would lose the audit trail; keeping the
     // projection would keep the totalisation. MUN-0043 does neither.
-    const mapped = mapHistoricalStatus('archived');
+    const mapped = mapHistoricalStatus('archived', 3);
     expect(mapped.historicalAssertedDone).toBe(true);
     expect(mapped.currentVerification).toBe(NOT_REVALIDATED);
     expect(mapped.taskStatus).toBe('archived');
@@ -209,7 +211,7 @@ describe('revision 3 — archived is not done', () => {
 
   it('asserts completion for exactly the four raw values, as before', () => {
     const asserting = CONTRACT_ROWS_REV3
-      .filter(([raw]) => mapHistoricalStatus(raw).historicalAssertedDone)
+      .filter(([raw]) => mapHistoricalStatus(raw, 3).historicalAssertedDone)
       .map(([raw]) => raw)
       .sort();
     expect(asserting).toEqual(['archived', 'completed', 'done', 'done_pending_archive']);
@@ -217,7 +219,7 @@ describe('revision 3 — archived is not done', () => {
 
   it('leaves `done` meaning done — only the archive card moved', () => {
     for (const raw of ['done', 'done_pending_archive', 'completed']) {
-      expect(mapHistoricalStatus(raw).taskStatus).toBe('done');
+      expect(mapHistoricalStatus(raw, 3).taskStatus).toBe('done');
     }
   });
 
@@ -232,7 +234,7 @@ describe('revision 3 — archived is not done', () => {
   });
 
   it('still parks an unknown value in todo and flags it', () => {
-    expect(mapHistoricalStatus('frobnicated')).toEqual({
+    expect(mapHistoricalStatus('frobnicated', 3)).toEqual({
       taskStatus: 'todo',
       historicalStatus: 'frobnicated',
       historicalAssertedDone: false,
@@ -255,14 +257,14 @@ describe('projecting under a named revision', () => {
     });
   });
 
-  it('gives the same answer as the default when revision 3 is named explicitly', () => {
+  it('keeps the same semantic projection under revisions 3 and 4 for prior keys', () => {
     for (const [raw] of CONTRACT_ROWS_REV3) {
-      expect(mapHistoricalStatus(raw, 3)).toEqual(mapHistoricalStatus(raw));
+      expect(mapHistoricalStatus(raw, 3)).toEqual({ ...mapHistoricalStatus(raw, 4), statusMapRevision: 3 });
     }
   });
 
   it('refuses a revision this build does not carry, instead of falling back', () => {
-    for (const missing of [0, 1, 4, 99]) {
+    for (const missing of [0, 1, 5, 99]) {
       expect(() => mapHistoricalStatus('archived', missing)).toThrow(
         UnknownStatusMapRevisionError,
       );

@@ -11,6 +11,15 @@ on:
     branches: [main]
   pull_request:
 
+# A newer push to a pull-request branch supersedes that branch's older run, which
+# otherwise keeps queueing on the shared self-hosted runners. Only pull_request
+# runs are ever cancelled: push (main), tag, schedule and workflow_dispatch runs get
+# a group unique to the run, so they are never cancelled or replaced while pending.
+# Job-level deploy locks are separate groups and are not touched.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   secrets-gate:
     # TRANS-0029: fail-fast if OPSBOT_API_KEY is missing/empty. Without this
@@ -18,7 +27,10 @@ jobs:
     # (empty Bearer token -> 401) and the incident would only surface when
     # someone noticed the missing alert. Pattern per TRANS-0027 (transcribator-api).
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: [self-hosted, linux, ci-general]
+    # A2-315: pre-deploy gates run on the dedicated `deploy-gate` lane, not on `ci-general`, where
+    # KC2 batteries held all five slots for hours (argana 95 min, muneral 150 min in the queue on
+    # 2026-09-24/25). The lane's runners carry ONLY that label (--no-default-labels): nothing else lands there.
+    runs-on: [deploy-gate]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - name: Assert OPSBOT_API_KEY is set
@@ -27,7 +39,11 @@ jobs:
         run: bash scripts/ci/opsbot-secret-gate.sh
 
   lint-and-test:
-    runs-on: [self-hosted, linux, ci-general]
+    # A2-315: pre-deploy gates run on the dedicated `deploy-gate` lane, not on `ci-general`, where
+    # KC2 batteries held all five slots for hours (argana 95 min, muneral 150 min in the queue on
+    # 2026-09-24/25). The lane's runners carry ONLY that label (--no-default-labels): nothing else lands there.
+    # Pull requests keep the shared pool; only the push that deploys takes the lane.
+    runs-on: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && fromJSON('["deploy-gate"]') || fromJSON('["self-hosted","linux","ci-general"]') }}
     services:
       postgres:
         image: postgres:16
@@ -69,6 +85,10 @@ jobs:
       # the key missing or malformed from a loopback stub and asserts the probe goes RED on each.
       - name: Test the contract-digest probe goes red on a build without the field
         run: bash scripts/ci/probe-contract-digest.test.sh
+      # A2-330: the post-deploy canary must be able to go red — a route missing from the resident
+      # route table, a 405, a router no-match 404 — and must never send anything but a GET.
+      - name: Test the post-deploy canary goes red
+        run: python3 -m unittest discover -s scripts/canary -p 'test_*.py'
       - name: Enable corepack (pnpm@11.5.2 from packageManager field)
         run: |
           COREPACK_HOME="${RUNNER_TEMP}/corepack-bin"
@@ -138,7 +158,7 @@ jobs:
     # and no retrievable annotation. Recorded as a hole, not as a solved problem.
     uses: ./.github/workflows/graph-admission.yml
     with:
-      program_ref: '46cbdc0adfd7e5d14e38b1b1ce2b5f1778bd8840'
+      program_ref: 'd33325d57904d2199c1bb39f7d37021db4e369c1'
       verifier_job: 'lint-and-test'
       verifier_conclusion: ${{ needs.lint-and-test.result }}
       # AUP-GRAPH-006:gate2b. The fingerprint of the Ed25519 key that signs the vendored bundle's
@@ -150,10 +170,12 @@ jobs:
       signing_key_fingerprint: 'SHA256:9QFqysn44UjA8rXyfHjItP3b2Oadhnbf1bDNqXrsCig'
 
   network-exposure:
-    uses: Arcanada-one/datarim/.github/workflows/network-exposure-lint.yml@dcba69e8811be8680fc1096b5ad572b73c65023b
+    uses: Arcanada-one/datarim/.github/workflows/network-exposure-lint.yml@50351e0468f57a39b280d75cf41827329d6393d2
     with:
       compose_paths: docker-compose.prod.yml
-      datarim_ref: '57afdfcd6a2d71aa8e0b577de6e43846e93b60dd'
+      datarim_ref: '50351e0468f57a39b280d75cf41827329d6393d2'
+      # A2-315: on the deploying push this gate takes the `deploy-gate` lane too (default is ci-general).
+      runner_labels: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && '["deploy-gate"]' || '["self-hosted","linux","ci-general"]' }}
 
   preflight-caller-contract:
     permissions:
@@ -165,7 +187,7 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ github.workflow_sha }}
-      - uses: Arcanada-one/datarim/.github/actions/preflight-caller-contract@dcba69e8811be8680fc1096b5ad572b73c65023b
+      - uses: Arcanada-one/datarim/.github/actions/preflight-caller-contract@50351e0468f57a39b280d75cf41827329d6393d2
         with:
           vault-addr: ${{ vars.VAULT_ADDR }}
 
@@ -194,7 +216,7 @@ jobs:
     steps:
       - name: Pre-deploy host readiness
         id: preflight
-        uses: Arcanada-one/datarim/.github/actions/preflight-check@dcba69e8811be8680fc1096b5ad572b73c65023b
+        uses: Arcanada-one/datarim/.github/actions/preflight-check@50351e0468f57a39b280d75cf41827329d6393d2
         with:
           target-host: arcana-prd
           service-name: muneral
@@ -211,6 +233,7 @@ jobs:
           ops-bot-agent: muneral
           ops-bot-key: ${{ secrets.OPSBOT_API_KEY }}
           ops-bot-url: https://ops.arcanada.ai/events
+          allowed_hosts: ops.arcanada.ai
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
@@ -263,6 +286,48 @@ jobs:
           sudo -n /usr/local/sbin/arcanada-compose-broker muneral logs 100
           exit 1
 
+      # A2-330: the post-deploy canary (observed-edges-and-deploy-gate.v1 rules C1/C3/C5). The program's
+      # admission policy lists muneral under decision_exemptions.no_live_contour.live_contours, so an
+      # inferred boundary here is lifted by running this, never by an exemption. Route presence is
+      # read from the RESIDENT process's own route table (/health/routes) and the router's no-match
+      # fingerprint, never from a status code; a 405 is a refusal. GET only, no body, no credential:
+      # nothing here writes. `-I` keeps scripts/canary/ off the import path (scrutator A2-329).
+      - name: Post-deploy canary
+        id: canary
+        if: steps.preflight.outputs.status != 'fail'
+        run: |
+          set -uo pipefail
+          mkdir -p "${RUNNER_TEMP}/canary"
+          rc=0
+          python3 -I scripts/canary/canary_probe.py \
+            --plan deploy/canary/muneral-route-presence.plan.json \
+            --phase post --base-url http://127.0.0.1:3500 --repo . \
+            --out "${RUNNER_TEMP}/canary/muneral-route-presence-post.json" || rc=$?
+          # Recorded, not raised here, so the result is uploaded before the verdict fails the run
+          # (every deploy step carries the same preflight `if:`; see preflight-caller-contract).
+          echo "rc=${rc}" >> "$GITHUB_OUTPUT"
+
+      - name: Keep the canary result
+        if: steps.preflight.outputs.status != 'fail'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: canary-post-${{ github.sha }}
+          path: ${{ runner.temp }}/canary/
+          if-no-files-found: error
+
+      # 0 = every entity verified; 3 = some not_measured (absence of measurement, rule C3: not a
+      # regression, never a pass); 1 = a measured failure; 2 = the plan was refused.
+      - name: Canary verdict
+        if: steps.preflight.outputs.status != 'fail'
+        env:
+          CANARY_RC: ${{ steps.canary.outputs.rc }}
+        run: |
+          case "${CANARY_RC}" in
+            0) echo "canary: every entity verified" ;;
+            3) echo "::warning title=canary::some entities not_measured (rule C3)" ;;
+            *) echo "::error title=canary::canary rc=${CANARY_RC:-missing}: a failed entity or a refused plan"; exit 1 ;;
+          esac
+
       - name: Semantic aggregate readback
         if: steps.preflight.outputs.status != 'fail'
         run: sudo -n /usr/local/sbin/arcanada-compose-broker muneral aggregate-readback
@@ -274,6 +339,11 @@ jobs:
   notify-deploy-failure:
     needs: deploy
     if: always() && needs.deploy.result == 'failure'
+    # A2-384: NOT on the `deploy-gate` lane. This job gates nothing and deploys nothing, and the lane
+    # runs on arcana-prd, the same host as `deploy` (`arcana-prd-host`): the one failure it most has to
+    # report (arcana-prd gone, taking the deploy runner with it) would take the lane down with it and
+    # the alert would queue forever. `ci-general` spans two hosts (arcana-devs and arcana-prd), so it
+    # still fires; the cost is that it can wait behind a KC2 battery. A late alert beats a lost one.
     runs-on: [self-hosted, linux, ci-general]
     steps:
       - name: Notify Ops Bot on deploy failure

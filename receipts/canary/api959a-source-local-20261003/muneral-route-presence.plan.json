@@ -1,0 +1,881 @@
+{
+ "schema": "CanaryPlan/v1",
+ "id": "muneral-route-presence",
+ "card": "A2-330",
+ "environment": "production",
+ "base_url": "http://127.0.0.1:3500",
+ "route_table_path": "/health/routes",
+ "owner": "none: read-only plan (GET only, no body, no credential)",
+ "read_only_declared": true,
+ "purpose": "Route presence in the RESIDENT version for every route the graph derives, judged by the resident route table and the router's no-match fingerprint, never by a status code (admission-gate.v1 decision_exemptions.classes.no_live_contour.live_contours).",
+ "probes": [
+  {
+   "id": "health-version",
+   "kind": "health",
+   "method": "GET",
+   "path": "/health",
+   "entities": [
+    "code_unit:apps/api/src/main.ts",
+    "code_unit:apps/api/src/app.module.ts"
+   ],
+   "means": "reads the resident version and proves the process bootstrapped by main.ts/app.module.ts answers"
+  },
+  {
+   "id": "route-delete-agents-keys-keyid",
+   "kind": "route_presence",
+   "method": "DELETE",
+   "route": "/api/v1/agents/keys/:keyId",
+   "path": "/api/v1/agents/keys/00000000-0000-4000-8000-000000000000",
+   "entities": [
+    "route:DELETE /agents/keys/:keyId",
+    "code_unit:apps/api/src/agents/agents.controller.ts"
+   ]
+  },
+  {
+   "id": "route-delete-agents-tasks-taskid-assign-agentid",
+   "kind": "route_presence",
+   "method": "DELETE",
+   "route": "/api/v1/agents/tasks/:taskId/assign/:agentId",
+   "path": "/api/v1/agents/tasks/00000000-0000-4000-8000-000000000000/assign/00000000-0000-4000-8000-000000000000",
+   "entities": [
+    "route:DELETE /agents/tasks/:taskId/assign/:agentId",
+    "code_unit:apps/api/src/agents/agents.controller.ts"
+   ]
+  },
+  {
+   "id": "route-delete-milestones-milestoneid",
+   "kind": "route_presence",
+   "method": "DELETE",
+   "route": "/api/v1/milestones/:milestoneId",
+   "path": "/api/v1/milestones/00000000-0000-4000-8000-000000000000",
+   "entities": [
+    "route:DELETE /milestones/:milestoneId",
+    "code_unit:apps/api/src/milestones/milestones.controller.ts"
+   ]
+  },
+  {
+   "id": "route-delete-projects-projectid",
+   "kind": "route_presence",
+   "method": "DELETE",
+   "route": "/api/v1/projects/:projectId",
+   "path": "/api/v1/projects/00000000-0000-4000-8000-000000000000",
+   "entities": [
+    "route:DELETE /projects/:projectId",
+    "code_unit:apps/api/src/projects/projects.controller.ts"
+   ]
+  },
+  {
+   "id": "route-delete-projects-git-refs-refid",
+   "kind": "route_presence",
+   "method": "DELETE",
+   "route": "/api/v1/projects/git-refs/:refId",
+   "path": "/api/v1/projects/git-refs/00000000-0000-4000-8000-000000000000",
+   "entities": [
+    "route:DELETE /projects/git-refs/:refId",
+    "code_unit:apps/api/src/projects/projects.controller.ts"
+   ]
+  },
+  {
+   "id": "route-delete-sprints-sprintid",
+   "kind": "route_presence",
+   "method": "DELETE",
+   "route": "/api/v1/sprints/:sprintId",
+   "path": "/api/v1/sprints/00000000-0000-4000-8000-000000000000",
+   "entities": [
+    "route:DELETE /sprints/:sprintId",
+    "code_unit:apps/api/src/milestones/milestones.controller.ts"
+   ]
+  },
+  {
+   "id": "route-delete-tasks-taskid",
+   "kind": "route_presence",
+   "method": "DELETE",
+   "route": "/api/v1/tasks/:taskId",
+   "path": "/api/v1/tasks/00000000-0000-4000-8000-000000000000",
+   "entities": [
+    "route:DELETE /tasks/:taskId",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-delete-tasks-taskid-checklist-itemid",
+   "kind": "route_presence",
+   "method": "DELETE",
+   "route": "/api/v1/tasks/:taskId/checklist/:itemId",
+   "path": "/api/v1/tasks/00000000-0000-4000-8000-000000000000/checklist/00000000-0000-4000-8000-000000000000",
+   "entities": [
+    "route:DELETE /tasks/:taskId/checklist/:itemId",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-delete-tasks-taskid-dependencies-depid",
+   "kind": "route_presence",
+   "method": "DELETE",
+   "route": "/api/v1/tasks/:taskId/dependencies/:depId",
+   "path": "/api/v1/tasks/00000000-0000-4000-8000-000000000000/dependencies/00000000-0000-4000-8000-000000000000",
+   "entities": [
+    "route:DELETE /tasks/:taskId/dependencies/:depId",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-delete-webhooks-webhookid",
+   "kind": "route_presence",
+   "method": "DELETE",
+   "route": "/api/v1/webhooks/:webhookId",
+   "path": "/api/v1/webhooks/00000000-0000-4000-8000-000000000000",
+   "entities": [
+    "route:DELETE /webhooks/:webhookId",
+    "code_unit:apps/api/src/webhooks/webhooks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-delete-workspaces-workspaceid-members-userid",
+   "kind": "route_presence",
+   "method": "DELETE",
+   "route": "/api/v1/workspaces/:workspaceId/members/:userId",
+   "path": "/api/v1/workspaces/00000000-0000-4000-8000-000000000000/members/00000000-0000-4000-8000-000000000000",
+   "entities": [
+    "route:DELETE /workspaces/:workspaceId/members/:userId",
+    "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-agents-tasks",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/agents/tasks",
+   "path": "/api/v1/agents/tasks",
+   "entities": [
+    "route:GET /agents/tasks",
+    "code_unit:apps/api/src/agents/agents.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-agents-workspace-workspaceid",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/agents/workspace/:workspaceId",
+   "path": "/api/v1/agents/workspace/00000000-0000-4000-8000-000000000000",
+   "entities": [
+    "route:GET /agents/workspace/:workspaceId",
+    "code_unit:apps/api/src/agents/agents.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-auth-github",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/auth/github",
+   "path": "/api/v1/auth/github",
+   "entities": [
+    "route:GET /auth/github",
+    "code_unit:apps/api/src/auth/auth.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-auth-github-callback",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/auth/github/callback",
+   "path": "/api/v1/auth/github/callback",
+   "entities": [
+    "route:GET /auth/github/callback",
+    "code_unit:apps/api/src/auth/auth.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-health",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/health",
+   "path": "/health",
+   "entities": [
+    "route:GET /health",
+    "code_unit:apps/api/src/health.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-health-routes",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/health/routes",
+   "path": "/health/routes",
+   "entities": [
+    "route:GET /health/routes",
+    "code_unit:apps/api/src/route-table.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-migration-batches-batchid",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/migration/batches/:batchId",
+   "path": "/api/v1/migration/batches/00000000-0000-4000-8000-000000000000",
+   "entities": [
+    "route:GET /migration/batches/:batchId",
+    "code_unit:apps/api/src/migration/migration.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-migration-identities-identityid-mappings",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/migration/identities/:identityId/mappings",
+   "path": "/api/v1/migration/identities/00000000-0000-4000-8000-000000000000/mappings",
+   "entities": [
+    "route:GET /migration/identities/:identityId/mappings",
+    "code_unit:apps/api/src/migration/migration.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-migration-work-items-by-legacy-sourcenamespace-legacyid",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/migration/work-items/by-legacy/:sourceNamespace/:legacyId",
+   "path": "/api/v1/migration/work-items/by-legacy/00000000-0000-4000-8000-000000000000/00000000-0000-4000-8000-000000000000",
+   "entities": [
+    "route:GET /migration/work-items/by-legacy/:sourceNamespace/:legacyId",
+    "code_unit:apps/api/src/migration/migration.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-migration-work-items-search",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/migration/work-items/search",
+   "path": "/api/v1/migration/work-items/search",
+   "entities": [
+    "route:GET /migration/work-items/search",
+    "code_unit:apps/api/src/migration/migration.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-projects-projectid",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/projects/:projectId",
+   "path": "/api/v1/projects/00000000-0000-4000-8000-000000000000",
+   "entities": [
+    "route:GET /projects/:projectId",
+    "code_unit:apps/api/src/projects/projects.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-projects-projectid-milestones",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/projects/:projectId/milestones",
+   "path": "/api/v1/projects/00000000-0000-4000-8000-000000000000/milestones",
+   "entities": [
+    "route:GET /projects/:projectId/milestones",
+    "code_unit:apps/api/src/milestones/milestones.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-projects-projectid-sprints",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/projects/:projectId/sprints",
+   "path": "/api/v1/projects/00000000-0000-4000-8000-000000000000/sprints",
+   "entities": [
+    "route:GET /projects/:projectId/sprints",
+    "code_unit:apps/api/src/milestones/milestones.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-projects-tasks-taskid-git-refs",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/projects/tasks/:taskId/git-refs",
+   "path": "/api/v1/projects/tasks/00000000-0000-4000-8000-000000000000/git-refs",
+   "entities": [
+    "route:GET /projects/tasks/:taskId/git-refs",
+    "code_unit:apps/api/src/projects/projects.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-projects-workspace-workspaceid",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/projects/workspace/:workspaceId",
+   "path": "/api/v1/projects/workspace/00000000-0000-4000-8000-000000000000",
+   "entities": [
+    "route:GET /projects/workspace/:workspaceId",
+    "code_unit:apps/api/src/projects/projects.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-sync-datarim-projectid",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/sync/datarim/:projectId",
+   "path": "/api/v1/sync/datarim/00000000-0000-4000-8000-000000000000",
+   "entities": [
+    "route:GET /sync/datarim/:projectId",
+    "code_unit:apps/api/src/sync/sync.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-tasks",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/tasks",
+   "path": "/api/v1/tasks",
+   "entities": [
+    "route:GET /tasks",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-tasks-taskid",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/tasks/:taskId",
+   "path": "/api/v1/tasks/00000000-0000-4000-8000-000000000000",
+   "entities": [
+    "route:GET /tasks/:taskId",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-tasks-taskid-activity",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/tasks/:taskId/activity",
+   "path": "/api/v1/tasks/00000000-0000-4000-8000-000000000000/activity",
+   "entities": [
+    "route:GET /tasks/:taskId/activity",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-tasks-taskid-attempts-attemptid-solution-log-head",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/tasks/:taskId/attempts/:attemptId/solution-log-head",
+   "path": "/api/v1/tasks/00000000-0000-4000-8000-000000000000/attempts/00000000-0000-4000-8000-000000000000/solution-log-head",
+   "entities": [
+    "route:GET /tasks/:taskId/attempts/:attemptId/solution-log-head",
+    "code_unit:apps/api/src/solution-log-head/solution-log-head.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-tasks-taskid-checklist",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/tasks/:taskId/checklist",
+   "path": "/api/v1/tasks/00000000-0000-4000-8000-000000000000/checklist",
+   "entities": [
+    "route:GET /tasks/:taskId/checklist",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-tasks-taskid-dependencies",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/tasks/:taskId/dependencies",
+   "path": "/api/v1/tasks/00000000-0000-4000-8000-000000000000/dependencies",
+   "entities": [
+    "route:GET /tasks/:taskId/dependencies",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-tasks-taskid-dependency-graph",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/tasks/:taskId/dependency-graph",
+   "path": "/api/v1/tasks/00000000-0000-4000-8000-000000000000/dependency-graph",
+   "entities": [
+    "route:GET /tasks/:taskId/dependency-graph",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-tasks-taskid-evidence",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/tasks/:taskId/evidence",
+   "path": "/api/v1/tasks/00000000-0000-4000-8000-000000000000/evidence",
+   "entities": [
+    "route:GET /tasks/:taskId/evidence",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-tasks-taskid-field-changes",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/tasks/:taskId/field-changes",
+   "path": "/api/v1/tasks/00000000-0000-4000-8000-000000000000/field-changes",
+   "entities": [
+    "route:GET /tasks/:taskId/field-changes",
+    "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-tasks-taskid-readiness",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/tasks/:taskId/readiness",
+   "path": "/api/v1/tasks/00000000-0000-4000-8000-000000000000/readiness",
+   "entities": [
+    "route:GET /tasks/:taskId/readiness",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-tasks-digest",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/tasks/digest",
+   "path": "/api/v1/tasks/digest",
+   "entities": [
+    "route:GET /tasks/digest",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-tasks-project-projectid",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/tasks/project/:projectId",
+   "path": "/api/v1/tasks/project/00000000-0000-4000-8000-000000000000",
+   "entities": [
+    "route:GET /tasks/project/:projectId",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-tasks-project-projectid-index",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/tasks/project/:projectId/index",
+   "path": "/api/v1/tasks/project/00000000-0000-4000-8000-000000000000/index",
+   "entities": [
+    "route:GET /tasks/project/:projectId/index",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-tasks-project-projectid-staleness",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/tasks/project/:projectId/staleness",
+   "path": "/api/v1/tasks/project/00000000-0000-4000-8000-000000000000/staleness",
+   "entities": [
+    "route:GET /tasks/project/:projectId/staleness",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-webhooks-workspace-workspaceid",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/webhooks/workspace/:workspaceId",
+   "path": "/api/v1/webhooks/workspace/00000000-0000-4000-8000-000000000000",
+   "entities": [
+    "route:GET /webhooks/workspace/:workspaceId",
+    "code_unit:apps/api/src/webhooks/webhooks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-workspaces",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/workspaces",
+   "path": "/api/v1/workspaces",
+   "entities": [
+    "route:GET /workspaces",
+    "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-workspaces-workspaceid",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/workspaces/:workspaceId",
+   "path": "/api/v1/workspaces/00000000-0000-4000-8000-000000000000",
+   "entities": [
+    "route:GET /workspaces/:workspaceId",
+    "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+   ]
+  },
+  {
+   "id": "route-get-workspaces-workspaceid-members",
+   "kind": "route_presence",
+   "method": "GET",
+   "route": "/api/v1/workspaces/:workspaceId/members",
+   "path": "/api/v1/workspaces/00000000-0000-4000-8000-000000000000/members",
+   "entities": [
+    "route:GET /workspaces/:workspaceId/members",
+    "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+   ]
+  },
+  {
+   "id": "route-patch-tasks-taskid-checklist-itemid",
+   "kind": "route_presence",
+   "method": "PATCH",
+   "route": "/api/v1/tasks/:taskId/checklist/:itemId",
+   "path": "/api/v1/tasks/00000000-0000-4000-8000-000000000000/checklist/00000000-0000-4000-8000-000000000000",
+   "entities": [
+    "route:PATCH /tasks/:taskId/checklist/:itemId",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-patch-tasks-taskid-status",
+   "kind": "route_presence",
+   "method": "PATCH",
+   "route": "/api/v1/tasks/:taskId/status",
+   "path": "/api/v1/tasks/00000000-0000-4000-8000-000000000000/status",
+   "entities": [
+    "route:PATCH /tasks/:taskId/status",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-patch-webhooks-webhookid-activate",
+   "kind": "route_presence",
+   "method": "PATCH",
+   "route": "/api/v1/webhooks/:webhookId/activate",
+   "path": "/api/v1/webhooks/00000000-0000-4000-8000-000000000000/activate",
+   "entities": [
+    "route:PATCH /webhooks/:webhookId/activate",
+    "code_unit:apps/api/src/webhooks/webhooks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-patch-webhooks-webhookid-deactivate",
+   "kind": "route_presence",
+   "method": "PATCH",
+   "route": "/api/v1/webhooks/:webhookId/deactivate",
+   "path": "/api/v1/webhooks/00000000-0000-4000-8000-000000000000/deactivate",
+   "entities": [
+    "route:PATCH /webhooks/:webhookId/deactivate",
+    "code_unit:apps/api/src/webhooks/webhooks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-patch-workspaces-workspaceid-members-userid-role",
+   "kind": "route_presence",
+   "method": "PATCH",
+   "route": "/api/v1/workspaces/:workspaceId/members/:userId/role",
+   "path": "/api/v1/workspaces/00000000-0000-4000-8000-000000000000/members/00000000-0000-4000-8000-000000000000/role",
+   "entities": [
+    "route:PATCH /workspaces/:workspaceId/members/:userId/role",
+    "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-agents",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/agents",
+   "path": "/api/v1/agents",
+   "entities": [
+    "route:POST /agents",
+    "code_unit:apps/api/src/agents/agents.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-agents-agentid-keys",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/agents/:agentId/keys",
+   "path": "/api/v1/agents/00000000-0000-4000-8000-000000000000/keys",
+   "entities": [
+    "route:POST /agents/:agentId/keys",
+    "code_unit:apps/api/src/agents/agents.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-agents-keys-keyid-rotate",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/agents/keys/:keyId/rotate",
+   "path": "/api/v1/agents/keys/00000000-0000-4000-8000-000000000000/rotate",
+   "entities": [
+    "route:POST /agents/keys/:keyId/rotate",
+    "code_unit:apps/api/src/agents/agents.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-agents-keys-self-revoke",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/agents/keys/self/revoke",
+   "path": "/api/v1/agents/keys/self/revoke",
+   "entities": [
+    "route:POST /agents/keys/self/revoke",
+    "code_unit:apps/api/src/agents/agents.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-agents-tasks-taskid-assign",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/agents/tasks/:taskId/assign",
+   "path": "/api/v1/agents/tasks/00000000-0000-4000-8000-000000000000/assign",
+   "entities": [
+    "route:POST /agents/tasks/:taskId/assign",
+    "code_unit:apps/api/src/agents/agents.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-auth-telegram",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/auth/telegram",
+   "path": "/api/v1/auth/telegram",
+   "entities": [
+    "route:POST /auth/telegram",
+    "code_unit:apps/api/src/auth/auth.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-migration-batches",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/migration/batches",
+   "path": "/api/v1/migration/batches",
+   "entities": [
+    "route:POST /migration/batches",
+    "code_unit:apps/api/src/migration/migration.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-migration-batches-batchid-commit",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/migration/batches/:batchId/commit",
+   "path": "/api/v1/migration/batches/00000000-0000-4000-8000-000000000000/commit",
+   "entities": [
+    "route:POST /migration/batches/:batchId/commit",
+    "code_unit:apps/api/src/migration/migration.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-migration-identities-identityid-decisions",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/migration/identities/:identityId/decisions",
+   "path": "/api/v1/migration/identities/00000000-0000-4000-8000-000000000000/decisions",
+   "entities": [
+    "route:POST /migration/identities/:identityId/decisions",
+    "code_unit:apps/api/src/migration/migration.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-migration-work-items",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/migration/work-items",
+   "path": "/api/v1/migration/work-items",
+   "entities": [
+    "route:POST /migration/work-items",
+    "code_unit:apps/api/src/migration/migration.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-migration-work-items-taskid-transitions",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/migration/work-items/:taskId/transitions",
+   "path": "/api/v1/migration/work-items/00000000-0000-4000-8000-000000000000/transitions",
+   "entities": [
+    "route:POST /migration/work-items/:taskId/transitions",
+    "code_unit:apps/api/src/migration/migration.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-milestones",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/milestones",
+   "path": "/api/v1/milestones",
+   "entities": [
+    "route:POST /milestones",
+    "code_unit:apps/api/src/milestones/milestones.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-projects",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/projects",
+   "path": "/api/v1/projects",
+   "entities": [
+    "route:POST /projects",
+    "code_unit:apps/api/src/projects/projects.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-projects-git-refs",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/projects/git-refs",
+   "path": "/api/v1/projects/git-refs",
+   "entities": [
+    "route:POST /projects/git-refs",
+    "code_unit:apps/api/src/projects/projects.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-sprints",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/sprints",
+   "path": "/api/v1/sprints",
+   "entities": [
+    "route:POST /sprints",
+    "code_unit:apps/api/src/milestones/milestones.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-sync-datarim-projectid-import",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/sync/datarim/:projectId/import",
+   "path": "/api/v1/sync/datarim/00000000-0000-4000-8000-000000000000/import",
+   "entities": [
+    "route:POST /sync/datarim/:projectId/import",
+    "code_unit:apps/api/src/sync/sync.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-tasks",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/tasks",
+   "path": "/api/v1/tasks",
+   "entities": [
+    "route:POST /tasks",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-tasks-taskid-attempts-attemptid-solution-log-heads",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/tasks/:taskId/attempts/:attemptId/solution-log-heads",
+   "path": "/api/v1/tasks/00000000-0000-4000-8000-000000000000/attempts/00000000-0000-4000-8000-000000000000/solution-log-heads",
+   "entities": [
+    "route:POST /tasks/:taskId/attempts/:attemptId/solution-log-heads",
+    "code_unit:apps/api/src/solution-log-head/solution-log-head.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-tasks-taskid-checklist",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/tasks/:taskId/checklist",
+   "path": "/api/v1/tasks/00000000-0000-4000-8000-000000000000/checklist",
+   "entities": [
+    "route:POST /tasks/:taskId/checklist",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-tasks-taskid-comments",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/tasks/:taskId/comments",
+   "path": "/api/v1/tasks/00000000-0000-4000-8000-000000000000/comments",
+   "entities": [
+    "route:POST /tasks/:taskId/comments",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-tasks-taskid-dependencies",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/tasks/:taskId/dependencies",
+   "path": "/api/v1/tasks/00000000-0000-4000-8000-000000000000/dependencies",
+   "entities": [
+    "route:POST /tasks/:taskId/dependencies",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-tasks-taskid-evidence",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/tasks/:taskId/evidence",
+   "path": "/api/v1/tasks/00000000-0000-4000-8000-000000000000/evidence",
+   "entities": [
+    "route:POST /tasks/:taskId/evidence",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-tasks-taskid-field-ack",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/tasks/:taskId/field-ack",
+   "path": "/api/v1/tasks/00000000-0000-4000-8000-000000000000/field-ack",
+   "entities": [
+    "route:POST /tasks/:taskId/field-ack",
+    "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-tasks-taskid-redactions",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/tasks/:taskId/redactions",
+   "path": "/api/v1/tasks/00000000-0000-4000-8000-000000000000/redactions",
+   "entities": [
+    "route:POST /tasks/:taskId/redactions",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-webhooks",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/webhooks",
+   "path": "/api/v1/webhooks",
+   "entities": [
+    "route:POST /webhooks",
+    "code_unit:apps/api/src/webhooks/webhooks.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-workspaces",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/workspaces",
+   "path": "/api/v1/workspaces",
+   "entities": [
+    "route:POST /workspaces",
+    "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+   ]
+  },
+  {
+   "id": "route-post-workspaces-workspaceid-members-userid",
+   "kind": "route_presence",
+   "method": "POST",
+   "route": "/api/v1/workspaces/:workspaceId/members/:userId",
+   "path": "/api/v1/workspaces/00000000-0000-4000-8000-000000000000/members/00000000-0000-4000-8000-000000000000",
+   "entities": [
+    "route:POST /workspaces/:workspaceId/members/:userId",
+    "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+   ]
+  }
+ ],
+ "not_measured_by_this_plan": [
+  {
+   "entity": "route:WS join:project",
+   "why": "not an HTTP route: a websocket gateway event is outside the HTTP router this canary reads"
+  },
+  {
+   "entity": "route:WS leave:project",
+   "why": "not an HTTP route: a websocket gateway event is outside the HTTP router this canary reads"
+  }
+ ]
+}
