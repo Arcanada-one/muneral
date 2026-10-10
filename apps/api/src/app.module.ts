@@ -8,6 +8,8 @@ import { PrismaModule } from './prisma/prisma.module.js';
 
 // Health
 import { HealthController } from './health.controller.js';
+import { ReadinessController } from './readiness.controller.js';
+import { ReadinessProbe } from './readiness.probe.js';
 import { RouteTableController } from './route-table.controller.js';
 
 // Feature modules
@@ -26,7 +28,7 @@ import { MigrationModule } from './migration/migration.module.js';
 import { OutboxModule } from './outbox/outbox.module.js';
 
 @Module({
-  controllers: [HealthController, RouteTableController],
+  controllers: [HealthController, ReadinessController, RouteTableController],
   imports: [
     PrismaModule,
     ThrottlerModule.forRoot([
@@ -65,6 +67,7 @@ import { OutboxModule } from './outbox/outbox.module.js';
     OutboxModule,
   ],
   providers: [
+    ReadinessProbe,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,

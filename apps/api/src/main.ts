@@ -32,9 +32,8 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
-  // Global API prefix; health check is excluded (served at /health), and so is the route table the
-  // post-deploy canary reads (served at /health/routes, A2-330)
-  app.setGlobalPrefix('api/v1', { exclude: ['health', 'health/routes'] });
+  // Liveness, database readiness and the resident route table are root health routes.
+  app.setGlobalPrefix('api/v1', { exclude: ['health', 'health/routes', 'health/ready'] });
 
   // The bind host is explicit and defaults to loopback — see bind-host.ts. Before A2-255 this was
   // `app.listen(port)`, which binds every interface; on a mesh host that published the API to every

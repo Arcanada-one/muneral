@@ -1,0 +1,104 @@
+{
+  "task_id": "c4f8c934-028f-4572-9ab6-cc74ecc4b5f6",
+  "parent_product_task": "4829ad0e-61eb-4aaf-b5af-25119432fd4f",
+  "design_authority": "Root 2026-10-08 14:05Z",
+  "route": "GET /health/ready",
+  "liveness_unchanged": true,
+  "database_operation": "SELECT 1 only; no application table read",
+  "limits_ms": {
+    "connection": 500,
+    "query": 500,
+    "postgres_statement": 500,
+    "http_wait": 1000
+  },
+  "database_pool_max": 1,
+  "read_only_connection": true,
+  "independent_negative_controls": [
+    {
+      "control": "always-ready",
+      "exit": 1,
+      "verdict": "killed_by_test"
+    },
+    {
+      "control": "table-read",
+      "exit": 1,
+      "verdict": "killed_by_test"
+    },
+    {
+      "control": "liveness-deploy",
+      "exit": 1,
+      "verdict": "killed_by_test"
+    }
+  ],
+  "source_sha256": {
+    "apps/api/src/readiness.probe.ts": "20bd55a1e71760b3e8695f8a4b58c8818de14845eec4145126dbe1f68e773061",
+    "apps/api/src/readiness.controller.ts": "695e23d1e87dea4480a6a98dd55a42c5f2593d017b8fb9ddfa94bff650bc421a",
+    "apps/api/src/main.ts": "14657a58ee6efb523d499ff1bca75c36059caf2f0b489a1bba55494116f9d4d0",
+    "apps/api/src/app.module.ts": "7f63fa945a3dd30a290667ba6281d1630f5a52c5f9edfdcea18c04473d29a056",
+    ".github/workflows/ci.yml": "e0a6c90b95863941a2f4f2cf47ab9fd245a8df342f6a3987c714765b529fe67f",
+    "apps/api/src/readiness.probe.spec.ts": "3687d418c665b670e5a21bf9dccc74fa9dda87c31820e981ede2365e6fb74a5a",
+    "apps/api/src/readiness.controller.spec.ts": "a088ceae476c05683de808bea1a85dfb2c3dc4da47095c7c031d9f3f45e15c24",
+    "apps/api/test/readiness.deploy.spec.ts": "ae408a7ce6369e2e9b2bdb5072711c4e4dd3be9006ad71f5c53ca47d1ef988e2",
+    "apps/api/test/readiness.postgres.spec.ts": "71c0775027e8fb091a1037087902cd42fd0b3280fc02f99892e77515ac283e81"
+  },
+  "verification": {
+    "API_typecheck_exit": 0,
+    "changed_source_lint_exit": 0,
+    "unit_HTTP_deploy_tests": "6/6 passed",
+    "real_database_removal_test": "1/1 passed; ready 200 ->503; liveness 200",
+    "teardown": {
+      "owned_postgres_port": 42423,
+      "postmaster_pid_absent": true,
+      "connection_refused": true,
+      "listener_absent": true,
+      "no_real_data_written": true,
+      "initial_rebind_check": "TIME_WAIT; fresh listener/connect/pid readback replaces rebind",
+      "captured_at_utc": "2026-10-08T14:14:24.852310+00:00"
+    },
+    "final_targeted_tests": "36/36 passed (30 mutation-evidence + 6 readiness/deploy)",
+    "fresh_assembly_pristine_tests": "394/394 passed"
+  },
+  "limitations": [
+    "Production not deployed",
+    "Independent review pending",
+    "Stock gate/hosted CI pending",
+    "Historical knowledge runtime admission NOT_MEASURED; source preparation only"
+  ],
+  "assembly_evidence_reuse": {
+    "binding_files_verified": 61,
+    "original_generated_at": "2026-10-02T21:00:36.695Z",
+    "original_summary": {
+      "total": 85,
+      "killedByTest": 76,
+      "killedByTypecheck": 9,
+      "survived": 0
+    },
+    "supplement_before": {
+      "excludedPrefixes": [
+        ".github/",
+        "apps/web/",
+        "receipts/"
+      ],
+      "trackedTreeWithoutEvidence": "31c3d51f66ae39a678f7536e450f9518011274fc",
+      "trackedSnapshotDiffSha256": "f73ef5af984632cb19ae82757541b2e218f66c8173acc0c47e7080e9b8dc2c7b"
+    },
+    "supplement_after": {
+      "excludedPrefixes": [
+        ".github/",
+        "apps/web/",
+        "receipts/"
+      ],
+      "trackedTreeWithoutEvidence": "1c9a6bb0a22a99409c034c62c743a306b2da8aab",
+      "trackedSnapshotDiffSha256": "82a22562b66c7a84e8c344a15f43ee88b65ced9bb08faf121bbe5d67f1e37cc7"
+    },
+    "derivation": "unchanged original native harness gitSupplement()",
+    "fresh_full_85_run": false,
+    "partial_run_log": "assembly-mutations.log",
+    "restoration_verified": true
+  },
+  "partial_mutation_run": {
+    "completed_mutants": 29,
+    "termination_exit": 130,
+    "full_run_claimed": false
+  }
+}

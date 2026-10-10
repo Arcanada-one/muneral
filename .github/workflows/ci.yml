@@ -265,24 +265,24 @@ jobs:
         if: steps.preflight.outputs.status != 'fail'
         run: sudo -n /usr/local/sbin/arcanada-compose-broker muneral up
 
-      - name: Wait for healthy
+      - name: Wait for database readiness
         if: steps.preflight.outputs.status != 'fail'
         run: |
           set -e
           for i in $(seq 1 20); do
-            if curl -fsS http://localhost:3500/health > /dev/null 2>&1; then
-              echo "muneral healthy on attempt $i"
+            if curl --connect-timeout 2 --max-time 3 -fsS http://localhost:3500/health/ready > /dev/null 2>&1; then
+              echo "muneral database ready on attempt $i"
               # A2-255: print WHICH build answered. `build.sha` is baked into the image from
               # ${BUILD_SHA:-} (apps/api/src/build-info.ts); when the deploy broker does not export
               # BUILD_SHA for muneral it is null WITH a reason, and this log line is where that gap
               # is visible instead of invisible. Informational on purpose — it is not yet a gate,
               # because a gate that cannot pass would be a red that teaches people to ignore reds.
-              echo "muneral /health says: $(curl -fsS http://localhost:3500/health)"
+              echo "muneral /health says: $(curl --connect-timeout 2 --max-time 3 -fsS http://localhost:3500/health)"
               exit 0
             fi
             sleep 5
           done
-          echo "Health check failed after 100s"
+          echo "Database readiness check failed after 20 bounded attempts"
           sudo -n /usr/local/sbin/arcanada-compose-broker muneral logs 100
           exit 1
 
