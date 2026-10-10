@@ -56,13 +56,15 @@ transition: in_progress → in_progress`, indistinguishable from a real refusal.
 ## What stays as it was
 
 - Every other route on the tasks controller keeps its scope or stays JWT-only:
-  delete, checklists, dependencies, the migration CAS transition path
+  delete, checklists, the migration CAS transition path
   (`tasks.revision` is moved by that path alone; this route leaves it at 0).
-- The creator is **not** thereby admitted to `GET /tasks/:taskId`,
-  `GET /tasks/:taskId/activity` or `POST /tasks/:taskId/comments` — those keep
-  `'task'` (assignment). Recorded as a finding for a separate card.
-- `POST /agents/tasks/:taskId/assign` is unchanged (and unscoped — a finding
-  recorded by MUN-0050, not touched here).
+- MUN-0051 also admits the own-workspace agent creator to task reads, activity
+  and comments (`task`: creator or assignee). The original assignment-only
+  restriction is historical, not the current onboarding contract.
+- `POST /agents/tasks/:taskId/assign` accepts an API key under `task-assign`
+  (MUN-0051): own-workspace task creator may assign lead/executor/reviewer;
+  an executor may assign executor/reviewer. A lead/reviewer row alone is not
+  assignment authority. See [agent-onboarding.md](agent-onboarding.md).
 
 ## Proof
 
