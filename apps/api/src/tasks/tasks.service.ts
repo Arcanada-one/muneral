@@ -44,7 +44,8 @@ export const WORKSPACE_DIGEST_COUNTED =
   "every task of the key's own workspace matching the filters, before paging";
 
 /**
- * A2-284: the only task columns `GET /tasks/digest` returns.
+ * Metadata-only candidate: six safe SQL columns; title is a constant output placeholder.
+ * No plaintext title/description is read. This does not renew the expired grant.
  *
  * An allowlist in the SELECT, not a strip after the read: a column added to
  * `tasks` later does not reach an agent key by default, which is the same
@@ -67,7 +68,6 @@ export const WORKSPACE_DIGEST_COUNTED =
 const WORKSPACE_DIGEST_SELECT = {
   id: true,
   projectId: true,
-  title: true,
   status: true,
   priority: true,
   createdAt: true,
@@ -330,18 +330,19 @@ export class TasksService {
       };
     }
 
-    const [items, total] = await this.prisma.$transaction([
-      this.prisma.task.findMany({
+    const { rows, total, audit } = await this.prisma.$transaction(async (tx) => {
+      const [rows, total] = await Promise.all([
+      tx.task.findMany({
         where,
         select: WORKSPACE_DIGEST_SELECT,
         orderBy: [{ updatedAt: 'desc' }, { id: 'asc' }],
         take: limit,
         skip: offset,
       }),
-      this.prisma.task.count({ where }),
-    ]);
+      tx.task.count({ where }),
+      ]);
 
-    const audit = await this.prisma.activityLog.create({
+    const audit = await tx.activityLog.create({
       data: {
         workspaceId,
         taskId: null,
@@ -350,7 +351,7 @@ export class TasksService {
         action: WORKSPACE_DIGEST_READ_ACTION,
         payload: {
           decision: grant.decision,
-          rowCount: items.length,
+          rowCount: rows.length,
           total,
           // The filters, not the rows: what was asked is the part an auditor
           // cannot reconstruct afterwards. Free text never enters the log
@@ -368,6 +369,10 @@ export class TasksService {
       select: { id: true, createdAt: true },
     });
 
+      return { rows, total, audit };
+    }, { isolationLevel: 'RepeatableRead' });
+    const items = rows.map(row => ({ ...row, title: '[Task text withheld: metadata-only digest]' }));
+
     return {
       // The first four keys, in this order, are the envelope `GET /tasks`
       // already answers, so a consumer moving to this route changes its path
@@ -377,6 +382,8 @@ export class TasksService {
       limit,
       offset,
       counted: WORKSPACE_DIGEST_COUNTED,
+      disclosure: { mode: 'metadata_only', withheld: ['title', 'description'],
+        notice: 'Task text withheld. This is a metadata-only digest, not a complete task briefing.' },
       generatedAt: audit.createdAt.toISOString(),
       auditEventId: audit.id,
       // The lapse warning rides the read the consumer already does — see
