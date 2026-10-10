@@ -97,9 +97,19 @@ export const MAX_DIGEST_GRANT_WINDOW_DAYS = MAX_GRANT_WINDOW_DAYS;
  * As shipped, that route withheld `title`/`description` only from a key holding
  * a project-read grant (DEC-AUP-0033 R4), so a digest-only key would have read
  * every title AND description in the workspace — measured live, 926 of them.
- * This pull request closes that door in the same change
- * (`agent-task-scope.guard.ts`, `assertTaskInWorkspace`), so there is no window
- * in which the grant exists without the fix.
+ *
+ * That door is closed by a SEPARATE, EARLIER pull request (muneral#172, A2-294b:
+ * `agent-task-scope.guard.ts`, `assertTaskInWorkspace`), which this branch is
+ * rebased onto. An earlier draft of this entry closed it in the same commit and
+ * said so; blind review (A2-294 F3) pointed out that atomicity and ordering are
+ * alternatives, not both, and that a decision whose whole control is an ORDER
+ * must not also claim there is no window. The order is the control, and it is
+ * enforced by the base of this branch rather than by prose: without #172 merged
+ * and DEPLOYED, this entry is not a seven-column read — it is a workspace
+ * free-text read. Its live verification is the probe
+ * `runs/A2-294b/probe_withholding.py`, which must answer
+ * `fields_not_withheld: 0` against the deployed API before this merges. Measured
+ * before #172: 926 plaintext titles and 892 plaintext descriptions.
  *
  * `until` is 14 days, not the 30-day ceiling: the ceiling was set for the
  * NARROWER project index, this read's only no-merge reversal is `until` passing
