@@ -170,7 +170,7 @@ jobs:
       signing_key_fingerprint: 'SHA256:9QFqysn44UjA8rXyfHjItP3b2Oadhnbf1bDNqXrsCig'
 
   network-exposure:
-    uses: Arcanada-one/datarim/.github/workflows/network-exposure-lint.yml@50351e0468f57a39b280d75cf41827329d6393d2
+    uses: Arcanada-one/datarim/.github/workflows/network-exposure-lint.yml@4846e68c953af9c05c1a1717a1a3c61aa32a9d53
     with:
       compose_paths: docker-compose.prod.yml
       datarim_ref: '50351e0468f57a39b280d75cf41827329d6393d2'
