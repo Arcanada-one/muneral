@@ -2,6 +2,11 @@
  * A2-284 — which agent keys may read their workspace's task digest, and until
  * when.
  *
+ * Current A6 SOURCE CANDIDATE: metadata only, never plaintext. Historical
+ * plaintext rationale below is retained as history, not current permission.
+ * Release requires actual adopted Program main and exact source/runtime gates;
+ * sourcePolicy is a source digest, not an issuer or a claim of adoption.
+ *
  * ## What this opens, and what it does not
  *
  * Exactly one route: `GET /tasks/digest` (`@AgentScope('workspace-digest')`).
@@ -73,7 +78,18 @@ export interface WorkspaceDigestGrantEntry {
   /** The program decision that admitted the grant. */
   decision: string;
   evidence: string;
+  /** Source binding, not an issuer: deployment remains gated by adopted Program main. */
+  projection?: "metadata_only";
+  sourcePolicy?: { amendment: "A6"; sha256: string };
+
 }
+
+/** Current source candidate. This literal does not assert adoption or issue authority. */
+export const EMERGENCY_DIGEST_SOURCE_POLICY = {
+  amendment: "A6",
+  sha256: "9131080d7637688de3d125ba2764dab352f7e237c602349e0a224413664cdf71",
+  until: "2026-10-12T20:00:00Z",
+} as const;
 
 /** Injection token, so a test module can supply its own list. */
 export const WORKSPACE_DIGEST_GRANTS = "a2284:workspaceDigestGrants";
@@ -122,15 +138,19 @@ export const WORKSPACE_DIGEST_GRANT_LIST: readonly WorkspaceDigestGrantEntry[] =
       agentId: "565171f7-a3ca-45a4-b50e-4d8b07cf0b86",
       agentName: "arcanada-assistant",
       workspaceId: "05f8cddf-e91f-430b-81e3-d67965aa4de3",
-      until: "2026-10-09T00:00:00Z",
+      until: "2026-10-12T20:00:00Z",
+      projection: "metadata_only",
+      sourcePolicy: {
+        amendment: "A6",
+        sha256: "9131080d7637688de3d125ba2764dab352f7e237c602349e0a224413664cdf71",
+      },
       decision: "DEC-AUP-0049",
       evidence:
-        "Live 2026-09-24/25: this key reads GET /tasks/digest -> 403 DIGEST_GRANT_REQUIRED and " +
-        "GET /agents/tasks -> 200, so the credential is valid and the refusal is real. Its measured " +
-        "alternative, GET /tasks/project/:id, answers 200 [] on a board of 880+ rows — an authorised, " +
-        'well-formed, completely false "nothing happened today" (runs/A2-281/probe-routes.txt). The three ' +
-        "KBSYNC-0 secret-bearing titles were re-read live on 2026-09-25 and each is still redacted " +
-        "(runs/A2-294/out/titles-today-*.json), discharging the DEC-AUP-0029 R7 title precondition.",
+        "Current DEC-AUP-0049 A6 metadata-only source candidate, fixed 2026-10-12T20:00:00Z. " +
+        "Requires exact independently adopted Program main, current source/graph/CI/deployment/consumer gates. " +
+        "Six DB metadata columns only; constant withheld title; no raw text SELECT, fallback, logs or cache. " +
+        "F2 full-scan FAIL and old 2026-10-09 grant / 2026-10-11T19:00 proposal remain historical failures. " +
+        "This source binding is not native issuance; single replacement only, never a rolling or appended grant.",
     },
   ];
 
@@ -173,10 +193,27 @@ export function workspaceDigestGrantState(
 ): WorkspaceDigestGrantState {
   const entries = entriesFor(agentId, workspaceId, grants);
   if (entries.length === 0) return { kind: "none" };
-  const live = entries.find((e) => now.getTime() < Date.parse(e.until));
+  // Unknown or mismatched emergency source modes never fall back to legacy eligibility.
+  const eligible = entries.filter((e) => {
+    if (e.projection === undefined && e.sourcePolicy === undefined) {
+      const namedAssistant = sameId(e.agentId, "565171f7-a3ca-45a4-b50e-4d8b07cf0b86") &&
+        sameId(e.workspaceId, "05f8cddf-e91f-430b-81e3-d67965aa4de3");
+      // Preserve the historical expired entry, never a missing-mode renewal of it.
+      return !namedAssistant || e.until === "2026-10-09T00:00:00Z";
+    }
+    return e.projection === "metadata_only" &&
+      e.sourcePolicy?.amendment === EMERGENCY_DIGEST_SOURCE_POLICY.amendment &&
+      e.sourcePolicy?.sha256 === EMERGENCY_DIGEST_SOURCE_POLICY.sha256 &&
+      e.until === EMERGENCY_DIGEST_SOURCE_POLICY.until &&
+      e.decision === "DEC-AUP-0049" &&
+      now.getTime() >= Date.parse(e.until) - 86_400_000;
+  });
+  if (eligible.length === 0) return { kind: "none" };
+  const live = eligible.find((e) => now.getTime() < Date.parse(e.until) &&
+    (e.projection === undefined || now.getTime() >= Date.parse(e.until) - 86_400_000));
   return live
     ? { kind: "live", entry: live }
-    : { kind: "expired", entry: entries[0] };
+    : { kind: "expired", entry: eligible[0] };
 }
 
 /** When the holder should renew: `GRANT_RENEWAL_LEAD_DAYS` before `until`. */
