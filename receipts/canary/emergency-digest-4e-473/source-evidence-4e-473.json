@@ -1,0 +1,14 @@
+{
+  "schema": "MeasuredGitSource/v1",
+  "repository_path": "/home/dev/aup/arc2/runs/A2-294/work/muneral",
+  "commit": "4e2beb7443cc6778889107803a72a9174c3e0452",
+  "tree": "05efb83883a334edc2710edc0cf1fb3a04e7b962",
+  "dirty": false,
+  "captured_at_utc": "2026-10-10T19:56:28.698314+00:00",
+  "producer": "MUNERAL actual git rev-parse HEAD/HEAD^{tree} and git status --porcelain at selected owned checkout",
+  "consumer_commit": "4731766e3151df966c4df282357e4b7d6b0bb7aa",
+  "consumer_tree": "27e7c720ffc95390b874b9ac87aaced6f3df0b1b",
+  "consumer_dirty": false,
+  "runtime_authorized": false,
+  "scope": "synthetic source observation; no grant or policy admission"
+}

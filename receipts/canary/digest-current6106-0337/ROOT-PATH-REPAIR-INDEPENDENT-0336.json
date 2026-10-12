@@ -1,0 +1,52 @@
+{
+  "at": "2026-10-12T03:36:20.250126+00:00",
+  "controls": [
+    {
+      "path": "/home/dev/.local/share/rtk-shims:/usr/bin:/bin",
+      "args": [
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit": 1,
+      "head_matches": false,
+      "clean": null,
+      "stderr_sha256": "3bec5ac48ef2b9bbcaea3d132d0003aceb26bb7185f1e72ba44d18b7a2b715dd"
+    },
+    {
+      "path": "/home/dev/.local/share/rtk-shims:/usr/bin:/bin",
+      "args": [
+        "status",
+        "--porcelain"
+      ],
+      "exit": 1,
+      "head_matches": null,
+      "clean": false,
+      "stderr_sha256": "3bec5ac48ef2b9bbcaea3d132d0003aceb26bb7185f1e72ba44d18b7a2b715dd"
+    },
+    {
+      "path": "/usr/bin:/bin",
+      "args": [
+        "rev-parse",
+        "HEAD"
+      ],
+      "exit": 0,
+      "head_matches": true,
+      "clean": null,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/usr/bin:/bin",
+      "args": [
+        "status",
+        "--porcelain"
+      ],
+      "exit": 0,
+      "head_matches": null,
+      "clean": true,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "scope": "Read-only independent material PATH repair; no helper/PG/grant effects, HOME or secret exposed",
+  "disposition": "APPROVE_CHANGED_ENVIRONMENT_CAPTURE",
+  "next": "MUN sole bounded original110s unchanged pins under material changed declared PATH=/usr/bin:/bin, fresh result path, original failed result preserved"
+}

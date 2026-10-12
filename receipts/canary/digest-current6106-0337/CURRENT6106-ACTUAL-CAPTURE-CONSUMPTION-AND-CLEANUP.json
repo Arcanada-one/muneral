@@ -1,0 +1,69 @@
+{
+  "at": "2026-10-12T03:37:28.635153+00:00",
+  "captures": [
+    {
+      "path": "/home/dev/aup/import-audit-work/runs/digest-renewal-current-20261010/digest-execution-20261011-0610/renewal-authority-20261011-1347/current-source-publication-preparation/CURRENT6106-PG-CANONICAL-RESULT-PATHFIX.json",
+      "sha256": "f22ca0c24810a6e743448266922f952400aea2f3ecc63b8593a5f0eb93bcad44",
+      "schema": "CanaryResult/v2",
+      "rows": 2,
+      "verified": 2,
+      "errors": [],
+      "subject": {
+        "schema": "GitCanarySubject/v1",
+        "commit": "610600e56ff715355c1803f2ac9af2fdb401461d",
+        "tree": "d9b3fc5a764d8a660806cb62657060ebf94eb233",
+        "evidence": {
+          "path": "CURRENT6106-WEB-MEASURED-SOURCE.json",
+          "sha256": "5ed427753a0f746b5db2af5264dfb73ef3466bd8206420fc9ba20583543ebcb6",
+          "source_field": "commit"
+        }
+      },
+      "probe_count": 1
+    },
+    {
+      "path": "/home/dev/aup/import-audit-work/runs/onboarding-source-20261010/candidate-pg-1817/native-http-e835e74e-897c-4abb-8820-0ab1fad6d8b3/result.json",
+      "sha256": "4ad4a5ea7f2eb3d3a47971b1f722cd099710336a3173e1aa9c55ab28ab69007c",
+      "schema": "CanaryResult/v1",
+      "rows": 58,
+      "verified": 58,
+      "errors": [],
+      "subject": {
+        "commit": "610600e56ff715355c1803f2ac9af2fdb401461d",
+        "evidence": {
+          "path": "measured-source.json",
+          "sha256": "a048ae3a7de622785c568309ea634a2b84501b33ace60bd0eaee7ee18db3b84b",
+          "source_field": "commit"
+        },
+        "schema": "GitCanarySubject/v1",
+        "tree": "d9b3fc5a764d8a660806cb62657060ebf94eb233"
+      },
+      "probe_count": 51
+    },
+    {
+      "path": "/home/dev/aup/import-audit-work/runs/digest-renewal-current-20261010/digest-execution-20261011-0610/renewal-authority-20261011-1347/current-source-publication-preparation/CURRENT6106-WEB-CANONICAL-RESULT.json",
+      "sha256": "623265f93429a73b460d1d2cb4ec918431997277dc1f8c3b6b91803925fdaf87",
+      "schema": "CanaryResult/v2",
+      "rows": 2,
+      "verified": 2,
+      "errors": [],
+      "subject": {
+        "schema": "GitCanarySubject/v1",
+        "commit": "610600e56ff715355c1803f2ac9af2fdb401461d",
+        "tree": "d9b3fc5a764d8a660806cb62657060ebf94eb233",
+        "evidence": {
+          "path": "CURRENT6106-WEB-MEASURED-SOURCE.json",
+          "sha256": "5ed427753a0f746b5db2af5264dfb73ef3466bd8206420fc9ba20583543ebcb6",
+          "source_field": "commit"
+        }
+      },
+      "probe_count": 1
+    }
+  ],
+  "fresh_native_invocation": "/home/dev/aup/import-audit-work/runs/onboarding-source-20261010/candidate-pg-1817/native-http-e835e74e-897c-4abb-8820-0ab1fad6d8b3",
+  "cleanup": {
+    "pg_ctl_status": 3,
+    "pid_absent": true,
+    "socket_absent": true
+  },
+  "scope": "51 actual anonymous route/auth boundaries plus resident method/path/controller checks; 7 controllers; metadata SQL/HTTP/consumer controls; web source tests mockedAPI/jsdom; no production/grant/nativePOST"
+}

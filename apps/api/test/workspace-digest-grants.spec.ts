@@ -37,7 +37,7 @@ const evidenceSha256Of = (evidence: string) =>
  * DEC-AUP-0049 admitted; editing that string fails the equality below, which is
  * the whole point of covering it.
  */
-const EVIDENCE_SHA256_PREFIX = "40150c92d41ca7c1";
+const EVIDENCE_SHA256_PREFIX = "acf4f748218879a4";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -77,7 +77,9 @@ describe("the shipped workspace-digest grant list", () => {
       agentId: "565171f7-a3ca-45a4-b50e-4d8b07cf0b86",
       agentName: "arcanada-assistant",
       workspaceId: "05f8cddf-e91f-430b-81e3-d67965aa4de3",
-      until: "2026-10-09T00:00:00Z",
+      until: "2026-10-12T20:00:00Z",
+      projection: "metadata_only",
+      sourcePolicy: { amendment: "A6", sha256: "9131080d7637688de3d125ba2764dab352f7e237c602349e0a224413664cdf71" },
       decision: "DEC-AUP-0049",
       // A prefix of sha256(evidence), so the projection covers `evidence` too:
       // the string that tells a reviewer what the entry bought could otherwise
@@ -94,6 +96,8 @@ describe("the shipped workspace-digest grant list", () => {
         workspaceId: g.workspaceId,
         until: g.until,
         decision: g.decision,
+        projection: g.projection,
+        sourcePolicy: g.sourcePolicy,
         evidenceSha256: evidenceSha256Of(g.evidence),
       })),
     ).toEqual(ENTRIES_THE_DECISIONS_NAME);
