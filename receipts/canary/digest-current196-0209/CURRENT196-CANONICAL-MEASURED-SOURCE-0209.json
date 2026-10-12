@@ -1,0 +1,9 @@
+{
+  "schema": "MeasuredGitSource/v1",
+  "commit": "1960450db6c5523acdee50e69d29ee4a4e8d2a46",
+  "tree": "7de96a9d5e8a85ed8ff2577f4863d7ced89c7f01",
+  "dirty": false,
+  "repository_path": "/home/dev/aup/arc2/runs/A2-294/work/muneral",
+  "producer": "MUNERAL read-only git rev-parse/status; not admission",
+  "captured_at_utc": "2026-10-12T02:06:17.589831+00:00"
+}
