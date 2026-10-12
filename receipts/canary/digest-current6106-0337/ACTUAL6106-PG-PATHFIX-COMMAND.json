@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "/usr/bin/python3.12",
+    "-B",
+    "-X",
+    "pycache_prefix=/home/dev/.local/state/arc2/digest-pg6106-pathfix-c9h5qck1/python-cache",
+    "/home/dev/aup/import-audit-work/runs/digest-renewal-current-20261010/verifier-recovery-current-0549/digest-sharing-current-1707/supplier/tools/graph/deploy_gate.py",
+    "canary",
+    "--plan",
+    "/home/dev/aup/import-audit-work/runs/digest-renewal-current-20261010/digest-execution-20261011-0610/renewal-authority-20261011-1347/current-source-publication-preparation/CURRENT6106-PG-HTTP-SUCCESSOR-PLAN.json",
+    "--subject-repo",
+    "/home/dev/aup/arc2/runs/A2-294/work/muneral",
+    "--phase",
+    "pre",
+    "--out",
+    "/home/dev/aup/import-audit-work/runs/digest-renewal-current-20261010/digest-execution-20261011-0610/renewal-authority-20261011-1347/current-source-publication-preparation/CURRENT6106-PG-CANONICAL-RESULT-PATHFIX.json"
+  ],
+  "environment": {
+    "PATH": "/usr/bin:/bin",
+    "MUNERAL_EXPECTED_CURRENT_PLAN_SHA256": "f434766061e92f81337dd623aeec5698ff0d062db1dce464f43be72719110f91"
+  },
+  "started_at": "2026-10-12T03:36:56.473764+00:00",
+  "cache": "/home/dev/.local/state/arc2/digest-pg6106-pathfix-c9h5qck1"
+}

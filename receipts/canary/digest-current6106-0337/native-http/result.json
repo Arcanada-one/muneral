@@ -1,0 +1,1115 @@
+{
+ "base_url": "http://127.0.0.1:36317/api/v1",
+ "captured_at_utc": "2026-10-12T03:36:58Z",
+ "card": "AUP-GRAPH-008",
+ "contract_ref": "contracts/graph-verified-change/observed-edges-and-deploy-gate.v1.json",
+ "counters": {
+  "failed": 0,
+  "not_measured": 0,
+  "verified": 51
+ },
+ "entity_verdicts": [
+  {
+   "entity": "code_unit:apps/api/src/agents/agents.controller.ts",
+   "probe_ids": [
+    "native-auth-0",
+    "native-auth-1",
+    "native-auth-34",
+    "native-auth-35",
+    "native-auth-36",
+    "native-auth-37",
+    "native-auth-38",
+    "native-auth-8",
+    "native-auth-9"
+   ],
+   "reason": "native-auth-0: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "code_unit:apps/api/src/projects/projects.controller.ts",
+   "probe_ids": [
+    "native-auth-10",
+    "native-auth-11",
+    "native-auth-12",
+    "native-auth-2",
+    "native-auth-3",
+    "native-auth-39",
+    "native-auth-40"
+   ],
+   "reason": "native-auth-2: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "code_unit:apps/api/src/sync/sync.controller.ts",
+   "probe_ids": [
+    "native-auth-13",
+    "native-auth-41"
+   ],
+   "reason": "native-auth-13: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts",
+   "probe_ids": [
+    "native-auth-21",
+    "native-auth-47"
+   ],
+   "reason": "native-auth-21: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts",
+   "probe_ids": [
+    "native-auth-31"
+   ],
+   "reason": "native-auth-31: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+   "probe_ids": [
+    "native-auth-14",
+    "native-auth-15",
+    "native-auth-16",
+    "native-auth-17",
+    "native-auth-18",
+    "native-auth-19",
+    "native-auth-20",
+    "native-auth-22",
+    "native-auth-23",
+    "native-auth-24",
+    "native-auth-25",
+    "native-auth-26",
+    "native-auth-30",
+    "native-auth-32",
+    "native-auth-4",
+    "native-auth-42",
+    "native-auth-43",
+    "native-auth-44",
+    "native-auth-45",
+    "native-auth-46",
+    "native-auth-48",
+    "native-auth-5",
+    "native-auth-6"
+   ],
+   "reason": "native-auth-4: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
+   "probe_ids": [
+    "native-auth-27",
+    "native-auth-28",
+    "native-auth-29",
+    "native-auth-33",
+    "native-auth-49",
+    "native-auth-50",
+    "native-auth-7"
+   ],
+   "reason": "native-auth-7: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:DELETE /agents/keys/:keyId",
+   "probe_ids": [
+    "native-auth-0"
+   ],
+   "reason": "native-auth-0: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:DELETE /agents/tasks/:taskId/assign/:agentId",
+   "probe_ids": [
+    "native-auth-1"
+   ],
+   "reason": "native-auth-1: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:DELETE /projects/:projectId",
+   "probe_ids": [
+    "native-auth-2"
+   ],
+   "reason": "native-auth-2: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:DELETE /projects/git-refs/:refId",
+   "probe_ids": [
+    "native-auth-3"
+   ],
+   "reason": "native-auth-3: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:DELETE /tasks/:taskId",
+   "probe_ids": [
+    "native-auth-4"
+   ],
+   "reason": "native-auth-4: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:DELETE /tasks/:taskId/checklist/:itemId",
+   "probe_ids": [
+    "native-auth-5"
+   ],
+   "reason": "native-auth-5: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:DELETE /tasks/:taskId/dependencies/:depId",
+   "probe_ids": [
+    "native-auth-6"
+   ],
+   "reason": "native-auth-6: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:DELETE /workspaces/:workspaceId/members/:userId",
+   "probe_ids": [
+    "native-auth-7"
+   ],
+   "reason": "native-auth-7: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /agents/tasks",
+   "probe_ids": [
+    "native-auth-8"
+   ],
+   "reason": "native-auth-8: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /agents/workspace/:workspaceId",
+   "probe_ids": [
+    "native-auth-9"
+   ],
+   "reason": "native-auth-9: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /projects/:projectId",
+   "probe_ids": [
+    "native-auth-10"
+   ],
+   "reason": "native-auth-10: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /projects/tasks/:taskId/git-refs",
+   "probe_ids": [
+    "native-auth-11"
+   ],
+   "reason": "native-auth-11: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /projects/workspace/:workspaceId",
+   "probe_ids": [
+    "native-auth-12"
+   ],
+   "reason": "native-auth-12: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /sync/datarim/:projectId",
+   "probe_ids": [
+    "native-auth-13"
+   ],
+   "reason": "native-auth-13: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks",
+   "probe_ids": [
+    "native-auth-14"
+   ],
+   "reason": "native-auth-14: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId",
+   "probe_ids": [
+    "native-auth-15"
+   ],
+   "reason": "native-auth-15: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/activity",
+   "probe_ids": [
+    "native-auth-16"
+   ],
+   "reason": "native-auth-16: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/checklist",
+   "probe_ids": [
+    "native-auth-17"
+   ],
+   "reason": "native-auth-17: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/dependencies",
+   "probe_ids": [
+    "native-auth-18"
+   ],
+   "reason": "native-auth-18: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/dependency-graph",
+   "probe_ids": [
+    "native-auth-19"
+   ],
+   "reason": "native-auth-19: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/evidence",
+   "probe_ids": [
+    "native-auth-20"
+   ],
+   "reason": "native-auth-20: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/field-changes",
+   "probe_ids": [
+    "native-auth-21"
+   ],
+   "reason": "native-auth-21: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/readiness",
+   "probe_ids": [
+    "native-auth-22"
+   ],
+   "reason": "native-auth-22: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/digest",
+   "probe_ids": [
+    "native-auth-23"
+   ],
+   "reason": "native-auth-23: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/project/:projectId",
+   "probe_ids": [
+    "native-auth-24"
+   ],
+   "reason": "native-auth-24: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/project/:projectId/index",
+   "probe_ids": [
+    "native-auth-25"
+   ],
+   "reason": "native-auth-25: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/project/:projectId/staleness",
+   "probe_ids": [
+    "native-auth-26"
+   ],
+   "reason": "native-auth-26: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /workspaces",
+   "probe_ids": [
+    "native-auth-27"
+   ],
+   "reason": "native-auth-27: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /workspaces/:workspaceId",
+   "probe_ids": [
+    "native-auth-28"
+   ],
+   "reason": "native-auth-28: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /workspaces/:workspaceId/members",
+   "probe_ids": [
+    "native-auth-29"
+   ],
+   "reason": "native-auth-29: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:PATCH /tasks/:taskId/checklist/:itemId",
+   "probe_ids": [
+    "native-auth-30"
+   ],
+   "reason": "native-auth-30: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:PATCH /tasks/:taskId/contract",
+   "probe_ids": [
+    "native-auth-31"
+   ],
+   "reason": "native-auth-31: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:PATCH /tasks/:taskId/status",
+   "probe_ids": [
+    "native-auth-32"
+   ],
+   "reason": "native-auth-32: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:PATCH /workspaces/:workspaceId/members/:userId/role",
+   "probe_ids": [
+    "native-auth-33"
+   ],
+   "reason": "native-auth-33: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /agents",
+   "probe_ids": [
+    "native-auth-34"
+   ],
+   "reason": "native-auth-34: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /agents/:agentId/keys",
+   "probe_ids": [
+    "native-auth-35"
+   ],
+   "reason": "native-auth-35: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /agents/keys/:keyId/rotate",
+   "probe_ids": [
+    "native-auth-36"
+   ],
+   "reason": "native-auth-36: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /agents/keys/self/revoke",
+   "probe_ids": [
+    "native-auth-37"
+   ],
+   "reason": "native-auth-37: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /agents/tasks/:taskId/assign",
+   "probe_ids": [
+    "native-auth-38"
+   ],
+   "reason": "native-auth-38: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /projects",
+   "probe_ids": [
+    "native-auth-39"
+   ],
+   "reason": "native-auth-39: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /projects/git-refs",
+   "probe_ids": [
+    "native-auth-40"
+   ],
+   "reason": "native-auth-40: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /sync/datarim/:projectId/import",
+   "probe_ids": [
+    "native-auth-41"
+   ],
+   "reason": "native-auth-41: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /tasks",
+   "probe_ids": [
+    "native-auth-42"
+   ],
+   "reason": "native-auth-42: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /tasks/:taskId/checklist",
+   "probe_ids": [
+    "native-auth-43"
+   ],
+   "reason": "native-auth-43: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /tasks/:taskId/comments",
+   "probe_ids": [
+    "native-auth-44"
+   ],
+   "reason": "native-auth-44: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /tasks/:taskId/dependencies",
+   "probe_ids": [
+    "native-auth-45"
+   ],
+   "reason": "native-auth-45: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /tasks/:taskId/evidence",
+   "probe_ids": [
+    "native-auth-46"
+   ],
+   "reason": "native-auth-46: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /tasks/:taskId/field-ack",
+   "probe_ids": [
+    "native-auth-47"
+   ],
+   "reason": "native-auth-47: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /tasks/:taskId/redactions",
+   "probe_ids": [
+    "native-auth-48"
+   ],
+   "reason": "native-auth-48: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /workspaces",
+   "probe_ids": [
+    "native-auth-49"
+   ],
+   "reason": "native-auth-49: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /workspaces/:workspaceId/members/:userId",
+   "probe_ids": [
+    "native-auth-50"
+   ],
+   "reason": "native-auth-50: status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "verdict": "verified"
+  }
+ ],
+ "environment": "owned loopback synthetic Nest/PG; no production",
+ "model": "claude-opus-5",
+ "mutating_owner": "MUNERAL existing run_2fa4e1b7b6fc task7b3",
+ "phase": "pre",
+ "plan": {
+  "digest": "sha256:eac062d366829806d019838cf571f4eaf82d9407b12e261da5ddebbf8de7d67e",
+  "id": "digest-current-original-auth-route-boundaries",
+  "path": "plan.json"
+ },
+ "probes": [
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 28,
+   "id": "native-auth-0",
+   "method": "DELETE",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/agents/keys/626bd0d3-2830-4223-bdc6-9b5baeee2942"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 1,
+   "id": "native-auth-1",
+   "method": "DELETE",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/agents/tasks/626bd0d3-2830-4223-bdc6-9b5baeee2942/assign/626bd0d3-2830-4223-bdc6-9b5baeee2942"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-2",
+   "method": "DELETE",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/projects/626bd0d3-2830-4223-bdc6-9b5baeee2942"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-3",
+   "method": "DELETE",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/projects/git-refs/626bd0d3-2830-4223-bdc6-9b5baeee2942"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-4",
+   "method": "DELETE",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/tasks/626bd0d3-2830-4223-bdc6-9b5baeee2942"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-5",
+   "method": "DELETE",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/tasks/626bd0d3-2830-4223-bdc6-9b5baeee2942/checklist/626bd0d3-2830-4223-bdc6-9b5baeee2942"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-6",
+   "method": "DELETE",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/tasks/626bd0d3-2830-4223-bdc6-9b5baeee2942/dependencies/626bd0d3-2830-4223-bdc6-9b5baeee2942"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-7",
+   "method": "DELETE",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/workspaces/626bd0d3-2830-4223-bdc6-9b5baeee2942/members/626bd0d3-2830-4223-bdc6-9b5baeee2942"
+  },
+  {
+   "body_bytes": 70,
+   "body_sha256": "sha256:fee3d135d639945a7035a39d5a989494ef2425ff4ba8ee5050026530c057d075",
+   "elapsed_ms": 0,
+   "id": "native-auth-8",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/agents/tasks"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-9",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/agents/workspace/626bd0d3-2830-4223-bdc6-9b5baeee2942"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-10",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/projects/626bd0d3-2830-4223-bdc6-9b5baeee2942"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-11",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/projects/tasks/626bd0d3-2830-4223-bdc6-9b5baeee2942/git-refs"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-12",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/projects/workspace/626bd0d3-2830-4223-bdc6-9b5baeee2942"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-13",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/sync/datarim/626bd0d3-2830-4223-bdc6-9b5baeee2942"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-14",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/tasks"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-15",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/tasks/626bd0d3-2830-4223-bdc6-9b5baeee2942"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-16",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/tasks/626bd0d3-2830-4223-bdc6-9b5baeee2942/activity"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-17",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/tasks/626bd0d3-2830-4223-bdc6-9b5baeee2942/checklist"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-18",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/tasks/626bd0d3-2830-4223-bdc6-9b5baeee2942/dependencies"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-19",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/tasks/626bd0d3-2830-4223-bdc6-9b5baeee2942/dependency-graph"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-20",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/tasks/626bd0d3-2830-4223-bdc6-9b5baeee2942/evidence"
+  },
+  {
+   "body_bytes": 70,
+   "body_sha256": "sha256:fee3d135d639945a7035a39d5a989494ef2425ff4ba8ee5050026530c057d075",
+   "elapsed_ms": 0,
+   "id": "native-auth-21",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/tasks/626bd0d3-2830-4223-bdc6-9b5baeee2942/field-changes"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-22",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/tasks/626bd0d3-2830-4223-bdc6-9b5baeee2942/readiness"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-23",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/tasks/digest"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-24",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/tasks/project/626bd0d3-2830-4223-bdc6-9b5baeee2942"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-25",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/tasks/project/626bd0d3-2830-4223-bdc6-9b5baeee2942/index"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-26",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/tasks/project/626bd0d3-2830-4223-bdc6-9b5baeee2942/staleness"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-27",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/workspaces"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-28",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/workspaces/626bd0d3-2830-4223-bdc6-9b5baeee2942"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-29",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/workspaces/626bd0d3-2830-4223-bdc6-9b5baeee2942/members"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-30",
+   "method": "PATCH",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/tasks/626bd0d3-2830-4223-bdc6-9b5baeee2942/checklist/626bd0d3-2830-4223-bdc6-9b5baeee2942"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-31",
+   "method": "PATCH",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/tasks/626bd0d3-2830-4223-bdc6-9b5baeee2942/contract"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-32",
+   "method": "PATCH",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/tasks/626bd0d3-2830-4223-bdc6-9b5baeee2942/status"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-33",
+   "method": "PATCH",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/workspaces/626bd0d3-2830-4223-bdc6-9b5baeee2942/members/626bd0d3-2830-4223-bdc6-9b5baeee2942/role"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-34",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/agents"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-35",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/agents/626bd0d3-2830-4223-bdc6-9b5baeee2942/keys"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-36",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/agents/keys/626bd0d3-2830-4223-bdc6-9b5baeee2942/rotate"
+  },
+  {
+   "body_bytes": 70,
+   "body_sha256": "sha256:fee3d135d639945a7035a39d5a989494ef2425ff4ba8ee5050026530c057d075",
+   "elapsed_ms": 0,
+   "id": "native-auth-37",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/agents/keys/self/revoke"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-38",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/agents/tasks/626bd0d3-2830-4223-bdc6-9b5baeee2942/assign"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-39",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/projects"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-40",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/projects/git-refs"
+  },
+  {
+   "body_bytes": 70,
+   "body_sha256": "sha256:fee3d135d639945a7035a39d5a989494ef2425ff4ba8ee5050026530c057d075",
+   "elapsed_ms": 0,
+   "id": "native-auth-41",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/sync/datarim/626bd0d3-2830-4223-bdc6-9b5baeee2942/import"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-42",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/tasks"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-43",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/tasks/626bd0d3-2830-4223-bdc6-9b5baeee2942/checklist"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-44",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/tasks/626bd0d3-2830-4223-bdc6-9b5baeee2942/comments"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-45",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/tasks/626bd0d3-2830-4223-bdc6-9b5baeee2942/dependencies"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-46",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/tasks/626bd0d3-2830-4223-bdc6-9b5baeee2942/evidence"
+  },
+  {
+   "body_bytes": 70,
+   "body_sha256": "sha256:fee3d135d639945a7035a39d5a989494ef2425ff4ba8ee5050026530c057d075",
+   "elapsed_ms": 0,
+   "id": "native-auth-47",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/tasks/626bd0d3-2830-4223-bdc6-9b5baeee2942/field-ack"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-48",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/tasks/626bd0d3-2830-4223-bdc6-9b5baeee2942/redactions"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-49",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/workspaces"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "native-auth-50",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "status 401 is neither 404 nor 405: the route is served by the resident version; key `statusCode` present",
+   "status": 401,
+   "url": "http://127.0.0.1:36317/api/v1/workspaces/626bd0d3-2830-4223-bdc6-9b5baeee2942/members/626bd0d3-2830-4223-bdc6-9b5baeee2942"
+  }
+ ],
+ "producer": {
+  "tool": "tools/graph/deploy_gate.py",
+  "version": "1.0.0"
+ },
+ "provisional_until_fable_review": true,
+ "read_only": false,
+ "resident_version": null,
+ "rules": [
+  "C3 a probe that could not run is not_measured, never verified",
+  "C4 probes are read-only unless the plan declares mutating with an owner"
+ ],
+ "schema": "CanaryResult/v1",
+ "subject": {
+  "commit": "610600e56ff715355c1803f2ac9af2fdb401461d",
+  "evidence": {
+   "path": "measured-source.json",
+   "sha256": "a048ae3a7de622785c568309ea634a2b84501b33ace60bd0eaee7ee18db3b84b",
+   "source_field": "commit"
+  },
+  "schema": "GitCanarySubject/v1",
+  "tree": "d9b3fc5a764d8a660806cb62657060ebf94eb233"
+ }
+}

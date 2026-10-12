@@ -1,0 +1,34 @@
+{
+  "checked_at": "2026-10-12T03:29:24.050360+00:00",
+  "plan_sha256": "f434766061e92f81337dd623aeec5698ff0d062db1dce464f43be72719110f91",
+  "execution_pins_checked": 32,
+  "pin_errors": [],
+  "producer_head": "610600e56ff715355c1803f2ac9af2fdb401461d",
+  "producer_tree": "d9b3fc5a764d8a660806cb62657060ebf94eb233",
+  "producer_dirty": false,
+  "consumer_head": "9e5b6eccc1d1601e8fcf9e4a4f92f2deec478659",
+  "consumer_tree": "890bc236cc1ecbff140fe1b803c306f37362d594",
+  "consumer_dirty": false,
+  "grammar_errors": [],
+  "source_errors": [],
+  "fresh_pg_log_absent": true,
+  "bounded_process": 110,
+  "scope": "Independent plan/source/pin receiving only; no PG execution, no complete compiled provenance or runtime admission",
+  "expect": {
+    "exit_codes": [
+      0
+    ],
+    "stdout_contains": [
+      "CURRENT_SYNTHETIC_SQL_HTTP_VERIFIED_TEARDOWN",
+      "\"kernel_no_children\": \"ECHILD\"",
+      "\"group_absent\": true",
+      "\"workload_exit\": 0"
+    ]
+  },
+  "wrong_result_schema_diagnostic_preserved": [
+    "not a CanaryResult/v1 object"
+  ],
+  "actual_api_build_receipt": "CURRENT6106-ACTUAL-API-BUILD-RECEIPT.json",
+  "disposition": "APPROVE_SCOPED_PLAN_EXECUTION",
+  "bounded_receiving_limits": "source2c independent reviews, unchanged helperd62 and guardian58e; actual compile14 stable. Only synthetic scoped execution, no native issuer or production or transitive complete admission."
+}
