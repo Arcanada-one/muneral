@@ -5,7 +5,7 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "paused_safe"
  },
- "captured_at_utc": "2026-10-13T17:54:49Z",
+ "captured_at_utc": "2026-10-13T18:20:58Z",
  "change_set": {
   "base": "2aae3fee0ee86711b8d20f3e03be307d12d7cebf",
   "files": [
@@ -155,9 +155,54 @@
     "new": true,
     "path": "receipts/canary/mun-artifacts-checklist-20261013/source-21aaf03/root1255-checklist-current-web.result.json",
     "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/mun-artifacts-checklist-20261013/source-a87a823/root1255-checklist-lintfix-api.plan.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/mun-artifacts-checklist-20261013/source-a87a823/root1255-checklist-lintfix-api.result.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/mun-artifacts-checklist-20261013/source-a87a823/root1255-checklist-lintfix-api.result.source-evidence.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/mun-artifacts-checklist-20261013/source-a87a823/root1255-checklist-lintfix-consumer-source.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/mun-artifacts-checklist-20261013/source-a87a823/root1255-checklist-lintfix-web.plan.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/mun-artifacts-checklist-20261013/source-a87a823/root1255-checklist-lintfix-web.result.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/mun-artifacts/checklist-change-admission.json",
+    "node_ids": [
+     "receipt:receipts/graph/mun-artifacts/checklist-change-admission.json"
+    ],
+    "path": "receipts/graph/mun-artifacts/checklist-change-admission.json",
+    "status": "A"
    }
   ],
-  "head": "8fbac997a7d45525fdd2ada6056341980c47943c",
+  "head": "e01422b5c28f6b94b912a9e7abd878022819b700",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -166,18 +211,18 @@
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
   "graph_digest": "sha256:34e82714d21013d222de32fcca4fc52f8e79b7e864315e4eb37875849f61a3db",
-  "path": "/tmp/root1255-checklist-reuse-own-verifier-outputs/graph-2aae3fee0ee8.json",
+  "path": "/tmp/root1255-checklist-lintfix-final-own-verifier-outputs/graph-2aae3fee0ee8.json",
   "source_commit": "2aae3fee0ee86711b8d20f3e03be307d12d7cebf"
  },
  "head_graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:1f4c423f2983ccdf8addfe982dfcc3cc4f6499328ebd90b8fc248d1e708392c1",
-  "path": "/tmp/root1255-checklist-reuse-own-verifier-outputs/graph-head-8fbac997a7d4.json",
-  "source_commit": "8fbac997a7d45525fdd2ada6056341980c47943c",
+  "graph_digest": "sha256:0c0e45ad73730496333ea6d2d2387554ea889767e6f52fdc23f390aaea920cf8",
+  "path": "/tmp/root1255-checklist-lintfix-final-own-verifier-outputs/graph-head-e01422b5c28f.json",
+  "source_commit": "e01422b5c28f6b94b912a9e7abd878022819b700",
   "staleness": {
-   "checked_at_utc": "2026-10-13T17:55:12Z",
-   "checked_nodes": 461,
+   "checked_at_utc": "2026-10-13T18:21:26Z",
+   "checked_nodes": 462,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -185,7 +230,7 @@
  },
  "host": "source-lane",
  "host_redacted": true,
- "host_sha256": "abc4e36c3a02f81f2cb03549fa0e596033f434d909cd8d511a0b4cd19e562a80",
+ "host_sha256": "52ad5706087d428a3eaa96a6e13e70e1d26fcf36e5e8cf1b27a46fcf29eadf55",
  "impact_set": {
   "deterministic_core": [
    {
@@ -2814,7 +2859,7 @@
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261013T175449Z-8fbac997",
+ "receipt_id": "car-verify-20261013T182058Z-e01422b5",
  "receipt_path": "receipts/graph/mun-artifacts/checklist-change-admission.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -3065,6 +3110,7 @@
    "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
    "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
    "receipt:receipts/graph/mun-0043-index-grant-20261007.json",
+   "receipt:receipts/graph/mun-artifacts/checklist-change-admission.json",
    "receipt:receipts/graph/mun-artifacts/content-change-admission.json",
    "receipt:receipts/graph/revision4-public-20261007.json",
    "receipt:receipts/graph/security-api959a-caller788.json",
@@ -3099,7 +3145,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-13T17:55:12Z",
+  "checked_at_utc": "2026-10-13T18:21:26Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -3525,6 +3571,21 @@
   },
   {
    "content_hash": {
+    "base": null,
+    "head": "sha256:18a617f714f4aad4dfc8793889893023ecd550dd30d3fc8e96f82b517e946cce"
+   },
+   "entity": "receipt:receipts/graph/mun-artifacts/checklist-change-admission.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/mun-artifacts/checklist-change-admission.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it; superseded by construction — this run re-issues the receipt at receipts/graph/mun-artifacts/checklist-change-admission.json for work item 1f99b768-65e6-4afe-93e6-611db53e3366",
+   "rule": "DEC-AUP-0035",
+   "superseded": {
+    "receipt_path": "receipts/graph/mun-artifacts/checklist-change-admission.json",
+    "work_item": "1f99b768-65e6-4afe-93e6-611db53e3366"
+   }
+  },
+  {
+   "content_hash": {
     "base": "sha256:43f8b8161b5ec54ee39de42fb331f9c2467728ef84c1436c9b4078ff823e81de",
     "head": "sha256:43f8b8161b5ec54ee39de42fb331f9c2467728ef84c1436c9b4078ff823e81de"
    },
@@ -3558,7 +3619,7 @@
   }
  ],
  "tree": {
-  "commit": "8fbac997a7d45525fdd2ada6056341980c47943c",
+  "commit": "e01422b5c28f6b94b912a9e7abd878022819b700",
   "dirty": false
  },
  "verdicts": [
@@ -4517,8 +4578,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/aup/mun-checklist-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-checklist-root1255-20261013/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-checklist-reuse-own-verifier-outputs/type-check-su7rbv15/check.tsbuildinfo --listFiles",
-   "duration_s": 3.27,
+   "command": "/home/dev/aup/mun-checklist-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-checklist-root1255-20261013/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-checklist-lintfix-final-own-verifier-outputs/type-check-knv63vkf/check.tsbuildinfo --listFiles",
+   "duration_s": 3.52,
    "entities": [
     "code_unit:apps/api/src/app.module.ts",
     "code_unit:apps/api/src/main.ts",
@@ -4596,13 +4657,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "/tmp/root1255-checklist-reuse-own-verifier-outputs/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-10-13T17:55:16Z",
+   "output_ref": "/tmp/root1255-checklist-lintfix-final-own-verifier-outputs/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-10-13T18:21:30Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1476 files listed"
   },
   {
-   "command": "/home/dev/aup/mun-checklist-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-checklist-root1255-20261013/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-checklist-reuse-own-verifier-outputs/type-check-8yv2ihoj/check.tsbuildinfo --listFiles",
-   "duration_s": 5.41,
+   "command": "/home/dev/aup/mun-checklist-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-checklist-root1255-20261013/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-checklist-lintfix-final-own-verifier-outputs/type-check-ccehwad2/check.tsbuildinfo --listFiles",
+   "duration_s": 6.02,
    "entities": [
     "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts",
     "code_unit:apps/api/test/agent-project-dependencies.e2e.spec.ts",
@@ -4658,13 +4719,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
-   "output_ref": "/tmp/root1255-checklist-reuse-own-verifier-outputs/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-10-13T17:55:20Z",
+   "output_ref": "/tmp/root1255-checklist-lintfix-final-own-verifier-outputs/v-type-check-apps-api-tsconfig-test.txt",
+   "started_at_utc": "2026-10-13T18:21:34Z",
    "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1640 files listed"
   },
   {
-   "command": "/home/dev/aup/mun-checklist-root1255-20261013/apps/web/node_modules/.bin/tsc -p /home/dev/aup/mun-checklist-root1255-20261013/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-checklist-reuse-own-verifier-outputs/type-check-38dmzmcg/check.tsbuildinfo --listFiles",
-   "duration_s": 4.08,
+   "command": "/home/dev/aup/mun-checklist-root1255-20261013/apps/web/node_modules/.bin/tsc -p /home/dev/aup/mun-checklist-root1255-20261013/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-checklist-lintfix-final-own-verifier-outputs/type-check-s2fqga2p/check.tsbuildinfo --listFiles",
+   "duration_s": 4.56,
    "entities": [
     "code_unit:apps/web/__tests__/kanban-board.test.ts",
     "code_unit:apps/web/__tests__/read-api-contract.test.ts",
@@ -4720,13 +4781,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/tmp/root1255-checklist-reuse-own-verifier-outputs/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-10-13T17:55:25Z",
+   "output_ref": "/tmp/root1255-checklist-lintfix-final-own-verifier-outputs/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-10-13T18:21:40Z",
    "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1313 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=2aae3fee0ee8, head=8fbac997a7d4, graph=head graph)",
-   "duration_s": 3.86,
+   "command": "tools/graph/contract_diff.py.run_diff(base=2aae3fee0ee8, head=e01422b5c28f, graph=head graph)",
+   "duration_s": 4.19,
    "entities": [
     "code_unit:apps/api/src/sync/sync.controller.ts",
     "code_unit:apps/api/src/tasks/dto/update-checklist-item.dto.ts",
@@ -4844,8 +4905,8 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "/tmp/root1255-checklist-reuse-own-verifier-outputs/v-contract-diff.json",
-   "started_at_utc": "2026-10-13T17:55:30Z",
+   "output_ref": "/tmp/root1255-checklist-lintfix-final-own-verifier-outputs/v-contract-diff.json",
+   "started_at_utc": "2026-10-13T18:21:45Z",
    "summary": "60→61 contracts, breaking 0, edges {'verified': 171}"
   },
   {
@@ -4908,13 +4969,13 @@
    "exit_code": 0,
    "id": "v-route-config",
    "kind": "config_schema",
-   "output_ref": "/tmp/root1255-checklist-reuse-own-verifier-outputs/v-route-config.txt",
-   "started_at_utc": "2026-10-13T17:55:33Z",
+   "output_ref": "/tmp/root1255-checklist-lintfix-final-own-verifier-outputs/v-route-config.txt",
+   "started_at_utc": "2026-10-13T18:21:49Z",
    "summary": "25 route(s), 0 failed"
   },
   {
    "command": "verify.py config_schema: keys read at head ⊆ declared keys",
-   "duration_s": 0.32,
+   "duration_s": 0.37,
    "entities": [
     "code_unit:apps/web/__tests__/web-consumer-live.test.ts"
    ],
@@ -4924,13 +4985,13 @@
    "exit_code": 0,
    "id": "v-config-schema",
    "kind": "config_schema",
-   "output_ref": "/tmp/root1255-checklist-reuse-own-verifier-outputs/v-config-schema.json",
-   "started_at_utc": "2026-10-13T17:55:33Z",
+   "output_ref": "/tmp/root1255-checklist-lintfix-final-own-verifier-outputs/v-config-schema.json",
+   "started_at_utc": "2026-10-13T18:21:49Z",
    "summary": "3 source(s), 0 new / 3 frozen undeclared reads, 0 failed; 4 vendored file(s) not attributed to this repository (Arcanada-one/arcanada-universal-program)"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.1,
+   "duration_s": 0.12,
    "entities": [
     "code_unit:apps/api/src/app.module.ts",
     "code_unit:apps/api/src/main.ts",
@@ -5052,8 +5113,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/tmp/root1255-checklist-reuse-own-verifier-outputs/v-fitness.json",
-   "started_at_utc": "2026-10-13T17:55:34Z",
+   "output_ref": "/tmp/root1255-checklist-lintfix-final-own-verifier-outputs/v-fitness.json",
+   "started_at_utc": "2026-10-13T18:21:49Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -5086,13 +5147,13 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/tmp/root1255-checklist-reuse-own-verifier-outputs/v-doc-reference.txt",
-   "started_at_utc": "2026-10-13T17:55:34Z",
+   "output_ref": "/tmp/root1255-checklist-lintfix-final-own-verifier-outputs/v-doc-reference.txt",
+   "started_at_utc": "2026-10-13T18:21:50Z",
    "summary": "10 document(s), 0 failed"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.6,
+   "duration_s": 0.66,
    "entities": [
     "code_unit:apps/api/src/sync/sync.controller.ts",
     "code_unit:apps/api/src/tasks/tasks.controller.ts",
@@ -5154,13 +5215,13 @@
    "exit_code": 0,
    "id": "v-canary-1",
    "kind": "canary",
-   "output_ref": "receipts/canary/mun-artifacts-checklist-20261013/source-21aaf03/root1255-checklist-current-api.result.json",
-   "started_at_utc": "2026-10-13T17:55:34Z",
-   "summary": "receipts/canary/mun-artifacts-checklist-20261013/source-21aaf03/root1255-checklist-current-api.result.json: 27 verified / 0 failed / 0 not_measured"
+   "output_ref": "receipts/canary/mun-artifacts-checklist-20261013/source-a87a823/root1255-checklist-lintfix-api.result.json",
+   "started_at_utc": "2026-10-13T18:21:50Z",
+   "summary": "receipts/canary/mun-artifacts-checklist-20261013/source-a87a823/root1255-checklist-lintfix-api.result.json: 27 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.6,
+   "duration_s": 0.66,
    "entities": [
     "code_unit:apps/web/__tests__/kanban-board.test.ts",
     "code_unit:apps/web/__tests__/read-api-contract.test.ts",
@@ -5212,13 +5273,13 @@
    "exit_code": 0,
    "id": "v-canary-2",
    "kind": "canary",
-   "output_ref": "receipts/canary/mun-artifacts-checklist-20261013/source-21aaf03/root1255-checklist-current-web.result.json",
-   "started_at_utc": "2026-10-13T17:55:34Z",
-   "summary": "receipts/canary/mun-artifacts-checklist-20261013/source-21aaf03/root1255-checklist-current-web.result.json: 22 verified / 0 failed / 0 not_measured"
+   "output_ref": "receipts/canary/mun-artifacts-checklist-20261013/source-a87a823/root1255-checklist-lintfix-web.result.json",
+   "started_at_utc": "2026-10-13T18:21:50Z",
+   "summary": "receipts/canary/mun-artifacts-checklist-20261013/source-a87a823/root1255-checklist-lintfix-web.result.json: 22 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.6,
+   "duration_s": 0.66,
    "entities": [
     "contract:apps/web/lib/api/task-detail-controller.ts#ReadOutcome",
     "contract:apps/web/lib/api/task-detail-read.ts#revision",
@@ -5234,17 +5295,23 @@
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/tmp/root1255-checklist-reuse-own-verifier-outputs/v-canary.json",
-   "started_at_utc": "2026-10-13T17:55:34Z",
+   "output_ref": "/tmp/root1255-checklist-lintfix-final-own-verifier-outputs/v-canary.json",
+   "started_at_utc": "2026-10-13T18:21:50Z",
    "summary": "2 canary result(s), 2 committed at head; 49 verified / 0 failed / 4 not_measured of 53 entities"
   }
  ],
  "verify": {
   "events": [
    {
+    "code": "SUPERSEDED_SELF_EXCLUSION",
+    "entity": "receipt:receipts/graph/mun-artifacts/checklist-change-admission.json",
+    "rule": "DEC-AUP-0035",
+    "text": "the receipt at receipts/graph/mun-artifacts/checklist-change-admission.json is the previous version of the one this run is writing, for the same work item 1f99b768-65e6-4afe-93e6-611db53e3366 — superseded by construction, so it owes this change no verdict"
+   },
+   {
     "code": "STRUCTURAL_EXCLUSION",
     "rule": "DEC-AUP-0034",
-    "text": "41 affected entity(ies) owe no verdict (receipt: 41): unchanged at both revisions and given no verifier by the matrix"
+    "text": "42 affected entity(ies) owe no verdict (receipt: 42): unchanged at both revisions and given no verifier by the matrix"
    }
   ],
   "required_by_entity": {
@@ -5583,6 +5650,7 @@
    "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json": [],
    "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json": [],
    "receipt:receipts/graph/mun-0043-index-grant-20261007.json": [],
+   "receipt:receipts/graph/mun-artifacts/checklist-change-admission.json": [],
    "receipt:receipts/graph/mun-artifacts/content-change-admission.json": [],
    "receipt:receipts/graph/revision4-public-20261007.json": [],
    "receipt:receipts/graph/security-api959a-caller788.json": [],
@@ -5738,9 +5806,9 @@
    ]
   },
   "seconds": {
-   "prepare": 1.7,
-   "total": 45.08,
-   "verifiers": 18.88
+   "prepare": 1.9,
+   "total": 51.97,
+   "verifiers": 20.8
   }
  },
  "work_item": "1f99b768-65e6-4afe-93e6-611db53e3366"
