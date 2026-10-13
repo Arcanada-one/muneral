@@ -16,7 +16,7 @@ const PGP = 'PGPASSWORD=' + 'synthetic' + 'a'.repeat(12);
 const PEM = ['-----BEGIN', 'RSA PRIVATE KEY-----'].join(' ');
 
 describe('secret-rules (vendored from Scrutator muneral_sync/secretscan.py)', () => {
-  it('carries exactly the six critical rule ids of the scanner', () => {
+  it('carries the six critical and generic-entropy rule ids of the scanner', () => {
     expect([...SECRET_RULE_IDS]).toEqual([
       'vault-token-hvs',
       'vault-token-legacy',
@@ -24,6 +24,7 @@ describe('secret-rules (vendored from Scrutator muneral_sync/secretscan.py)', ()
       'pgpassword',
       'cloudflare-origin-token',
       'pem-private-key',
+      'generic-entropy',
     ]);
   });
 

@@ -87,6 +87,44 @@ const dto = (over: Partial<{ field: 'title' | 'description'; span_sha256: string
 });
 
 describe('TaskRedactionService', () => {
+  it('refuses a concurrent field change without writing audit or notifying', async () => {
+    const d = makeDeps({ title: HVS, description: null });
+    d.tx.task.update.mockRejectedValueOnce({ code: 'P2025' });
+    await expect(d.service.redact(TASK_ID, ACTOR, dto())).rejects.toMatchObject({
+      response: { code: 'FIELD_CHANGED' },
+    });
+    expect(d.created).toEqual([]);
+    expect(d.tx.activityLog.create).not.toHaveBeenCalled();
+    expect(d.kanban.notify).not.toHaveBeenCalled();
+  });
+
+  it('refuses scanner-blocked Unicode replacement before update, response or audit', async () => {
+    const d = makeDeps({ title: HVS, description: null });
+    const replacement = 'ключ="Zq3TbWxPnLdRvKJ8FheApcNyUgMsBtVxHwEzQrLm"';
+    await expect(d.service.redact(TASK_ID, ACTOR, dto({ replacement }))).rejects.toMatchObject({
+      response: { code: 'REPLACEMENT_NOT_CLEAN', rules: ['generic-entropy'] },
+    });
+    expect(d.tx.task.update).not.toHaveBeenCalled();
+    expect(d.created).toEqual([]);
+    expect(d.tx.activityLog.create).not.toHaveBeenCalled();
+    expect(d.kanban.notify).not.toHaveBeenCalled();
+  });
+
+  it('redacts generic-entropy only at scanner value positions with hash-only audit', async () => {
+    const value = 'Zq3TbWxPnLdRvKJ8FheApcNyUgMsBtVxHwEzQrLm';
+    const text = `public ${value}; api_token="${value}"`;
+    const replacement = '[REDACTED generic-entropy DEC-AUP-0049 A6]';
+    const d = makeDeps({ title: 'synthetic title', description: text });
+    const out = await d.service.redact(TASK_ID, ACTOR, dto({
+      field: 'description', rule: 'generic-entropy', span_sha256: sha256Hex(value), replacement,
+    }));
+    expect(out.statusCode).toBe(201);
+    expect(d.updates).toEqual([{ description: `public ${value}; api_token="${replacement}"` }]);
+    expect(d.tx.task.update.mock.calls[0][0]).toMatchObject({ where: { id: TASK_ID, description: text } });
+    expect(d.created[0]).toMatchObject({ rule: 'generic-entropy', occurrences: 1, previousValueSha256: sha256Hex(text) });
+    expect(JSON.stringify(out.body) + JSON.stringify(d.tx.activityLog.create.mock.calls)).not.toContain(value);
+  });
+
   it('replaces exactly the span, recomputes field state, and writes a hash-only activity row + record', async () => {
     const title = `SEC-0076 rotate ${HVS} in vault`;
     const d = makeDeps({ title, description: null });
