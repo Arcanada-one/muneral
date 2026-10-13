@@ -1,0 +1,147 @@
+{
+  "schema": "CanaryPlan/v2",
+  "id": "mun-whole-work-item-real-api",
+  "owner": "MUN-ARTIFACTS",
+  "environment": "owned-loopback-postgres-disposable-databases",
+  "read_only": false,
+  "producer_repository": "/home/dev/aup/mun-open-task-root1255-20261013",
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "15d6ab565538c3c53148b9c68bd0801c8d39d8e1",
+    "tree": "a6633f33fa209174ecaf098403c7d438dfc93ce6",
+    "evidence": {
+      "path": "root1255-open-task-source.json",
+      "sha256": "e5ccbeeba55b94e2a9189c78e48275ab0b3fc11a75817d1b92783085da1c2b9e",
+      "source_field": "commit"
+    }
+  },
+  "probes": [
+    {
+      "id": "whole-work-item-pg-http-snapshot-and-scopes",
+      "kind": "process",
+      "argv": [
+        "/opt/ard-ci-adamalante/_work/_tool/node/24.21.0/x64/bin/node",
+        "/home/dev/aup/mun-open-task-root1255-20261013/apps/api/node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "test/task-open.e2e.spec.ts",
+        "test/mutation-evidence.spec.ts"
+      ],
+      "cwd": "apps/api",
+      "env_keys": [
+        "PATH",
+        "DATABASE_URL",
+        "MUN0020_DB_URL",
+        "MUN0021_PG_BASE_URL",
+        "NODE_OPTIONS",
+        "HOME",
+        "TMPDIR"
+      ],
+      "timeout_seconds": 120,
+      "capture_limit_bytes": 1048576,
+      "mutating": true,
+      "entities": [
+        "code_unit:apps/api/src/tasks/content/task-content.controller.ts",
+        "code_unit:apps/api/src/tasks/content/task-content.dto.ts",
+        "code_unit:apps/api/src/tasks/content/task-content.service.ts",
+        "code_unit:apps/api/src/tasks/content/task-graph.schema.ts",
+        "code_unit:apps/api/src/tasks/content/task-graph.validation.ts"
+      ],
+      "executable_sha256": "7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c",
+      "execution_files": [
+        {
+          "path": "/home/dev/aup/mun-open-task-root1255-20261013/apps/api/src/auth/auth.module.ts",
+          "sha256": "c35615b88a7ea66f6847768745bcacdc5d48a54f95d7e6906c9b3080cbbb094e"
+        },
+        {
+          "path": "/home/dev/aup/mun-open-task-root1255-20261013/apps/api/src/auth/guards/agent-task-scope.guard.ts",
+          "sha256": "69c460ff0e71095474ae4b16803e090e5ab8812c91fd1e0dcf6d055dfce7fb5a"
+        },
+        {
+          "path": "/home/dev/aup/mun-open-task-root1255-20261013/apps/api/src/tasks/tasks.controller.ts",
+          "sha256": "ca3d93fb1be51ec8f78d28582613039a06779a57ade89be5b20a8478a06f69ac"
+        },
+        {
+          "path": "/home/dev/aup/mun-open-task-root1255-20261013/apps/api/src/tasks/tasks.service.ts",
+          "sha256": "d25366729147cce14d2dc562405be0be293f5845fd1d938adb2bcf229ed36707"
+        },
+        {
+          "path": "/home/dev/aup/mun-open-task-root1255-20261013/apps/api/src/auth/guards/human-task-read.guard.ts",
+          "sha256": "cb8de58d5c5480fb8621522d4799cb2938af2bae8ddc43ba84562ca6883b2dcc"
+        },
+        {
+          "path": "/home/dev/aup/mun-open-task-root1255-20261013/apps/api/src/auth/human-task-visibility.ts",
+          "sha256": "d455058fbf5f3ac68ab273ff30cffe1dc846e22395e9611b837e7b084d14cfd6"
+        },
+        {
+          "path": "/home/dev/aup/mun-open-task-root1255-20261013/apps/api/prisma/schema.prisma",
+          "sha256": "cae71f96eb25244f49ca86dbd95a84de83f55c0552812999af312b9099166552"
+        },
+        {
+          "path": "/home/dev/aup/mun-open-task-root1255-20261013/pnpm-lock.yaml",
+          "sha256": "009a3900acc211fcead10605cf4898b2222d8e42972550274d5c2cdf514b6483"
+        },
+        {
+          "path": "/home/dev/aup/mun-open-task-root1255-20261013/apps/api/package.json",
+          "sha256": "5b738ab0266d2eb2cc6038cf34f4cc49931ddff2dc41c767264bf55f6c172065"
+        },
+        {
+          "path": "/home/dev/aup/mun-open-task-root1255-20261013/apps/api/tsconfig.json",
+          "sha256": "e9d48a8d90da20846c7725067dd944d1f1f7c6d21faff18022360aa8759740bf"
+        },
+        {
+          "path": "/home/dev/aup/mun-open-task-root1255-20261013/apps/api/tsconfig.test.json",
+          "sha256": "b45b51f10e6897b5fa212f421842c1334c9e1f7942e446dcf278bb08b9c55d1d"
+        },
+        {
+          "path": "/home/dev/aup/mun-open-task-root1255-20261013/apps/api/test/task-open.e2e.spec.ts",
+          "sha256": "397b9382a7f37b495f93d49ecfe0b36ebe138cc81e0835055a788b5d2850779f"
+        },
+        {
+          "path": "/home/dev/aup/mun-open-task-root1255-20261013/apps/api/test/mutation-evidence.spec.ts",
+          "sha256": "0621c127b42a4b5b32be9c16e2d49ccdd7e4c83fb77a5c5fb824244089f961aa"
+        },
+        {
+          "path": "/home/dev/aup/mun-open-task-root1255-20261013/apps/api/test/support/disposable-postgres.ts",
+          "sha256": "6644ee5e273b9bc866254288f8e4c426800da68875f485c932f28dc1e8576e3b"
+        },
+        {
+          "path": "/home/dev/aup/mun-open-task-root1255-20261013/apps/api/test/assembly/mutation-results.json",
+          "sha256": "f5c11cf0601fec1099cbc36edbe6b4438b2f03da948bea2ec8db2c17bd4ec345"
+        },
+        {
+          "path": "/home/dev/aup/mun-open-task-root1255-20261013/apps/api/src/tasks/content/task-content.controller.ts",
+          "sha256": "efb95c7c08e4800d9102120955f7159875a69f03862530caf29638fe0d437685"
+        },
+        {
+          "path": "/home/dev/aup/mun-open-task-root1255-20261013/apps/api/src/tasks/content/task-content.dto.ts",
+          "sha256": "32777722bcf687469bebb24c18ed8b94463eeb7ecb36cd0ef225f965572b269e"
+        },
+        {
+          "path": "/home/dev/aup/mun-open-task-root1255-20261013/apps/api/src/tasks/content/task-content.service.ts",
+          "sha256": "6a646e135e885103e264263a19a8649dcfe099baf1c447fbcaf4ff82ebec037d"
+        },
+        {
+          "path": "/home/dev/aup/mun-open-task-root1255-20261013/apps/api/src/tasks/content/task-graph.schema.ts",
+          "sha256": "aa9234f61ee9ed5c03965936a6af0caab251997607755dcfd0fcee51247e8d25"
+        },
+        {
+          "path": "/home/dev/aup/mun-open-task-root1255-20261013/apps/api/src/tasks/content/task-graph.validation.ts",
+          "sha256": "d36c01398bf24a5c73bd0c55ab6d99fefc423b5a9d8ab48f0f0a5d003c8ee43d"
+        }
+      ],
+      "expect": {
+        "exit_codes": [
+          0
+        ],
+        "stdout_contains": [],
+        "stderr_contains": [
+          "37 passed"
+        ]
+      }
+    }
+  ],
+  "limitations": [
+    "Owned loopback HTTP/PG fixture only; framework session/navigation seams remain. No production deployment, native lifecycle issuance or KC2 admission.",
+    "Process evidence does not claim native unsupported contract labels or web deployable."
+  ]
+}

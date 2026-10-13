@@ -1,0 +1,12 @@
+{
+  "schema": "MeasuredGitSource/v1",
+  "commit": "15d6ab565538c3c53148b9c68bd0801c8d39d8e1",
+  "tree": "a6633f33fa209174ecaf098403c7d438dfc93ce6",
+  "dirty": false,
+  "repository_path": "/home/dev/aup/mun-open-task-root1255-20261013",
+  "captured_at_utc": "2026-10-13T20:35:52.626113Z",
+  "producer": {
+    "tool": "own-process-canary",
+    "version": "1"
+  }
+}
