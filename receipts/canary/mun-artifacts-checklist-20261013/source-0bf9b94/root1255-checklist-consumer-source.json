@@ -1,0 +1,12 @@
+{
+  "schema": "MeasuredGitSource/v1",
+  "commit": "0bf9b9402ddab64b11ffffd70447607fd2cf1e54",
+  "tree": "4deb0712462ca5abaa3d5e93ca01f63be786e15a",
+  "dirty": false,
+  "captured_at_utc": "2026-10-13T17:11:48.115575Z",
+  "producer": {
+    "tool": "scripts/canary/canary_probe.py",
+    "version": "1.0.0"
+  },
+  "repository_path": "/home/dev/aup/mun-checklist-root1255-20261013"
+}
