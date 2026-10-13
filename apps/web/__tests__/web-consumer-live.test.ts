@@ -17,6 +17,9 @@ import '../lib/auth/nextauth';
 import { Providers } from '../app/providers';
 import TaskPage from '../app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page';
 import { useProject } from '../lib/api/projects';
+import ProjectPage from '../app/(app)/workspaces/[wsSlug]/projects/[projSlug]/page';
+import DashboardPage from '../app/(app)/workspaces/[wsSlug]/dashboard/page';
+import { useProjectStore } from '../store/project';
 
 const fixturePath=process.env.MUN_ARTIFACT_CANARY_FIXTURE;
 describe.skipIf(!fixturePath)('MUN artifact actual web-to-API HTTP consumer seam', () => {
@@ -24,6 +27,7 @@ describe.skipIf(!fixturePath)('MUN artifact actual web-to-API HTTP consumer seam
     state.fixture=JSON.parse(fs.readFileSync(fixturePath!, 'utf8'));
     if (state.fixture.baseUrl !== 'http://127.0.0.1:25456') throw new Error('Only isolated loopback candidate permitted');
     apiClient.defaults.baseURL=state.fixture.baseUrl+'/api/v1';
+    process.env.NEXT_PUBLIC_API_URL=state.fixture.baseUrl;
     // Node HTTP transport still performs real requests; session lookup above is the sole frontend seam.
     apiClient.defaults.adapter='http';
   });
@@ -65,6 +69,19 @@ describe.skipIf(!fixturePath)('MUN artifact actual web-to-API HTTP consumer seam
     } finally {
       view.unmount();await apiClient.delete(`/tasks/${state.fixture.taskId}/checklist/${item.id}`);
     }
+  });
+  it('renders the existing project kanban from the actual project task list', async () => {
+    const view=render(React.createElement(Providers,{children:React.createElement(ProjectPage)}));
+    try {
+      await screen.findByText('Artifact consumer canary',undefined,{timeout:10000});
+      expect(screen.getByText('To Do')).toBeTruthy();
+    } finally { view.unmount();useProjectStore.getState().clearProject(); }
+  });
+  it('renders existing dashboard blockers after reading the actual filtered task list', async () => {
+    useProjectStore.getState().setCurrentProject(state.fixture.projectSlug,state.fixture.projectId);
+    const view=render(React.createElement(Providers,{children:React.createElement(DashboardPage)}));
+    try { await screen.findByText(/No blockers/,undefined,{timeout:10000}); }
+    finally { view.unmount();useProjectStore.getState().clearProject(); }
   });
   it('observes the existing Telegram protocol refusal through the actual NextAuth consumer and API', async () => {
     process.env.TELEGRAM_BOT_TOKEN=state.fixture.telegramBotToken;
