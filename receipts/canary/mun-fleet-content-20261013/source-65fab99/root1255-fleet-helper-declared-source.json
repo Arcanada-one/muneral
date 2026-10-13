@@ -1,0 +1,12 @@
+{
+  "schema": "MeasuredGitSource/v1",
+  "commit": "65fab99747724dd050cc8a491d1605ebc403e48c",
+  "tree": "6b388964c0b32dee2ff312558d299494bb083032",
+  "dirty": false,
+  "repository_path": "/home/dev/aup/mun-fleet-content-root1255-20261013",
+  "captured_at_utc": "2026-10-13T21:07:49.441819Z",
+  "producer": {
+    "tool": "own-process-canary",
+    "version": "1"
+  }
+}
