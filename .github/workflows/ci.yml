@@ -89,6 +89,8 @@ jobs:
       # route table, a 405, a router no-match 404 — and must never send anything but a GET.
       - name: Test the post-deploy canary goes red
         run: python3 -m unittest discover -s scripts/canary -p 'test_*.py'
+      - name: Test task content helper readback and refusal controls
+        run: python3 -B -I scripts/agents/test_attach.py -v
       - name: Enable corepack (pnpm@11.5.2 from packageManager field)
         run: |
           COREPACK_HOME="${RUNNER_TEMP}/corepack-bin"
