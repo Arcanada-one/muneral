@@ -6,6 +6,7 @@ import { PrismaService } from '../../prisma/prisma.service.js';
 import { ActivityService } from '../../activity/activity.service.js';
 import { ArtifactMetadataDto, UploadArtifactDto, StoreGraphDto } from './task-content.dto.js';
 import { humanTaskWhere } from '../../auth/human-task-visibility.js';
+import { agentOwnTaskWhere } from '../../auth/agent-task-visibility.js';
 import type { GraphDocument, GraphKind } from './task-graph.schema.js';
 import { parseGraph, validateGraphReferences } from './task-graph.validation.js';
 
@@ -77,12 +78,11 @@ export class TaskContentService {
           agents.some(row => row.agent.workspaceId !== custody.project.workspaceId)) {
         throw new ConflictException('WORK_ITEM_CUSTODY_MISMATCH');
       }
-      // A dependency is disclosed only if this credential can read BOTH ends.
+      // MUN-0055: retain same-workspace edges/status, withholding unowned free text.
       const endpointIds = [...new Set([taskId, ...dependencies.flatMap(row => [row.fromTaskId, row.toTaskId])])];
       const endpoints = [];
       for (const id of endpointIds) {
-        await this.authorize(tx, id, actor);
-        endpoints.push(await tx.task.findUniqueOrThrow({ where: { id }, select: { id: true, title: true, status: true, projectId: true } }));
+        endpoints.push(await this.dependencyEndpoint(tx, id, actor, custody.project.workspaceId));
       }
       for (const row of content) {
         if (row.sizeBytes !== row.content.length || digest(row.content) !== row.sha256) {
@@ -107,6 +107,17 @@ export class TaskContentService {
             contentRevisions: content.length, dependencies: dependencies.length } },
       };
     }, { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead, timeout: 10000 });
+  }
+
+  private async dependencyEndpoint(tx: Prisma.TransactionClient, id: string, actor: Actor, workspaceId: string) {
+    const row = await tx.task.findFirst({ where: { id, project: { workspaceId } },
+      select: { id: true, status: true, projectId: true } });
+    if (!row) throw new ForbiddenException('Dependency endpoint is outside workspace custody');
+    const readable = await tx.task.findFirst({ where: { id, ...(actor.type === 'human'
+      ? humanTaskWhere(actor.id) : agentOwnTaskWhere(actor.id)) }, select: { title: true } });
+    if (actor.type === 'human' && !readable) throw new ForbiddenException('Dependency endpoint is outside credential scope');
+    // Reuse getDependencyGraph's ownership predicate, inside this read's snapshot.
+    return readable ? { ...row, title: readable.title } : row;
   }
 
   uploadBytes(taskId: string, actor: Actor, dto: ArtifactMetadataDto, bytes: Buffer | undefined) {
