@@ -207,6 +207,8 @@ export class AgentTaskScopeGuard implements CanActivate {
       // must be assigned to the task — and is listed separately so the write
       // can be revoked without touching the read/comment/status routes.
       // MUN-0051 deliberately did not widen it to the creator.
+      // MUN-ARTIFACTS: assigned task artifact reads and writes only.
+      case 'task-content':
       case 'task-redaction': {
         const taskId = this.paramOf(req, 'taskId');
         if (!taskId) throw new ForbiddenException('No task in scope for this key.');
