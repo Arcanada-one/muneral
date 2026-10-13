@@ -56,7 +56,7 @@ describe.skipIf(!fixturePath)('MUN artifact actual web-to-API HTTP consumer seam
   });
   it('opens the real task page and toggles a checklist item through its original UI and HTTP client', async () => {
     const item=(await apiClient.post(`/tasks/${state.fixture.taskId}/checklist`,{text:'Actual checklist HTTP fixture'})).data;
-    const view=render(React.createElement(Providers,{children:React.createElement(TaskPage)}));
+    const view=render(React.createElement(Providers,null,React.createElement(TaskPage)));
     try {
       const checkbox=await screen.findByRole('checkbox',{name:'Actual checklist HTTP fixture'},{timeout:10000});
       fireEvent.click(checkbox);
@@ -71,7 +71,7 @@ describe.skipIf(!fixturePath)('MUN artifact actual web-to-API HTTP consumer seam
     }
   });
   it('renders the existing project kanban from the actual project task list', async () => {
-    const view=render(React.createElement(Providers,{children:React.createElement(ProjectPage)}));
+    const view=render(React.createElement(Providers,null,React.createElement(ProjectPage)));
     try {
       await screen.findByText('Artifact consumer canary',undefined,{timeout:10000});
       expect(screen.getByText('To Do')).toBeTruthy();
@@ -79,7 +79,7 @@ describe.skipIf(!fixturePath)('MUN artifact actual web-to-API HTTP consumer seam
   });
   it('renders existing dashboard blockers after reading the actual filtered task list', async () => {
     useProjectStore.getState().setCurrentProject(state.fixture.projectSlug,state.fixture.projectId);
-    const view=render(React.createElement(Providers,{children:React.createElement(DashboardPage)}));
+    const view=render(React.createElement(Providers,null,React.createElement(DashboardPage)));
     try { await screen.findByText(/No blockers/,undefined,{timeout:10000}); }
     finally { view.unmount();useProjectStore.getState().clearProject(); }
   });
