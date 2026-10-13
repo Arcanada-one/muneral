@@ -5,10 +5,19 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "paused_safe"
  },
- "captured_at_utc": "2026-10-13T15:28:21Z",
+ "captured_at_utc": "2026-10-13T16:34:43Z",
  "change_set": {
   "base": "840e3be216844d57c163daf14ec0a5d51657f963",
   "files": [
+   {
+    "kind": "config",
+    "node_id": "code_unit:.github/workflows/ci.yml",
+    "node_ids": [
+     "code_unit:.github/workflows/ci.yml"
+    ],
+    "path": ".github/workflows/ci.yml",
+    "status": "M"
+   },
    {
     "kind": "config",
     "node_id": "code_unit:.github/workflows/graph-admission.yml",
@@ -276,6 +285,42 @@
    {
     "kind": "receipt",
     "new": true,
+    "path": "receipts/canary/mun-artifacts-content-20261013/source-96a4212/root1255-heapfix-api.plan.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/mun-artifacts-content-20261013/source-96a4212/root1255-heapfix-api.result.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/mun-artifacts-content-20261013/source-96a4212/root1255-heapfix-api.result.source-evidence.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/mun-artifacts-content-20261013/source-96a4212/root1255-heapfix-consumer-source.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/mun-artifacts-content-20261013/source-96a4212/root1255-heapfix-web.plan.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/mun-artifacts-content-20261013/source-96a4212/root1255-heapfix-web.result.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
     "path": "receipts/canary/mun-artifacts-content-20261013/source-f8db289/root1255-consumer-source.json",
     "status": "A"
    },
@@ -319,7 +364,7 @@
     "status": "A"
    }
   ],
-  "head": "55d5cbfffb9e108f38862c8c370e2aa663606679",
+  "head": "10b50833343436b8a8bd7e81c3dfb6718e4389b8",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -328,17 +373,17 @@
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
   "graph_digest": "sha256:d4be88318996f7d945b83d7a8faba9c0a3a8331b2dfdc25ae10056a6be4100f7",
-  "path": "/tmp/root1255-own-clean-final-verifier-outputs/graph-840e3be21684.json",
+  "path": "/tmp/root1255-heapfix-own-verifier-outputs/graph-840e3be21684.json",
   "source_commit": "840e3be216844d57c163daf14ec0a5d51657f963"
  },
  "head_graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:4bf920a5829db95d10658a254566d9029ba8455cf1aa4ebdfaf34055b713428f",
-  "path": "/tmp/root1255-own-clean-final-verifier-outputs/graph-head-55d5cbfffb9e.json",
-  "source_commit": "55d5cbfffb9e108f38862c8c370e2aa663606679",
+  "graph_digest": "sha256:4433c7ed2c43114e1f83df78b600ff8554e2d37f062106f678403aab99548da9",
+  "path": "/tmp/root1255-heapfix-own-verifier-outputs/graph-head-10b508333434.json",
+  "source_commit": "10b50833343436b8a8bd7e81c3dfb6718e4389b8",
   "staleness": {
-   "checked_at_utc": "2026-10-13T15:28:45Z",
+   "checked_at_utc": "2026-10-13T16:35:03Z",
    "checked_nodes": 459,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
@@ -347,29 +392,9 @@
  },
  "host": "source-lane",
  "host_redacted": true,
- "host_sha256": "c71c5fbd19cd3f3eadca429df0cdeb0fb927f258c8cefdf25fd9848a6254f798",
+ "host_sha256": "65b48285eb36c133373e509753af894d94fe6d2c95f4740c009043a23274e9f0",
  "impact_set": {
   "deterministic_core": [
-   {
-    "boundary": "intra_unit",
-    "depth": 1,
-    "entity": "code_unit:.github/workflows/ci.yml",
-    "node_type": "code_unit",
-    "path": [
-     {
-      "edge_type": "calls",
-      "from": "code_unit:.github/workflows/ci.yml",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
-      "via": "literal-local-workflow"
-     }
-    ],
-    "revisions": [
-     "base",
-     "head"
-    ],
-    "verifier_hint": "type-check of the caller; canary when inferred across a boundary"
-   },
    {
     "boundary": "intra_unit",
     "depth": 2,
@@ -3040,17 +3065,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "document:SECURITY.md",
     "node_type": "document",
     "path": [
-     {
-      "edge_type": "calls",
-      "from": "code_unit:.github/workflows/ci.yml",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
-      "via": "literal-local-workflow"
-     },
      {
       "edge_type": "documents",
       "from": "document:SECURITY.md",
@@ -3298,17 +3316,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "document:docs/graph-admission.md",
     "node_type": "document",
     "path": [
-     {
-      "edge_type": "calls",
-      "from": "code_unit:.github/workflows/ci.yml",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
-      "via": "literal-local-workflow"
-     },
      {
       "edge_type": "documents",
       "from": "document:docs/graph-admission.md",
@@ -3413,17 +3424,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/A2-330-muneral-canary.json",
     "node_type": "receipt",
     "path": [
-     {
-      "edge_type": "calls",
-      "from": "code_unit:.github/workflows/ci.yml",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
-      "via": "literal-local-workflow"
-     },
      {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/A2-330-muneral-canary.json",
@@ -3502,7 +3506,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
       "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
+      "to": "code_unit:.github/workflows/ci.yml",
       "via": "explicit-path"
      }
     ],
@@ -3595,17 +3599,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/A2-384-deploy-gate-lane.json",
     "node_type": "receipt",
     "path": [
-     {
-      "edge_type": "calls",
-      "from": "code_unit:.github/workflows/ci.yml",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
-      "via": "literal-local-workflow"
-     },
      {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/A2-384-deploy-gate-lane.json",
@@ -3677,7 +3674,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/a2-304-dependabot-group.json",
       "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
+      "to": "code_unit:.github/workflows/ci.yml",
       "via": "explicit-path"
      }
     ],
@@ -3689,17 +3686,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json",
     "node_type": "receipt",
     "path": [
-     {
-      "edge_type": "calls",
-      "from": "code_unit:.github/workflows/ci.yml",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
-      "via": "literal-local-workflow"
-     },
      {
       "edge_type": "documents",
       "from": "document:docs/graph-admission.md",
@@ -3731,7 +3721,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/a2-320-web-eslint10.json",
       "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
+      "to": "code_unit:.github/workflows/ci.yml",
       "via": "explicit-path"
      }
     ],
@@ -3763,17 +3753,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/bundle-refresh-8681292.json",
     "node_type": "receipt",
     "path": [
-     {
-      "edge_type": "calls",
-      "from": "code_unit:.github/workflows/ci.yml",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
-      "via": "literal-local-workflow"
-     },
      {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/bundle-refresh-8681292.json",
@@ -3790,17 +3773,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json",
     "node_type": "receipt",
     "path": [
-     {
-      "edge_type": "calls",
-      "from": "code_unit:.github/workflows/ci.yml",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
-      "via": "literal-local-workflow"
-     },
      {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json",
@@ -3817,17 +3793,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json",
     "node_type": "receipt",
     "path": [
-     {
-      "edge_type": "calls",
-      "from": "code_unit:.github/workflows/ci.yml",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
-      "via": "literal-local-workflow"
-     },
      {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json",
@@ -3892,7 +3861,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
+      "to": "code_unit:.github/workflows/ci.yml",
       "via": "explicit-path"
      }
     ],
@@ -3912,7 +3881,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/prisma/schema.prisma",
+      "to": "code_unit:.github/workflows/ci.yml",
       "via": "explicit-path"
      }
     ],
@@ -3944,17 +3913,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "receipt:receipts/graph/change-admission-a2275-20260924T172252Z.json",
     "node_type": "receipt",
     "path": [
-     {
-      "edge_type": "calls",
-      "from": "code_unit:.github/workflows/ci.yml",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
-      "via": "literal-local-workflow"
-     },
      {
       "edge_type": "documents",
       "from": "document:docs/graph-admission.md",
@@ -4006,7 +3968,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
+      "to": "code_unit:.github/workflows/ci.yml",
       "via": "explicit-path"
      }
     ],
@@ -4038,17 +4000,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-bundle-46cbdc0-a2-291c.json",
     "node_type": "receipt",
     "path": [
-     {
-      "edge_type": "calls",
-      "from": "code_unit:.github/workflows/ci.yml",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
-      "via": "literal-local-workflow"
-     },
      {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-bundle-46cbdc0-a2-291c.json",
@@ -4065,17 +4020,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-bundle-515c-20261003.json",
     "node_type": "receipt",
     "path": [
-     {
-      "edge_type": "calls",
-      "from": "code_unit:.github/workflows/ci.yml",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
-      "via": "literal-local-workflow"
-     },
      {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-bundle-515c-20261003.json",
@@ -4092,17 +4040,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-bundle-5fde907.json",
     "node_type": "receipt",
     "path": [
-     {
-      "edge_type": "calls",
-      "from": "code_unit:.github/workflows/ci.yml",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
-      "via": "literal-local-workflow"
-     },
      {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-bundle-5fde907.json",
@@ -4119,17 +4060,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-bundle-966bcf3.json",
     "node_type": "receipt",
     "path": [
-     {
-      "edge_type": "calls",
-      "from": "code_unit:.github/workflows/ci.yml",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
-      "via": "literal-local-workflow"
-     },
      {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-bundle-966bcf3.json",
@@ -4146,17 +4080,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-bundle-a81a6d5.json",
     "node_type": "receipt",
     "path": [
-     {
-      "edge_type": "calls",
-      "from": "code_unit:.github/workflows/ci.yml",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
-      "via": "literal-local-workflow"
-     },
      {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-bundle-a81a6d5.json",
@@ -4173,17 +4100,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-ci-pr-concurrency-454a9f0.json",
     "node_type": "receipt",
     "path": [
-     {
-      "edge_type": "calls",
-      "from": "code_unit:.github/workflows/ci.yml",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
-      "via": "literal-local-workflow"
-     },
      {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-ci-pr-concurrency-454a9f0.json",
@@ -4208,7 +4128,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
+      "to": "code_unit:.github/workflows/ci.yml",
       "via": "explicit-path"
      }
     ],
@@ -4220,17 +4140,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "receipt:receipts/graph/change-admission-gateorder0-proof-20260914T172339Z.json",
     "node_type": "receipt",
     "path": [
-     {
-      "edge_type": "calls",
-      "from": "code_unit:.github/workflows/ci.yml",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
-      "via": "literal-local-workflow"
-     },
      {
       "edge_type": "documents",
       "from": "document:docs/graph-admission.md",
@@ -4254,17 +4167,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-infra0417-muneral-20260916T100801Z.json",
     "node_type": "receipt",
     "path": [
-     {
-      "edge_type": "calls",
-      "from": "code_unit:.github/workflows/ci.yml",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
-      "via": "literal-local-workflow"
-     },
      {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-infra0417-muneral-20260916T100801Z.json",
@@ -4289,7 +4195,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-integration-batch1.json",
       "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
+      "to": "code_unit:.github/workflows/ci.yml",
       "via": "explicit-path"
      }
     ],
@@ -4421,17 +4327,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json",
     "node_type": "receipt",
     "path": [
-     {
-      "edge_type": "calls",
-      "from": "code_unit:.github/workflows/ci.yml",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
-      "via": "literal-local-workflow"
-     },
      {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json",
@@ -4448,17 +4347,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-mun0053-revert-override-20260914T150343Z.json",
     "node_type": "receipt",
     "path": [
-     {
-      "edge_type": "calls",
-      "from": "code_unit:.github/workflows/ci.yml",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
-      "via": "literal-local-workflow"
-     },
      {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-mun0053-revert-override-20260914T150343Z.json",
@@ -4543,7 +4435,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
+      "to": "code_unit:.github/workflows/ci.yml",
       "via": "explicit-path"
      }
     ],
@@ -4563,7 +4455,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
+      "to": "code_unit:.github/workflows/ci.yml",
       "via": "explicit-path"
      }
     ],
@@ -4583,7 +4475,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
+      "to": "code_unit:.github/workflows/ci.yml",
       "via": "explicit-path"
      }
     ],
@@ -4603,7 +4495,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
+      "to": "code_unit:.github/workflows/ci.yml",
       "via": "explicit-path"
      }
     ],
@@ -4623,7 +4515,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
+      "to": "code_unit:.github/workflows/ci.yml",
       "via": "explicit-path"
      }
     ],
@@ -4635,17 +4527,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/ctl-bundle-refresh-20260925.json",
     "node_type": "receipt",
     "path": [
-     {
-      "edge_type": "calls",
-      "from": "code_unit:.github/workflows/ci.yml",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
-      "via": "literal-local-workflow"
-     },
      {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/ctl-bundle-refresh-20260925.json",
@@ -4682,17 +4567,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/pin-repair-muneral-20261007.json",
     "node_type": "receipt",
     "path": [
-     {
-      "edge_type": "calls",
-      "from": "code_unit:.github/workflows/ci.yml",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
-      "via": "literal-local-workflow"
-     },
      {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/pin-repair-muneral-20261007.json",
@@ -4709,17 +4587,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/pin-repair-muneral213r2-20261007.json",
     "node_type": "receipt",
     "path": [
-     {
-      "edge_type": "calls",
-      "from": "code_unit:.github/workflows/ci.yml",
-      "provenance": "deterministic",
-      "to": "code_unit:.github/workflows/graph-admission.yml",
-      "via": "literal-local-workflow"
-     },
      {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/pin-repair-muneral213r2-20261007.json",
@@ -7184,7 +7055,7 @@
   ],
   "max_depth": 3,
   "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
-  "total": 269
+  "total": 268
  },
  "notes": [
   "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
@@ -7195,7 +7066,7 @@
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261013T152821Z-55d5cbff",
+ "receipt_id": "car-verify-20261013T163443Z-10b50833",
  "receipt_path": "receipts/graph/mun-artifacts/content-change-admission.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -7851,7 +7722,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-13T15:28:44Z",
+  "checked_at_utc": "2026-10-13T16:35:03Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -8465,7 +8336,7 @@
   {
    "content_hash": {
     "base": null,
-    "head": "sha256:967168b575ed23c9dbf3b8f7259ca16e5088f171fb1c352c544cc9310d888e48"
+    "head": "sha256:0d0694fdc717ff2d8365c9007f2431622da3076a8b358bec590e4cd1c680352e"
    },
    "entity": "receipt:receipts/graph/mun-artifacts/content-change-admission.json",
    "node_type": "receipt",
@@ -8523,7 +8394,7 @@
   }
  ],
  "tree": {
-  "commit": "55d5cbfffb9e108f38862c8c370e2aa663606679",
+  "commit": "10b50833343436b8a8bd7e81c3dfb6718e4389b8",
   "dirty": false
  },
  "verdicts": [
@@ -11095,8 +10966,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/aup/mun-artifacts-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-artifacts-root1255-20261013/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-own-clean-final-verifier-outputs/type-check-pgii865a/check.tsbuildinfo --listFiles",
-   "duration_s": 3.98,
+   "command": "/home/dev/aup/mun-artifacts-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-artifacts-root1255-20261013/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-heapfix-own-verifier-outputs/type-check-x8n8if6h/check.tsbuildinfo --listFiles",
+   "duration_s": 2.83,
    "entities": [
     "code_unit:apps/api/src/activity/activity.module.ts",
     "code_unit:apps/api/src/activity/activity.service.ts",
@@ -11408,13 +11279,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "/tmp/root1255-own-clean-final-verifier-outputs/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-10-13T15:28:49Z",
+   "output_ref": "/tmp/root1255-heapfix-own-verifier-outputs/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-10-13T16:35:06Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1475 files listed"
   },
   {
-   "command": "/home/dev/aup/mun-artifacts-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-artifacts-root1255-20261013/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-own-clean-final-verifier-outputs/type-check-ky849i9y/check.tsbuildinfo --listFiles",
-   "duration_s": 5.43,
+   "command": "/home/dev/aup/mun-artifacts-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-artifacts-root1255-20261013/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-heapfix-own-verifier-outputs/type-check-s_y14shk/check.tsbuildinfo --listFiles",
+   "duration_s": 5.05,
    "entities": [
     "code_unit:apps/api/test/activity.service.spec.ts",
     "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts",
@@ -11518,13 +11389,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
-   "output_ref": "/tmp/root1255-own-clean-final-verifier-outputs/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-10-13T15:28:53Z",
+   "output_ref": "/tmp/root1255-heapfix-own-verifier-outputs/v-type-check-apps-api-tsconfig-test.txt",
+   "started_at_utc": "2026-10-13T16:35:09Z",
    "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1638 files listed"
   },
   {
-   "command": "/home/dev/aup/mun-artifacts-root1255-20261013/apps/web/node_modules/.bin/tsc -p /home/dev/aup/mun-artifacts-root1255-20261013/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-own-clean-final-verifier-outputs/type-check-jsktv1h4/check.tsbuildinfo --listFiles",
-   "duration_s": 4.46,
+   "command": "/home/dev/aup/mun-artifacts-root1255-20261013/apps/web/node_modules/.bin/tsc -p /home/dev/aup/mun-artifacts-root1255-20261013/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-heapfix-own-verifier-outputs/type-check-rtf2qykk/check.tsbuildinfo --listFiles",
+   "duration_s": 3.82,
    "entities": [
     "code_unit:apps/web/__tests__/web-consumer-live.test.ts",
     "code_unit:apps/web/lib/api/task-detail-read.ts",
@@ -11544,13 +11415,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/tmp/root1255-own-clean-final-verifier-outputs/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-10-13T15:28:59Z",
-   "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1313 files listed"
+   "output_ref": "/tmp/root1255-heapfix-own-verifier-outputs/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-10-13T16:35:15Z",
+   "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1317 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=840e3be21684, head=55d5cbfffb9e, graph=head graph)",
-   "duration_s": 4.2,
+   "command": "tools/graph/contract_diff.py.run_diff(base=840e3be21684, head=10b508333434, graph=head graph)",
+   "duration_s": 3.71,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.service.ts",
@@ -11788,13 +11659,13 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "/tmp/root1255-own-clean-final-verifier-outputs/v-contract-diff.json",
-   "started_at_utc": "2026-10-13T15:29:03Z",
+   "output_ref": "/tmp/root1255-heapfix-own-verifier-outputs/v-contract-diff.json",
+   "started_at_utc": "2026-10-13T16:35:19Z",
    "summary": "58→60 contracts, breaking 0, edges {'verified': 170}"
   },
   {
    "command": "verify.py route_config_consistency RC-01 prefix / RC-02 registration / RC-03 served",
-   "duration_s": 0.06,
+   "duration_s": 0.05,
    "entities": [
     "route:DELETE /agents/keys/:keyId",
     "route:DELETE /agents/tasks/:taskId/assign/:agentId",
@@ -11964,13 +11835,13 @@
    "exit_code": 0,
    "id": "v-route-config",
    "kind": "config_schema",
-   "output_ref": "/tmp/root1255-own-clean-final-verifier-outputs/v-route-config.txt",
-   "started_at_utc": "2026-10-13T15:29:07Z",
+   "output_ref": "/tmp/root1255-heapfix-own-verifier-outputs/v-route-config.txt",
+   "started_at_utc": "2026-10-13T16:35:22Z",
    "summary": "81 route(s), 0 failed"
   },
   {
    "command": "verify.py prisma-lite diff base→head + /home/dev/aup/mun-artifacts-root1255-20261013/node_modules/.bin/prisma validate",
-   "duration_s": 1.03,
+   "duration_s": 0.91,
    "entities": [
     "data_model:ActivityLog",
     "data_model:Agent",
@@ -12060,8 +11931,8 @@
    "exit_code": 0,
    "id": "v-schema-diff",
    "kind": "schema_diff",
-   "output_ref": "/tmp/root1255-own-clean-final-verifier-outputs/v-schema-diff.json",
-   "started_at_utc": "2026-10-13T15:29:08Z",
+   "output_ref": "/tmp/root1255-heapfix-own-verifier-outputs/v-schema-diff.json",
+   "started_at_utc": "2026-10-13T16:35:22Z",
    "summary": "1 schema(s), 3 change(s), 0 failed, validate exit 0"
   },
   {
@@ -12076,8 +11947,8 @@
    "exit_code": 1,
    "id": "v-workflow-config-b803fcb7f17ed923",
    "kind": "config_schema",
-   "output_ref": "/tmp/root1255-own-clean-final-verifier-outputs/v-workflow-config-b803fcb7f17ed923.txt",
-   "started_at_utc": "2026-10-13T15:29:09Z",
+   "output_ref": "/tmp/root1255-heapfix-own-verifier-outputs/v-workflow-config-b803fcb7f17ed923.txt",
+   "started_at_utc": "2026-10-13T16:35:23Z",
    "summary": "workflow configuration not measured: reusable workflow input expression value/type unresolved"
   },
   {
@@ -12092,13 +11963,13 @@
    "exit_code": 1,
    "id": "v-workflow-config-dc49cc771602c92b",
    "kind": "config_schema",
-   "output_ref": "/tmp/root1255-own-clean-final-verifier-outputs/v-workflow-config-dc49cc771602c92b.txt",
-   "started_at_utc": "2026-10-13T15:29:09Z",
+   "output_ref": "/tmp/root1255-heapfix-own-verifier-outputs/v-workflow-config-dc49cc771602c92b.txt",
+   "started_at_utc": "2026-10-13T16:35:23Z",
    "summary": "workflow shell caller closure not measured: job graph-admission step 10: local action/checkout path scope unresolved; job graph-admission step 3: line 19: dynamic load/substitution; job graph-admission step 8: line 11: multiline/opaque shell statement; job graph-admission step 8: line 12: wrapper options/child command unresolved; job graph-admission step 8: line 3: multiline/opaque shell statement; job graph-admission step 8: line 4: wrapper options/child command unresolved; job graph-admission step 9: line 14: multiline/opaque shell statement; job graph-admission step 9: line 15: multiline/opaque shell statement; job graph-admission step 9: line 16: multiline/opaque shell statement; job graph-admission step 9: line 17: multiline/opaque shell statement; job graph-admission step 9: line 18: multiline/opaque shell statement; job graph-admission step 9: line 19: multiline/opaque shell statement; job graph-admission step 9: line 20: multiline/opaque shell statement; job graph-admission step 9: line 21: multiline/opaque shell statement; job graph-admission step 9: line 22: multiline/opaque shell statement; job graph-admission step 9: line 23: multiline/opaque shell statement; job graph-admission step 9: line 24: multiline/opaque shell statement; job graph-admission step 9: line 25: multiline/opaque shell statement; job graph-admission step 9: line 26: dynamic command/alias/eval"
   },
   {
    "command": "verify.py config_schema: keys read at head ⊆ declared keys",
-   "duration_s": 0.41,
+   "duration_s": 0.32,
    "entities": [
     "code_unit:apps/web/__tests__/web-consumer-live.test.ts"
    ],
@@ -12108,13 +11979,13 @@
    "exit_code": 0,
    "id": "v-config-schema",
    "kind": "config_schema",
-   "output_ref": "/tmp/root1255-own-clean-final-verifier-outputs/v-config-schema.json",
-   "started_at_utc": "2026-10-13T15:29:09Z",
+   "output_ref": "/tmp/root1255-heapfix-own-verifier-outputs/v-config-schema.json",
+   "started_at_utc": "2026-10-13T16:35:23Z",
    "summary": "3 source(s), 0 new / 3 frozen undeclared reads, 0 failed; 4 vendored file(s) not attributed to this repository (Arcanada-one/arcanada-universal-program)"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.12,
+   "duration_s": 0.11,
    "entities": [
     "code_unit:.github/workflows/ci.yml",
     "code_unit:.github/workflows/graph-admission.yml",
@@ -12376,8 +12247,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/tmp/root1255-own-clean-final-verifier-outputs/v-fitness.json",
-   "started_at_utc": "2026-10-13T15:29:09Z",
+   "output_ref": "/tmp/root1255-heapfix-own-verifier-outputs/v-fitness.json",
+   "started_at_utc": "2026-10-13T16:35:24Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -12416,13 +12287,13 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/tmp/root1255-own-clean-final-verifier-outputs/v-doc-reference.txt",
-   "started_at_utc": "2026-10-13T15:29:09Z",
+   "output_ref": "/tmp/root1255-heapfix-own-verifier-outputs/v-doc-reference.txt",
+   "started_at_utc": "2026-10-13T16:35:24Z",
    "summary": "13 document(s), 0 failed"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.35,
+   "duration_s": 0.34,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/auth/auth.controller.ts",
@@ -12618,13 +12489,13 @@
    "exit_code": 0,
    "id": "v-canary-1",
    "kind": "canary",
-   "output_ref": "receipts/canary/mun-artifacts-content-20261013/source-27abfc7/root1255-revision-api.result.json",
-   "started_at_utc": "2026-10-13T15:29:09Z",
-   "summary": "receipts/canary/mun-artifacts-content-20261013/source-27abfc7/root1255-revision-api.result.json: 94 verified / 0 failed / 0 not_measured"
+   "output_ref": "receipts/canary/mun-artifacts-content-20261013/source-96a4212/root1255-heapfix-api.result.json",
+   "started_at_utc": "2026-10-13T16:35:24Z",
+   "summary": "receipts/canary/mun-artifacts-content-20261013/source-96a4212/root1255-heapfix-api.result.json: 94 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.35,
+   "duration_s": 0.34,
    "entities": [
     "code_unit:apps/web/lib/api/task-detail-read.ts",
     "code_unit:apps/web/lib/api/tasks.ts",
@@ -12640,19 +12511,19 @@
    "exit_code": 0,
    "id": "v-canary-2",
    "kind": "canary",
-   "output_ref": "receipts/canary/mun-artifacts-content-20261013/source-27abfc7/root1255-web-consumer.result.json",
-   "started_at_utc": "2026-10-13T15:29:09Z",
-   "summary": "receipts/canary/mun-artifacts-content-20261013/source-27abfc7/root1255-web-consumer.result.json: 4 verified / 0 failed / 0 not_measured"
+   "output_ref": "receipts/canary/mun-artifacts-content-20261013/source-96a4212/root1255-heapfix-web.result.json",
+   "started_at_utc": "2026-10-13T16:35:24Z",
+   "summary": "receipts/canary/mun-artifacts-content-20261013/source-96a4212/root1255-heapfix-web.result.json: 4 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.35,
+   "duration_s": 0.34,
    "entities": [],
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/tmp/root1255-own-clean-final-verifier-outputs/v-canary.json",
-   "started_at_utc": "2026-10-13T15:29:09Z",
+   "output_ref": "/tmp/root1255-heapfix-own-verifier-outputs/v-canary.json",
+   "started_at_utc": "2026-10-13T16:35:24Z",
    "summary": "2 canary result(s), 2 committed at head; 98 verified / 0 failed / 0 not_measured of 98 entities"
   }
  ],
@@ -13952,9 +13823,9 @@
    ]
   },
   "seconds": {
-   "prepare": 1.76,
-   "total": 48.95,
-   "verifiers": 20.75
+   "prepare": 1.53,
+   "total": 41.79,
+   "verifiers": 17.83
   }
  },
  "work_item": "1f99b768-65e6-4afe-93e6-611db53e3366"
