@@ -24,6 +24,7 @@ import { QueryTasksDto } from './dto/query-tasks.dto.js';
 import { QueryWorkspaceDigestDto } from './dto/query-workspace-digest.dto.js';
 import { AddDependencyDto } from './dto/add-dependency.dto.js';
 import { CreateChecklistItemDto } from './dto/create-checklist-item.dto.js';
+import { UpdateChecklistItemDto } from './dto/update-checklist-item.dto.js';
 import { AddCommentDto } from './dto/add-comment.dto.js';
 import { JwtOrApiKeyGuard } from '../auth/guards/jwt-or-api-key.guard.js';
 import { AgentTaskScopeGuard } from '../auth/guards/agent-task-scope.guard.js';
@@ -55,7 +56,7 @@ type AuthRequest = Request & { actor: Actor; agentScope?: AgentScopeContext };
  * accepts either credential, and `AgentTaskScopeGuard` then refuses an API key
  * on every route that is not explicitly marked `@AgentScope(...)`, and on every
  * marked route whose task the key's agent is not assigned to. Routes with no
- * marker — delete, checklists — stay exactly as JWT-only as they
+ * marker — delete — stay exactly as JWT-only as they
  * were; the only visible difference is that a valid key is now told 403
  * instead of 401.
  *
@@ -386,34 +387,41 @@ export class TasksController {
   // --- Checklist ---
 
   @Get(':taskId/checklist')
+  @AgentScope('task-checklist')
   getChecklist(@Param('taskId') taskId: string, @Req() req: AuthRequest) {
-    return this.tasksService.getChecklist(taskId, req.actor.type === 'human' ? req.actor.id : undefined);
+    return this.tasksService.getChecklist(taskId, req.actor);
   }
 
   @Post(':taskId/checklist')
+  @AgentScope('task-checklist')
   addChecklistItem(
     @Param('taskId') taskId: string,
     @Body() dto: CreateChecklistItemDto,
+    @Req() req: AuthRequest,
   ) {
-    return this.tasksService.addChecklistItem(taskId, dto);
+    return this.tasksService.addChecklistItem(taskId, dto, req.actor);
   }
 
   @Patch(':taskId/checklist/:itemId')
+  @AgentScope('task-checklist')
   toggleChecklistItem(
     @Param('taskId') taskId: string,
     @Param('itemId') itemId: string,
-    @Body() body: { checked: boolean },
+    @Body() body: UpdateChecklistItemDto,
+    @Req() req: AuthRequest,
   ) {
-    return this.tasksService.toggleChecklistItem(taskId, itemId, body.checked);
+    return this.tasksService.toggleChecklistItem(taskId, itemId, body.checked, req.actor);
   }
 
   @Delete(':taskId/checklist/:itemId')
+  @AgentScope('task-checklist')
   @HttpCode(HttpStatus.NO_CONTENT)
   deleteChecklistItem(
     @Param('taskId') taskId: string,
     @Param('itemId') itemId: string,
+    @Req() req: AuthRequest,
   ) {
-    return this.tasksService.deleteChecklistItem(taskId, itemId);
+    return this.tasksService.deleteChecklistItem(taskId, itemId, req.actor);
   }
 
   // --- Dependencies ---
