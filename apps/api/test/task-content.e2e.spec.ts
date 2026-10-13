@@ -43,8 +43,7 @@ describe('Task content artifacts (MUN-ARTIFACTS, e2e)', () => {
       .overrideProvider(KanbanService)
       .useValue({ notify: () => void 0 })
       .compile();
-    app = moduleRef.createNestApplication<NestExpressApplication>({ bodyParser: false });
-    app.useBodyParser('json', { limit: '384kb' });
+    app = moduleRef.createNestApplication<NestExpressApplication>();
     app.useGlobalPipes(
       new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
     );
@@ -157,13 +156,13 @@ describe('Task content artifacts (MUN-ARTIFACTS, e2e)', () => {
     await upload(task.id, executorKey, { ...payload(), sha256: '0'.repeat(64) }).expect(400);
     await upload(task.id, executorKey, { ...payload(), contentBase64: '!invalid' }).expect(400);
     await upload(task.id, executorKey, { ...payload(), actorId: creatorAgentId }).expect(400);
-    await upload(task.id, executorKey, payload(Buffer.alloc(262145))).expect(413);
+    await upload(task.id, executorKey, payload(Buffer.alloc(65537))).expect(413);
     expect(await prisma.taskArtifactRevision.count({ where: { taskId: task.id } })).toBe(0);
   });
 
   it('accepts boundary size and empty bytes', async () => {
     const task = await assignedTask();
-    await upload(task.id, executorKey, payload(Buffer.alloc(262144), 'boundary.bin')).expect(201);
+    await upload(task.id, executorKey, payload(Buffer.alloc(65536), 'boundary.bin')).expect(201);
     await upload(task.id, executorKey, payload(Buffer.alloc(0), 'empty.bin')).expect(201);
   });
 

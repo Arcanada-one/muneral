@@ -16,8 +16,8 @@ claim is reused without rewriting its URI or its original attribution.
 }
 ```
 
-Limits are 256 KiB per decoded artifact, 16 MiB and 1000 stored revisions per
-task, and 384 KiB per HTTP JSON body. A changed body under the same name appends
+Limits are 64 KiB per decoded artifact, 16 MiB and 1000 stored revisions per
+task, and the existing 100 KiB per HTTP JSON body. A changed body under the same name appends
 a revision; retrying the same name/digest returns the same immutable revision.
 A digest already registered with another content type is a conflict. The task
 row lock serializes revision allocation and quota checks. The database refuses

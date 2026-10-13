@@ -7,7 +7,7 @@ import { ActivityService } from '../../activity/activity.service.js';
 import { UploadArtifactDto } from './task-content.dto.js';
 import { humanTaskWhere } from '../../auth/human-task-visibility.js';
 
-export const MAX_CONTENT_BYTES = 262144;
+export const MAX_CONTENT_BYTES = 65536;
 const MAX_TASK_BYTES = 16 * 1024 * 1024;
 const MAX_TASK_REVISIONS = 1000;
 export const digest = (bytes: Uint8Array) => createHash('sha256').update(bytes).digest('hex');
@@ -15,7 +15,7 @@ export const digest = (bytes: Uint8Array) => createHash('sha256').update(bytes).
 export function decodeArtifact(dto: UploadArtifactDto): Buffer {
   const bytes = Buffer.from(dto.contentBase64, 'base64');
   if (bytes.toString('base64') !== dto.contentBase64) throw new BadRequestException('Canonical base64 required');
-  if (bytes.length > MAX_CONTENT_BYTES) throw new PayloadTooLargeException('Artifact exceeds 256 KiB');
+  if (bytes.length > MAX_CONTENT_BYTES) throw new PayloadTooLargeException('Artifact exceeds 64 KiB');
   if (dto.sha256 !== undefined && dto.sha256 !== digest(bytes)) throw new BadRequestException('ARTIFACT_DIGEST_MISMATCH');
   return bytes;
 }
@@ -49,7 +49,7 @@ export class TaskContentService {
   }
 
   private async store(taskId: string, actor: Actor, kind: string, name: string, contentType: string, bytes: Buffer) {
-    if (bytes.length > MAX_CONTENT_BYTES) throw new PayloadTooLargeException('Content exceeds 256 KiB');
+    if (bytes.length > MAX_CONTENT_BYTES) throw new PayloadTooLargeException('Content exceeds 64 KiB');
     if (actor.type !== 'agent') throw new ForbiddenException('Artifact uploads require an assigned agent key');
     const sha256 = digest(bytes);
     return this.prisma.$transaction(async tx => {

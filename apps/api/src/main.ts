@@ -1,5 +1,4 @@
 import 'reflect-metadata';
-import type { NestExpressApplication } from '@nestjs/platform-express';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module.js';
@@ -7,10 +6,7 @@ import { bindsEveryInterface, resolveBindHost } from './bind-host.js';
 import helmet from 'helmet';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bodyParser: false });
-  // 256 KiB content encoded as base64 plus bounded metadata.
-  app.useBodyParser('json', { limit: '384kb' });
-  app.useBodyParser('urlencoded', { extended: true, limit: '100kb' });
+  const app = await NestFactory.create(AppModule);
 
   // Express 5 (shipped with NestJS 11) changed the default query parser to
   // 'simple'; set it back to 'extended' (qs) to preserve NestJS 10 behaviour.

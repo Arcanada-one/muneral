@@ -18,26 +18,26 @@ export class TaskContentController {
   constructor(private readonly content: TaskContentService) {}
 
   @Post(':taskId/artifacts')
-  @AgentScope('task-content')
+  @AgentScope('task-evidence')
   upload(@Param('taskId', ParseUUIDPipe) taskId: string, @Req() req: AuthRequest, @Body() dto: UploadArtifactDto) {
     return this.content.uploadArtifact(taskId, req.actor, dto);
   }
 
   @Get(':taskId/artifacts')
-  @AgentScope('task-content')
+  @AgentScope('task-evidence')
   list(@Param('taskId', ParseUUIDPipe) taskId: string, @Req() req: AuthRequest,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number) {
     return this.content.list(taskId, req.actor, 'artifact', page);
   }
 
   @Get(':taskId/artifacts/by-sha/:sha256')
-  @AgentScope('task-content')
+  @AgentScope('task-evidence')
   bySha(@Param('taskId', ParseUUIDPipe) taskId: string, @Param('sha256') sha256: string, @Req() req: AuthRequest) {
     return this.content.get(taskId, req.actor, 'artifact', sha256, true);
   }
 
   @Get(':taskId/artifacts/:artifactId')
-  @AgentScope('task-content')
+  @AgentScope('task-evidence')
   get(@Param('taskId', ParseUUIDPipe) taskId: string, @Param('artifactId', ParseUUIDPipe) artifactId: string, @Req() req: AuthRequest) {
     return this.content.get(taskId, req.actor, 'artifact', artifactId);
   }

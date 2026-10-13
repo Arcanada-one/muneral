@@ -134,7 +134,6 @@ export type AgentScopeKind =
   | 'task-workspace'
   | 'project-write'
   | 'task-redaction'
-  | 'task-content'
   | 'task-evidence'
   | 'task-status'
   | 'task-assign'
