@@ -1,0 +1,12 @@
+{
+  "schema": "MeasuredGitSource/v1",
+  "commit": "27abfc7952cba7d53d1cf4b2113fdec1963947ee",
+  "tree": "4e4ab29e9adecf1b353dfe7685bf43fd36f28212",
+  "dirty": false,
+  "captured_at_utc": "2026-10-13T14:50:59.757124+00:00",
+  "producer": {
+    "tool": "native git rev-parse/status source capture",
+    "version": "1"
+  },
+  "repository_path": "/home/dev/aup/mun-artifacts-root1255-20261013"
+}
