@@ -1,0 +1,12 @@
+{
+  "schema": "MeasuredGitSource/v1",
+  "commit": "65f066c0a6b8d8785754f668b2caf40204194fab",
+  "tree": "9b308fb7ddef6c66c9ea923a82e3b4911f6d2864",
+  "dirty": false,
+  "captured_at_utc": "2026-10-13T13:22:17.823321+00:00",
+  "producer": {
+    "tool": "scripts/canary/canary_probe.py",
+    "version": "1.0.0"
+  },
+  "repository_path": "/home/dev/aup/mun-artifacts-root1255-20261013"
+}
