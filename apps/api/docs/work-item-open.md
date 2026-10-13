@@ -24,8 +24,10 @@ digest are checked before returning any response; a mismatch refuses the whole
 read. Evidence `availability` distinguishes `server_content` from
 `legacy_pointer`; a legacy URI is never fetched and is not proof of stored bytes.
 
-Dependencies are returned only after independently checking this credential's
-access to both endpoints. Any inaccessible endpoint refuses the whole read rather
-than silently dropping an edge. Activity and assigned-agent workspace custody are
+Dependencies retain same-workspace endpoints even when another executor owns
+the counterpart. Following MUN-0055, an agent receives its ID/status/project ID,
+without a title unless the existing creator-or-assignee predicate permits text.
+Both edge directions remain present. Human membership is rechecked in the same
+snapshot. Any cross-workspace endpoint refuses the whole read. Activity and assigned-agent workspace custody are
 also checked. Concurrent uploads cannot mix later bytes with earlier chronology:
 all data comes from the original database snapshot. No read audit is invented.

@@ -195,15 +195,34 @@ describe('Whole work-item open (MUN-ARTIFACTS, e2e)', () => {
     await open(task.id,jwt).expect(403);await prisma.user.delete({where:{id:user.id}});
   });
 
-  it('refuses a dependency unless both endpoints are readable, including cross-workspace forgery', async () => {
-    const task=await assignedTask();const target=await assignedTask();
+  it('retains both directions and status for unassigned same-workspace dependencies without disclosing titles', async () => {
+    const task=await assignedTask();const originalTarget=await assignedTask();
+    const target=await prisma.task.update({where:{id:originalTarget.id},data:{title:'Other executor private title'}});
     await prisma.taskDependency.create({data:{fromTaskId:task.id,toTaskId:target.id,type:'blocks'}});
     const row=(await open(task.id).expect(200)).body;expect(row.dependencyGraph.nodes).toHaveLength(2);expect(row.dependencyGraph.edges).toHaveLength(1);
-    await prisma.taskAgent.deleteMany({where:{taskId:target.id}});await open(task.id).expect(403);
+    await prisma.taskAgent.deleteMany({where:{taskId:target.id}});
+    const withheld=(await open(task.id).expect(200)).body;
+    expect(withheld.dependencyGraph.nodes.find((node:{id:string})=>node.id===target.id)).toEqual({id:target.id,status:target.status,projectId:target.projectId});
+    expect(withheld.dependencyGraph.edges).toHaveLength(1);
+    expect(JSON.stringify(withheld.dependencyGraph)).not.toContain(target.title);
+    const native=await http().get(`/tasks/${task.id}/dependency-graph`).set('Authorization',`Bearer ${executorKey}`).expect(200);
+    expect(native.body[0]).toMatchObject({otherTaskId:target.id,otherTaskTitle:null,otherTaskTitleWithheld:true,otherTaskStatus:target.status});
+    await prisma.taskDependency.deleteMany({where:{fromTaskId:task.id}});
+    await prisma.taskDependency.create({data:{fromTaskId:target.id,toTaskId:task.id,type:'blocks'}});
+    const incoming=(await open(task.id).expect(200)).body;
+    expect(incoming.dependencyGraph.edges[0]).toMatchObject({fromTaskId:target.id,toTaskId:task.id,type:'blocks'});
+    expect(incoming.dependencyGraph.nodes.find((node:{id:string})=>node.id===target.id)).not.toHaveProperty('title');
+    await prisma.task.update({where:{id:target.id},data:{createdById:executorAgentId,actorType:'human'}});
+    expect((await open(task.id).expect(200)).body.dependencyGraph.nodes.find((node:{id:string})=>node.id===target.id)).not.toHaveProperty('title');
+    await prisma.task.update({where:{id:target.id},data:{actorType:'agent'}});
+    expect((await open(task.id).expect(200)).body.dependencyGraph.nodes.find((node:{id:string})=>node.id===target.id).title).toBe(target.title);
+  });
+
+  it('refuses cross-workspace dependency endpoints even if a forged assignment exists', async () => {
+    const task=await assignedTask();
     const foreignProject=await prisma.project.create({data:{workspaceId:otherWorkspaceId,slug:'foreign-open-'+uuidv4(),name:'Foreign'}});
     const foreignTask=await prisma.task.create({data:{projectId:foreignProject.id,title:'Foreign secret task'}});
     await prisma.taskAgent.create({data:{taskId:foreignTask.id,agentId:executorAgentId,role:'executor'}});
-    await prisma.taskDependency.deleteMany({where:{fromTaskId:task.id}});
     await prisma.taskDependency.create({data:{fromTaskId:foreignTask.id,toTaskId:task.id,type:'related_to'}});
     await open(task.id).expect(403);
   });
