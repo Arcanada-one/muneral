@@ -18,6 +18,12 @@ type AuthRequest = Request & { actor: Actor };
 export class TaskContentController {
   constructor(private readonly content: TaskContentService) {}
 
+  @Get(':taskId/open')
+  @AgentScope('task-evidence')
+  open(@Param('taskId', ParseUUIDPipe) taskId: string, @Req() req: AuthRequest) {
+    return this.content.open(taskId, req.actor);
+  }
+
   @Post(':taskId/graphs/:kind')
   @AgentScope('task-evidence')
   storeGraph(@Param('taskId', ParseUUIDPipe) taskId: string, @Param('kind') kind: string,

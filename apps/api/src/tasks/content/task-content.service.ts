@@ -56,6 +56,59 @@ export class TaskContentService {
     return this.store(taskId, actor, 'artifact', dto.name, dto.contentType, decodeArtifact(dto));
   }
 
+  /** TZ638: the whole work item and owned bytes, from one database snapshot. */
+  open(taskId: string, actor: Actor) {
+    return this.prisma.$transaction(async tx => {
+      const custody = await this.authorize(tx, taskId, actor);
+      const [task, chronology, checklist, agents, attempts, evidence, content, dependencies] = await Promise.all([
+        tx.task.findUniqueOrThrow({ where: { id: taskId } }),
+        tx.activityLog.findMany({ where: { taskId }, orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] }),
+        tx.taskChecklist.findMany({ where: { taskId }, orderBy: [{ position: 'asc' }, { id: 'asc' }] }),
+        tx.taskAgent.findMany({ where: { taskId }, orderBy: { agentId: 'asc' }, select: {
+          agentId: true, role: true, assignedAt: true,
+          agent: { select: { id: true, name: true, workspaceId: true } },
+        } }),
+        tx.taskExecutionAttempt.findMany({ where: { taskId }, orderBy: { ordinal: 'asc' } }),
+        tx.taskEvidenceAttachment.findMany({ where: { taskId }, orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] }),
+        tx.taskArtifactRevision.findMany({ where: { taskId }, orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] }),
+        tx.taskDependency.findMany({ where: { OR: [{ fromTaskId: taskId }, { toTaskId: taskId }] }, orderBy: { id: 'asc' } }),
+      ]);
+      if (chronology.some(row => row.workspaceId !== custody.project.workspaceId) ||
+          agents.some(row => row.agent.workspaceId !== custody.project.workspaceId)) {
+        throw new ConflictException('WORK_ITEM_CUSTODY_MISMATCH');
+      }
+      // A dependency is disclosed only if this credential can read BOTH ends.
+      const endpointIds = [...new Set([taskId, ...dependencies.flatMap(row => [row.fromTaskId, row.toTaskId])])];
+      const endpoints = [];
+      for (const id of endpointIds) {
+        await this.authorize(tx, id, actor);
+        endpoints.push(await tx.task.findUniqueOrThrow({ where: { id }, select: { id: true, title: true, status: true, projectId: true } }));
+      }
+      for (const row of content) {
+        if (row.sizeBytes !== row.content.length || digest(row.content) !== row.sha256) {
+          throw new ConflictException('STORED_CONTENT_DIGEST_MISMATCH');
+        }
+      }
+      const graphs = Object.fromEntries((['task_graph', 'agent_graph'] as const).map(kind => {
+        const revisions = content.filter(row => row.kind === kind).sort((a, b) => a.revision - b.revision)
+          .map(row => ({ ...present(row, true), document: JSON.parse(Buffer.from(row.content).toString('utf8')) as unknown }));
+        return [kind, { state: revisions.length ? 'present' : 'absent', latestRevision: revisions.at(-1)?.revision ?? null, revisions }];
+      }));
+      const artifacts = content.filter(row => row.kind === 'artifact').map(row => present(row, true));
+      const evidenceWithAvailability = evidence.map(row => ({ ...row,
+        availability: content.some(revision => revision.evidenceId === row.id) ? 'server_content' : 'legacy_pointer',
+      }));
+      return { schema: 'WorkItemOpen/v1', task, chronology, checklist, agents, attempts,
+        artifacts, graphs, evidence: evidenceWithAvailability,
+        dependencyGraph: { source: 'native_TaskDependency', nodes: endpoints, edges: dependencies },
+        completeness: { complete: true, snapshot: 'repeatable_read', contentIntegrity: 'verified',
+          counts: { chronology: chronology.length, checklist: checklist.length, agents: agents.length,
+            attempts: attempts.length, evidence: evidence.length, artifacts: artifacts.length,
+            contentRevisions: content.length, dependencies: dependencies.length } },
+      };
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead, timeout: 10000 });
+  }
+
   uploadBytes(taskId: string, actor: Actor, dto: ArtifactMetadataDto, bytes: Buffer | undefined) {
     if (!Buffer.isBuffer(bytes)) throw new BadRequestException('One content file is required');
     if (dto.sha256 !== undefined && dto.sha256 !== digest(bytes)) throw new BadRequestException('ARTIFACT_DIGEST_MISMATCH');
