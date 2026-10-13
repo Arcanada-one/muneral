@@ -1,0 +1,12 @@
+{
+  "schema": "MeasuredGitSource/v1",
+  "commit": "0b902afeb9157e75476b31e0904e30d27f4b65fe",
+  "tree": "bc7b990bb41f434e0d4de9bdb4fe1610bf2bcab5",
+  "dirty": false,
+  "captured_at_utc": "2026-10-13T19:23:45.697488Z",
+  "producer": {
+    "tool": "own-process-canary",
+    "version": "1"
+  },
+  "repository_path": "/home/dev/aup/mun-project-index-root1255-20261013"
+}
