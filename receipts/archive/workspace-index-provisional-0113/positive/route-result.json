@@ -1,0 +1,996 @@
+{
+ "base_url": "http://127.0.0.1:35561",
+ "captured_at_utc": "2026-10-07T12:15:55Z",
+ "card": "AUP-GRAPH-008",
+ "contract_ref": "contracts/graph-verified-change/observed-edges-and-deploy-gate.v1.json",
+ "counters": {
+  "failed": 0,
+  "not_measured": 0,
+  "verified": 50
+ },
+ "entity_verdicts": [
+  {
+   "entity": "route:DELETE /agents/keys/:keyId",
+   "probe_ids": [
+    "route-0"
+   ],
+   "reason": "route-0: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:DELETE /agents/tasks/:taskId/assign/:agentId",
+   "probe_ids": [
+    "route-1"
+   ],
+   "reason": "route-1: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:DELETE /projects/:projectId",
+   "probe_ids": [
+    "route-2"
+   ],
+   "reason": "route-2: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:DELETE /projects/git-refs/:refId",
+   "probe_ids": [
+    "route-3"
+   ],
+   "reason": "route-3: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:DELETE /tasks/:taskId",
+   "probe_ids": [
+    "route-4"
+   ],
+   "reason": "route-4: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:DELETE /tasks/:taskId/checklist/:itemId",
+   "probe_ids": [
+    "route-5"
+   ],
+   "reason": "route-5: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:DELETE /tasks/:taskId/dependencies/:depId",
+   "probe_ids": [
+    "route-6"
+   ],
+   "reason": "route-6: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:DELETE /workspaces/:workspaceId/members/:userId",
+   "probe_ids": [
+    "route-7"
+   ],
+   "reason": "route-7: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /agents/tasks",
+   "probe_ids": [
+    "route-8"
+   ],
+   "reason": "route-8: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /agents/workspace/:workspaceId",
+   "probe_ids": [
+    "route-9"
+   ],
+   "reason": "route-9: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /projects/:projectId",
+   "probe_ids": [
+    "route-10"
+   ],
+   "reason": "route-10: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /projects/tasks/:taskId/git-refs",
+   "probe_ids": [
+    "route-11"
+   ],
+   "reason": "route-11: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /projects/workspace/:workspaceId",
+   "probe_ids": [
+    "route-12"
+   ],
+   "reason": "route-12: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /sync/datarim/:projectId",
+   "probe_ids": [
+    "route-13"
+   ],
+   "reason": "route-13: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks",
+   "probe_ids": [
+    "route-14"
+   ],
+   "reason": "route-14: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId",
+   "probe_ids": [
+    "route-15"
+   ],
+   "reason": "route-15: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/activity",
+   "probe_ids": [
+    "route-16"
+   ],
+   "reason": "route-16: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/checklist",
+   "probe_ids": [
+    "route-17"
+   ],
+   "reason": "route-17: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/dependencies",
+   "probe_ids": [
+    "route-18"
+   ],
+   "reason": "route-18: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/dependency-graph",
+   "probe_ids": [
+    "route-19"
+   ],
+   "reason": "route-19: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/evidence",
+   "probe_ids": [
+    "route-20"
+   ],
+   "reason": "route-20: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/field-changes",
+   "probe_ids": [
+    "route-21"
+   ],
+   "reason": "route-21: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/readiness",
+   "probe_ids": [
+    "route-22"
+   ],
+   "reason": "route-22: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/digest",
+   "probe_ids": [
+    "route-23"
+   ],
+   "reason": "route-23: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/project/:projectId",
+   "probe_ids": [
+    "route-24"
+   ],
+   "reason": "route-24: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/project/:projectId/index",
+   "probe_ids": [
+    "route-25"
+   ],
+   "reason": "route-25: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /tasks/project/:projectId/staleness",
+   "probe_ids": [
+    "route-26"
+   ],
+   "reason": "route-26: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /workspaces",
+   "probe_ids": [
+    "route-27"
+   ],
+   "reason": "route-27: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /workspaces/:workspaceId",
+   "probe_ids": [
+    "route-28"
+   ],
+   "reason": "route-28: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:GET /workspaces/:workspaceId/members",
+   "probe_ids": [
+    "route-29"
+   ],
+   "reason": "route-29: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:PATCH /tasks/:taskId/checklist/:itemId",
+   "probe_ids": [
+    "route-30"
+   ],
+   "reason": "route-30: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:PATCH /tasks/:taskId/status",
+   "probe_ids": [
+    "route-31"
+   ],
+   "reason": "route-31: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:PATCH /workspaces/:workspaceId/members/:userId/role",
+   "probe_ids": [
+    "route-32"
+   ],
+   "reason": "route-32: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /agents",
+   "probe_ids": [
+    "route-33"
+   ],
+   "reason": "route-33: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /agents/:agentId/keys",
+   "probe_ids": [
+    "route-34"
+   ],
+   "reason": "route-34: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /agents/keys/:keyId/rotate",
+   "probe_ids": [
+    "route-35"
+   ],
+   "reason": "route-35: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /agents/keys/self/revoke",
+   "probe_ids": [
+    "route-36"
+   ],
+   "reason": "route-36: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /agents/tasks/:taskId/assign",
+   "probe_ids": [
+    "route-37"
+   ],
+   "reason": "route-37: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /projects",
+   "probe_ids": [
+    "route-38"
+   ],
+   "reason": "route-38: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /projects/git-refs",
+   "probe_ids": [
+    "route-39"
+   ],
+   "reason": "route-39: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /sync/datarim/:projectId/import",
+   "probe_ids": [
+    "route-40"
+   ],
+   "reason": "route-40: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /tasks",
+   "probe_ids": [
+    "route-41"
+   ],
+   "reason": "route-41: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /tasks/:taskId/checklist",
+   "probe_ids": [
+    "route-42"
+   ],
+   "reason": "route-42: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /tasks/:taskId/comments",
+   "probe_ids": [
+    "route-43"
+   ],
+   "reason": "route-43: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /tasks/:taskId/dependencies",
+   "probe_ids": [
+    "route-44"
+   ],
+   "reason": "route-44: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /tasks/:taskId/evidence",
+   "probe_ids": [
+    "route-45"
+   ],
+   "reason": "route-45: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /tasks/:taskId/field-ack",
+   "probe_ids": [
+    "route-46"
+   ],
+   "reason": "route-46: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /tasks/:taskId/redactions",
+   "probe_ids": [
+    "route-47"
+   ],
+   "reason": "route-47: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /workspaces",
+   "probe_ids": [
+    "route-48"
+   ],
+   "reason": "route-48: ",
+   "verdict": "verified"
+  },
+  {
+   "entity": "route:POST /workspaces/:workspaceId/members/:userId",
+   "probe_ids": [
+    "route-49"
+   ],
+   "reason": "route-49: ",
+   "verdict": "verified"
+  }
+ ],
+ "environment": "Task-local compiled Nest modules and synthetic disposable PostgreSQL",
+ "model": "claude-opus-5",
+ "mutating_owner": "Arcanada-one/muneral PR #219",
+ "phase": "pre",
+ "plan": {
+  "digest": "sha256:69d8a6d245449ce18c52e51ab57f2630ded727c121167aeddf02562194621b52",
+  "id": "workspace-index-real-route-dispatch",
+  "path": "route-plan.json"
+ },
+ "probes": [
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 49,
+   "id": "route-0",
+   "method": "DELETE",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/agents/keys/dfcff517-2171-4bd7-8aa9-8301f702c7ef"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 6,
+   "id": "route-1",
+   "method": "DELETE",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/agents/tasks/fc32b17c-957e-4cd2-9d12-0ddd8122c54e/assign/fc32b17c-957e-4cd2-9d12-0ddd8122c54e"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 4,
+   "id": "route-2",
+   "method": "DELETE",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/projects/ec686b21-74e8-4ac7-a65b-5d8d595dc8a3"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 2,
+   "id": "route-3",
+   "method": "DELETE",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/projects/git-refs/cae2daa4-b2b1-4ecf-8a87-7745b7c3b6aa"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 1,
+   "id": "route-4",
+   "method": "DELETE",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/tasks/1888d72d-86e8-409b-ac47-e22c80074495"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 3,
+   "id": "route-5",
+   "method": "DELETE",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/tasks/f76152a9-1a82-474e-9278-7912ea3809e2/checklist/f76152a9-1a82-474e-9278-7912ea3809e2"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 4,
+   "id": "route-6",
+   "method": "DELETE",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/tasks/ca1b4054-309b-4606-9c56-5a44d856faa8/dependencies/ca1b4054-309b-4606-9c56-5a44d856faa8"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 2,
+   "id": "route-7",
+   "method": "DELETE",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/workspaces/971dc941-2e31-440d-b853-4a6d76715bb6/members/971dc941-2e31-440d-b853-4a6d76715bb6"
+  },
+  {
+   "body_bytes": 70,
+   "body_sha256": "sha256:fee3d135d639945a7035a39d5a989494ef2425ff4ba8ee5050026530c057d075",
+   "elapsed_ms": 2,
+   "id": "route-8",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/agents/tasks"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 1,
+   "id": "route-9",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/agents/workspace/c5f994af-8804-49b0-8c85-8ef2e8247833"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 1,
+   "id": "route-10",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/projects/71bfbb03-451a-40ad-855c-c0777783e239"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 1,
+   "id": "route-11",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/projects/tasks/44c8d779-2d3d-4fec-8acf-e5b8dddc81f6/git-refs"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 2,
+   "id": "route-12",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/projects/workspace/81ee7853-732f-47e0-9f25-058b519eef1f"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 1,
+   "id": "route-13",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/sync/datarim/c9f9a0e4-64ae-43b8-96f2-92f582fc6960"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 1,
+   "id": "route-14",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/tasks"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 3,
+   "id": "route-15",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/tasks/4cbd3263-925b-45c4-a389-4a1060063aa6"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 5,
+   "id": "route-16",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/tasks/facb7779-0dfa-4214-9c53-49afc1c6216b/activity"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 1,
+   "id": "route-17",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/tasks/f6785423-b6ce-450e-80b4-94a13f41b0a8/checklist"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 1,
+   "id": "route-18",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/tasks/ac827f93-a9ba-4fd7-81ca-992d73006eed/dependencies"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 3,
+   "id": "route-19",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/tasks/96a73dae-b5f5-4f16-bd07-95809ecc187f/dependency-graph"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 1,
+   "id": "route-20",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/tasks/14901643-6880-478f-9628-3358779d8c31/evidence"
+  },
+  {
+   "body_bytes": 70,
+   "body_sha256": "sha256:fee3d135d639945a7035a39d5a989494ef2425ff4ba8ee5050026530c057d075",
+   "elapsed_ms": 0,
+   "id": "route-21",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/tasks/742c1893-02aa-403d-ad53-9a012d76b8f9/field-changes"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 1,
+   "id": "route-22",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/tasks/6a040423-5af2-4d09-978d-79445c0e8688/readiness"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 1,
+   "id": "route-23",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/tasks/digest"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 1,
+   "id": "route-24",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/tasks/project/f868f5c2-21d2-4b5a-b7f3-7b92f1e6e47e"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 6,
+   "id": "route-25",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/tasks/project/3f922406-b6af-40d8-a66d-ef6def174f25/index"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 1,
+   "id": "route-26",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/tasks/project/0ce9da4c-3c06-43ee-bf1c-e22fd118054b/staleness"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 2,
+   "id": "route-27",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/workspaces"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 1,
+   "id": "route-28",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/workspaces/ac5d5606-f064-43f8-bbeb-0d0390fb047a"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 2,
+   "id": "route-29",
+   "method": "GET",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/workspaces/79c2882a-a74c-4700-95be-656e7bda9d21/members"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 5,
+   "id": "route-30",
+   "method": "PATCH",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/tasks/a7247993-2d31-4d33-9eae-116dc5b14e8c/checklist/a7247993-2d31-4d33-9eae-116dc5b14e8c"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 2,
+   "id": "route-31",
+   "method": "PATCH",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/tasks/3b05a33f-f2c5-4a6e-85d4-7a430ac2467c/status"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 1,
+   "id": "route-32",
+   "method": "PATCH",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/workspaces/9c39c81e-1b8a-4365-9337-999e587c7bc0/members/9c39c81e-1b8a-4365-9337-999e587c7bc0/role"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 3,
+   "id": "route-33",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/agents"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 4,
+   "id": "route-34",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/agents/39d0e877-c72b-4464-b313-126783209228/keys"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 4,
+   "id": "route-35",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/agents/keys/92c94c68-aee3-431f-9345-7a1451bbc912/rotate"
+  },
+  {
+   "body_bytes": 70,
+   "body_sha256": "sha256:fee3d135d639945a7035a39d5a989494ef2425ff4ba8ee5050026530c057d075",
+   "elapsed_ms": 1,
+   "id": "route-36",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/agents/keys/self/revoke"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 1,
+   "id": "route-37",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/agents/tasks/2ae66503-d1c3-422a-82b1-08d328a3eb5c/assign"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 1,
+   "id": "route-38",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/projects"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 0,
+   "id": "route-39",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/projects/git-refs"
+  },
+  {
+   "body_bytes": 70,
+   "body_sha256": "sha256:fee3d135d639945a7035a39d5a989494ef2425ff4ba8ee5050026530c057d075",
+   "elapsed_ms": 1,
+   "id": "route-40",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/sync/datarim/02c94cef-8c88-4c47-8864-28acb049303a/import"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 1,
+   "id": "route-41",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/tasks"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 1,
+   "id": "route-42",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/tasks/21b9053b-eb5b-4bf0-bb22-f15a03901db4/checklist"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 2,
+   "id": "route-43",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/tasks/0ddafa25-b755-43ca-a484-804d9b1183b4/comments"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 1,
+   "id": "route-44",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/tasks/75670ba8-9948-4c46-a201-0a348a8460e6/dependencies"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 1,
+   "id": "route-45",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/tasks/d509a47a-bb90-413a-8d5a-1dfa57aa6b7b/evidence"
+  },
+  {
+   "body_bytes": 70,
+   "body_sha256": "sha256:fee3d135d639945a7035a39d5a989494ef2425ff4ba8ee5050026530c057d075",
+   "elapsed_ms": 1,
+   "id": "route-46",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/tasks/f0a1518d-6e68-4aaa-8bd7-53809b1da812/field-ack"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 1,
+   "id": "route-47",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/tasks/72242903-687e-4374-b9fa-7b315d4a3429/redactions"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 2,
+   "id": "route-48",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/workspaces"
+  },
+  {
+   "body_bytes": 43,
+   "body_sha256": "sha256:e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "elapsed_ms": 2,
+   "id": "route-49",
+   "method": "POST",
+   "outcome": "verified",
+   "reason": "",
+   "status": 401,
+   "url": "http://127.0.0.1:35561/workspaces/6aa62280-0f8f-44fc-8e40-bc56fb38b9a9/members/6aa62280-0f8f-44fc-8e40-bc56fb38b9a9"
+  }
+ ],
+ "producer": {
+  "tool": "tools/graph/deploy_gate.py",
+  "version": "1.0.0"
+ },
+ "provisional_until_fable_review": true,
+ "read_only": false,
+ "resident_version": null,
+ "rules": [
+  "C3 a probe that could not run is not_measured, never verified",
+  "C4 probes are read-only unless the plan declares mutating with an owner"
+ ],
+ "schema": "CanaryResult/v1",
+ "subject": {
+  "commit": "89a3af0c36c21eccfbda5cac5ce5384e7d752eb8",
+  "evidence": {
+   "path": "source-evidence.json",
+   "sha256": "f3770b668790a453e8f0f9a235f15775595b98ad898f538a2e24d4fcbcdb38c9",
+   "source_field": "commit"
+  },
+  "schema": "GitCanarySubject/v1",
+  "tree": "48584e34089a44df37f28161803b1076810fa87a"
+ }
+}

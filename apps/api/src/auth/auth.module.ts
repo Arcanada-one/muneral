@@ -1,3 +1,4 @@
+import { WORKSPACE_INDEX_GRANTS, WORKSPACE_INDEX_GRANT_LIST } from './workspace-index-grants.js';
 import { Module, Provider, Logger } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
@@ -46,6 +47,7 @@ if (process.env.GITHUB_CLIENT_ID) {
     AgentTaskScopeGuard,
     // MUN-0052: the task-index grant list, as a provider so the guard reads it
     // through DI (a test module overrides it) — see project-read-grants.ts.
+    { provide: WORKSPACE_INDEX_GRANTS, useValue: WORKSPACE_INDEX_GRANT_LIST },
     { provide: PROJECT_READ_GRANTS, useValue: PROJECT_READ_GRANT_LIST },
     { provide: WORKSPACE_DIGEST_GRANTS, useValue: WORKSPACE_DIGEST_GRANT_LIST },
   ],
@@ -69,6 +71,7 @@ if (process.env.GITHUB_CLIENT_ID) {
     JwtOrApiKeyGuard,
     AgentTaskScopeGuard,
     PROJECT_READ_GRANTS,
+    WORKSPACE_INDEX_GRANTS,
     WORKSPACE_DIGEST_GRANTS,
   ],
 })

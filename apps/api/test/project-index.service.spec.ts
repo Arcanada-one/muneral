@@ -24,7 +24,9 @@ const GRANT = {
 
 function makeService() {
   const prisma = {
-    project: { findUnique: jest.fn().mockResolvedValue({ workspaceId: 'ws-1' }) },
+    project: { findFirst: jest.fn().mockResolvedValue({ id: 'proj-1', workspaceId: 'ws-1', slug: 'unit' }) },
+    agent: { findUnique: jest.fn().mockResolvedValue({ workspaceId: 'ws-1' }) },
+    $queryRaw: jest.fn().mockResolvedValue([]),
     task: {
       findMany: jest.fn().mockResolvedValue([
         { id: 't-1', parentId: null, status: 'todo', priority: 'high', actorType: 'human', createdAt: new Date(0), updatedAt: new Date(0), title: 'plain' },
@@ -35,12 +37,14 @@ function makeService() {
       count: jest.fn().mockResolvedValue(1),
     },
   };
+  const db = { ...prisma, $transaction: async (fn: (tx: typeof prisma) => Promise<unknown>) => fn(prisma) };
   const service = new TasksService(
-    prisma as unknown as PrismaService,
+    db as unknown as PrismaService,
     {} as ActivityService,
     {} as KanbanService,
     {} as TaskFieldStateService,
     {} as TaskExecutionRecorderService,
+    [GRANT], [],
   );
   return { prisma, service };
 }
@@ -49,10 +53,10 @@ describe('TasksService.indexForProject (MUN-0052)', () => {
   it('queries exactly the project, every status, with an explicit select that has no free-text or provenance column', async () => {
     const { prisma, service } = makeService();
 
-    const res = await service.indexForProject('proj-1', 'agent-1', GRANT);
+    const res = await service.indexForProject('proj-1', 'agent-1', GRANT, 'ws-1');
 
     const args = prisma.task.findMany.mock.calls[0][0];
-    expect(args.where).toEqual({ projectId: 'proj-1' });
+    expect(args.where).toEqual({ projectId: 'proj-1', project: { workspaceId: 'ws-1', slug: { notIn: [] } } });
     expect(Object.keys(args.select).sort()).toEqual(
       ['actorType', 'createdAt', 'id', 'parentId', 'priority', 'status', 'title', 'updatedAt'],
     );
@@ -64,14 +68,14 @@ describe('TasksService.indexForProject (MUN-0052)', () => {
     const { prisma, service } = makeService();
     prisma.activityLog.create.mockRejectedValue(new Error('db down'));
 
-    await expect(service.indexForProject('proj-1', 'agent-1', GRANT)).rejects.toThrow('db down');
+    await expect(service.indexForProject('proj-1', 'agent-1', GRANT, 'ws-1')).rejects.toThrow('db down');
   });
 
   it('answers 404 for a project that disappeared between the guard and the read', async () => {
     const { prisma, service } = makeService();
-    prisma.project.findUnique.mockResolvedValue(null);
+    prisma.project.findFirst.mockResolvedValue(null);
 
-    await expect(service.indexForProject('proj-1', 'agent-1', GRANT)).rejects.toThrow(NotFoundException);
+    await expect(service.indexForProject('proj-1', 'agent-1', GRANT, 'ws-1')).rejects.toThrow(NotFoundException);
     expect(prisma.activityLog.create).not.toHaveBeenCalled();
   });
 });
