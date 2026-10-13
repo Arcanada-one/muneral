@@ -614,45 +614,86 @@ export class TasksService {
 
   // --- Checklist ---
 
-  async addChecklistItem(taskId: string, dto: CreateChecklistItemDto) {
-    await this.findOne(taskId); // verify task exists
-    return this.prisma.taskChecklist.create({
-      data: {
-        taskId,
-        text: dto.text,
-        position: dto.position ?? null,
-      },
+  async addChecklistItem(taskId: string, dto: CreateChecklistItemDto, actor: Actor) {
+    return this.prisma.$transaction(async (tx) => {
+      await this.authorizeChecklist(tx, taskId, actor, true);
+      const { task, ...item } = await tx.taskChecklist.create({
+        data: { taskId, text: dto.text, position: dto.position ?? null },
+        include: { task: { select: { project: { select: { workspaceId: true } } } } },
+      });
+      await this.activityService.log({
+        workspaceId: task.project.workspaceId, taskId, actor,
+        action: 'task:checklist_added',
+        payload: { itemId: item.id, text: item.text, checked: item.checked, position: item.position },
+      }, tx);
+      return item;
     });
   }
 
-  async toggleChecklistItem(taskId: string, itemId: string, checked: boolean) {
-    const item = await this.prisma.taskChecklist.findFirst({
-      where: { id: itemId, taskId },
-    });
-    if (!item) {
-      throw new NotFoundException('Checklist item not found');
-    }
-    return this.prisma.taskChecklist.update({
-      where: { id: itemId },
-      data: { checked },
+  async toggleChecklistItem(taskId: string, itemId: string, checked: boolean, actor: Actor) {
+    return this.prisma.$transaction(async (tx) => {
+      await this.authorizeChecklist(tx, taskId, actor, true);
+      const existing = await tx.taskChecklist.findFirst({ where: { id: itemId, taskId } });
+      if (!existing) throw new NotFoundException('Checklist item not found');
+      const { task, ...item } = await tx.taskChecklist.update({
+        where: { id: itemId, taskId }, data: { checked },
+        include: { task: { select: { project: { select: { workspaceId: true } } } } },
+      });
+      await this.activityService.log({
+        workspaceId: task.project.workspaceId, taskId, actor,
+        action: 'task:checklist_updated',
+        payload: { itemId: item.id, checked: item.checked },
+      }, tx);
+      return item;
     });
   }
 
-  async deleteChecklistItem(taskId: string, itemId: string): Promise<void> {
-    const item = await this.prisma.taskChecklist.findFirst({
-      where: { id: itemId, taskId },
+  async deleteChecklistItem(taskId: string, itemId: string, actor: Actor): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      await this.authorizeChecklist(tx, taskId, actor, true);
+      // Prisma's relation include prefetches before DELETE. RETURNING binds the
+      // audit to the row PostgreSQL actually removes after competing updates.
+      const [item] = await tx.$queryRaw<Array<{
+        id: string; text: string; checked: boolean; position: number | null;
+      }>>`DELETE FROM "task_checklists"
+          WHERE "id" = ${itemId}::uuid AND "task_id" = ${taskId}::uuid
+          RETURNING "id", "text", "checked", "position"`;
+      if (!item) throw new NotFoundException('Checklist item not found');
+      const task = await tx.task.findUniqueOrThrow({
+        where: { id: taskId }, select: { project: { select: { workspaceId: true } } },
+      });
+      await this.activityService.log({
+        workspaceId: task.project.workspaceId, taskId, actor,
+        action: 'task:checklist_removed',
+        payload: { itemId: item.id, text: item.text, checked: item.checked, position: item.position },
+      }, tx);
     });
-    if (!item) {
-      throw new NotFoundException('Checklist item not found');
-    }
-    await this.prisma.taskChecklist.delete({ where: { id: itemId } });
   }
 
-  async getChecklist(taskId: string, humanUserId?: string) {
-    return this.prisma.taskChecklist.findMany({
-      where: { taskId, ...(humanUserId ? { task: humanTaskWhere(humanUserId) } : {}) },
-      orderBy: { position: { sort: 'asc', nulls: 'last' } },
+  async getChecklist(taskId: string, actor: Actor) {
+    return this.prisma.$transaction(async (tx) => {
+      await this.authorizeChecklist(tx, taskId, actor);
+      return tx.taskChecklist.findMany({
+        where: { taskId }, orderBy: { position: { sort: 'asc', nulls: 'last' } },
+      });
+    }, { isolationLevel: 'RepeatableRead' });
+  }
+
+  /** Credential-derived scope is rechecked in the same transaction as audit.
+   * Task locking also keeps project custody stable until a write commits. */
+  private async authorizeChecklist(tx: Prisma.TransactionClient, taskId: string, actor: Actor, write = false) {
+    if (write) await tx.$queryRaw`SELECT id FROM tasks WHERE id = ${taskId}::uuid FOR UPDATE`;
+    const where: Prisma.TaskWhereInput = actor.type === 'human'
+      ? { id: taskId, ...humanTaskWhere(actor.id) }
+      : {
+          id: taskId, agents: { some: { agentId: actor.id } },
+          project: { workspace: { agents: { some: { id: actor.id } } } },
+        };
+    const task = await tx.task.findFirst({
+      where, select: { id: true, project: { select: { workspaceId: true } } },
     });
+    if (!task) throw new ForbiddenException('Checklist is outside credential scope');
+    return task;
   }
 
   // --- Dependencies ---

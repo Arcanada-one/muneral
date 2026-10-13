@@ -1,0 +1,96 @@
+{
+  "schema": "CanaryPlan/v2",
+  "id": "mun-artifacts-real-web-api-consumers",
+  "owner": "MUN-ARTIFACTS",
+  "environment": "isolated-loopback-http-consumer-seam",
+  "read_only": false,
+  "producer_repository": "/home/dev/aup/mun-checklist-root1255-20261013",
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "0bf9b9402ddab64b11ffffd70447607fd2cf1e54",
+    "tree": "4deb0712462ca5abaa3d5e93ca01f63be786e15a",
+    "evidence": {
+      "path": "root1255-checklist-consumer-source.json",
+      "sha256": "cba8f465f61bf896099c688664577c6720ac7cbbc1de2597e5bcfdb1cbc42a76",
+      "source_field": "commit"
+    }
+  },
+  "probes": [
+    {
+      "id": "real-http-four-web-consumers",
+      "kind": "process",
+      "argv": [
+        "/opt/ard-ci-adamalante/_work/_tool/node/24.21.0/x64/bin/node",
+        "/home/dev/aup/mun-checklist-root1255-20261013/apps/web/node_modules/vitest/vitest.mjs",
+        "run",
+        "__tests__/web-consumer-live.test.ts"
+      ],
+      "cwd": "apps/web",
+      "env_keys": [
+        "PATH",
+        "MUN_ARTIFACT_CANARY_FIXTURE"
+      ],
+      "timeout_seconds": 60,
+      "capture_limit_bytes": 1048576,
+      "mutating": true,
+      "entities": [
+        "code_unit:apps/web/lib/api/tasks.ts",
+        "code_unit:apps/web/lib/api/workspaces.ts",
+        "code_unit:apps/web/lib/api/task-detail-read.ts",
+        "code_unit:apps/web/lib/auth/nextauth.ts"
+      ],
+      "executable_sha256": "7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c",
+      "execution_files": [
+        {
+          "path": "/home/dev/aup/mun-checklist-root1255-20261013/apps/web/__tests__/web-consumer-live.test.ts",
+          "sha256": "370544a74814fcee935e8696083451e5e874f057fdd54126f17e413a6cd3839d"
+        },
+        {
+          "path": "/home/dev/aup/mun-checklist-root1255-20261013/apps/web/lib/api/client.ts",
+          "sha256": "768d9c7a9290a8d7f2209042f03a6cf63e41b18bc9dae4cd971abf9a6463e0d6"
+        },
+        {
+          "path": "/home/dev/aup/mun-checklist-root1255-20261013/apps/web/lib/api/tasks.ts",
+          "sha256": "fb6e1a1602605e67e3d3de5a047e39f2742618158e4e5cea2fa877c84f80fdb2"
+        },
+        {
+          "path": "/home/dev/aup/mun-checklist-root1255-20261013/apps/web/lib/api/workspaces.ts",
+          "sha256": "fb22bde2382fd62dfdf8076a734a8fe3f66531310256dda8ce36a77596876b27"
+        },
+        {
+          "path": "/home/dev/aup/mun-checklist-root1255-20261013/apps/web/lib/api/task-detail-read.ts",
+          "sha256": "915703e62d4c2cacdad1c9f35b3237528f267b061643cbeed52572f6e83a64d4"
+        },
+        {
+          "path": "/home/dev/aup/mun-checklist-root1255-20261013/apps/web/lib/auth/nextauth.ts",
+          "sha256": "d9f1df0a870a36c8ba7b91c3f7d46eb22ce9784e08aa138bd7d3cb1f6cda1460"
+        },
+        {
+          "path": "/home/dev/aup/mun-checklist-root1255-20261013/apps/web/vitest.config.ts",
+          "sha256": "a3688859e6fe27f3e8e670a50d3476b4f2854fe2a2c81895d979f58b36cba66f"
+        },
+        {
+          "path": "/home/dev/aup/mun-checklist-root1255-20261013/apps/web/vitest.setup.ts",
+          "sha256": "a46d66851af2c056e805fdd574bf5ec3adb1181c43c5e41f0a1c592e338afe64"
+        },
+        {
+          "path": "/home/dev/aup/mun-checklist-root1255-20261013/apps/web/.env.example",
+          "sha256": "e72f249d942f09593259042395ce4894cfcad90fb6ab4fefc91459276197cf88"
+        }
+      ],
+      "expect": {
+        "exit_codes": [
+          0
+        ],
+        "stdout_contains": [
+          "4 passed"
+        ]
+      }
+    }
+  ],
+  "limitations": [
+    "NextAuth framework/session glue is a test seam; actual consumer methods issue real HTTP to isolated candidate",
+    "Workspace/task/detail success and actual existing Telegram HTTP400 refusal are observed, not successful Telegram authentication",
+    "No production, Redis queue, provider call or live deployment acceptance"
+  ]
+}
