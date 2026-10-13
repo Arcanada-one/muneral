@@ -1,0 +1,459 @@
+{
+ "admission": {
+  "rule": "admitted requires every verdict = verified; failed without exemption ⇒ refused; not_measured without exemption ⇒ paused_safe; exemptions (owner + expiry) are attached by the admitting agent, never by the verifier (DEC-AUP-0008, matrix P1/P4)",
+  "structural_exclusion_rule": "DEC-AUP-0034: an affected entity is NOT verdict-owing when all three hold — the verifier matrix declares neither a mandatory nor a selectable verifier for its node type (so the only verdict it could ever carry states a property of the MATRIX, not of this change), the change set does not contain it, and its bytes are identical at base and head. Each one is listed in structural_exclusions with the content hash at both revisions that proves the byte-identity, and impact_pair.receipt_problems re-derives that proof from Git rather than believing the receipt.",
+  "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
+  "verdict": "refused"
+ },
+ "captured_at_utc": "2026-10-13T20:58:26Z",
+ "change_set": {
+  "base": "d67ce746084ed569cafcd85f7d1dcf975115e084",
+  "files": [
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/mun-fleet-content-20261013/source-969ebfd/root1255-fleet-helper-source.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/mun-fleet-content-20261013/source-969ebfd/root1255-fleet-helper.plan.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/mun-fleet-content-20261013/source-969ebfd/root1255-fleet-helper.result.json",
+    "status": "A"
+   },
+   {
+    "kind": "doc",
+    "node_id": "document:scripts/agents/README.md",
+    "node_ids": [
+     "document:scripts/agents/README.md"
+    ],
+    "path": "scripts/agents/README.md",
+    "status": "A"
+   },
+   {
+    "kind": "other",
+    "node_id": "code_unit:scripts/agents/attach.py",
+    "node_ids": [
+     "code_unit:scripts/agents/attach.py"
+    ],
+    "path": "scripts/agents/attach.py",
+    "status": "A"
+   },
+   {
+    "kind": "other",
+    "node_id": "code_unit:scripts/agents/test_attach.py",
+    "node_ids": [
+     "code_unit:scripts/agents/test_attach.py"
+    ],
+    "path": "scripts/agents/test_attach.py",
+    "status": "A"
+   }
+  ],
+  "head": "f89f2d3ae1134831036b659d9683ccdcb4fcd933",
+  "mode": "diff"
+ },
+ "decision_ref": "DEC-AUP-0008",
+ "empty_impact_explanation": {
+  "graph_metadata": {
+   "revisions": {
+    "base": {
+     "changed_node_known_to_graph": false,
+     "edge_types": "all",
+     "external_reverse_edges": 0,
+     "extractors": [
+      "imports",
+      "routes",
+      "contracts",
+      "prisma",
+      "config",
+      "reuse",
+      "di",
+      "queue",
+      "tests",
+      "http_client",
+      "deployables",
+      "docs",
+      "work_items",
+      "receipts",
+      "rust",
+      "python"
+     ],
+     "files": [
+      {
+       "kind": "receipt",
+       "new": true,
+       "path": "receipts/canary/mun-fleet-content-20261013/source-969ebfd/root1255-fleet-helper-source.json",
+       "status": "A"
+      },
+      {
+       "kind": "receipt",
+       "new": true,
+       "path": "receipts/canary/mun-fleet-content-20261013/source-969ebfd/root1255-fleet-helper.plan.json",
+       "status": "A"
+      },
+      {
+       "kind": "receipt",
+       "new": true,
+       "path": "receipts/canary/mun-fleet-content-20261013/source-969ebfd/root1255-fleet-helper.result.json",
+       "status": "A"
+      },
+      {
+       "kind": "doc",
+       "new": true,
+       "path": "scripts/agents/README.md",
+       "status": "A"
+      },
+      {
+       "kind": "other",
+       "new": true,
+       "path": "scripts/agents/attach.py",
+       "status": "A"
+      },
+      {
+       "kind": "other",
+       "new": true,
+       "path": "scripts/agents/test_attach.py",
+       "status": "A"
+      }
+     ],
+     "graph_digest": "sha256:e64a365f0889e8e7019d2933d8b8ec17386291ac23ab8a67b776d7078d61be2c",
+     "internal_reverse_edges": 0,
+     "language_coverage": [
+      "typescript",
+      "javascript",
+      "prisma",
+      "markdown",
+      "json-receipts",
+      "rust",
+      "python",
+      "bash",
+      "bats"
+     ],
+     "max_depth": 3,
+     "seeds": [],
+     "source_commit": "d67ce746084ed569cafcd85f7d1dcf975115e084"
+    },
+    "head": {
+     "changed_node_known_to_graph": true,
+     "edge_types": "all",
+     "external_reverse_edges": 0,
+     "extractors": [
+      "imports",
+      "routes",
+      "contracts",
+      "prisma",
+      "config",
+      "reuse",
+      "di",
+      "queue",
+      "tests",
+      "http_client",
+      "deployables",
+      "docs",
+      "work_items",
+      "receipts",
+      "rust",
+      "python"
+     ],
+     "files": [
+      {
+       "kind": "receipt",
+       "new": true,
+       "path": "receipts/canary/mun-fleet-content-20261013/source-969ebfd/root1255-fleet-helper-source.json",
+       "status": "A"
+      },
+      {
+       "kind": "receipt",
+       "new": true,
+       "path": "receipts/canary/mun-fleet-content-20261013/source-969ebfd/root1255-fleet-helper.plan.json",
+       "status": "A"
+      },
+      {
+       "kind": "receipt",
+       "new": true,
+       "path": "receipts/canary/mun-fleet-content-20261013/source-969ebfd/root1255-fleet-helper.result.json",
+       "status": "A"
+      },
+      {
+       "kind": "doc",
+       "node_id": "document:scripts/agents/README.md",
+       "node_ids": [
+        "document:scripts/agents/README.md"
+       ],
+       "path": "scripts/agents/README.md",
+       "status": "A"
+      },
+      {
+       "kind": "other",
+       "node_id": "code_unit:scripts/agents/attach.py",
+       "node_ids": [
+        "code_unit:scripts/agents/attach.py"
+       ],
+       "path": "scripts/agents/attach.py",
+       "status": "A"
+      },
+      {
+       "kind": "other",
+       "node_id": "code_unit:scripts/agents/test_attach.py",
+       "node_ids": [
+        "code_unit:scripts/agents/test_attach.py"
+       ],
+       "path": "scripts/agents/test_attach.py",
+       "status": "A"
+      }
+     ],
+     "graph_digest": "sha256:105e2584d376075dcfbd7d8185ce14ebcad30bcd76f791a6683ce707a137ece3",
+     "internal_reverse_edges": 1,
+     "language_coverage": [
+      "typescript",
+      "javascript",
+      "prisma",
+      "markdown",
+      "json-receipts",
+      "rust",
+      "python",
+      "bash",
+      "bats"
+     ],
+     "max_depth": 3,
+     "seeds": [
+      "code_unit:scripts/agents/attach.py",
+      "code_unit:scripts/agents/test_attach.py",
+      "document:scripts/agents/README.md"
+     ],
+     "source_commit": "f89f2d3ae1134831036b659d9683ccdcb4fcd933"
+    }
+   },
+   "scope": "graph_non_seed_dependents"
+  },
+  "reason": "GENERATED by impact.py — a draft the receipt author must confirm or replace: scripts/agents/attach.py: new file (status A): no consumer can exist in the graph before it is committed; scripts/agents/test_attach.py: new file (status A): no consumer can exist in the graph before it is committed"
+ },
+ "exemptions": [],
+ "graph": {
+  "builder_version": "1.0.5",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:e64a365f0889e8e7019d2933d8b8ec17386291ac23ab8a67b776d7078d61be2c",
+  "path": "/tmp/root1255-fleet-helper-own-verifiers/graph-d67ce746084e.json",
+  "source_commit": "d67ce746084ed569cafcd85f7d1dcf975115e084"
+ },
+ "head_graph": {
+  "builder_version": "1.0.5",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:105e2584d376075dcfbd7d8185ce14ebcad30bcd76f791a6683ce707a137ece3",
+  "path": "/tmp/root1255-fleet-helper-own-verifiers/graph-head-f89f2d3ae113.json",
+  "source_commit": "f89f2d3ae1134831036b659d9683ccdcb4fcd933",
+  "staleness": {
+   "checked_at_utc": "2026-10-13T20:58:51Z",
+   "checked_nodes": 473,
+   "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+   "mismatched_nodes": [],
+   "verdict": "fresh"
+  }
+ },
+ "host": "source-lane",
+ "host_redacted": true,
+ "host_sha256": "260d6b939ad7cd7212fd1ad416da66774099fef2ea5dd6dc7868a15f54ffdfd2",
+ "impact_set": {
+  "deterministic_core": [],
+  "edge_types": "all",
+  "global_fallback": {
+   "triggered": false
+  },
+  "inferred_tail": [],
+  "max_depth": 3,
+  "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
+  "total": 0
+ },
+ "notes": [
+  "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
+  "profile: (auto-detected); baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none"
+ ],
+ "producer": {
+  "tool": "tools/graph/verify.py",
+  "version": "1.4.1"
+ },
+ "receipt_id": "car-verify-20261013T205826Z-f89f2d3a",
+ "receipt_path": "receipts/graph/mun-artifacts/fleet-helper-change-admission.json",
+ "repo": {
+  "name": "Arcanada-one/muneral",
+  "path": "/home/dev/aup/mun-fleet-content-root1255-20261013"
+ },
+ "revision_selection": {
+  "base": [],
+  "head": [
+   "code_unit:scripts/agents/attach.py",
+   "code_unit:scripts/agents/test_attach.py",
+   "document:scripts/agents/README.md"
+  ],
+  "schema": "RevisionImpactSelection/v1",
+  "unmeasured_head_files": []
+ },
+ "schema": "ChangeAdmissionReceipt/v1",
+ "staleness": {
+  "checked_at_utc": "2026-10-13T20:58:50Z",
+  "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+  "mismatched_nodes": [],
+  "verdict": "fresh"
+ },
+ "structural_exclusions": [],
+ "tree": {
+  "commit": "f89f2d3ae1134831036b659d9683ccdcb4fcd933",
+  "dirty": false
+ },
+ "verdicts": [
+  {
+   "entity": "code_unit:scripts/agents/attach.py",
+   "reason": "v-config-schema: UNDECLARED_CONFIG_KEY MUNERAL_AGENT_KEY_FILE",
+   "verdict": "failed",
+   "verifier_ids": [
+    "v-canary-1",
+    "v-config-schema",
+    "v-fitness"
+   ]
+  },
+  {
+   "entity": "code_unit:scripts/agents/test_attach.py",
+   "reason": "v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness"
+   ]
+  },
+  {
+   "entity": "document:scripts/agents/README.md",
+   "reason": "v-doc-reference: 1 reference(s) resolve at head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-doc-reference"
+   ]
+  }
+ ],
+ "verifier_selection": {
+  "applied": {},
+  "not_applied": [],
+  "requested": [],
+  "schema": "VerifierSelection/v1"
+ },
+ "verifiers": [
+  {
+   "command": "verify.py config_schema: keys read at head ⊆ declared keys",
+   "duration_s": 0.36,
+   "entities": [
+    "code_unit:scripts/agents/attach.py"
+   ],
+   "entity_verdicts": {
+    "code_unit:scripts/agents/attach.py": "failed"
+   },
+   "exit_code": 1,
+   "id": "v-config-schema",
+   "kind": "config_schema",
+   "output_ref": "/tmp/root1255-fleet-helper-own-verifiers/v-config-schema.json",
+   "started_at_utc": "2026-10-13T20:58:54Z",
+   "summary": "3 source(s), 1 new / 3 frozen undeclared reads, 1 failed; 4 vendored file(s) not attributed to this repository (Arcanada-one/arcanada-universal-program)"
+  },
+  {
+   "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
+   "duration_s": 0.12,
+   "entities": [
+    "code_unit:scripts/agents/attach.py",
+    "code_unit:scripts/agents/test_attach.py"
+   ],
+   "entity_verdicts": {
+    "code_unit:scripts/agents/attach.py": "verified",
+    "code_unit:scripts/agents/test_attach.py": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-fitness",
+   "kind": "fitness_rules",
+   "output_ref": "/tmp/root1255-fleet-helper-own-verifiers/v-fitness.json",
+   "started_at_utc": "2026-10-13T20:58:55Z",
+   "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
+  },
+  {
+   "command": "verify.py doc_reference: path / route / model references of affected documents resolve at head",
+   "duration_s": 0.0,
+   "entities": [
+    "document:scripts/agents/README.md"
+   ],
+   "entity_verdicts": {
+    "document:scripts/agents/README.md": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-doc-reference",
+   "kind": "doc_reference",
+   "output_ref": "/tmp/root1255-fleet-helper-own-verifiers/v-doc-reference.txt",
+   "started_at_utc": "2026-10-13T20:58:55Z",
+   "summary": "1 document(s), 0 failed"
+  },
+  {
+   "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
+   "duration_s": 0.09,
+   "entities": [
+    "code_unit:scripts/agents/attach.py"
+   ],
+   "entity_verdicts": {
+    "code_unit:scripts/agents/attach.py": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-canary-1",
+   "kind": "canary",
+   "output_ref": "receipts/canary/mun-fleet-content-20261013/source-969ebfd/root1255-fleet-helper.result.json",
+   "started_at_utc": "2026-10-13T20:58:55Z",
+   "summary": "receipts/canary/mun-fleet-content-20261013/source-969ebfd/root1255-fleet-helper.result.json: 1 verified / 0 failed / 0 not_measured"
+  },
+  {
+   "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
+   "duration_s": 0.09,
+   "entities": [],
+   "exit_code": 0,
+   "id": "v-canary",
+   "kind": "canary",
+   "output_ref": "/tmp/root1255-fleet-helper-own-verifiers/v-canary.json",
+   "started_at_utc": "2026-10-13T20:58:55Z",
+   "summary": "1 canary result(s), 1 committed at head; 1 verified / 0 failed / 0 not_measured of 1 entities"
+  }
+ ],
+ "verify": {
+  "events": [
+   {
+    "code": {
+     "code": "EMPTY_IMPACT_REQUIRES_EXPLANATION",
+     "revision": "base",
+     "text": "non-documentation change with an empty impact set: a prediction that must be explained in the receipt (empty_impact_explanation), never an approval"
+    }
+   },
+   {
+    "code": {
+     "code": "EMPTY_IMPACT_REQUIRES_EXPLANATION",
+     "revision": "head",
+     "text": "non-documentation change with an empty impact set: a prediction that must be explained in the receipt (empty_impact_explanation), never an approval"
+    }
+   }
+  ],
+  "required_by_entity": {
+   "code_unit:scripts/agents/attach.py": [
+    "canary",
+    "config_schema",
+    "fitness_rules"
+   ],
+   "code_unit:scripts/agents/test_attach.py": [
+    "fitness_rules"
+   ],
+   "document:scripts/agents/README.md": [
+    "doc_reference"
+   ]
+  },
+  "seconds": {
+   "prepare": 1.81,
+   "total": 29.09,
+   "verifiers": 0.66
+  }
+ },
+ "work_item": "1f99b768-65e6-4afe-93e6-611db53e3366"
+}
