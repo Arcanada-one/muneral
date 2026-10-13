@@ -1,0 +1,147 @@
+{
+  "schema": "CanaryPlan/v2",
+  "id": "mun-typed-graphs-real-api",
+  "owner": "MUN-ARTIFACTS",
+  "environment": "owned-loopback-postgres-disposable-databases",
+  "read_only": false,
+  "producer_repository": "/home/dev/aup/mun-graphs-root1255-20261013",
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "479dc93401da2f8a3a1dd20249cbc1685dbcea72",
+    "tree": "748b659a963fe5fdde7b04ae3d36ff6a051a73bc",
+    "evidence": {
+      "path": "root1255-graphs-source-479dc93.json",
+      "sha256": "ecdaf3f196b037d018abd7a556e4d3cddb57a8a10cfe09545196a3f45efa567a",
+      "source_field": "commit"
+    }
+  },
+  "probes": [
+    {
+      "id": "typed-graph-http-pg-and-native-mutation-evidence",
+      "kind": "process",
+      "argv": [
+        "/opt/ard-ci-adamalante/_work/_tool/node/24.21.0/x64/bin/node",
+        "/home/dev/aup/mun-graphs-root1255-20261013/apps/api/node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "test/task-graphs.e2e.spec.ts",
+        "test/mutation-evidence.spec.ts"
+      ],
+      "cwd": "apps/api",
+      "env_keys": [
+        "PATH",
+        "DATABASE_URL",
+        "MUN0020_DB_URL",
+        "MUN0021_PG_BASE_URL",
+        "NODE_OPTIONS",
+        "HOME",
+        "TMPDIR"
+      ],
+      "timeout_seconds": 120,
+      "capture_limit_bytes": 1048576,
+      "mutating": true,
+      "entities": [
+        "code_unit:apps/api/src/tasks/content/task-content.controller.ts",
+        "code_unit:apps/api/src/tasks/content/task-content.dto.ts",
+        "code_unit:apps/api/src/tasks/content/task-content.service.ts",
+        "code_unit:apps/api/src/tasks/content/task-graph.schema.ts",
+        "code_unit:apps/api/src/tasks/content/task-graph.validation.ts"
+      ],
+      "executable_sha256": "7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c",
+      "execution_files": [
+        {
+          "path": "/home/dev/aup/mun-graphs-root1255-20261013/apps/api/src/auth/auth.module.ts",
+          "sha256": "c35615b88a7ea66f6847768745bcacdc5d48a54f95d7e6906c9b3080cbbb094e"
+        },
+        {
+          "path": "/home/dev/aup/mun-graphs-root1255-20261013/apps/api/src/auth/guards/agent-task-scope.guard.ts",
+          "sha256": "69c460ff0e71095474ae4b16803e090e5ab8812c91fd1e0dcf6d055dfce7fb5a"
+        },
+        {
+          "path": "/home/dev/aup/mun-graphs-root1255-20261013/apps/api/src/tasks/tasks.controller.ts",
+          "sha256": "ca3d93fb1be51ec8f78d28582613039a06779a57ade89be5b20a8478a06f69ac"
+        },
+        {
+          "path": "/home/dev/aup/mun-graphs-root1255-20261013/apps/api/src/tasks/tasks.service.ts",
+          "sha256": "d25366729147cce14d2dc562405be0be293f5845fd1d938adb2bcf229ed36707"
+        },
+        {
+          "path": "/home/dev/aup/mun-graphs-root1255-20261013/apps/api/src/auth/guards/human-task-read.guard.ts",
+          "sha256": "cb8de58d5c5480fb8621522d4799cb2938af2bae8ddc43ba84562ca6883b2dcc"
+        },
+        {
+          "path": "/home/dev/aup/mun-graphs-root1255-20261013/apps/api/src/auth/human-task-visibility.ts",
+          "sha256": "d455058fbf5f3ac68ab273ff30cffe1dc846e22395e9611b837e7b084d14cfd6"
+        },
+        {
+          "path": "/home/dev/aup/mun-graphs-root1255-20261013/apps/api/prisma/schema.prisma",
+          "sha256": "cae71f96eb25244f49ca86dbd95a84de83f55c0552812999af312b9099166552"
+        },
+        {
+          "path": "/home/dev/aup/mun-graphs-root1255-20261013/pnpm-lock.yaml",
+          "sha256": "009a3900acc211fcead10605cf4898b2222d8e42972550274d5c2cdf514b6483"
+        },
+        {
+          "path": "/home/dev/aup/mun-graphs-root1255-20261013/apps/api/package.json",
+          "sha256": "5b738ab0266d2eb2cc6038cf34f4cc49931ddff2dc41c767264bf55f6c172065"
+        },
+        {
+          "path": "/home/dev/aup/mun-graphs-root1255-20261013/apps/api/tsconfig.json",
+          "sha256": "e9d48a8d90da20846c7725067dd944d1f1f7c6d21faff18022360aa8759740bf"
+        },
+        {
+          "path": "/home/dev/aup/mun-graphs-root1255-20261013/apps/api/tsconfig.test.json",
+          "sha256": "b45b51f10e6897b5fa212f421842c1334c9e1f7942e446dcf278bb08b9c55d1d"
+        },
+        {
+          "path": "/home/dev/aup/mun-graphs-root1255-20261013/apps/api/test/task-graphs.e2e.spec.ts",
+          "sha256": "74ab5336044b2432b95aaed3137cf3a5e1c4b322d53da8551d308c05fedce1a8"
+        },
+        {
+          "path": "/home/dev/aup/mun-graphs-root1255-20261013/apps/api/test/mutation-evidence.spec.ts",
+          "sha256": "0621c127b42a4b5b32be9c16e2d49ccdd7e4c83fb77a5c5fb824244089f961aa"
+        },
+        {
+          "path": "/home/dev/aup/mun-graphs-root1255-20261013/apps/api/test/support/disposable-postgres.ts",
+          "sha256": "6644ee5e273b9bc866254288f8e4c426800da68875f485c932f28dc1e8576e3b"
+        },
+        {
+          "path": "/home/dev/aup/mun-graphs-root1255-20261013/apps/api/test/assembly/mutation-results.json",
+          "sha256": "29eafb051703a10cc29e7fdc61f377d082014b342c244ca19e24bb63c67303e8"
+        },
+        {
+          "path": "/home/dev/aup/mun-graphs-root1255-20261013/apps/api/src/tasks/content/task-content.controller.ts",
+          "sha256": "387e6df70063fb466b1c789cc444bf3099d55dc0842b389e403229b70fe68749"
+        },
+        {
+          "path": "/home/dev/aup/mun-graphs-root1255-20261013/apps/api/src/tasks/content/task-content.dto.ts",
+          "sha256": "32777722bcf687469bebb24c18ed8b94463eeb7ecb36cd0ef225f965572b269e"
+        },
+        {
+          "path": "/home/dev/aup/mun-graphs-root1255-20261013/apps/api/src/tasks/content/task-content.service.ts",
+          "sha256": "2cc0074abba86bba088785617a0934acdab1af5c287faeac8b6b7fd519b59cdc"
+        },
+        {
+          "path": "/home/dev/aup/mun-graphs-root1255-20261013/apps/api/src/tasks/content/task-graph.schema.ts",
+          "sha256": "aa9234f61ee9ed5c03965936a6af0caab251997607755dcfd0fcee51247e8d25"
+        },
+        {
+          "path": "/home/dev/aup/mun-graphs-root1255-20261013/apps/api/src/tasks/content/task-graph.validation.ts",
+          "sha256": "d36c01398bf24a5c73bd0c55ab6d99fefc423b5a9d8ab48f0f0a5d003c8ee43d"
+        }
+      ],
+      "expect": {
+        "exit_codes": [
+          0
+        ],
+        "stdout_contains": [],
+        "stderr_contains": [
+          "39 passed"
+        ]
+      }
+    }
+  ],
+  "limitations": [
+    "Owned loopback HTTP/PG fixture only; framework session/navigation seams remain. No production deployment, native lifecycle issuance or KC2 admission.",
+    "Process evidence does not claim native unsupported contract labels or web deployable."
+  ]
+}
