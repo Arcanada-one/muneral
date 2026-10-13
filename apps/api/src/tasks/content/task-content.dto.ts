@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, MaxLength, IsOptional, Matches } from 'class-validator';
+import { IsString, IsNotEmpty, MaxLength, IsOptional, Matches, IsInt, Min, Max, IsObject } from 'class-validator';
 
 export class ArtifactMetadataDto {
   @IsString() @IsNotEmpty() @MaxLength(128)
@@ -12,5 +12,12 @@ export class ArtifactMetadataDto {
 export class UploadArtifactDto extends ArtifactMetadataDto {
   @IsString() @MaxLength(87384)
   contentBase64: string;
+}
+
+export class StoreGraphDto {
+  @IsInt() @Min(0) @Max(1000)
+  expectedRevision: number;
+  @IsObject()
+  document: Record<string, unknown>;
 }
 

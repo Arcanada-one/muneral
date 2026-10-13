@@ -8,7 +8,7 @@ import { HumanTaskReadGuard } from '../../auth/guards/human-task-read.guard.js';
 import { AgentScope } from '../../auth/agent-scope.decorator.js';
 import { ActorInterceptor } from '../../common/interceptors/actor.interceptor.js';
 import { MAX_CONTENT_BYTES, TaskContentService } from './task-content.service.js';
-import { ArtifactMetadataDto, UploadArtifactDto } from './task-content.dto.js';
+import { ArtifactMetadataDto, UploadArtifactDto, StoreGraphDto } from './task-content.dto.js';
 
 type AuthRequest = Request & { actor: Actor };
 
@@ -17,6 +17,33 @@ type AuthRequest = Request & { actor: Actor };
 @UseInterceptors(ActorInterceptor)
 export class TaskContentController {
   constructor(private readonly content: TaskContentService) {}
+
+  @Post(':taskId/graphs/:kind')
+  @AgentScope('task-evidence')
+  storeGraph(@Param('taskId', ParseUUIDPipe) taskId: string, @Param('kind') kind: string,
+    @Req() req: AuthRequest, @Body() dto: StoreGraphDto) {
+    return this.content.storeGraph(taskId, req.actor, kind, dto);
+  }
+
+  @Get(':taskId/graphs/:kind/revisions')
+  @AgentScope('task-evidence')
+  listGraphs(@Param('taskId', ParseUUIDPipe) taskId: string, @Param('kind') kind: string,
+    @Req() req: AuthRequest, @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number) {
+    return this.content.listGraphs(taskId, req.actor, kind, page);
+  }
+
+  @Get(':taskId/graphs/:kind')
+  @AgentScope('task-evidence')
+  latestGraph(@Param('taskId', ParseUUIDPipe) taskId: string, @Param('kind') kind: string, @Req() req: AuthRequest) {
+    return this.content.getGraph(taskId, req.actor, kind);
+  }
+
+  @Get(':taskId/graphs/:kind/:revision')
+  @AgentScope('task-evidence')
+  graphRevision(@Param('taskId', ParseUUIDPipe) taskId: string, @Param('kind') kind: string,
+    @Param('revision', ParseIntPipe) revision: number, @Req() req: AuthRequest) {
+    return this.content.getGraph(taskId, req.actor, kind, revision);
+  }
 
   @Post(':taskId/artifacts')
   @AgentScope('task-evidence')
