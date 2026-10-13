@@ -5,7 +5,7 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "paused_safe"
  },
- "captured_at_utc": "2026-10-13T21:35:30Z",
+ "captured_at_utc": "2026-10-13T21:40:20Z",
  "change_set": {
   "base": "db91fac8d178e479f149aa7d6be1a0e64ecea711",
   "files": [
@@ -85,6 +85,24 @@
    },
    {
     "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/mun-fleet-content-20261013/source-ca5b5d4/root1255-fleet-helper-ci-source.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/mun-fleet-content-20261013/source-ca5b5d4/root1255-fleet-helper-ci.plan.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/mun-fleet-content-20261013/source-ca5b5d4/root1255-fleet-helper-ci.result.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
     "node_id": "receipt:receipts/graph/mun-artifacts/fleet-helper-change-admission.json",
     "node_ids": [
      "receipt:receipts/graph/mun-artifacts/fleet-helper-change-admission.json"
@@ -120,7 +138,7 @@
     "status": "A"
    }
   ],
-  "head": "1ee230b603cc15f04fbf669888a40909ff7780e8",
+  "head": "08229944b06528f59527a346b1a12430009e55fb",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -129,17 +147,17 @@
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
   "graph_digest": "sha256:a9ea37f044780505c4a058a610f4f41e24f6c17431ef268e21557fe11548ab96",
-  "path": "/tmp/root1255-fleet-helper-ci-own-verifiers/graph-db91fac8d178.json",
+  "path": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/graph-db91fac8d178.json",
   "source_commit": "db91fac8d178e479f149aa7d6be1a0e64ecea711"
  },
  "head_graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:d609e0f632abd155bbebed9a3239191501a280e01d15915a153fa248690b58c5",
-  "path": "/tmp/root1255-fleet-helper-ci-own-verifiers/graph-head-1ee230b603cc.json",
-  "source_commit": "1ee230b603cc15f04fbf669888a40909ff7780e8",
+  "graph_digest": "sha256:220e220211811c4313b0da8144fe71e8760128c9204a5ed3f76443ed9b0c75bf",
+  "path": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/graph-head-08229944b065.json",
+  "source_commit": "08229944b06528f59527a346b1a12430009e55fb",
   "staleness": {
-   "checked_at_utc": "2026-10-13T21:36:02Z",
+   "checked_at_utc": "2026-10-13T21:40:47Z",
    "checked_nodes": 474,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
@@ -148,7 +166,7 @@
  },
  "host": "source-lane",
  "host_redacted": true,
- "host_sha256": "7a27328bbfd8f410beef8bde660e199fa6c799dd00672570737d6963505a8779",
+ "host_sha256": "e55719eeaeb00daae8c0a0954041110e1c5b3acf5a4c7122c1f248d35bdbcc14",
  "impact_set": {
   "deterministic_core": [
    {
@@ -14728,7 +14746,7 @@
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261013T213530Z-1ee230b6",
+ "receipt_id": "car-verify-20261013T214020Z-08229944",
  "receipt_path": "receipts/graph/mun-artifacts/fleet-helper-change-admission.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -14916,7 +14934,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-13T21:36:01Z",
+  "checked_at_utc": "2026-10-13T21:40:46Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -15332,7 +15350,7 @@
   {
    "content_hash": {
     "base": null,
-    "head": "sha256:643191c330e57acf79266adb6857b2caa71d3c2b42d8e29363263ded872f631a"
+    "head": "sha256:93366a8501fe5266df94780b9c5ea8b05c3781ee739c342765cc0e6002d87c1f"
    },
    "entity": "receipt:receipts/graph/mun-artifacts/fleet-helper-change-admission.json",
    "node_type": "receipt",
@@ -15379,7 +15397,7 @@
   }
  ],
  "tree": {
-  "commit": "1ee230b603cc15f04fbf669888a40909ff7780e8",
+  "commit": "08229944b06528f59527a346b1a12430009e55fb",
   "dirty": false
  },
  "verdicts": [
@@ -15634,10 +15652,10 @@
   },
   {
    "entity": "code_unit:scripts/agents/attach.py",
-   "reason": "v-canary: canary muneral-content-helper-mock-red-controls (pre) on owned-loopback-mock-http-client-controls: CANARY_EVIDENCE_UNVERIFIABLE: .github/workflows/ci.yml is not a record document: the delta between the measured subject and the candidate may only touch receipts/, governance/design/",
-   "verdict": "not_measured",
+   "reason": "v-config-schema: every key read is declared; v-fitness: no new fitness violation; v-canary-1: canary muneral-content-helper-mock-red-controls (pre) on owned-loopback-mock-http-client-controls: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-config-schema",
     "v-fitness"
    ]
@@ -15852,13 +15870,13 @@
    "exit_code": 127,
    "id": "v-type-check-uncovered",
    "kind": "type_check",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-type-check-uncovered.txt",
-   "started_at_utc": "2026-10-13T21:36:07Z",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-type-check-uncovered.txt",
+   "started_at_utc": "2026-10-13T21:40:51Z",
    "summary": "not_measured: 2 entity(ies) no tsconfig covers"
   },
   {
-   "command": "/home/dev/aup/mun-fleet-content-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-fleet-content-root1255-20261013/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-fleet-helper-ci-own-verifiers/type-check-wtoergud/check.tsbuildinfo --listFiles",
-   "duration_s": 4.24,
+   "command": "/home/dev/aup/mun-fleet-content-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-fleet-content-root1255-20261013/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-fleet-helper-refreshed-own-verifiers/type-check-c02yvq37/check.tsbuildinfo --listFiles",
+   "duration_s": 3.97,
    "entities": [
     "deployable_unit:apps/api"
    ],
@@ -15868,13 +15886,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-10-13T21:36:07Z",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-10-13T21:40:51Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1492 files listed"
   },
   {
-   "command": "/home/dev/aup/mun-fleet-content-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-fleet-content-root1255-20261013/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-fleet-helper-ci-own-verifiers/type-check-atkhg1dh/check.tsbuildinfo --listFiles",
-   "duration_s": 6.26,
+   "command": "/home/dev/aup/mun-fleet-content-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-fleet-content-root1255-20261013/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-fleet-helper-refreshed-own-verifiers/type-check-87luo83x/check.tsbuildinfo --listFiles",
+   "duration_s": 6.55,
    "entities": [
     "deployable_unit:apps/api"
    ],
@@ -15884,13 +15902,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-10-13T21:36:11Z",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-type-check-apps-api-tsconfig-test.txt",
+   "started_at_utc": "2026-10-13T21:40:55Z",
    "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1654 files listed"
   },
   {
-   "command": "/home/dev/aup/mun-fleet-content-root1255-20261013/apps/web/node_modules/.bin/tsc -p /home/dev/aup/mun-fleet-content-root1255-20261013/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-fleet-helper-ci-own-verifiers/type-check-2_k56lcv/check.tsbuildinfo --listFiles",
-   "duration_s": 4.27,
+   "command": "/home/dev/aup/mun-fleet-content-root1255-20261013/apps/web/node_modules/.bin/tsc -p /home/dev/aup/mun-fleet-content-root1255-20261013/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-fleet-helper-refreshed-own-verifiers/type-check-bs3f8pue/check.tsbuildinfo --listFiles",
+   "duration_s": 4.69,
    "entities": [
     "deployable_unit:apps/web"
    ],
@@ -15900,13 +15918,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-10-13T21:36:18Z",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-10-13T21:41:02Z",
    "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1313 files listed"
   },
   {
-   "command": "/home/dev/aup/mun-fleet-content-root1255-20261013/packages/types/node_modules/.bin/tsc -p /home/dev/aup/mun-fleet-content-root1255-20261013/packages/types/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-fleet-helper-ci-own-verifiers/type-check-k5byf_qr/check.tsbuildinfo --listFiles",
-   "duration_s": 0.3,
+   "command": "/home/dev/aup/mun-fleet-content-root1255-20261013/packages/types/node_modules/.bin/tsc -p /home/dev/aup/mun-fleet-content-root1255-20261013/packages/types/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-fleet-helper-refreshed-own-verifiers/type-check-roocgv6k/check.tsbuildinfo --listFiles",
+   "duration_s": 0.33,
    "entities": [
     "deployable_unit:packages/types"
    ],
@@ -15916,8 +15934,8 @@
    "exit_code": 0,
    "id": "v-type-check-packages-types-tsconfig",
    "kind": "type_check",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-type-check-packages-types-tsconfig.txt",
-   "started_at_utc": "2026-10-13T21:36:22Z",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-type-check-packages-types-tsconfig.txt",
+   "started_at_utc": "2026-10-13T21:41:07Z",
    "summary": "packages/types/tsconfig.json: exit 0, 0 error(s), 58 files listed"
   },
   {
@@ -15932,8 +15950,8 @@
    "exit_code": 1,
    "id": "v-workflow-config-b803fcb7f17ed923",
    "kind": "config_schema",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-workflow-config-b803fcb7f17ed923.txt",
-   "started_at_utc": "2026-10-13T21:36:22Z",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-workflow-config-b803fcb7f17ed923.txt",
+   "started_at_utc": "2026-10-13T21:41:07Z",
    "summary": "workflow configuration not measured: reusable workflow input expression value/type unresolved"
   },
   {
@@ -15948,8 +15966,8 @@
    "exit_code": 1,
    "id": "v-workflow-config-2fe48d1021006468",
    "kind": "config_schema",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-workflow-config-2fe48d1021006468.txt",
-   "started_at_utc": "2026-10-13T21:36:23Z",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-workflow-config-2fe48d1021006468.txt",
+   "started_at_utc": "2026-10-13T21:41:07Z",
    "summary": "workflow shell caller closure not measured: job auto-merge step 0: line 10: dynamic load/substitution; job auto-merge step 0: line 11: dynamic load/substitution; job auto-merge step 0: line 12: dynamic load/substitution; job auto-merge step 0: line 13: dynamic load/substitution; job auto-merge step 0: line 3: multiline/opaque shell statement; job auto-merge step 0: line 4: wrapper options/child command unresolved; job auto-merge step 0: line 57: dynamic load/substitution; job auto-merge step 0: line 58: multiline/opaque shell statement; job auto-merge step 0: line 65: multiline/opaque shell statement; job auto-merge step 0: line 66: wrapper options/child command unresolved; job auto-merge step 0: line 67: dynamic load/substitution; job auto-merge step 0: line 68: dynamic load/substitution; job auto-merge step 0: line 69: dynamic load/substitution; job auto-merge step 0: line 82: dynamic command/alias/eval; job auto-merge step 0: line 82: dynamic load/substitution; job auto-merge step 0: line 9: dynamic load/substitution"
   },
   {
@@ -15964,8 +15982,8 @@
    "exit_code": 0,
    "id": "v-workflow-config-5844296ae241614c",
    "kind": "config_schema",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-workflow-config-5844296ae241614c.txt",
-   "started_at_utc": "2026-10-13T21:36:23Z",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-workflow-config-5844296ae241614c.txt",
+   "started_at_utc": "2026-10-13T21:41:07Z",
    "summary": "bounded workflow configuration shape valid; expressions, shell, actions, callee interface compatibility and hosted execution NOT_MEASURED"
   },
   {
@@ -15980,8 +15998,8 @@
    "exit_code": 1,
    "id": "v-workflow-config-dc49cc771602c92b",
    "kind": "config_schema",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-workflow-config-dc49cc771602c92b.txt",
-   "started_at_utc": "2026-10-13T21:36:23Z",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-workflow-config-dc49cc771602c92b.txt",
+   "started_at_utc": "2026-10-13T21:41:07Z",
    "summary": "workflow shell caller closure not measured: job graph-admission step 10: local action/checkout path scope unresolved; job graph-admission step 3: line 19: dynamic load/substitution; job graph-admission step 8: line 11: multiline/opaque shell statement; job graph-admission step 8: line 12: wrapper options/child command unresolved; job graph-admission step 8: line 3: multiline/opaque shell statement; job graph-admission step 8: line 4: wrapper options/child command unresolved; job graph-admission step 9: line 14: multiline/opaque shell statement; job graph-admission step 9: line 15: multiline/opaque shell statement; job graph-admission step 9: line 16: multiline/opaque shell statement; job graph-admission step 9: line 17: multiline/opaque shell statement; job graph-admission step 9: line 18: multiline/opaque shell statement; job graph-admission step 9: line 19: multiline/opaque shell statement; job graph-admission step 9: line 20: multiline/opaque shell statement; job graph-admission step 9: line 21: multiline/opaque shell statement; job graph-admission step 9: line 22: multiline/opaque shell statement; job graph-admission step 9: line 23: multiline/opaque shell statement; job graph-admission step 9: line 24: multiline/opaque shell statement; job graph-admission step 9: line 25: multiline/opaque shell statement; job graph-admission step 9: line 26: dynamic command/alias/eval"
   },
   {
@@ -15996,13 +16014,13 @@
    "exit_code": 1,
    "id": "v-workflow-config-f2afde09eeffcba0",
    "kind": "config_schema",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-workflow-config-f2afde09eeffcba0.txt",
-   "started_at_utc": "2026-10-13T21:36:23Z",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-workflow-config-f2afde09eeffcba0.txt",
+   "started_at_utc": "2026-10-13T21:41:07Z",
    "summary": "workflow shell caller closure not measured: job regenerate step 0: line 2: multiline/opaque shell statement; job regenerate step 0: line 3: wrapper options/child command unresolved; job regenerate step 0: line 5: dynamic load/substitution; job regenerate step 0: line 6: dynamic load/substitution; job regenerate step 0: line 7: dynamic load/substitution; job regenerate step 0: line 8: dynamic load/substitution; job regenerate step 2: line 3: dynamic load/substitution; job regenerate step 3: line 10: dynamic load/substitution; job regenerate step 3: line 11: dynamic load/substitution; job regenerate step 4: line 10: dynamic load/substitution; job regenerate step 4: line 18: dynamic load/substitution; job regenerate step 4: line 21: dynamic command/alias/eval; job regenerate step 4: line 22: dynamic load/substitution; job regenerate step 4: line 5: dynamic load/substitution; job regenerate step 4: line 8: dynamic load/substitution; job regenerate step 4: line 9: dynamic load/substitution; job regenerate step 7: line 2: multiline/opaque shell statement; job regenerate step 7: line 3: wrapper options/child command unresolved; job regenerate step 8: line 26: dynamic load/substitution; job regenerate step 8: line 38: heredoc data/generation closure not measured; job regenerate step 8: line 52: dynamic load/substitution; job regenerate step 8: line 5: dynamic load/substitution; job regenerate step 8: line 68: multiline/opaque shell statement"
   },
   {
    "command": "verify.py config_schema: keys read at head ⊆ declared keys",
-   "duration_s": 0.35,
+   "duration_s": 0.38,
    "entities": [
     "code_unit:scripts/agents/attach.py"
    ],
@@ -16012,13 +16030,13 @@
    "exit_code": 0,
    "id": "v-config-schema",
    "kind": "config_schema",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-config-schema.json",
-   "started_at_utc": "2026-10-13T21:36:23Z",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-config-schema.json",
+   "started_at_utc": "2026-10-13T21:41:07Z",
    "summary": "3 source(s), 0 new / 3 frozen undeclared reads, 0 failed; 4 vendored file(s) not attributed to this repository (Arcanada-one/arcanada-universal-program)"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.13,
+   "duration_s": 0.12,
    "entities": [
     "code_unit:.github/graph-admission/tools/graph/admit_change.py",
     "code_unit:.github/graph-admission/tools/graph/build_graph.py",
@@ -16114,8 +16132,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-fitness.json",
-   "started_at_utc": "2026-10-13T21:36:23Z",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-fitness.json",
+   "started_at_utc": "2026-10-13T21:41:07Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -16134,25 +16152,36 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-doc-reference.txt",
-   "started_at_utc": "2026-10-13T21:36:23Z",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-doc-reference.txt",
+   "started_at_utc": "2026-10-13T21:41:07Z",
    "summary": "3 document(s), 0 failed"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.05,
+   "duration_s": 0.09,
    "entities": [
     "code_unit:scripts/agents/attach.py"
    ],
    "entity_verdicts": {
-    "code_unit:scripts/agents/attach.py": "not_measured"
+    "code_unit:scripts/agents/attach.py": "verified"
    },
+   "exit_code": 0,
+   "id": "v-canary-1",
+   "kind": "canary",
+   "output_ref": "receipts/canary/mun-fleet-content-20261013/source-ca5b5d4/root1255-fleet-helper-ci.result.json",
+   "started_at_utc": "2026-10-13T21:41:07Z",
+   "summary": "receipts/canary/mun-fleet-content-20261013/source-ca5b5d4/root1255-fleet-helper-ci.result.json: 1 verified / 0 failed / 0 not_measured"
+  },
+  {
+   "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
+   "duration_s": 0.09,
+   "entities": [],
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-canary.json",
-   "started_at_utc": "2026-10-13T21:36:23Z",
-   "summary": "1 canary result(s), 0 committed at head; 0 verified / 0 failed / 1 not_measured of 1 entities"
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-canary.json",
+   "started_at_utc": "2026-10-13T21:41:07Z",
+   "summary": "1 canary result(s), 1 committed at head; 1 verified / 0 failed / 0 not_measured of 1 entities"
   },
   {
    "command": "bash --noprofile --norc -n <exact bytes; Bats declarations translated, never executed>",
@@ -16166,9 +16195,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-8510dad442972b20",
    "kind": "shell_syntax",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-shell-syntax-8510dad442972b20.txt",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-shell-syntax-8510dad442972b20.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-13T21:36:23Z",
+   "started_at_utc": "2026-10-13T21:41:08Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -16183,9 +16212,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-83ef9d3b99092081",
    "kind": "shell_syntax",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-shell-syntax-83ef9d3b99092081.txt",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-shell-syntax-83ef9d3b99092081.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-13T21:36:23Z",
+   "started_at_utc": "2026-10-13T21:41:08Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -16200,9 +16229,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-11784c754a05e4be",
    "kind": "shell_syntax",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-shell-syntax-11784c754a05e4be.txt",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-shell-syntax-11784c754a05e4be.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-13T21:36:23Z",
+   "started_at_utc": "2026-10-13T21:41:08Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -16217,9 +16246,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-8c31e335c6c5ebab",
    "kind": "shell_syntax",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-shell-syntax-8c31e335c6c5ebab.txt",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-shell-syntax-8c31e335c6c5ebab.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-13T21:36:23Z",
+   "started_at_utc": "2026-10-13T21:41:08Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -16234,9 +16263,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-4b1446736a74bcbc",
    "kind": "shell_syntax",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-shell-syntax-4b1446736a74bcbc.txt",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-shell-syntax-4b1446736a74bcbc.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-13T21:36:23Z",
+   "started_at_utc": "2026-10-13T21:41:08Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -16251,9 +16280,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-85b3438308b0c1fe",
    "kind": "shell_syntax",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-shell-syntax-85b3438308b0c1fe.txt",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-shell-syntax-85b3438308b0c1fe.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-13T21:36:23Z",
+   "started_at_utc": "2026-10-13T21:41:08Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -16268,9 +16297,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-a582a36e78fe3ccf",
    "kind": "shell_syntax",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-shell-syntax-a582a36e78fe3ccf.txt",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-shell-syntax-a582a36e78fe3ccf.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-13T21:36:23Z",
+   "started_at_utc": "2026-10-13T21:41:08Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -16285,9 +16314,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-519064afc564b0e8",
    "kind": "shell_syntax",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-shell-syntax-519064afc564b0e8.txt",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-shell-syntax-519064afc564b0e8.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-13T21:36:23Z",
+   "started_at_utc": "2026-10-13T21:41:08Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -16302,9 +16331,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-b792645f8cae2d8c",
    "kind": "shell_syntax",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-shell-syntax-b792645f8cae2d8c.txt",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-shell-syntax-b792645f8cae2d8c.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-13T21:36:23Z",
+   "started_at_utc": "2026-10-13T21:41:08Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -16319,9 +16348,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-8510dad442972b20",
    "kind": "shell_behavior",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-shell-behavior-8510dad442972b20.txt",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-shell-behavior-8510dad442972b20.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-13T21:36:23Z",
+   "started_at_utc": "2026-10-13T21:41:08Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: line 14: dynamic command/alias/eval"
   },
   {
@@ -16336,9 +16365,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-83ef9d3b99092081",
    "kind": "shell_behavior",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-shell-behavior-83ef9d3b99092081.txt",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-shell-behavior-83ef9d3b99092081.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-13T21:36:23Z",
+   "started_at_utc": "2026-10-13T21:41:08Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: directory transition has unresolved execution cwd; line 14: dynamic command/alias/eval; line 25: dynamic command/alias/eval; line 38: multiline/opaque shell statement; line 39: dynamic command/alias/eval; line 40: multiline/opaque shell statement; line 41: dynamic command/alias/eval; line 43: multiline/opaque shell statement; line 44: dynamic command/alias/eval; line 49: multiline/opaque shell statement; line 4: dynamic load/substitution; line 50: dynamic command/alias/eval"
   },
   {
@@ -16353,9 +16382,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-11784c754a05e4be",
    "kind": "shell_behavior",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-shell-behavior-11784c754a05e4be.txt",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-shell-behavior-11784c754a05e4be.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-13T21:36:23Z",
+   "started_at_utc": "2026-10-13T21:41:08Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: directory transition has unresolved execution cwd; line 106: dynamic load/substitution; line 116: multiline/opaque shell statement; line 117: multiline/opaque shell statement; line 118: dynamic command/alias/eval; line 121: multiline/opaque shell statement; line 122: multiline/opaque shell statement; line 123: dynamic command/alias/eval; line 125: multiline/opaque shell statement; line 126: multiline/opaque shell statement; line 127: dynamic command/alias/eval; line 129: multiline/opaque shell statement; line 130: multiline/opaque shell statement; line 131: dynamic command/alias/eval; line 133: multiline/opaque shell statement; line 134: multiline/opaque shell statement; line 135: dynamic command/alias/eval; line 137: multiline/opaque shell statement; line 138: multiline/opaque shell statement; line 139: dynamic command/alias/eval; line 142: multiline/opaque shell statement; line 145: multiline/opaque shell statement; line 14: dynamic load/substitution; line 27: heredoc data/generation closure not measured; line 57: multiline/opaque shell statement; line 62: multiline/opaque shell statement; line 63: dynamic command/alias/eval; line 66: dynamic load/substitution; line 81: dynamic load/substitution; line 94: multiline/opaque shell statement"
   },
   {
@@ -16370,9 +16399,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-8c31e335c6c5ebab",
    "kind": "shell_behavior",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-shell-behavior-8c31e335c6c5ebab.txt",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-shell-behavior-8c31e335c6c5ebab.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-13T21:36:23Z",
+   "started_at_utc": "2026-10-13T21:41:08Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: directory transition has unresolved execution cwd; line 114: multiline/opaque shell statement; line 128: dynamic load/substitution; line 136: multiline/opaque shell statement; line 137: multiline/opaque shell statement; line 141: multiline/opaque shell statement; line 142: multiline/opaque shell statement; line 145: multiline/opaque shell statement; line 146: multiline/opaque shell statement; line 149: multiline/opaque shell statement; line 150: multiline/opaque shell statement; line 153: multiline/opaque shell statement; line 154: multiline/opaque shell statement; line 158: multiline/opaque shell statement; line 159: multiline/opaque shell statement; line 162: multiline/opaque shell statement; line 163: multiline/opaque shell statement; line 166: multiline/opaque shell statement; line 167: multiline/opaque shell statement; line 170: multiline/opaque shell statement; line 171: multiline/opaque shell statement; line 175: multiline/opaque shell statement; line 176: multiline/opaque shell statement; line 177: dynamic command/alias/eval; line 179: multiline/opaque shell statement; line 180: multiline/opaque shell statement; line 181: dynamic command/alias/eval; line 183: multiline/opaque shell statement; line 184: multiline/opaque shell statement; line 185: dynamic command/alias/eval; line 18: dynamic load/substitution; line 31: heredoc data/generation closure not measured; line 65: multiline/opaque shell statement; line 73: dynamic load/substitution; line 91: dynamic load/substitution"
   },
   {
@@ -16387,9 +16416,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-4b1446736a74bcbc",
    "kind": "shell_behavior",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-shell-behavior-4b1446736a74bcbc.txt",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-shell-behavior-4b1446736a74bcbc.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-13T21:36:23Z",
+   "started_at_utc": "2026-10-13T21:41:08Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: line 38: dynamic load/substitution; line 40: dynamic load/substitution; line 51: dynamic command/alias/eval; line 56: multiline/opaque shell statement; line 57: dynamic command/alias/eval; line 64: wrapper execution scope/options unresolved"
   },
   {
@@ -16404,9 +16433,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-85b3438308b0c1fe",
    "kind": "shell_behavior",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-shell-behavior-85b3438308b0c1fe.txt",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-shell-behavior-85b3438308b0c1fe.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-13T21:36:23Z",
+   "started_at_utc": "2026-10-13T21:41:08Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: directory transition has unresolved execution cwd; line 20: dynamic load/substitution; line 36: dynamic command/alias/eval; line 36: dynamic load/substitution; line 37: dynamic command/alias/eval; line 37: dynamic load/substitution; line 42: multiline/opaque shell statement; line 43: multiline/opaque shell statement; line 44: multiline/opaque shell statement; line 45: multiline/opaque shell statement; line 46: multiline/opaque shell statement; line 47: multiline/opaque shell statement; line 48: multiline/opaque shell statement; line 49: dynamic command/alias/eval; line 54: dynamic command/alias/eval; line 64: dynamic command/alias/eval; line 6: dynamic load/substitution; line 88: multiline/opaque shell statement; line 90: multiline/opaque shell statement; line 96: multiline/opaque shell statement"
   },
   {
@@ -16421,9 +16450,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-a582a36e78fe3ccf",
    "kind": "shell_behavior",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-shell-behavior-a582a36e78fe3ccf.txt",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-shell-behavior-a582a36e78fe3ccf.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-13T21:36:23Z",
+   "started_at_utc": "2026-10-13T21:41:08Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: line 13: wrapper options/child command unresolved; line 18: multiline/opaque shell statement; line 28: dynamic load/substitution"
   },
   {
@@ -16438,9 +16467,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-519064afc564b0e8",
    "kind": "shell_behavior",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-shell-behavior-519064afc564b0e8.txt",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-shell-behavior-519064afc564b0e8.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-13T21:36:23Z",
+   "started_at_utc": "2026-10-13T21:41:08Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: directory transition has unresolved execution cwd; line 10: heredoc data/generation closure not measured; line 26: multiline/opaque shell statement; line 27: dynamic command/alias/eval; line 37: multiline/opaque shell statement; line 38: dynamic command/alias/eval; line 4: dynamic load/substitution"
   },
   {
@@ -16455,9 +16484,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-b792645f8cae2d8c",
    "kind": "shell_behavior",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-shell-behavior-b792645f8cae2d8c.txt",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-shell-behavior-b792645f8cae2d8c.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-13T21:36:24Z",
+   "started_at_utc": "2026-10-13T21:41:08Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: line 134: multiline/opaque shell statement; line 155: multiline/opaque shell statement; line 201: multiline/opaque shell statement; line 253: multiline/opaque shell statement; line 290: multiline/opaque shell statement; line 53: wrapper options/child command unresolved; line 54: wrapper options/child command unresolved; line 55: wrapper options/child command unresolved; line 56: wrapper options/child command unresolved; line 57: wrapper options/child command unresolved; line 75: dynamic load/substitution; line 76: dynamic load/substitution; line 77: dynamic load/substitution; line 79: heredoc data/generation closure not measured; line 94: wrapper options/child command unresolved; line 98: dynamic command/alias/eval; line 98: dynamic load/substitution"
   },
   {
@@ -16546,9 +16575,9 @@
    "exit_code": 127,
    "id": "v-global-fallback-test-root",
    "kind": "targeted_test",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-global-fallback-test-root.txt",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-global-fallback-test-root.txt",
    "scope": "global_fallback_full_suite",
-   "started_at_utc": "2026-10-13T21:36:24Z",
+   "started_at_utc": "2026-10-13T21:41:08Z",
    "summary": "complete fallback suite: not_measured",
    "timeout_seconds": 900
   },
@@ -16564,9 +16593,9 @@
    "exit_code": 127,
    "id": "v-global-fallback-test-apps-api",
    "kind": "targeted_test",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-global-fallback-test-apps-api.txt",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-global-fallback-test-apps-api.txt",
    "scope": "global_fallback_full_suite",
-   "started_at_utc": "2026-10-13T21:36:24Z",
+   "started_at_utc": "2026-10-13T21:41:08Z",
    "summary": "complete fallback suite: not_measured",
    "timeout_seconds": 900
   },
@@ -16582,9 +16611,9 @@
    "exit_code": 127,
    "id": "v-global-fallback-test-apps-web",
    "kind": "targeted_test",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-global-fallback-test-apps-web.txt",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-global-fallback-test-apps-web.txt",
    "scope": "global_fallback_full_suite",
-   "started_at_utc": "2026-10-13T21:36:24Z",
+   "started_at_utc": "2026-10-13T21:41:08Z",
    "summary": "complete fallback suite: not_measured",
    "timeout_seconds": 900
   },
@@ -16600,9 +16629,9 @@
    "exit_code": 127,
    "id": "v-global-fallback-test-packages-types",
    "kind": "targeted_test",
-   "output_ref": "/tmp/root1255-fleet-helper-ci-own-verifiers/v-global-fallback-test-packages-types.txt",
+   "output_ref": "/tmp/root1255-fleet-helper-refreshed-own-verifiers/v-global-fallback-test-packages-types.txt",
    "scope": "global_fallback_full_suite",
-   "started_at_utc": "2026-10-13T21:36:24Z",
+   "started_at_utc": "2026-10-13T21:41:08Z",
    "summary": "complete fallback suite: not_measured",
    "timeout_seconds": 900
   }
@@ -16877,9 +16906,9 @@
    "receipt:receipts/graph/pin-repair-muneral213r2-20261007.json": []
   },
   "seconds": {
-   "prepare": 2.72,
-   "total": 53.47,
-   "verifiers": 15.6
+   "prepare": 1.85,
+   "total": 48.54,
+   "verifiers": 16.22
   }
  },
  "work_item": "1f99b768-65e6-4afe-93e6-611db53e3366"
