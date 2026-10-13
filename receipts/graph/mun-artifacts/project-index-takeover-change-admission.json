@@ -5,7 +5,7 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "paused_safe"
  },
- "captured_at_utc": "2026-10-13T19:50:37Z",
+ "captured_at_utc": "2026-10-13T20:10:37Z",
  "change_set": {
   "base": "840e3be216844d57c163daf14ec0a5d51657f963",
   "files": [
@@ -416,18 +416,9 @@
     ],
     "path": "receipts/graph/mun-artifacts/project-index-takeover-change-admission.json",
     "status": "A"
-   },
-   {
-    "kind": "receipt",
-    "node_id": "receipt:receipts/graph/workspace-index-219-20261007.json",
-    "node_ids": [
-     "receipt:receipts/graph/workspace-index-219-20261007.json"
-    ],
-    "path": "receipts/graph/workspace-index-219-20261007.json",
-    "status": "A"
    }
   ],
-  "head": "461cac24312ecb4907f7e516454edd951bf15c7c",
+  "head": "d95edf763230447f26efb0cdf7e6c843476624ea",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -436,18 +427,18 @@
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
   "graph_digest": "sha256:d4be88318996f7d945b83d7a8faba9c0a3a8331b2dfdc25ae10056a6be4100f7",
-  "path": "/tmp/root1255-219-declared-own-verifier-outputs/graph-840e3be21684.json",
+  "path": "/tmp/root1255-219-retired-receipt-verifiers/graph-840e3be21684.json",
   "source_commit": "840e3be216844d57c163daf14ec0a5d51657f963"
  },
  "head_graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:86b7a547186d4015df1b08add3fcb5b31a418a07544ee16ce9b9f42c7b479c54",
-  "path": "/tmp/root1255-219-declared-own-verifier-outputs/graph-head-461cac24312e.json",
-  "source_commit": "461cac24312ecb4907f7e516454edd951bf15c7c",
+  "graph_digest": "sha256:f0dc690cf9abf7b88ca68ee39a6e5de7d8058f4aadfa997aa9d54ff264b0ec7f",
+  "path": "/tmp/root1255-219-retired-receipt-verifiers/graph-head-d95edf763230.json",
+  "source_commit": "d95edf763230447f26efb0cdf7e6c843476624ea",
   "staleness": {
-   "checked_at_utc": "2026-10-13T19:51:00Z",
-   "checked_nodes": 459,
+   "checked_at_utc": "2026-10-13T20:11:00Z",
+   "checked_nodes": 458,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -455,7 +446,7 @@
  },
  "host": "source-lane",
  "host_redacted": true,
- "host_sha256": "3cdff901cdfb0e6a916842b6ea0bef7fb8afb812c181cbd345fee873ce25fc9d",
+ "host_sha256": "1392210547c7c55c17e7512da6fc85354959ceaff5bad244d80103bc49bbd122",
  "impact_set": {
   "deterministic_core": [
    {
@@ -3959,7 +3950,7 @@
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261013T195037Z-461cac24",
+ "receipt_id": "car-verify-20261013T201037Z-d95edf76",
  "receipt_path": "receipts/graph/mun-artifacts/project-index-takeover-change-admission.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -4288,7 +4279,6 @@
    "receipt:receipts/graph/mun-artifacts/project-index-takeover-change-admission.json",
    "receipt:receipts/graph/revision4-public-20261007.json",
    "receipt:receipts/graph/security-api959a-caller788.json",
-   "receipt:receipts/graph/workspace-index-219-20261007.json",
    "route:DELETE /agents/keys/:keyId",
    "route:DELETE /agents/tasks/:taskId/assign/:agentId",
    "route:DELETE /projects/:projectId",
@@ -4346,7 +4336,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-13T19:50:59Z",
+  "checked_at_utc": "2026-10-13T20:11:00Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -4773,7 +4763,7 @@
   {
    "content_hash": {
     "base": null,
-    "head": "sha256:4e7f9e224b1990b9691a1cc9ae187ae39f7aa57666f4fc32faf2ce63a503f8cf"
+    "head": "sha256:9cf0fd7a16daf14d8fe2c477b70e85fe5d4f9215f25581ee3c0cf2a533812862"
    },
    "entity": "receipt:receipts/graph/mun-artifacts/project-index-takeover-change-admission.json",
    "node_type": "receipt",
@@ -4809,7 +4799,7 @@
   }
  ],
  "tree": {
-  "commit": "461cac24312ecb4907f7e516454edd951bf15c7c",
+  "commit": "d95edf763230447f26efb0cdf7e6c843476624ea",
   "dirty": false
  },
  "verdicts": [
@@ -5738,11 +5728,6 @@
    ]
   },
   {
-   "entity": "receipt:receipts/graph/workspace-index-219-20261007.json",
-   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
-   "verdict": "not_measured"
-  },
-  {
    "entity": "route:DELETE /agents/keys/:keyId",
    "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-3: canary muneral-route-presence (post) on owned-project-index-local-fixture: route-delete-agents-keys-keyid: DELETE /api/v1/agents/keys/:keyId is in the resident route table (not called: not a safe verb)",
    "verdict": "verified",
@@ -6312,8 +6297,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/aup/mun-project-index-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-project-index-root1255-20261013/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-219-declared-own-verifier-outputs/type-check-fxm1u37c/check.tsbuildinfo --listFiles",
-   "duration_s": 3.37,
+   "command": "/home/dev/aup/mun-project-index-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-project-index-root1255-20261013/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-219-retired-receipt-verifiers/type-check-wnnsm34_/check.tsbuildinfo --listFiles",
+   "duration_s": 3.36,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -6485,13 +6470,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "/tmp/root1255-219-declared-own-verifier-outputs/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-10-13T19:51:04Z",
+   "output_ref": "/tmp/root1255-219-retired-receipt-verifiers/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-10-13T20:11:04Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1456 files listed"
   },
   {
-   "command": "/home/dev/aup/mun-project-index-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-project-index-root1255-20261013/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-219-declared-own-verifier-outputs/type-check-qhhny9bz/check.tsbuildinfo --listFiles",
-   "duration_s": 5.15,
+   "command": "/home/dev/aup/mun-project-index-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-project-index-root1255-20261013/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-219-retired-receipt-verifiers/type-check-ovnrguen/check.tsbuildinfo --listFiles",
+   "duration_s": 5.01,
    "entities": [
     "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts",
     "code_unit:apps/api/test/agent-project-dependencies.e2e.spec.ts",
@@ -6553,13 +6538,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
-   "output_ref": "/tmp/root1255-219-declared-own-verifier-outputs/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-10-13T19:51:07Z",
+   "output_ref": "/tmp/root1255-219-retired-receipt-verifiers/v-type-check-apps-api-tsconfig-test.txt",
+   "started_at_utc": "2026-10-13T20:11:07Z",
    "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1619 files listed"
   },
   {
-   "command": "/home/dev/aup/mun-project-index-root1255-20261013/apps/web/node_modules/.bin/tsc -p /home/dev/aup/mun-project-index-root1255-20261013/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-219-declared-own-verifier-outputs/type-check-o68hyvn5/check.tsbuildinfo --listFiles",
-   "duration_s": 4.2,
+   "command": "/home/dev/aup/mun-project-index-root1255-20261013/apps/web/node_modules/.bin/tsc -p /home/dev/aup/mun-project-index-root1255-20261013/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-219-retired-receipt-verifiers/type-check-6803q12q/check.tsbuildinfo --listFiles",
+   "duration_s": 3.61,
    "entities": [
     "code_unit:apps/web/__tests__/kanban-board.test.ts",
     "code_unit:apps/web/__tests__/read-api-contract.test.ts",
@@ -6619,13 +6604,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/tmp/root1255-219-declared-own-verifier-outputs/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-10-13T19:51:13Z",
+   "output_ref": "/tmp/root1255-219-retired-receipt-verifiers/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-10-13T20:11:12Z",
    "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1313 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=840e3be21684, head=461cac24312e, graph=head graph)",
-   "duration_s": 3.68,
+   "command": "tools/graph/contract_diff.py.run_diff(base=840e3be21684, head=d95edf763230, graph=head graph)",
+   "duration_s": 3.39,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.service.ts",
@@ -6811,13 +6796,13 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "/tmp/root1255-219-declared-own-verifier-outputs/v-contract-diff.json",
-   "started_at_utc": "2026-10-13T19:51:17Z",
+   "output_ref": "/tmp/root1255-219-retired-receipt-verifiers/v-contract-diff.json",
+   "started_at_utc": "2026-10-13T20:11:16Z",
    "summary": "58→58 contracts, breaking 0, edges {'verified': 164}"
   },
   {
    "command": "verify.py route_config_consistency RC-01 prefix / RC-02 registration / RC-03 served",
-   "duration_s": 0.04,
+   "duration_s": 0.03,
    "entities": [
     "route:DELETE /agents/keys/:keyId",
     "route:DELETE /agents/tasks/:taskId/assign/:agentId",
@@ -6927,13 +6912,13 @@
    "exit_code": 0,
    "id": "v-route-config",
    "kind": "config_schema",
-   "output_ref": "/tmp/root1255-219-declared-own-verifier-outputs/v-route-config.txt",
-   "started_at_utc": "2026-10-13T19:51:21Z",
+   "output_ref": "/tmp/root1255-219-retired-receipt-verifiers/v-route-config.txt",
+   "started_at_utc": "2026-10-13T20:11:20Z",
    "summary": "51 route(s), 0 failed"
   },
   {
    "command": "verify.py config_schema: keys read at head ⊆ declared keys",
-   "duration_s": 0.36,
+   "duration_s": 0.3,
    "entities": [
     "code_unit:apps/api/src/auth/auth.module.ts",
     "code_unit:apps/api/test/agent-project-index.e2e.spec.ts",
@@ -6947,13 +6932,13 @@
    "exit_code": 0,
    "id": "v-config-schema",
    "kind": "config_schema",
-   "output_ref": "/tmp/root1255-219-declared-own-verifier-outputs/v-config-schema.json",
-   "started_at_utc": "2026-10-13T19:51:21Z",
+   "output_ref": "/tmp/root1255-219-retired-receipt-verifiers/v-config-schema.json",
+   "started_at_utc": "2026-10-13T20:11:20Z",
    "summary": "3 source(s), 0 new / 3 frozen undeclared reads, 0 failed; 4 vendored file(s) not attributed to this repository (Arcanada-one/arcanada-universal-program)"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.11,
+   "duration_s": 0.1,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -7127,8 +7112,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/tmp/root1255-219-declared-own-verifier-outputs/v-fitness.json",
-   "started_at_utc": "2026-10-13T19:51:21Z",
+   "output_ref": "/tmp/root1255-219-retired-receipt-verifiers/v-fitness.json",
+   "started_at_utc": "2026-10-13T20:11:20Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -7161,13 +7146,13 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/tmp/root1255-219-declared-own-verifier-outputs/v-doc-reference.txt",
-   "started_at_utc": "2026-10-13T19:51:21Z",
+   "output_ref": "/tmp/root1255-219-retired-receipt-verifiers/v-doc-reference.txt",
+   "started_at_utc": "2026-10-13T20:11:20Z",
    "summary": "10 document(s), 0 failed"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.94,
+   "duration_s": 0.84,
    "entities": [
     "code_unit:apps/api/src/auth/auth.module.ts",
     "code_unit:apps/api/src/tasks/tasks.controller.ts"
@@ -7180,12 +7165,12 @@
    "id": "v-canary-1",
    "kind": "canary",
    "output_ref": "receipts/canary/workspace-index-219/source-1802f2c-root1255-20261013/root1255-219-declared-api.result.json",
-   "started_at_utc": "2026-10-13T19:51:21Z",
+   "started_at_utc": "2026-10-13T20:11:20Z",
    "summary": "receipts/canary/workspace-index-219/source-1802f2c-root1255-20261013/root1255-219-declared-api.result.json: 2 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.94,
+   "duration_s": 0.84,
    "entities": [
     "code_unit:apps/web/__tests__/kanban-board.test.ts",
     "code_unit:apps/web/__tests__/read-api-contract.test.ts",
@@ -7242,12 +7227,12 @@
    "id": "v-canary-2",
    "kind": "canary",
    "output_ref": "receipts/canary/workspace-index-219/source-1802f2c-root1255-20261013/root1255-219-declared-web.result.json",
-   "started_at_utc": "2026-10-13T19:51:21Z",
+   "started_at_utc": "2026-10-13T20:11:20Z",
    "summary": "receipts/canary/workspace-index-219/source-1802f2c-root1255-20261013/root1255-219-declared-web.result.json: 24 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.94,
+   "duration_s": 0.84,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/projects/projects.controller.ts",
@@ -7372,12 +7357,12 @@
    "id": "v-canary-3",
    "kind": "canary",
    "output_ref": "receipts/canary/workspace-index-219/source-1802f2c-root1255-20261013/root1255-219-declared-routes.result.json",
-   "started_at_utc": "2026-10-13T19:51:21Z",
+   "started_at_utc": "2026-10-13T20:11:20Z",
    "summary": "receipts/canary/workspace-index-219/source-1802f2c-root1255-20261013/root1255-219-declared-routes.result.json: 58 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.94,
+   "duration_s": 0.84,
    "entities": [
     "contract:apps/web/lib/api/task-detail-controller.ts#ReadOutcome",
     "contract:apps/web/lib/api/task-detail-read.ts#revision",
@@ -7395,8 +7380,8 @@
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/tmp/root1255-219-declared-own-verifier-outputs/v-canary.json",
-   "started_at_utc": "2026-10-13T19:51:21Z",
+   "output_ref": "/tmp/root1255-219-retired-receipt-verifiers/v-canary.json",
+   "started_at_utc": "2026-10-13T20:11:20Z",
    "summary": "3 canary result(s), 3 committed at head; 83 verified / 0 failed / 5 not_measured of 88 entities"
   }
  ],
@@ -7875,7 +7860,6 @@
    "receipt:receipts/graph/mun-artifacts/project-index-takeover-change-admission.json": [],
    "receipt:receipts/graph/revision4-public-20261007.json": [],
    "receipt:receipts/graph/security-api959a-caller788.json": [],
-   "receipt:receipts/graph/workspace-index-219-20261007.json": [],
    "route:DELETE /agents/keys/:keyId": [
     "canary",
     "contract_diff",
@@ -8184,9 +8168,9 @@
    ]
   },
   "seconds": {
-   "prepare": 1.83,
-   "total": 45.06,
-   "verifiers": 20.68
+   "prepare": 1.66,
+   "total": 44.01,
+   "verifiers": 19.17
   }
  },
  "work_item": "1f99b768-65e6-4afe-93e6-611db53e3366"
