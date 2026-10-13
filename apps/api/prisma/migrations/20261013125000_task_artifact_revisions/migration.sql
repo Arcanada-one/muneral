@@ -8,7 +8,7 @@ CREATE TABLE task_artifact_revisions (
   content BYTEA NOT NULL,
   sha256 VARCHAR(64) NOT NULL CHECK (sha256 ~ '^[0-9a-f]{64}$'),
   content_type VARCHAR(128) NOT NULL,
-  size_bytes INTEGER NOT NULL CHECK (size_bytes BETWEEN 0 AND 65536 AND size_bytes = octet_length(content)),
+  size_bytes INTEGER NOT NULL CHECK (size_bytes BETWEEN 0 AND 1048576 AND size_bytes = octet_length(content)),
   actor_type VARCHAR(16) NOT NULL CHECK (actor_type IN ('human','agent')),
   actor_id UUID NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),

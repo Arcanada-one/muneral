@@ -16,7 +16,13 @@ claim is reused without rewriting its URI or its original attribution.
 }
 ```
 
-Limits are 64 KiB per decoded artifact, 16 MiB and 1000 stored revisions per
+For larger artifacts, `POST /tasks/:taskId/artifacts/bytes` accepts multipart
+form data with one `content` file and metadata fields `name`, `contentType`, and
+optional `sha256`. The server hashes the exact file bytes; the upload filename
+does not select the artifact name or content type. This route uses a bounded
+memory buffer, without changing the application's JSON parser limits.
+
+Limits are 64 KiB per JSON upload, 1 MiB per byte upload, 16 MiB and 1000 stored revisions per
 task, and the existing 100 KiB per HTTP JSON body. A changed body under the same name appends
 a revision; retrying the same name/digest returns the same immutable revision.
 A digest already registered with another content type is a conflict. The task

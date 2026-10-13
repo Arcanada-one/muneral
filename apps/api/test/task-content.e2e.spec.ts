@@ -126,6 +126,56 @@ describe('Task content artifacts (MUN-ARTIFACTS, e2e)', () => {
   const upload = (id: string, key = executorKey, body: object = payload()) => http().post(`/tasks/${id}/artifacts`).set('Authorization', `Bearer ${key}`).send(body);
   const get = (id: string, suffix: string, key = executorKey) => http().get(`/tasks/${id}/artifacts${suffix}`).set('Authorization', `Bearer ${key}`);
 
+  const uploadFile = (id: string, data: Buffer, key = executorKey, expectedSha?: string) => {
+    const req = http().post(`/tasks/${id}/artifacts/bytes`).set('Authorization', `Bearer ${key}`)
+      .field('name', 'large-receipt.bin').field('contentType', 'application/octet-stream');
+    if (expectedSha !== undefined) req.field('sha256', expectedSha);
+    return req.attach('content', data, { filename: 'ignored-client-filename.bin' });
+  };
+
+  it('stores a whole 1 MiB byte upload, verifies server SHA and shares idempotency with JSON', async () => {
+    const task = await assignedTask();
+    const large = Buffer.alloc(1024 * 1024, 0x81);
+    const expected = createHash('sha256').update(large).digest('hex');
+    const result = await uploadFile(task.id, large, executorKey, expected).expect(201);
+    expect(result.body).toMatchObject({ sha256: expected, sizeBytes: large.length, revision: 1, actorId: executorAgentId });
+    const fetched = await get(task.id, `/${result.body.id}`).expect(200);
+    expect(Buffer.from(fetched.body.contentBase64, 'base64').equals(large)).toBe(true);
+    expect((await uploadFile(task.id, large).expect(201)).body).toMatchObject({ id: result.body.id, idempotent: true });
+    const small = Buffer.from('same bytes across both transports');
+    const uploaded = await uploadFile(task.id, small).expect(201);
+    const retry = await upload(task.id, executorKey, { ...payload(small, 'large-receipt.bin'), contentType: 'application/octet-stream' }).expect(201);
+    expect(retry.body).toMatchObject({ id: uploaded.body.id, idempotent: true });
+  });
+
+  it('refuses oversize/missing byte files, digest mismatch and forged metadata before storage', async () => {
+    const task = await assignedTask();
+    await uploadFile(task.id, Buffer.alloc(1024 * 1024 + 1)).expect(413);
+    await uploadFile(task.id, bytes, executorKey, '0'.repeat(64)).expect(400);
+    await http().post(`/tasks/${task.id}/artifacts/bytes`).set('Authorization', `Bearer ${executorKey}`)
+      .field('name', 'missing.bin').field('contentType', 'application/octet-stream').expect(400);
+    await http().post(`/tasks/${task.id}/artifacts/bytes`).set('Authorization', `Bearer ${executorKey}`)
+      .field('name', 'forged.bin').field('contentType', 'application/octet-stream').field('actorId', creatorAgentId)
+      .attach('content', bytes, 'content.bin').expect(400);
+    await http().post(`/tasks/${task.id}/artifacts/bytes`).set('Authorization', `Bearer ${executorKey}`)
+      .field('name', 'duplicate-file.bin').field('contentType', 'application/octet-stream')
+      .attach('content', bytes, 'one.bin').attach('content', bytes, 'two.bin').expect(400);
+    expect(await prisma.taskArtifactRevision.count({ where: { taskId: task.id } })).toBe(0);
+  });
+
+  it('refuses byte writes by unassigned/foreign/creator-only keys and keeps DB byte limits', async () => {
+    const task = await assignedTask();
+    for (const key of [strangerKey, foreignKey, creatorKey]) await uploadFile(task.id, bytes, key).expect(403);
+    const result = await uploadFile(task.id, Buffer.alloc(0)).expect(201);
+    expect(result.body.sizeBytes).toBe(0);
+    const row = await prisma.taskArtifactRevision.findUniqueOrThrow({ where: { id: result.body.id } });
+    await expect(prisma.taskArtifactRevision.create({ data: {
+      taskId: task.id, evidenceId: row.evidenceId, kind: 'artifact', name: 'db-oversize', revision: 1,
+      content: new Uint8Array(1024 * 1024 + 1), sha256: '0'.repeat(64), sizeBytes: 1024 * 1024 + 1,
+      contentType: 'application/octet-stream', actorType: 'agent', actorId: executorAgentId,
+    } })).rejects.toThrow();
+  });
+
   it('stores exact bytes with server digest and credential attribution; lists and retrieves by ID and SHA', async () => {
     const task = await assignedTask();
     const result = await upload(task.id).expect(201);
