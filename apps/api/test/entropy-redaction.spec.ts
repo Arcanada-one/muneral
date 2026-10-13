@@ -27,6 +27,19 @@ describe('A6 generic-entropy redaction parity', () => {
     expect(redactSpans(text, spans[0], MARKER)).toBe(`public ${VALUE}; api_token="${MARKER}"; other_token='${MARKER}'`);
   });
 
+  it.each(['ключ', '密钥', 'éé', '𝟙𝟚'])('matches the original Unicode key %s', key => {
+    const spans = spansOfRule(ruleById('generic-entropy')!, `${key}="${VALUE}"`);
+    expect(spans).toHaveLength(1);
+    expect(spans[0].sha256).toBe(sha256Hex(VALUE));
+  });
+
+  it('uses the scanner Unicode version and whitespace table, not Node17 defaults', () => {
+    // Node17 recognizes U+1C89, but the pinned Python15 scanner does not.
+    expect(spansOfRule(ruleById('generic-entropy')!, `\u{1c89}\u{1c89}="${VALUE}"`)).toEqual([]);
+    expect(spansOfRule(ruleById('generic-entropy')!, `api_token=\ufeff"${VALUE}"`)).toEqual([]);
+    expect(spansOfRule(ruleById('generic-entropy')!, `api_token=\u001f"${VALUE}"`)).toHaveLength(1);
+  });
+
   it('uses actual capture offsets when the key repeats the same value', () => {
     const text = `${VALUE}="${VALUE}"`;
     expect(redactSpans(text, spansOfRule(ruleById('generic-entropy')!, text)[0], MARKER))

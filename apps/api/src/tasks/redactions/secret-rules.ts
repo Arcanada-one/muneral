@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { PYTHON_SECRET_WORD_CLASS, PYTHON_SECRET_SPACE_CLASS } from './python-secret-classes.js';
 
 /**
  * MUN-0049 — the six critical and generic-entropy rules of the Scrutator `muneral-kb-sync` scanner,
@@ -32,7 +33,7 @@ export const SECRET_RULES: ReadonlyArray<SecretRule> = [
   { id: 'cloudflare-origin-token', pattern: /v1\.0-[A-Za-z0-9-]{100,}/g },
   { id: 'pem-private-key', pattern: /-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----/g },
   // A3 Finding.span_hash hashes the captured value, not the assignment.
-  { id: 'generic-entropy', pattern: /([\w.\-]{2,})["']?\s*[:=]\s*["']([A-Za-z0-9+/=_\-]{20,})["']/g,
+  { id: 'generic-entropy', pattern: new RegExp(String.raw`([${PYTHON_SECRET_WORD_CLASS}.\-]{2,})["']?[${PYTHON_SECRET_SPACE_CLASS}]*[:=][${PYTHON_SECRET_SPACE_CLASS}]*["']([A-Za-z0-9+/=_\-]{20,})["']`, 'gu'),
     captureGroup: 2, minimumEntropy: 4.0 },
 ];
 

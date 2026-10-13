@@ -98,6 +98,18 @@ describe('TaskRedactionService', () => {
     expect(d.kanban.notify).not.toHaveBeenCalled();
   });
 
+  it('refuses scanner-blocked Unicode replacement before update, response or audit', async () => {
+    const d = makeDeps({ title: HVS, description: null });
+    const replacement = 'ключ="Zq3TbWxPnLdRvKJ8FheApcNyUgMsBtVxHwEzQrLm"';
+    await expect(d.service.redact(TASK_ID, ACTOR, dto({ replacement }))).rejects.toMatchObject({
+      response: { code: 'REPLACEMENT_NOT_CLEAN', rules: ['generic-entropy'] },
+    });
+    expect(d.tx.task.update).not.toHaveBeenCalled();
+    expect(d.created).toEqual([]);
+    expect(d.tx.activityLog.create).not.toHaveBeenCalled();
+    expect(d.kanban.notify).not.toHaveBeenCalled();
+  });
+
   it('redacts generic-entropy only at scanner value positions with hash-only audit', async () => {
     const value = 'Zq3TbWxPnLdRvKJ8FheApcNyUgMsBtVxHwEzQrLm';
     const text = `public ${value}; api_token="${value}"`;
