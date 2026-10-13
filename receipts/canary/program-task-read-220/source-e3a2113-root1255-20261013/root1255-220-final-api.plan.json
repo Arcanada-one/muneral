@@ -1,0 +1,159 @@
+{
+  "schema": "CanaryPlan/v2",
+  "id": "own-pr220-merged-main-native-admission",
+  "owner": "MUN-ARTIFACTS",
+  "environment": "owned-loopback-postgres-disposable-databases",
+  "read_only": false,
+  "producer_repository": "/home/dev/aup/mun-program-read-root1255-20261013",
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "e3a211302ea89f1ee7d48e1725ed79487ce515f8",
+    "tree": "75b7fdad227adc5a3ceb17d34ae5646ce114c505",
+    "evidence": {
+      "path": "root1255-220-final-source.json",
+      "sha256": "9a55e229f6b021d8abe0d18acdae99ddfd813ca586cfad4fe225f4eafbb15f09",
+      "source_field": "commit"
+    }
+  },
+  "probes": [
+    {
+      "id": "native-task-evidence-http-admission-and-human-isolation",
+      "kind": "process",
+      "argv": [
+        "/opt/ard-ci-adamalante/_work/_tool/node/24.21.0/x64/bin/node",
+        "/home/dev/aup/mun-program-read-root1255-20261013/apps/api/node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "test/task-granted-read.e2e.spec.ts",
+        "test/agent-task-scope.guard.spec.ts",
+        "test/human-task-read-isolation.e2e.spec.ts",
+        "test/workspace-digest.unit.spec.ts",
+        "test/mutation-evidence.spec.ts"
+      ],
+      "cwd": "apps/api",
+      "env_keys": [
+        "PATH",
+        "DATABASE_URL",
+        "MUN0020_DB_URL",
+        "MUN0021_PG_BASE_URL",
+        "NODE_OPTIONS",
+        "HOME",
+        "TMPDIR"
+      ],
+      "timeout_seconds": 120,
+      "capture_limit_bytes": 1048576,
+      "mutating": true,
+      "entities": [
+        "code_unit:apps/api/src/auth/auth.module.ts",
+        "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
+        "code_unit:apps/api/src/auth/task-project-read-admission.ts",
+        "code_unit:apps/api/src/auth/task-project-read-capabilities.ts",
+        "code_unit:apps/api/src/tasks/granted-task-read.service.ts",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts",
+        "code_unit:apps/api/src/tasks/tasks.service.ts",
+        "code_unit:apps/api/src/auth/project-index-admission.ts",
+        "code_unit:apps/api/src/auth/guards/human-task-read.guard.ts",
+        "code_unit:apps/api/src/auth/human-task-visibility.ts"
+      ],
+      "executable_sha256": "7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c",
+      "execution_files": [
+        {
+          "path": "/home/dev/aup/mun-program-read-root1255-20261013/apps/api/src/auth/auth.module.ts",
+          "sha256": "569813c8c0ecb234811d85f3df3ffc84e438ec13009eed825866b7b9d2a4e05e"
+        },
+        {
+          "path": "/home/dev/aup/mun-program-read-root1255-20261013/apps/api/src/auth/guards/agent-task-scope.guard.ts",
+          "sha256": "8826bf759434d2b7d349b1c57075d550f0c36a4e9962a56079fafbdc92e08478"
+        },
+        {
+          "path": "/home/dev/aup/mun-program-read-root1255-20261013/apps/api/src/auth/task-project-read-admission.ts",
+          "sha256": "e96c1cee1eed294f41fdb9b0b07b38ebf378c5265d18b99f66855880240d5a23"
+        },
+        {
+          "path": "/home/dev/aup/mun-program-read-root1255-20261013/apps/api/src/auth/task-project-read-capabilities.ts",
+          "sha256": "4a7516b09372b6266cac2d983893df9561a87889db4041c94bcbdd32356cddb4"
+        },
+        {
+          "path": "/home/dev/aup/mun-program-read-root1255-20261013/apps/api/src/tasks/granted-task-read.service.ts",
+          "sha256": "3b26ce1722a8ea70f1e711e39897c25c67749ca2c631ee279f7f1614de16fadf"
+        },
+        {
+          "path": "/home/dev/aup/mun-program-read-root1255-20261013/apps/api/src/tasks/tasks.controller.ts",
+          "sha256": "418435f31ef4ebc2d8b347d7590aa02ec17c35eed307b5b3937d74e26158433d"
+        },
+        {
+          "path": "/home/dev/aup/mun-program-read-root1255-20261013/apps/api/src/tasks/tasks.service.ts",
+          "sha256": "9a9607f7bbb34cf56ae380c20641f744ba6822932b85e45a9ddadc6c8cb2c50c"
+        },
+        {
+          "path": "/home/dev/aup/mun-program-read-root1255-20261013/apps/api/src/auth/project-index-admission.ts",
+          "sha256": "9d1ef1997ce1234da5d05ebcbde4b9f6702bf34a76ea8a179d15b9570c66a122"
+        },
+        {
+          "path": "/home/dev/aup/mun-program-read-root1255-20261013/apps/api/src/auth/guards/human-task-read.guard.ts",
+          "sha256": "cb8de58d5c5480fb8621522d4799cb2938af2bae8ddc43ba84562ca6883b2dcc"
+        },
+        {
+          "path": "/home/dev/aup/mun-program-read-root1255-20261013/apps/api/src/auth/human-task-visibility.ts",
+          "sha256": "d455058fbf5f3ac68ab273ff30cffe1dc846e22395e9611b837e7b084d14cfd6"
+        },
+        {
+          "path": "/home/dev/aup/mun-program-read-root1255-20261013/apps/api/test/task-granted-read.e2e.spec.ts",
+          "sha256": "93ceda3967e2821119496a67c7738b39937b25803ac1abbcc06f86498f2671ad"
+        },
+        {
+          "path": "/home/dev/aup/mun-program-read-root1255-20261013/apps/api/test/agent-task-scope.guard.spec.ts",
+          "sha256": "094d9b302b061e2cf3e29a58d23ff907f2bbafde5c342e709b351235a54a6516"
+        },
+        {
+          "path": "/home/dev/aup/mun-program-read-root1255-20261013/apps/api/test/human-task-read-isolation.e2e.spec.ts",
+          "sha256": "722849332bdb240d348cf130df75f0d355cf76df8dcd268eb86aa7e687d29f95"
+        },
+        {
+          "path": "/home/dev/aup/mun-program-read-root1255-20261013/apps/api/test/workspace-digest.unit.spec.ts",
+          "sha256": "b20aa39ab63905d48526c034a388cc0fa710229b04bb8d53a6130697f73879ce"
+        },
+        {
+          "path": "/home/dev/aup/mun-program-read-root1255-20261013/apps/api/test/mutation-evidence.spec.ts",
+          "sha256": "0621c127b42a4b5b32be9c16e2d49ccdd7e4c83fb77a5c5fb824244089f961aa"
+        },
+        {
+          "path": "/home/dev/aup/mun-program-read-root1255-20261013/apps/api/test/support/disposable-postgres.ts",
+          "sha256": "6644ee5e273b9bc866254288f8e4c426800da68875f485c932f28dc1e8576e3b"
+        },
+        {
+          "path": "/home/dev/aup/mun-program-read-root1255-20261013/apps/api/prisma/schema.prisma",
+          "sha256": "4ba70ef686a76611855b6fa59c5fc3b1ca4abcfe622f46c611ac846bdc2e753c"
+        },
+        {
+          "path": "/home/dev/aup/mun-program-read-root1255-20261013/pnpm-lock.yaml",
+          "sha256": "b9fd7a00c104eccb56944baa49ef119aee98792efb68467fd6018cfae5d84978"
+        },
+        {
+          "path": "/home/dev/aup/mun-program-read-root1255-20261013/apps/api/package.json",
+          "sha256": "919202c86e4a269cb8e4e680b9fdb768e555bbf8d7caf449adea37123657652c"
+        },
+        {
+          "path": "/home/dev/aup/mun-program-read-root1255-20261013/apps/api/tsconfig.json",
+          "sha256": "e9d48a8d90da20846c7725067dd944d1f1f7c6d21faff18022360aa8759740bf"
+        },
+        {
+          "path": "/home/dev/aup/mun-program-read-root1255-20261013/apps/api/tsconfig.test.json",
+          "sha256": "b45b51f10e6897b5fa212f421842c1334c9e1f7942e446dcf278bb08b9c55d1d"
+        }
+      ],
+      "expect": {
+        "exit_codes": [
+          0
+        ],
+        "stdout_contains": [],
+        "stderr_contains": [
+          "191 passed"
+        ]
+      }
+    }
+  ],
+  "limitations": [
+    "Actual HTTP/PG tests use their existing grant/capability fixtures; no production key or deployment acceptance.",
+    "No claim for web consumer entities or contract labels unsupported by the native process evidence codec."
+  ]
+}
