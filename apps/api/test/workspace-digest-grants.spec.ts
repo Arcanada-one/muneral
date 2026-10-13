@@ -72,19 +72,7 @@ describe("the shipped workspace-digest grant list", () => {
    * repository's own gate — not here. A green test on this file is evidence
    * about the literal, not about the authority behind it.
    */
-  const ENTRIES_THE_DECISIONS_NAME = [
-    {
-      agentId: "565171f7-a3ca-45a4-b50e-4d8b07cf0b86",
-      agentName: "arcanada-assistant",
-      workspaceId: "05f8cddf-e91f-430b-81e3-d67965aa4de3",
-      until: "2026-10-09T00:00:00Z",
-      decision: "DEC-AUP-0049",
-      // A prefix of sha256(evidence), so the projection covers `evidence` too:
-      // the string that tells a reviewer what the entry bought could otherwise
-      // be rewritten freely without failing this equality.
-      evidenceSha256: EVIDENCE_SHA256_PREFIX,
-    },
-  ];
+  const ENTRIES_THE_DECISIONS_NAME = [] as const;
 
   it("holds EXACTLY the entries the program decisions name", () => {
     expect(
@@ -149,25 +137,41 @@ describe("workspaceDigestGrantState", () => {
     expect(workspaceDigestGrantState(AGENT, WS, now).kind).toBe("none");
   });
 
+  it("refuses the temporarily removed assistant pair against the shipped list", () => {
+    expect(workspaceDigestGrantState(
+      "565171f7-a3ca-45a4-b50e-4d8b07cf0b86",
+      "05f8cddf-e91f-430b-81e3-d67965aa4de3",
+      new Date(),
+    ).kind).toBe("none");
+  });
+
   it("answers `live` for the granted pair, and `expired` after its window", () => {
-    const granted = WORKSPACE_DIGEST_GRANT_LIST[0]!;
+    const granted = entry({
+      agentId: "565171f7-a3ca-45a4-b50e-4d8b07cf0b86",
+      workspaceId: "05f8cddf-e91f-430b-81e3-d67965aa4de3",
+      until: "2026-10-09T00:00:00Z",
+    });
     const during = new Date(Date.parse(granted.until) - 86_400_000);
     const after = new Date(Date.parse(granted.until));
     expect(
-      workspaceDigestGrantState(granted.agentId, granted.workspaceId, during)
+      workspaceDigestGrantState(granted.agentId, granted.workspaceId, during, [granted])
         .kind,
     ).toBe("live");
     // `until` is EXCLUSIVE: the grant is closed AT the instant, not after it.
     expect(
-      workspaceDigestGrantState(granted.agentId, granted.workspaceId, after)
+      workspaceDigestGrantState(granted.agentId, granted.workspaceId, after, [granted])
         .kind,
     ).toBe("expired");
   });
 
   it("does not answer `live` for the granted agent in another workspace", () => {
-    const granted = WORKSPACE_DIGEST_GRANT_LIST[0]!;
+    const granted = entry({
+      agentId: "565171f7-a3ca-45a4-b50e-4d8b07cf0b86",
+      workspaceId: "05f8cddf-e91f-430b-81e3-d67965aa4de3",
+      until: "2026-10-09T00:00:00Z",
+    });
     const during = new Date(Date.parse(granted.until) - 86_400_000);
-    expect(workspaceDigestGrantState(granted.agentId, WS, during).kind).toBe(
+    expect(workspaceDigestGrantState(granted.agentId, WS, during, [granted]).kind).toBe(
       "none",
     );
   });
