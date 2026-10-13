@@ -5,7 +5,7 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "admitted"
  },
- "captured_at_utc": "2026-10-13T13:41:58Z",
+ "captured_at_utc": "2026-10-13T14:40:56Z",
  "change_set": {
   "base": "840e3be216844d57c163daf14ec0a5d51657f963",
   "files": [
@@ -73,7 +73,8 @@
      "route:GET /tasks/:taskId/artifacts",
      "route:GET /tasks/:taskId/artifacts/:artifactId",
      "route:GET /tasks/:taskId/artifacts/by-sha/:sha256",
-     "route:POST /tasks/:taskId/artifacts"
+     "route:POST /tasks/:taskId/artifacts",
+     "route:POST /tasks/:taskId/artifacts/bytes"
     ],
     "path": "apps/api/src/tasks/content/task-content.controller.ts",
     "status": "A"
@@ -83,6 +84,7 @@
     "node_id": "code_unit:apps/api/src/tasks/content/task-content.dto.ts",
     "node_ids": [
      "code_unit:apps/api/src/tasks/content/task-content.dto.ts",
+     "contract:apps/api/src/tasks/content/task-content.dto.ts#ArtifactMetadataDto",
      "contract:apps/api/src/tasks/content/task-content.dto.ts#UploadArtifactDto"
     ],
     "path": "apps/api/src/tasks/content/task-content.dto.ts",
@@ -193,6 +195,42 @@
    {
     "kind": "receipt",
     "new": true,
+    "path": "receipts/canary/mun-artifacts-content-20261013/source-74cea9e/root1255-bytes-api.plan.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/mun-artifacts-content-20261013/source-74cea9e/root1255-bytes-api.result.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/mun-artifacts-content-20261013/source-74cea9e/root1255-bytes-api.result.source-evidence.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/mun-artifacts-content-20261013/source-74cea9e/root1255-consumer-source.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/mun-artifacts-content-20261013/source-74cea9e/root1255-web-consumer.plan.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/mun-artifacts-content-20261013/source-74cea9e/root1255-web-consumer.result.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
     "path": "receipts/canary/mun-artifacts-content-20261013/source-f8db289/root1255-consumer-source.json",
     "status": "A"
    },
@@ -236,7 +274,7 @@
     "status": "A"
    }
   ],
-  "head": "986764dc1e9b9b51d70d8d661f28264bd1faf244",
+  "head": "ac4e9e5513ca550999b11688751b4365edc3671c",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -245,17 +283,17 @@
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
   "graph_digest": "sha256:d4be88318996f7d945b83d7a8faba9c0a3a8331b2dfdc25ae10056a6be4100f7",
-  "path": "/tmp/root1255-content-full-outputs/graph-840e3be21684.json",
+  "path": "/tmp/root1255-bytes-verifier-outputs/graph-840e3be21684.json",
   "source_commit": "840e3be216844d57c163daf14ec0a5d51657f963"
  },
  "head_graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:c5b5b07ff2e4d3f00979af8e89bcd99191009793f31c925dab87ff29825fbdb8",
-  "path": "/tmp/root1255-content-full-outputs/graph-head-986764dc1e9b.json",
-  "source_commit": "986764dc1e9b9b51d70d8d661f28264bd1faf244",
+  "graph_digest": "sha256:3c7485ecd17112e3fc8fa53fa84e32b44aba393fb7e2784f7fdab7b890cf5165",
+  "path": "/tmp/root1255-bytes-verifier-outputs/graph-head-ac4e9e5513ca.json",
+  "source_commit": "ac4e9e5513ca550999b11688751b4365edc3671c",
   "staleness": {
-   "checked_at_utc": "2026-10-13T13:42:20Z",
+   "checked_at_utc": "2026-10-13T14:41:22Z",
    "checked_nodes": 459,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
@@ -264,7 +302,7 @@
  },
  "host": "source-lane",
  "host_redacted": true,
- "host_sha256": "4e160934d6b9b243b23f8bba7a17a541b796c29b3c594f928bdc8a14bdc12256",
+ "host_sha256": "18eb494b4c628e7714db877b22f2c38395d6ef1e1cf51dfa24a6c1fa36ab60b1",
  "impact_set": {
   "deterministic_core": [
    {
@@ -6504,7 +6542,7 @@
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261013T134158Z-986764dc",
+ "receipt_id": "car-verify-20261013T144056Z-ac4e9e55",
  "receipt_path": "receipts/graph/mun-artifacts/content-change-admission.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -6930,6 +6968,7 @@
    "contract:apps/api/src/execution-authority/task-execution-recorder.service.ts#RecordVerdict",
    "contract:apps/api/src/execution-authority/task-staleness.service.ts#StalenessVerdict",
    "contract:apps/api/src/outbox/work-outcome-ledger.reader.ts#WorkOutcomeDisposition",
+   "contract:apps/api/src/tasks/content/task-content.dto.ts#ArtifactMetadataDto",
    "contract:apps/api/src/tasks/content/task-content.dto.ts#UploadArtifactDto",
    "data_model:ActivityLog",
    "data_model:Agent",
@@ -7096,6 +7135,7 @@
    "route:POST /sync/datarim/:projectId/import",
    "route:POST /tasks",
    "route:POST /tasks/:taskId/artifacts",
+   "route:POST /tasks/:taskId/artifacts/bytes",
    "route:POST /tasks/:taskId/attempts/:attemptId/solution-log-heads",
    "route:POST /tasks/:taskId/checklist",
    "route:POST /tasks/:taskId/comments",
@@ -7112,7 +7152,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-13T13:42:20Z",
+  "checked_at_utc": "2026-10-13T14:41:22Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -7539,7 +7579,7 @@
   {
    "content_hash": {
     "base": null,
-    "head": "sha256:ecade69f86dd467cd165b5c8ee4c18a386c97d1b0e9f70fae8a018317cd61286"
+    "head": "sha256:e9d50ca51e0202e5423c5901d3332b563df816425a96b807940e6de8b7546400"
    },
    "entity": "receipt:receipts/graph/mun-artifacts/content-change-admission.json",
    "node_type": "receipt",
@@ -7575,7 +7615,7 @@
   }
  ],
  "tree": {
-  "commit": "986764dc1e9b9b51d70d8d661f28264bd1faf244",
+  "commit": "ac4e9e5513ca550999b11688751b4365edc3671c",
   "dirty": false
  },
  "verdicts": [
@@ -8060,7 +8100,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/content/task-content.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-1: canary muneral-route-presence (post) on local-candidate-fixture-auth: all 4 cited probes verified; first: route-get-tasks-taskid-artifacts: status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/artifacts is in the resident route table",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-1: canary muneral-route-presence (post) on local-candidate-fixture-auth: all 5 cited probes verified; first: route-get-tasks-taskid-artifacts: status 401 (not 404/405/5xx) and GET /api/v1/tasks/:taskId/artifacts is in the resident route table",
    "verdict": "verified",
    "verifier_ids": [
     "v-canary-1",
@@ -8071,7 +8111,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/content/task-content.dto.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation",
    "verdict": "verified",
    "verifier_ids": [
     "v-contract-diff",
@@ -8081,7 +8121,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/content/task-content.service.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation",
    "verdict": "verified",
    "verifier_ids": [
     "v-contract-diff",
@@ -8764,6 +8804,14 @@
    ]
   },
   {
+   "entity": "contract:apps/api/src/tasks/content/task-content.dto.ts#ArtifactMetadataDto",
+   "reason": "v-contract-diff: added: no breaking change (1 change(s))",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-contract-diff"
+   ]
+  },
+  {
    "entity": "contract:apps/api/src/tasks/content/task-content.dto.ts#UploadArtifactDto",
    "reason": "v-contract-diff: added: no breaking change (1 change(s))",
    "verdict": "verified",
@@ -9199,7 +9247,7 @@
   },
   {
    "entity": "document:docs/task-content-artifacts.md",
-   "reason": "v-doc-reference: 2 reference(s) resolve at head",
+   "reason": "v-doc-reference: 3 reference(s) resolve at head",
    "verdict": "verified",
    "verifier_ids": [
     "v-doc-reference"
@@ -9976,6 +10024,17 @@
    ]
   },
   {
+   "entity": "route:POST /tasks/:taskId/artifacts/bytes",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-route-presence (post) on local-candidate-fixture-auth: route-post-tasks-taskid-artifacts-bytes: POST /api/v1/tasks/:taskId/artifacts/bytes is in the resident route table (not called: not a safe verb)",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-canary-1",
+    "v-contract-diff",
+    "v-route-config",
+    "v-type-check-apps-api-tsconfig"
+   ]
+  },
+  {
    "entity": "route:POST /tasks/:taskId/attempts/:attemptId/solution-log-heads",
    "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-route-presence (post) on local-candidate-fixture-auth: route-post-tasks-taskid-attempts-attemptid-solution-log-heads: POST /api/v1/tasks/:taskId/attempts/:attemptId/solution-log-heads is in the resident route table (not called: not a safe verb)",
    "verdict": "verified",
@@ -10094,8 +10153,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/aup/mun-artifacts-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-artifacts-root1255-20261013/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-content-full-outputs/type-check-b22uhn9j/check.tsbuildinfo --listFiles",
-   "duration_s": 3.13,
+   "command": "/home/dev/aup/mun-artifacts-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-artifacts-root1255-20261013/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-bytes-verifier-outputs/type-check-bf1cd0yy/check.tsbuildinfo --listFiles",
+   "duration_s": 6.08,
    "entities": [
     "code_unit:apps/api/src/activity/activity.module.ts",
     "code_unit:apps/api/src/activity/activity.service.ts",
@@ -10238,6 +10297,7 @@
     "route:POST /sync/datarim/:projectId/import",
     "route:POST /tasks",
     "route:POST /tasks/:taskId/artifacts",
+    "route:POST /tasks/:taskId/artifacts/bytes",
     "route:POST /tasks/:taskId/attempts/:attemptId/solution-log-heads",
     "route:POST /tasks/:taskId/checklist",
     "route:POST /tasks/:taskId/comments",
@@ -10391,6 +10451,7 @@
     "route:POST /sync/datarim/:projectId/import": "verified",
     "route:POST /tasks": "verified",
     "route:POST /tasks/:taskId/artifacts": "verified",
+    "route:POST /tasks/:taskId/artifacts/bytes": "verified",
     "route:POST /tasks/:taskId/attempts/:attemptId/solution-log-heads": "verified",
     "route:POST /tasks/:taskId/checklist": "verified",
     "route:POST /tasks/:taskId/comments": "verified",
@@ -10405,13 +10466,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "/tmp/root1255-content-full-outputs/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-10-13T13:42:24Z",
-   "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1456 files listed"
+   "output_ref": "/tmp/root1255-bytes-verifier-outputs/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-10-13T14:41:27Z",
+   "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1475 files listed"
   },
   {
-   "command": "/home/dev/aup/mun-artifacts-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-artifacts-root1255-20261013/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-content-full-outputs/type-check-qfzdp6e0/check.tsbuildinfo --listFiles",
-   "duration_s": 5.19,
+   "command": "/home/dev/aup/mun-artifacts-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-artifacts-root1255-20261013/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-bytes-verifier-outputs/type-check-d0ttjyhf/check.tsbuildinfo --listFiles",
+   "duration_s": 9.39,
    "entities": [
     "code_unit:apps/api/test/activity.service.spec.ts",
     "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts",
@@ -10515,13 +10576,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
-   "output_ref": "/tmp/root1255-content-full-outputs/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-10-13T13:42:27Z",
+   "output_ref": "/tmp/root1255-bytes-verifier-outputs/v-type-check-apps-api-tsconfig-test.txt",
+   "started_at_utc": "2026-10-13T14:41:34Z",
    "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1638 files listed"
   },
   {
-   "command": "/home/dev/aup/mun-artifacts-root1255-20261013/apps/web/node_modules/.bin/tsc -p /home/dev/aup/mun-artifacts-root1255-20261013/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-content-full-outputs/type-check-za5iro1h/check.tsbuildinfo --listFiles",
-   "duration_s": 4.06,
+   "command": "/home/dev/aup/mun-artifacts-root1255-20261013/apps/web/node_modules/.bin/tsc -p /home/dev/aup/mun-artifacts-root1255-20261013/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-bytes-verifier-outputs/type-check-e9_khxgh/check.tsbuildinfo --listFiles",
+   "duration_s": 9.33,
    "entities": [
     "code_unit:apps/web/__tests__/web-consumer-live.test.ts",
     "code_unit:apps/web/lib/api/task-detail-read.ts",
@@ -10541,13 +10602,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/tmp/root1255-content-full-outputs/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-10-13T13:42:33Z",
+   "output_ref": "/tmp/root1255-bytes-verifier-outputs/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-10-13T14:41:44Z",
    "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1313 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=840e3be21684, head=986764dc1e9b, graph=head graph)",
-   "duration_s": 4.58,
+   "command": "tools/graph/contract_diff.py.run_diff(base=840e3be21684, head=ac4e9e5513ca, graph=head graph)",
+   "duration_s": 6.3,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.service.ts",
@@ -10581,6 +10642,7 @@
     "contract:apps/api/src/execution-authority/task-execution-recorder.service.ts#RecordVerdict",
     "contract:apps/api/src/execution-authority/task-staleness.service.ts#StalenessVerdict",
     "contract:apps/api/src/outbox/work-outcome-ledger.reader.ts#WorkOutcomeDisposition",
+    "contract:apps/api/src/tasks/content/task-content.dto.ts#ArtifactMetadataDto",
     "contract:apps/api/src/tasks/content/task-content.dto.ts#UploadArtifactDto",
     "route:DELETE /agents/keys/:keyId",
     "route:DELETE /agents/tasks/:taskId/assign/:agentId",
@@ -10652,6 +10714,7 @@
     "route:POST /sync/datarim/:projectId/import",
     "route:POST /tasks",
     "route:POST /tasks/:taskId/artifacts",
+    "route:POST /tasks/:taskId/artifacts/bytes",
     "route:POST /tasks/:taskId/attempts/:attemptId/solution-log-heads",
     "route:POST /tasks/:taskId/checklist",
     "route:POST /tasks/:taskId/comments",
@@ -10696,6 +10759,7 @@
     "contract:apps/api/src/execution-authority/task-execution-recorder.service.ts#RecordVerdict": "verified",
     "contract:apps/api/src/execution-authority/task-staleness.service.ts#StalenessVerdict": "verified",
     "contract:apps/api/src/outbox/work-outcome-ledger.reader.ts#WorkOutcomeDisposition": "verified",
+    "contract:apps/api/src/tasks/content/task-content.dto.ts#ArtifactMetadataDto": "verified",
     "contract:apps/api/src/tasks/content/task-content.dto.ts#UploadArtifactDto": "verified",
     "route:DELETE /agents/keys/:keyId": "verified",
     "route:DELETE /agents/tasks/:taskId/assign/:agentId": "verified",
@@ -10767,6 +10831,7 @@
     "route:POST /sync/datarim/:projectId/import": "verified",
     "route:POST /tasks": "verified",
     "route:POST /tasks/:taskId/artifacts": "verified",
+    "route:POST /tasks/:taskId/artifacts/bytes": "verified",
     "route:POST /tasks/:taskId/attempts/:attemptId/solution-log-heads": "verified",
     "route:POST /tasks/:taskId/checklist": "verified",
     "route:POST /tasks/:taskId/comments": "verified",
@@ -10781,13 +10846,13 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "/tmp/root1255-content-full-outputs/v-contract-diff.json",
-   "started_at_utc": "2026-10-13T13:42:37Z",
-   "summary": "58→59 contracts, breaking 0, edges {'verified': 167}"
+   "output_ref": "/tmp/root1255-bytes-verifier-outputs/v-contract-diff.json",
+   "started_at_utc": "2026-10-13T14:41:53Z",
+   "summary": "58→60 contracts, breaking 0, edges {'verified': 170}"
   },
   {
    "command": "verify.py route_config_consistency RC-01 prefix / RC-02 registration / RC-03 served",
-   "duration_s": 0.05,
+   "duration_s": 0.08,
    "entities": [
     "route:DELETE /agents/keys/:keyId",
     "route:DELETE /agents/tasks/:taskId/assign/:agentId",
@@ -10859,6 +10924,7 @@
     "route:POST /sync/datarim/:projectId/import",
     "route:POST /tasks",
     "route:POST /tasks/:taskId/artifacts",
+    "route:POST /tasks/:taskId/artifacts/bytes",
     "route:POST /tasks/:taskId/attempts/:attemptId/solution-log-heads",
     "route:POST /tasks/:taskId/checklist",
     "route:POST /tasks/:taskId/comments",
@@ -10941,6 +11007,7 @@
     "route:POST /sync/datarim/:projectId/import": "verified",
     "route:POST /tasks": "verified",
     "route:POST /tasks/:taskId/artifacts": "verified",
+    "route:POST /tasks/:taskId/artifacts/bytes": "verified",
     "route:POST /tasks/:taskId/attempts/:attemptId/solution-log-heads": "verified",
     "route:POST /tasks/:taskId/checklist": "verified",
     "route:POST /tasks/:taskId/comments": "verified",
@@ -10955,13 +11022,13 @@
    "exit_code": 0,
    "id": "v-route-config",
    "kind": "config_schema",
-   "output_ref": "/tmp/root1255-content-full-outputs/v-route-config.txt",
-   "started_at_utc": "2026-10-13T13:42:42Z",
-   "summary": "80 route(s), 0 failed"
+   "output_ref": "/tmp/root1255-bytes-verifier-outputs/v-route-config.txt",
+   "started_at_utc": "2026-10-13T14:42:00Z",
+   "summary": "81 route(s), 0 failed"
   },
   {
    "command": "verify.py prisma-lite diff base→head + /home/dev/aup/mun-artifacts-root1255-20261013/node_modules/.bin/prisma validate",
-   "duration_s": 0.96,
+   "duration_s": 1.96,
    "entities": [
     "data_model:ActivityLog",
     "data_model:Agent",
@@ -11051,13 +11118,13 @@
    "exit_code": 0,
    "id": "v-schema-diff",
    "kind": "schema_diff",
-   "output_ref": "/tmp/root1255-content-full-outputs/v-schema-diff.json",
-   "started_at_utc": "2026-10-13T13:42:42Z",
+   "output_ref": "/tmp/root1255-bytes-verifier-outputs/v-schema-diff.json",
+   "started_at_utc": "2026-10-13T14:42:00Z",
    "summary": "1 schema(s), 3 change(s), 0 failed, validate exit 0"
   },
   {
    "command": "verify.py config_schema: keys read at head ⊆ declared keys",
-   "duration_s": 0.34,
+   "duration_s": 0.58,
    "entities": [
     "code_unit:apps/web/__tests__/web-consumer-live.test.ts"
    ],
@@ -11067,13 +11134,13 @@
    "exit_code": 0,
    "id": "v-config-schema",
    "kind": "config_schema",
-   "output_ref": "/tmp/root1255-content-full-outputs/v-config-schema.json",
-   "started_at_utc": "2026-10-13T13:42:43Z",
+   "output_ref": "/tmp/root1255-bytes-verifier-outputs/v-config-schema.json",
+   "started_at_utc": "2026-10-13T14:42:02Z",
    "summary": "3 source(s), 0 new / 3 frozen undeclared reads, 0 failed; 4 vendored file(s) not attributed to this repository (Arcanada-one/arcanada-universal-program)"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.11,
+   "duration_s": 0.17,
    "entities": [
     "code_unit:apps/api/prisma/schema.prisma",
     "code_unit:apps/api/src/activity/activity.module.ts",
@@ -11331,8 +11398,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/tmp/root1255-content-full-outputs/v-fitness.json",
-   "started_at_utc": "2026-10-13T13:42:43Z",
+   "output_ref": "/tmp/root1255-bytes-verifier-outputs/v-fitness.json",
+   "started_at_utc": "2026-10-13T14:42:02Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -11367,13 +11434,13 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/tmp/root1255-content-full-outputs/v-doc-reference.txt",
-   "started_at_utc": "2026-10-13T13:42:43Z",
+   "output_ref": "/tmp/root1255-bytes-verifier-outputs/v-doc-reference.txt",
+   "started_at_utc": "2026-10-13T14:42:02Z",
    "summary": "11 document(s), 0 failed"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.34,
+   "duration_s": 0.62,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/auth/auth.controller.ts",
@@ -11458,6 +11525,7 @@
     "route:POST /sync/datarim/:projectId/import",
     "route:POST /tasks",
     "route:POST /tasks/:taskId/artifacts",
+    "route:POST /tasks/:taskId/artifacts/bytes",
     "route:POST /tasks/:taskId/attempts/:attemptId/solution-log-heads",
     "route:POST /tasks/:taskId/checklist",
     "route:POST /tasks/:taskId/comments",
@@ -11553,6 +11621,7 @@
     "route:POST /sync/datarim/:projectId/import": "verified",
     "route:POST /tasks": "verified",
     "route:POST /tasks/:taskId/artifacts": "verified",
+    "route:POST /tasks/:taskId/artifacts/bytes": "verified",
     "route:POST /tasks/:taskId/attempts/:attemptId/solution-log-heads": "verified",
     "route:POST /tasks/:taskId/checklist": "verified",
     "route:POST /tasks/:taskId/comments": "verified",
@@ -11567,13 +11636,13 @@
    "exit_code": 0,
    "id": "v-canary-1",
    "kind": "canary",
-   "output_ref": "receipts/canary/mun-artifacts-content-20261013/source-f8db289/root1255-sourcef8-api.result.json",
-   "started_at_utc": "2026-10-13T13:42:43Z",
-   "summary": "receipts/canary/mun-artifacts-content-20261013/source-f8db289/root1255-sourcef8-api.result.json: 93 verified / 0 failed / 0 not_measured"
+   "output_ref": "receipts/canary/mun-artifacts-content-20261013/source-74cea9e/root1255-bytes-api.result.json",
+   "started_at_utc": "2026-10-13T14:42:02Z",
+   "summary": "receipts/canary/mun-artifacts-content-20261013/source-74cea9e/root1255-bytes-api.result.json: 94 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.34,
+   "duration_s": 0.62,
    "entities": [
     "code_unit:apps/web/lib/api/task-detail-read.ts",
     "code_unit:apps/web/lib/api/tasks.ts",
@@ -11589,20 +11658,20 @@
    "exit_code": 0,
    "id": "v-canary-2",
    "kind": "canary",
-   "output_ref": "receipts/canary/mun-artifacts-content-20261013/source-f8db289/root1255-web-consumer.result.json",
-   "started_at_utc": "2026-10-13T13:42:43Z",
-   "summary": "receipts/canary/mun-artifacts-content-20261013/source-f8db289/root1255-web-consumer.result.json: 4 verified / 0 failed / 0 not_measured"
+   "output_ref": "receipts/canary/mun-artifacts-content-20261013/source-74cea9e/root1255-web-consumer.result.json",
+   "started_at_utc": "2026-10-13T14:42:02Z",
+   "summary": "receipts/canary/mun-artifacts-content-20261013/source-74cea9e/root1255-web-consumer.result.json: 4 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.34,
+   "duration_s": 0.62,
    "entities": [],
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/tmp/root1255-content-full-outputs/v-canary.json",
-   "started_at_utc": "2026-10-13T13:42:43Z",
-   "summary": "2 canary result(s), 2 committed at head; 97 verified / 0 failed / 0 not_measured of 97 entities"
+   "output_ref": "/tmp/root1255-bytes-verifier-outputs/v-canary.json",
+   "started_at_utc": "2026-10-13T14:42:02Z",
+   "summary": "2 canary result(s), 2 committed at head; 98 verified / 0 failed / 0 not_measured of 98 entities"
   }
  ],
  "verify": {
@@ -12167,6 +12236,9 @@
     "contract_diff"
    ],
    "contract:apps/api/src/outbox/work-outcome-ledger.reader.ts#WorkOutcomeDisposition": [
+    "contract_diff"
+   ],
+   "contract:apps/api/src/tasks/content/task-content.dto.ts#ArtifactMetadataDto": [
     "contract_diff"
    ],
    "contract:apps/api/src/tasks/content/task-content.dto.ts#UploadArtifactDto": [
@@ -12797,6 +12869,12 @@
     "route_config_consistency",
     "type_check"
    ],
+   "route:POST /tasks/:taskId/artifacts/bytes": [
+    "canary",
+    "contract_diff",
+    "route_config_consistency",
+    "type_check"
+   ],
    "route:POST /tasks/:taskId/attempts/:attemptId/solution-log-heads": [
     "canary",
     "contract_diff",
@@ -12859,9 +12937,9 @@
    ]
   },
   "seconds": {
-   "prepare": 1.63,
-   "total": 45.51,
-   "verifiers": 19.45
+   "prepare": 2.09,
+   "total": 67.07,
+   "verifiers": 35.76
   }
  },
  "work_item": "1f99b768-65e6-4afe-93e6-611db53e3366"
