@@ -15,8 +15,15 @@ const typeLabels: Record<string, { label: string; className: string }> = {
 };
 
 export function TaskDependencies({ taskId }: TaskDependenciesProps) {
-  const { data: deps = [], isLoading } = useDependencies(taskId);
+  const { data: deps = [], isLoading, isError } = useDependencies(taskId);
 
+  if (isError) {
+    return (
+      <div role="alert" className="rounded-lg border p-4 text-sm text-muted-foreground">
+        Dependencies are unavailable. Try again later.
+      </div>
+    );
+  }
   if (isLoading) return null;
   if (deps.length === 0) return null;
 

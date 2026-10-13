@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from './client';
+import { readTask, readTaskPage, readChecklist, readDependencies, readActivity } from './read-contract';
 import type {
   TaskStatus,
   TaskPriority,
@@ -10,15 +11,15 @@ import type {
 export interface Task {
   id: string;
   title: string;
-  description?: string;
+  description?: string | null;
   status: TaskStatus;
   priority: TaskPriority;
   projectId: string;
   parentTaskId?: string;
-  estimateHours?: number;
-  dueDate?: string;
-  tags: string[];
-  actorType: ActorType;
+  estimateHours?: number | string | null;
+  dueDate?: string | null;
+  tags?: string[];
+  actorType: ActorType | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -36,7 +37,7 @@ export interface ChecklistItem {
   taskId: string;
   label: string;
   checked: boolean;
-  order: number;
+  order: number | null;
 }
 
 export interface TaskDependency {
@@ -50,10 +51,10 @@ export interface ActivityLogEntry {
   id: string;
   taskId: string;
   actorId: string;
-  actorName: string;
+  actorName?: string;
   actorType: ActorType;
   action: string;
-  payload?: Record<string, unknown>;
+  payload?: Record<string, unknown> | null;
   createdAt: string;
 }
 
@@ -61,32 +62,34 @@ async function fetchTasks(
   projectId: string,
   filters: TaskFilters = {},
 ): Promise<PaginatedResult<Task>> {
-  const params = new URLSearchParams();
+  if (Object.keys(filters).some(key => !['status', 'page', 'limit'].includes(key)) || filters.priority !== undefined || filters.actorType !== undefined)
+    throw new Error('Task filter is unavailable: unsupported filter');
+  const page = filters.page ?? 1;
+  const limit = filters.limit ?? 50;
+  if (!Number.isSafeInteger(page) || page < 1 || !Number.isSafeInteger(limit) || limit < 1 || limit > 200 || !Number.isSafeInteger((page - 1) * limit))
+    throw new Error('Task filter is unavailable: invalid pagination');
+  const params = new URLSearchParams({ projectId, limit: String(limit), offset: String((page - 1) * limit) });
   if (filters.status) params.set('status', filters.status);
-  if (filters.priority) params.set('priority', filters.priority);
-  if (filters.actorType) params.set('actorType', filters.actorType);
-  if (filters.page) params.set('page', String(filters.page));
-  if (filters.limit) params.set('limit', String(filters.limit));
-
-  const res = await apiClient.get<PaginatedResult<Task>>(
-    `/tasks/project/${projectId}?${params.toString()}`,
-  );
-  return res.data;
+  const res = await apiClient.get<unknown>(`/tasks?${params.toString()}`);
+  const result = readTaskPage(res.data);
+  if (result.limit !== limit || result.page !== page || result.data.some(task => task.projectId !== projectId || (filters.status !== undefined && task.status !== filters.status)))
+    throw new Error('Tasks response is unavailable: invalid query binding');
+  return result;
 }
 
 async function fetchTask(taskId: string): Promise<Task> {
   const res = await apiClient.get<Task>(`/tasks/${taskId}`);
-  return res.data;
+  return readTask(res.data);
 }
 
 async function fetchChecklist(taskId: string): Promise<ChecklistItem[]> {
   const res = await apiClient.get<ChecklistItem[]>(`/tasks/${taskId}/checklist`);
-  return res.data;
+  return readChecklist(res.data);
 }
 
 async function fetchDependencies(taskId: string): Promise<TaskDependency[]> {
   const res = await apiClient.get<TaskDependency[]>(`/tasks/${taskId}/dependencies`);
-  return res.data;
+  return readDependencies(res.data);
 }
 
 async function fetchActivity(
@@ -97,7 +100,7 @@ async function fetchActivity(
   const res = await apiClient.get<PaginatedResult<ActivityLogEntry>>(
     `/tasks/${taskId}/activity?page=${page}&limit=${limit}`,
   );
-  return res.data;
+  return readActivity(res.data);
 }
 
 export function useTasks(projectId: string, filters: TaskFilters = {}) {
@@ -158,7 +161,7 @@ export function useCreateTask() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (
-      data: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'tags'> & { tags?: string[] },
+      data: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'tags' | 'description' | 'estimateHours' | 'dueDate' | 'actorType'> & { tags?: string[]; description?: string; estimateHours?: number; dueDate?: string; actorType: ActorType },
     ) => apiClient.post<Task>('/tasks', data).then((r) => r.data),
     onSuccess: (task) => {
       queryClient.invalidateQueries({ queryKey: ['tasks', 'project', task.projectId] });

@@ -76,12 +76,12 @@ export function KanbanCard({ task, wsSlug, projSlug }: KanbanCardProps) {
               <Bot className="h-3 w-3" />
               Agent
             </span>
-          ) : (
+          ) : task.actorType === 'human' ? (
             <span className="flex items-center gap-1 text-xs text-muted-foreground">
               <User className="h-3 w-3" />
               Human
             </span>
-          )}
+          ) : <span className="text-xs text-muted-foreground">Actor not specified</span>}
 
           {task.status === 'blocked' && (
             <AlertCircle className="h-3.5 w-3.5 text-destructive" />
@@ -90,7 +90,7 @@ export function KanbanCard({ task, wsSlug, projSlug }: KanbanCardProps) {
 
         {task.dueDate && (
           <p className="mt-1 text-xs text-muted-foreground">
-            Due {new Date(task.dueDate).toLocaleDateString()}
+            Due {Number.isNaN(Date.parse(task.dueDate)) ? task.dueDate : new Date(task.dueDate).toLocaleDateString()}
           </p>
         )}
       </div>

@@ -5,6 +5,8 @@ import {
   ConflictException,
   ForbiddenException,
 } from '@nestjs/common';
+import type { Prisma } from '@prisma/client';
+import { humanTaskWhere } from '../auth/human-task-visibility.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { TasksService } from '../tasks/tasks.service.js';
 import { ActivityService } from '../activity/activity.service.js';
@@ -77,18 +79,28 @@ export class SyncService {
   /**
    * Export project tasks in Datarim tasks.md format.
    */
-  async exportDatarim(projectId: string): Promise<string> {
-    const project = await this.prisma.project.findUnique({
-      where: { id: projectId },
-    });
-    if (!project) {
-      throw new NotFoundException('Project not found');
-    }
-
-    const tasks = await this.prisma.task.findMany({
-      where: { projectId },
-      orderBy: { createdAt: 'asc' },
-    });
+  async exportDatarim(projectId: string, humanUserId?: string): Promise<string> {
+    // Public human export always supplies the verified principal. Authorize
+    // the project and materialize its task rows in the same database snapshot.
+    const read = async (client: Prisma.TransactionClient | PrismaService) => {
+      const project = humanUserId
+        ? await client.project.findFirst({
+          where: { id: projectId, workspace: { members: { some: { userId: humanUserId } } } },
+        })
+        : await client.project.findUnique({ where: { id: projectId } });
+      if (!project) {
+        if (humanUserId) throw new ForbiddenException('Human task read forbidden');
+        throw new NotFoundException('Project not found');
+      }
+      const tasks = await client.task.findMany({
+        where: { projectId, ...humanTaskWhere(humanUserId) },
+        orderBy: { createdAt: 'asc' },
+      });
+      return { project, tasks };
+    };
+    const { project, tasks } = humanUserId
+      ? await this.prisma.$transaction(read, { isolationLevel: 'RepeatableRead' })
+      : await read(this.prisma);
 
     // MUN-0043: `archived` is not active work — the card left the board — and
     // it is not `done` either, so it belongs in neither of the two existing

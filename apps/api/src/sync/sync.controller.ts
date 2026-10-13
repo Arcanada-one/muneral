@@ -12,6 +12,7 @@ import {
 import type { Request } from 'express';
 import type { Actor } from '@muneral/types';
 import { SyncService } from './sync.service.js';
+import { HumanTaskReadGuard } from '../auth/guards/human-task-read.guard.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
 import { ApiKeyGuard } from '../auth/guards/api-key.guard.js';
 import { AgentTaskScopeGuard } from '../auth/guards/agent-task-scope.guard.js';
@@ -28,10 +29,13 @@ export class SyncController {
 
   /** Export project tasks in Datarim tasks.md format */
   @Get('datarim/:projectId')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, HumanTaskReadGuard)
   @Header('Content-Type', 'text/markdown; charset=utf-8')
-  async exportDatarim(@Param('projectId') projectId: string): Promise<string> {
-    return this.syncService.exportDatarim(projectId);
+  async exportDatarim(
+    @Param('projectId') projectId: string,
+    @Req() req: Request & { actor: Actor },
+  ): Promise<string> {
+    return this.syncService.exportDatarim(projectId, req.actor.id);
   }
 
   /** Import tasks from Datarim markdown with an agent API key.

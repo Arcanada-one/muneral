@@ -1,3 +1,4 @@
+import { humanTaskWhere } from '../../auth/human-task-visibility.js';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { TaskEvidenceAttachment } from '@prisma/client';
 import type { Actor } from '@muneral/types';
@@ -136,9 +137,9 @@ export class TaskEvidenceService {
     }
   }
 
-  async list(taskId: string): Promise<WorkItemEvidenceList> {
+  async list(taskId: string, humanUserId?: string): Promise<WorkItemEvidenceList> {
     const rows = await this.prisma.taskEvidenceAttachment.findMany({
-      where: { taskId },
+      where: { taskId, ...(humanUserId ? { task: humanTaskWhere(humanUserId) } : {}) },
       orderBy: { createdAt: 'asc' },
     });
     return {
