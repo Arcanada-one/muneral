@@ -63,16 +63,15 @@ export class TaskContentService {
       // One task lock serializes revision allocation and quota checks across all content kinds.
       await tx.$queryRaw`SELECT id FROM tasks WHERE id = ${taskId}::uuid FOR UPDATE`;
       const task = await this.authorize(tx, taskId, actor);
-      const existing = await tx.taskArtifactRevision.findUnique({ where: { taskId_kind_name_sha256: { taskId, kind, name, sha256 } } });
-      if (existing) {
-        if (existing.contentType !== contentType) throw new ConflictException('CONTENT_DIGEST_CONFLICT');
-        return { ...present(existing), idempotent: true };
+      const last = await tx.taskArtifactRevision.findFirst({ where: { taskId, kind, name }, orderBy: { revision: 'desc' } });
+      if (last?.sha256 === sha256) {
+        if (last.contentType !== contentType) throw new ConflictException('CONTENT_DIGEST_CONFLICT');
+        return { ...present(last), idempotent: true };
       }
       const usage = await tx.taskArtifactRevision.aggregate({ where: { taskId }, _sum: { sizeBytes: true }, _count: true });
       if ((usage._sum.sizeBytes ?? 0) + bytes.length > MAX_TASK_BYTES || usage._count >= MAX_TASK_REVISIONS) {
         throw new PayloadTooLargeException('Task content quota exceeded (16 MiB / 1000 revisions)');
       }
-      const last = await tx.taskArtifactRevision.findFirst({ where: { taskId, kind, name }, orderBy: { revision: 'desc' }, select: { revision: true } });
       let evidence = await tx.taskEvidenceAttachment.findUnique({ where: { taskId_sha256: { taskId, sha256 } } });
       if (evidence && evidence.contentType !== contentType) throw new ConflictException('CONTENT_DIGEST_CONFLICT');
       if (!evidence) evidence = await tx.taskEvidenceAttachment.create({ data: { taskId, sha256, contentType,

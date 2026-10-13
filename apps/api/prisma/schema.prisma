@@ -1005,7 +1005,6 @@ model TaskArtifactRevision {
   task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   @@unique([taskId, kind, name, revision])
-  @@unique([taskId, kind, name, sha256])
   @@index([taskId, kind, sha256])
   @@map("task_artifact_revisions")
 }

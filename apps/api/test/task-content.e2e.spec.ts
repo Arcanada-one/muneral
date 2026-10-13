@@ -197,6 +197,16 @@ describe('Task content artifacts (MUN-ARTIFACTS, e2e)', () => {
     expect(results[0].body.id).toBe(results[1].body.id);
     const second = await upload(task.id, executorKey, payload(Buffer.from('changed'))).expect(201);
     expect(second.body.revision).toBe(2);
+    const restored = await Promise.all([upload(task.id), upload(task.id)]);
+    expect(restored.every(r => r.status === 201 && r.body.revision === 3)).toBe(true);
+    expect(restored[0].body.id).toBe(restored[1].body.id);
+    expect(restored[0].body.id).not.toBe(results[0].body.id);
+    expect((await upload(task.id).expect(201)).body).toMatchObject({ id: restored[0].body.id, revision: 3, idempotent: true });
+    const rows = await prisma.taskArtifactRevision.findMany({ where: { taskId: task.id }, orderBy: { revision: 'asc' } });
+    expect(rows.map(r => r.revision)).toEqual([1, 2, 3]);
+    expect(rows[0].sha256).toBe(rows[2].sha256);
+    expect(await prisma.taskEvidenceAttachment.count({ where: { taskId: task.id } })).toBe(2);
+    expect(await prisma.activityLog.count({ where: { taskId: task.id, action: 'task:content_uploaded' } })).toBe(3);
     expect((await get(task.id, `/${results[0].body.id}`).expect(200)).body.contentBase64).toBe(bytes.toString('base64'));
     await expect(prisma.taskArtifactRevision.update({ where: { id: second.body.id }, data: { name: 'overwrite' } })).rejects.toThrow();
   });

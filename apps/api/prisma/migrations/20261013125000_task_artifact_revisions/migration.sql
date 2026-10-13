@@ -12,8 +12,7 @@ CREATE TABLE task_artifact_revisions (
   actor_type VARCHAR(16) NOT NULL CHECK (actor_type IN ('human','agent')),
   actor_id UUID NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  UNIQUE(task_id, kind, name, revision),
-  UNIQUE(task_id, kind, name, sha256)
+  UNIQUE(task_id, kind, name, revision)
 );
 CREATE INDEX task_artifact_revisions_task_id_kind_sha256_idx ON task_artifact_revisions(task_id, kind, sha256);
 -- No update API exists; prevent accidental in-place replacement by another writer.

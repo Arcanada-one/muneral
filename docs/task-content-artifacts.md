@@ -24,7 +24,10 @@ memory buffer, without changing the application's JSON parser limits.
 
 Limits are 64 KiB per JSON upload, 1 MiB per byte upload, 16 MiB and 1000 stored revisions per
 task, and the existing 100 KiB per HTTP JSON body. A changed body under the same name appends
-a revision; retrying the same name/digest returns the same immutable revision.
+a revision; retrying the current latest name/digest returns that immutable revision.
+Returning to earlier bytes appends a new revision: A to B to A records revisions
+1, 2, and 3, including a new audit event for the restoration. Concurrent retries
+of that latest A share revision 3; prior revision IDs still read their original bytes.
 A digest already registered with another content type is a conflict. The task
 row lock serializes revision allocation and quota checks. The database refuses
 in-place updates. Deleting a task retains the existing task-cascade semantics;
