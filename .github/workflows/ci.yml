@@ -122,8 +122,13 @@ jobs:
         env:
           DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
       - name: Test
-        run: pnpm test
+        # Retain ts-jest's complete-program diagnostics and mutation typecheck
+        # evidence; bound the API process explicitly above V8's default 2 GiB.
+        run: |
+          pnpm --filter @muneral/api exec node --max-old-space-size=4096 node_modules/jest/bin/jest.js --passWithNoTests --runInBand
+          pnpm exec turbo run test --filter='!@muneral/api'
         env:
+          NODE_OPTIONS: --experimental-vm-modules
           DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
           MUN0020_DB_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
 
