@@ -386,14 +386,17 @@ export class TasksController {
 
   // --- Checklist ---
 
+  // Reuse the content/evidence scope; the service additionally requires an
+  // assignment and rechecks credential custody inside every transaction.
+
   @Get(':taskId/checklist')
-  @AgentScope('task-checklist')
+  @AgentScope('task-evidence')
   getChecklist(@Param('taskId') taskId: string, @Req() req: AuthRequest) {
     return this.tasksService.getChecklist(taskId, req.actor);
   }
 
   @Post(':taskId/checklist')
-  @AgentScope('task-checklist')
+  @AgentScope('task-evidence')
   addChecklistItem(
     @Param('taskId') taskId: string,
     @Body() dto: CreateChecklistItemDto,
@@ -403,7 +406,7 @@ export class TasksController {
   }
 
   @Patch(':taskId/checklist/:itemId')
-  @AgentScope('task-checklist')
+  @AgentScope('task-evidence')
   toggleChecklistItem(
     @Param('taskId') taskId: string,
     @Param('itemId') itemId: string,
@@ -414,7 +417,7 @@ export class TasksController {
   }
 
   @Delete(':taskId/checklist/:itemId')
-  @AgentScope('task-checklist')
+  @AgentScope('task-evidence')
   @HttpCode(HttpStatus.NO_CONTENT)
   deleteChecklistItem(
     @Param('taskId') taskId: string,

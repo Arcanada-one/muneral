@@ -51,9 +51,6 @@ import { SetMetadata } from '@nestjs/common';
  *                      allowlist entry that can be narrowed or revoked on its
  *                      own is worth one more enum value. The route never takes
  *                      the new value as free text: see TaskRedactionService.
- *   'task-checklist' — Assigned-agent checklist reads and writes, inside its
- *                      workspace. Services recheck this predicate and attribute
- *                      mutations to the authenticated actor transactionally.
  *   'task-evidence'  — A2-274. The route names a task (`:taskId`) and attaches
  *                      an artefact to it (uri + sha256 + content type), or
  *                      reads the list back. The ownership check is exactly
@@ -137,7 +134,6 @@ export type AgentScopeKind =
   | 'task-workspace'
   | 'project-write'
   | 'task-redaction'
-  | 'task-checklist'
   | 'task-evidence'
   | 'task-status'
   | 'task-assign'
