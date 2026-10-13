@@ -114,10 +114,16 @@ jobs:
           persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
-      - name: Python 3.12 (the gate tools are stdlib-only)
+      - name: Python 3.12
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
         with:
           python-version: '3.12'
+
+      # workflow_config.py imports yaml. Match the canonical program workflow's
+      # parser dependency so CI rebuilds the same graph as the local verifier.
+      # Isolated mode prevents a PR checkout from shadowing pip or user modules.
+      - name: PyYAML for the workflow-configuration verifier
+        run: python3 -I -m pip install --disable-pip-version-check --no-input 'pyyaml==6.0.2'
 
       # AUP-GRAPH-006:gate5b (B6). A DECLARED DERIVED ARTEFACT is admitted only if the gate can RUN the
       # caller's own verifier — accept the honest tree, then REFUSE it with one byte corrupted. That needs
