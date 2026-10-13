@@ -3,9 +3,9 @@
   "rule": "admitted requires every verdict = verified; failed without exemption ⇒ refused; not_measured without exemption ⇒ paused_safe; exemptions (owner + expiry) are attached by the admitting agent, never by the verifier (DEC-AUP-0008, matrix P1/P4)",
   "structural_exclusion_rule": "DEC-AUP-0034: an affected entity is NOT verdict-owing when all three hold — the verifier matrix declares neither a mandatory nor a selectable verifier for its node type (so the only verdict it could ever carry states a property of the MATRIX, not of this change), the change set does not contain it, and its bytes are identical at base and head. Each one is listed in structural_exclusions with the content hash at both revisions that proves the byte-identity, and impact_pair.receipt_problems re-derives that proof from Git rather than believing the receipt.",
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
-  "verdict": "admitted"
+  "verdict": "paused_safe"
  },
- "captured_at_utc": "2026-10-13T13:32:14Z",
+ "captured_at_utc": "2026-10-13T13:38:29Z",
  "change_set": {
   "base": "840e3be216844d57c163daf14ec0a5d51657f963",
   "files": [
@@ -225,9 +225,27 @@
     "new": true,
     "path": "receipts/canary/mun-artifacts-content-20261013/source-f8db289/root1255-web-consumer.result.json",
     "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/mun-artifacts/content-change-admission.json",
+    "node_ids": [
+     "receipt:receipts/graph/mun-artifacts/content-change-admission.json"
+    ],
+    "path": "receipts/graph/mun-artifacts/content-change-admission.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/mun-artifacts/content-readiness.json",
+    "node_ids": [
+     "receipt:receipts/graph/mun-artifacts/content-readiness.json"
+    ],
+    "path": "receipts/graph/mun-artifacts/content-readiness.json",
+    "status": "A"
    }
   ],
-  "head": "67ec6f255b19719ce59f79e1c0771743c8a67aa8",
+  "head": "cdf753d77896073744492deea804075147072acd",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -236,18 +254,18 @@
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
   "graph_digest": "sha256:d4be88318996f7d945b83d7a8faba9c0a3a8331b2dfdc25ae10056a6be4100f7",
-  "path": "/tmp/root1255-content-final-outputs/graph-840e3be21684.json",
+  "path": "/tmp/root1255-content-reissued-outputs/graph-840e3be21684.json",
   "source_commit": "840e3be216844d57c163daf14ec0a5d51657f963"
  },
  "head_graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:cd410fb7a0ccfdfdf0e649089415aa2cb0bb5993bbcf2186e2751ed5faaea673",
-  "path": "/tmp/root1255-content-final-outputs/graph-head-67ec6f255b19.json",
-  "source_commit": "67ec6f255b19719ce59f79e1c0771743c8a67aa8",
+  "graph_digest": "sha256:2883964fb89cf3a895a556f58ede46c4c2fe327b270d1b23677af98e7448f116",
+  "path": "/tmp/root1255-content-reissued-outputs/graph-head-cdf753d77896.json",
+  "source_commit": "cdf753d77896073744492deea804075147072acd",
   "staleness": {
-   "checked_at_utc": "2026-10-13T13:32:36Z",
-   "checked_nodes": 458,
+   "checked_at_utc": "2026-10-13T13:38:50Z",
+   "checked_nodes": 460,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -255,7 +273,7 @@
  },
  "host": "source-lane",
  "host_redacted": true,
- "host_sha256": "48cf588031832e4cdf733e4f48e37b6bf4b35015cdce9561c03036290bdf13e2",
+ "host_sha256": "7a24490e1ab1a4e400d7e2ad44f4a8b60f4ce804f20923180f3a509423a1cba5",
  "impact_set": {
   "deterministic_core": [
    {
@@ -6495,7 +6513,8 @@
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261013T133214Z-67ec6f25",
+ "receipt_id": "car-verify-20261013T133829Z-cdf753d7",
+ "receipt_path": "receipts/graph/mun-artifacts/content-change-admission.json",
  "repo": {
   "name": "Arcanada-one/muneral",
   "path": "/home/dev/aup/mun-artifacts-root1255-20261013"
@@ -7013,6 +7032,8 @@
    "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
    "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
    "receipt:receipts/graph/mun-0043-index-grant-20261007.json",
+   "receipt:receipts/graph/mun-artifacts/content-change-admission.json",
+   "receipt:receipts/graph/mun-artifacts/content-readiness.json",
    "receipt:receipts/graph/revision4-public-20261007.json",
    "receipt:receipts/graph/security-api959a-caller788.json",
    "route:DELETE /agents/keys/:keyId",
@@ -7101,7 +7122,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-13T13:32:36Z",
+  "checked_at_utc": "2026-10-13T13:38:50Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -7527,6 +7548,21 @@
   },
   {
    "content_hash": {
+    "base": null,
+    "head": "sha256:caa7bafe7ef8234167b8206cabce1e32b5b3c1fe5ae4e5b3a6e9b46a37255860"
+   },
+   "entity": "receipt:receipts/graph/mun-artifacts/content-change-admission.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/mun-artifacts/content-change-admission.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it; superseded by construction — this run re-issues the receipt at receipts/graph/mun-artifacts/content-change-admission.json for work item 1f99b768-65e6-4afe-93e6-611db53e3366",
+   "rule": "DEC-AUP-0035",
+   "superseded": {
+    "receipt_path": "receipts/graph/mun-artifacts/content-change-admission.json",
+    "work_item": "1f99b768-65e6-4afe-93e6-611db53e3366"
+   }
+  },
+  {
+   "content_hash": {
     "base": "sha256:1c94d3471b00a482ab1b9c14c147b36a16a6985f827ba0cb9fc2776387963530",
     "head": "sha256:1c94d3471b00a482ab1b9c14c147b36a16a6985f827ba0cb9fc2776387963530"
    },
@@ -7549,7 +7585,7 @@
   }
  ],
  "tree": {
-  "commit": "67ec6f255b19719ce59f79e1c0771743c8a67aa8",
+  "commit": "cdf753d77896073744492deea804075147072acd",
   "dirty": false
  },
  "verdicts": [
@@ -9180,6 +9216,11 @@
    ]
   },
   {
+   "entity": "receipt:receipts/graph/mun-artifacts/content-readiness.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "verdict": "not_measured"
+  },
+  {
    "entity": "route:DELETE /agents/keys/:keyId",
    "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-route-presence (post) on local-candidate-fixture-auth: route-delete-agents-keys-keyid: DELETE /api/v1/agents/keys/:keyId is in the resident route table (not called: not a safe verb)",
    "verdict": "verified",
@@ -10068,8 +10109,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/aup/mun-artifacts-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-artifacts-root1255-20261013/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-content-final-outputs/type-check-sgixkz4k/check.tsbuildinfo --listFiles",
-   "duration_s": 3.5,
+   "command": "/home/dev/aup/mun-artifacts-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-artifacts-root1255-20261013/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-content-reissued-outputs/type-check-o00u8hnu/check.tsbuildinfo --listFiles",
+   "duration_s": 3.01,
    "entities": [
     "code_unit:apps/api/src/activity/activity.module.ts",
     "code_unit:apps/api/src/activity/activity.service.ts",
@@ -10379,13 +10420,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "/tmp/root1255-content-final-outputs/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-10-13T13:32:40Z",
+   "output_ref": "/tmp/root1255-content-reissued-outputs/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-10-13T13:38:54Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1456 files listed"
   },
   {
-   "command": "/home/dev/aup/mun-artifacts-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-artifacts-root1255-20261013/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-content-final-outputs/type-check-hbcul_3s/check.tsbuildinfo --listFiles",
-   "duration_s": 5.44,
+   "command": "/home/dev/aup/mun-artifacts-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-artifacts-root1255-20261013/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-content-reissued-outputs/type-check-34net5n7/check.tsbuildinfo --listFiles",
+   "duration_s": 5.1,
    "entities": [
     "code_unit:apps/api/test/activity.service.spec.ts",
     "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts",
@@ -10489,13 +10530,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
-   "output_ref": "/tmp/root1255-content-final-outputs/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-10-13T13:32:44Z",
+   "output_ref": "/tmp/root1255-content-reissued-outputs/v-type-check-apps-api-tsconfig-test.txt",
+   "started_at_utc": "2026-10-13T13:38:57Z",
    "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1638 files listed"
   },
   {
-   "command": "/home/dev/aup/mun-artifacts-root1255-20261013/apps/web/node_modules/.bin/tsc -p /home/dev/aup/mun-artifacts-root1255-20261013/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-content-final-outputs/type-check-ola25958/check.tsbuildinfo --listFiles",
-   "duration_s": 4.16,
+   "command": "/home/dev/aup/mun-artifacts-root1255-20261013/apps/web/node_modules/.bin/tsc -p /home/dev/aup/mun-artifacts-root1255-20261013/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-content-reissued-outputs/type-check-xvrrhxvm/check.tsbuildinfo --listFiles",
+   "duration_s": 3.84,
    "entities": [
     "code_unit:apps/web/__tests__/web-consumer-live.test.ts",
     "code_unit:apps/web/lib/api/task-detail-read.ts",
@@ -10515,13 +10556,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/tmp/root1255-content-final-outputs/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-10-13T13:32:49Z",
+   "output_ref": "/tmp/root1255-content-reissued-outputs/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-10-13T13:39:03Z",
    "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1313 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=840e3be21684, head=67ec6f255b19, graph=head graph)",
-   "duration_s": 4.01,
+   "command": "tools/graph/contract_diff.py.run_diff(base=840e3be21684, head=cdf753d77896, graph=head graph)",
+   "duration_s": 3.67,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.service.ts",
@@ -10755,13 +10796,13 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "/tmp/root1255-content-final-outputs/v-contract-diff.json",
-   "started_at_utc": "2026-10-13T13:32:54Z",
+   "output_ref": "/tmp/root1255-content-reissued-outputs/v-contract-diff.json",
+   "started_at_utc": "2026-10-13T13:39:07Z",
    "summary": "58→59 contracts, breaking 0, edges {'verified': 167}"
   },
   {
    "command": "verify.py route_config_consistency RC-01 prefix / RC-02 registration / RC-03 served",
-   "duration_s": 0.05,
+   "duration_s": 0.04,
    "entities": [
     "route:DELETE /agents/keys/:keyId",
     "route:DELETE /agents/tasks/:taskId/assign/:agentId",
@@ -10929,13 +10970,13 @@
    "exit_code": 0,
    "id": "v-route-config",
    "kind": "config_schema",
-   "output_ref": "/tmp/root1255-content-final-outputs/v-route-config.txt",
-   "started_at_utc": "2026-10-13T13:32:58Z",
+   "output_ref": "/tmp/root1255-content-reissued-outputs/v-route-config.txt",
+   "started_at_utc": "2026-10-13T13:39:10Z",
    "summary": "80 route(s), 0 failed"
   },
   {
    "command": "verify.py prisma-lite diff base→head + /home/dev/aup/mun-artifacts-root1255-20261013/node_modules/.bin/prisma validate",
-   "duration_s": 0.96,
+   "duration_s": 0.93,
    "entities": [
     "data_model:ActivityLog",
     "data_model:Agent",
@@ -11025,13 +11066,13 @@
    "exit_code": 0,
    "id": "v-schema-diff",
    "kind": "schema_diff",
-   "output_ref": "/tmp/root1255-content-final-outputs/v-schema-diff.json",
-   "started_at_utc": "2026-10-13T13:32:58Z",
+   "output_ref": "/tmp/root1255-content-reissued-outputs/v-schema-diff.json",
+   "started_at_utc": "2026-10-13T13:39:10Z",
    "summary": "1 schema(s), 3 change(s), 0 failed, validate exit 0"
   },
   {
    "command": "verify.py config_schema: keys read at head ⊆ declared keys",
-   "duration_s": 0.36,
+   "duration_s": 0.34,
    "entities": [
     "code_unit:apps/web/__tests__/web-consumer-live.test.ts"
    ],
@@ -11041,8 +11082,8 @@
    "exit_code": 0,
    "id": "v-config-schema",
    "kind": "config_schema",
-   "output_ref": "/tmp/root1255-content-final-outputs/v-config-schema.json",
-   "started_at_utc": "2026-10-13T13:32:59Z",
+   "output_ref": "/tmp/root1255-content-reissued-outputs/v-config-schema.json",
+   "started_at_utc": "2026-10-13T13:39:11Z",
    "summary": "3 source(s), 0 new / 3 frozen undeclared reads, 0 failed; 4 vendored file(s) not attributed to this repository (Arcanada-one/arcanada-universal-program)"
   },
   {
@@ -11305,8 +11346,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/tmp/root1255-content-final-outputs/v-fitness.json",
-   "started_at_utc": "2026-10-13T13:32:59Z",
+   "output_ref": "/tmp/root1255-content-reissued-outputs/v-fitness.json",
+   "started_at_utc": "2026-10-13T13:39:12Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -11341,13 +11382,13 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/tmp/root1255-content-final-outputs/v-doc-reference.txt",
-   "started_at_utc": "2026-10-13T13:32:59Z",
+   "output_ref": "/tmp/root1255-content-reissued-outputs/v-doc-reference.txt",
+   "started_at_utc": "2026-10-13T13:39:12Z",
    "summary": "11 document(s), 0 failed"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.38,
+   "duration_s": 0.33,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/auth/auth.controller.ts",
@@ -11542,12 +11583,12 @@
    "id": "v-canary-1",
    "kind": "canary",
    "output_ref": "receipts/canary/mun-artifacts-content-20261013/source-f8db289/root1255-sourcef8-api.result.json",
-   "started_at_utc": "2026-10-13T13:32:59Z",
+   "started_at_utc": "2026-10-13T13:39:12Z",
    "summary": "receipts/canary/mun-artifacts-content-20261013/source-f8db289/root1255-sourcef8-api.result.json: 93 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.38,
+   "duration_s": 0.33,
    "entities": [
     "code_unit:apps/web/lib/api/task-detail-read.ts",
     "code_unit:apps/web/lib/api/tasks.ts",
@@ -11564,27 +11605,33 @@
    "id": "v-canary-2",
    "kind": "canary",
    "output_ref": "receipts/canary/mun-artifacts-content-20261013/source-f8db289/root1255-web-consumer.result.json",
-   "started_at_utc": "2026-10-13T13:32:59Z",
+   "started_at_utc": "2026-10-13T13:39:12Z",
    "summary": "receipts/canary/mun-artifacts-content-20261013/source-f8db289/root1255-web-consumer.result.json: 4 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.38,
+   "duration_s": 0.33,
    "entities": [],
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/tmp/root1255-content-final-outputs/v-canary.json",
-   "started_at_utc": "2026-10-13T13:32:59Z",
+   "output_ref": "/tmp/root1255-content-reissued-outputs/v-canary.json",
+   "started_at_utc": "2026-10-13T13:39:12Z",
    "summary": "2 canary result(s), 2 committed at head; 97 verified / 0 failed / 0 not_measured of 97 entities"
   }
  ],
  "verify": {
   "events": [
    {
+    "code": "SUPERSEDED_SELF_EXCLUSION",
+    "entity": "receipt:receipts/graph/mun-artifacts/content-change-admission.json",
+    "rule": "DEC-AUP-0035",
+    "text": "the receipt at receipts/graph/mun-artifacts/content-change-admission.json is the previous version of the one this run is writing, for the same work item 1f99b768-65e6-4afe-93e6-611db53e3366 — superseded by construction, so it owes this change no verdict"
+   },
+   {
     "code": "STRUCTURAL_EXCLUSION",
     "rule": "DEC-AUP-0034",
-    "text": "40 affected entity(ies) owe no verdict (receipt: 40): unchanged at both revisions and given no verifier by the matrix"
+    "text": "41 affected entity(ies) owe no verdict (receipt: 41): unchanged at both revisions and given no verifier by the matrix"
    }
   ],
   "required_by_entity": {
@@ -12342,6 +12389,8 @@
    "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json": [],
    "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json": [],
    "receipt:receipts/graph/mun-0043-index-grant-20261007.json": [],
+   "receipt:receipts/graph/mun-artifacts/content-change-admission.json": [],
+   "receipt:receipts/graph/mun-artifacts/content-readiness.json": [],
    "receipt:receipts/graph/revision4-public-20261007.json": [],
    "receipt:receipts/graph/security-api959a-caller788.json": [],
    "route:DELETE /agents/keys/:keyId": [
@@ -12826,9 +12875,9 @@
    ]
   },
   "seconds": {
-   "prepare": 1.79,
-   "total": 46.17,
-   "verifiers": 19.74
+   "prepare": 1.61,
+   "total": 42.82,
+   "verifiers": 18.04
   }
  },
  "work_item": "1f99b768-65e6-4afe-93e6-611db53e3366"
