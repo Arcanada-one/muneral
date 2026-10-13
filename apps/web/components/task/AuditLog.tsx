@@ -22,8 +22,10 @@ function formatRelativeTime(dateStr: string): string {
 }
 
 export function AuditLog({ taskId }: AuditLogProps) {
-  const { data, isLoading } = useActivity(taskId);
+  const { data, isLoading, isError } = useActivity(taskId);
   const entries = data?.data ?? [];
+
+  if (isError) return <div role="alert" className="rounded-lg border p-4 text-sm text-muted-foreground">Activity is unavailable. Try again later.</div>;
 
   if (isLoading) {
     return (

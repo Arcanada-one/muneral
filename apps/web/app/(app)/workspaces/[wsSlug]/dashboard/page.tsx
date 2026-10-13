@@ -6,14 +6,6 @@ import { VelocityChart } from '@/components/dashboard/VelocityChart';
 import { BlockersList } from '@/components/dashboard/BlockersList';
 import { useProjectStore } from '@/store/project';
 
-// Placeholder data for demo when no sprint data is available
-const PLACEHOLDER_VELOCITY = [
-  { sprint: 'Sprint 1', completed: 8, planned: 10 },
-  { sprint: 'Sprint 2', completed: 12, planned: 12 },
-  { sprint: 'Sprint 3', completed: 9, planned: 14 },
-  { sprint: 'Sprint 4', completed: 15, planned: 15 },
-];
-
 export default function DashboardPage() {
   const { wsSlug } = useParams<{ wsSlug: string }>();
   const { currentProjectId, currentProjectSlug } = useProjectStore();
@@ -33,7 +25,7 @@ export default function DashboardPage() {
 
         {/* Velocity + blockers — take 2 cols */}
         <div className="space-y-6 lg:col-span-2">
-          <VelocityChart data={PLACEHOLDER_VELOCITY} />
+          <VelocityChart data={[]} />
 
           {currentProjectId && currentProjectSlug ? (
             <BlockersList

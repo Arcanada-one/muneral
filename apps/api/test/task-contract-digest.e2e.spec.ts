@@ -88,6 +88,8 @@ describe('Task contract digest (A2-267, e2e)', () => {
         data: { slug: `ws-a2267-${id}`, name: `WS ${id}`, ownerId: user.id },
       })
     ).id;
+    // Match normal WorkspacesService creation: human reads require membership.
+    await prisma.workspaceMember.create({ data: { workspaceId, userId, role: 'owner' } });
     projectId = (
       await prisma.project.create({
         data: { workspaceId, slug: `proj-a2267-${id}`, name: `Proj ${id}` },

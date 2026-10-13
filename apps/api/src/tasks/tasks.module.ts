@@ -9,6 +9,7 @@ import { WsModule } from '../ws/ws.module.js';
 import { TaskFieldStateService } from './field-state/task-field-state.service.js';
 import { FieldChangesService } from './field-state/field-changes.service.js';
 import { AuthModule } from '../auth/auth.module.js';
+import { HumanTaskReadGuard } from '../auth/guards/human-task-read.guard.js';
 import { ExecutionAuthorityModule } from '../execution-authority/execution-authority.module.js';
 import { TaskExecutionRecorderService } from '../execution-authority/task-execution-recorder.service.js';
 import { TaskStalenessService } from '../execution-authority/task-staleness.service.js';
@@ -19,6 +20,7 @@ import { TaskEvidenceService } from './evidence/task-evidence.service.js';
   imports: [ActivityModule, WsModule, AuthModule, ExecutionAuthorityModule],
   controllers: [TasksController, FieldChangesController, TaskContractBindingController],
   providers: [
+    HumanTaskReadGuard,
     TasksService,
     TaskContractBindingService,
     TaskFieldStateService,

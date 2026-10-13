@@ -1,13 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from './client';
+import { readWorkspaces, uniqueSlug } from './read-contract';
 import type { PaginatedResult } from '@muneral/types';
 
 export interface Workspace {
   id: string;
   slug: string;
   name: string;
-  description?: string;
-  memberCount: number;
+  description?: string | null;
+  memberCount?: number;
   createdAt: string;
 }
 
@@ -19,14 +20,13 @@ export interface WorkspaceMember {
   joinedAt: string;
 }
 
-async function fetchWorkspaces(): Promise<Workspace[]> {
-  const res = await apiClient.get<PaginatedResult<Workspace>>('/workspaces');
-  return res.data.data;
+export async function fetchWorkspaces(): Promise<Workspace[]> {
+  const res = await apiClient.get<unknown>('/workspaces');
+  return readWorkspaces(res.data);
 }
 
 async function fetchWorkspace(slug: string): Promise<Workspace> {
-  const res = await apiClient.get<Workspace>(`/workspaces/${slug}`);
-  return res.data;
+  return uniqueSlug(await fetchWorkspaces(), slug, 'Workspace');
 }
 
 async function fetchWorkspaceMembers(wsSlug: string): Promise<WorkspaceMember[]> {

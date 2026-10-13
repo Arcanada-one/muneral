@@ -11,12 +11,14 @@ interface TaskChecklistProps {
 
 export function TaskChecklist({ taskId }: TaskChecklistProps) {
   const [expanded, setExpanded] = useState(true);
-  const { data: items = [], isLoading } = useChecklist(taskId);
+  const { data: items = [], isLoading, isError } = useChecklist(taskId);
   const toggle = useToggleChecklistItem();
 
   const completed = items.filter((i) => i.checked).length;
   const total = items.length;
   const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+  if (isError) return <div role="alert" className="rounded-lg border p-4 text-sm text-muted-foreground">Checklist is unavailable. Try again later.</div>;
 
   if (isLoading) return null;
   if (total === 0) return null;
