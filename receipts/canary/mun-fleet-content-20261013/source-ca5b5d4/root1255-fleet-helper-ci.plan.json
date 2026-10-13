@@ -1,0 +1,67 @@
+{
+  "schema": "CanaryPlan/v2",
+  "id": "muneral-content-helper-mock-red-controls",
+  "owner": "MUN-ARTIFACTS",
+  "environment": "owned-loopback-mock-http-client-controls",
+  "read_only": false,
+  "producer_repository": "/home/dev/aup/mun-fleet-content-root1255-20261013",
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "ca5b5d4df81318e026e088709ad89893b953c15b",
+    "tree": "3d7867096d035f8a51e7c40bcf17127e071fe4ed",
+    "evidence": {
+      "path": "root1255-fleet-helper-ci-source.json",
+      "sha256": "e35184578158d58b47acfc938ae63a78ba06f5a694d8966ef76e97ead61a573b",
+      "source_field": "commit"
+    }
+  },
+  "probes": [
+    {
+      "id": "binary-content-client-red-controls",
+      "kind": "process",
+      "argv": [
+        "/usr/bin/python3.12",
+        "-B",
+        "-I",
+        "scripts/agents/test_attach.py",
+        "-v"
+      ],
+      "cwd": ".",
+      "env_keys": [
+        "PATH",
+        "HOME"
+      ],
+      "timeout_seconds": 60,
+      "capture_limit_bytes": 1048576,
+      "mutating": true,
+      "entities": [
+        "code_unit:scripts/agents/attach.py"
+      ],
+      "executable_sha256": "e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f",
+      "execution_files": [
+        {
+          "path": "/home/dev/aup/mun-fleet-content-root1255-20261013/scripts/agents/attach.py",
+          "sha256": "b703498f5489d1c8e4824b8ff2424355e6677e4b81e4847428a9d6afd658a751"
+        },
+        {
+          "path": "/home/dev/aup/mun-fleet-content-root1255-20261013/scripts/agents/test_attach.py",
+          "sha256": "5274631787459fc7180665db4ac295c8f9d859b0224a67ff369161d3f384a8a6"
+        }
+      ],
+      "expect": {
+        "exit_codes": [
+          0
+        ],
+        "stdout_contains": [],
+        "stderr_contains": [
+          "Ran 8 tests",
+          "OK"
+        ]
+      }
+    }
+  ],
+  "limitations": [
+    "Mock API measures client controls only, not native task scoping, production upload, fleet installation or coordinator adoption.",
+    "Existing helper source SHA is unchanged from independently reviewed b703498f; no pointer fallback."
+  ]
+}
