@@ -12,7 +12,7 @@ import { ActivityService } from '../../activity/activity.service.js';
 import { KanbanService } from '../../ws/kanban.service.js';
 import { TaskFieldStateService } from '../field-state/task-field-state.service.js';
 import { RedactFieldDto } from './redact-field.dto.js';
-import { findingsOf, ruleById, sha256Hex, spansOfRule } from './secret-rules.js';
+import { findingsOf, ruleById, sha256Hex, spansOfRule, redactSpans } from './secret-rules.js';
 
 /** What the route answers. Never the field value, before or after. */
 export interface RedactionResult {
@@ -105,7 +105,7 @@ export class TaskRedactionService {
       });
     }
 
-    const next = current.split(target.spanText).join(dto.replacement);
+    const next = redactSpans(current, target, dto.replacement);
     // Post-condition, not a hope: the span must be gone from what we write.
     if (spansOfRule(rule, next).some((s) => s.sha256 === dto.span_sha256)) {
       throw new InternalServerErrorException({ code: 'REDACTION_INCOMPLETE' });
@@ -120,7 +120,9 @@ export class TaskRedactionService {
       ({ record, updated } = await this.prisma.$transaction(
         async (tx) => {
           const u = await tx.task.update({
-            where: { id: taskId },
+            // The span/ranges were computed from this exact field value. Never
+            // overwrite a concurrent author's changed body with that snapshot.
+            where: { id: taskId, ...(dto.field === 'title' ? { title: task.title } : { description: task.description }) },
             data: dto.field === 'title' ? { title: next } : { description: next },
           });
           await this.fieldStateService.recompute(tx, u);
@@ -162,6 +164,11 @@ export class TaskRedactionService {
         { timeout: 10_000, isolationLevel: 'ReadCommitted' },
       ));
     } catch (err) {
+      if (isRecordMissing(err)) {
+        const raced = await this.findRecord(taskId, dto);
+        if (raced) return { statusCode: 200, body: present(raced, true) };
+        throw new ConflictException({ code: 'FIELD_CHANGED', message: 'The task field changed before redaction; rescan its current value.' });
+      }
       if (isUniqueViolation(err)) {
         const raced = await this.findRecord(taskId, dto);
         if (raced) return { statusCode: 200, body: present(raced, true) };
@@ -206,4 +213,8 @@ function present(r: TaskRedaction, idempotent: boolean): RedactionResult {
 function isUniqueViolation(err: unknown): boolean {
   if (err === null || err === undefined || typeof err !== 'object') return false;
   return (err as { code?: string }).code === 'P2002';
+}
+
+function isRecordMissing(err: unknown): boolean {
+  return err !== null && typeof err === 'object' && (err as { code?: string }).code === 'P2025';
 }
