@@ -1,0 +1,12 @@
+{
+  "schema": "MeasuredGitSource/v1",
+  "commit": "71c5aced2aa65303c623d975381c416a26fdaa6d",
+  "tree": "c9e18c65b3e943ea4360dc506e96ab630d70e174",
+  "dirty": false,
+  "captured_at_utc": "2026-10-13T18:55:38.408159Z",
+  "producer": {
+    "tool": "own-process-canary",
+    "version": "1"
+  },
+  "repository_path": "/home/dev/aup/mun-program-read-root1255-20261013"
+}

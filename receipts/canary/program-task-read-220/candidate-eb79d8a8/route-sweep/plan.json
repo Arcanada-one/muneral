@@ -1,0 +1,618 @@
+{
+  "schema": "CanaryPlan/v2",
+  "id": "pr220-route-sweep-38553086",
+  "owner": "MUNERAL PR220",
+  "environment": "Candidate-local NestJS Supertest HTTP against an isolated PostgreSQL 16/regress pg_virtualenv cluster; the suite's disposable database and cluster were removed.",
+  "read_only": false,
+  "mutating_owner": "Synthetic fixture only; all create/update/delete requests were confined to the disposable database.",
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "eb79d8a829626f585c1ec2a3816f072ffc089b40",
+    "tree": "04ea63339307b27d7a2a965429cd6a293b978d87",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "647b80f89f3c81cff4dda1b10f7a71962f2bb49178c3a31332bf1f7093f95ba0",
+      "source_field": "commit"
+    }
+  },
+  "purpose": "Mechanically exercise the 51 route entities in the PR220 candidate CAR, issuing one anonymous and one correctly scoped synthetic owner/agent request per route. Compare each authenticated response with the route's documented status and retain failures.",
+  "execution": {
+    "command": "pg_virtualenv -v 16 bash -c 'DATABASE_URL=postgresql://${PGUSER:-$USER}@127.0.0.1:${PGPORT}/postgres pnpm --filter @muneral/api test -- test/pr220-route-sweep.e2e.spec.ts'",
+    "node": "24.20.0",
+    "suite": "apps/api/test/pr220-route-sweep.e2e.spec.ts (temporary harness; exact source retained in runner-source.txt)",
+    "request_count": 102,
+    "expected_anonymous_statuses": [
+      401,
+      403
+    ],
+    "authenticated_status_rule": "The status expected by the route handler/decorator; GET=200, default POST=201, explicit 200/204 decorators, and missing task DELETE=404.",
+    "exit_code": 1,
+    "tests_passed": 0,
+    "tests_failed": 1,
+    "elapsed_seconds": 15.134,
+    "cleanup": "Disposable PostgreSQL 16 database muneral_pr220_route_sweep_test_96ff733d dropped; pg_virtualenv cluster 16/regress removed."
+  },
+  "coverage_scope": {
+    "route_count": 51,
+    "request_cases_per_route": 2,
+    "routes": [
+      {
+        "entity": "route:DELETE /agents/keys/:keyId",
+        "method": "DELETE",
+        "path_template": "/api/v1/agents/keys/:keyId",
+        "expected_authenticated_status": 204,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:DELETE /agents/tasks/:taskId/assign/:agentId",
+        "method": "DELETE",
+        "path_template": "/api/v1/agents/tasks/:taskId/assign/:agentId",
+        "expected_authenticated_status": 204,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:DELETE /projects/:projectId",
+        "method": "DELETE",
+        "path_template": "/api/v1/projects/:projectId",
+        "expected_authenticated_status": 204,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:DELETE /projects/git-refs/:refId",
+        "method": "DELETE",
+        "path_template": "/api/v1/projects/git-refs/:refId",
+        "expected_authenticated_status": 204,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:DELETE /tasks/:taskId",
+        "method": "DELETE",
+        "path_template": "/api/v1/tasks/:taskId",
+        "expected_authenticated_status": 404,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:DELETE /tasks/:taskId/checklist/:itemId",
+        "method": "DELETE",
+        "path_template": "/api/v1/tasks/:taskId/checklist/:itemId",
+        "expected_authenticated_status": 204,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:DELETE /tasks/:taskId/dependencies/:depId",
+        "method": "DELETE",
+        "path_template": "/api/v1/tasks/:taskId/dependencies/:depId",
+        "expected_authenticated_status": 204,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:DELETE /workspaces/:workspaceId/members/:userId",
+        "method": "DELETE",
+        "path_template": "/api/v1/workspaces/:workspaceId/members/:userId",
+        "expected_authenticated_status": 204,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:GET /agents/tasks",
+        "method": "GET",
+        "path_template": "/api/v1/agents/tasks",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:GET /agents/workspace/:workspaceId",
+        "method": "GET",
+        "path_template": "/api/v1/agents/workspace/:workspaceId",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:GET /migration/batches/:batchId",
+        "method": "GET",
+        "path_template": "/api/v1/migration/batches/:batchId",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:GET /migration/identities/:identityId/mappings",
+        "method": "GET",
+        "path_template": "/api/v1/migration/identities/:identityId/mappings",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:GET /migration/work-items/by-legacy/:sourceNamespace/:legacyId",
+        "method": "GET",
+        "path_template": "/api/v1/migration/work-items/by-legacy/:sourceNamespace/:legacyId",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:GET /migration/work-items/search",
+        "method": "GET",
+        "path_template": "/api/v1/migration/work-items/search",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:GET /projects/:projectId",
+        "method": "GET",
+        "path_template": "/api/v1/projects/:projectId",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:GET /projects/tasks/:taskId/git-refs",
+        "method": "GET",
+        "path_template": "/api/v1/projects/tasks/:taskId/git-refs",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:GET /projects/workspace/:workspaceId",
+        "method": "GET",
+        "path_template": "/api/v1/projects/workspace/:workspaceId",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:GET /sync/datarim/:projectId",
+        "method": "GET",
+        "path_template": "/api/v1/sync/datarim/:projectId",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:GET /tasks",
+        "method": "GET",
+        "path_template": "/api/v1/tasks",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:GET /tasks/:taskId/checklist",
+        "method": "GET",
+        "path_template": "/api/v1/tasks/:taskId/checklist",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:GET /tasks/:taskId/dependencies",
+        "method": "GET",
+        "path_template": "/api/v1/tasks/:taskId/dependencies",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:GET /tasks/:taskId/dependency-graph",
+        "method": "GET",
+        "path_template": "/api/v1/tasks/:taskId/dependency-graph",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:GET /tasks/:taskId/readiness",
+        "method": "GET",
+        "path_template": "/api/v1/tasks/:taskId/readiness",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:GET /tasks/digest",
+        "method": "GET",
+        "path_template": "/api/v1/tasks/digest",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:GET /tasks/project/:projectId",
+        "method": "GET",
+        "path_template": "/api/v1/tasks/project/:projectId",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:GET /tasks/project/:projectId/index",
+        "method": "GET",
+        "path_template": "/api/v1/tasks/project/:projectId/index",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:GET /tasks/project/:projectId/staleness",
+        "method": "GET",
+        "path_template": "/api/v1/tasks/project/:projectId/staleness",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:GET /workspaces",
+        "method": "GET",
+        "path_template": "/api/v1/workspaces",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:GET /workspaces/:workspaceId",
+        "method": "GET",
+        "path_template": "/api/v1/workspaces/:workspaceId",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:GET /workspaces/:workspaceId/members",
+        "method": "GET",
+        "path_template": "/api/v1/workspaces/:workspaceId/members",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:PATCH /tasks/:taskId/checklist/:itemId",
+        "method": "PATCH",
+        "path_template": "/api/v1/tasks/:taskId/checklist/:itemId",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:PATCH /tasks/:taskId/contract",
+        "method": "PATCH",
+        "path_template": "/api/v1/tasks/:taskId/contract",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:PATCH /workspaces/:workspaceId/members/:userId/role",
+        "method": "PATCH",
+        "path_template": "/api/v1/workspaces/:workspaceId/members/:userId/role",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:POST /agents",
+        "method": "POST",
+        "path_template": "/api/v1/agents",
+        "expected_authenticated_status": 201,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:POST /agents/:agentId/keys",
+        "method": "POST",
+        "path_template": "/api/v1/agents/:agentId/keys",
+        "expected_authenticated_status": 201,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:POST /agents/keys/:keyId/rotate",
+        "method": "POST",
+        "path_template": "/api/v1/agents/keys/:keyId/rotate",
+        "expected_authenticated_status": 201,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:POST /agents/keys/self/revoke",
+        "method": "POST",
+        "path_template": "/api/v1/agents/keys/self/revoke",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:POST /migration/batches",
+        "method": "POST",
+        "path_template": "/api/v1/migration/batches",
+        "expected_authenticated_status": 201,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:POST /migration/batches/:batchId/commit",
+        "method": "POST",
+        "path_template": "/api/v1/migration/batches/:batchId/commit",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:POST /migration/identities/:identityId/decisions",
+        "method": "POST",
+        "path_template": "/api/v1/migration/identities/:identityId/decisions",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:POST /migration/work-items",
+        "method": "POST",
+        "path_template": "/api/v1/migration/work-items",
+        "expected_authenticated_status": 201,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:POST /migration/work-items/:taskId/transitions",
+        "method": "POST",
+        "path_template": "/api/v1/migration/work-items/:taskId/transitions",
+        "expected_authenticated_status": 200,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:POST /projects",
+        "method": "POST",
+        "path_template": "/api/v1/projects",
+        "expected_authenticated_status": 201,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:POST /projects/git-refs",
+        "method": "POST",
+        "path_template": "/api/v1/projects/git-refs",
+        "expected_authenticated_status": 201,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:POST /sync/datarim/:projectId/import",
+        "method": "POST",
+        "path_template": "/api/v1/sync/datarim/:projectId/import",
+        "expected_authenticated_status": 201,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:POST /tasks",
+        "method": "POST",
+        "path_template": "/api/v1/tasks",
+        "expected_authenticated_status": 201,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:POST /tasks/:taskId/checklist",
+        "method": "POST",
+        "path_template": "/api/v1/tasks/:taskId/checklist",
+        "expected_authenticated_status": 201,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:POST /tasks/:taskId/dependencies",
+        "method": "POST",
+        "path_template": "/api/v1/tasks/:taskId/dependencies",
+        "expected_authenticated_status": 201,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:POST /tasks/:taskId/redactions",
+        "method": "POST",
+        "path_template": "/api/v1/tasks/:taskId/redactions",
+        "expected_authenticated_status": 201,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:POST /workspaces",
+        "method": "POST",
+        "path_template": "/api/v1/workspaces",
+        "expected_authenticated_status": 201,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      },
+      {
+        "entity": "route:POST /workspaces/:workspaceId/members/:userId",
+        "method": "POST",
+        "path_template": "/api/v1/workspaces/:workspaceId/members/:userId",
+        "expected_authenticated_status": 201,
+        "auth_cases": [
+          "anonymous",
+          "synthetic scoped JWT/API key"
+        ]
+      }
+    ],
+    "entities": [
+      "code_unit:apps/api/src/agents/agents.controller.ts",
+      "code_unit:apps/api/src/migration/migration.controller.ts",
+      "code_unit:apps/api/src/projects/projects.controller.ts",
+      "code_unit:apps/api/src/sync/sync.controller.ts",
+      "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts",
+      "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
+      "route:DELETE /agents/keys/:keyId",
+      "route:DELETE /agents/tasks/:taskId/assign/:agentId",
+      "route:DELETE /projects/:projectId",
+      "route:DELETE /projects/git-refs/:refId",
+      "route:DELETE /tasks/:taskId",
+      "route:DELETE /tasks/:taskId/checklist/:itemId",
+      "route:DELETE /tasks/:taskId/dependencies/:depId",
+      "route:DELETE /workspaces/:workspaceId/members/:userId",
+      "route:GET /agents/tasks",
+      "route:GET /agents/workspace/:workspaceId",
+      "route:GET /migration/batches/:batchId",
+      "route:GET /migration/identities/:identityId/mappings",
+      "route:GET /migration/work-items/by-legacy/:sourceNamespace/:legacyId",
+      "route:GET /migration/work-items/search",
+      "route:GET /projects/:projectId",
+      "route:GET /projects/tasks/:taskId/git-refs",
+      "route:GET /projects/workspace/:workspaceId",
+      "route:GET /sync/datarim/:projectId",
+      "route:GET /tasks",
+      "route:GET /tasks/:taskId/checklist",
+      "route:GET /tasks/:taskId/dependencies",
+      "route:GET /tasks/:taskId/dependency-graph",
+      "route:GET /tasks/:taskId/readiness",
+      "route:GET /tasks/digest",
+      "route:GET /tasks/project/:projectId",
+      "route:GET /tasks/project/:projectId/index",
+      "route:GET /tasks/project/:projectId/staleness",
+      "route:GET /workspaces",
+      "route:GET /workspaces/:workspaceId",
+      "route:GET /workspaces/:workspaceId/members",
+      "route:PATCH /tasks/:taskId/checklist/:itemId",
+      "route:PATCH /tasks/:taskId/contract",
+      "route:PATCH /workspaces/:workspaceId/members/:userId/role",
+      "route:POST /agents",
+      "route:POST /agents/:agentId/keys",
+      "route:POST /agents/keys/:keyId/rotate",
+      "route:POST /agents/keys/self/revoke",
+      "route:POST /migration/batches",
+      "route:POST /migration/batches/:batchId/commit",
+      "route:POST /migration/identities/:identityId/decisions",
+      "route:POST /migration/work-items",
+      "route:POST /migration/work-items/:taskId/transitions",
+      "route:POST /projects",
+      "route:POST /projects/git-refs",
+      "route:POST /sync/datarim/:projectId/import",
+      "route:POST /tasks",
+      "route:POST /tasks/:taskId/checklist",
+      "route:POST /tasks/:taskId/dependencies",
+      "route:POST /tasks/:taskId/redactions",
+      "route:POST /workspaces",
+      "route:POST /workspaces/:workspaceId/members/:userId"
+    ]
+  },
+  "controls": [
+    "All 51 unauthenticated calls returned 401 or 403.",
+    "Every route was called using a synthetic owner JWT or agent API key selected from the route's guard contract.",
+    "The workspace membership fixture inserted the owner and a manager membership before HTTP requests.",
+    "A route is counted verified only when the authenticated response equals the documented status; the five observed workspace-member 403 responses remain failures."
+  ],
+  "teardown": "The disposable PostgreSQL database was dropped and the temporary PostgreSQL 16 cluster was removed."
+}

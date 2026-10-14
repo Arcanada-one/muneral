@@ -37,7 +37,7 @@ describe('TasksController.digest (A2-284)', () => {
   const digestForWorkspace = jest.fn().mockResolvedValue({ items: [], total: 0 });
   const tasks = { digestForWorkspace } as unknown as TasksService;
   const stub = {} as never;
-  const controller = new TasksController(tasks, stub, stub, stub, stub);
+  const controller = new TasksController(tasks, stub, stub, stub, stub, stub);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const call = (agentScope: unknown) => controller.digest({ agentScope } as any, {});
 

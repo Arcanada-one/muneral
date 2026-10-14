@@ -1,0 +1,394 @@
+{
+  "schema": "CanaryResult/v1",
+  "captured_at_utc": "2026-10-14T02:02:25.235Z",
+  "card": "PR220",
+  "contract_ref": "DEC-AUP-0117 bounded named-program task/evidence read",
+  "producer": {
+    "tool": "existing Jest task-granted-read.e2e.spec.ts + pg_virtualenv",
+    "version": "Node 24.21.0"
+  },
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "eb79d8a829626f585c1ec2a3816f072ffc089b40",
+    "tree": "04ea63339307b27d7a2a965429cd6a293b978d87",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "647b80f89f3c81cff4dda1b10f7a71962f2bb49178c3a31332bf1f7093f95ba0",
+      "source_field": "commit"
+    }
+  },
+  "plan": {
+    "id": "pr220-task-granted-read-e2e-eb79d8a8",
+    "path": "plan.json",
+    "digest": "sha256:9847f6469134cdadae4627f333bb24c596119623220198c08f3abe6f84962333"
+  },
+  "environment": "Local candidate NestJS HTTP app with synthetic API-key principals and an isolated pg_virtualenv PostgreSQL 16/regress cluster; generated disposable database was dropped and the temporary cluster removed.",
+  "base_url": "NestJS app via Supertest in-process HTTP; ephemeral loopback port not logged by the test suite",
+  "phase": "post",
+  "read_only": false,
+  "mutating_owner": "Synthetic disposable fixture only; no production or live task data",
+  "resident_version": null,
+  "model": "candidate-local HTTP/real-PostgreSQL source test",
+  "probes": [
+    {
+      "id": "task-get-200",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/:taskId",
+      "outcome": "verified",
+      "status": 200,
+      "executed": true,
+      "reason": "Observed by passing Supertest .expect(200) assertion: named nonowner; creator; assigned reader; workspace-only authorized read"
+    },
+    {
+      "id": "task-get-304",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/:taskId",
+      "outcome": "verified",
+      "status": 304,
+      "executed": true,
+      "reason": "Observed by passing Supertest .expect(304) assertion: matching ETag revalidation after authorization and audit"
+    },
+    {
+      "id": "task-get-401",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/:taskId",
+      "outcome": "verified",
+      "status": 401,
+      "executed": true,
+      "reason": "Observed by passing Supertest .expect(401) assertion: anonymous no-key task read"
+    },
+    {
+      "id": "task-get-403",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/:taskId",
+      "outcome": "verified",
+      "status": 403,
+      "executed": true,
+      "reason": "Observed by passing Supertest .expect(403) assertion: missing/expired/invalid/duplicate/wrong-workspace/wrong-anchor grant; foreign or excluded scope; expired after lock wait"
+    },
+    {
+      "id": "task-head-200",
+      "kind": "http",
+      "method": "HEAD",
+      "path": "/tasks/:taskId",
+      "outcome": "verified",
+      "status": 200,
+      "executed": true,
+      "reason": "Observed by passing Supertest .expect(200) assertion: owner and assigned-reader HEAD cases"
+    },
+    {
+      "id": "task-head-403",
+      "kind": "http",
+      "method": "HEAD",
+      "path": "/tasks/:taskId",
+      "outcome": "verified",
+      "status": 403,
+      "executed": true,
+      "reason": "Observed by passing Supertest .expect(403) assertion: read capability alone does not authorize HEAD"
+    },
+    {
+      "id": "evidence-get-200",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/:taskId/evidence",
+      "outcome": "verified",
+      "status": 200,
+      "executed": true,
+      "reason": "Observed by passing Supertest .expect(200) assertion: authorized populated and empty evidence; creator and assigned-reader paths"
+    },
+    {
+      "id": "evidence-get-401",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/:taskId/evidence",
+      "outcome": "verified",
+      "status": 401,
+      "executed": true,
+      "reason": "Observed by passing Supertest .expect(401) assertion: anonymous no-key evidence read"
+    },
+    {
+      "id": "evidence-get-403",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/:taskId/evidence",
+      "outcome": "verified",
+      "status": 403,
+      "executed": true,
+      "reason": "Observed by passing Supertest .expect(403) assertion: missing/expired/invalid/foreign/excluded read authority and missing task opacity"
+    },
+    {
+      "id": "evidence-get-500",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/:taskId/evidence",
+      "outcome": "verified",
+      "status": 500,
+      "executed": true,
+      "reason": "Observed by passing Supertest .expect(500) assertion: injected late audit failure returns error before disclosure and rolls back"
+    },
+    {
+      "id": "evidence-post-201",
+      "kind": "http",
+      "method": "POST",
+      "path": "/tasks/:taskId/evidence",
+      "outcome": "verified",
+      "status": 201,
+      "executed": true,
+      "reason": "Observed by passing Supertest .expect(201) assertion: creator attaches synthetic evidence fixture"
+    },
+    {
+      "id": "evidence-post-403",
+      "kind": "http",
+      "method": "POST",
+      "path": "/tasks/:taskId/evidence",
+      "outcome": "verified",
+      "status": 403,
+      "executed": true,
+      "reason": "Observed by passing Supertest .expect(403) assertion: read capability does not authorize write sibling"
+    },
+    {
+      "id": "field-ack-post-204",
+      "kind": "http",
+      "method": "POST",
+      "path": "/tasks/:taskId/field-ack",
+      "outcome": "verified",
+      "status": 204,
+      "executed": true,
+      "reason": "Observed by passing Supertest .expect(204) assertion: creator acknowledges activity sentinel in synthetic fixture"
+    },
+    {
+      "id": "field-changes-get-200",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/:taskId/field-changes",
+      "outcome": "verified",
+      "status": 200,
+      "executed": true,
+      "reason": "Observed by passing Supertest .expect(200) assertion: before/after poller read; grant-read audit remains absent from activity signal"
+    },
+    {
+      "id": "activity-get-200",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/:taskId/activity",
+      "outcome": "verified",
+      "status": 200,
+      "executed": true,
+      "reason": "Observed by passing Supertest .expect(200) assertion: owner activity read excludes grant-read audit action"
+    },
+    {
+      "id": "activity-get-403",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/:taskId/activity",
+      "outcome": "verified",
+      "status": 403,
+      "executed": true,
+      "reason": "Observed by passing Supertest .expect(403) assertion: additional task-read capability does not authorize activity sibling"
+    },
+    {
+      "id": "comments-post-403",
+      "kind": "http",
+      "method": "POST",
+      "path": "/tasks/:taskId/comments",
+      "outcome": "verified",
+      "status": 403,
+      "executed": true,
+      "reason": "Observed by passing Supertest .expect(403) assertion: additional task-read capability does not authorize comment write"
+    },
+    {
+      "id": "status-patch-403",
+      "kind": "http",
+      "method": "PATCH",
+      "path": "/tasks/:taskId/status",
+      "outcome": "verified",
+      "status": 403,
+      "executed": true,
+      "reason": "Observed by passing Supertest .expect(403) assertion: additional task-read capability does not authorize status write"
+    },
+    {
+      "id": "assign-post-403",
+      "kind": "http",
+      "method": "POST",
+      "path": "/agents/tasks/:taskId/assign",
+      "outcome": "verified",
+      "status": 403,
+      "executed": true,
+      "reason": "Observed by passing Supertest .expect(403) assertion: additional task-read capability does not authorize task assignment"
+    }
+  ],
+  "entity_verdicts": [
+    {
+      "entity": "route:GET /tasks/:taskId",
+      "verdict": "verified",
+      "probe_ids": [
+        "task-get-200",
+        "task-get-304",
+        "task-get-401",
+        "task-get-403",
+        "task-head-200",
+        "task-head-403"
+      ],
+      "reason": "All cited route/status assertion groups passed in the 28-test real PostgreSQL/HTTP suite."
+    },
+    {
+      "entity": "route:GET /tasks/:taskId/activity",
+      "verdict": "verified",
+      "probe_ids": [
+        "activity-get-200",
+        "activity-get-403"
+      ],
+      "reason": "All cited route/status assertion groups passed in the 28-test real PostgreSQL/HTTP suite."
+    },
+    {
+      "entity": "route:GET /tasks/:taskId/evidence",
+      "verdict": "verified",
+      "probe_ids": [
+        "evidence-get-200",
+        "evidence-get-401",
+        "evidence-get-403",
+        "evidence-get-500"
+      ],
+      "reason": "All cited route/status assertion groups passed in the 28-test real PostgreSQL/HTTP suite."
+    },
+    {
+      "entity": "route:GET /tasks/:taskId/field-changes",
+      "verdict": "verified",
+      "probe_ids": [
+        "field-changes-get-200"
+      ],
+      "reason": "All cited route/status assertion groups passed in the 28-test real PostgreSQL/HTTP suite."
+    },
+    {
+      "entity": "route:PATCH /tasks/:taskId/status",
+      "verdict": "verified",
+      "probe_ids": [
+        "status-patch-403"
+      ],
+      "reason": "All cited route/status assertion groups passed in the 28-test real PostgreSQL/HTTP suite."
+    },
+    {
+      "entity": "route:POST /agents/tasks/:taskId/assign",
+      "verdict": "verified",
+      "probe_ids": [
+        "assign-post-403"
+      ],
+      "reason": "All cited route/status assertion groups passed in the 28-test real PostgreSQL/HTTP suite."
+    },
+    {
+      "entity": "route:POST /tasks/:taskId/comments",
+      "verdict": "verified",
+      "probe_ids": [
+        "comments-post-403"
+      ],
+      "reason": "All cited route/status assertion groups passed in the 28-test real PostgreSQL/HTTP suite."
+    },
+    {
+      "entity": "route:POST /tasks/:taskId/evidence",
+      "verdict": "verified",
+      "probe_ids": [
+        "evidence-post-201",
+        "evidence-post-403"
+      ],
+      "reason": "All cited route/status assertion groups passed in the 28-test real PostgreSQL/HTTP suite."
+    },
+    {
+      "entity": "route:POST /tasks/:taskId/field-ack",
+      "verdict": "verified",
+      "probe_ids": [
+        "field-ack-post-204"
+      ],
+      "reason": "All cited route/status assertion groups passed in the 28-test real PostgreSQL/HTTP suite."
+    },
+    {
+      "entity": "code_unit:apps/api/src/agents/agents.controller.ts",
+      "verdict": "verified",
+      "probe_ids": [
+        "assign-post-403"
+      ],
+      "reason": "Controller assignment endpoint was exercised and refused read-capability escalation."
+    },
+    {
+      "entity": "code_unit:apps/api/src/auth/auth.module.ts",
+      "verdict": "verified",
+      "probe_ids": [
+        "task-get-200",
+        "task-get-304",
+        "task-get-401",
+        "task-get-403",
+        "task-head-200",
+        "task-head-403",
+        "evidence-get-200",
+        "evidence-get-401",
+        "evidence-get-403",
+        "evidence-get-500",
+        "evidence-post-201",
+        "evidence-post-403",
+        "field-ack-post-204",
+        "field-changes-get-200",
+        "activity-get-200",
+        "activity-get-403",
+        "comments-post-403",
+        "status-patch-403",
+        "assign-post-403"
+      ],
+      "reason": "Candidate Nest application booted with this module; synthetic-key authorization paths passed their cited HTTP assertions."
+    },
+    {
+      "entity": "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts",
+      "verdict": "verified",
+      "probe_ids": [
+        "field-ack-post-204",
+        "field-changes-get-200"
+      ],
+      "reason": "Field acknowledgement and poller HTTP endpoints passed against the isolated database."
+    },
+    {
+      "entity": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "verdict": "verified",
+      "probe_ids": [
+        "task-get-200",
+        "task-get-304",
+        "task-get-401",
+        "task-get-403",
+        "task-head-200",
+        "task-head-403",
+        "evidence-get-200",
+        "evidence-get-401",
+        "evidence-get-403",
+        "evidence-get-500",
+        "evidence-post-201",
+        "evidence-post-403",
+        "activity-get-200",
+        "activity-get-403",
+        "comments-post-403",
+        "status-patch-403"
+      ],
+      "reason": "Task, evidence, activity, comment and status controller routes passed their cited HTTP assertions."
+    }
+  ],
+  "counters": {
+    "verified": 19,
+    "not_measured": 0,
+    "failed": 0
+  },
+  "rules": [
+    "Each probe records an exact HTTP status asserted by the passing current-head test run; one probe groups occurrences of the same route and status oracle.",
+    "Only the listed routes and four listed API code units are claimed; project-index and browser entities are not claimed.",
+    "Synthetic credentials, fixture writes and service-level DI do not establish production identity, deployment, browser hydration or grant restoration."
+  ],
+  "execution": {
+    "command": "pg_virtualenv -v 16 bash -c 'DATABASE_URL=postgresql://${PGUSER:-$USER}@127.0.0.1:${PGPORT}/postgres pnpm --filter @muneral/api test -- test/task-granted-read.e2e.spec.ts'",
+    "exit_code": 0,
+    "suite": "apps/api/test/task-granted-read.e2e.spec.ts",
+    "tests_passed": 28,
+    "tests_failed": 0,
+    "elapsed_seconds": 49.447,
+    "postgres": "16/regress disposable pg_virtualenv cluster; synthetic per-suite database dropped",
+    "cleanup": "cluster and database teardown completed"
+  }
+}

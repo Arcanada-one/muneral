@@ -1,0 +1,70 @@
+{
+  "schema": "CanaryPlan/v2",
+  "id": "pr220-task-granted-read-e2e-eb79d8a8",
+  "owner": "MUNERAL PR220",
+  "environment": "Local candidate NestJS HTTP app with synthetic API-key principals and an isolated pg_virtualenv PostgreSQL 16/regress cluster; generated disposable database was dropped and the temporary cluster removed.",
+  "read_only": false,
+  "mutating_owner": "Synthetic fixture only; owned by the PR220 test suite.",
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "eb79d8a829626f585c1ec2a3816f072ffc089b40",
+    "tree": "04ea63339307b27d7a2a965429cd6a293b978d87",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "647b80f89f3c81cff4dda1b10f7a71962f2bb49178c3a31332bf1f7093f95ba0",
+      "source_field": "commit"
+    }
+  },
+  "purpose": "Exercise the existing task-granted-read PostgreSQL/HTTP end-to-end suite at the exact PR220 source head. This is a narrow candidate-local source canary, not production identity, browser hydration, or deployment evidence.",
+  "execution": {
+    "command": "pg_virtualenv -v 16 bash -c 'DATABASE_URL=postgresql://${PGUSER:-$USER}@127.0.0.1:${PGPORT}/postgres pnpm --filter @muneral/api test -- test/task-granted-read.e2e.spec.ts'",
+    "node": "24.21.0",
+    "suite": "apps/api/test/task-granted-read.e2e.spec.ts",
+    "exit_code": 0,
+    "tests_passed": 28,
+    "tests_failed": 0,
+    "elapsed_seconds": 49.447,
+    "cleanup": "test helper dropped muneral_task_granted_read_test_3c398cfb; pg_virtualenv removed cluster 16/regress"
+  },
+  "coverage_scope": {
+    "routes": [
+      "GET /tasks/:taskId",
+      "HEAD /tasks/:taskId (same Nest GET route; owner/assigned cases only)",
+      "GET /tasks/:taskId/evidence",
+      "POST /tasks/:taskId/evidence",
+      "GET /tasks/:taskId/activity",
+      "GET /tasks/:taskId/field-changes",
+      "POST /tasks/:taskId/field-ack",
+      "POST /tasks/:taskId/comments",
+      "PATCH /tasks/:taskId/status",
+      "POST /agents/tasks/:taskId/assign"
+    ],
+    "entities": [
+      "code_unit:apps/api/src/agents/agents.controller.ts",
+      "code_unit:apps/api/src/auth/auth.module.ts",
+      "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts",
+      "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "route:GET /tasks/:taskId",
+      "route:GET /tasks/:taskId/activity",
+      "route:GET /tasks/:taskId/evidence",
+      "route:GET /tasks/:taskId/field-changes",
+      "route:PATCH /tasks/:taskId/status",
+      "route:POST /agents/tasks/:taskId/assign",
+      "route:POST /tasks/:taskId/comments",
+      "route:POST /tasks/:taskId/evidence",
+      "route:POST /tasks/:taskId/field-ack"
+    ],
+    "not_exercised": [
+      "GET /tasks/project/:projectId/index (helper is declared but never called in this suite)",
+      "task-contract-binding.controller and all web/browser entities"
+    ]
+  },
+  "controls": [
+    "401 anonymous task/evidence requests",
+    "403 missing capability/grant, foreign workspace/principal, excluded project, expired/invalid/duplicate/mismatched capability, and write/activity siblings",
+    "HEAD owner/assigned allows; read-capability-only request denies before assignment",
+    "304 reauthorizes and audits; expiry after a real row-lock wait denies without a committed audit",
+    "500 injected late audit failure rolls transaction back before disclosure"
+  ],
+  "teardown": "Test suite's fail-closed disposable database cleanup and pg_virtualenv temporary-cluster teardown completed successfully."
+}

@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { createHash } from 'node:crypto';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import { TASK_GRANTED_READ_ACTION } from '../../activity/activity-actions.js';
 import {
   TRACKED_FIELDS,
   ACTIVITY_SENTINEL,
@@ -124,7 +125,7 @@ export class FieldChangesService {
     // Activity pseudo-entry: latest activity_log entry for this task
     // lastSeenActivityId stored in agentFieldRead.lastSeenHash for the sentinel row
     const latestActivity = await this.prisma.activityLog.findFirst({
-      where: { taskId },
+      where: { taskId, action: { not: TASK_GRANTED_READ_ACTION } },
       orderBy: { createdAt: 'desc' },
       select: { id: true },
     });
@@ -184,7 +185,7 @@ export class FieldChangesService {
       if (field === ACTIVITY_SENTINEL) {
         // For __activity__: fetch the latest activity entry and store its ID in lastSeenHash
         const latestActivity = await this.prisma.activityLog.findFirst({
-          where: { taskId },
+          where: { taskId, action: { not: TASK_GRANTED_READ_ACTION } },
           orderBy: { createdAt: 'desc' },
           select: { id: true },
         });

@@ -1,0 +1,246 @@
+import { createHash, randomUUID } from 'node:crypto';
+import { writeFileSync, readFileSync } from 'node:fs';
+import { Module, ValidationPipe } from '@nestjs/common';
+import type { INestApplication } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import supertest from 'supertest';
+import { PrismaModule } from '../src/prisma/prisma.module.js';
+import { PrismaService } from '../src/prisma/prisma.service.js';
+import { AuthModule } from '../src/auth/auth.module.js';
+import { AuthService } from '../src/auth/auth.service.js';
+import { WORKSPACE_DIGEST_GRANTS } from '../src/auth/workspace-digest-grants.js';
+import { PROJECT_READ_GRANTS } from '../src/auth/project-read-grants.js';
+import { TASK_PROJECT_READ_CAPABILITIES } from '../src/auth/task-project-read-capabilities.js';
+import { ActivityModule } from '../src/activity/activity.module.js';
+import { AgentsModule } from '../src/agents/agents.module.js';
+import { ProjectsModule } from '../src/projects/projects.module.js';
+import { WorkspacesModule } from '../src/workspaces/workspaces.module.js';
+import { TasksModule } from '../src/tasks/tasks.module.js';
+import { SyncModule } from '../src/sync/sync.module.js';
+import { MigrationModule } from '../src/migration/migration.module.js';
+import { KanbanService } from '../src/ws/kanban.service.js';
+import { createDisposablePostgres } from './support/disposable-postgres.js';
+import { ACTIVITY_SENTINEL } from '../src/tasks/field-state/task-field-state.service.js';
+
+const routeList = JSON.parse(readFileSync(new URL('./../../../receipts/canary/program-task-read-220/candidate-eb79d8a8/route-sweep/request-list.json', import.meta.url), 'utf8')) as {
+  source_head: string;
+  routes: Array<{ route_entity: string; method: string; path_template: string; entities: string[] }>;
+};
+const future = '2999-01-01T00:00:00Z';
+const workspaceDigestGrants: Array<Record<string, string>> = [];
+const projectReadGrants: Array<Record<string, string>> = [];
+const taskReadCapabilities: Array<Record<string, string>> = [];
+const run = randomUUID().slice(0, 8);
+const digest = (value: string) => createHash('sha256').update(value).digest('hex');
+
+@Module({
+  imports: [PrismaModule, AuthModule, ActivityModule, AgentsModule, ProjectsModule, WorkspacesModule, TasksModule, SyncModule, MigrationModule],
+  providers: [{ provide: KanbanService, useValue: { notify: () => void 0 } }],
+})
+class RouteSweepModule {}
+
+describe('PR220 route sweep from current CAR route entities (disposable PostgreSQL 16)', () => {
+  let app: INestApplication;
+  let prisma: PrismaService;
+  let auth: AuthService;
+  const db = createDisposablePostgres('pr220-route-sweep');
+  const oldDatabaseUrl = process.env.DATABASE_URL;
+  let ownerId: string;
+  let workspaceId: string;
+  let projectId: string;
+  let deleteProjectId: string;
+  let agentId: string;
+  let otherAgentId: string;
+  let taskId: string;
+  let otherTaskId: string;
+  let deleteTaskId: string;
+  let memberUserId: string;
+  let ownerJwt: string;
+  let agentKey: string;
+  let deleteKeyId: string;
+  let rotateKeyId: string;
+  let revokeKeyId: string;
+  let batchId = '';
+  let migrationTaskId = '';
+  let identityId = '';
+  let targetIdentityId = '';
+  let gitRefId = '';
+  let checklistId = '';
+  let dependencyId = '';
+  const sourceNamespace = `pr220-route-sweep-${run}`;
+  const legacyId = `R220-${run}`;
+  const output: Array<Record<string, unknown>> = [];
+  const failures: string[] = [];
+
+  beforeAll(async () => {
+    await db.start();
+    process.env.DATABASE_URL = db.url();
+    const moduleRef: TestingModule = await Test.createTestingModule({ imports: [RouteSweepModule] })
+      .overrideProvider(KanbanService).useValue({ notify: () => void 0 })
+      .overrideProvider(WORKSPACE_DIGEST_GRANTS).useValue(workspaceDigestGrants)
+      .overrideProvider(PROJECT_READ_GRANTS).useValue(projectReadGrants)
+      .overrideProvider(TASK_PROJECT_READ_CAPABILITIES).useValue(taskReadCapabilities)
+      .compile();
+    app = moduleRef.createNestApplication();
+    app.setGlobalPrefix('api/v1');
+    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+    await app.init();
+    prisma = moduleRef.get(PrismaService);
+    auth = moduleRef.get(AuthService);
+    ownerId = (await prisma.user.create({ data: { name: `pr220-owner-${run}` } })).id;
+    memberUserId = (await prisma.user.create({ data: { name: `pr220-member-${run}` } })).id;
+    workspaceId = (await prisma.workspace.create({ data: { slug: `pr220-${run}`, name: `PR220 ${run}`, ownerId } })).id;
+    projectId = (await prisma.project.create({ data: { workspaceId, slug: `pr220-${run}`, name: `PR220 ${run}` } })).id;
+    deleteProjectId = (await prisma.project.create({ data: { workspaceId, slug: `pr220-delete-${run}`, name: `PR220 delete ${run}` } })).id;
+    agentId = (await prisma.agent.create({ data: { workspaceId, name: `pr220-agent-${run}` } })).id;
+    otherAgentId = (await prisma.agent.create({ data: { workspaceId, name: `pr220-target-${run}` } })).id;
+    const key = await auth.createApiKey(agentId, 'route-sweep');
+    agentKey = key.key;
+    deleteKeyId = (await auth.createApiKey(agentId, 'delete-only')).keyId;
+    rotateKeyId = (await auth.createApiKey(agentId, 'rotate-only')).keyId;
+    revokeKeyId = (await auth.createApiKey(agentId, 'revoke-only')).key;
+    ownerJwt = auth.signAccess(ownerId);
+    workspaceDigestGrants.push({ agentId, agentName: `pr220-agent-${run}`, workspaceId, until: future, decision: 'synthetic-route-sweep', evidence: 'isolated candidate route sweep' });
+    projectReadGrants.push({ agentId, agentName: `pr220-agent-${run}`, projectId, until: future, decision: 'synthetic-route-sweep', evidence: 'isolated candidate route sweep' });
+    taskId = (await prisma.task.create({ data: { projectId, title: `PR220 sweep task ${run} hvs.${run.repeat(3)}`, status: 'todo', priority: 'medium', createdById: agentId, actorType: 'agent' } })).id;
+    otherTaskId = (await prisma.task.create({ data: { projectId, title: `PR220 sweep target ${run}`, status: 'todo', priority: 'medium', createdById: agentId, actorType: 'agent' } })).id;
+    deleteTaskId = (await prisma.task.create({ data: { projectId, title: `PR220 delete task ${run}`, status: 'todo', priority: 'medium', createdById: ownerId, actorType: 'human' } })).id;
+    await prisma.workspaceMember.create({ data: { workspaceId, userId: ownerId, role: 'owner' } });
+    await prisma.workspaceMember.create({ data: { workspaceId, userId: memberUserId, role: 'manager' } });
+    await prisma.taskAgent.create({ data: { taskId, agentId, role: 'executor' } });
+    await prisma.taskAgent.create({ data: { taskId, agentId: otherAgentId, role: 'reviewer' } });
+    const targetIdentity = await prisma.legacyIdentity.create({ data: { sourceNamespace: `${sourceNamespace}-target`, legacyId: `${legacyId}-target`, taskId: otherTaskId } });
+    targetIdentityId = targetIdentity.id;
+  }, 120_000);
+
+  afterAll(async () => {
+    try { if (app) await app.close(); } finally {
+      await db.stop();
+      if (oldDatabaseUrl === undefined) delete process.env.DATABASE_URL;
+      else process.env.DATABASE_URL = oldDatabaseUrl;
+    }
+  }, 30_000);
+
+  const pathFor = (r: { method: string; path_template: string }) => {
+    let path = r.path_template;
+    const isTaskDelete = r.method === 'DELETE' && path === '/api/v1/tasks/:taskId';
+    const isProjectDelete = r.method === 'DELETE' && path === '/api/v1/projects/:projectId';
+    const isMigrationTask = path.includes('/migration/work-items/:taskId/transitions');
+    const vars: Record<string, string> = {
+      taskId: isTaskDelete ? '00000000-0000-4000-8000-000000000007' : isMigrationTask ? (migrationTaskId || '00000000-0000-4000-8000-000000000006') : taskId,
+      projectId: isProjectDelete ? deleteProjectId : projectId,
+      workspaceId,
+      agentId: otherAgentId,
+      userId: memberUserId,
+      keyId: r.path_template.includes('/rotate') ? rotateKeyId : deleteKeyId,
+      itemId: checklistId || '00000000-0000-4000-8000-000000000001',
+      depId: dependencyId || '00000000-0000-4000-8000-000000000002',
+      refId: gitRefId || '00000000-0000-4000-8000-000000000003',
+      batchId: batchId || '00000000-0000-4000-8000-000000000004',
+      identityId: identityId || '00000000-0000-4000-8000-000000000005',
+      sourceNamespace,
+      legacyId,
+    };
+    for (const [name, value] of Object.entries(vars)) path = path.replaceAll(`:${name}`, value);
+    if (path.endsWith('/migration/work-items/search')) path += `?legacyId=${encodeURIComponent(legacyId)}`;
+    return path;
+  };
+
+  const apiKeyOnly = (r: { method: string; path_template: string }) =>
+    r.method === 'GET' && (r.path_template === '/api/v1/agents/tasks' || r.path_template === '/api/v1/tasks/digest' || r.path_template === '/api/v1/tasks/project/:projectId/index' || r.path_template === '/api/v1/tasks/:taskId/field-changes') ||
+    r.method === 'POST' && (r.path_template.startsWith('/api/v1/migration/') || r.path_template === '/api/v1/tasks/:taskId/field-ack' || r.path_template === '/api/v1/tasks/:taskId/evidence' || r.path_template === '/api/v1/sync/datarim/:projectId/import' || r.path_template === '/api/v1/agents/keys/self/revoke') ||
+    r.method === 'PATCH' && r.path_template === '/api/v1/tasks/:taskId/contract' ||
+    r.method === 'DELETE' && r.path_template === '/api/v1/tasks/:taskId/dependencies/:depId';
+
+  const bodyFor = (r: { method: string; path_template: string }) => {
+    const p = r.path_template;
+    if (p === '/api/v1/agents') return { workspaceId, name: `created-${run}` };
+    if (p === '/api/v1/agents/:agentId/keys') return { label: `created-${run}` };
+    if (p === '/api/v1/agents/tasks/:taskId/assign') return { agentId: otherAgentId, role: 'reviewer' };
+    if (p === '/api/v1/migration/batches') return { batchKey: `b-${run}`, sourceSetEpoch: 'route-sweep', producer: 'pr220-route-sweep', projectId };
+    if (p === '/api/v1/migration/work-items') return { batchId, sourceNamespace, legacyId, title: `Route sweep ${run}`, historicalStatus: 'todo', idempotencyKey: `wi-${run}`, occurrence: { sourceRoot: sourceNamespace, sourceLocator: `${sourceNamespace}/tasks.md#${legacyId}`, sourceKey: `heading:${legacyId}`, contentDigest: digest(run), capturedAt: '2026-10-14T00:00:00.000Z' } };
+    if (p === '/api/v1/migration/work-items/:taskId/transitions') return { expectedRevision: 0, toStatus: 'in_progress', idempotencyKey: `tr-${run}`, basis: 'synthetic bounded route sweep' };
+    if (p === '/api/v1/migration/identities/:identityId/decisions') return { kind: 'same', targets: [targetIdentityId], basis: 'synthetic bounded route sweep', expectedMappingRevision: 0 };
+    if (p === '/api/v1/sync/datarim/:projectId/import') return { markdown: `### PR220 synthetic import ${run}\n- **Status:** todo\n- **Priority:** low` };
+    if (p === '/api/v1/projects') return { workspaceId, slug: `created-${run}`, name: `Created ${run}` };
+    if (p === '/api/v1/projects/git-refs') return { taskId, type: 'commit', url: 'https://example.invalid/pr220-route-sweep' };
+    if (p === '/api/v1/tasks') return { projectId, title: `Created route sweep ${run}` };
+    if (p === '/api/v1/tasks/:taskId/checklist') return { text: `Checklist ${run}` };
+    if (p === '/api/v1/tasks/:taskId/dependencies') return { toTaskId: otherTaskId, type: 'related_to' };
+    if (p === '/api/v1/tasks/:taskId/redactions') return { field: 'title', span_sha256: digest(`hvs.${run.repeat(3)}`), rule: 'vault-token-hvs', replacement: '[redacted]' };
+    if (p === '/api/v1/tasks/:taskId/evidence') return { uri: `urn:pr220-route-sweep:${run}`, sha256: digest(run), contentType: 'application/json' };
+    if (p === '/api/v1/tasks/:taskId/field-ack') return { agentId, fields: [{ field: ACTIVITY_SENTINEL, version: 0 }] };
+    if (p === '/api/v1/tasks/:taskId/comments') return { body: `Synthetic route sweep ${run}` };
+    if (p === '/api/v1/tasks/:taskId/status') return { status: 'in_progress' };
+    if (p === '/api/v1/tasks/:taskId/contract') return { contractDigest: null, expectedContractDigest: null, expectedProjectId: projectId };
+    if (p === '/api/v1/workspaces') return { name: `Created ${run}`, slug: `created-${run}` };
+    if (p === '/api/v1/workspaces/:workspaceId/members/:userId/role') return { role: 'viewer' };
+    if (p === '/api/v1/agents/keys/self/revoke') return undefined;
+    return {};
+  };
+
+  const documentedStatus = (r: { method: string; path_template: string }) => {
+    const p = r.path_template;
+    if (r.method === 'GET') return 200;
+    if (p === '/api/v1/tasks/:taskId') return 404;
+    if (r.method === 'DELETE') return 204;
+    if (r.method === 'PATCH') return 200;
+    if (p === '/api/v1/agents/keys/self/revoke' || p === '/api/v1/migration/batches/:batchId/commit' || p === '/api/v1/migration/work-items/:taskId/transitions' || p === '/api/v1/migration/identities/:identityId/decisions') return 200;
+    return 201;
+  };
+
+  const send = async (r: { method: string; path_template: string }, authCase: 'anonymous' | 'synthetic-scoped-principal') => {
+    const method = r.method.toLowerCase() as 'get'|'post'|'patch'|'delete';
+    const path = pathFor(r);
+    let q: any = (supertest(app.getHttpServer()) as any)[method](path);
+    if (authCase !== 'anonymous') q = q.set('Authorization', `Bearer ${apiKeyOnly(r) ? agentKey : ownerJwt}`) as typeof q;
+    const body = authCase === 'anonymous' ? undefined : bodyFor(r);
+    if (body !== undefined) q = q.send(body) as typeof q;
+    const response = await q;
+    return { status: response.status, path, request_body_sha256: body === undefined ? null : digest(JSON.stringify(body)) };
+  };
+
+  it('issues exactly one anonymous and one scoped synthetic request for each CAR route entity', async () => {
+    const routes = routeList.routes;
+    expect(routes).toHaveLength(51);
+    for (const r of routes) {
+      const observed = await send(r, 'anonymous');
+      const ok = observed.status === 401 || observed.status === 403;
+      output.push({ route_entity: r.route_entity, method: r.method, path: observed.path, auth_case: 'anonymous', status: observed.status, outcome: ok ? 'verified' : 'failed' });
+      if (!ok) failures.push(`${r.route_entity} anonymous expected 401|403, got ${observed.status}`);
+    }
+    const ordered = [...routes].sort((a,b) => {
+      const priority = (r: typeof a) => r.path_template === '/api/v1/agents/keys/self/revoke' ? 9 : r.method === 'DELETE' ? 8 : r.method === 'PATCH' ? 6 : r.method === 'GET' ? 7 : r.path_template === '/api/v1/migration/batches' ? 1 : r.path_template === '/api/v1/migration/work-items' ? 2 : r.path_template === '/api/v1/migration/identities/:identityId/decisions' ? 3 : r.path_template === '/api/v1/migration/work-items/:taskId/transitions' ? 4 : r.path_template === '/api/v1/migration/batches/:batchId/commit' ? 5 : 2;
+      return priority(a)-priority(b) || a.path_template.localeCompare(b.path_template);
+    });
+    for (const r of ordered) {
+      const observed = await send(r, 'synthetic-scoped-principal');
+      const expected = documentedStatus(r);
+      const allowed = observed.status === expected;
+      output.push({ route_entity: r.route_entity, method: r.method, path: observed.path, auth_case: 'synthetic-scoped-principal', expected_status: expected, status: observed.status, request_body_sha256: observed.request_body_sha256, outcome: allowed ? 'verified' : 'failed' });
+      if (!allowed) failures.push(`${r.route_entity} scoped expected ${expected}, got ${observed.status}`);
+      if (r.path_template === '/api/v1/migration/batches') {
+        const candidate = (await prisma.migrationBatch.findUnique({ where: { batchKey: `b-${run}` } }))?.id;
+        batchId = candidate ?? '';
+      }
+      if (r.path_template === '/api/v1/migration/work-items') {
+        const task = await prisma.task.findFirst({ where: { title: `Route sweep ${run}` }, select: { id: true } });
+        migrationTaskId = task?.id ?? '';
+        const identity = await prisma.legacyIdentity.findUnique({ where: { sourceNamespace_legacyId: { sourceNamespace, legacyId } }, select: { id: true } }).catch(() => null);
+        identityId = identity?.id ?? '';
+      }
+      if (r.path_template === '/api/v1/projects/git-refs') {
+        gitRefId = (await prisma.taskGitRef.findFirst({ where: { taskId }, orderBy: { createdAt: 'desc' }, select: { id: true } }))?.id ?? '';
+      }
+      if (r.path_template === '/api/v1/tasks/:taskId/checklist') {
+        checklistId = (await prisma.taskChecklist.findFirst({ where: { taskId }, orderBy: { createdAt: 'desc' }, select: { id: true } }))?.id ?? '';
+      }
+      if (r.path_template === '/api/v1/tasks/:taskId/dependencies') {
+        dependencyId = (await prisma.taskDependency.findFirst({ where: { fromTaskId: taskId, toTaskId: otherTaskId }, select: { id: true } }))?.id ?? '';
+      }
+    }
+    writeFileSync('/tmp/pr220-route-sweep-observed.json', JSON.stringify({ schema: 'PR220RouteSweepObservation/v1', source_head: routeList.source_head, request_count: output.length, observations: output }, null, 2)+'\n');
+    expect(output).toHaveLength(102);
+    expect(failures).toEqual([]);
+  }, 120_000);
+});

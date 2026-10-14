@@ -1,3 +1,4 @@
+import { GrantedTaskReadService } from './granted-task-read.service.js';
 import { Module } from '@nestjs/common';
 import { TasksService } from './tasks.service.js';
 import { TasksController } from './tasks.controller.js';
@@ -22,6 +23,7 @@ import { TaskEvidenceService } from './evidence/task-evidence.service.js';
   providers: [
     HumanTaskReadGuard,
     TasksService,
+    GrantedTaskReadService,
     TaskContractBindingService,
     TaskFieldStateService,
     FieldChangesService,
