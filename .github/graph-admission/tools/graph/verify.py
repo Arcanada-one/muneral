@@ -314,6 +314,12 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def route_uses_http_global_prefix(entity_id: str) -> bool:
+    """HTTP routes are mounted under setGlobalPrefix; WebSocket events are not HTTP paths."""
+    match = re.match(r"route:(\w+)\s+", entity_id)
+    return bool(match and match.group(1) != "WS")
+
+
 def sha_text(s: str) -> str:
     return "sha256:" + hashlib.sha256(s.encode("utf-8")).hexdigest()
 
@@ -2115,7 +2121,8 @@ class Verify:
                 continue
             want = (n.get("attrs") or {}).get("global_prefix")
             want = ("/" + want.strip("/")) if want else None
-            if nest and "rc01" in self.fr_rules and want != effective:
+            http_route = route_uses_http_global_prefix(eid)
+            if nest and http_route and "rc01" in self.fr_rules and want != effective:
                 problems.append(f"PREFIX_MISMATCH: route built with prefix {want!r}, selected bootstrap requires {effective!r}")
             reg, rnotes = registered[dep]
             if nest and "rc02" in self.fr_rules:
@@ -2131,6 +2138,8 @@ class Verify:
                 verdicts[eid] = ("verified", "RC-03 only: served at head and no consumer left dangling. RC-01/RC-02 "
                                              "INAPPLICABLE_FRAMEWORK — this tree declares no @nestjs/ package, so "
                                              "there is no bootstrap prefix and no @Module graph to check")
+            elif not http_route:
+                verdicts[eid] = ("verified", f"WebSocket event served at head; RC-01 inapplicable (not an HTTP route), selected bootstrap {bootstrap.root_file}, gateway registered")
             else:
                 verdicts[eid] = ("verified", f"served at head, prefix {effective!r} consistent, selected bootstrap {bootstrap.root_file}, controller registered")
             log.append(f"{eid}: {verdicts[eid][0]} — {verdicts[eid][1]}")
@@ -3640,6 +3649,10 @@ def selftest(a) -> int:
                                       text=lambda q: _nest_files[q], under=lambda d: sorted(_nest_files))
     _nest._has_nest = None
     check("a tree that DOES declare NestJS keeps the full RC-01/RC-02 check", Verify.repo_has_nest(_nest) is True)
+    check("HTTP routes use the global prefix while WebSocket events do not",
+          route_uses_http_global_prefix("route:POST /tasks")
+          and not route_uses_http_global_prefix("route:WS join:project")
+          and not route_uses_http_global_prefix("route:WS leave:project"))
     _nm = [{"entity": "e1", "verdict": "not_measured"}, {"entity": "e2", "verdict": "verified"}]
     _ex = [{"entity": "e1", "code": "ENV_UNAVAILABLE", "owner": "selftest", "expires_at_utc": "2099-01-01T00:00:00Z"}]
     check("an exemption attached before the verdict turns paused_safe into admitted_with_exemptions, and only "
