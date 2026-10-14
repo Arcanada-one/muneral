@@ -6,6 +6,8 @@ Behavior remains a separate mandatory, source-bound fixture evidence obligation.
 """
 import os
 import re
+import hashlib
+import shutil
 import shlex
 import subprocess
 import tempfile
@@ -30,7 +32,23 @@ def kind(path, raw, mode=None):
 def analyse(path, raw, paths, *, root_cwd=False, cwd=None):
     text = raw.decode("utf-8", errors="replace")
     unknown, references, inventory = [], [], []
+    functions, commands = [], []
     cwd = "." if root_cwd else cwd
+    # Resolve only the common, source-anchored directory idiom.  Arbitrary
+    # command substitutions remain dynamic and are never evaluated here.
+    source_dirs = {}
+    for match in re.finditer(
+            r'''(?m)^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=.*\$\(\s*cd\b.*\bdirname\s+['"]?\$\{?BASH_SOURCE(?:\[[^]]+\])?''', text):
+        source_dirs[match.group(1)] = os.path.dirname(path) or "."
+    # Also accept `HERE=$(dirname "${BASH_SOURCE[0]}")`, whose relative
+    # directory is anchored to the repository-root invocation of shell jobs.
+    for match in re.finditer(
+            r'''(?m)^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*['"]?\$\(\s*dirname\s+['"]?\$\{?BASH_SOURCE(?:\[[^]]+\])?\}?['"]?\s*\)['"]?\s*$''', text):
+        source_dirs[match.group(1)] = os.path.dirname(path) or "."
+    for match in re.finditer(
+            r'''(?m)^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*['"]?\$\{?([A-Za-z_][A-Za-z0-9_]*)\}?/([^$`*?\s'";|&]+)['"]?\s*$''', text):
+        if match[2] in source_dirs:
+            source_dirs[match[1]] = os.path.join(source_dirs[match[2]], match[3])
     # A bounded scanner cannot prove branch/subshell directory transitions.
     # Invalidate the entire block before extracting any deterministic caller.
     if re.search(r"\b(?:cd|pushd|popd)\b", text):
@@ -70,6 +88,15 @@ def analyse(path, raw, paths, *, root_cwd=False, cwd=None):
             if re.search(r"bats.*\bfocus\b", stripped):
                 unknown.append(f"line {lineno}: focused Bats selection")
             continue
+        for m in re.finditer(r'''['"]?\$\{?([A-Za-z_][A-Za-z0-9_]*)\}?(?:/([^$`*?{}\s'";|&]+))?['"]?''', line):
+            if m[1] not in source_dirs or (m[2] and os.path.isabs(m[2])):
+                continue
+            data_path = os.path.normpath(os.path.join(source_dirs[m[1]], m[2] or ""))
+            if data_path in paths and ".." not in PurePosixPath(data_path).parts:
+                references.append({"path": data_path, "type": "imports", "line": lineno,
+                                   "cwd": source_dirs[m[1]], "loader": "data-read",
+                                   "function_namespace": True, "provenance": "deterministic",
+                                   "via": "literal-shell-data-read"})
         if root_cwd and re.match(r"^(?:-\s*)?run:", stripped):
             line = re.sub(r"^(?:-\s*)?run:", "", stripped).strip()
             if len(line) >= 2 and line[0] == line[-1] and line[0] in "\"'":
@@ -97,22 +124,37 @@ def analyse(path, raw, paths, *, root_cwd=False, cwd=None):
             else:
                 current.append(token)
         for words in statements:
+            bypass_function = False
             while words and (words[0] in ("then", "do", "else", "if", "elif", "!", "exec", "run", "env")
                              or re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*=.*", words[0])):
+                bypass_function = bypass_function or words[0] in {"exec", "env"}
                 words = words[1:]
             if len(words) > 1 and words[0] == "command" and not words[1].startswith("-"):
+                bypass_function = True
                 words = words[1:]
             if words and words[0] in ("timeout", "nice", "sudo"):
                 unknown.append(f"line {lineno}: wrapper execution scope/options unresolved")
                 continue
-            if not words or words[0] in ("fi", "done", "esac", "}", "function"):
+            if words and words[0] == "function" and len(words) > 1:
+                if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", words[1]):
+                    functions.append({"name": words[1], "line": lineno})
+                else:
+                    unknown.append("unsupported function declaration identity")
+                continue
+            if not words or words[0] in ("fi", "done", "esac", "}"):
                 continue
             if words[0].startswith("-"):
                 unknown.append(f"line {lineno}: wrapper options/child command unresolved")
                 continue
-            if len(words) > 1 and words[1] == "(":  # function declaration, not a call
+            if len(words) > 1 and (words[1] == "()" or words[1:3] == ["(", ")"]):
+                if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", words[0]):
+                    functions.append({"name": words[0], "line": lineno})
+                else:
+                    unknown.append("unsupported function declaration identity")
                 continue
             command = words[0]
+            if not bypass_function and re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", command):
+                commands.append({"name": command, "line": lineno})
             if command in ("eval", "alias", "unalias") or "$" in command or "`" in command:
                 unknown.append(f"line {lineno}: dynamic command/alias/eval")
                 continue
@@ -149,7 +191,7 @@ def analyse(path, raw, paths, *, root_cwd=False, cwd=None):
                 continue
             certain_cwd = cwd is not None or bats_dir or command == "load"
             references.append({"path": resolved[0], "type": "imports" if command in ("source", ".", "load") else "calls",
-                               "line": lineno, "provenance": "deterministic" if certain_cwd else "inferred"})
+                               "line": lineno, "cwd": cwd, "loader": command, "function_namespace": not bypass_function, "provenance": "deterministic" if certain_cwd else "inferred"})
             if not certain_cwd:
                 unknown.append(f"line {lineno}: relative execution cwd is not declared")
     if path.endswith(".bats") and not inventory:
@@ -168,6 +210,7 @@ def analyse(path, raw, paths, *, root_cwd=False, cwd=None):
             if any(re.match(r"(?:if|for|while|until|case)\b", s) for s in statements):
                 unknown.append("Bats conditional execution membership is not statically resolved")
     return {"references": references, "unknown": sorted(set(unknown)), "tests": inventory,
+            "functions": functions, "commands": commands,
             "syntax_source": "\n".join(translated) + "\n"}
 
 
@@ -271,8 +314,271 @@ def syntax(path, raw, paths):
             p.write_text(analysis["syntax_source"])
             run = subprocess.run(["bash", "--noprofile", "--norc", "-n", str(p)],
                                  capture_output=True, timeout=15)
-        verdict = "failed" if run.returncode else ("not_measured" if analysis["unknown"] else "verified")
-        return verdict, {**analysis, "exit_code": run.returncode,
-                         "stderr": run.stderr.decode("utf-8", errors="replace")}
+            shellcheck = shutil.which("shellcheck")
+            shellcheck_sha256 = "4da528ddb3a4d1b7b24a59d4e16eb2f5fd960f4bd9a3708a15baddbdf1d5a55b"
+            lint = {"verdict": "not_measured", "reason": "pinned ShellCheck 0.11.0 unavailable"}
+            if shellcheck:
+                shellcheck = str(Path(shellcheck).resolve())
+                digest = hashlib.sha256(Path(shellcheck).read_bytes()).hexdigest()
+                version_run = subprocess.run([shellcheck, "--version"], capture_output=True, timeout=5)
+                version_text = (version_run.stdout + version_run.stderr).decode("utf-8", "replace")
+                if (digest == shellcheck_sha256 and version_run.returncode == 0 and
+                        re.search(r"(?m)^version: 0\.11\.0$", version_text)):
+                    lint_args = [shellcheck, "--shell=bash", "--severity=warning", "--format=json"]
+                    # Bats' `run` command creates `status`; ShellCheck cannot see
+                    # that framework-provided dynamic variable in a syntax projection.
+                    if path.endswith(".bats"):
+                        lint_args += ["--exclude=SC2154"]
+                    lint_run = subprocess.run([*lint_args, str(p)],
+                                              capture_output=True, timeout=15)
+                    lint_out = (lint_run.stdout + lint_run.stderr).decode("utf-8", "replace")
+                    lint = {"verdict": "failed" if lint_run.returncode else "verified",
+                            "path": shellcheck, "sha256": digest, "version": "0.11.0",
+                            "exit_code": lint_run.returncode, "output": lint_out[:4000]}
+                else:
+                    lint = {"verdict": "not_measured", "reason": "ShellCheck binary identity is not the pinned release",
+                            "path": shellcheck, "sha256": digest, "version_output": version_text[:1000]}
+        if run.returncode or lint["verdict"] == "failed":
+            verdict = "failed"
+        elif analysis["unknown"] or lint["verdict"] == "not_measured":
+            verdict = "not_measured"
+        else:
+            verdict = "verified"
+        return verdict, {**analysis, "source_sha256": hashlib.sha256(raw).hexdigest(),
+                         "exit_code": run.returncode,
+                         "stderr": run.stderr.decode("utf-8", errors="replace"), "shellcheck": lint}
     except (ValueError, OSError, subprocess.SubprocessError) as ex:
         return "not_measured", {"unknown": [str(ex)], "exit_code": 127}
+
+
+def function_scope_unknown(analysis, *, allowed_calls=(), shadowed=()):
+    """Check declaration/include scope at token positions, never in string data."""
+    conditional = {'if', 'elif', 'else', 'then', 'case', 'for', 'while', 'until', 'select'}
+    mutable = {'unset', 'eval', 'alias', 'unalias', 'declare', 'typeset', 'enable',
+               'return', 'exit', 'exec', 'trap', 'set', 'shopt'}
+    # Export qualification is a closed grammar, not a catalogue of every shell
+    # builtin that might change state. Provider bodies/callbacks outside it owe
+    # a separate proof; only the consumer may call its captured sourced names.
+    allowed = ({'true', ':', 'echo'} - set(shadowed)) | set(allowed_calls)
+    allowed |= {'source', '.', 'load', 'function', 'command', 'builtin', '!'}
+    captured_names = {fn['name'] for fn in analysis.get('functions', [])}
+    # These bodies come only from the existing validated Bats projection;
+    # they are scope containers, never exported declarations/binding candidates.
+    captured_names |= {'__graph_bats_test_' + str(i)
+                       for i in range(1, len(analysis.get('tests', [])) + 1)}
+    unknown, depth = [], 0
+    for line in analysis['syntax_source'].splitlines():
+        try:
+            lexer = shlex.shlex(line, posix=False, punctuation_chars='{}();&|')
+            lexer.whitespace_split = True
+            lexer.commenters = '#'
+            raw_tokens = list(lexer)
+            if any(token and all(c in '{}();&|' for c in token) and any(c in '&|' for c in token)
+                   for token in raw_tokens):
+                unknown.append('conditional/mutable function source scope')
+            tokens = [part for token in raw_tokens for part in
+                      (list(token) if token and all(c in '{}();&|' for c in token) else [token])]
+        except ValueError:
+            unknown.append('nested/unbalanced function declaration scope')
+            continue
+        command_start, source_offset = True, 0
+        for i, token in enumerate(tokens):
+            token_start = line.find(token, source_offset)
+            token_end = token_start + len(token)
+            if token_start < 0:
+                unknown.append('opaque command word source position')
+            else:
+                source_offset = token_end
+            try:
+                normalized = shlex.split(token) if command_start else []
+            except ValueError:
+                normalized = []
+            word = normalized[0] if len(normalized) == 1 else token
+            declaration = (re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*', token) and (tokens[i+1:i+3] == ['(', ')']
+                           or (i > 0 and tokens[i-1] == 'function')))
+            header = tokens[i+1:i+3] == ['(', ')'] or (i > 0 and tokens[i-1] == 'function')
+            if header and (not declaration or token not in captured_names):
+                unknown.append('function declaration outside captured name grammar')
+            if depth and (declaration or (command_start and word in {'source', '.', 'load'})):
+                unknown.append('nested/unbalanced function declaration scope')
+            if command_start:
+                if (not declaration
+                        and token not in {'{', '}', '(', ')', ';', '&', '|'}
+                        and word not in allowed):
+                    unknown.append('command outside closed function export grammar')
+                # posix=False retains quoted reserved-word spelling, but can
+                # split a command such as 'un'set into two tokens. Refuse that
+                # adjacent word grammar instead of qualifying its first piece.
+                joined_quote = (token.startswith(('"', "'")) and token_start >= 0
+                                and token_end < len(line)
+                                and not line[token_end].isspace()
+                                and line[token_end] not in '{}();&|<>')
+                if (joined_quote or token == 'time'
+                        or re.match(r'^[0-9]*[<>]', token)):
+                    unknown.append('unsupported command word/prefix source scope')
+                # Reserved words require unquoted spelling; quoted arguments
+                # and comments never introduce a conditional source scope.
+                if token in conditional or word in mutable or token.startswith('-'):
+                    unknown.append('conditional/mutable function source scope')
+            if token in {'{', '('}:
+                depth += 1
+                command_start = True
+            elif token in {'}', ')'}:
+                depth -= 1
+                if depth < 0:
+                    unknown.append('nested/unbalanced function declaration scope')
+                command_start = False
+            elif token in {';', '&', '|'}:
+                command_start = True
+            elif command_start and (token == 'function' or word in {'command', 'builtin', 'exec', '!'}
+                                    or re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*=.*', token)):
+                continue
+            else:
+                command_start = False
+    if depth:
+        unknown.append('nested/unbalanced function declaration scope')
+    return unknown
+
+
+def function_bindings(path, files, *, cwd=None, expected_calls=()):
+    """Source-reference contracts only; no execution/reachability claim.
+
+    Resolve declarations through literal source/dot/load includes. Do not treat
+    bash child scripts as imports into the caller's function namespace. Ambiguous
+    declarations and uncertain include cwd cannot establish a binding.
+    """
+    seen, declarations, unknown = set(), {}, []
+    analyses = {}
+    def visit(current, context):
+        key = (current, context)
+        if key in seen:
+            unknown.append("recursive source closure")
+            return
+        if len(seen) >= 64 or current not in files:
+            unknown.append("missing/oversized source closure")
+            return
+        seen.add(key)
+        a = analyse(current, files[current], files, cwd=context)
+        analyses[current] = a
+        unknown.extend(a["unknown"])
+        for fn in a["functions"]:
+            declarations.setdefault(fn["name"], []).append((current, fn["line"]))
+        for ref in a["references"]:
+            if ref["type"] != "imports":
+                continue
+            if ref.get("loader") == "load" and not path.endswith(".bats"):
+                unknown.append("Bats load namespace unavailable")
+                continue
+            if ref["provenance"] != "deterministic" or not ref.get("function_namespace", True):
+                unknown.append("source include cwd/namespace not bound")
+                continue
+            visit(ref["path"], ref.get("cwd"))
+    visit(path, cwd)
+    a = analyses.get(path, {"commands": []})
+    sourced_names = {name for name, providers in declarations.items()
+                     if any(provider != path for provider, _ in providers)}
+    for current, analysis in analyses.items():
+        unknown.extend(function_scope_unknown(analysis,
+            allowed_calls=sourced_names | set(expected_calls) if current == path else (),
+            shadowed=declarations))
+    if set(declarations) & {"source", "load"}:
+        unknown.append("source/load loader is shadowed by a function declaration")
+    bindings = []
+    for call in a["commands"]:
+        providers = declarations.get(call["name"], [])
+        imports = [ref for ref in analyses.get(path, {}).get("references", [])
+                   if ref["type"] == "imports" and ref["provenance"] == "deterministic"]
+        if (len(providers) == 1 and providers[0][0] != path
+                and imports and call["line"] > max(ref["line"] for ref in imports)):
+            bindings.append({"name": call["name"], "line": call["line"],
+                             "provider": providers[0][0], "definition_line": providers[0][1]})
+        elif len(providers) > 1:
+            unknown.append("ambiguous function declaration: " + call["name"])
+    if bindings:
+        # A lexical declaration in invalid source is not an exported function.
+        # Parse captured bytes only; -n never sources a helper or runs its body.
+        for analysis in analyses.values():
+            try:
+                checked = subprocess.run(["bash", "--noprofile", "--norc", "-n"],
+                    input=analysis["syntax_source"].encode("utf-8"),
+                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=5)
+                if checked.returncode:
+                    unknown.append("function source syntax not qualified")
+            except (OSError, subprocess.SubprocessError):
+                unknown.append("function source syntax qualification unavailable")
+    return {"bindings": [] if unknown else bindings, "commands": a["commands"],
+            "candidate_names": sorted({c["name"] for c in a["commands"]} & sourced_names),
+            "unknown": sorted(set(unknown))}
+
+
+def removed_function_references(path, base_files, head_files, *, cwd=None):
+    """Prove a removed source function contract with a retained direct reference.
+
+    No success result here can discharge shell behavior. Only loss of an exact
+    previously bound provider definition is a failure. Unknown selection stays NM.
+    """
+    if path not in base_files or path not in head_files:
+        return []
+    before = function_bindings(path, base_files, cwd=cwd)
+    # A retained call to an already qualified baseline name is the obligation
+    # being checked, not an invented head export or an opaque new command.
+    after = function_bindings(path, head_files, cwd=cwd,
+                              expected_calls={x['name'] for x in before['bindings']})
+    # Unknown source selection must never be promoted into a proven binding.
+    if before["unknown"] or after["unknown"]:
+        return []
+    calls = {x["name"] for x in after["commands"]}
+    retained = {x["name"] for x in after["bindings"]}
+    return [x for x in before["bindings"] if x["name"] in calls
+            and x["name"] not in retained
+            and not any(f["name"] == x["name"] for f in analyse(
+                path, head_files[path], head_files, cwd=cwd)["functions"])]
+
+
+def workflow_script_contexts(files):
+    """Native Git workflow run-step cwd facts, using the existing parser.
+
+    Conflicting caller cwd values are retained as a set, never resolved by a
+    preferred root. Child bash inherits a literal caller cwd; dynamic workflows
+    establish no qualified context.
+    """
+    contexts = {}
+    for path, raw in files.items():
+        if not path.startswith(".github/workflows/") or not path.endswith((".yml", ".yaml")):
+            continue
+        # Shape validation is an independent prerequisite; a malformed author
+        # workflow cannot invent a native caller cwd for function qualification.
+        import workflow_config
+        if workflow_config.validate(raw)[0] != "verified":
+            continue
+        facts = workflow(path, raw, files)
+        if facts["unknown"]:
+            continue
+        for ref in facts["references"]:
+            if ref["type"] == "calls" and ref["provenance"] == "deterministic" and ref.get("cwd") is not None:
+                contexts.setdefault(ref["path"], set()).add(ref["cwd"])
+    return contexts
+
+
+def paired_function_regressions(path, base_files, head_files):
+    before = workflow_script_contexts(base_files).get(path, set())
+    after = workflow_script_contexts(head_files).get(path, set())
+    # Only the same unique native caller context proves script cwd in both trees.
+    context = next(iter(before)) if len(before) == 1 and before == after else None
+    return removed_function_references(path, base_files, head_files, cwd=context)
+
+
+def changed_function_uncertainty(path, base_files, head_files):
+    """A changed potentially bound function is not compatible by absence of proof."""
+    if path not in base_files or path not in head_files:
+        return []
+    before_contexts = workflow_script_contexts(base_files).get(path, set())
+    after_contexts = workflow_script_contexts(head_files).get(path, set())
+    cwd = next(iter(before_contexts)) if len(before_contexts) == 1 and before_contexts == after_contexts else None
+    before = function_bindings(path, base_files, cwd=cwd)
+    after = function_bindings(path, head_files, cwd=cwd)
+    if not before["unknown"] and not after["unknown"]:
+        return []
+    calls = {c["name"] for c in after["commands"]}
+    return [c for c in before["bindings"] if c["name"] in calls
+            and base_files.get(c["provider"]) != head_files.get(c["provider"])]

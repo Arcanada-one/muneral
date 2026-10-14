@@ -207,10 +207,34 @@ def host_cannot_reach(exc) -> bool:
     Forgiving it is safe and changes no verdict upward: the branch it reaches records the entry in
     `execution_freshness_not_measured` BY NAME, the committed pins are still checked, and
     `not_measured` is never read as a pass (DEC-AUP-0008 I4). What stays a refusal is the case the
-    discriminator is for: if ANY of the inventory resolves, the tree IS on this host and a missing
-    or unreadable member is a removal.
+    discriminator is for: if ANY producer-specific inventory path resolves, the tree IS on this
+    host and a missing or unreadable member is a removal. Shared system tools are filtered out by
+    `_shared_toolchain_path` below; their presence says nothing about the producer checkout.
     """
     return isinstance(exc, (FileNotFoundError, NotADirectoryError, PermissionError))
+
+
+_SHARED_TOOLCHAIN_DIRS = (
+    "/bin", "/sbin", "/usr/bin", "/usr/sbin",
+    # The arcana-prd-general runner's actions/setup-python installation. This
+    # runner-wide tool is not evidence that the producer checkout is local.
+    "/opt/arcanada-runners/arcana-prd-general/_work/_tool/Python",
+)
+
+
+def _shared_toolchain_path(path):
+    """A host executable is not proof that the producer's project tree is present.
+
+    Legacy plans do not carry `producer_repository`, so their discriminator uses the input
+    inventory. Exclude only standard system executable directories from that presence check;
+    project and canary-input paths still make a partial local tree visible and keep missing-member
+    refusals intact.
+    """
+    if not isinstance(path, str) or not os.path.isabs(path):
+        return False
+    normalized = os.path.normpath(path)
+    return any(normalized == root or normalized.startswith(root + os.sep)
+               for root in _SHARED_TOOLCHAIN_DIRS)
 
 
 def bound_errors(doc, read):
@@ -264,7 +288,8 @@ def bound_errors(doc, read):
         # evidence and original plan both bind that root. Legacy plans retain
         # their existing inventory discriminator.
         tree_present = (os.path.isdir(producer_root) if producer_root is not None
-                        else any(os.path.exists(x) for x in inventory))
+                        else any(os.path.exists(x) for x in inventory
+                                 if not _shared_toolchain_path(x)))
         remote_origin = producer_root is not None and not tree_present
         plans = {p["id"]: p for p in plan["probes"]}
         if {p["id"] for p in doc["probes"]} != set(plans): return ["process result omits or adds original probes"]
