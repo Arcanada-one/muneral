@@ -1,0 +1,35 @@
+{
+  "schema": "ReadinessReceipt/v1",
+  "captured_at_utc": "2026-10-14T11:45:54Z",
+  "producer": {
+    "tool": "MUNERAL candidate readiness evidence assembler",
+    "version": "1"
+  },
+  "work_item": "7b3b4703-23d9-4a50-a4bd-f43b1efda0ab",
+  "repository": "Arcanada-one/muneral",
+  "candidate_head": "297b6e005922c873fb8865ac0e0e409504e071fc",
+  "tested_source_commit": "86c719e567c51373c5308f5ae943a89ab80838d9",
+  "claims": [
+    {
+      "id": "hosted-api-web-lint-and-test",
+      "verdict": "verified",
+      "evidence": "GitHub Actions run 38557282938, lint-and-test job 115830078332 completed success on candidate head 297b6e005922c873fb8865ac0e0e409504e071fc."
+    },
+    {
+      "id": "disposable-postgresql-migrations",
+      "verdict": "verified",
+      "evidence": "PostgreSQL 16 migration deploy completed successfully against disposable database for tested source 86c719e567c51373c5308f5ae943a89ab80838d9; log sha256:c5af2c92296fe5624b29f172468725ebd7a859641a1fdcfb788bbf092cd556be; synthetic database dropped and server stopped."
+    },
+    {
+      "id": "candidate-local-http-route-sweep",
+      "verdict": "failed",
+      "evidence": "CanaryResult plan sha256:d087ca8dc17b75e5c3a4c678a621e83743f087610a2be93cd413b3c2e781b840; result sha256:6f39288a9a4ef63f0be15ae2e9fb426bb1d0eb2622b75343f04e0b57a9c5eac9. 50 verified, 8 failed, 0 not_measured over 58 entities and 103 probes. The eight failures are the previously measured main debts in parity report fb1a21612b7b56f41b5668142ac6ce51172a884cc3a3d244422be09f55c9d792 and are separately represented by the exact exemptions file."
+    },
+    {
+      "id": "production-granted-digest-readback",
+      "verdict": "not_measured",
+      "reason": "No deployment or production request was made. A successful granted digest read, live expiry equality, and non-grantee production denial remain unverified."
+    }
+  ],
+  "reverse_if": "If any evidence is found to refer to a different source head, a non-disposable database, or a production effect, withdraw this receipt and preserve the raw result; if route results cease to match the documented main-debt parity, withdraw the eight exemptions and remeasure."
+}
