@@ -5,9 +5,9 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "admitted"
  },
- "captured_at_utc": "2026-10-13T21:08:59Z",
+ "captured_at_utc": "2026-10-14T01:00:15Z",
  "change_set": {
-  "base": "1c599d52884f89e2748ce43862a6904ecf1139e0",
+  "base": "5cdd6a87ac7fa073a64608b22b550092bb41f6f6",
   "files": [
    {
     "kind": "doc",
@@ -176,7 +176,7 @@
     "status": "A"
    }
   ],
-  "head": "a65a7e5d29df100093a9a7da76d73181581fa9a8",
+  "head": "e94466f2db1cc27224ee871eccb830bce158dca4",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -184,27 +184,25 @@
  "graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:d625ac63fdf6b6facc692117306c1fb15cd99b9bff8cdca82ea5b3b6e8131105",
-  "path": "/tmp/root1255-open-p2-own-verifiers/graph-1c599d52884f.json",
-  "source_commit": "1c599d52884f89e2748ce43862a6904ecf1139e0"
+  "graph_digest": "sha256:d04f76930ffcaa28f34b76b2f952a14e5dfcda1e9e0e8f97f7cbbcd6480d157c",
+  "path": "/tmp/muneral-pr244-restack-canaries/verifier-out/graph-5cdd6a87ac7f.json",
+  "source_commit": "5cdd6a87ac7fa073a64608b22b550092bb41f6f6"
  },
  "head_graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:1d33ecb1f68e37cd0661511807f39979edd44e453ce77d8900e653e4a4db81de",
-  "path": "/tmp/root1255-open-p2-own-verifiers/graph-head-a65a7e5d29df.json",
-  "source_commit": "a65a7e5d29df100093a9a7da76d73181581fa9a8",
+  "graph_digest": "sha256:6e6c868d10105d802f33df92bf7b79a6095a196bb854b9ab4286dca0b5f8cbff",
+  "path": "/tmp/muneral-pr244-restack-canaries/verifier-out/graph-head-e94466f2db1c.json",
+  "source_commit": "e94466f2db1cc27224ee871eccb830bce158dca4",
   "staleness": {
-   "checked_at_utc": "2026-10-13T21:09:23Z",
+   "checked_at_utc": "2026-10-14T01:01:42Z",
    "checked_nodes": 470,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
   }
  },
- "host": "source-lane",
- "host_redacted": true,
- "host_sha256": "410c7f1214b0abfcad4e448899a442f09592c0042b242fec3fe8b0bf3eba2ee8",
+ "host": "arcana-devs",
  "impact_set": {
   "deterministic_core": [
    {
@@ -2048,7 +2046,7 @@
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261013T210859Z-a65a7e5d",
+ "receipt_id": "car-verify-20261014T010015Z-e94466f2",
  "receipt_path": "receipts/graph/mun-artifacts/open-task-change-admission.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -2228,7 +2226,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-13T21:09:23Z",
+  "checked_at_utc": "2026-10-14T01:01:41Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -2655,7 +2653,7 @@
   {
    "content_hash": {
     "base": null,
-    "head": "sha256:03091cb426f3a7bb9bab7b72f068b6acf8ac344bc71c5f3008d27b724f883480"
+    "head": "sha256:1c625e8ce1ef02bc7eb10c4cb71c83a1687f5805fd3b6b5391c38e89f80ad717"
    },
    "entity": "receipt:receipts/graph/mun-artifacts/open-task-change-admission.json",
    "node_type": "receipt",
@@ -2669,8 +2667,8 @@
   },
   {
    "content_hash": {
-    "base": "sha256:3413386ed6bc193174699be6efd494ea597d8a977e47285b1193162541911c21",
-    "head": "sha256:3413386ed6bc193174699be6efd494ea597d8a977e47285b1193162541911c21"
+    "base": "sha256:d1d04b1d11b0d69875ad7d63ded36ed4c5c0e621c38f48d75c0e8b079c236aff",
+    "head": "sha256:d1d04b1d11b0d69875ad7d63ded36ed4c5c0e621c38f48d75c0e8b079c236aff"
    },
    "entity": "receipt:receipts/graph/mun-artifacts/typed-graphs-change-admission.json",
    "node_type": "receipt",
@@ -2702,7 +2700,7 @@
   }
  ],
  "tree": {
-  "commit": "a65a7e5d29df100093a9a7da76d73181581fa9a8",
+  "commit": "e94466f2db1cc27224ee871eccb830bce158dca4",
   "dirty": false
  },
  "verdicts": [
@@ -3115,8 +3113,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/aup/mun-open-task-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-open-task-root1255-20261013/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-open-p2-own-verifiers/type-check-0458h_nx/check.tsbuildinfo --listFiles",
-   "duration_s": 3.47,
+   "command": "/home/dev/aup/mun-open-task-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-open-task-root1255-20261013/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/muneral-pr244-restack-canaries/verifier-out/type-check-mbqv9kee/check.tsbuildinfo --listFiles",
+   "duration_s": 18.17,
    "entities": [
     "code_unit:apps/api/src/app.module.ts",
     "code_unit:apps/api/src/main.ts",
@@ -3158,13 +3156,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "/tmp/root1255-open-p2-own-verifiers/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-10-13T21:09:27Z",
+   "output_ref": "/tmp/muneral-pr244-restack-canaries/verifier-out/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-10-14T01:01:57Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1492 files listed"
   },
   {
-   "command": "/home/dev/aup/mun-open-task-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-open-task-root1255-20261013/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-open-p2-own-verifiers/type-check-nf7c4afh/check.tsbuildinfo --listFiles",
-   "duration_s": 5.81,
+   "command": "/home/dev/aup/mun-open-task-root1255-20261013/apps/api/node_modules/.bin/tsc -p /home/dev/aup/mun-open-task-root1255-20261013/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /tmp/muneral-pr244-restack-canaries/verifier-out/type-check-1wuwxa2g/check.tsbuildinfo --listFiles",
+   "duration_s": 23.16,
    "entities": [
     "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts",
     "code_unit:apps/api/test/agent-project-dependencies.e2e.spec.ts",
@@ -3214,13 +3212,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
-   "output_ref": "/tmp/root1255-open-p2-own-verifiers/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-10-13T21:09:31Z",
+   "output_ref": "/tmp/muneral-pr244-restack-canaries/verifier-out/v-type-check-apps-api-tsconfig-test.txt",
+   "started_at_utc": "2026-10-14T01:02:16Z",
    "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1658 files listed"
   },
   {
-   "command": "/home/dev/aup/mun-open-task-root1255-20261013/apps/web/node_modules/.bin/tsc -p /home/dev/aup/mun-open-task-root1255-20261013/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/root1255-open-p2-own-verifiers/type-check-flpv9dqh/check.tsbuildinfo --listFiles",
-   "duration_s": 4.06,
+   "command": "/home/dev/aup/mun-open-task-root1255-20261013/apps/web/node_modules/.bin/tsc -p /home/dev/aup/mun-open-task-root1255-20261013/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/muneral-pr244-restack-canaries/verifier-out/type-check-zk62ww8r/check.tsbuildinfo --listFiles",
+   "duration_s": 13.84,
    "entities": [
     "code_unit:apps/web/__tests__/web-consumer-live.test.ts",
     "deployable_unit:apps/web"
@@ -3232,13 +3230,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/tmp/root1255-open-p2-own-verifiers/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-10-13T21:09:37Z",
-   "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1313 files listed"
+   "output_ref": "/tmp/muneral-pr244-restack-canaries/verifier-out/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-10-14T01:02:40Z",
+   "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1317 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=1c599d52884f, head=a65a7e5d29df, graph=head graph)",
-   "duration_s": 3.87,
+   "command": "tools/graph/contract_diff.py.run_diff(base=5cdd6a87ac7f, head=e94466f2db1c, graph=head graph)",
+   "duration_s": 10.38,
    "entities": [
     "code_unit:apps/api/src/tasks/content/task-content.controller.ts",
     "code_unit:apps/api/src/tasks/content/task-content.service.ts",
@@ -3272,13 +3270,13 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "/tmp/root1255-open-p2-own-verifiers/v-contract-diff.json",
-   "started_at_utc": "2026-10-13T21:09:41Z",
+   "output_ref": "/tmp/muneral-pr244-restack-canaries/verifier-out/v-contract-diff.json",
+   "started_at_utc": "2026-10-14T01:02:55Z",
    "summary": "74→74 contracts, breaking 0, edges {'verified': 188}"
   },
   {
    "command": "verify.py route_config_consistency RC-01 prefix / RC-02 registration / RC-03 served",
-   "duration_s": 0.01,
+   "duration_s": 0.02,
    "entities": [
     "route:GET /tasks/:taskId/artifacts",
     "route:GET /tasks/:taskId/artifacts/:artifactId",
@@ -3306,13 +3304,13 @@
    "exit_code": 0,
    "id": "v-route-config",
    "kind": "config_schema",
-   "output_ref": "/tmp/root1255-open-p2-own-verifiers/v-route-config.txt",
-   "started_at_utc": "2026-10-13T21:09:45Z",
+   "output_ref": "/tmp/muneral-pr244-restack-canaries/verifier-out/v-route-config.txt",
+   "started_at_utc": "2026-10-14T01:03:05Z",
    "summary": "10 route(s), 0 failed"
   },
   {
    "command": "verify.py config_schema: keys read at head ⊆ declared keys",
-   "duration_s": 0.32,
+   "duration_s": 0.98,
    "entities": [
     "code_unit:apps/web/__tests__/web-consumer-live.test.ts"
    ],
@@ -3322,13 +3320,13 @@
    "exit_code": 0,
    "id": "v-config-schema",
    "kind": "config_schema",
-   "output_ref": "/tmp/root1255-open-p2-own-verifiers/v-config-schema.json",
-   "started_at_utc": "2026-10-13T21:09:45Z",
+   "output_ref": "/tmp/muneral-pr244-restack-canaries/verifier-out/v-config-schema.json",
+   "started_at_utc": "2026-10-14T01:03:05Z",
    "summary": "3 source(s), 0 new / 3 frozen undeclared reads, 0 failed; 4 vendored file(s) not attributed to this repository (Arcanada-one/arcanada-universal-program)"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.12,
+   "duration_s": 0.34,
    "entities": [
     "code_unit:apps/api/src/app.module.ts",
     "code_unit:apps/api/src/main.ts",
@@ -3394,8 +3392,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/tmp/root1255-open-p2-own-verifiers/v-fitness.json",
-   "started_at_utc": "2026-10-13T21:09:45Z",
+   "output_ref": "/tmp/muneral-pr244-restack-canaries/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-10-14T01:03:06Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -3414,13 +3412,13 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/tmp/root1255-open-p2-own-verifiers/v-doc-reference.txt",
-   "started_at_utc": "2026-10-13T21:09:45Z",
+   "output_ref": "/tmp/muneral-pr244-restack-canaries/verifier-out/v-doc-reference.txt",
+   "started_at_utc": "2026-10-14T01:03:06Z",
    "summary": "3 document(s), 0 failed"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.86,
+   "duration_s": 2.67,
    "entities": [
     "code_unit:apps/api/src/tasks/content/task-content.controller.ts"
    ],
@@ -3431,12 +3429,12 @@
    "id": "v-canary-1",
    "kind": "canary",
    "output_ref": "receipts/canary/mun-artifacts-open-20261013/source-5548df0/root1255-open-p2-api.result.json",
-   "started_at_utc": "2026-10-13T21:09:45Z",
+   "started_at_utc": "2026-10-14T01:03:06Z",
    "summary": "receipts/canary/mun-artifacts-open-20261013/source-5548df0/root1255-open-p2-api.result.json: 1 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.86,
+   "duration_s": 2.67,
    "entities": [
     "code_unit:apps/api/src/tasks/content/task-content.controller.ts",
     "route:GET /tasks/:taskId/artifacts",
@@ -3467,18 +3465,18 @@
    "id": "v-canary-2",
    "kind": "canary",
    "output_ref": "receipts/canary/mun-artifacts-open-20261013/source-5548df0/root1255-open-p2-routes.result.json",
-   "started_at_utc": "2026-10-13T21:09:45Z",
+   "started_at_utc": "2026-10-14T01:03:06Z",
    "summary": "receipts/canary/mun-artifacts-open-20261013/source-5548df0/root1255-open-p2-routes.result.json: 11 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.86,
+   "duration_s": 2.67,
    "entities": [],
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/tmp/root1255-open-p2-own-verifiers/v-canary.json",
-   "started_at_utc": "2026-10-13T21:09:45Z",
+   "output_ref": "/tmp/muneral-pr244-restack-canaries/verifier-out/v-canary.json",
+   "started_at_utc": "2026-10-14T01:03:06Z",
    "summary": "3 canary result(s), 2 committed at head; 11 verified / 0 failed / 0 not_measured of 11 entities"
   }
  ],
@@ -3731,9 +3729,9 @@
    ]
   },
   "seconds": {
-   "prepare": 1.73,
-   "total": 47.58,
-   "verifiers": 20.24
+   "prepare": 7.8,
+   "total": 173.72,
+   "verifiers": 74.9
   }
  },
  "work_item": "1f99b768-65e6-4afe-93e6-611db53e3366"
