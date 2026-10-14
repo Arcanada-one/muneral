@@ -257,6 +257,19 @@ describe('TasksService', () => {
 
       await service.delete('task-1', humanActor);
 
+      expect(activityService.log).toHaveBeenCalledWith(
+        {
+          workspaceId: 'ws-1',
+          taskId: 'task-1',
+          actor: humanActor,
+          action: 'task:deleted',
+          payload: { title: 'Test task' },
+        },
+        prisma,
+      );
+      expect(activityService.log.mock.invocationCallOrder[0]).toBeLessThan(
+        prisma.task.delete.mock.invocationCallOrder[0],
+      );
       expect(prisma.task.delete).toHaveBeenCalled();
       expect(kanbanService.notify).toHaveBeenCalledWith(
         'proj-1',
