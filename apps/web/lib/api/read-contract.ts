@@ -13,6 +13,9 @@ const task = z.object({
 });
 const workspace = z.object({ id, slug: z.string().min(1), name: z.string(), createdAt: timestamp,
   description: z.string().nullable().optional(), memberCount: z.number().int().nonnegative().optional() });
+const workspaceMember = z.object({ workspaceId: id, userId: id,
+  role: z.enum(['owner', 'manager', 'developer', 'viewer']),
+  user: z.object({ name: z.string().nullable() }) });
 const project = z.object({ id, workspaceId: id, slug: z.string().min(1), name: z.string(), createdAt: timestamp,
   repoUrl: z.string().nullable().optional(),
   description: z.string().nullable().optional(), status: z.enum(['active', 'archived']).optional(),
@@ -31,6 +34,8 @@ function read<T>(schema: z.ZodType<T, z.ZodTypeDef, unknown>, value: unknown, la
 }
 export const readTask = (value: unknown) => read(task, value, 'Task');
 export const readWorkspaces = (value: unknown) => read(z.array(workspace), value, 'Workspaces');
+export const readWorkspaceMembers = (value: unknown) => read(z.array(workspaceMember), value, 'Workspace members')
+  .map(({ userId, role, user }) => ({ id: userId, userId, userName: user.name ?? 'Unknown', role }));
 export const readProjects = (value: unknown) => read(z.array(project), value, 'Projects');
 export const readDependencies = (value: unknown) => read(z.array(dependency), value, 'Dependencies');
 export function readChecklist(value: unknown) {
