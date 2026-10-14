@@ -5,7 +5,7 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "paused_safe"
  },
- "captured_at_utc": "2026-10-14T03:25:37Z",
+ "captured_at_utc": "2026-10-14T04:22:21Z",
  "change_set": {
   "base": "840e3be216844d57c163daf14ec0a5d51657f963",
   "files": [
@@ -28,10 +28,37 @@
     "status": "M"
    },
    {
+    "kind": "code",
+    "node_id": "code_unit:apps/api/src/tasks/tasks.service.ts",
+    "node_ids": [
+     "code_unit:apps/api/src/tasks/tasks.service.ts"
+    ],
+    "path": "apps/api/src/tasks/tasks.service.ts",
+    "status": "M"
+   },
+   {
     "kind": "test",
     "path": "apps/api/test/assembly/mutation-results.json",
     "status": "M",
     "uncovered": true
+   },
+   {
+    "kind": "test",
+    "node_id": "code_unit:apps/api/test/task-delete-audit.e2e.spec.ts",
+    "node_ids": [
+     "code_unit:apps/api/test/task-delete-audit.e2e.spec.ts"
+    ],
+    "path": "apps/api/test/task-delete-audit.e2e.spec.ts",
+    "status": "A"
+   },
+   {
+    "kind": "test",
+    "node_id": "code_unit:apps/api/test/tasks.service.spec.ts",
+    "node_ids": [
+     "code_unit:apps/api/test/tasks.service.spec.ts"
+    ],
+    "path": "apps/api/test/tasks.service.spec.ts",
+    "status": "M"
    },
    {
     "kind": "test",
@@ -60,6 +87,42 @@
    {
     "kind": "receipt",
     "new": true,
+    "path": "receipts/canary/pr246-workspace-membership/membership-post-fix-route-sweep-execution.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/pr246-workspace-membership/membership-post-fix-route-sweep.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/pr246-workspace-membership/membership-post-fix-source-evidence.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/pr246-workspace-membership/post-fix-route-sweep-execution.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/pr246-workspace-membership/post-fix-route-sweep.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/pr246-workspace-membership/post-fix-source-evidence.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
     "path": "receipts/canary/pr246-workspace-membership/result.json",
     "status": "A"
    },
@@ -68,9 +131,18 @@
     "new": true,
     "path": "receipts/canary/pr246-workspace-membership/source-evidence.json",
     "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/pr246-workspace-membership-change-admission.json",
+    "node_ids": [
+     "receipt:receipts/graph/pr246-workspace-membership-change-admission.json"
+    ],
+    "path": "receipts/graph/pr246-workspace-membership-change-admission.json",
+    "status": "A"
    }
   ],
-  "head": "9ae6d29a2999e4bff8d8a186c21ee43bfb23f801",
+  "head": "0927103f9d959c519684ddd3f721d713dc033f1f",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -78,19 +150,19 @@
  "graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:d4be88318996f7d945b83d7a8faba9c0a3a8331b2dfdc25ae10056a6be4100f7",
-  "path": "/tmp/pr246-verifier-out/graph-840e3be21684.json",
+  "graph_digest": "sha256:bf33296cc766a1f737cca68db94703420616a99c3e9468d82952a3c28c00821f",
+  "path": "/home/dev/aup/muneral-pr246-car-20261014-final/receipts/graph/verifier-out/pr246-0927103/graph-840e3be21684.json",
   "source_commit": "840e3be216844d57c163daf14ec0a5d51657f963"
  },
  "head_graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:470a1d076c0e8a0d30617b10cacaeff0690b14d309cdf8c1737379805513a204",
-  "path": "/tmp/pr246-verifier-out/graph-head-9ae6d29a2999.json",
-  "source_commit": "9ae6d29a2999e4bff8d8a186c21ee43bfb23f801",
+  "graph_digest": "sha256:aadfa84842d216cd272e2f2008bed2f3100d3ea28dd2d252b28ae8e1a271143d",
+  "path": "/home/dev/aup/muneral-pr246-car-20261014-final/receipts/graph/verifier-out/pr246-0927103/graph-head-0927103f9d95.json",
+  "source_commit": "0927103f9d959c519684ddd3f721d713dc033f1f",
   "staleness": {
-   "checked_at_utc": "2026-10-14T03:26:15Z",
-   "checked_nodes": 453,
+   "checked_at_utc": "2026-10-14T04:22:50Z",
+   "checked_nodes": 455,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -499,16 +571,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "code_unit:apps/api/src/sync/sync.service.ts",
     "node_type": "code_unit",
     "path": [
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/tasks/tasks.service.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
      {
       "edge_type": "imports",
       "from": "code_unit:apps/api/src/sync/sync.service.ts",
@@ -601,47 +667,15 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "code_unit:apps/api/src/tasks/tasks.controller.ts",
     "node_type": "code_unit",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts"
-     }
-    ],
-    "revisions": [
-     "base",
-     "head"
-    ],
-    "verifier_hint": "type-check / compile of the importer"
-   },
-   {
-    "boundary": "intra_unit",
-    "depth": 2,
-    "entity": "code_unit:apps/api/src/tasks/tasks.module.ts",
-    "node_type": "code_unit",
-    "path": [
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/tasks/tasks.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
       "via": "relative"
      }
     ],
@@ -654,14 +688,15 @@
    {
     "boundary": "intra_unit",
     "depth": 1,
-    "entity": "code_unit:apps/api/src/tasks/tasks.service.ts",
+    "entity": "code_unit:apps/api/src/tasks/tasks.module.ts",
     "node_type": "code_unit",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "from": "code_unit:apps/api/src/tasks/tasks.module.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
      }
     ],
     "revisions": [
@@ -793,22 +828,15 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "code_unit:apps/api/test/agent-project-index.e2e.spec.ts",
     "node_type": "code_unit",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/test/agent-project-index.e2e.spec.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
       "via": "relative"
      }
     ],
@@ -918,22 +946,15 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "code_unit:apps/api/test/human-task-read-isolation.e2e.spec.ts",
     "node_type": "code_unit",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/test/human-task-read-isolation.e2e.spec.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
       "via": "relative"
      }
     ],
@@ -1026,16 +1047,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "code_unit:apps/api/test/project-index.service.spec.ts",
     "node_type": "code_unit",
     "path": [
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/tasks/tasks.service.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
      {
       "edge_type": "imports",
       "from": "code_unit:apps/api/test/project-index.service.spec.ts",
@@ -1079,16 +1094,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "code_unit:apps/api/test/sync.service.spec.ts",
     "node_type": "code_unit",
     "path": [
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/tasks/tasks.service.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
      {
       "edge_type": "imports",
       "from": "code_unit:apps/api/test/sync.service.spec.ts",
@@ -1267,45 +1276,13 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "code_unit:apps/api/test/tasks.query.spec.ts",
     "node_type": "code_unit",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/tasks/tasks.service.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/test/tasks.query.spec.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
-      "via": "relative"
-     }
-    ],
-    "revisions": [
-     "base",
-     "head"
-    ],
-    "verifier_hint": "type-check / compile of the importer"
-   },
-   {
-    "boundary": "intra_unit",
-    "depth": 2,
-    "entity": "code_unit:apps/api/test/tasks.service.spec.ts",
-    "node_type": "code_unit",
-    "path": [
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/tasks/tasks.service.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/test/tasks.service.spec.ts",
       "provenance": "deterministic",
       "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
       "via": "relative"
@@ -1386,28 +1363,198 @@
    {
     "boundary": "intra_unit",
     "depth": 3,
+    "entity": "document:README.md",
+    "node_type": "document",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "provides_route",
+      "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "provenance": "deterministic",
+      "to": "route:GET /tasks/:taskId",
+      "via": "nest-decorator"
+     },
+     {
+      "edge_type": "documents",
+      "from": "document:README.md",
+      "provenance": "deterministic",
+      "to": "route:GET /tasks/:taskId",
+      "via": "explicit-route"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 3,
+    "entity": "document:apps/api/docs/agent-read-loop.md",
+    "node_type": "document",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "provides_route",
+      "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "provenance": "deterministic",
+      "to": "route:GET /tasks/:taskId",
+      "via": "nest-decorator"
+     },
+     {
+      "edge_type": "documents",
+      "from": "document:apps/api/docs/agent-read-loop.md",
+      "provenance": "deterministic",
+      "to": "route:GET /tasks/:taskId",
+      "via": "explicit-route"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 3,
+    "entity": "document:apps/api/docs/agent-status-transitions.md",
+    "node_type": "document",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "provides_route",
+      "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "provenance": "deterministic",
+      "to": "route:GET /tasks/:taskId",
+      "via": "nest-decorator"
+     },
+     {
+      "edge_type": "documents",
+      "from": "document:apps/api/docs/agent-status-transitions.md",
+      "provenance": "deterministic",
+      "to": "route:GET /tasks/:taskId",
+      "via": "explicit-route"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 3,
     "entity": "document:apps/api/docs/agent-task-contract.md",
     "node_type": "document",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
+      "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/common/guards/workspace-member.guard.ts",
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
       "via": "relative"
      },
      {
       "edge_type": "provides_route",
-      "from": "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
+      "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "route:GET /workspaces",
+      "to": "route:DELETE /tasks/:taskId",
       "via": "nest-decorator"
      },
      {
       "edge_type": "documents",
       "from": "document:apps/api/docs/agent-task-contract.md",
       "provenance": "deterministic",
-      "to": "route:GET /workspaces",
+      "to": "route:DELETE /tasks/:taskId",
+      "via": "explicit-route"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 3,
+    "entity": "document:apps/api/docs/agent-workspace-digest.md",
+    "node_type": "document",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "provides_route",
+      "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "provenance": "deterministic",
+      "to": "route:GET /tasks",
+      "via": "nest-decorator"
+     },
+     {
+      "edge_type": "documents",
+      "from": "document:apps/api/docs/agent-workspace-digest.md",
+      "provenance": "deterministic",
+      "to": "route:GET /tasks",
+      "via": "explicit-route"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 3,
+    "entity": "document:apps/api/docs/migration-import.md",
+    "node_type": "document",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "provides_route",
+      "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "provenance": "deterministic",
+      "to": "route:PATCH /tasks/:taskId/status",
+      "via": "nest-decorator"
+     },
+     {
+      "edge_type": "documents",
+      "from": "document:apps/api/docs/migration-import.md",
+      "provenance": "deterministic",
+      "to": "route:PATCH /tasks/:taskId/status",
       "via": "explicit-route"
      }
     ],
@@ -1443,6 +1590,108 @@
       "provenance": "deterministic",
       "to": "code_unit:apps/api/test/task-evidence.e2e.spec.ts",
       "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 3,
+    "entity": "document:apps/api/docs/task-redactions.md",
+    "node_type": "document",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "provides_route",
+      "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "provenance": "deterministic",
+      "to": "route:PATCH /tasks/:taskId/status",
+      "via": "nest-decorator"
+     },
+     {
+      "edge_type": "documents",
+      "from": "document:apps/api/docs/task-redactions.md",
+      "provenance": "deterministic",
+      "to": "route:PATCH /tasks/:taskId/status",
+      "via": "explicit-route"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 3,
+    "entity": "document:docs/how-to/enable-outbox-relay.md",
+    "node_type": "document",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "provides_route",
+      "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "provenance": "deterministic",
+      "to": "route:PATCH /tasks/:taskId/status",
+      "via": "nest-decorator"
+     },
+     {
+      "edge_type": "documents",
+      "from": "document:docs/how-to/enable-outbox-relay.md",
+      "provenance": "deterministic",
+      "to": "route:PATCH /tasks/:taskId/status",
+      "via": "explicit-route"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 3,
+    "entity": "document:docs/reference/task-contract-binding.md",
+    "node_type": "document",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "provides_route",
+      "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "provenance": "deterministic",
+      "to": "route:GET /tasks/:taskId",
+      "via": "nest-decorator"
+     },
+     {
+      "edge_type": "documents",
+      "from": "document:docs/reference/task-contract-binding.md",
+      "provenance": "deterministic",
+      "to": "route:GET /tasks/:taskId",
+      "via": "explicit-route"
      }
     ],
     "revisions": [
@@ -1547,29 +1796,22 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "receipt:receipts/graph/A2-379-sync-import-scope.json",
     "node_type": "receipt",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
+      "from": "code_unit:apps/api/src/sync/sync.service.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/app.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
       "via": "relative"
      },
      {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/A2-379-sync-import-scope.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/app.module.ts",
+      "to": "code_unit:apps/api/src/sync/sync.service.ts",
       "via": "explicit-path"
      }
     ],
@@ -1615,29 +1857,22 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "receipt:receipts/graph/A2-387-sync-import-audit.json",
     "node_type": "receipt",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
+      "from": "code_unit:apps/api/src/sync/sync.service.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/app.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
       "via": "relative"
      },
      {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/A2-387-sync-import-audit.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/app.module.ts",
+      "to": "code_unit:apps/api/src/sync/sync.service.ts",
       "via": "explicit-path"
      }
     ],
@@ -1709,16 +1944,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/backend-workspace-isolation-20261008.json",
     "node_type": "receipt",
     "path": [
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/tasks/tasks.service.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
      {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/backend-workspace-isolation-20261008.json",
@@ -1889,16 +2118,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-a2p29-archived-20260915T131011Z.json",
     "node_type": "receipt",
     "path": [
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/tasks/tasks.service.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
      {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-a2p29-archived-20260915T131011Z.json",
@@ -1955,16 +2178,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-mun0048-rescue-20260915T070641Z.json",
     "node_type": "receipt",
     "path": [
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/tasks/tasks.service.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
      {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-mun0048-rescue-20260915T070641Z.json",
@@ -2081,16 +2298,10 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-mun0054-deps-20260918T170850Z.json",
     "node_type": "receipt",
     "path": [
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/tasks/tasks.service.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
      {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-mun0054-deps-20260918T170850Z.json",
@@ -2301,22 +2512,15 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/security-api959a-caller788.json",
     "node_type": "receipt",
     "path": [
      {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/security-api959a-caller788.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
       "via": "explicit-path"
      }
     ],
@@ -2456,21 +2660,16 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "route:DELETE /tasks/:taskId",
     "node_type": "route",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts"
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
      },
      {
       "edge_type": "provides_route",
@@ -2488,21 +2687,16 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "route:DELETE /tasks/:taskId/checklist/:itemId",
     "node_type": "route",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts"
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
      },
      {
       "edge_type": "provides_route",
@@ -2520,21 +2714,16 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "route:DELETE /tasks/:taskId/dependencies/:depId",
     "node_type": "route",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts"
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
      },
      {
       "edge_type": "provides_route",
@@ -2772,21 +2961,16 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "route:GET /tasks",
     "node_type": "route",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts"
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
      },
      {
       "edge_type": "provides_route",
@@ -2804,21 +2988,16 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "route:GET /tasks/:taskId",
     "node_type": "route",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts"
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
      },
      {
       "edge_type": "provides_route",
@@ -2836,21 +3015,16 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "route:GET /tasks/:taskId/activity",
     "node_type": "route",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts"
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
      },
      {
       "edge_type": "provides_route",
@@ -2868,21 +3042,16 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "route:GET /tasks/:taskId/checklist",
     "node_type": "route",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts"
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
      },
      {
       "edge_type": "provides_route",
@@ -2900,21 +3069,16 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "route:GET /tasks/:taskId/dependencies",
     "node_type": "route",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts"
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
      },
      {
       "edge_type": "provides_route",
@@ -2932,21 +3096,16 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "route:GET /tasks/:taskId/dependency-graph",
     "node_type": "route",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts"
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
      },
      {
       "edge_type": "provides_route",
@@ -2964,21 +3123,16 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "route:GET /tasks/:taskId/evidence",
     "node_type": "route",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts"
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
      },
      {
       "edge_type": "provides_route",
@@ -3028,21 +3182,16 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "route:GET /tasks/:taskId/readiness",
     "node_type": "route",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts"
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
      },
      {
       "edge_type": "provides_route",
@@ -3060,21 +3209,16 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "route:GET /tasks/digest",
     "node_type": "route",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts"
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
      },
      {
       "edge_type": "provides_route",
@@ -3092,21 +3236,16 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "route:GET /tasks/project/:projectId",
     "node_type": "route",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts"
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
      },
      {
       "edge_type": "provides_route",
@@ -3124,21 +3263,16 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "route:GET /tasks/project/:projectId/index",
     "node_type": "route",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts"
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
      },
      {
       "edge_type": "provides_route",
@@ -3156,21 +3290,16 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "route:GET /tasks/project/:projectId/staleness",
     "node_type": "route",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts"
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
      },
      {
       "edge_type": "provides_route",
@@ -3269,21 +3398,16 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "route:PATCH /tasks/:taskId/checklist/:itemId",
     "node_type": "route",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts"
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
      },
      {
       "edge_type": "provides_route",
@@ -3333,21 +3457,16 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "route:PATCH /tasks/:taskId/status",
     "node_type": "route",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts"
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
      },
      {
       "edge_type": "provides_route",
@@ -3649,21 +3768,16 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "route:POST /tasks",
     "node_type": "route",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts"
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
      },
      {
       "edge_type": "provides_route",
@@ -3681,21 +3795,16 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "route:POST /tasks/:taskId/checklist",
     "node_type": "route",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts"
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
      },
      {
       "edge_type": "provides_route",
@@ -3713,21 +3822,16 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "route:POST /tasks/:taskId/comments",
     "node_type": "route",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts"
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
      },
      {
       "edge_type": "provides_route",
@@ -3745,21 +3849,16 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "route:POST /tasks/:taskId/dependencies",
     "node_type": "route",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts"
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
      },
      {
       "edge_type": "provides_route",
@@ -3777,21 +3876,16 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "route:POST /tasks/:taskId/evidence",
     "node_type": "route",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts"
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
      },
      {
       "edge_type": "provides_route",
@@ -3841,21 +3935,16 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 3,
+    "depth": 2,
     "entity": "route:POST /tasks/:taskId/redactions",
     "node_type": "route",
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
       "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts"
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
      },
      {
       "edge_type": "provides_route",
@@ -3939,16 +4028,16 @@
     "path": [
      {
       "edge_type": "imports",
-      "from": "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
+      "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/common/guards/workspace-member.guard.ts",
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
       "via": "relative"
      },
      {
       "edge_type": "provides_route",
-      "from": "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
+      "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
       "provenance": "deterministic",
-      "to": "route:GET /workspaces",
+      "to": "route:GET /tasks",
       "via": "nest-decorator"
      },
      {
@@ -3957,7 +4046,42 @@
       "from": "code_unit:apps/web/lib/api/task-detail-read.ts",
       "inferred_by": "http-client-url-match",
       "provenance": "inferred",
-      "to": "route:GET /workspaces"
+      "to": "route:GET /tasks"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "consumer ⊆ provider check (contract-diff)"
+   },
+   {
+    "boundary": "service",
+    "depth": 3,
+    "entity": "code_unit:apps/web/lib/api/tasks.ts",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/api/src/tasks/tasks.service.ts",
+      "via": "relative"
+     },
+     {
+      "edge_type": "provides_route",
+      "from": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "provenance": "deterministic",
+      "to": "route:GET /tasks",
+      "via": "nest-decorator"
+     },
+     {
+      "boundary": "service",
+      "edge_type": "consumes_contract",
+      "from": "code_unit:apps/web/lib/api/tasks.ts",
+      "inferred_by": "http-client-url-match",
+      "provenance": "inferred",
+      "to": "route:GET /tasks"
      }
     ],
     "revisions": [
@@ -4004,7 +4128,7 @@
   ],
   "max_depth": 3,
   "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
-  "total": 143
+  "total": 150
  },
  "notes": [
   "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
@@ -4015,11 +4139,11 @@
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261014T032537Z-9ae6d29a",
+ "receipt_id": "car-verify-20261014T042221Z-0927103f",
  "receipt_path": "receipts/graph/pr246-workspace-membership-change-admission.json",
  "repo": {
   "name": "Arcanada-one/muneral",
-  "path": "/home/dev/aup/muneral-main-membership-check"
+  "path": "/home/dev/aup/muneral-pr246-car-20261014-final"
  },
  "revision_selection": {
   "base": [
@@ -4075,11 +4199,20 @@
    "code_unit:apps/api/test/workspace-digest-grants.spec.ts",
    "code_unit:apps/api/test/workspace-digest.unit.spec.ts",
    "code_unit:apps/web/lib/api/task-detail-read.ts",
+   "code_unit:apps/web/lib/api/tasks.ts",
    "code_unit:apps/web/lib/api/workspaces.ts",
    "contract:apps/api/src/auth/guards/agent-task-scope.guard.ts#AssignBasis",
    "deployable_unit:apps/api",
+   "document:README.md",
+   "document:apps/api/docs/agent-read-loop.md",
+   "document:apps/api/docs/agent-status-transitions.md",
    "document:apps/api/docs/agent-task-contract.md",
+   "document:apps/api/docs/agent-workspace-digest.md",
+   "document:apps/api/docs/migration-import.md",
    "document:apps/api/docs/task-evidence.md",
+   "document:apps/api/docs/task-redactions.md",
+   "document:docs/how-to/enable-outbox-relay.md",
+   "document:docs/reference/task-contract-binding.md",
    "receipt:receipts/graph/A2-294-digest-grant-on-refresh.json",
    "receipt:receipts/graph/A2-330-muneral-canary.json",
    "receipt:receipts/graph/A2-365-revert-digest-grant.json",
@@ -4214,6 +4347,7 @@
    "code_unit:apps/api/test/sync.service.spec.ts",
    "code_unit:apps/api/test/task-contract-binding.e2e.spec.ts",
    "code_unit:apps/api/test/task-contract-digest.e2e.spec.ts",
+   "code_unit:apps/api/test/task-delete-audit.e2e.spec.ts",
    "code_unit:apps/api/test/task-evidence.e2e.spec.ts",
    "code_unit:apps/api/test/task-redactions.e2e.spec.ts",
    "code_unit:apps/api/test/tasks-agent-scope.e2e.spec.ts",
@@ -4224,11 +4358,20 @@
    "code_unit:apps/api/test/workspace-digest.unit.spec.ts",
    "code_unit:apps/api/test/workspace-membership.routes.e2e.spec.ts",
    "code_unit:apps/web/lib/api/task-detail-read.ts",
+   "code_unit:apps/web/lib/api/tasks.ts",
    "code_unit:apps/web/lib/api/workspaces.ts",
    "contract:apps/api/src/auth/guards/agent-task-scope.guard.ts#AssignBasis",
    "deployable_unit:apps/api",
+   "document:README.md",
+   "document:apps/api/docs/agent-read-loop.md",
+   "document:apps/api/docs/agent-status-transitions.md",
    "document:apps/api/docs/agent-task-contract.md",
+   "document:apps/api/docs/agent-workspace-digest.md",
+   "document:apps/api/docs/migration-import.md",
    "document:apps/api/docs/task-evidence.md",
+   "document:apps/api/docs/task-redactions.md",
+   "document:docs/how-to/enable-outbox-relay.md",
+   "document:docs/reference/task-contract-binding.md",
    "receipt:receipts/graph/A2-294-digest-grant-on-refresh.json",
    "receipt:receipts/graph/A2-330-muneral-canary.json",
    "receipt:receipts/graph/A2-365-revert-digest-grant.json",
@@ -4265,6 +4408,7 @@
    "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
    "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
    "receipt:receipts/graph/mun-0043-index-grant-20261007.json",
+   "receipt:receipts/graph/pr246-workspace-membership-change-admission.json",
    "receipt:receipts/graph/revision4-public-20261007.json",
    "receipt:receipts/graph/security-api959a-caller788.json",
    "route:DELETE /agents/keys/:keyId",
@@ -4324,7 +4468,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-14T03:26:15Z",
+  "checked_at_utc": "2026-10-14T04:22:50Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -4728,6 +4872,21 @@
   },
   {
    "content_hash": {
+    "base": null,
+    "head": "sha256:1a2d9ec47cc11102f1024c5d1a3d4329c80a83a913aac878bca08755c531a756"
+   },
+   "entity": "receipt:receipts/graph/pr246-workspace-membership-change-admission.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/pr246-workspace-membership-change-admission.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it; superseded by construction — this run re-issues the receipt at receipts/graph/pr246-workspace-membership-change-admission.json for work item 1f99b768-65e6-4afe-93e6-611db53e3366",
+   "rule": "DEC-AUP-0035",
+   "superseded": {
+    "receipt_path": "receipts/graph/pr246-workspace-membership-change-admission.json",
+    "work_item": "1f99b768-65e6-4afe-93e6-611db53e3366"
+   }
+  },
+  {
+   "content_hash": {
     "base": "sha256:1c94d3471b00a482ab1b9c14c147b36a16a6985f827ba0cb9fc2776387963530",
     "head": "sha256:1c94d3471b00a482ab1b9c14c147b36a16a6985f827ba0cb9fc2776387963530"
    },
@@ -4750,16 +4909,16 @@
   }
  ],
  "tree": {
-  "commit": "9ae6d29a2999e4bff8d8a186c21ee43bfb23f801",
+  "commit": "0927103f9d959c519684ddd3f721d713dc033f1f",
   "dirty": false
  },
  "verdicts": [
   {
    "entity": "code_unit:apps/api/src/agents/agents.controller.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation (1 frozen: FR-01); v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -4868,10 +5027,10 @@
   },
   {
    "entity": "code_unit:apps/api/src/projects/projects.controller.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -4897,10 +5056,10 @@
   },
   {
    "entity": "code_unit:apps/api/src/sync/sync.controller.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -4926,10 +5085,10 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation (1 frozen: FR-01); v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -4937,10 +5096,10 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -4957,10 +5116,10 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/tasks.controller.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 9 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -4977,9 +5136,10 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/tasks.service.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 7 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation",
    "verdict": "verified",
    "verifier_ids": [
+    "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
    ]
@@ -4995,10 +5155,10 @@
   },
   {
    "entity": "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation (1 frozen: FR-01); v-canary-1: canary pr246-workspace-membership-five-routes (post) on author-local Nest HTTP application with disposable PostgreSQL 16: Five workspace-membership controller routes were exercised through the local Nest HTTP application; this does not cover the separate workspace collection routes.",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation (1 frozen: FR-01); v-canary-2: canary pr246-candidate-local-membership-routes (post) on candidate-local Nest HTTP application on loopback with private disposable PostgreSQL 16 and synthetic owner/target users: all five workspace membership route controls passed on candidate source",
    "verdict": "verified",
    "verifier_ids": [
-    "v-canary-1",
+    "v-canary-2",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -5158,6 +5318,15 @@
    ]
   },
   {
+   "entity": "code_unit:apps/api/test/task-delete-audit.e2e.spec.ts",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-api-tsconfig-test"
+   ]
+  },
+  {
    "entity": "code_unit:apps/api/test/task-evidence.e2e.spec.ts",
    "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
    "verdict": "verified",
@@ -5251,6 +5420,17 @@
    ]
   },
   {
+   "entity": "code_unit:apps/web/lib/api/tasks.ts",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-canary",
+    "v-contract-diff",
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
    "entity": "code_unit:apps/web/lib/api/workspaces.ts",
    "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
@@ -5279,8 +5459,48 @@
    ]
   },
   {
+   "entity": "document:README.md",
+   "reason": "v-doc-reference: 3 reference(s) resolve at head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-doc-reference"
+   ]
+  },
+  {
+   "entity": "document:apps/api/docs/agent-read-loop.md",
+   "reason": "v-doc-reference: 11 reference(s) resolve at head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-doc-reference"
+   ]
+  },
+  {
+   "entity": "document:apps/api/docs/agent-status-transitions.md",
+   "reason": "v-doc-reference: 6 reference(s) resolve at head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-doc-reference"
+   ]
+  },
+  {
    "entity": "document:apps/api/docs/agent-task-contract.md",
    "reason": "v-doc-reference: 12 reference(s) resolve at head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-doc-reference"
+   ]
+  },
+  {
+   "entity": "document:apps/api/docs/agent-workspace-digest.md",
+   "reason": "v-doc-reference: 4 reference(s) resolve at head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-doc-reference"
+   ]
+  },
+  {
+   "entity": "document:apps/api/docs/migration-import.md",
+   "reason": "v-doc-reference: 10 reference(s) resolve at head",
    "verdict": "verified",
    "verifier_ids": [
     "v-doc-reference"
@@ -5295,11 +5515,35 @@
    ]
   },
   {
-   "entity": "route:DELETE /agents/keys/:keyId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "entity": "document:apps/api/docs/task-redactions.md",
+   "reason": "v-doc-reference: 2 reference(s) resolve at head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-doc-reference"
+   ]
+  },
+  {
+   "entity": "document:docs/how-to/enable-outbox-relay.md",
+   "reason": "v-doc-reference: 2 reference(s) resolve at head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-doc-reference"
+   ]
+  },
+  {
+   "entity": "document:docs/reference/task-contract-binding.md",
+   "reason": "v-doc-reference: 1 reference(s) resolve at head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-doc-reference"
+   ]
+  },
+  {
+   "entity": "route:DELETE /agents/keys/:keyId",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5307,10 +5551,10 @@
   },
   {
    "entity": "route:DELETE /agents/tasks/:taskId/assign/:agentId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5318,10 +5562,10 @@
   },
   {
    "entity": "route:DELETE /projects/:projectId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5329,10 +5573,10 @@
   },
   {
    "entity": "route:DELETE /projects/git-refs/:refId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5340,10 +5584,10 @@
   },
   {
    "entity": "route:DELETE /tasks/:taskId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5351,10 +5595,10 @@
   },
   {
    "entity": "route:DELETE /tasks/:taskId/checklist/:itemId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5362,10 +5606,10 @@
   },
   {
    "entity": "route:DELETE /tasks/:taskId/dependencies/:depId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5373,10 +5617,10 @@
   },
   {
    "entity": "route:DELETE /workspaces/:workspaceId/members/:userId",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-workspace-membership-five-routes (post) on author-local Nest HTTP application with disposable PostgreSQL 16: The owner and anonymous controls both passed for DELETE /workspaces/:workspaceId/members/:userId.",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-2: canary pr246-candidate-local-membership-routes (post) on candidate-local Nest HTTP application on loopback with private disposable PostgreSQL 16 and synthetic owner/target users: candidate HTTP owner and anonymous controls passed",
    "verdict": "verified",
    "verifier_ids": [
-    "v-canary-1",
+    "v-canary-2",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5384,10 +5628,10 @@
   },
   {
    "entity": "route:GET /agents/tasks",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5395,10 +5639,10 @@
   },
   {
    "entity": "route:GET /agents/workspace/:workspaceId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5406,10 +5650,10 @@
   },
   {
    "entity": "route:GET /projects/:projectId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5417,10 +5661,10 @@
   },
   {
    "entity": "route:GET /projects/tasks/:taskId/git-refs",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5428,10 +5672,10 @@
   },
   {
    "entity": "route:GET /projects/workspace/:workspaceId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5439,10 +5683,10 @@
   },
   {
    "entity": "route:GET /sync/datarim/:projectId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5450,10 +5694,10 @@
   },
   {
    "entity": "route:GET /tasks",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5461,10 +5705,10 @@
   },
   {
    "entity": "route:GET /tasks/:taskId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5472,10 +5716,10 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/activity",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5483,10 +5727,10 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/checklist",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5494,10 +5738,10 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/dependencies",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5505,10 +5749,10 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/dependency-graph",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5516,10 +5760,10 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/evidence",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5527,10 +5771,10 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/field-changes",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5538,10 +5782,10 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/readiness",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5549,10 +5793,10 @@
   },
   {
    "entity": "route:GET /tasks/digest",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5560,10 +5804,10 @@
   },
   {
    "entity": "route:GET /tasks/project/:projectId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5571,10 +5815,10 @@
   },
   {
    "entity": "route:GET /tasks/project/:projectId/index",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5582,10 +5826,10 @@
   },
   {
    "entity": "route:GET /tasks/project/:projectId/staleness",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5593,10 +5837,10 @@
   },
   {
    "entity": "route:GET /workspaces",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5604,10 +5848,10 @@
   },
   {
    "entity": "route:GET /workspaces/:workspaceId",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-workspace-membership-five-routes (post) on author-local Nest HTTP application with disposable PostgreSQL 16: The owner and anonymous controls both passed for GET /workspaces/:workspaceId.",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-2: canary pr246-candidate-local-membership-routes (post) on candidate-local Nest HTTP application on loopback with private disposable PostgreSQL 16 and synthetic owner/target users: candidate HTTP owner and anonymous controls passed",
    "verdict": "verified",
    "verifier_ids": [
-    "v-canary-1",
+    "v-canary-2",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5615,10 +5859,10 @@
   },
   {
    "entity": "route:GET /workspaces/:workspaceId/members",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-workspace-membership-five-routes (post) on author-local Nest HTTP application with disposable PostgreSQL 16: The owner and anonymous controls both passed for GET /workspaces/:workspaceId/members.",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-2: canary pr246-candidate-local-membership-routes (post) on candidate-local Nest HTTP application on loopback with private disposable PostgreSQL 16 and synthetic owner/target users: candidate HTTP owner and anonymous controls passed",
    "verdict": "verified",
    "verifier_ids": [
-    "v-canary-1",
+    "v-canary-2",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5626,10 +5870,10 @@
   },
   {
    "entity": "route:PATCH /tasks/:taskId/checklist/:itemId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5637,10 +5881,10 @@
   },
   {
    "entity": "route:PATCH /tasks/:taskId/contract",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5648,10 +5892,10 @@
   },
   {
    "entity": "route:PATCH /tasks/:taskId/status",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5659,10 +5903,10 @@
   },
   {
    "entity": "route:PATCH /workspaces/:workspaceId/members/:userId/role",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-workspace-membership-five-routes (post) on author-local Nest HTTP application with disposable PostgreSQL 16: The owner and anonymous controls both passed for PATCH /workspaces/:workspaceId/members/:userId/role.",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-2: canary pr246-candidate-local-membership-routes (post) on candidate-local Nest HTTP application on loopback with private disposable PostgreSQL 16 and synthetic owner/target users: candidate HTTP owner and anonymous controls passed",
    "verdict": "verified",
    "verifier_ids": [
-    "v-canary-1",
+    "v-canary-2",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5670,10 +5914,10 @@
   },
   {
    "entity": "route:POST /agents",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5681,10 +5925,10 @@
   },
   {
    "entity": "route:POST /agents/:agentId/keys",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5692,10 +5936,10 @@
   },
   {
    "entity": "route:POST /agents/keys/:keyId/rotate",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5703,10 +5947,10 @@
   },
   {
    "entity": "route:POST /agents/keys/self/revoke",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5714,10 +5958,10 @@
   },
   {
    "entity": "route:POST /agents/tasks/:taskId/assign",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5725,10 +5969,10 @@
   },
   {
    "entity": "route:POST /projects",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5736,10 +5980,10 @@
   },
   {
    "entity": "route:POST /projects/git-refs",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5747,10 +5991,10 @@
   },
   {
    "entity": "route:POST /sync/datarim/:projectId/import",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5758,10 +6002,10 @@
   },
   {
    "entity": "route:POST /tasks",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5769,10 +6013,10 @@
   },
   {
    "entity": "route:POST /tasks/:taskId/checklist",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5780,10 +6024,10 @@
   },
   {
    "entity": "route:POST /tasks/:taskId/comments",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5791,10 +6035,10 @@
   },
   {
    "entity": "route:POST /tasks/:taskId/dependencies",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5802,10 +6046,10 @@
   },
   {
    "entity": "route:POST /tasks/:taskId/evidence",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5813,10 +6057,10 @@
   },
   {
    "entity": "route:POST /tasks/:taskId/field-ack",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5824,10 +6068,10 @@
   },
   {
    "entity": "route:POST /tasks/:taskId/redactions",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5835,10 +6079,10 @@
   },
   {
    "entity": "route:POST /workspaces",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-candidate-local-authenticated-route-sweep (post) on candidate-local Nest test application with real middleware/controllers and synthetic owner JWT + agent API key: all bound authenticated/anonymous HTTP controls passed on the exact source head",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5846,10 +6090,10 @@
   },
   {
    "entity": "route:POST /workspaces/:workspaceId/members/:userId",
-   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-workspace-membership-five-routes (post) on author-local Nest HTTP application with disposable PostgreSQL 16: The owner and anonymous controls both passed for POST /workspaces/:workspaceId/members/:userId.",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-2: canary pr246-candidate-local-membership-routes (post) on candidate-local Nest HTTP application on loopback with private disposable PostgreSQL 16 and synthetic owner/target users: candidate HTTP owner and anonymous controls passed",
    "verdict": "verified",
    "verifier_ids": [
-    "v-canary-1",
+    "v-canary-2",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5864,8 +6108,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/aup/muneral-main-membership-check/apps/api/node_modules/.bin/tsc -p /home/dev/aup/muneral-main-membership-check/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/pr246-verifier-out/type-check-qid3dz6t/check.tsbuildinfo --listFiles",
-   "duration_s": 6.85,
+   "command": "/home/dev/aup/muneral-pr246-car-20261014-final/apps/api/node_modules/.bin/tsc -p /home/dev/aup/muneral-pr246-car-20261014-final/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/muneral-pr246-car-20261014-final/receipts/graph/verifier-out/pr246-0927103/type-check-9ivefs5h/check.tsbuildinfo --listFiles",
+   "duration_s": 4.76,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -6031,13 +6275,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "/tmp/pr246-verifier-out/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-10-14T03:26:22Z",
+   "output_ref": "/home/dev/aup/muneral-pr246-car-20261014-final/receipts/graph/verifier-out/pr246-0927103/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-10-14T04:22:55Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1453 files listed"
   },
   {
-   "command": "/home/dev/aup/muneral-main-membership-check/apps/api/node_modules/.bin/tsc -p /home/dev/aup/muneral-main-membership-check/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /tmp/pr246-verifier-out/type-check-h9g7bswt/check.tsbuildinfo --listFiles",
-   "duration_s": 15.49,
+   "command": "/home/dev/aup/muneral-pr246-car-20261014-final/apps/api/node_modules/.bin/tsc -p /home/dev/aup/muneral-pr246-car-20261014-final/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/muneral-pr246-car-20261014-final/receipts/graph/verifier-out/pr246-0927103/type-check-8cixshek/check.tsbuildinfo --listFiles",
+   "duration_s": 8.54,
    "entities": [
     "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts",
     "code_unit:apps/api/test/agent-project-dependencies.e2e.spec.ts",
@@ -6055,6 +6299,7 @@
     "code_unit:apps/api/test/sync.service.spec.ts",
     "code_unit:apps/api/test/task-contract-binding.e2e.spec.ts",
     "code_unit:apps/api/test/task-contract-digest.e2e.spec.ts",
+    "code_unit:apps/api/test/task-delete-audit.e2e.spec.ts",
     "code_unit:apps/api/test/task-evidence.e2e.spec.ts",
     "code_unit:apps/api/test/task-redactions.e2e.spec.ts",
     "code_unit:apps/api/test/tasks-agent-scope.e2e.spec.ts",
@@ -6083,6 +6328,7 @@
     "code_unit:apps/api/test/sync.service.spec.ts": "verified",
     "code_unit:apps/api/test/task-contract-binding.e2e.spec.ts": "verified",
     "code_unit:apps/api/test/task-contract-digest.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/task-delete-audit.e2e.spec.ts": "verified",
     "code_unit:apps/api/test/task-evidence.e2e.spec.ts": "verified",
     "code_unit:apps/api/test/task-redactions.e2e.spec.ts": "verified",
     "code_unit:apps/api/test/tasks-agent-scope.e2e.spec.ts": "verified",
@@ -6097,31 +6343,33 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
-   "output_ref": "/tmp/pr246-verifier-out/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-10-14T03:26:29Z",
-   "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1616 files listed"
+   "output_ref": "/home/dev/aup/muneral-pr246-car-20261014-final/receipts/graph/verifier-out/pr246-0927103/v-type-check-apps-api-tsconfig-test.txt",
+   "started_at_utc": "2026-10-14T04:23:00Z",
+   "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1613 files listed"
   },
   {
-   "command": "/home/dev/aup/muneral-main-membership-check/apps/web/node_modules/.bin/tsc -p /home/dev/aup/muneral-main-membership-check/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/pr246-verifier-out/type-check-uo_3urz7/check.tsbuildinfo --listFiles",
-   "duration_s": 8.33,
+   "command": "/home/dev/aup/muneral-pr246-car-20261014-final/apps/web/node_modules/.bin/tsc -p /home/dev/aup/muneral-pr246-car-20261014-final/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/muneral-pr246-car-20261014-final/receipts/graph/verifier-out/pr246-0927103/type-check-h8ogodda/check.tsbuildinfo --listFiles",
+   "duration_s": 7.51,
    "entities": [
     "code_unit:apps/web/lib/api/task-detail-read.ts",
+    "code_unit:apps/web/lib/api/tasks.ts",
     "code_unit:apps/web/lib/api/workspaces.ts"
    ],
    "entity_verdicts": {
     "code_unit:apps/web/lib/api/task-detail-read.ts": "verified",
+    "code_unit:apps/web/lib/api/tasks.ts": "verified",
     "code_unit:apps/web/lib/api/workspaces.ts": "verified"
    },
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/tmp/pr246-verifier-out/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-10-14T03:26:45Z",
+   "output_ref": "/home/dev/aup/muneral-pr246-car-20261014-final/receipts/graph/verifier-out/pr246-0927103/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-10-14T04:23:09Z",
    "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1312 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=840e3be21684, head=9ae6d29a2999, graph=head graph)",
-   "duration_s": 6.98,
+   "command": "tools/graph/contract_diff.py.run_diff(base=840e3be21684, head=0927103f9d95, graph=head graph)",
+   "duration_s": 5.24,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.service.ts",
@@ -6131,8 +6379,10 @@
     "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts",
     "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts",
     "code_unit:apps/api/src/tasks/tasks.controller.ts",
+    "code_unit:apps/api/src/tasks/tasks.service.ts",
     "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
     "code_unit:apps/web/lib/api/task-detail-read.ts",
+    "code_unit:apps/web/lib/api/tasks.ts",
     "code_unit:apps/web/lib/api/workspaces.ts",
     "contract:apps/api/src/auth/guards/agent-task-scope.guard.ts#AssignBasis",
     "route:DELETE /agents/keys/:keyId",
@@ -6196,8 +6446,10 @@
     "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts": "verified",
     "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts": "verified",
     "code_unit:apps/api/src/tasks/tasks.controller.ts": "verified",
+    "code_unit:apps/api/src/tasks/tasks.service.ts": "verified",
     "code_unit:apps/api/src/workspaces/workspaces.controller.ts": "verified",
     "code_unit:apps/web/lib/api/task-detail-read.ts": "verified",
+    "code_unit:apps/web/lib/api/tasks.ts": "verified",
     "code_unit:apps/web/lib/api/workspaces.ts": "verified",
     "contract:apps/api/src/auth/guards/agent-task-scope.guard.ts#AssignBasis": "verified",
     "route:DELETE /agents/keys/:keyId": "verified",
@@ -6255,13 +6507,13 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "/tmp/pr246-verifier-out/v-contract-diff.json",
-   "started_at_utc": "2026-10-14T03:26:54Z",
+   "output_ref": "/home/dev/aup/muneral-pr246-car-20261014-final/receipts/graph/verifier-out/pr246-0927103/v-contract-diff.json",
+   "started_at_utc": "2026-10-14T04:23:16Z",
    "summary": "58→58 contracts, breaking 0, edges {'verified': 164}"
   },
   {
    "command": "verify.py route_config_consistency RC-01 prefix / RC-02 registration / RC-03 served",
-   "duration_s": 0.08,
+   "duration_s": 0.05,
    "entities": [
     "route:DELETE /agents/keys/:keyId",
     "route:DELETE /agents/tasks/:taskId/assign/:agentId",
@@ -6371,13 +6623,13 @@
    "exit_code": 0,
    "id": "v-route-config",
    "kind": "config_schema",
-   "output_ref": "/tmp/pr246-verifier-out/v-route-config.txt",
-   "started_at_utc": "2026-10-14T03:27:01Z",
+   "output_ref": "/home/dev/aup/muneral-pr246-car-20261014-final/receipts/graph/verifier-out/pr246-0927103/v-route-config.txt",
+   "started_at_utc": "2026-10-14T04:23:22Z",
    "summary": "51 route(s), 0 failed"
   },
   {
    "command": "verify.py config_schema: keys read at head ⊆ declared keys",
-   "duration_s": 0.6,
+   "duration_s": 0.41,
    "entities": [
     "code_unit:apps/api/test/workspace-membership.routes.e2e.spec.ts"
    ],
@@ -6387,13 +6639,13 @@
    "exit_code": 0,
    "id": "v-config-schema",
    "kind": "config_schema",
-   "output_ref": "/tmp/pr246-verifier-out/v-config-schema.json",
-   "started_at_utc": "2026-10-14T03:27:01Z",
+   "output_ref": "/home/dev/aup/muneral-pr246-car-20261014-final/receipts/graph/verifier-out/pr246-0927103/v-config-schema.json",
+   "started_at_utc": "2026-10-14T04:23:22Z",
    "summary": "2 source(s), 0 new / 3 frozen undeclared reads, 0 failed; 4 vendored file(s) not attributed to this repository (Arcanada-one/arcanada-universal-program)"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.16,
+   "duration_s": 0.14,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -6438,6 +6690,7 @@
     "code_unit:apps/api/test/sync.service.spec.ts",
     "code_unit:apps/api/test/task-contract-binding.e2e.spec.ts",
     "code_unit:apps/api/test/task-contract-digest.e2e.spec.ts",
+    "code_unit:apps/api/test/task-delete-audit.e2e.spec.ts",
     "code_unit:apps/api/test/task-evidence.e2e.spec.ts",
     "code_unit:apps/api/test/task-redactions.e2e.spec.ts",
     "code_unit:apps/api/test/tasks-agent-scope.e2e.spec.ts",
@@ -6448,6 +6701,7 @@
     "code_unit:apps/api/test/workspace-digest.unit.spec.ts",
     "code_unit:apps/api/test/workspace-membership.routes.e2e.spec.ts",
     "code_unit:apps/web/lib/api/task-detail-read.ts",
+    "code_unit:apps/web/lib/api/tasks.ts",
     "code_unit:apps/web/lib/api/workspaces.ts",
     "deployable_unit:apps/api"
    ],
@@ -6495,6 +6749,7 @@
     "code_unit:apps/api/test/sync.service.spec.ts": "verified",
     "code_unit:apps/api/test/task-contract-binding.e2e.spec.ts": "verified",
     "code_unit:apps/api/test/task-contract-digest.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/task-delete-audit.e2e.spec.ts": "verified",
     "code_unit:apps/api/test/task-evidence.e2e.spec.ts": "verified",
     "code_unit:apps/api/test/task-redactions.e2e.spec.ts": "verified",
     "code_unit:apps/api/test/tasks-agent-scope.e2e.spec.ts": "verified",
@@ -6505,63 +6760,54 @@
     "code_unit:apps/api/test/workspace-digest.unit.spec.ts": "verified",
     "code_unit:apps/api/test/workspace-membership.routes.e2e.spec.ts": "verified",
     "code_unit:apps/web/lib/api/task-detail-read.ts": "verified",
+    "code_unit:apps/web/lib/api/tasks.ts": "verified",
     "code_unit:apps/web/lib/api/workspaces.ts": "verified",
     "deployable_unit:apps/api": "verified"
    },
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/tmp/pr246-verifier-out/v-fitness.json",
-   "started_at_utc": "2026-10-14T03:27:02Z",
+   "output_ref": "/home/dev/aup/muneral-pr246-car-20261014-final/receipts/graph/verifier-out/pr246-0927103/v-fitness.json",
+   "started_at_utc": "2026-10-14T04:23:22Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
    "command": "verify.py doc_reference: path / route / model references of affected documents resolve at head",
-   "duration_s": 0.0,
+   "duration_s": 0.01,
    "entities": [
+    "document:README.md",
+    "document:apps/api/docs/agent-read-loop.md",
+    "document:apps/api/docs/agent-status-transitions.md",
     "document:apps/api/docs/agent-task-contract.md",
-    "document:apps/api/docs/task-evidence.md"
+    "document:apps/api/docs/agent-workspace-digest.md",
+    "document:apps/api/docs/migration-import.md",
+    "document:apps/api/docs/task-evidence.md",
+    "document:apps/api/docs/task-redactions.md",
+    "document:docs/how-to/enable-outbox-relay.md",
+    "document:docs/reference/task-contract-binding.md"
    ],
    "entity_verdicts": {
+    "document:README.md": "verified",
+    "document:apps/api/docs/agent-read-loop.md": "verified",
+    "document:apps/api/docs/agent-status-transitions.md": "verified",
     "document:apps/api/docs/agent-task-contract.md": "verified",
-    "document:apps/api/docs/task-evidence.md": "verified"
+    "document:apps/api/docs/agent-workspace-digest.md": "verified",
+    "document:apps/api/docs/migration-import.md": "verified",
+    "document:apps/api/docs/task-evidence.md": "verified",
+    "document:apps/api/docs/task-redactions.md": "verified",
+    "document:docs/how-to/enable-outbox-relay.md": "verified",
+    "document:docs/reference/task-contract-binding.md": "verified"
    },
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/tmp/pr246-verifier-out/v-doc-reference.txt",
-   "started_at_utc": "2026-10-14T03:27:02Z",
-   "summary": "2 document(s), 0 failed"
+   "output_ref": "/home/dev/aup/muneral-pr246-car-20261014-final/receipts/graph/verifier-out/pr246-0927103/v-doc-reference.txt",
+   "started_at_utc": "2026-10-14T04:23:22Z",
+   "summary": "10 document(s), 0 failed"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.07,
-   "entities": [
-    "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
-    "route:DELETE /workspaces/:workspaceId/members/:userId",
-    "route:GET /workspaces/:workspaceId",
-    "route:GET /workspaces/:workspaceId/members",
-    "route:PATCH /workspaces/:workspaceId/members/:userId/role",
-    "route:POST /workspaces/:workspaceId/members/:userId"
-   ],
-   "entity_verdicts": {
-    "code_unit:apps/api/src/workspaces/workspaces.controller.ts": "verified",
-    "route:DELETE /workspaces/:workspaceId/members/:userId": "verified",
-    "route:GET /workspaces/:workspaceId": "verified",
-    "route:GET /workspaces/:workspaceId/members": "verified",
-    "route:PATCH /workspaces/:workspaceId/members/:userId/role": "verified",
-    "route:POST /workspaces/:workspaceId/members/:userId": "verified"
-   },
-   "exit_code": 0,
-   "id": "v-canary-1",
-   "kind": "canary",
-   "output_ref": "receipts/canary/pr246-workspace-membership/result.json",
-   "started_at_utc": "2026-10-14T03:27:02Z",
-   "summary": "receipts/canary/pr246-workspace-membership/result.json: 6 verified / 0 failed / 0 not_measured"
-  },
-  {
-   "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.07,
+   "duration_s": 0.12,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/projects/projects.controller.ts",
@@ -6569,8 +6815,6 @@
     "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts",
     "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts",
     "code_unit:apps/api/src/tasks/tasks.controller.ts",
-    "code_unit:apps/web/lib/api/task-detail-read.ts",
-    "code_unit:apps/web/lib/api/workspaces.ts",
     "route:DELETE /agents/keys/:keyId",
     "route:DELETE /agents/tasks/:taskId/assign/:agentId",
     "route:DELETE /projects/:projectId",
@@ -6619,75 +6863,125 @@
     "route:POST /workspaces"
    ],
    "entity_verdicts": {
-    "code_unit:apps/api/src/agents/agents.controller.ts": "not_measured",
-    "code_unit:apps/api/src/projects/projects.controller.ts": "not_measured",
-    "code_unit:apps/api/src/sync/sync.controller.ts": "not_measured",
-    "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts": "not_measured",
-    "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts": "not_measured",
-    "code_unit:apps/api/src/tasks/tasks.controller.ts": "not_measured",
+    "code_unit:apps/api/src/agents/agents.controller.ts": "verified",
+    "code_unit:apps/api/src/projects/projects.controller.ts": "verified",
+    "code_unit:apps/api/src/sync/sync.controller.ts": "verified",
+    "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts": "verified",
+    "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts": "verified",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts": "verified",
+    "route:DELETE /agents/keys/:keyId": "verified",
+    "route:DELETE /agents/tasks/:taskId/assign/:agentId": "verified",
+    "route:DELETE /projects/:projectId": "verified",
+    "route:DELETE /projects/git-refs/:refId": "verified",
+    "route:DELETE /tasks/:taskId": "verified",
+    "route:DELETE /tasks/:taskId/checklist/:itemId": "verified",
+    "route:DELETE /tasks/:taskId/dependencies/:depId": "verified",
+    "route:GET /agents/tasks": "verified",
+    "route:GET /agents/workspace/:workspaceId": "verified",
+    "route:GET /projects/:projectId": "verified",
+    "route:GET /projects/tasks/:taskId/git-refs": "verified",
+    "route:GET /projects/workspace/:workspaceId": "verified",
+    "route:GET /sync/datarim/:projectId": "verified",
+    "route:GET /tasks": "verified",
+    "route:GET /tasks/:taskId": "verified",
+    "route:GET /tasks/:taskId/activity": "verified",
+    "route:GET /tasks/:taskId/checklist": "verified",
+    "route:GET /tasks/:taskId/dependencies": "verified",
+    "route:GET /tasks/:taskId/dependency-graph": "verified",
+    "route:GET /tasks/:taskId/evidence": "verified",
+    "route:GET /tasks/:taskId/field-changes": "verified",
+    "route:GET /tasks/:taskId/readiness": "verified",
+    "route:GET /tasks/digest": "verified",
+    "route:GET /tasks/project/:projectId": "verified",
+    "route:GET /tasks/project/:projectId/index": "verified",
+    "route:GET /tasks/project/:projectId/staleness": "verified",
+    "route:GET /workspaces": "verified",
+    "route:PATCH /tasks/:taskId/checklist/:itemId": "verified",
+    "route:PATCH /tasks/:taskId/contract": "verified",
+    "route:PATCH /tasks/:taskId/status": "verified",
+    "route:POST /agents": "verified",
+    "route:POST /agents/:agentId/keys": "verified",
+    "route:POST /agents/keys/:keyId/rotate": "verified",
+    "route:POST /agents/keys/self/revoke": "verified",
+    "route:POST /agents/tasks/:taskId/assign": "verified",
+    "route:POST /projects": "verified",
+    "route:POST /projects/git-refs": "verified",
+    "route:POST /sync/datarim/:projectId/import": "verified",
+    "route:POST /tasks": "verified",
+    "route:POST /tasks/:taskId/checklist": "verified",
+    "route:POST /tasks/:taskId/comments": "verified",
+    "route:POST /tasks/:taskId/dependencies": "verified",
+    "route:POST /tasks/:taskId/evidence": "verified",
+    "route:POST /tasks/:taskId/field-ack": "verified",
+    "route:POST /tasks/:taskId/redactions": "verified",
+    "route:POST /workspaces": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-canary-1",
+   "kind": "canary",
+   "output_ref": "receipts/canary/pr246-workspace-membership/post-fix-route-sweep.json",
+   "started_at_utc": "2026-10-14T04:23:22Z",
+   "summary": "receipts/canary/pr246-workspace-membership/post-fix-route-sweep.json: 52 verified / 0 failed / 0 not_measured"
+  },
+  {
+   "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
+   "duration_s": 0.12,
+   "entities": [
+    "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
+    "route:DELETE /workspaces/:workspaceId/members/:userId",
+    "route:GET /workspaces/:workspaceId",
+    "route:GET /workspaces/:workspaceId/members",
+    "route:PATCH /workspaces/:workspaceId/members/:userId/role",
+    "route:POST /workspaces/:workspaceId/members/:userId"
+   ],
+   "entity_verdicts": {
+    "code_unit:apps/api/src/workspaces/workspaces.controller.ts": "verified",
+    "route:DELETE /workspaces/:workspaceId/members/:userId": "verified",
+    "route:GET /workspaces/:workspaceId": "verified",
+    "route:GET /workspaces/:workspaceId/members": "verified",
+    "route:PATCH /workspaces/:workspaceId/members/:userId/role": "verified",
+    "route:POST /workspaces/:workspaceId/members/:userId": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-canary-2",
+   "kind": "canary",
+   "output_ref": "receipts/canary/pr246-workspace-membership/membership-post-fix-route-sweep.json",
+   "started_at_utc": "2026-10-14T04:23:22Z",
+   "summary": "receipts/canary/pr246-workspace-membership/membership-post-fix-route-sweep.json: 6 verified / 0 failed / 0 not_measured"
+  },
+  {
+   "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
+   "duration_s": 0.12,
+   "entities": [
+    "code_unit:apps/web/lib/api/task-detail-read.ts",
+    "code_unit:apps/web/lib/api/tasks.ts",
+    "code_unit:apps/web/lib/api/workspaces.ts"
+   ],
+   "entity_verdicts": {
     "code_unit:apps/web/lib/api/task-detail-read.ts": "not_measured",
-    "code_unit:apps/web/lib/api/workspaces.ts": "not_measured",
-    "route:DELETE /agents/keys/:keyId": "not_measured",
-    "route:DELETE /agents/tasks/:taskId/assign/:agentId": "not_measured",
-    "route:DELETE /projects/:projectId": "not_measured",
-    "route:DELETE /projects/git-refs/:refId": "not_measured",
-    "route:DELETE /tasks/:taskId": "not_measured",
-    "route:DELETE /tasks/:taskId/checklist/:itemId": "not_measured",
-    "route:DELETE /tasks/:taskId/dependencies/:depId": "not_measured",
-    "route:GET /agents/tasks": "not_measured",
-    "route:GET /agents/workspace/:workspaceId": "not_measured",
-    "route:GET /projects/:projectId": "not_measured",
-    "route:GET /projects/tasks/:taskId/git-refs": "not_measured",
-    "route:GET /projects/workspace/:workspaceId": "not_measured",
-    "route:GET /sync/datarim/:projectId": "not_measured",
-    "route:GET /tasks": "not_measured",
-    "route:GET /tasks/:taskId": "not_measured",
-    "route:GET /tasks/:taskId/activity": "not_measured",
-    "route:GET /tasks/:taskId/checklist": "not_measured",
-    "route:GET /tasks/:taskId/dependencies": "not_measured",
-    "route:GET /tasks/:taskId/dependency-graph": "not_measured",
-    "route:GET /tasks/:taskId/evidence": "not_measured",
-    "route:GET /tasks/:taskId/field-changes": "not_measured",
-    "route:GET /tasks/:taskId/readiness": "not_measured",
-    "route:GET /tasks/digest": "not_measured",
-    "route:GET /tasks/project/:projectId": "not_measured",
-    "route:GET /tasks/project/:projectId/index": "not_measured",
-    "route:GET /tasks/project/:projectId/staleness": "not_measured",
-    "route:GET /workspaces": "not_measured",
-    "route:PATCH /tasks/:taskId/checklist/:itemId": "not_measured",
-    "route:PATCH /tasks/:taskId/contract": "not_measured",
-    "route:PATCH /tasks/:taskId/status": "not_measured",
-    "route:POST /agents": "not_measured",
-    "route:POST /agents/:agentId/keys": "not_measured",
-    "route:POST /agents/keys/:keyId/rotate": "not_measured",
-    "route:POST /agents/keys/self/revoke": "not_measured",
-    "route:POST /agents/tasks/:taskId/assign": "not_measured",
-    "route:POST /projects": "not_measured",
-    "route:POST /projects/git-refs": "not_measured",
-    "route:POST /sync/datarim/:projectId/import": "not_measured",
-    "route:POST /tasks": "not_measured",
-    "route:POST /tasks/:taskId/checklist": "not_measured",
-    "route:POST /tasks/:taskId/comments": "not_measured",
-    "route:POST /tasks/:taskId/dependencies": "not_measured",
-    "route:POST /tasks/:taskId/evidence": "not_measured",
-    "route:POST /tasks/:taskId/field-ack": "not_measured",
-    "route:POST /tasks/:taskId/redactions": "not_measured",
-    "route:POST /workspaces": "not_measured"
+    "code_unit:apps/web/lib/api/tasks.ts": "not_measured",
+    "code_unit:apps/web/lib/api/workspaces.ts": "not_measured"
    },
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/tmp/pr246-verifier-out/v-canary.json",
-   "started_at_utc": "2026-10-14T03:27:02Z",
-   "summary": "1 canary result(s), 1 committed at head; 6 verified / 0 failed / 54 not_measured of 60 entities"
+   "output_ref": "/home/dev/aup/muneral-pr246-car-20261014-final/receipts/graph/verifier-out/pr246-0927103/v-canary.json",
+   "started_at_utc": "2026-10-14T04:23:22Z",
+   "summary": "2 canary result(s), 2 committed at head; 58 verified / 0 failed / 3 not_measured of 61 entities"
   }
  ],
  "verify": {
   "events": [
    {
+    "code": "SUPERSEDED_SELF_EXCLUSION",
+    "entity": "receipt:receipts/graph/pr246-workspace-membership-change-admission.json",
+    "rule": "DEC-AUP-0035",
+    "text": "the receipt at receipts/graph/pr246-workspace-membership-change-admission.json is the previous version of the one this run is writing, for the same work item 1f99b768-65e6-4afe-93e6-611db53e3366 — superseded by construction, so it owes this change no verdict"
+   },
+   {
     "code": "STRUCTURAL_EXCLUSION",
     "rule": "DEC-AUP-0034",
-    "text": "38 affected entity(ies) owe no verdict (receipt: 38): unchanged at both revisions and given no verifier by the matrix"
+    "text": "39 affected entity(ies) owe no verdict (receipt: 39): unchanged at both revisions and given no verifier by the matrix"
    }
   ],
   "required_by_entity": {
@@ -6798,6 +7092,7 @@
     "type_check"
    ],
    "code_unit:apps/api/src/tasks/tasks.service.ts": [
+    "contract_diff",
     "fitness_rules",
     "type_check"
    ],
@@ -6879,6 +7174,10 @@
     "fitness_rules",
     "type_check"
    ],
+   "code_unit:apps/api/test/task-delete-audit.e2e.spec.ts": [
+    "fitness_rules",
+    "type_check"
+   ],
    "code_unit:apps/api/test/task-evidence.e2e.spec.ts": [
     "fitness_rules",
     "type_check"
@@ -6922,6 +7221,12 @@
     "fitness_rules",
     "type_check"
    ],
+   "code_unit:apps/web/lib/api/tasks.ts": [
+    "canary",
+    "contract_diff",
+    "fitness_rules",
+    "type_check"
+   ],
    "code_unit:apps/web/lib/api/workspaces.ts": [
     "canary",
     "contract_diff",
@@ -6935,10 +7240,34 @@
     "fitness_rules",
     "type_check"
    ],
+   "document:README.md": [
+    "doc_reference"
+   ],
+   "document:apps/api/docs/agent-read-loop.md": [
+    "doc_reference"
+   ],
+   "document:apps/api/docs/agent-status-transitions.md": [
+    "doc_reference"
+   ],
    "document:apps/api/docs/agent-task-contract.md": [
     "doc_reference"
    ],
+   "document:apps/api/docs/agent-workspace-digest.md": [
+    "doc_reference"
+   ],
+   "document:apps/api/docs/migration-import.md": [
+    "doc_reference"
+   ],
    "document:apps/api/docs/task-evidence.md": [
+    "doc_reference"
+   ],
+   "document:apps/api/docs/task-redactions.md": [
+    "doc_reference"
+   ],
+   "document:docs/how-to/enable-outbox-relay.md": [
+    "doc_reference"
+   ],
+   "document:docs/reference/task-contract-binding.md": [
     "doc_reference"
    ],
    "receipt:receipts/graph/A2-294-digest-grant-on-refresh.json": [],
@@ -6977,6 +7306,7 @@
    "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json": [],
    "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json": [],
    "receipt:receipts/graph/mun-0043-index-grant-20261007.json": [],
+   "receipt:receipts/graph/pr246-workspace-membership-change-admission.json": [],
    "receipt:receipts/graph/revision4-public-20261007.json": [],
    "receipt:receipts/graph/security-api959a-caller788.json": [],
    "route:DELETE /agents/keys/:keyId": [
@@ -7287,9 +7617,9 @@
    ]
   },
   "seconds": {
-   "prepare": 3.0,
-   "total": 85.25,
-   "verifiers": 38.63
+   "prepare": 1.9,
+   "total": 61.54,
+   "verifiers": 27.02
   }
  },
  "work_item": "1f99b768-65e6-4afe-93e6-611db53e3366"
