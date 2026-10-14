@@ -27,11 +27,6 @@ import {
 } from "../src/auth/project-read-grants.js";
 import type { WorkspaceDigestGrantEntry } from "../src/auth/workspace-digest-grants.js";
 
-// Fixed policy anchor: the A6 source grant was approved on 2026-10-13. Runtime
-// expiry is enforced by workspaceDigestGrantState; this static policy test must
-// not turn red merely because wall-clock time passes after a valid merge.
-const DIGEST_GRANT_POLICY_ANCHOR_MS = Date.parse("2026-10-13T00:00:00Z");
-
 const evidenceSha256Of = (evidence: string) =>
   createHash("sha256").update(evidence, "utf8").digest("hex").slice(0, 16);
 
@@ -103,14 +98,14 @@ describe("the shipped workspace-digest grant list", () => {
     ).toEqual(ENTRIES_THE_DECISIONS_NAME);
   });
 
-  it("gives every entry a window valid at the fixed A6 policy anchor", () => {
-    // The grant is checked against its approval-time anchor, not Date.now().
-    // The runtime state tests below separately prove that expired grants close.
+  it("requires every shipped grant to remain active", () => {
     for (const g of WORKSPACE_DIGEST_GRANT_LIST) {
       const until = Date.parse(g.until);
       expect(Number.isNaN(until)).toBe(false);
-      expect(until).toBeGreaterThan(DIGEST_GRANT_POLICY_ANCHOR_MS);
-      expect(until - DIGEST_GRANT_POLICY_ANCHOR_MS).toBeLessThanOrEqual(
+      // Keep this wall-clock check: it is the renewal signal when a shipped
+      // grant expires, including after a future date passes.
+      expect(until).toBeGreaterThan(Date.now());
+      expect(until - Date.now()).toBeLessThanOrEqual(
         MAX_DIGEST_GRANT_WINDOW_DAYS * 86_400_000,
       );
     }
@@ -130,7 +125,7 @@ describe("the shipped workspace-digest grant list", () => {
     for (const g of WORKSPACE_DIGEST_GRANT_LIST) {
       const until = Date.parse(g.until);
       expect(Number.isNaN(until)).toBe(false);
-      expect(until - DIGEST_GRANT_POLICY_ANCHOR_MS).toBeLessThanOrEqual(
+      expect(until - Date.now()).toBeLessThanOrEqual(
         MAX_DIGEST_GRANT_WINDOW_DAYS * 86_400_000,
       );
       expect(g.until).toMatch(/Z$/);
