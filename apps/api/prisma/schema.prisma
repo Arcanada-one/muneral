@@ -203,6 +203,7 @@ model Task {
   legacyIdentities        LegacyIdentity[]
   redactions              TaskRedaction[]
   evidence                TaskEvidenceAttachment[]
+  artifactRevisions        TaskArtifactRevision[]
 
   @@index([projectId], name: "idx_tasks_project_id")
   @@index([sprintId], name: "idx_tasks_sprint_id")
@@ -373,6 +374,7 @@ model TaskEvidenceAttachment {
 
   task           Task  @relation(fields: [taskId], references: [id], onDelete: Cascade)
   createdByAgent Agent @relation(fields: [createdByAgentId], references: [id], onDelete: Restrict)
+  artifactRevisions TaskArtifactRevision[]
 
   @@unique([taskId, sha256], map: "task_evidence_attachments_task_sha256_unique")
   @@index([taskId], map: "idx_task_evidence_attachments_task_id")
@@ -982,4 +984,27 @@ model MigrationIdempotencyRecord {
 
   @@id([scope, idempotencyKey])
   @@map("migration_idempotency_records")
+}
+
+/// Task-owned content. Revisions are append-only; attribution is credential-derived.
+model TaskArtifactRevision {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  taskId      String   @map("task_id") @db.Uuid
+  kind        String   @db.VarChar(32)
+  name        String   @db.VarChar(128)
+  revision    Int
+  content     Bytes
+  sha256      String   @db.VarChar(64)
+  contentType String   @map("content_type") @db.VarChar(128)
+  sizeBytes   Int      @map("size_bytes")
+  actorType   String   @map("actor_type") @db.VarChar(16)
+  actorId     String   @map("actor_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  evidenceId  String   @map("evidence_id") @db.Uuid
+  evidence    TaskEvidenceAttachment @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+  task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, kind, name, revision])
+  @@index([taskId, kind, sha256])
+  @@map("task_artifact_revisions")
 }
