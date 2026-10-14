@@ -1,10 +1,10 @@
 {
  "attachments": [
   {
-   "attached_at_utc": "2026-10-14T15:09:47Z",
+   "attached_at_utc": "2026-10-14T15:13:15Z",
    "attachment_kind": "evidence",
    "delivery": {
-    "checked_at_utc": "2026-10-14T15:11:57Z",
+    "checked_at_utc": "2026-10-14T15:13:15Z",
     "probe": [],
     "reason_code": "MUNERAL_POST_NOT_REQUESTED",
     "status": "not_measured",
@@ -12,7 +12,7 @@
    },
    "evidence_ref": {
     "contentType": "application/json",
-    "digest": "sha256:0372266d56b8bead4cd45c27ebe6a4faa60242512d88d29c43daba8d0b65e6da",
+    "digest": "sha256:f6e86b8d7df11915ab9f53f054cc24af33cad569c4b571ebd64c8b1b811b1240",
     "label": "PR249 project-read renewal CAR with candidate and parent canaries",
     "uri": "aup://arcanada-universal-program/receipts/graph/change-admission-pr249-project-read-renewal.json"
    },
@@ -22,7 +22,7 @@
     "version": "1.0.0"
    },
    "provisional_until_fable_review": true,
-   "receipt_id": "car-verify-20261014T150719Z-c2bfece7",
+   "receipt_id": "car-verify-20261014T151207Z-1261738b",
    "receipt_path": "receipts/graph/change-admission-pr249-project-read-renewal.json",
    "schema": "WorkItemEvidenceAttachment/v1",
    "work_item": {
@@ -35,6 +35,6 @@
  ],
  "schema": "WorkItemEvidenceLedger/v1",
  "system": "muneral",
- "updated_at_utc": "2026-10-14T15:11:57Z",
+ "updated_at_utc": "2026-10-14T15:13:15Z",
  "work_item": "971d0143-8549-47a9-b89b-19f0a4023a53"
 }
