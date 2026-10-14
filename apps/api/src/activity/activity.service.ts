@@ -2,6 +2,7 @@ import { humanTaskWhere } from '../auth/human-task-visibility.js';
 import { Prisma } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { TASK_GRANTED_READ_ACTION } from './activity-actions.js';
 import type { Actor } from '@muneral/types';
 
 /**
@@ -48,7 +49,11 @@ export class ActivityService {
     humanUserId?: string,
   ): Promise<{ data: object[]; total: number; page: number; limit: number }> {
     const skip = (page - 1) * limit;
-    const where = { taskId, ...(humanUserId ? { task: humanTaskWhere(humanUserId) } : {}) };
+    const where = {
+      taskId,
+      action: { not: TASK_GRANTED_READ_ACTION },
+      ...(humanUserId ? { task: humanTaskWhere(humanUserId) } : {}),
+    };
     const [data, total] = await Promise.all([
       this.prisma.activityLog.findMany({
         where,

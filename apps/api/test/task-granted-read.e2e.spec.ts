@@ -38,7 +38,7 @@ import { KanbanService } from '../src/ws/kanban.service.js';
 import { PROJECT_READ_GRANTS, GRANT_RENEWAL_LEAD_DAYS } from '../src/auth/project-read-grants.js';
 import type { ProjectReadGrantEntry } from '../src/auth/project-read-grants.js';
 import { PROJECT_INDEX_COUNTED, PROJECT_INDEX_READ_ACTION } from '../src/tasks/tasks.service.js';
-import { TaskFieldStateService } from '../src/tasks/field-state/task-field-state.service.js';
+import { ACTIVITY_SENTINEL, TaskFieldStateService } from '../src/tasks/field-state/task-field-state.service.js';
 
 @Module({
   imports: [PrismaModule, AuthModule, ActivityModule, AgentsModule, TasksModule],
@@ -240,6 +240,32 @@ describe('Separate named program task/evidence GET capability (real PostgreSQL/H
     await taskRead(task.id,keys.creator).expect(200); await evidenceRead(task.id,keys.creator).expect(200);
     await prisma.taskAgent.create({data:{taskId:task.id,agentId:ids.reader,role:'reviewer'}});
     await taskRead(task.id).expect(200); await evidenceRead(task.id).expect(200);
+    expect(await auditCount(task.id)).toBe(0);
+  });
+  it('grant-read audit stays out of task activity and poller activity signals', async () => {
+    const task = await othersTask();
+    admit();
+    await http().post(`/tasks/${task.id}/field-ack`).set(bearer(keys.creator))
+      .send({ agentId: ids.creator, fields: [{ field: ACTIVITY_SENTINEL, version: 0 }] }).expect(204);
+    const before = await http().get(`/tasks/${task.id}/field-changes`).set(bearer(keys.creator)).expect(200);
+    expect(before.body.activity.changed).toBe(false);
+
+    await taskRead(task.id).expect(200);
+
+    const activity = await http().get(`/tasks/${task.id}/activity`).set(bearer(keys.creator)).expect(200);
+    expect(JSON.stringify(activity.body)).not.toContain(TASK_GRANTED_READ_ACTION);
+    const after = await http().get(`/tasks/${task.id}/field-changes`).set(bearer(keys.creator)).expect(200);
+    expect(after.body.activity.changed).toBe(false);
+    expect(after.body.activity.latestActivityId).toBe(before.body.activity.latestActivityId);
+    expect(await auditCount(task.id)).toBe(1);
+  });
+  it('HEAD remains available on the owner path but never uses read capability', async () => {
+    const task = await othersTask();
+    admit();
+    await http().head(`/tasks/${task.id}`).set(bearer(keys.creator)).expect(200);
+    await http().head(`/tasks/${task.id}`).set(bearer(keys.reader)).expect(403);
+    await prisma.taskAgent.create({ data: { taskId: task.id, agentId: ids.reader, role: 'reviewer' } });
+    await http().head(`/tasks/${task.id}`).set(bearer(keys.reader)).expect(200);
     expect(await auditCount(task.id)).toBe(0);
   });
   it.each(['task','evidence'])('no-key %s read stays 401', async kind => {

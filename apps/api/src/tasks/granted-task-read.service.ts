@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { createHash } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { TASK_GRANTED_READ_ACTION } from '../activity/activity-actions.js';
 import { admitGrantedTaskRead, taskReadDenied } from '../auth/task-project-read-admission.js';
 import type { GrantedTaskReadContext } from '../auth/task-project-read-admission.js';
 import { TASK_PROJECT_READ_CAPABILITIES } from '../auth/task-project-read-capabilities.js';
@@ -12,7 +13,7 @@ import { WORKSPACE_INDEX_GRANTS } from '../auth/workspace-index-grants.js';
 import type { WorkspaceIndexGrantEntry } from '../auth/workspace-index-grants.js';
 import { WORK_ITEM_EVIDENCE_SCHEMA } from './evidence/task-evidence.service.js';
 
-export const TASK_GRANTED_READ_ACTION = 'task:project_grant_read';
+export { TASK_GRANTED_READ_ACTION } from '../activity/activity-actions.js';
 @Injectable()
 export class GrantedTaskReadService {
   constructor(

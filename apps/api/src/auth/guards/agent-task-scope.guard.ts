@@ -171,7 +171,8 @@ export class AgentTaskScopeGuard implements CanActivate {
     }
 
     if (this.reflector.get<boolean>(TASK_GRANTED_READ_HANDLER, context.getHandler())) {
-      if (req.method !== 'GET' || (kind !== 'task' && kind !== 'task-evidence')) throw taskReadDenied();
+      if (req.method !== 'GET' && req.method !== 'HEAD') throw taskReadDenied();
+      if (kind !== 'task' && kind !== 'task-evidence') throw taskReadDenied();
       const taskId = this.paramOf(req, 'taskId');
       if (!taskId) throw taskReadDenied();
       try {
@@ -179,6 +180,9 @@ export class AgentTaskScopeGuard implements CanActivate {
         req.agentScope = { agentId: agent.id, kind, workspaceId: agent.workspaceId };
       } catch (error) {
         if (!(error instanceof ForbiddenException)) throw error;
+        // HEAD retains the pre-capability owner path, but never exercises a
+        // read capability or performs its audit side effect.
+        if (req.method !== 'GET') throw taskReadDenied();
         const admitted = await admitGrantedTaskRead(this.prisma, agent.id, taskId, new Date(),
           this.taskReadCapabilities, this.projectReadGrants, this.workspaceIndexGrants);
         req.agentScope = { agentId: agent.id, kind, workspaceId: admitted.workspaceId, grantedTaskRead: admitted };

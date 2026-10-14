@@ -120,6 +120,20 @@ describe('AgentTaskScopeGuard', () => {
     expect(req.agentScope).toEqual({ agentId: 'agent-1', kind: 'task' });
   });
 
+  it('preserves owner HEAD reads but never evaluates a grant for non-owner HEAD', async () => {
+    reflector.getAllAndOverride.mockReturnValue('task');
+    reflector.get.mockReturnValue(true);
+    prisma.task.findFirst.mockResolvedValueOnce({ id: 't-1' }).mockResolvedValueOnce(null);
+    const owner = makeContext({ apiKeyAgent: AGENT, method: 'HEAD', params: { taskId: 't-1' } });
+    await expect(guard.canActivate(owner.ctx)).resolves.toBe(true);
+    expect(owner.req.agentScope).toEqual({ agentId: 'agent-1', kind: 'task', workspaceId: 'ws-1' });
+
+    const nonOwner = makeContext({ apiKeyAgent: AGENT, method: 'HEAD', params: { taskId: 't-1' } });
+    await expect(guard.canActivate(nonOwner.ctx)).rejects.toThrow(ForbiddenException);
+    expect(prisma.agent.findUnique).not.toHaveBeenCalled();
+    expect(prisma.project.findFirst).not.toHaveBeenCalled();
+  });
+
   it('MUN-0051: asks ONE question for task — workspace, then assigned OR agent-created', async () => {
     reflector.getAllAndOverride.mockReturnValue('task');
     prisma.task.findFirst.mockResolvedValue({ id: 't-1' });

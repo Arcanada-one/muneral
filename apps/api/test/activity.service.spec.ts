@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ActivityService } from '../src/activity/activity.service.js';
+import { TASK_GRANTED_READ_ACTION } from '../src/activity/activity-actions.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
 import type { Actor } from '@muneral/types';
 // ESM has no injected globals, so `jest` must be imported for the RUNTIME.
@@ -113,6 +114,12 @@ describe('ActivityService', () => {
 
       const result = await service.findForTask('task-1', 1, 20);
       expect(result).toEqual({ data: mockLogs, total: 1, page: 1, limit: 20 });
+      expect(prisma.activityLog.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { taskId: 'task-1', action: { not: TASK_GRANTED_READ_ACTION } } }),
+      );
+      expect(prisma.activityLog.count).toHaveBeenCalledWith({
+        where: { taskId: 'task-1', action: { not: TASK_GRANTED_READ_ACTION } },
+      });
     });
 
     it('applies correct pagination skip/take', async () => {
