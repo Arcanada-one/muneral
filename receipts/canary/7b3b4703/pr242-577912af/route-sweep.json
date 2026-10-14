@@ -1,0 +1,1895 @@
+{
+  "schema": "CanaryResult/v1",
+  "captured_at_utc": "2026-10-14T10:04:56Z",
+  "card": "7b3b4703-23d9-4a50-a4bd-f43b1efda0ab",
+  "phase": "pre",
+  "plan": {
+    "id": "pr242-exact-head-51-route-7-controller-sweep",
+    "path": "plan.json",
+    "digest": "sha256:ab26c18e0d677ceb2f4d501ee5951644dac07cc35b4d70025711046f43263091"
+  },
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "577912af0aa71cd3b27df69ab3e5c124b74bf39e",
+    "tree": "3af0cfb6bb46986bff0f2d0ce2b47678b86b24b1",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "410a2efe70d357327ab1ab700c6eeba1af8f36897efe837c12a65d4b83aa4af5",
+      "source_field": "commit"
+    }
+  },
+  "environment": "candidate-local Nest API on loopback with disposable PostgreSQL 16 and private Redis; synthetic owner and agent principals",
+  "producer": {
+    "tool": "bounded PR246 private-PG HTTP route-sweep runner",
+    "version": "MUNERAL runner v2"
+  },
+  "mutating_owner": "MUNERAL; disposable synthetic PostgreSQL only",
+  "read_only": false,
+  "resident_version": null,
+  "model": "deterministic synthetic HTTP runner",
+  "counters": {
+    "entities_verified": 50,
+    "failed": 8,
+    "not_measured": 0
+  },
+  "entity_verdicts": [
+    {
+      "entity": "route:POST /agents",
+      "probe_ids": [
+        "owner-001",
+        "anonymous-002"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 201; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:POST /agents/:agentId/keys",
+      "probe_ids": [
+        "owner-003",
+        "anonymous-004"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 201; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:POST /agents/keys/:keyId/rotate",
+      "probe_ids": [
+        "owner-005",
+        "anonymous-006"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 201; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:POST /agents/tasks/:taskId/assign",
+      "probe_ids": [
+        "owner-007",
+        "anonymous-008"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 201; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:POST /projects",
+      "probe_ids": [
+        "owner-009",
+        "anonymous-010"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 201; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:POST /projects/git-refs",
+      "probe_ids": [
+        "owner-011",
+        "anonymous-012"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 201; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:POST /sync/datarim/:projectId/import",
+      "probe_ids": [
+        "agent-013",
+        "anonymous-014"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 201; anonymous status 401; real agent API key scoped to its own workspace/project; synthetic import body"
+    },
+    {
+      "entity": "route:POST /tasks",
+      "probe_ids": [
+        "owner-015",
+        "anonymous-016"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 201; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:POST /tasks/:taskId/checklist",
+      "probe_ids": [
+        "owner-017",
+        "anonymous-018"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 201; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:POST /tasks/:taskId/comments",
+      "probe_ids": [
+        "owner-019",
+        "anonymous-020"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 201; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:POST /tasks/:taskId/dependencies",
+      "probe_ids": [
+        "owner-021",
+        "anonymous-022"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 201; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:POST /tasks/:taskId/evidence",
+      "probe_ids": [
+        "agent-023",
+        "anonymous-024"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 201; anonymous status 401; real assigned agent API key with synthetic evidence claim"
+    },
+    {
+      "entity": "route:POST /tasks/:taskId/field-ack",
+      "probe_ids": [
+        "agent-025",
+        "anonymous-026"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 204; anonymous status 401; real assigned agent API key and valid field acknowledgement body"
+    },
+    {
+      "entity": "route:POST /tasks/:taskId/redactions",
+      "probe_ids": [
+        "owner-027",
+        "anonymous-028"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 201; anonymous status 401; synthetic known-span redaction; only span hash sent"
+    },
+    {
+      "entity": "route:POST /workspaces",
+      "probe_ids": [
+        "owner-029",
+        "anonymous-030"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 201; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:POST /workspaces/:workspaceId/members/:userId",
+      "probe_ids": [
+        "owner-031",
+        "anonymous-032"
+      ],
+      "verdict": "failed",
+      "reason": "authenticated status 403; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:PATCH /tasks/:taskId/checklist/:itemId",
+      "probe_ids": [
+        "owner-033",
+        "anonymous-034"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:PATCH /tasks/:taskId/contract",
+      "probe_ids": [
+        "agent-035",
+        "anonymous-036"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 200; anonymous status 401; assigned executor API key with exact null-precondition CAS"
+    },
+    {
+      "entity": "route:PATCH /tasks/:taskId/status",
+      "probe_ids": [
+        "agent-037",
+        "anonymous-038"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 200; anonymous status 401; assigned executor API key with valid todo-to-in_progress transition"
+    },
+    {
+      "entity": "route:PATCH /workspaces/:workspaceId/members/:userId/role",
+      "probe_ids": [
+        "owner-039",
+        "anonymous-040"
+      ],
+      "verdict": "failed",
+      "reason": "authenticated status 403; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:GET /agents/tasks",
+      "probe_ids": [
+        "agent-041",
+        "anonymous-042"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 200; anonymous status 401; valid assigned synthetic agent API key"
+    },
+    {
+      "entity": "route:GET /agents/workspace/:workspaceId",
+      "probe_ids": [
+        "owner-043",
+        "anonymous-044"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:GET /projects/:projectId",
+      "probe_ids": [
+        "owner-045",
+        "anonymous-046"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:GET /projects/tasks/:taskId/git-refs",
+      "probe_ids": [
+        "owner-047",
+        "anonymous-048"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:GET /projects/workspace/:workspaceId",
+      "probe_ids": [
+        "owner-049",
+        "anonymous-050"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:GET /sync/datarim/:projectId",
+      "probe_ids": [
+        "owner-051",
+        "anonymous-052"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:GET /tasks",
+      "probe_ids": [
+        "owner-053",
+        "anonymous-054"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:GET /tasks/:taskId",
+      "probe_ids": [
+        "owner-055",
+        "anonymous-056"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:GET /tasks/:taskId/activity",
+      "probe_ids": [
+        "owner-057",
+        "anonymous-058"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:GET /tasks/:taskId/checklist",
+      "probe_ids": [
+        "owner-059",
+        "anonymous-060"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:GET /tasks/:taskId/dependencies",
+      "probe_ids": [
+        "owner-061",
+        "anonymous-062"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:GET /tasks/:taskId/dependency-graph",
+      "probe_ids": [
+        "owner-063",
+        "anonymous-064"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:GET /tasks/:taskId/evidence",
+      "probe_ids": [
+        "owner-065",
+        "anonymous-066"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:GET /tasks/:taskId/field-changes",
+      "probe_ids": [
+        "agent-067",
+        "anonymous-068"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 200; anonymous status 401; assigned synthetic agent API key"
+    },
+    {
+      "entity": "route:GET /tasks/:taskId/readiness",
+      "probe_ids": [
+        "owner-069",
+        "anonymous-070"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:GET /tasks/digest",
+      "probe_ids": [
+        "digest-071",
+        "agent-072",
+        "anonymous-073"
+      ],
+      "verdict": "verified",
+      "reason": "grant.until matches source literal=true; non-granted code=DIGEST_GRANT_REQUIRED; anonymous status=401"
+    },
+    {
+      "entity": "route:GET /tasks/project/:projectId",
+      "probe_ids": [
+        "owner-074",
+        "anonymous-075"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:GET /tasks/project/:projectId/index",
+      "probe_ids": [
+        "agent-076",
+        "anonymous-077"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 404; anonymous status 401; valid synthetic key without a project-index grant; expected non-enumerating 404 refusal"
+    },
+    {
+      "entity": "route:GET /tasks/project/:projectId/staleness",
+      "probe_ids": [
+        "owner-078",
+        "anonymous-079"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:GET /workspaces",
+      "probe_ids": [
+        "owner-080",
+        "anonymous-081"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:GET /workspaces/:workspaceId",
+      "probe_ids": [
+        "owner-082",
+        "anonymous-083"
+      ],
+      "verdict": "failed",
+      "reason": "authenticated status 403; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:GET /workspaces/:workspaceId/members",
+      "probe_ids": [
+        "owner-084",
+        "anonymous-085"
+      ],
+      "verdict": "failed",
+      "reason": "authenticated status 403; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:DELETE /agents/keys/:keyId",
+      "probe_ids": [
+        "owner-086",
+        "anonymous-087"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 204; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:DELETE /agents/tasks/:taskId/assign/:agentId",
+      "probe_ids": [
+        "owner-088",
+        "anonymous-089"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 204; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:DELETE /projects/:projectId",
+      "probe_ids": [
+        "owner-090",
+        "anonymous-091"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 204; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:DELETE /projects/git-refs/:refId",
+      "probe_ids": [
+        "owner-092",
+        "anonymous-093"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 204; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:DELETE /tasks/:taskId",
+      "probe_ids": [
+        "owner-094",
+        "anonymous-095"
+      ],
+      "verdict": "failed",
+      "reason": "authenticated status 500; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:DELETE /tasks/:taskId/checklist/:itemId",
+      "probe_ids": [
+        "owner-096",
+        "anonymous-097"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 204; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:DELETE /tasks/:taskId/dependencies/:depId",
+      "probe_ids": [
+        "owner-098",
+        "anonymous-099"
+      ],
+      "verdict": "verified",
+      "reason": "authenticated status 204; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:DELETE /workspaces/:workspaceId/members/:userId",
+      "probe_ids": [
+        "owner-100",
+        "anonymous-101"
+      ],
+      "verdict": "failed",
+      "reason": "authenticated status 403; anonymous status 401; real candidate-local request with synthetic fixture and applicable human owner JWT"
+    },
+    {
+      "entity": "route:POST /agents/keys/self/revoke",
+      "probe_ids": [
+        "rotated-102",
+        "anonymous-103"
+      ],
+      "verdict": "verified",
+      "reason": "self-revoke 200; anonymous 401"
+    },
+    {
+      "entity": "code_unit:apps/api/src/agents/agents.controller.ts",
+      "probe_ids": [
+        "owner-001",
+        "anonymous-002",
+        "owner-003",
+        "anonymous-004",
+        "owner-005",
+        "anonymous-006",
+        "owner-007",
+        "anonymous-008",
+        "agent-041",
+        "anonymous-042",
+        "owner-043",
+        "anonymous-044",
+        "owner-086",
+        "anonymous-087",
+        "owner-088",
+        "anonymous-089",
+        "rotated-102",
+        "anonymous-103"
+      ],
+      "verdict": "verified",
+      "reason": "direct controller routes exercised: 9; derived from every mapped route pair"
+    },
+    {
+      "entity": "code_unit:apps/api/src/projects/projects.controller.ts",
+      "probe_ids": [
+        "owner-009",
+        "anonymous-010",
+        "owner-011",
+        "anonymous-012",
+        "owner-045",
+        "anonymous-046",
+        "owner-047",
+        "anonymous-048",
+        "owner-049",
+        "anonymous-050",
+        "owner-090",
+        "anonymous-091",
+        "owner-092",
+        "anonymous-093"
+      ],
+      "verdict": "verified",
+      "reason": "direct controller routes exercised: 7; derived from every mapped route pair"
+    },
+    {
+      "entity": "code_unit:apps/api/src/sync/sync.controller.ts",
+      "probe_ids": [
+        "agent-013",
+        "anonymous-014",
+        "owner-051",
+        "anonymous-052"
+      ],
+      "verdict": "verified",
+      "reason": "direct controller routes exercised: 2; derived from every mapped route pair"
+    },
+    {
+      "entity": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "probe_ids": [
+        "owner-015",
+        "anonymous-016",
+        "owner-017",
+        "anonymous-018",
+        "owner-019",
+        "anonymous-020",
+        "owner-021",
+        "anonymous-022",
+        "agent-023",
+        "anonymous-024",
+        "owner-027",
+        "anonymous-028",
+        "owner-033",
+        "anonymous-034",
+        "agent-037",
+        "anonymous-038",
+        "owner-053",
+        "anonymous-054",
+        "owner-055",
+        "anonymous-056",
+        "owner-057",
+        "anonymous-058",
+        "owner-059",
+        "anonymous-060",
+        "owner-061",
+        "anonymous-062",
+        "owner-063",
+        "anonymous-064",
+        "owner-065",
+        "anonymous-066",
+        "owner-069",
+        "anonymous-070",
+        "digest-071",
+        "agent-072",
+        "anonymous-073",
+        "owner-074",
+        "anonymous-075",
+        "agent-076",
+        "anonymous-077",
+        "owner-078",
+        "anonymous-079",
+        "owner-094",
+        "anonymous-095",
+        "owner-096",
+        "anonymous-097",
+        "owner-098",
+        "anonymous-099"
+      ],
+      "verdict": "failed",
+      "reason": "direct controller routes exercised: 23; derived from every mapped route pair"
+    },
+    {
+      "entity": "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts",
+      "probe_ids": [
+        "agent-025",
+        "anonymous-026",
+        "agent-067",
+        "anonymous-068"
+      ],
+      "verdict": "verified",
+      "reason": "direct controller routes exercised: 2; derived from every mapped route pair"
+    },
+    {
+      "entity": "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
+      "probe_ids": [
+        "owner-029",
+        "anonymous-030",
+        "owner-031",
+        "anonymous-032",
+        "owner-039",
+        "anonymous-040",
+        "owner-080",
+        "anonymous-081",
+        "owner-082",
+        "anonymous-083",
+        "owner-084",
+        "anonymous-085",
+        "owner-100",
+        "anonymous-101"
+      ],
+      "verdict": "failed",
+      "reason": "direct controller routes exercised: 7; derived from every mapped route pair"
+    },
+    {
+      "entity": "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts",
+      "probe_ids": [
+        "agent-035",
+        "anonymous-036"
+      ],
+      "verdict": "verified",
+      "reason": "direct controller routes exercised: 1; derived from every mapped route pair"
+    }
+  ],
+  "probes": [
+    {
+      "id": "owner-001",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/agents",
+      "status": 201,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 201, received 201",
+      "response_sha256": "98c8dd672158a0e625791fdc87414662aea2bd6571656123e4069985c31f5bb2",
+      "response_bytes": 224
+    },
+    {
+      "id": "anonymous-002",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/agents",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-003",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/agents/af32cee8-2de3-459b-9244-2f35addaaeec/keys",
+      "status": 201,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 201, received 201",
+      "response_sha256": "55a02f93b44ff708ecdd79cd2baabb9be7028882ffb32497ace587402a040c14",
+      "response_bytes": 96
+    },
+    {
+      "id": "anonymous-004",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/agents/af32cee8-2de3-459b-9244-2f35addaaeec/keys",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-005",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/agents/keys/bac2fb69-7c62-4fed-a539-2e2650b1d26c/rotate",
+      "status": 201,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 201|200, received 201",
+      "response_sha256": "0ed51e2e6ed769b260f0ca81b4bdbd7f084f8e5ef06aad404f250a8b708bc553",
+      "response_bytes": 96
+    },
+    {
+      "id": "anonymous-006",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/agents/keys/bac2fb69-7c62-4fed-a539-2e2650b1d26c/rotate",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-007",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/agents/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/assign",
+      "status": 201,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 201, received 201",
+      "response_sha256": "0a5ac6d45121019c27b6113642108bd97070e56b444dc9cc8e8442dad2bf3df2",
+      "response_bytes": 156
+    },
+    {
+      "id": "anonymous-008",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/agents/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/assign",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-009",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/projects",
+      "status": 201,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 201, received 201",
+      "response_sha256": "13a915be0c7ba3579a060ceab98c122213f663235ec8cfaeeba03bdc7df5a084",
+      "response_bytes": 234
+    },
+    {
+      "id": "anonymous-010",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/projects",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-011",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/projects/git-refs",
+      "status": 201,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 201, received 201",
+      "response_sha256": "3765ad3920b34814c9f32acaca6325898262d39e5226c4666799e4bbe9f2e6ae",
+      "response_bytes": 206
+    },
+    {
+      "id": "anonymous-012",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/projects/git-refs",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "agent-013",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/sync/datarim/9f47d33d-6989-40da-8036-61b7e2791795/import",
+      "status": 201,
+      "outcome": "verified",
+      "reason": "real agent API key scoped to its own workspace/project; synthetic import body; expected 201|200, received 201",
+      "response_sha256": "92b6c1d0828ec9dd0249255524d5e128009b4258810c19b5a206931b06da8427",
+      "response_bytes": 39
+    },
+    {
+      "id": "anonymous-014",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/sync/datarim/9f47d33d-6989-40da-8036-61b7e2791795/import",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "fee3d135d639945a7035a39d5a989494ef2425ff4ba8ee5050026530c057d075",
+      "response_bytes": 70
+    },
+    {
+      "id": "owner-015",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/tasks",
+      "status": 201,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 201, received 201",
+      "response_sha256": "0ac693714d3902e464b0fac3b23ae01efdd67f0671b932ae90d2eb42d3281965",
+      "response_bytes": 531
+    },
+    {
+      "id": "anonymous-016",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/tasks",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-017",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/checklist",
+      "status": 201,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 201, received 201",
+      "response_sha256": "5802db41784ad2ba2eb976f32501949460bf7eaf5fb8fddf673e6fd7a029f52c",
+      "response_bytes": 193
+    },
+    {
+      "id": "anonymous-018",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/checklist",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-019",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/comments",
+      "status": 201,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 201, received 201",
+      "response_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "response_bytes": 0
+    },
+    {
+      "id": "anonymous-020",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/comments",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-021",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/dependencies",
+      "status": 201,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 201, received 201",
+      "response_sha256": "5c2b0c3bcdf28ef3a3f829979d2f37805b500dab2d0c064358ed82518d3ce8e3",
+      "response_bytes": 167
+    },
+    {
+      "id": "anonymous-022",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/dependencies",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "agent-023",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/evidence",
+      "status": 201,
+      "outcome": "verified",
+      "reason": "real assigned agent API key with synthetic evidence claim; expected 201|200, received 201",
+      "response_sha256": "444f8caecaf2c52c6756e3c07517c474cdbec81c859c2e09cdd708e70e9b1520",
+      "response_bytes": 421
+    },
+    {
+      "id": "anonymous-024",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/evidence",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "agent-025",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/field-ack",
+      "status": 204,
+      "outcome": "verified",
+      "reason": "real assigned agent API key and valid field acknowledgement body; expected 204, received 204",
+      "response_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "response_bytes": 0
+    },
+    {
+      "id": "anonymous-026",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/field-ack",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "fee3d135d639945a7035a39d5a989494ef2425ff4ba8ee5050026530c057d075",
+      "response_bytes": 70
+    },
+    {
+      "id": "owner-027",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/tasks/578faff8-31d9-4c81-a1b7-9c6182d6825a/redactions",
+      "status": 201,
+      "outcome": "verified",
+      "reason": "synthetic known-span redaction; only span hash sent; expected 201|200, received 201",
+      "response_sha256": "d0be5f0f14b4f8465c91e3e293095d53b8c4330c5833e749126ae8ff9ecfc320",
+      "response_bytes": 576
+    },
+    {
+      "id": "anonymous-028",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/tasks/578faff8-31d9-4c81-a1b7-9c6182d6825a/redactions",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-029",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/workspaces",
+      "status": 201,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 201, received 201",
+      "response_sha256": "f5ca71472de25fe2e5f0a8dc1403b1e01b2f7986d15d687221c6f4b20a31acd5",
+      "response_bytes": 227
+    },
+    {
+      "id": "anonymous-030",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/workspaces",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-031",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members/ee26a59b-3648-4b6d-a62c-d79f01dc84f5",
+      "status": 403,
+      "outcome": "failed",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 201, received 403",
+      "response_sha256": "b04afb13dcec56498b87e976461724c5244db85b2b69f7d379513393a8ee0ac9",
+      "response_bytes": 80
+    },
+    {
+      "id": "anonymous-032",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members/ee26a59b-3648-4b6d-a62c-d79f01dc84f5",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-033",
+      "kind": "http",
+      "executed": true,
+      "method": "PATCH",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/checklist/c46ce3c9-30d8-49ec-ad9f-76767b0ccc21",
+      "status": 200,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 200, received 200",
+      "response_sha256": "f1b0df888055ce5447790235aef1058a74ca65df70dbb86c1618aee99e9f6639",
+      "response_bytes": 192
+    },
+    {
+      "id": "anonymous-034",
+      "kind": "http",
+      "executed": true,
+      "method": "PATCH",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/checklist/c46ce3c9-30d8-49ec-ad9f-76767b0ccc21",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "agent-035",
+      "kind": "http",
+      "executed": true,
+      "method": "PATCH",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/contract",
+      "status": 200,
+      "outcome": "verified",
+      "reason": "assigned executor API key with exact null-precondition CAS; expected 200, received 200",
+      "response_sha256": "ffbf3718526c0bcd04ffcc6385f776bd1cedec6eed0fd760c89c2cf1883129f4",
+      "response_bytes": 571
+    },
+    {
+      "id": "anonymous-036",
+      "kind": "http",
+      "executed": true,
+      "method": "PATCH",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/contract",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "agent-037",
+      "kind": "http",
+      "executed": true,
+      "method": "PATCH",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/status",
+      "status": 200,
+      "outcome": "verified",
+      "reason": "assigned executor API key with valid todo-to-in_progress transition; expected 200, received 200",
+      "response_sha256": "9e189717a8263d04b03f043ac229030d9a21b9c0c2a2cbed27f30bf738461b35",
+      "response_bytes": 578
+    },
+    {
+      "id": "anonymous-038",
+      "kind": "http",
+      "executed": true,
+      "method": "PATCH",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/status",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-039",
+      "kind": "http",
+      "executed": true,
+      "method": "PATCH",
+      "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members/ee26a59b-3648-4b6d-a62c-d79f01dc84f5/role",
+      "status": 403,
+      "outcome": "failed",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 200, received 403",
+      "response_sha256": "b04afb13dcec56498b87e976461724c5244db85b2b69f7d379513393a8ee0ac9",
+      "response_bytes": 80
+    },
+    {
+      "id": "anonymous-040",
+      "kind": "http",
+      "executed": true,
+      "method": "PATCH",
+      "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members/ee26a59b-3648-4b6d-a62c-d79f01dc84f5/role",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "agent-041",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/agents/tasks",
+      "status": 200,
+      "outcome": "verified",
+      "reason": "valid assigned synthetic agent API key; expected 200, received 200",
+      "response_sha256": "f155e6f4ac1b14ac66eca632fea4f01c6a60043b4ac8078d93600219879f3791",
+      "response_bytes": 744
+    },
+    {
+      "id": "anonymous-042",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/agents/tasks",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "fee3d135d639945a7035a39d5a989494ef2425ff4ba8ee5050026530c057d075",
+      "response_bytes": 70
+    },
+    {
+      "id": "owner-043",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/agents/workspace/05f8cddf-e91f-430b-81e3-d67965aa4de3",
+      "status": 200,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 200, received 200",
+      "response_sha256": "7b961bb97cc855ef3417c35c417ff4673379f13e674ef90caf5132a1682199d6",
+      "response_bytes": 658
+    },
+    {
+      "id": "anonymous-044",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/agents/workspace/05f8cddf-e91f-430b-81e3-d67965aa4de3",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-045",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/projects/9f47d33d-6989-40da-8036-61b7e2791795",
+      "status": 200,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 200, received 200",
+      "response_sha256": "549db586c314282e3e99e87645aedb5727119fb44e5330b1a3e180f3b8c51698",
+      "response_bytes": 235
+    },
+    {
+      "id": "anonymous-046",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/projects/9f47d33d-6989-40da-8036-61b7e2791795",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-047",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/projects/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/git-refs",
+      "status": 200,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 200, received 200",
+      "response_sha256": "b71ed667f4b352adcb0eff7d96cd1a768887c749556540e9f372259ea0752e31",
+      "response_bytes": 208
+    },
+    {
+      "id": "anonymous-048",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/projects/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/git-refs",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-049",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/projects/workspace/05f8cddf-e91f-430b-81e3-d67965aa4de3",
+      "status": 200,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 200, received 200",
+      "response_sha256": "875ff684dd5d2f85ea4bfa38c79d2e86031a8b90b1ec4321e71a185e0036a5ff",
+      "response_bytes": 472
+    },
+    {
+      "id": "anonymous-050",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/projects/workspace/05f8cddf-e91f-430b-81e3-d67965aa4de3",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-051",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/sync/datarim/9f47d33d-6989-40da-8036-61b7e2791795",
+      "status": 200,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 200, received 200",
+      "response_sha256": "222e583355b8d9dc2e33405b8342944ce66a8ff4c486432034e46bf558024198",
+      "response_bytes": 650
+    },
+    {
+      "id": "anonymous-052",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/sync/datarim/9f47d33d-6989-40da-8036-61b7e2791795",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-053",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks",
+      "status": 200,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 200, received 200",
+      "response_sha256": "39a11ca56948ee254d8f45e115ef8ec5788e0a1d62feaf509f1fc5ce35311794",
+      "response_bytes": 2136
+    },
+    {
+      "id": "anonymous-054",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-055",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2",
+      "status": 200,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 200, received 200",
+      "response_sha256": "9e189717a8263d04b03f043ac229030d9a21b9c0c2a2cbed27f30bf738461b35",
+      "response_bytes": 578
+    },
+    {
+      "id": "anonymous-056",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-057",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/activity",
+      "status": 200,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 200, received 200",
+      "response_sha256": "bcd373ba505196804f97b855c3147de6b4e4adadf0c60320c4c6d4aa54703609",
+      "response_bytes": 2042
+    },
+    {
+      "id": "anonymous-058",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/activity",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-059",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/checklist",
+      "status": 200,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 200, received 200",
+      "response_sha256": "bf9276dfa9820c8c5ddb738cadf36dea31aa3fcb7797c39f067f1963e2a94a6e",
+      "response_bytes": 194
+    },
+    {
+      "id": "anonymous-060",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/checklist",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-061",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/dependencies",
+      "status": 200,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 200, received 200",
+      "response_sha256": "60cc7089d4779a67d94fee7dd07e482072d5ea315c7a9e6c9904a8c1b4dc4f16",
+      "response_bytes": 169
+    },
+    {
+      "id": "anonymous-062",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/dependencies",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-063",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/dependency-graph",
+      "status": 200,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 200, received 200",
+      "response_sha256": "5d5ee474f01bdc8bdb7379f07fa9a6ecaa6d41d2466d3c60c1039b74ab294c93",
+      "response_bytes": 325
+    },
+    {
+      "id": "anonymous-064",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/dependency-graph",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-065",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/evidence",
+      "status": 200,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 200, received 200",
+      "response_sha256": "8306d081f85231c88a97d9b83d0efbf4a2984dfb478f17d74c742e141fea93fe",
+      "response_bytes": 476
+    },
+    {
+      "id": "anonymous-066",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/evidence",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "agent-067",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/field-changes",
+      "status": 200,
+      "outcome": "verified",
+      "reason": "assigned synthetic agent API key; expected 200, received 200",
+      "response_sha256": "5d11101ceff81844d92a00eb731c0d7509128472b4efc0ac1c6c35bf293099e8",
+      "response_bytes": 1273
+    },
+    {
+      "id": "anonymous-068",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/field-changes",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "fee3d135d639945a7035a39d5a989494ef2425ff4ba8ee5050026530c057d075",
+      "response_bytes": 70
+    },
+    {
+      "id": "owner-069",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/readiness",
+      "status": 200,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 200, received 200",
+      "response_sha256": "10c4353874f62afd57c3225586432fcd23981a98f34040ea31f5bf364b63b5bc",
+      "response_bytes": 97
+    },
+    {
+      "id": "anonymous-070",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/readiness",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "digest-071",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/digest",
+      "status": 200,
+      "outcome": "verified",
+      "reason": "source-listed synthetic assistant principal; exact grant expiry checked; expected 200, received 200",
+      "response_sha256": "d6b3c5498311405efd41c89f4b72bbff38960ba19ab4ffab27d1d53d2403b932",
+      "response_bytes": 1350
+    },
+    {
+      "id": "agent-072",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/digest",
+      "status": 403,
+      "outcome": "verified",
+      "reason": "non-granted synthetic key denied; expected 403, received 403, code=DIGEST_GRANT_REQUIRED",
+      "response_sha256": "b7eae9b2e426ccc7f911c26b1d9f395ed4c61304a2f1fc49554d85126c15e2a0",
+      "response_bytes": 348,
+      "response_code": "DIGEST_GRANT_REQUIRED"
+    },
+    {
+      "id": "anonymous-073",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/digest",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "anonymous digest request denied; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-074",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/project/9f47d33d-6989-40da-8036-61b7e2791795",
+      "status": 200,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 200, received 200",
+      "response_sha256": "8e5c94c657afe2204980259f43b9e329843080a6f54d09c83cc88be5e5cc8ad9",
+      "response_bytes": 2094
+    },
+    {
+      "id": "anonymous-075",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/project/9f47d33d-6989-40da-8036-61b7e2791795",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "agent-076",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/project/9f47d33d-6989-40da-8036-61b7e2791795/index",
+      "status": 404,
+      "outcome": "verified",
+      "reason": "valid synthetic key without a project-index grant; expected non-enumerating 404 refusal; expected 404, received 404",
+      "response_sha256": "4514d6bfd2c6bcc6d6f18d5afe28aaefe1c54f9283ccba5fcceeb57e80061919",
+      "response_bytes": 106
+    },
+    {
+      "id": "anonymous-077",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/project/9f47d33d-6989-40da-8036-61b7e2791795/index",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-078",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/project/9f47d33d-6989-40da-8036-61b7e2791795/staleness",
+      "status": 200,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 200, received 200",
+      "response_sha256": "6a2a70efdc1080216e527794b94c392993f7b2cb2483d16b7dd99d34710a1476",
+      "response_bytes": 132
+    },
+    {
+      "id": "anonymous-079",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/project/9f47d33d-6989-40da-8036-61b7e2791795/staleness",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-080",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/workspaces",
+      "status": 200,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 200, received 200",
+      "response_sha256": "b1663316a4f955e150fd98b43884d75fc5ea9926f500799ba6f297b1ee43cacf",
+      "response_bytes": 452
+    },
+    {
+      "id": "anonymous-081",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/workspaces",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-082",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3",
+      "status": 403,
+      "outcome": "failed",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 200, received 403",
+      "response_sha256": "b04afb13dcec56498b87e976461724c5244db85b2b69f7d379513393a8ee0ac9",
+      "response_bytes": 80
+    },
+    {
+      "id": "anonymous-083",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-084",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members",
+      "status": 403,
+      "outcome": "failed",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 200, received 403",
+      "response_sha256": "b04afb13dcec56498b87e976461724c5244db85b2b69f7d379513393a8ee0ac9",
+      "response_bytes": 80
+    },
+    {
+      "id": "anonymous-085",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-086",
+      "kind": "http",
+      "executed": true,
+      "method": "DELETE",
+      "path": "/agents/keys/4337f2fc-04ff-45a3-b358-66063b3b0bd1",
+      "status": 204,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 204, received 204",
+      "response_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "response_bytes": 0
+    },
+    {
+      "id": "anonymous-087",
+      "kind": "http",
+      "executed": true,
+      "method": "DELETE",
+      "path": "/agents/keys/4337f2fc-04ff-45a3-b358-66063b3b0bd1",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-088",
+      "kind": "http",
+      "executed": true,
+      "method": "DELETE",
+      "path": "/agents/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/assign/af32cee8-2de3-459b-9244-2f35addaaeec",
+      "status": 204,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 204, received 204",
+      "response_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "response_bytes": 0
+    },
+    {
+      "id": "anonymous-089",
+      "kind": "http",
+      "executed": true,
+      "method": "DELETE",
+      "path": "/agents/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/assign/af32cee8-2de3-459b-9244-2f35addaaeec",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-090",
+      "kind": "http",
+      "executed": true,
+      "method": "DELETE",
+      "path": "/projects/92a6bee1-becd-4afa-8160-2516e7e7efd1",
+      "status": 204,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 204, received 204",
+      "response_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "response_bytes": 0
+    },
+    {
+      "id": "anonymous-091",
+      "kind": "http",
+      "executed": true,
+      "method": "DELETE",
+      "path": "/projects/92a6bee1-becd-4afa-8160-2516e7e7efd1",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-092",
+      "kind": "http",
+      "executed": true,
+      "method": "DELETE",
+      "path": "/projects/git-refs/6a71be8d-6a16-457c-98f6-38283e224763",
+      "status": 204,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 204, received 204",
+      "response_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "response_bytes": 0
+    },
+    {
+      "id": "anonymous-093",
+      "kind": "http",
+      "executed": true,
+      "method": "DELETE",
+      "path": "/projects/git-refs/6a71be8d-6a16-457c-98f6-38283e224763",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-094",
+      "kind": "http",
+      "executed": true,
+      "method": "DELETE",
+      "path": "/tasks/578faff8-31d9-4c81-a1b7-9c6182d6825a",
+      "status": 500,
+      "outcome": "failed",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 204, received 500",
+      "response_sha256": "fcbda2e2660dbbff82ba8df76212f3d4ab9ced3b9b9a8b8700621f45fb5ce006",
+      "response_bytes": 52
+    },
+    {
+      "id": "anonymous-095",
+      "kind": "http",
+      "executed": true,
+      "method": "DELETE",
+      "path": "/tasks/578faff8-31d9-4c81-a1b7-9c6182d6825a",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-096",
+      "kind": "http",
+      "executed": true,
+      "method": "DELETE",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/checklist/c46ce3c9-30d8-49ec-ad9f-76767b0ccc21",
+      "status": 204,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 204, received 204",
+      "response_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "response_bytes": 0
+    },
+    {
+      "id": "anonymous-097",
+      "kind": "http",
+      "executed": true,
+      "method": "DELETE",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/checklist/c46ce3c9-30d8-49ec-ad9f-76767b0ccc21",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-098",
+      "kind": "http",
+      "executed": true,
+      "method": "DELETE",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/dependencies/b776ca84-424f-4503-824c-258d68f614f7",
+      "status": 204,
+      "outcome": "verified",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 204, received 204",
+      "response_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "response_bytes": 0
+    },
+    {
+      "id": "anonymous-099",
+      "kind": "http",
+      "executed": true,
+      "method": "DELETE",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/dependencies/b776ca84-424f-4503-824c-258d68f614f7",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "owner-100",
+      "kind": "http",
+      "executed": true,
+      "method": "DELETE",
+      "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members/ee26a59b-3648-4b6d-a62c-d79f01dc84f5",
+      "status": 403,
+      "outcome": "failed",
+      "reason": "real candidate-local request with synthetic fixture and applicable human owner JWT; expected 204, received 403",
+      "response_sha256": "b04afb13dcec56498b87e976461724c5244db85b2b69f7d379513393a8ee0ac9",
+      "response_bytes": 80
+    },
+    {
+      "id": "anonymous-101",
+      "kind": "http",
+      "executed": true,
+      "method": "DELETE",
+      "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members/ee26a59b-3648-4b6d-a62c-d79f01dc84f5",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    },
+    {
+      "id": "rotated-102",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/agents/keys/self/revoke",
+      "status": 200,
+      "outcome": "verified",
+      "reason": "new rotated synthetic agent key self-revocation; expected 200",
+      "response_sha256": "9b6c19a88101aa912f5d4d3c282124c45b983648e48cbe481123c30195a47314",
+      "response_bytes": 136
+    },
+    {
+      "id": "anonymous-103",
+      "kind": "http",
+      "executed": true,
+      "method": "POST",
+      "path": "/agents/keys/self/revoke",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+      "response_sha256": "fee3d135d639945a7035a39d5a989494ef2425ff4ba8ee5050026530c057d075",
+      "response_bytes": 70
+    }
+  ],
+  "rules": [
+    "Route rows are loaded from the exact-head CAR not_measured routes.",
+    "Each route receives an authenticated and unauthenticated loopback HTTP request; the digest route also checks its grant literal and a non-granted key.",
+    "Seven code-unit rows cite every directly mapped controller route pair, with the binding table in the plan.",
+    "Response bodies and credentials are not retained; status, bounded error code, response byte count and SHA-256 are recorded.",
+    "Mutations are confined to synthetic rows in the disposable PostgreSQL database."
+  ]
+}

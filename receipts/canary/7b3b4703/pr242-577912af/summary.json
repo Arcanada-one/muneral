@@ -1,0 +1,32 @@
+{
+  "captured_at_utc": "2026-10-14T10:04:56Z",
+  "controller_code_unit_count": 7,
+  "controller_failures": [
+    "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts"
+  ],
+  "database": "Owned disposable PostgreSQL 16 on 127.0.0.1:55439; database dropped/recreated between fixture runs; shared 5432 untouched.",
+  "entity_count": 58,
+  "entity_verdict_counts": {
+    "entities_verified": 50,
+    "failed": 8,
+    "not_measured": 0
+  },
+  "environment": "candidate-local Nest API on loopback with disposable PostgreSQL 16 and private Redis; synthetic owner and agent principals",
+  "http_probe_count": 103,
+  "limits": "The canary measures candidate-local route status/auth behavior only. It does not establish production deployment or runtime restoration.",
+  "route_count": 51,
+  "route_failure_classes": [
+    {
+      "class": "workspace membership routes returned HTTP 403 for the synthetic owner; confirmed in source at WorkspaceMemberGuard request-actor lookup before ActorInterceptor.",
+      "count": 5
+    },
+    {
+      "class": "DELETE /tasks/:taskId returned HTTP 500 from activity_log_task_id_fkey during synthetic task deletion.",
+      "count": 1
+    }
+  ],
+  "schema": "MUNERAL-PR242-CandidateCanarySummary/v1",
+  "source_head": "577912af0aa71cd3b27df69ab3e5c124b74bf39e",
+  "source_tree": "3af0cfb6bb46986bff0f2d0ce2b47678b86b24b1"
+}
