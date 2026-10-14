@@ -6,6 +6,7 @@ import { PrismaService } from '../../prisma/prisma.service.js';
 import { ActivityService } from '../../activity/activity.service.js';
 import { ArtifactMetadataDto, UploadArtifactDto, StoreGraphDto } from './task-content.dto.js';
 import { humanTaskWhere } from '../../auth/human-task-visibility.js';
+import { agentOwnTaskWhere } from '../../auth/agent-task-visibility.js';
 import type { GraphDocument, GraphKind } from './task-graph.schema.js';
 import { parseGraph, validateGraphReferences } from './task-graph.validation.js';
 
@@ -54,6 +55,69 @@ export class TaskContentService {
 
   uploadArtifact(taskId: string, actor: Actor, dto: UploadArtifactDto) {
     return this.store(taskId, actor, 'artifact', dto.name, dto.contentType, decodeArtifact(dto));
+  }
+
+  /** TZ638: the whole work item and owned bytes, from one database snapshot. */
+  open(taskId: string, actor: Actor) {
+    return this.prisma.$transaction(async tx => {
+      const custody = await this.authorize(tx, taskId, actor);
+      const [task, chronology, checklist, agents, attempts, evidence, content, dependencies] = await Promise.all([
+        tx.task.findUniqueOrThrow({ where: { id: taskId } }),
+        tx.activityLog.findMany({ where: { taskId }, orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] }),
+        tx.taskChecklist.findMany({ where: { taskId }, orderBy: [{ position: 'asc' }, { id: 'asc' }] }),
+        tx.taskAgent.findMany({ where: { taskId }, orderBy: { agentId: 'asc' }, select: {
+          agentId: true, role: true, assignedAt: true,
+          agent: { select: { id: true, name: true, workspaceId: true } },
+        } }),
+        tx.taskExecutionAttempt.findMany({ where: { taskId }, orderBy: { ordinal: 'asc' } }),
+        tx.taskEvidenceAttachment.findMany({ where: { taskId }, orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] }),
+        tx.taskArtifactRevision.findMany({ where: { taskId }, orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] }),
+        tx.taskDependency.findMany({ where: { OR: [{ fromTaskId: taskId }, { toTaskId: taskId }] }, orderBy: { id: 'asc' } }),
+      ]);
+      if (chronology.some(row => row.workspaceId !== custody.project.workspaceId) ||
+          agents.some(row => row.agent.workspaceId !== custody.project.workspaceId)) {
+        throw new ConflictException('WORK_ITEM_CUSTODY_MISMATCH');
+      }
+      // MUN-0055: retain same-workspace edges/status, withholding unowned free text.
+      const endpointIds = [...new Set([taskId, ...dependencies.flatMap(row => [row.fromTaskId, row.toTaskId])])];
+      const endpoints = [];
+      for (const id of endpointIds) {
+        endpoints.push(await this.dependencyEndpoint(tx, id, actor, custody.project.workspaceId));
+      }
+      for (const row of content) {
+        if (row.sizeBytes !== row.content.length || digest(row.content) !== row.sha256) {
+          throw new ConflictException('STORED_CONTENT_DIGEST_MISMATCH');
+        }
+      }
+      const graphs = Object.fromEntries((['task_graph', 'agent_graph'] as const).map(kind => {
+        const revisions = content.filter(row => row.kind === kind).sort((a, b) => a.revision - b.revision)
+          .map(row => ({ ...present(row, true), document: JSON.parse(Buffer.from(row.content).toString('utf8')) as unknown }));
+        return [kind, { state: revisions.length ? 'present' : 'absent', latestRevision: revisions.at(-1)?.revision ?? null, revisions }];
+      }));
+      const artifacts = content.filter(row => row.kind === 'artifact').map(row => present(row, true));
+      const evidenceWithAvailability = evidence.map(row => ({ ...row,
+        availability: content.some(revision => revision.evidenceId === row.id) ? 'server_content' : 'legacy_pointer',
+      }));
+      return { schema: 'WorkItemOpen/v1', task, chronology, checklist, agents, attempts,
+        artifacts, graphs, evidence: evidenceWithAvailability,
+        dependencyGraph: { source: 'native_TaskDependency', nodes: endpoints, edges: dependencies },
+        completeness: { complete: true, snapshot: 'repeatable_read', contentIntegrity: 'verified',
+          counts: { chronology: chronology.length, checklist: checklist.length, agents: agents.length,
+            attempts: attempts.length, evidence: evidence.length, artifacts: artifacts.length,
+            contentRevisions: content.length, dependencies: dependencies.length } },
+      };
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead, timeout: 10000 });
+  }
+
+  private async dependencyEndpoint(tx: Prisma.TransactionClient, id: string, actor: Actor, workspaceId: string) {
+    const row = await tx.task.findFirst({ where: { id, project: { workspaceId } },
+      select: { id: true, status: true, projectId: true } });
+    if (!row) throw new ForbiddenException('Dependency endpoint is outside workspace custody');
+    const readable = await tx.task.findFirst({ where: { id, ...(actor.type === 'human'
+      ? humanTaskWhere(actor.id) : agentOwnTaskWhere(actor.id)) }, select: { title: true } });
+    if (actor.type === 'human' && !readable) throw new ForbiddenException('Dependency endpoint is outside credential scope');
+    // Reuse getDependencyGraph's ownership predicate, inside this read's snapshot.
+    return readable ? { ...row, title: readable.title } : row;
   }
 
   uploadBytes(taskId: string, actor: Actor, dto: ArtifactMetadataDto, bytes: Buffer | undefined) {

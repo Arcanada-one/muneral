@@ -35,6 +35,18 @@ describe.skipIf(!fixturePath)('MUN artifact actual web-to-API HTTP consumer seam
     const rows=await fetchWorkspaces();
     expect(rows.some(w=>w.id===state.fixture.workspaceId)).toBe(true);
   });
+  it('opens the whole item with server content through the original authenticated HTTP client', async () => {
+    const row=(await apiClient.get(`/tasks/${state.fixture.taskId}/open`)).data;
+    expect(row.schema).toBe('WorkItemOpen/v1');
+    expect(row.task.id).toBe(state.fixture.taskId);
+    expect(row.completeness).toMatchObject({complete:true,snapshot:'repeatable_read',contentIntegrity:'verified'});
+    for (const kind of ['task_graph','agent_graph']) {
+      const revisions=row.graphs[kind].revisions;
+      expect(revisions.at(-1).document).toEqual(state.fixture.graphDocuments[kind]);
+      for (const revision of revisions) expect(createHash('sha256').update(Buffer.from(revision.contentBase64,'base64')).digest('hex')).toBe(revision.sha256);
+    }
+    expect(row.completeness.counts.contentRevisions).toBe(row.artifacts.length+row.graphs.task_graph.revisions.length+row.graphs.agent_graph.revisions.length);
+  });
   it.each(['task_graph', 'agent_graph'])('reads %s document content and history through the original authenticated HTTP client', async kind => {
     if (!state.fixture.graphDocuments) throw new Error('Graph consumer fixture must contain both graph documents');
     const row=(await apiClient.get(`/tasks/${state.fixture.taskId}/graphs/${kind}`)).data;
