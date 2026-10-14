@@ -5,7 +5,7 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "paused_safe"
  },
- "captured_at_utc": "2026-10-14T14:30:16Z",
+ "captured_at_utc": "2026-10-14T14:36:58Z",
  "change_set": {
   "base": "42061f8299115618bc256301c88beca02de755a9",
   "files": [
@@ -44,7 +44,7 @@
   "path": "/tmp/arcana-verify/verifier-out/graph-head-c649d12230d5.json",
   "source_commit": "c649d12230d5589e5a8ae441f00da354e61ce526",
   "staleness": {
-   "checked_at_utc": "2026-10-14T14:30:37Z",
+   "checked_at_utc": "2026-10-14T14:37:20Z",
    "checked_nodes": 456,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
@@ -4136,13 +4136,14 @@
  },
  "notes": [
   "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
-  "profile: (auto-detected); baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none"
+  "profile: (auto-detected); baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none",
+  "head tree c649d12230d5 exported with git archive into /tmp/arcana-verify/export-c649d12230d5 (node_modules linked from the repository for ['.', 'apps/api', 'apps/web', 'packages/types']; workspace packages built: ['packages/types (tsc exit 0, 0.3s)']); the repository was not written"
  ],
  "producer": {
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261014T143016Z-c649d122",
+ "receipt_id": "car-verify-20261014T143658Z-c649d122",
  "receipt_path": "receipts/graph/change-admission-pr249-project-read-renewal.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -4450,7 +4451,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-14T14:30:37Z",
+  "checked_at_utc": "2026-10-14T14:37:20Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -4887,13 +4888,13 @@
   }
  ],
  "tree": {
-  "commit": "c649d12230d5589e5a8ae441f00da354e61ce526",
+  "commit": "c574e6d09e51077da1ba52c960b184b875731024",
   "dirty": false
  },
  "verdicts": [
   {
    "entity": "code_unit:apps/api/src/agents/agents.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -4904,8 +4905,8 @@
   },
   {
    "entity": "code_unit:apps/api/src/agents/agents.module.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -4913,8 +4914,8 @@
   },
   {
    "entity": "code_unit:apps/api/src/agents/agents.service.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 3 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-contract-diff",
     "v-fitness",
@@ -4923,8 +4924,8 @@
   },
   {
    "entity": "code_unit:apps/api/src/app.module.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -4932,8 +4933,8 @@
   },
   {
    "entity": "code_unit:apps/api/src/auth/auth.module.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -4941,8 +4942,8 @@
   },
   {
    "entity": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-contract-diff",
     "v-fitness",
@@ -4951,8 +4952,8 @@
   },
   {
    "entity": "code_unit:apps/api/src/auth/project-read-grants.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -4960,8 +4961,8 @@
   },
   {
    "entity": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -4969,8 +4970,8 @@
   },
   {
    "entity": "code_unit:apps/api/src/main.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -4978,8 +4979,8 @@
   },
   {
    "entity": "code_unit:apps/api/src/migration/index.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -4987,8 +4988,8 @@
   },
   {
    "entity": "code_unit:apps/api/src/migration/migration.module.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -4996,8 +4997,8 @@
   },
   {
    "entity": "code_unit:apps/api/src/milestones/milestones.module.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -5005,7 +5006,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/projects/projects.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5016,8 +5017,8 @@
   },
   {
    "entity": "code_unit:apps/api/src/projects/projects.module.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -5025,8 +5026,8 @@
   },
   {
    "entity": "code_unit:apps/api/src/solution-log-head/solution-log-head.module.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -5034,7 +5035,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/sync/sync.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5045,8 +5046,8 @@
   },
   {
    "entity": "code_unit:apps/api/src/sync/sync.module.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -5054,8 +5055,8 @@
   },
   {
    "entity": "code_unit:apps/api/src/sync/sync.service.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -5063,7 +5064,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5074,7 +5075,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5085,8 +5086,8 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/task-contract-binding.service.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -5094,7 +5095,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/tasks.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5105,8 +5106,8 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/tasks.module.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -5114,8 +5115,8 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/tasks.service.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -5123,8 +5124,8 @@
   },
   {
    "entity": "code_unit:apps/api/src/webhooks/webhooks.module.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -5132,7 +5133,7 @@
   },
   {
    "entity": "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5143,8 +5144,8 @@
   },
   {
    "entity": "code_unit:apps/api/src/workspaces/workspaces.module.ts",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -5152,8 +5153,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -5161,8 +5162,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/agent-project-dependencies.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -5170,8 +5171,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/agent-project-index.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -5179,8 +5180,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/agent-task-scope.guard.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -5188,8 +5189,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/agent-workspace-digest.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -5197,8 +5198,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/app-module-boot.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -5206,8 +5207,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/field-changes.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -5215,8 +5216,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/human-task-read-isolation.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -5224,8 +5225,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -5233,8 +5234,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/outbox-relay-probe.postgres.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -5242,8 +5243,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/outbox-relay-wired.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -5251,8 +5252,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/project-index.service.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -5260,8 +5261,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/project-read-grants.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -5269,8 +5270,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/sync-import-scope.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -5278,8 +5279,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/sync.service.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -5287,8 +5288,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/task-contract-binding.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -5296,8 +5297,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/task-contract-digest.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -5305,8 +5306,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/task-evidence.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -5314,8 +5315,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/task-redactions.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -5323,8 +5324,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/tasks-agent-scope.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -5332,8 +5333,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/tasks-agent-status.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -5341,8 +5342,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/tasks.query.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -5350,8 +5351,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/tasks.service.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -5359,8 +5360,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/workspace-digest-grants.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -5368,8 +5369,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/workspace-digest.unit.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -5385,8 +5386,8 @@
   },
   {
    "entity": "deployable_unit:apps/api",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: 0 errors; v-fitness: no new violation in apps/api (5 frozen)",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -5410,7 +5411,7 @@
   },
   {
    "entity": "route:DELETE /agents/keys/:keyId",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5421,7 +5422,7 @@
   },
   {
    "entity": "route:DELETE /agents/tasks/:taskId/assign/:agentId",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5432,7 +5433,7 @@
   },
   {
    "entity": "route:DELETE /projects/:projectId",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5443,7 +5444,7 @@
   },
   {
    "entity": "route:DELETE /projects/git-refs/:refId",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5454,7 +5455,7 @@
   },
   {
    "entity": "route:DELETE /tasks/:taskId",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5465,7 +5466,7 @@
   },
   {
    "entity": "route:DELETE /tasks/:taskId/checklist/:itemId",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5476,7 +5477,7 @@
   },
   {
    "entity": "route:DELETE /tasks/:taskId/dependencies/:depId",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5487,7 +5488,7 @@
   },
   {
    "entity": "route:DELETE /workspaces/:workspaceId/members/:userId",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5498,7 +5499,7 @@
   },
   {
    "entity": "route:GET /agents/tasks",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5509,7 +5510,7 @@
   },
   {
    "entity": "route:GET /agents/workspace/:workspaceId",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5520,7 +5521,7 @@
   },
   {
    "entity": "route:GET /projects/:projectId",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5531,7 +5532,7 @@
   },
   {
    "entity": "route:GET /projects/tasks/:taskId/git-refs",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5542,7 +5543,7 @@
   },
   {
    "entity": "route:GET /projects/workspace/:workspaceId",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5553,7 +5554,7 @@
   },
   {
    "entity": "route:GET /sync/datarim/:projectId",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5564,7 +5565,7 @@
   },
   {
    "entity": "route:GET /tasks",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5575,7 +5576,7 @@
   },
   {
    "entity": "route:GET /tasks/:taskId",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5586,7 +5587,7 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/activity",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5597,7 +5598,7 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/checklist",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5608,7 +5609,7 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/dependencies",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5619,7 +5620,7 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/dependency-graph",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5630,7 +5631,7 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/evidence",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5641,7 +5642,7 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/field-changes",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5652,7 +5653,7 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/readiness",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5663,7 +5664,7 @@
   },
   {
    "entity": "route:GET /tasks/digest",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5674,7 +5675,7 @@
   },
   {
    "entity": "route:GET /tasks/project/:projectId",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5685,7 +5686,7 @@
   },
   {
    "entity": "route:GET /tasks/project/:projectId/index",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5696,7 +5697,7 @@
   },
   {
    "entity": "route:GET /tasks/project/:projectId/staleness",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5707,7 +5708,7 @@
   },
   {
    "entity": "route:GET /workspaces",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5718,7 +5719,7 @@
   },
   {
    "entity": "route:GET /workspaces/:workspaceId",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5729,7 +5730,7 @@
   },
   {
    "entity": "route:GET /workspaces/:workspaceId/members",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5740,7 +5741,7 @@
   },
   {
    "entity": "route:PATCH /tasks/:taskId/checklist/:itemId",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5751,7 +5752,7 @@
   },
   {
    "entity": "route:PATCH /tasks/:taskId/contract",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5762,7 +5763,7 @@
   },
   {
    "entity": "route:PATCH /tasks/:taskId/status",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5773,7 +5774,7 @@
   },
   {
    "entity": "route:PATCH /workspaces/:workspaceId/members/:userId/role",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5784,7 +5785,7 @@
   },
   {
    "entity": "route:POST /agents",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5795,7 +5796,7 @@
   },
   {
    "entity": "route:POST /agents/:agentId/keys",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5806,7 +5807,7 @@
   },
   {
    "entity": "route:POST /agents/keys/:keyId/rotate",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5817,7 +5818,7 @@
   },
   {
    "entity": "route:POST /agents/keys/self/revoke",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5828,7 +5829,7 @@
   },
   {
    "entity": "route:POST /agents/tasks/:taskId/assign",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5839,7 +5840,7 @@
   },
   {
    "entity": "route:POST /projects",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5850,7 +5851,7 @@
   },
   {
    "entity": "route:POST /projects/git-refs",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5861,7 +5862,7 @@
   },
   {
    "entity": "route:POST /sync/datarim/:projectId/import",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5872,7 +5873,7 @@
   },
   {
    "entity": "route:POST /tasks",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5883,7 +5884,7 @@
   },
   {
    "entity": "route:POST /tasks/:taskId/checklist",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5894,7 +5895,7 @@
   },
   {
    "entity": "route:POST /tasks/:taskId/comments",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5905,7 +5906,7 @@
   },
   {
    "entity": "route:POST /tasks/:taskId/dependencies",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5916,7 +5917,7 @@
   },
   {
    "entity": "route:POST /tasks/:taskId/evidence",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5927,7 +5928,7 @@
   },
   {
    "entity": "route:POST /tasks/:taskId/field-ack",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5938,7 +5939,7 @@
   },
   {
    "entity": "route:POST /tasks/:taskId/redactions",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5949,7 +5950,7 @@
   },
   {
    "entity": "route:POST /workspaces",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5960,7 +5961,7 @@
   },
   {
    "entity": "route:POST /workspaces/:workspaceId/members/:userId",
-   "reason": "v-type-check-apps-api-tsconfig: tsc unavailable on this host; v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-canary",
@@ -5978,8 +5979,8 @@
  },
  "verifiers": [
   {
-   "command": "tsc -p /home/dev/aup/muneral-pr249-car-clean/apps/api/tsconfig.json (tsc not found)",
-   "duration_s": 0.0,
+   "command": "/tmp/arcana-verify/export-c649d12230d5/apps/api/node_modules/.bin/tsc -p /tmp/arcana-verify/export-c649d12230d5/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/arcana-verify/verifier-out/type-check-6mjo5w6q/check.tsbuildinfo --listFiles",
+   "duration_s": 3.28,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -6062,96 +6063,96 @@
     "route:POST /workspaces/:workspaceId/members/:userId"
    ],
    "entity_verdicts": {
-    "code_unit:apps/api/src/agents/agents.controller.ts": "not_measured",
-    "code_unit:apps/api/src/agents/agents.module.ts": "not_measured",
-    "code_unit:apps/api/src/agents/agents.service.ts": "not_measured",
-    "code_unit:apps/api/src/app.module.ts": "not_measured",
-    "code_unit:apps/api/src/auth/auth.module.ts": "not_measured",
-    "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts": "not_measured",
-    "code_unit:apps/api/src/auth/project-read-grants.ts": "not_measured",
-    "code_unit:apps/api/src/auth/workspace-digest-grants.ts": "not_measured",
-    "code_unit:apps/api/src/main.ts": "not_measured",
-    "code_unit:apps/api/src/migration/index.ts": "not_measured",
-    "code_unit:apps/api/src/migration/migration.module.ts": "not_measured",
-    "code_unit:apps/api/src/milestones/milestones.module.ts": "not_measured",
-    "code_unit:apps/api/src/projects/projects.controller.ts": "not_measured",
-    "code_unit:apps/api/src/projects/projects.module.ts": "not_measured",
-    "code_unit:apps/api/src/solution-log-head/solution-log-head.module.ts": "not_measured",
-    "code_unit:apps/api/src/sync/sync.controller.ts": "not_measured",
-    "code_unit:apps/api/src/sync/sync.module.ts": "not_measured",
-    "code_unit:apps/api/src/sync/sync.service.ts": "not_measured",
-    "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts": "not_measured",
-    "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts": "not_measured",
-    "code_unit:apps/api/src/tasks/task-contract-binding.service.ts": "not_measured",
-    "code_unit:apps/api/src/tasks/tasks.controller.ts": "not_measured",
-    "code_unit:apps/api/src/tasks/tasks.module.ts": "not_measured",
-    "code_unit:apps/api/src/tasks/tasks.service.ts": "not_measured",
-    "code_unit:apps/api/src/webhooks/webhooks.module.ts": "not_measured",
-    "code_unit:apps/api/src/workspaces/workspaces.controller.ts": "not_measured",
-    "code_unit:apps/api/src/workspaces/workspaces.module.ts": "not_measured",
-    "deployable_unit:apps/api": "not_measured",
-    "route:DELETE /agents/keys/:keyId": "not_measured",
-    "route:DELETE /agents/tasks/:taskId/assign/:agentId": "not_measured",
-    "route:DELETE /projects/:projectId": "not_measured",
-    "route:DELETE /projects/git-refs/:refId": "not_measured",
-    "route:DELETE /tasks/:taskId": "not_measured",
-    "route:DELETE /tasks/:taskId/checklist/:itemId": "not_measured",
-    "route:DELETE /tasks/:taskId/dependencies/:depId": "not_measured",
-    "route:DELETE /workspaces/:workspaceId/members/:userId": "not_measured",
-    "route:GET /agents/tasks": "not_measured",
-    "route:GET /agents/workspace/:workspaceId": "not_measured",
-    "route:GET /projects/:projectId": "not_measured",
-    "route:GET /projects/tasks/:taskId/git-refs": "not_measured",
-    "route:GET /projects/workspace/:workspaceId": "not_measured",
-    "route:GET /sync/datarim/:projectId": "not_measured",
-    "route:GET /tasks": "not_measured",
-    "route:GET /tasks/:taskId": "not_measured",
-    "route:GET /tasks/:taskId/activity": "not_measured",
-    "route:GET /tasks/:taskId/checklist": "not_measured",
-    "route:GET /tasks/:taskId/dependencies": "not_measured",
-    "route:GET /tasks/:taskId/dependency-graph": "not_measured",
-    "route:GET /tasks/:taskId/evidence": "not_measured",
-    "route:GET /tasks/:taskId/field-changes": "not_measured",
-    "route:GET /tasks/:taskId/readiness": "not_measured",
-    "route:GET /tasks/digest": "not_measured",
-    "route:GET /tasks/project/:projectId": "not_measured",
-    "route:GET /tasks/project/:projectId/index": "not_measured",
-    "route:GET /tasks/project/:projectId/staleness": "not_measured",
-    "route:GET /workspaces": "not_measured",
-    "route:GET /workspaces/:workspaceId": "not_measured",
-    "route:GET /workspaces/:workspaceId/members": "not_measured",
-    "route:PATCH /tasks/:taskId/checklist/:itemId": "not_measured",
-    "route:PATCH /tasks/:taskId/contract": "not_measured",
-    "route:PATCH /tasks/:taskId/status": "not_measured",
-    "route:PATCH /workspaces/:workspaceId/members/:userId/role": "not_measured",
-    "route:POST /agents": "not_measured",
-    "route:POST /agents/:agentId/keys": "not_measured",
-    "route:POST /agents/keys/:keyId/rotate": "not_measured",
-    "route:POST /agents/keys/self/revoke": "not_measured",
-    "route:POST /agents/tasks/:taskId/assign": "not_measured",
-    "route:POST /projects": "not_measured",
-    "route:POST /projects/git-refs": "not_measured",
-    "route:POST /sync/datarim/:projectId/import": "not_measured",
-    "route:POST /tasks": "not_measured",
-    "route:POST /tasks/:taskId/checklist": "not_measured",
-    "route:POST /tasks/:taskId/comments": "not_measured",
-    "route:POST /tasks/:taskId/dependencies": "not_measured",
-    "route:POST /tasks/:taskId/evidence": "not_measured",
-    "route:POST /tasks/:taskId/field-ack": "not_measured",
-    "route:POST /tasks/:taskId/redactions": "not_measured",
-    "route:POST /workspaces": "not_measured",
-    "route:POST /workspaces/:workspaceId/members/:userId": "not_measured"
+    "code_unit:apps/api/src/agents/agents.controller.ts": "verified",
+    "code_unit:apps/api/src/agents/agents.module.ts": "verified",
+    "code_unit:apps/api/src/agents/agents.service.ts": "verified",
+    "code_unit:apps/api/src/app.module.ts": "verified",
+    "code_unit:apps/api/src/auth/auth.module.ts": "verified",
+    "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts": "verified",
+    "code_unit:apps/api/src/auth/project-read-grants.ts": "verified",
+    "code_unit:apps/api/src/auth/workspace-digest-grants.ts": "verified",
+    "code_unit:apps/api/src/main.ts": "verified",
+    "code_unit:apps/api/src/migration/index.ts": "verified",
+    "code_unit:apps/api/src/migration/migration.module.ts": "verified",
+    "code_unit:apps/api/src/milestones/milestones.module.ts": "verified",
+    "code_unit:apps/api/src/projects/projects.controller.ts": "verified",
+    "code_unit:apps/api/src/projects/projects.module.ts": "verified",
+    "code_unit:apps/api/src/solution-log-head/solution-log-head.module.ts": "verified",
+    "code_unit:apps/api/src/sync/sync.controller.ts": "verified",
+    "code_unit:apps/api/src/sync/sync.module.ts": "verified",
+    "code_unit:apps/api/src/sync/sync.service.ts": "verified",
+    "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts": "verified",
+    "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts": "verified",
+    "code_unit:apps/api/src/tasks/task-contract-binding.service.ts": "verified",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts": "verified",
+    "code_unit:apps/api/src/tasks/tasks.module.ts": "verified",
+    "code_unit:apps/api/src/tasks/tasks.service.ts": "verified",
+    "code_unit:apps/api/src/webhooks/webhooks.module.ts": "verified",
+    "code_unit:apps/api/src/workspaces/workspaces.controller.ts": "verified",
+    "code_unit:apps/api/src/workspaces/workspaces.module.ts": "verified",
+    "deployable_unit:apps/api": "verified",
+    "route:DELETE /agents/keys/:keyId": "verified",
+    "route:DELETE /agents/tasks/:taskId/assign/:agentId": "verified",
+    "route:DELETE /projects/:projectId": "verified",
+    "route:DELETE /projects/git-refs/:refId": "verified",
+    "route:DELETE /tasks/:taskId": "verified",
+    "route:DELETE /tasks/:taskId/checklist/:itemId": "verified",
+    "route:DELETE /tasks/:taskId/dependencies/:depId": "verified",
+    "route:DELETE /workspaces/:workspaceId/members/:userId": "verified",
+    "route:GET /agents/tasks": "verified",
+    "route:GET /agents/workspace/:workspaceId": "verified",
+    "route:GET /projects/:projectId": "verified",
+    "route:GET /projects/tasks/:taskId/git-refs": "verified",
+    "route:GET /projects/workspace/:workspaceId": "verified",
+    "route:GET /sync/datarim/:projectId": "verified",
+    "route:GET /tasks": "verified",
+    "route:GET /tasks/:taskId": "verified",
+    "route:GET /tasks/:taskId/activity": "verified",
+    "route:GET /tasks/:taskId/checklist": "verified",
+    "route:GET /tasks/:taskId/dependencies": "verified",
+    "route:GET /tasks/:taskId/dependency-graph": "verified",
+    "route:GET /tasks/:taskId/evidence": "verified",
+    "route:GET /tasks/:taskId/field-changes": "verified",
+    "route:GET /tasks/:taskId/readiness": "verified",
+    "route:GET /tasks/digest": "verified",
+    "route:GET /tasks/project/:projectId": "verified",
+    "route:GET /tasks/project/:projectId/index": "verified",
+    "route:GET /tasks/project/:projectId/staleness": "verified",
+    "route:GET /workspaces": "verified",
+    "route:GET /workspaces/:workspaceId": "verified",
+    "route:GET /workspaces/:workspaceId/members": "verified",
+    "route:PATCH /tasks/:taskId/checklist/:itemId": "verified",
+    "route:PATCH /tasks/:taskId/contract": "verified",
+    "route:PATCH /tasks/:taskId/status": "verified",
+    "route:PATCH /workspaces/:workspaceId/members/:userId/role": "verified",
+    "route:POST /agents": "verified",
+    "route:POST /agents/:agentId/keys": "verified",
+    "route:POST /agents/keys/:keyId/rotate": "verified",
+    "route:POST /agents/keys/self/revoke": "verified",
+    "route:POST /agents/tasks/:taskId/assign": "verified",
+    "route:POST /projects": "verified",
+    "route:POST /projects/git-refs": "verified",
+    "route:POST /sync/datarim/:projectId/import": "verified",
+    "route:POST /tasks": "verified",
+    "route:POST /tasks/:taskId/checklist": "verified",
+    "route:POST /tasks/:taskId/comments": "verified",
+    "route:POST /tasks/:taskId/dependencies": "verified",
+    "route:POST /tasks/:taskId/evidence": "verified",
+    "route:POST /tasks/:taskId/field-ack": "verified",
+    "route:POST /tasks/:taskId/redactions": "verified",
+    "route:POST /workspaces": "verified",
+    "route:POST /workspaces/:workspaceId/members/:userId": "verified"
    },
-   "exit_code": 127,
+   "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-10-14T14:30:41Z",
-   "summary": "not_measured: tsc unavailable"
+   "started_at_utc": "2026-10-14T14:37:24Z",
+   "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1453 files listed"
   },
   {
-   "command": "tsc -p /home/dev/aup/muneral-pr249-car-clean/apps/api/tsconfig.test.json (tsc not found)",
-   "duration_s": 0.0,
+   "command": "/tmp/arcana-verify/export-c649d12230d5/apps/api/node_modules/.bin/tsc -p /tmp/arcana-verify/export-c649d12230d5/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /tmp/arcana-verify/verifier-out/type-check-ab55ghvg/check.tsbuildinfo --listFiles",
+   "duration_s": 5.85,
    "entities": [
     "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts",
     "code_unit:apps/api/test/agent-project-dependencies.e2e.spec.ts",
@@ -6181,43 +6182,43 @@
     "deployable_unit:apps/api"
    ],
    "entity_verdicts": {
-    "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/agent-project-dependencies.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/agent-project-index.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/agent-task-scope.guard.spec.ts": "not_measured",
-    "code_unit:apps/api/test/agent-workspace-digest.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/app-module-boot.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/field-changes.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/human-task-read-isolation.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/outbox-relay-probe.postgres.spec.ts": "not_measured",
-    "code_unit:apps/api/test/outbox-relay-wired.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/project-index.service.spec.ts": "not_measured",
-    "code_unit:apps/api/test/project-read-grants.spec.ts": "not_measured",
-    "code_unit:apps/api/test/sync-import-scope.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/sync.service.spec.ts": "not_measured",
-    "code_unit:apps/api/test/task-contract-binding.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/task-contract-digest.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/task-evidence.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/task-redactions.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/tasks-agent-scope.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/tasks-agent-status.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/tasks.query.spec.ts": "not_measured",
-    "code_unit:apps/api/test/tasks.service.spec.ts": "not_measured",
-    "code_unit:apps/api/test/workspace-digest-grants.spec.ts": "not_measured",
-    "code_unit:apps/api/test/workspace-digest.unit.spec.ts": "not_measured",
-    "deployable_unit:apps/api": "not_measured"
+    "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/agent-project-dependencies.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/agent-project-index.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/agent-task-scope.guard.spec.ts": "verified",
+    "code_unit:apps/api/test/agent-workspace-digest.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/app-module-boot.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/field-changes.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/human-task-read-isolation.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/outbox-relay-probe.postgres.spec.ts": "verified",
+    "code_unit:apps/api/test/outbox-relay-wired.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/project-index.service.spec.ts": "verified",
+    "code_unit:apps/api/test/project-read-grants.spec.ts": "verified",
+    "code_unit:apps/api/test/sync-import-scope.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/sync.service.spec.ts": "verified",
+    "code_unit:apps/api/test/task-contract-binding.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/task-contract-digest.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/task-evidence.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/task-redactions.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/tasks-agent-scope.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/tasks-agent-status.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/tasks.query.spec.ts": "verified",
+    "code_unit:apps/api/test/tasks.service.spec.ts": "verified",
+    "code_unit:apps/api/test/workspace-digest-grants.spec.ts": "verified",
+    "code_unit:apps/api/test/workspace-digest.unit.spec.ts": "verified",
+    "deployable_unit:apps/api": "verified"
    },
-   "exit_code": 127,
+   "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-10-14T14:30:41Z",
-   "summary": "not_measured: tsc unavailable"
+   "started_at_utc": "2026-10-14T14:37:27Z",
+   "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1611 files listed"
   },
   {
    "command": "tools/graph/contract_diff.py.run_diff(base=42061f829911, head=c649d12230d5, graph=head graph)",
-   "duration_s": 3.81,
+   "duration_s": 6.44,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.service.ts",
@@ -6348,12 +6349,12 @@
    "id": "v-contract-diff",
    "kind": "contract_diff",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-contract-diff.json",
-   "started_at_utc": "2026-10-14T14:30:41Z",
+   "started_at_utc": "2026-10-14T14:37:34Z",
    "summary": "58→58 contracts, breaking 0, edges {'verified': 164}"
   },
   {
    "command": "verify.py route_config_consistency RC-01 prefix / RC-02 registration / RC-03 served",
-   "duration_s": 0.04,
+   "duration_s": 0.08,
    "entities": [
     "route:DELETE /agents/keys/:keyId",
     "route:DELETE /agents/tasks/:taskId/assign/:agentId",
@@ -6464,12 +6465,12 @@
    "id": "v-route-config",
    "kind": "config_schema",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-route-config.txt",
-   "started_at_utc": "2026-10-14T14:30:45Z",
+   "started_at_utc": "2026-10-14T14:37:40Z",
    "summary": "51 route(s), 0 failed"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.11,
+   "duration_s": 0.23,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -6584,7 +6585,7 @@
    "id": "v-fitness",
    "kind": "fitness_rules",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-fitness.json",
-   "started_at_utc": "2026-10-14T14:30:45Z",
+   "started_at_utc": "2026-10-14T14:37:40Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -6602,7 +6603,7 @@
    "id": "v-doc-reference",
    "kind": "doc_reference",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-doc-reference.txt",
-   "started_at_utc": "2026-10-14T14:30:45Z",
+   "started_at_utc": "2026-10-14T14:37:40Z",
    "summary": "2 document(s), 0 failed"
   },
   {
@@ -6732,7 +6733,7 @@
    "id": "v-canary",
    "kind": "canary",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-canary.json",
-   "started_at_utc": "2026-10-14T14:30:45Z",
+   "started_at_utc": "2026-10-14T14:37:40Z",
    "summary": "0 canary result(s), 0 committed at head; 0 verified / 0 failed / 58 not_measured of 58 entities"
   }
  ],
@@ -7329,9 +7330,9 @@
    ]
   },
   "seconds": {
-   "prepare": 1.65,
-   "total": 28.96,
-   "verifiers": 3.96
+   "prepare": 1.68,
+   "total": 42.62,
+   "verifiers": 15.88
   }
  },
  "work_item": "971d0143-8549-47a9-b89b-19f0a4023a53"
