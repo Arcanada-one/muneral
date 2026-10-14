@@ -1,0 +1,2467 @@
+{
+  "schema": "CanaryResult/v1",
+  "captured_at_utc": "2026-10-14T02:29:41Z",
+  "card": "PR220",
+  "contract_ref": "DEC-AUP-0117 bounded named-program task/evidence read",
+  "producer": {
+    "tool": "temporary Jest/Supertest route-sweep harness + pg_virtualenv",
+    "version": "Node 24.20.0"
+  },
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "eb79d8a829626f585c1ec2a3816f072ffc089b40",
+    "tree": "04ea63339307b27d7a2a965429cd6a293b978d87",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "647b80f89f3c81cff4dda1b10f7a71962f2bb49178c3a31332bf1f7093f95ba0",
+      "source_field": "commit"
+    }
+  },
+  "plan": {
+    "id": "pr220-route-sweep-38553086",
+    "path": "plan.json",
+    "digest": "sha256:c1e0061d6d690fd16fc3b74e95198b20b1b9d2bf9f254fcc5b33fc548a35916a"
+  },
+  "environment": "Candidate-local NestJS Supertest HTTP against an isolated PostgreSQL 16/regress pg_virtualenv cluster; the suite's disposable database and cluster were removed.",
+  "base_url": "NestJS candidate app via Supertest in-process HTTP; isolated PostgreSQL 16/regress",
+  "phase": "post",
+  "read_only": false,
+  "mutating_owner": "Synthetic disposable fixture only; no production or live task data.",
+  "resident_version": null,
+  "model": "candidate-local HTTP route sweep with real PostgreSQL 16",
+  "probes": [
+    {
+      "id": "request-001",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/api/v1/agents/keys/397c48c9-0605-4880-94a9-9b1a2d271b31",
+      "entities": [
+        "route:DELETE /agents/keys/:keyId",
+        "code_unit:apps/api/src/agents/agents.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-002",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/api/v1/agents/tasks/df53570f-bd56-4683-945f-886cc60c882b/assign/1c8c7a89-fd63-4e46-8304-ae3e94c4b822",
+      "entities": [
+        "route:DELETE /agents/tasks/:taskId/assign/:agentId",
+        "code_unit:apps/api/src/agents/agents.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-003",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/api/v1/projects/d947a781-3c30-4ac9-8ff8-f1e852f9c51c",
+      "entities": [
+        "route:DELETE /projects/:projectId",
+        "code_unit:apps/api/src/projects/projects.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-004",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/api/v1/projects/git-refs/00000000-0000-4000-8000-000000000003",
+      "entities": [
+        "route:DELETE /projects/git-refs/:refId",
+        "code_unit:apps/api/src/projects/projects.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-005",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/api/v1/tasks/00000000-0000-4000-8000-000000000007",
+      "entities": [
+        "route:DELETE /tasks/:taskId",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-006",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/api/v1/tasks/df53570f-bd56-4683-945f-886cc60c882b/checklist/00000000-0000-4000-8000-000000000001",
+      "entities": [
+        "route:DELETE /tasks/:taskId/checklist/:itemId",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-007",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/api/v1/tasks/df53570f-bd56-4683-945f-886cc60c882b/dependencies/00000000-0000-4000-8000-000000000002",
+      "entities": [
+        "route:DELETE /tasks/:taskId/dependencies/:depId",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-008",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/api/v1/workspaces/b3d1805c-88d2-4e7b-aad5-f6378bfe5fdd/members/e572e8ac-9df2-4a9e-8702-70d1b1c22404",
+      "entities": [
+        "route:DELETE /workspaces/:workspaceId/members/:userId",
+        "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-009",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/agents/tasks",
+      "entities": [
+        "route:GET /agents/tasks",
+        "code_unit:apps/api/src/agents/agents.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false
+    },
+    {
+      "id": "request-010",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/agents/workspace/b3d1805c-88d2-4e7b-aad5-f6378bfe5fdd",
+      "entities": [
+        "route:GET /agents/workspace/:workspaceId",
+        "code_unit:apps/api/src/agents/agents.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false
+    },
+    {
+      "id": "request-011",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/migration/batches/00000000-0000-4000-8000-000000000004",
+      "entities": [
+        "route:GET /migration/batches/:batchId",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false
+    },
+    {
+      "id": "request-012",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/migration/identities/00000000-0000-4000-8000-000000000005/mappings",
+      "entities": [
+        "route:GET /migration/identities/:identityId/mappings",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false
+    },
+    {
+      "id": "request-013",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/migration/work-items/by-legacy/pr220-route-sweep-e9c8dc42/R220-e9c8dc42",
+      "entities": [
+        "route:GET /migration/work-items/by-legacy/:sourceNamespace/:legacyId",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false
+    },
+    {
+      "id": "request-014",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/migration/work-items/search?legacyId=R220-e9c8dc42",
+      "entities": [
+        "route:GET /migration/work-items/search",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false
+    },
+    {
+      "id": "request-015",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/projects/71e203d3-68b0-405d-bfa7-c5f8ddb5a4ad",
+      "entities": [
+        "route:GET /projects/:projectId",
+        "code_unit:apps/api/src/projects/projects.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false
+    },
+    {
+      "id": "request-016",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/projects/tasks/df53570f-bd56-4683-945f-886cc60c882b/git-refs",
+      "entities": [
+        "route:GET /projects/tasks/:taskId/git-refs",
+        "code_unit:apps/api/src/projects/projects.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false
+    },
+    {
+      "id": "request-017",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/projects/workspace/b3d1805c-88d2-4e7b-aad5-f6378bfe5fdd",
+      "entities": [
+        "route:GET /projects/workspace/:workspaceId",
+        "code_unit:apps/api/src/projects/projects.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false
+    },
+    {
+      "id": "request-018",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/sync/datarim/71e203d3-68b0-405d-bfa7-c5f8ddb5a4ad",
+      "entities": [
+        "route:GET /sync/datarim/:projectId",
+        "code_unit:apps/api/src/sync/sync.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false
+    },
+    {
+      "id": "request-019",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/tasks",
+      "entities": [
+        "route:GET /tasks",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false
+    },
+    {
+      "id": "request-020",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/tasks/df53570f-bd56-4683-945f-886cc60c882b/checklist",
+      "entities": [
+        "route:GET /tasks/:taskId/checklist",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false
+    },
+    {
+      "id": "request-021",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/tasks/df53570f-bd56-4683-945f-886cc60c882b/dependencies",
+      "entities": [
+        "route:GET /tasks/:taskId/dependencies",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false
+    },
+    {
+      "id": "request-022",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/tasks/df53570f-bd56-4683-945f-886cc60c882b/dependency-graph",
+      "entities": [
+        "route:GET /tasks/:taskId/dependency-graph",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false
+    },
+    {
+      "id": "request-023",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/tasks/df53570f-bd56-4683-945f-886cc60c882b/readiness",
+      "entities": [
+        "route:GET /tasks/:taskId/readiness",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false
+    },
+    {
+      "id": "request-024",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/tasks/digest",
+      "entities": [
+        "route:GET /tasks/digest",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false
+    },
+    {
+      "id": "request-025",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/tasks/project/71e203d3-68b0-405d-bfa7-c5f8ddb5a4ad",
+      "entities": [
+        "route:GET /tasks/project/:projectId",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false
+    },
+    {
+      "id": "request-026",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/tasks/project/71e203d3-68b0-405d-bfa7-c5f8ddb5a4ad/index",
+      "entities": [
+        "route:GET /tasks/project/:projectId/index",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false
+    },
+    {
+      "id": "request-027",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/tasks/project/71e203d3-68b0-405d-bfa7-c5f8ddb5a4ad/staleness",
+      "entities": [
+        "route:GET /tasks/project/:projectId/staleness",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false
+    },
+    {
+      "id": "request-028",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/workspaces",
+      "entities": [
+        "route:GET /workspaces",
+        "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false
+    },
+    {
+      "id": "request-029",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/workspaces/b3d1805c-88d2-4e7b-aad5-f6378bfe5fdd",
+      "entities": [
+        "route:GET /workspaces/:workspaceId",
+        "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false
+    },
+    {
+      "id": "request-030",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/workspaces/b3d1805c-88d2-4e7b-aad5-f6378bfe5fdd/members",
+      "entities": [
+        "route:GET /workspaces/:workspaceId/members",
+        "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false
+    },
+    {
+      "id": "request-031",
+      "kind": "http",
+      "method": "PATCH",
+      "path": "/api/v1/tasks/df53570f-bd56-4683-945f-886cc60c882b/checklist/00000000-0000-4000-8000-000000000001",
+      "entities": [
+        "route:PATCH /tasks/:taskId/checklist/:itemId",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-032",
+      "kind": "http",
+      "method": "PATCH",
+      "path": "/api/v1/tasks/df53570f-bd56-4683-945f-886cc60c882b/contract",
+      "entities": [
+        "route:PATCH /tasks/:taskId/contract",
+        "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-033",
+      "kind": "http",
+      "method": "PATCH",
+      "path": "/api/v1/workspaces/b3d1805c-88d2-4e7b-aad5-f6378bfe5fdd/members/e572e8ac-9df2-4a9e-8702-70d1b1c22404/role",
+      "entities": [
+        "route:PATCH /workspaces/:workspaceId/members/:userId/role",
+        "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-034",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/agents",
+      "entities": [
+        "route:POST /agents",
+        "code_unit:apps/api/src/agents/agents.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-035",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/agents/1c8c7a89-fd63-4e46-8304-ae3e94c4b822/keys",
+      "entities": [
+        "route:POST /agents/:agentId/keys",
+        "code_unit:apps/api/src/agents/agents.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-036",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/agents/keys/2522b232-be3d-454f-a33b-4674a81545c0/rotate",
+      "entities": [
+        "route:POST /agents/keys/:keyId/rotate",
+        "code_unit:apps/api/src/agents/agents.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-037",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/agents/keys/self/revoke",
+      "entities": [
+        "route:POST /agents/keys/self/revoke",
+        "code_unit:apps/api/src/agents/agents.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-038",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/migration/batches",
+      "entities": [
+        "route:POST /migration/batches",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-039",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/migration/batches/00000000-0000-4000-8000-000000000004/commit",
+      "entities": [
+        "route:POST /migration/batches/:batchId/commit",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-040",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/migration/identities/00000000-0000-4000-8000-000000000005/decisions",
+      "entities": [
+        "route:POST /migration/identities/:identityId/decisions",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-041",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/migration/work-items",
+      "entities": [
+        "route:POST /migration/work-items",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-042",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/migration/work-items/00000000-0000-4000-8000-000000000006/transitions",
+      "entities": [
+        "route:POST /migration/work-items/:taskId/transitions",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-043",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/projects",
+      "entities": [
+        "route:POST /projects",
+        "code_unit:apps/api/src/projects/projects.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-044",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/projects/git-refs",
+      "entities": [
+        "route:POST /projects/git-refs",
+        "code_unit:apps/api/src/projects/projects.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-045",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/sync/datarim/71e203d3-68b0-405d-bfa7-c5f8ddb5a4ad/import",
+      "entities": [
+        "route:POST /sync/datarim/:projectId/import",
+        "code_unit:apps/api/src/sync/sync.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-046",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/tasks",
+      "entities": [
+        "route:POST /tasks",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-047",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/tasks/df53570f-bd56-4683-945f-886cc60c882b/checklist",
+      "entities": [
+        "route:POST /tasks/:taskId/checklist",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-048",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/tasks/df53570f-bd56-4683-945f-886cc60c882b/dependencies",
+      "entities": [
+        "route:POST /tasks/:taskId/dependencies",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-049",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/tasks/df53570f-bd56-4683-945f-886cc60c882b/redactions",
+      "entities": [
+        "route:POST /tasks/:taskId/redactions",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-050",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/workspaces",
+      "entities": [
+        "route:POST /workspaces",
+        "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-051",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/workspaces/b3d1805c-88d2-4e7b-aad5-f6378bfe5fdd/members/e572e8ac-9df2-4a9e-8702-70d1b1c22404",
+      "entities": [
+        "route:POST /workspaces/:workspaceId/members/:userId",
+        "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+      ],
+      "auth": "none",
+      "auth_case": "anonymous",
+      "expected_status": 401,
+      "status": 401,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    },
+    {
+      "id": "request-052",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/migration/batches",
+      "entities": [
+        "route:POST /migration/batches",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth": "synthetic-agent-api-key",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 201,
+      "status": 201,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "729a9786551cbd5ad102cece0d3463e754a48aadd85cbb53f76ffbb42164e85d"
+    },
+    {
+      "id": "request-053",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/agents",
+      "entities": [
+        "route:POST /agents",
+        "code_unit:apps/api/src/agents/agents.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 201,
+      "status": 201,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "ef7a9ea155b74c93e22ee7981fab3e4cb015411953c9d4202c16ac668f103ce4"
+    },
+    {
+      "id": "request-054",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/agents/1c8c7a89-fd63-4e46-8304-ae3e94c4b822/keys",
+      "entities": [
+        "route:POST /agents/:agentId/keys",
+        "code_unit:apps/api/src/agents/agents.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 201,
+      "status": 201,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "867512a61349f27b164071c4e8d6b5999325af2d720fdca6b13c1d851cdc8cb3"
+    },
+    {
+      "id": "request-055",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/agents/keys/2522b232-be3d-454f-a33b-4674a81545c0/rotate",
+      "entities": [
+        "route:POST /agents/keys/:keyId/rotate",
+        "code_unit:apps/api/src/agents/agents.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 201,
+      "status": 201,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "request-056",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/migration/work-items",
+      "entities": [
+        "route:POST /migration/work-items",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth": "synthetic-agent-api-key",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 201,
+      "status": 201,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "719444c1c1c39ca6f0fbfce9ad98c4ec4fe2e968d3be4128f4f5339cdbbc4aaf"
+    },
+    {
+      "id": "request-057",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/projects",
+      "entities": [
+        "route:POST /projects",
+        "code_unit:apps/api/src/projects/projects.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 201,
+      "status": 201,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "c526e3cbb2bd7102a557dd599f94948e3e6d410850415f7a1f49136ff8a34701"
+    },
+    {
+      "id": "request-058",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/projects/git-refs",
+      "entities": [
+        "route:POST /projects/git-refs",
+        "code_unit:apps/api/src/projects/projects.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 201,
+      "status": 201,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "0f52e72bb3f424cda5a16b8719f5c09915c06c11fe272420fad05240a04197e3"
+    },
+    {
+      "id": "request-059",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/sync/datarim/71e203d3-68b0-405d-bfa7-c5f8ddb5a4ad/import",
+      "entities": [
+        "route:POST /sync/datarim/:projectId/import",
+        "code_unit:apps/api/src/sync/sync.controller.ts"
+      ],
+      "auth": "synthetic-agent-api-key",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 201,
+      "status": 201,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "89c20de1ffea805dc193484bfc6e8b1ec13f27e9599d8d35077c8763b584e679"
+    },
+    {
+      "id": "request-060",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/tasks",
+      "entities": [
+        "route:POST /tasks",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 201,
+      "status": 201,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "d3392095d5c9460be14ad090dd63f77d595d4e773d348e23715e889e7714bbf3"
+    },
+    {
+      "id": "request-061",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/tasks/df53570f-bd56-4683-945f-886cc60c882b/checklist",
+      "entities": [
+        "route:POST /tasks/:taskId/checklist",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 201,
+      "status": 201,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "6d712e60b7f47ca954464d59d26690ac8355e3bef267a19b06364b54b93b9b6f"
+    },
+    {
+      "id": "request-062",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/tasks/df53570f-bd56-4683-945f-886cc60c882b/dependencies",
+      "entities": [
+        "route:POST /tasks/:taskId/dependencies",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 201,
+      "status": 201,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "b784913d0c85b3880b063b828f0b0e68ccb8a66a229b9e3898535795c05578f7"
+    },
+    {
+      "id": "request-063",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/tasks/df53570f-bd56-4683-945f-886cc60c882b/redactions",
+      "entities": [
+        "route:POST /tasks/:taskId/redactions",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 201,
+      "status": 201,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "58f4c57ca112c119df320b830d8be70d2181547c2644657b43c2014d9e6cfb28"
+    },
+    {
+      "id": "request-064",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/workspaces",
+      "entities": [
+        "route:POST /workspaces",
+        "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 201,
+      "status": 201,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "3162dcde1e65077a92092123eebcff89bcbb57f026e5e0383bf1f6b218fb530f"
+    },
+    {
+      "id": "request-065",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/workspaces/b3d1805c-88d2-4e7b-aad5-f6378bfe5fdd/members/e572e8ac-9df2-4a9e-8702-70d1b1c22404",
+      "entities": [
+        "route:POST /workspaces/:workspaceId/members/:userId",
+        "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 201,
+      "status": 403,
+      "outcome": "failed",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "reason": "Authenticated workspace-member route returned 403 for a synthetic owner/member despite a seeded membership; see source diagnosis in this result."
+    },
+    {
+      "id": "request-066",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/migration/identities/2986a2e7-1c0d-413a-a6f2-9cea6fc8e4dd/decisions",
+      "entities": [
+        "route:POST /migration/identities/:identityId/decisions",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth": "synthetic-agent-api-key",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 200,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "9ca39021e0019655d784d8a665ecf3f8f444e9c4974a81c2cee1a0909436f47b"
+    },
+    {
+      "id": "request-067",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/migration/work-items/a1398538-f24f-49dc-9502-02933b08ff61/transitions",
+      "entities": [
+        "route:POST /migration/work-items/:taskId/transitions",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth": "synthetic-agent-api-key",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 200,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "d810f393d061b8733a2f254a4c1166e8d6b921e8cea6a62fa6b8b9891cc8115d"
+    },
+    {
+      "id": "request-068",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/migration/batches/dbaef28f-4649-470e-a9cb-811bc12991ce/commit",
+      "entities": [
+        "route:POST /migration/batches/:batchId/commit",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth": "synthetic-agent-api-key",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 200,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "request-069",
+      "kind": "http",
+      "method": "PATCH",
+      "path": "/api/v1/tasks/df53570f-bd56-4683-945f-886cc60c882b/checklist/7d2dc52b-eb86-454d-a120-821c5d6271d7",
+      "entities": [
+        "route:PATCH /tasks/:taskId/checklist/:itemId",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 200,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "request-070",
+      "kind": "http",
+      "method": "PATCH",
+      "path": "/api/v1/tasks/df53570f-bd56-4683-945f-886cc60c882b/contract",
+      "entities": [
+        "route:PATCH /tasks/:taskId/contract",
+        "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts"
+      ],
+      "auth": "synthetic-agent-api-key",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 200,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "fd443688b9c3898bd0f97e332dd8dba48b93f062ae0ae4b3777f20b8e5847e9b"
+    },
+    {
+      "id": "request-071",
+      "kind": "http",
+      "method": "PATCH",
+      "path": "/api/v1/workspaces/b3d1805c-88d2-4e7b-aad5-f6378bfe5fdd/members/e572e8ac-9df2-4a9e-8702-70d1b1c22404/role",
+      "entities": [
+        "route:PATCH /workspaces/:workspaceId/members/:userId/role",
+        "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 403,
+      "outcome": "failed",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "471778e7ae5792b3a5a04112838d2583e848f9cfc4bb291d7e0b28cbff3fb3f0",
+      "reason": "Authenticated workspace-member route returned 403 for a synthetic owner/member despite a seeded membership; see source diagnosis in this result."
+    },
+    {
+      "id": "request-072",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/agents/tasks",
+      "entities": [
+        "route:GET /agents/tasks",
+        "code_unit:apps/api/src/agents/agents.controller.ts"
+      ],
+      "auth": "synthetic-agent-api-key",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 200,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "request-073",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/agents/workspace/b3d1805c-88d2-4e7b-aad5-f6378bfe5fdd",
+      "entities": [
+        "route:GET /agents/workspace/:workspaceId",
+        "code_unit:apps/api/src/agents/agents.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 200,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "request-074",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/migration/batches/dbaef28f-4649-470e-a9cb-811bc12991ce",
+      "entities": [
+        "route:GET /migration/batches/:batchId",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 200,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "request-075",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/migration/identities/2986a2e7-1c0d-413a-a6f2-9cea6fc8e4dd/mappings",
+      "entities": [
+        "route:GET /migration/identities/:identityId/mappings",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 200,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "request-076",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/migration/work-items/by-legacy/pr220-route-sweep-e9c8dc42/R220-e9c8dc42",
+      "entities": [
+        "route:GET /migration/work-items/by-legacy/:sourceNamespace/:legacyId",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 200,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "request-077",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/migration/work-items/search?legacyId=R220-e9c8dc42",
+      "entities": [
+        "route:GET /migration/work-items/search",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 200,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "request-078",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/projects/71e203d3-68b0-405d-bfa7-c5f8ddb5a4ad",
+      "entities": [
+        "route:GET /projects/:projectId",
+        "code_unit:apps/api/src/projects/projects.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 200,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "request-079",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/projects/tasks/df53570f-bd56-4683-945f-886cc60c882b/git-refs",
+      "entities": [
+        "route:GET /projects/tasks/:taskId/git-refs",
+        "code_unit:apps/api/src/projects/projects.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 200,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "request-080",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/projects/workspace/b3d1805c-88d2-4e7b-aad5-f6378bfe5fdd",
+      "entities": [
+        "route:GET /projects/workspace/:workspaceId",
+        "code_unit:apps/api/src/projects/projects.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 200,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "request-081",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/sync/datarim/71e203d3-68b0-405d-bfa7-c5f8ddb5a4ad",
+      "entities": [
+        "route:GET /sync/datarim/:projectId",
+        "code_unit:apps/api/src/sync/sync.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 200,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "request-082",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/tasks",
+      "entities": [
+        "route:GET /tasks",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 200,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false,
+      "request_body_sha256": "d3392095d5c9460be14ad090dd63f77d595d4e773d348e23715e889e7714bbf3"
+    },
+    {
+      "id": "request-083",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/tasks/df53570f-bd56-4683-945f-886cc60c882b/checklist",
+      "entities": [
+        "route:GET /tasks/:taskId/checklist",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 200,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false,
+      "request_body_sha256": "6d712e60b7f47ca954464d59d26690ac8355e3bef267a19b06364b54b93b9b6f"
+    },
+    {
+      "id": "request-084",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/tasks/df53570f-bd56-4683-945f-886cc60c882b/dependencies",
+      "entities": [
+        "route:GET /tasks/:taskId/dependencies",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 200,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false,
+      "request_body_sha256": "b784913d0c85b3880b063b828f0b0e68ccb8a66a229b9e3898535795c05578f7"
+    },
+    {
+      "id": "request-085",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/tasks/df53570f-bd56-4683-945f-886cc60c882b/dependency-graph",
+      "entities": [
+        "route:GET /tasks/:taskId/dependency-graph",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 200,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "request-086",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/tasks/df53570f-bd56-4683-945f-886cc60c882b/readiness",
+      "entities": [
+        "route:GET /tasks/:taskId/readiness",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 200,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "request-087",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/tasks/digest",
+      "entities": [
+        "route:GET /tasks/digest",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "synthetic-agent-api-key",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 200,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "request-088",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/tasks/project/71e203d3-68b0-405d-bfa7-c5f8ddb5a4ad",
+      "entities": [
+        "route:GET /tasks/project/:projectId",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 200,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "request-089",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/tasks/project/71e203d3-68b0-405d-bfa7-c5f8ddb5a4ad/index",
+      "entities": [
+        "route:GET /tasks/project/:projectId/index",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "synthetic-agent-api-key",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 200,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "request-090",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/tasks/project/71e203d3-68b0-405d-bfa7-c5f8ddb5a4ad/staleness",
+      "entities": [
+        "route:GET /tasks/project/:projectId/staleness",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 200,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "request-091",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/workspaces",
+      "entities": [
+        "route:GET /workspaces",
+        "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 200,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": false,
+      "request_body_sha256": "3162dcde1e65077a92092123eebcff89bcbb57f026e5e0383bf1f6b218fb530f"
+    },
+    {
+      "id": "request-092",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/workspaces/b3d1805c-88d2-4e7b-aad5-f6378bfe5fdd",
+      "entities": [
+        "route:GET /workspaces/:workspaceId",
+        "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 403,
+      "outcome": "failed",
+      "executed": true,
+      "mutating": false,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "reason": "Authenticated workspace-member route returned 403 for a synthetic owner/member despite a seeded membership; see source diagnosis in this result."
+    },
+    {
+      "id": "request-093",
+      "kind": "http",
+      "method": "GET",
+      "path": "/api/v1/workspaces/b3d1805c-88d2-4e7b-aad5-f6378bfe5fdd/members",
+      "entities": [
+        "route:GET /workspaces/:workspaceId/members",
+        "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 403,
+      "outcome": "failed",
+      "executed": true,
+      "mutating": false,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "reason": "Authenticated workspace-member route returned 403 for a synthetic owner/member despite a seeded membership; see source diagnosis in this result."
+    },
+    {
+      "id": "request-094",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/api/v1/agents/keys/397c48c9-0605-4880-94a9-9b1a2d271b31",
+      "entities": [
+        "route:DELETE /agents/keys/:keyId",
+        "code_unit:apps/api/src/agents/agents.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 204,
+      "status": 204,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "request-095",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/api/v1/agents/tasks/df53570f-bd56-4683-945f-886cc60c882b/assign/1c8c7a89-fd63-4e46-8304-ae3e94c4b822",
+      "entities": [
+        "route:DELETE /agents/tasks/:taskId/assign/:agentId",
+        "code_unit:apps/api/src/agents/agents.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 204,
+      "status": 204,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "request-096",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/api/v1/projects/d947a781-3c30-4ac9-8ff8-f1e852f9c51c",
+      "entities": [
+        "route:DELETE /projects/:projectId",
+        "code_unit:apps/api/src/projects/projects.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 204,
+      "status": 204,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "request-097",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/api/v1/projects/git-refs/5723b709-3b24-4bca-9efd-281edea7fff7",
+      "entities": [
+        "route:DELETE /projects/git-refs/:refId",
+        "code_unit:apps/api/src/projects/projects.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 204,
+      "status": 204,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "request-098",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/api/v1/tasks/00000000-0000-4000-8000-000000000007",
+      "entities": [
+        "route:DELETE /tasks/:taskId",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 404,
+      "status": 404,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "request-099",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/api/v1/tasks/df53570f-bd56-4683-945f-886cc60c882b/checklist/7d2dc52b-eb86-454d-a120-821c5d6271d7",
+      "entities": [
+        "route:DELETE /tasks/:taskId/checklist/:itemId",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 204,
+      "status": 204,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "request-100",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/api/v1/tasks/df53570f-bd56-4683-945f-886cc60c882b/dependencies/b7044e21-6d79-4a8c-b9bc-3535cb3fd526",
+      "entities": [
+        "route:DELETE /tasks/:taskId/dependencies/:depId",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth": "synthetic-agent-api-key",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 204,
+      "status": 204,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "id": "request-101",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/api/v1/workspaces/b3d1805c-88d2-4e7b-aad5-f6378bfe5fdd/members/e572e8ac-9df2-4a9e-8702-70d1b1c22404",
+      "entities": [
+        "route:DELETE /workspaces/:workspaceId/members/:userId",
+        "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+      ],
+      "auth": "synthetic-owner-jwt",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 204,
+      "status": 403,
+      "outcome": "failed",
+      "executed": true,
+      "mutating": true,
+      "request_body_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "reason": "Authenticated workspace-member route returned 403 for a synthetic owner/member despite a seeded membership; see source diagnosis in this result."
+    },
+    {
+      "id": "request-102",
+      "kind": "http",
+      "method": "POST",
+      "path": "/api/v1/agents/keys/self/revoke",
+      "entities": [
+        "route:POST /agents/keys/self/revoke",
+        "code_unit:apps/api/src/agents/agents.controller.ts"
+      ],
+      "auth": "synthetic-agent-api-key",
+      "auth_case": "synthetic-scoped-principal",
+      "expected_status": 200,
+      "status": 200,
+      "outcome": "verified",
+      "executed": true,
+      "mutating": true
+    }
+  ],
+  "entity_verdicts": [
+    {
+      "entity": "route:DELETE /agents/keys/:keyId",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-001",
+        "request-094"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:DELETE /agents/tasks/:taskId/assign/:agentId",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-002",
+        "request-095"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:DELETE /projects/:projectId",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-003",
+        "request-096"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:DELETE /projects/git-refs/:refId",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-004",
+        "request-097"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:DELETE /tasks/:taskId",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-005",
+        "request-098"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:DELETE /tasks/:taskId/checklist/:itemId",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-006",
+        "request-099"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:DELETE /tasks/:taskId/dependencies/:depId",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-007",
+        "request-100"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:DELETE /workspaces/:workspaceId/members/:userId",
+      "verdict": "failed",
+      "probe_ids": [
+        "request-008",
+        "request-101"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:GET /agents/tasks",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-009",
+        "request-072"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:GET /agents/workspace/:workspaceId",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-010",
+        "request-073"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:GET /migration/batches/:batchId",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-011",
+        "request-074"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:GET /migration/identities/:identityId/mappings",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-012",
+        "request-075"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:GET /migration/work-items/by-legacy/:sourceNamespace/:legacyId",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-013",
+        "request-076"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:GET /migration/work-items/search",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-014",
+        "request-077"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:GET /projects/:projectId",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-015",
+        "request-078"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:GET /projects/tasks/:taskId/git-refs",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-016",
+        "request-079"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:GET /projects/workspace/:workspaceId",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-017",
+        "request-080"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:GET /sync/datarim/:projectId",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-018",
+        "request-081"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:GET /tasks",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-019",
+        "request-082"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:GET /tasks/:taskId/checklist",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-020",
+        "request-083"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:GET /tasks/:taskId/dependencies",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-021",
+        "request-084"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:GET /tasks/:taskId/dependency-graph",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-022",
+        "request-085"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:GET /tasks/:taskId/readiness",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-023",
+        "request-086"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:GET /tasks/digest",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-024",
+        "request-087"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:GET /tasks/project/:projectId",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-025",
+        "request-088"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:GET /tasks/project/:projectId/index",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-026",
+        "request-089"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:GET /tasks/project/:projectId/staleness",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-027",
+        "request-090"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:GET /workspaces",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-028",
+        "request-091"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:GET /workspaces/:workspaceId",
+      "verdict": "failed",
+      "probe_ids": [
+        "request-029",
+        "request-092"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:GET /workspaces/:workspaceId/members",
+      "verdict": "failed",
+      "probe_ids": [
+        "request-030",
+        "request-093"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:PATCH /tasks/:taskId/checklist/:itemId",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-031",
+        "request-069"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:PATCH /tasks/:taskId/contract",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-032",
+        "request-070"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:PATCH /workspaces/:workspaceId/members/:userId/role",
+      "verdict": "failed",
+      "probe_ids": [
+        "request-033",
+        "request-071"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:POST /agents",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-034",
+        "request-053"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:POST /agents/:agentId/keys",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-035",
+        "request-054"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:POST /agents/keys/:keyId/rotate",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-036",
+        "request-055"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:POST /agents/keys/self/revoke",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-037",
+        "request-102"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:POST /migration/batches",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-038",
+        "request-052"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:POST /migration/batches/:batchId/commit",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-039",
+        "request-068"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:POST /migration/identities/:identityId/decisions",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-040",
+        "request-066"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:POST /migration/work-items",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-041",
+        "request-056"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:POST /migration/work-items/:taskId/transitions",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-042",
+        "request-067"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:POST /projects",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-043",
+        "request-057"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:POST /projects/git-refs",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-044",
+        "request-058"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:POST /sync/datarim/:projectId/import",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-045",
+        "request-059"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:POST /tasks",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-046",
+        "request-060"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:POST /tasks/:taskId/checklist",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-047",
+        "request-061"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:POST /tasks/:taskId/dependencies",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-048",
+        "request-062"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:POST /tasks/:taskId/redactions",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-049",
+        "request-063"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:POST /workspaces",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-050",
+        "request-064"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "route:POST /workspaces/:workspaceId/members/:userId",
+      "verdict": "failed",
+      "probe_ids": [
+        "request-051",
+        "request-065"
+      ],
+      "reason": "Both anonymous and scoped-auth requests were issued; expected/observed status is recorded per request."
+    },
+    {
+      "entity": "code_unit:apps/api/src/agents/agents.controller.ts",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-001",
+        "request-002",
+        "request-009",
+        "request-010",
+        "request-034",
+        "request-035",
+        "request-036",
+        "request-037",
+        "request-053",
+        "request-054",
+        "request-055",
+        "request-072",
+        "request-073",
+        "request-094",
+        "request-095",
+        "request-102"
+      ],
+      "reason": "Every listed route mapped to this controller was exercised with anonymous and scoped synthetic authorization."
+    },
+    {
+      "entity": "code_unit:apps/api/src/migration/migration.controller.ts",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-011",
+        "request-012",
+        "request-013",
+        "request-014",
+        "request-038",
+        "request-039",
+        "request-040",
+        "request-041",
+        "request-042",
+        "request-052",
+        "request-056",
+        "request-066",
+        "request-067",
+        "request-068",
+        "request-074",
+        "request-075",
+        "request-076",
+        "request-077"
+      ],
+      "reason": "Every listed route mapped to this controller was exercised with anonymous and scoped synthetic authorization."
+    },
+    {
+      "entity": "code_unit:apps/api/src/projects/projects.controller.ts",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-003",
+        "request-004",
+        "request-015",
+        "request-016",
+        "request-017",
+        "request-043",
+        "request-044",
+        "request-057",
+        "request-058",
+        "request-078",
+        "request-079",
+        "request-080",
+        "request-096",
+        "request-097"
+      ],
+      "reason": "Every listed route mapped to this controller was exercised with anonymous and scoped synthetic authorization."
+    },
+    {
+      "entity": "code_unit:apps/api/src/sync/sync.controller.ts",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-018",
+        "request-045",
+        "request-059",
+        "request-081"
+      ],
+      "reason": "Every listed route mapped to this controller was exercised with anonymous and scoped synthetic authorization."
+    },
+    {
+      "entity": "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-032",
+        "request-070"
+      ],
+      "reason": "Every listed route mapped to this controller was exercised with anonymous and scoped synthetic authorization."
+    },
+    {
+      "entity": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "verdict": "verified",
+      "probe_ids": [
+        "request-005",
+        "request-006",
+        "request-007",
+        "request-019",
+        "request-020",
+        "request-021",
+        "request-022",
+        "request-023",
+        "request-024",
+        "request-025",
+        "request-026",
+        "request-027",
+        "request-031",
+        "request-046",
+        "request-047",
+        "request-048",
+        "request-049",
+        "request-060",
+        "request-061",
+        "request-062",
+        "request-063",
+        "request-069",
+        "request-082",
+        "request-083",
+        "request-084",
+        "request-085",
+        "request-086",
+        "request-087",
+        "request-088",
+        "request-089",
+        "request-090",
+        "request-098",
+        "request-099",
+        "request-100"
+      ],
+      "reason": "Every listed route mapped to this controller was exercised with anonymous and scoped synthetic authorization."
+    },
+    {
+      "entity": "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
+      "verdict": "failed",
+      "probe_ids": [
+        "request-008",
+        "request-028",
+        "request-029",
+        "request-030",
+        "request-033",
+        "request-050",
+        "request-051",
+        "request-064",
+        "request-065",
+        "request-071",
+        "request-091",
+        "request-092",
+        "request-093",
+        "request-101"
+      ],
+      "reason": "Every listed route mapped to this controller was exercised with both auth cases; at least one mapped route failed its documented authenticated status."
+    }
+  ],
+  "counters": {
+    "verified": 46,
+    "not_measured": 0,
+    "failed": 5
+  },
+  "rules": [
+    "Every CAR route entity produced exactly two recorded HTTP observations: anonymous and scoped synthetic auth.",
+    "Only route entities whose scoped response matched the documented status are verified; no 5xx occurred.",
+    "Six controller code-unit entities had all mapped route observations pass; the workspace controller has failed route observations.",
+    "This evidence is candidate-local source measurement only; it does not establish browser behavior, merge, deploy, or production access."
+  ],
+  "execution": {
+    "command": "pg_virtualenv -v 16 bash -c 'DATABASE_URL=postgresql://${PGUSER:-$USER}@127.0.0.1:${PGPORT}/postgres pnpm --filter @muneral/api test -- test/pr220-route-sweep.e2e.spec.ts'",
+    "node": "24.20.0",
+    "suite": "apps/api/test/pr220-route-sweep.e2e.spec.ts (temporary harness; exact source retained in runner-source.txt)",
+    "request_count": 102,
+    "expected_anonymous_statuses": [
+      401,
+      403
+    ],
+    "authenticated_status_rule": "The status expected by the route handler/decorator; GET=200, default POST=201, explicit 200/204 decorators, and missing task DELETE=404.",
+    "exit_code": 1,
+    "tests_passed": 0,
+    "tests_failed": 1,
+    "elapsed_seconds": 15.134,
+    "cleanup": "Disposable PostgreSQL 16 database muneral_pr220_route_sweep_test_96ff733d dropped; pg_virtualenv cluster 16/regress removed."
+  },
+  "limitations": [
+    "Runtime used Node 24.20.0 while package declares Node 24.21.0.",
+    "No browser/hydration or production endpoint was exercised.",
+    "Five workspace member routes returned 403 for a valid synthetic owner/member and need source repair before they can be credited."
+  ]
+}

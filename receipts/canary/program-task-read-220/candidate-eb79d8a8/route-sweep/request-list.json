@@ -1,0 +1,672 @@
+{
+  "schema": "Pr220RouteSweepRequestList/v1",
+  "source_receipt_id": "car-verify-20261014T020348Z-38553086",
+  "source_head": "385530864a44a8855dc512482411631d608bd727",
+  "route_count": 51,
+  "request_cases_per_route": 2,
+  "routes": [
+    {
+      "route_entity": "route:DELETE /agents/keys/:keyId",
+      "method": "DELETE",
+      "path_template": "/api/v1/agents/keys/:keyId",
+      "entities": [
+        "route:DELETE /agents/keys/:keyId",
+        "code_unit:apps/api/src/agents/agents.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:DELETE /agents/tasks/:taskId/assign/:agentId",
+      "method": "DELETE",
+      "path_template": "/api/v1/agents/tasks/:taskId/assign/:agentId",
+      "entities": [
+        "route:DELETE /agents/tasks/:taskId/assign/:agentId",
+        "code_unit:apps/api/src/agents/agents.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:DELETE /projects/:projectId",
+      "method": "DELETE",
+      "path_template": "/api/v1/projects/:projectId",
+      "entities": [
+        "route:DELETE /projects/:projectId",
+        "code_unit:apps/api/src/projects/projects.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:DELETE /projects/git-refs/:refId",
+      "method": "DELETE",
+      "path_template": "/api/v1/projects/git-refs/:refId",
+      "entities": [
+        "route:DELETE /projects/git-refs/:refId",
+        "code_unit:apps/api/src/projects/projects.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:DELETE /tasks/:taskId",
+      "method": "DELETE",
+      "path_template": "/api/v1/tasks/:taskId",
+      "entities": [
+        "route:DELETE /tasks/:taskId",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:DELETE /tasks/:taskId/checklist/:itemId",
+      "method": "DELETE",
+      "path_template": "/api/v1/tasks/:taskId/checklist/:itemId",
+      "entities": [
+        "route:DELETE /tasks/:taskId/checklist/:itemId",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:DELETE /tasks/:taskId/dependencies/:depId",
+      "method": "DELETE",
+      "path_template": "/api/v1/tasks/:taskId/dependencies/:depId",
+      "entities": [
+        "route:DELETE /tasks/:taskId/dependencies/:depId",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:DELETE /workspaces/:workspaceId/members/:userId",
+      "method": "DELETE",
+      "path_template": "/api/v1/workspaces/:workspaceId/members/:userId",
+      "entities": [
+        "route:DELETE /workspaces/:workspaceId/members/:userId",
+        "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:GET /agents/tasks",
+      "method": "GET",
+      "path_template": "/api/v1/agents/tasks",
+      "entities": [
+        "route:GET /agents/tasks",
+        "code_unit:apps/api/src/agents/agents.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:GET /agents/workspace/:workspaceId",
+      "method": "GET",
+      "path_template": "/api/v1/agents/workspace/:workspaceId",
+      "entities": [
+        "route:GET /agents/workspace/:workspaceId",
+        "code_unit:apps/api/src/agents/agents.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:GET /migration/batches/:batchId",
+      "method": "GET",
+      "path_template": "/api/v1/migration/batches/:batchId",
+      "entities": [
+        "route:GET /migration/batches/:batchId",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:GET /migration/identities/:identityId/mappings",
+      "method": "GET",
+      "path_template": "/api/v1/migration/identities/:identityId/mappings",
+      "entities": [
+        "route:GET /migration/identities/:identityId/mappings",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:GET /migration/work-items/by-legacy/:sourceNamespace/:legacyId",
+      "method": "GET",
+      "path_template": "/api/v1/migration/work-items/by-legacy/:sourceNamespace/:legacyId",
+      "entities": [
+        "route:GET /migration/work-items/by-legacy/:sourceNamespace/:legacyId",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:GET /migration/work-items/search",
+      "method": "GET",
+      "path_template": "/api/v1/migration/work-items/search",
+      "entities": [
+        "route:GET /migration/work-items/search",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:GET /projects/:projectId",
+      "method": "GET",
+      "path_template": "/api/v1/projects/:projectId",
+      "entities": [
+        "route:GET /projects/:projectId",
+        "code_unit:apps/api/src/projects/projects.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:GET /projects/tasks/:taskId/git-refs",
+      "method": "GET",
+      "path_template": "/api/v1/projects/tasks/:taskId/git-refs",
+      "entities": [
+        "route:GET /projects/tasks/:taskId/git-refs",
+        "code_unit:apps/api/src/projects/projects.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:GET /projects/workspace/:workspaceId",
+      "method": "GET",
+      "path_template": "/api/v1/projects/workspace/:workspaceId",
+      "entities": [
+        "route:GET /projects/workspace/:workspaceId",
+        "code_unit:apps/api/src/projects/projects.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:GET /sync/datarim/:projectId",
+      "method": "GET",
+      "path_template": "/api/v1/sync/datarim/:projectId",
+      "entities": [
+        "route:GET /sync/datarim/:projectId",
+        "code_unit:apps/api/src/sync/sync.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:GET /tasks",
+      "method": "GET",
+      "path_template": "/api/v1/tasks",
+      "entities": [
+        "route:GET /tasks",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:GET /tasks/:taskId/checklist",
+      "method": "GET",
+      "path_template": "/api/v1/tasks/:taskId/checklist",
+      "entities": [
+        "route:GET /tasks/:taskId/checklist",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:GET /tasks/:taskId/dependencies",
+      "method": "GET",
+      "path_template": "/api/v1/tasks/:taskId/dependencies",
+      "entities": [
+        "route:GET /tasks/:taskId/dependencies",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:GET /tasks/:taskId/dependency-graph",
+      "method": "GET",
+      "path_template": "/api/v1/tasks/:taskId/dependency-graph",
+      "entities": [
+        "route:GET /tasks/:taskId/dependency-graph",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:GET /tasks/:taskId/readiness",
+      "method": "GET",
+      "path_template": "/api/v1/tasks/:taskId/readiness",
+      "entities": [
+        "route:GET /tasks/:taskId/readiness",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:GET /tasks/digest",
+      "method": "GET",
+      "path_template": "/api/v1/tasks/digest",
+      "entities": [
+        "route:GET /tasks/digest",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:GET /tasks/project/:projectId",
+      "method": "GET",
+      "path_template": "/api/v1/tasks/project/:projectId",
+      "entities": [
+        "route:GET /tasks/project/:projectId",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:GET /tasks/project/:projectId/index",
+      "method": "GET",
+      "path_template": "/api/v1/tasks/project/:projectId/index",
+      "entities": [
+        "route:GET /tasks/project/:projectId/index",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:GET /tasks/project/:projectId/staleness",
+      "method": "GET",
+      "path_template": "/api/v1/tasks/project/:projectId/staleness",
+      "entities": [
+        "route:GET /tasks/project/:projectId/staleness",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:GET /workspaces",
+      "method": "GET",
+      "path_template": "/api/v1/workspaces",
+      "entities": [
+        "route:GET /workspaces",
+        "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:GET /workspaces/:workspaceId",
+      "method": "GET",
+      "path_template": "/api/v1/workspaces/:workspaceId",
+      "entities": [
+        "route:GET /workspaces/:workspaceId",
+        "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:GET /workspaces/:workspaceId/members",
+      "method": "GET",
+      "path_template": "/api/v1/workspaces/:workspaceId/members",
+      "entities": [
+        "route:GET /workspaces/:workspaceId/members",
+        "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:PATCH /tasks/:taskId/checklist/:itemId",
+      "method": "PATCH",
+      "path_template": "/api/v1/tasks/:taskId/checklist/:itemId",
+      "entities": [
+        "route:PATCH /tasks/:taskId/checklist/:itemId",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:PATCH /tasks/:taskId/contract",
+      "method": "PATCH",
+      "path_template": "/api/v1/tasks/:taskId/contract",
+      "entities": [
+        "route:PATCH /tasks/:taskId/contract",
+        "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:PATCH /workspaces/:workspaceId/members/:userId/role",
+      "method": "PATCH",
+      "path_template": "/api/v1/workspaces/:workspaceId/members/:userId/role",
+      "entities": [
+        "route:PATCH /workspaces/:workspaceId/members/:userId/role",
+        "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:POST /agents",
+      "method": "POST",
+      "path_template": "/api/v1/agents",
+      "entities": [
+        "route:POST /agents",
+        "code_unit:apps/api/src/agents/agents.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:POST /agents/:agentId/keys",
+      "method": "POST",
+      "path_template": "/api/v1/agents/:agentId/keys",
+      "entities": [
+        "route:POST /agents/:agentId/keys",
+        "code_unit:apps/api/src/agents/agents.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:POST /agents/keys/:keyId/rotate",
+      "method": "POST",
+      "path_template": "/api/v1/agents/keys/:keyId/rotate",
+      "entities": [
+        "route:POST /agents/keys/:keyId/rotate",
+        "code_unit:apps/api/src/agents/agents.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:POST /agents/keys/self/revoke",
+      "method": "POST",
+      "path_template": "/api/v1/agents/keys/self/revoke",
+      "entities": [
+        "route:POST /agents/keys/self/revoke",
+        "code_unit:apps/api/src/agents/agents.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:POST /migration/batches",
+      "method": "POST",
+      "path_template": "/api/v1/migration/batches",
+      "entities": [
+        "route:POST /migration/batches",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:POST /migration/batches/:batchId/commit",
+      "method": "POST",
+      "path_template": "/api/v1/migration/batches/:batchId/commit",
+      "entities": [
+        "route:POST /migration/batches/:batchId/commit",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:POST /migration/identities/:identityId/decisions",
+      "method": "POST",
+      "path_template": "/api/v1/migration/identities/:identityId/decisions",
+      "entities": [
+        "route:POST /migration/identities/:identityId/decisions",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:POST /migration/work-items",
+      "method": "POST",
+      "path_template": "/api/v1/migration/work-items",
+      "entities": [
+        "route:POST /migration/work-items",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:POST /migration/work-items/:taskId/transitions",
+      "method": "POST",
+      "path_template": "/api/v1/migration/work-items/:taskId/transitions",
+      "entities": [
+        "route:POST /migration/work-items/:taskId/transitions",
+        "code_unit:apps/api/src/migration/migration.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:POST /projects",
+      "method": "POST",
+      "path_template": "/api/v1/projects",
+      "entities": [
+        "route:POST /projects",
+        "code_unit:apps/api/src/projects/projects.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:POST /projects/git-refs",
+      "method": "POST",
+      "path_template": "/api/v1/projects/git-refs",
+      "entities": [
+        "route:POST /projects/git-refs",
+        "code_unit:apps/api/src/projects/projects.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:POST /sync/datarim/:projectId/import",
+      "method": "POST",
+      "path_template": "/api/v1/sync/datarim/:projectId/import",
+      "entities": [
+        "route:POST /sync/datarim/:projectId/import",
+        "code_unit:apps/api/src/sync/sync.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:POST /tasks",
+      "method": "POST",
+      "path_template": "/api/v1/tasks",
+      "entities": [
+        "route:POST /tasks",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:POST /tasks/:taskId/checklist",
+      "method": "POST",
+      "path_template": "/api/v1/tasks/:taskId/checklist",
+      "entities": [
+        "route:POST /tasks/:taskId/checklist",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:POST /tasks/:taskId/dependencies",
+      "method": "POST",
+      "path_template": "/api/v1/tasks/:taskId/dependencies",
+      "entities": [
+        "route:POST /tasks/:taskId/dependencies",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:POST /tasks/:taskId/redactions",
+      "method": "POST",
+      "path_template": "/api/v1/tasks/:taskId/redactions",
+      "entities": [
+        "route:POST /tasks/:taskId/redactions",
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:POST /workspaces",
+      "method": "POST",
+      "path_template": "/api/v1/workspaces",
+      "entities": [
+        "route:POST /workspaces",
+        "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    },
+    {
+      "route_entity": "route:POST /workspaces/:workspaceId/members/:userId",
+      "method": "POST",
+      "path_template": "/api/v1/workspaces/:workspaceId/members/:userId",
+      "entities": [
+        "route:POST /workspaces/:workspaceId/members/:userId",
+        "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+      ],
+      "auth_cases": [
+        "synthetic-scoped-principal",
+        "anonymous"
+      ]
+    }
+  ]
+}
