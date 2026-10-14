@@ -1,0 +1,40 @@
+{
+  "schema": "PR246MembershipCanaryPlan/v1",
+  "id": "pr246-membership-e2e-92556c8",
+  "head": "92556c81b2e4b6e878b52f2feb8e595b1dc26eb2",
+  "tree": "7a777c096a60762c37a46f71f74e69386eb7bb0d",
+  "test": "apps/api/test/workspace-membership.routes.e2e.spec.ts",
+  "controls": "5 authenticated synthetic workspace-owner requests and 5 anonymous requests; private disposable PostgreSQL 16; test-owned database dropped in afterAll",
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/workspaces/:workspaceId/members/:userId",
+      "owner_status": 201,
+      "anonymous_status": 401
+    },
+    {
+      "method": "PATCH",
+      "path": "/workspaces/:workspaceId/members/:userId/role",
+      "owner_status": 200,
+      "anonymous_status": 401
+    },
+    {
+      "method": "GET",
+      "path": "/workspaces/:workspaceId",
+      "owner_status": 200,
+      "anonymous_status": 401
+    },
+    {
+      "method": "GET",
+      "path": "/workspaces/:workspaceId/members",
+      "owner_status": 200,
+      "anonymous_status": 401
+    },
+    {
+      "method": "DELETE",
+      "path": "/workspaces/:workspaceId/members/:userId",
+      "owner_status": 204,
+      "anonymous_status": 401
+    }
+  ]
+}

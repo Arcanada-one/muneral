@@ -1,0 +1,48 @@
+{
+  "schema": "PR246MembershipCanaryExecution/v1",
+  "captured_at_utc": "2026-10-14T08:28:38Z",
+  "head": "92556c81b2e4b6e878b52f2feb8e595b1dc26eb2",
+  "tree": "7a777c096a60762c37a46f71f74e69386eb7bb0d",
+  "environment": "candidate-local Nest HTTP application with real middleware/controllers and synthetic owner JWT; isolated PostgreSQL 16 on private loopback port 56000",
+  "source_test": {
+    "path": "apps/api/test/workspace-membership.routes.e2e.spec.ts",
+    "sha256": "b7c4410882e6560fdf783e74b266205ef54cb5aa8f28dd74c3a0346f2153acb9"
+  },
+  "test_log": {
+    "sha256": "448936ebf57c5572a456c6ec1c36444b07346414c19d4a66517da8e137b4d27d",
+    "summary": "PASS; 1 suite, 5 tests, 0 failed"
+  },
+  "probes": [
+    {
+      "method": "POST",
+      "path": "/workspaces/:workspaceId/members/:userId",
+      "owner_status": 201,
+      "anonymous_status": 401
+    },
+    {
+      "method": "PATCH",
+      "path": "/workspaces/:workspaceId/members/:userId/role",
+      "owner_status": 200,
+      "anonymous_status": 401
+    },
+    {
+      "method": "GET",
+      "path": "/workspaces/:workspaceId",
+      "owner_status": 200,
+      "anonymous_status": 401
+    },
+    {
+      "method": "GET",
+      "path": "/workspaces/:workspaceId/members",
+      "owner_status": 200,
+      "anonymous_status": 401
+    },
+    {
+      "method": "DELETE",
+      "path": "/workspaces/:workspaceId/members/:userId",
+      "owner_status": 204,
+      "anonymous_status": 401
+    }
+  ],
+  "cleanup": "Jest afterAll dropped disposable database; isolated PostgreSQL and Redis remain task-owned and are stopped after evidence capture."
+}

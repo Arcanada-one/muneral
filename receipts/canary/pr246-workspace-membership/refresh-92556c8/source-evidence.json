@@ -1,0 +1,11 @@
+{
+  "schema": "MeasuredGitSource/v1",
+  "captured_at_utc": "2026-10-14T08:28:38Z",
+  "commit": "92556c81b2e4b6e878b52f2feb8e595b1dc26eb2",
+  "tree": "7a777c096a60762c37a46f71f74e69386eb7bb0d",
+  "dirty": false,
+  "producer": {
+    "tool": "git rev-parse + exact-head Jest e2e",
+    "version": "Node 24.21.0"
+  }
+}
