@@ -4,7 +4,7 @@
    "attached_at_utc": "2026-10-14T15:09:47Z",
    "attachment_kind": "evidence",
    "delivery": {
-    "checked_at_utc": "2026-10-14T15:09:47Z",
+    "checked_at_utc": "2026-10-14T15:11:57Z",
     "probe": [],
     "reason_code": "MUNERAL_POST_NOT_REQUESTED",
     "status": "not_measured",
@@ -14,7 +14,7 @@
     "contentType": "application/json",
     "digest": "sha256:0372266d56b8bead4cd45c27ebe6a4faa60242512d88d29c43daba8d0b65e6da",
     "label": "PR249 project-read renewal CAR with candidate and parent canaries",
-    "uri": "receipts/graph/change-admission-pr249-project-read-renewal.jsonreceipts/graph/change-admission-pr249-project-read-renewal.json"
+    "uri": "aup://arcanada-universal-program/receipts/graph/change-admission-pr249-project-read-renewal.json"
    },
    "model": "claude-opus-5",
    "producer": {
@@ -35,6 +35,6 @@
  ],
  "schema": "WorkItemEvidenceLedger/v1",
  "system": "muneral",
- "updated_at_utc": "2026-10-14T15:09:47Z",
+ "updated_at_utc": "2026-10-14T15:11:57Z",
  "work_item": "971d0143-8549-47a9-b89b-19f0a4023a53"
 }
