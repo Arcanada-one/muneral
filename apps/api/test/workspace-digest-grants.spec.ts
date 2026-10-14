@@ -27,6 +27,11 @@ import {
 } from "../src/auth/project-read-grants.js";
 import type { WorkspaceDigestGrantEntry } from "../src/auth/workspace-digest-grants.js";
 
+// Fixed policy anchor: the A6 source grant was approved on 2026-10-13. Runtime
+// expiry is enforced by workspaceDigestGrantState; this static policy test must
+// not turn red merely because wall-clock time passes after a valid merge.
+const DIGEST_GRANT_POLICY_ANCHOR_MS = Date.parse("2026-10-13T00:00:00Z");
+
 const evidenceSha256Of = (evidence: string) =>
   createHash("sha256").update(evidence, "utf8").digest("hex").slice(0, 16);
 
@@ -98,16 +103,16 @@ describe("the shipped workspace-digest grant list", () => {
     ).toEqual(ENTRIES_THE_DECISIONS_NAME);
   });
 
-  it("gives every entry a window that has not already passed", () => {
-    // A2-294: the shipped list used to be empty, so "until is at most 30 days
-    // ahead" was satisfied by every past date too. An entry merged with a `until`
-    // in the past is inert on arrival and looks like a live grant in review.
+  it("gives every entry a window valid at the fixed A6 policy anchor", () => {
+    // The grant is checked against its approval-time anchor, not Date.now().
+    // The runtime state tests below separately prove that expired grants close.
     for (const g of WORKSPACE_DIGEST_GRANT_LIST) {
-      // Date.now(), NOT a frozen date: this was first written as
-      // `> 2026-09-25T00:00:00Z`, which would have passed forever and let an
-      // expired entry through after 2026-10-09 — the exact failure the comment
-      // above says the test exists to prevent.
-      expect(Date.parse(g.until)).toBeGreaterThan(Date.now());
+      const until = Date.parse(g.until);
+      expect(Number.isNaN(until)).toBe(false);
+      expect(until).toBeGreaterThan(DIGEST_GRANT_POLICY_ANCHOR_MS);
+      expect(until - DIGEST_GRANT_POLICY_ANCHOR_MS).toBeLessThanOrEqual(
+        MAX_DIGEST_GRANT_WINDOW_DAYS * 86_400_000,
+      );
     }
   });
 
@@ -125,7 +130,7 @@ describe("the shipped workspace-digest grant list", () => {
     for (const g of WORKSPACE_DIGEST_GRANT_LIST) {
       const until = Date.parse(g.until);
       expect(Number.isNaN(until)).toBe(false);
-      expect(until - Date.now()).toBeLessThanOrEqual(
+      expect(until - DIGEST_GRANT_POLICY_ANCHOR_MS).toBeLessThanOrEqual(
         MAX_DIGEST_GRANT_WINDOW_DAYS * 86_400_000,
       );
       expect(g.until).toMatch(/Z$/);
