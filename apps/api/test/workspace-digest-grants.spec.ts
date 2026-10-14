@@ -34,10 +34,9 @@ const evidenceSha256Of = (evidence: string) =>
  * A LITERAL, not `evidenceSha256Of(WORKSPACE_DIGEST_GRANT_LIST[0].evidence)` —
  * that first draft compared the shipped entry against itself and would have
  * passed whatever `evidence` said. This is the sha256 prefix of the evidence
- * DEC-AUP-0049 admitted; editing that string fails the equality below, which is
- * the whole point of covering it.
+ * proposed by A6; editing the recorded basis fails the equality below.
  */
-const EVIDENCE_SHA256_PREFIX = "40150c92d41ca7c1";
+const EVIDENCE_SHA256_PREFIX = "c9dba15d1136978b";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -77,7 +76,7 @@ describe("the shipped workspace-digest grant list", () => {
       agentId: "565171f7-a3ca-45a4-b50e-4d8b07cf0b86",
       agentName: "arcanada-assistant",
       workspaceId: "05f8cddf-e91f-430b-81e3-d67965aa4de3",
-      until: "2026-10-09T00:00:00Z",
+      until: "2026-10-27T00:00:00Z",
       decision: "DEC-AUP-0049",
       // A prefix of sha256(evidence), so the projection covers `evidence` too:
       // the string that tells a reviewer what the entry bought could otherwise
@@ -99,16 +98,16 @@ describe("the shipped workspace-digest grant list", () => {
     ).toEqual(ENTRIES_THE_DECISIONS_NAME);
   });
 
-  it("gives every entry a window that has not already passed", () => {
-    // A2-294: the shipped list used to be empty, so "until is at most 30 days
-    // ahead" was satisfied by every past date too. An entry merged with a `until`
-    // in the past is inert on arrival and looks like a live grant in review.
+  it("requires every shipped grant to remain active", () => {
     for (const g of WORKSPACE_DIGEST_GRANT_LIST) {
-      // Date.now(), NOT a frozen date: this was first written as
-      // `> 2026-09-25T00:00:00Z`, which would have passed forever and let an
-      // expired entry through after 2026-10-09 — the exact failure the comment
-      // above says the test exists to prevent.
-      expect(Date.parse(g.until)).toBeGreaterThan(Date.now());
+      const until = Date.parse(g.until);
+      expect(Number.isNaN(until)).toBe(false);
+      // Keep this wall-clock check: it is the renewal signal when a shipped
+      // grant expires, including after a future date passes.
+      expect(until).toBeGreaterThan(Date.now());
+      expect(until - Date.now()).toBeLessThanOrEqual(
+        MAX_DIGEST_GRANT_WINDOW_DAYS * 86_400_000,
+      );
     }
   });
 

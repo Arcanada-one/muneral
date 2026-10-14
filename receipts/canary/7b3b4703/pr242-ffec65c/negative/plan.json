@@ -1,0 +1,45 @@
+{
+  "schema": "CanaryPlan/v1",
+  "id": "pr242-digest-denial-controls",
+  "environment": "candidate-local Nest API on loopback with disposable PostgreSQL 16 and private Redis; synthetic owner and agent principals",
+  "base_url": "http://127.0.0.1:35542/api/v1",
+  "head_sha": "ffec65c87af8dcd4bbad5f9a40924bc74b685d02",
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "ffec65c87af8dcd4bbad5f9a40924bc74b685d02",
+    "tree": "718e7f30f371d9c217b1c54031282fc55faab604",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "915f6b1c9ff25df795871bc05ef88dccdf32e0dfb18d8e1c9149cb7feeace999",
+      "source_field": "commit"
+    }
+  },
+  "read_only": true,
+  "probes": [
+    {
+      "id": "agent-072",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/digest",
+      "status": 403,
+      "outcome": "verified",
+      "reason": "non-granted synthetic key denied; expected 403, received 403, code=DIGEST_GRANT_REQUIRED",
+      "response_sha256": "b7eae9b2e426ccc7f911c26b1d9f395ed4c61304a2f1fc49554d85126c15e2a0",
+      "response_bytes": 348,
+      "response_code": "DIGEST_GRANT_REQUIRED"
+    },
+    {
+      "id": "anonymous-073",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/digest",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "anonymous digest request denied; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    }
+  ]
+}
