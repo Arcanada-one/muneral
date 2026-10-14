@@ -212,7 +212,20 @@ class Repo:
         return p.read_bytes() if p.is_file() else None
 
     def read_at(self, rev: str, rels: list[str]) -> dict[str, bytes | None]:
-        spec = "".join(f"{rev}:{self.prefix}{r}\n" for r in rels).encode()
+        # Graph paths may spell the scoped manifest as ./package.json. Git's
+        # object-path lookup does not normalize that spelling; preserve caller
+        # keys while resolving each name inside the requested repository scope.
+        normalized = []
+        for rel in rels:
+            if (not isinstance(rel, str) or not rel or rel.startswith("/")
+                    or "\\" in rel or ":" in rel or any(ord(c) < 32 or ord(c) == 127 for c in rel)
+                    or ".." in rel.split("/")):
+                raise Refusal("SOURCE_PATH_INVALID", "source path must remain relative to the requested scope")
+            path = "/".join(part for part in rel.split("/") if part not in ("", "."))
+            if not path:
+                raise Refusal("SOURCE_PATH_INVALID", "source path must name a file inside the requested scope")
+            normalized.append(path)
+        spec = "".join(f"{rev}:{self.prefix}{r}\n" for r in normalized).encode()
         out = subprocess.run(["git", "cat-file", "--batch"], cwd=str(self.top), input=spec, check=True,
                              capture_output=True).stdout
         res, pos = {}, 0
@@ -480,7 +493,8 @@ def query(idx: GraphIndex, files: list[dict], *, mode: str, base: str | None = N
     if not files:
         raise Refusal("EMPTY_CHANGE_SET", "no changed files (nothing to admit)", {})
     for f in files:
-        f["kind"] = classify_file(f["path"], idx)
+        f["kind"] = ("config" if f.get("_config_schema_keys") and f["path"] == ".env.example"
+                     else classify_file(f["path"], idx))
     changed_paths = {f["path"] for f in files}
     out["staleness"] = check_staleness(idx, repo, mode, base, tree_commit, tree_dirty, changed_paths, rules, reader, head=head, graph_role=graph_role)
     cs = {"mode": mode, "files": []}
@@ -490,12 +504,17 @@ def query(idx: GraphIndex, files: list[dict], *, mode: str, base: str | None = N
     open_containment: set[str] = set()
     unknown, uncovered, new_files = [], [], []
     fallback_files = []
+    config_key_seeds: set[str] = set()
+    traversal_seeds: set[str] = set()
     for f in files:
         entry = {"path": f["path"], "status": f["status"], "kind": f["kind"]}
         for k in ("renamed_to", "renamed_from"):
             if k in f:
                 entry[k] = f[k]
         ids = idx.path_nodes(f["path"], rules)
+        narrow_keys = f.get("_config_schema_keys", []) if f["path"] == ".env.example" else []
+        key_ids = {f"config_key:{key}" for key in narrow_keys if f"config_key:{key}" in idx.nodes}
+        ids = sorted(set(ids) | key_ids)
         base_name = os.path.basename(f["path"])
         d = os.path.dirname(f["path"])
         dep_id = idx.deployables.get(d) or (f"deployable_unit:{d}" if f"deployable_unit:{d}" in idx.nodes else None)
@@ -509,6 +528,8 @@ def query(idx: GraphIndex, files: list[dict], *, mode: str, base: str | None = N
             entry["node_id"] = next((i for i in ids if i.startswith("code_unit:")), ids[0])
             entry["node_ids"] = ids
             seeds.update(ids)
+            config_key_seeds.update(key_ids)
+            traversal_seeds.update(set(ids) - key_ids)
         elif f["status"] == "A":
             entry["new"] = True
             new_files.append(f["path"])
@@ -532,7 +553,11 @@ def query(idx: GraphIndex, files: list[dict], *, mode: str, base: str | None = N
            "max_depth": max_depth, "edge_types": sorted(edge_types) if edge_types else "all",
            "global_fallback": {"triggered": False}, "deterministic_core": [], "inferred_tail": [], "total": 0}
     # Global scope adds coverage; it cannot erase the normal dependency paths.
-    reached = traverse(idx, seeds, max_depth, edge_types, rules, open_containment)
+    reached = traverse(idx, traversal_seeds, max_depth, edge_types, rules, open_containment)
+    for eid in sorted(config_key_seeds):
+        reached.append({"entity": eid, "node_type": "config_key", "depth": 0,
+                        "boundary": "intra_unit", "path": [],
+                        "verifier_hint": idx.hints.get("reads_config", "")})
     for e in reached:
         non_det = any(h["provenance"] != "deterministic" for h in e["path"])
         (imp["inferred_tail"] if non_det else imp["deterministic_core"]).append(e)

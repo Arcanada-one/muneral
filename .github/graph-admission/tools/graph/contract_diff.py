@@ -1335,6 +1335,73 @@ def _executable_text(code, issues=None, literals=None):
         mask(start, len(code))
         return len(code)
 
+    def generic_arrow(start):
+        # Recognize only unambiguous TS parameter lists: a nested type argument
+        # or a top-level comma cannot be a valid JSX opening tag. Simple <T>
+        # remains ambiguous without a source-language binding. Never mask the
+        # value parameter defaults or arrow body, which may consume contracts.
+        bounded_header = code[start:start + 1025]
+        relative_end = match_close(bounded_header, 0, angle=True)
+        if relative_end >= len(bounded_header):
+            return None
+        end = start + relative_end
+        header = code[start + 1:end]
+        if not re.fullmatch(r'[\w$\s.,<>\[\]]+', header):
+            return None
+        level, comma, nested = 0, False, False
+        for ch in header:
+            if ch == '<':
+                nested = True
+                level += 1
+            elif ch == '>':
+                level -= 1
+            elif ch == ',' and level == 0:
+                comma = True
+            if level < 0 or level > 8:
+                return None
+        if level or not (comma or nested):
+            return None
+
+        def type_ref(text, depth=0):
+            if depth > 8:
+                return False
+            text = text.strip()
+            while text.endswith('[]'):
+                text = text[:-2].rstrip()
+            name = re.match(r'[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*', text)
+            if not name:
+                return False
+            rest = text[name.end():].strip()
+            if not rest:
+                return True
+            if not rest.startswith('<') or match_close(rest, 0, angle=True) != len(rest) - 1:
+                return False
+            args = split_top(rest[1:-1], ',', angle=True)
+            return bool(args) and all(type_ref(arg, depth + 1) for arg in args)
+
+        parameters = split_top(header, ',', angle=True)
+        if not parameters:
+            return None
+        for parameter in parameters:
+            declaration = re.fullmatch(r'([A-Za-z_$][\w$]*)(?:\s+extends\s+(.+))?', parameter.strip())
+            if not declaration or (declaration.group(2) and not type_ref(declaration.group(2))):
+                return None
+        value_start = end + 1
+        while value_start < len(code) and code[value_start].isspace():
+            value_start += 1
+        if value_start >= len(code) or code[value_start] != '(':
+            return None
+        bounded_values = code[value_start:start + 2049]
+        relative_value_end = match_close(bounded_values, 0)
+        if relative_value_end >= len(bounded_values):
+            return None
+        value_end = value_start + relative_value_end
+        tail = code[value_end + 1:value_end + 1025]
+        arrow = re.match(r'\s*(?::([^;={}]*?))?\s*=>', tail)
+        if not arrow or (arrow.group(1) and not type_ref(arrow.group(1))):
+            return None
+        return end + 1
+
     def jsx(start, depth):
         # Tags/text are inert; braces retain executable expressions at their
         # original offsets. Unsupported TS assertions and malformed JSX stay NM.
@@ -1410,8 +1477,13 @@ def _executable_text(code, issues=None, literals=None):
                 mask(i, end)
                 i = end
             elif code[i] == '<' and operand is True and re.match(r'<(?:[A-Za-z_$]|>)', code[i:]):
-                i = jsx(i, depth + 1)
-                operand, previous = False, 'literal'
+                generic_end = generic_arrow(i)
+                if generic_end is not None:
+                    mask(i, generic_end)
+                    i, operand, previous = generic_end, True, None
+                else:
+                    i = jsx(i, depth + 1)
+                    operand, previous = False, 'literal'
             elif code[i] == '/':
                 if operand is None:
                     issues.append('ambiguous slash expression')

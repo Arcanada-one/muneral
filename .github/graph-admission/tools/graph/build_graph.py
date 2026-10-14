@@ -61,11 +61,14 @@ ROOT = HERE.parents[1]
 sys.path.insert(0, str(HERE))
 import workflow_config
 import nest_bootstrap
+import python_search_path
 import schema_check  # noqa: E402  (tools/graph/schema_check.py — the validator of GRAPH-001)
 import shell_source
+import nest_fixture_scope
+import fixture_contracts
 import native_projection  # noqa: E402
 
-VERSION = "1.0.5"  # Literal workflow cwd contexts and conservative unknown reverse callers.
+VERSION = "1.0.6"  # Bounded Python caller contexts remain explicitly inferred.
 BUILDER = "tools/graph/build_graph.py"
 EXTRACTORS = ["imports", "routes", "contracts", "prisma", "config", "reuse", "di", "queue", "tests",
               "http_client", "deployables", "docs", "work_items", "receipts", "rust", "python"]
@@ -99,8 +102,8 @@ RUST_USE_RE = re.compile(r"\buse\s+((?:crate|self|super)(?:::[A-Za-z_][A-Za-z0-9
                           r"|[A-Za-z_][A-Za-z0-9_]*(?:::[A-Za-z_][A-Za-z0-9_]*)*)")
 RUST_ENV_RE = re.compile(r"\b(?:std::)?env::var(?:_os)?\(\s*\"([A-Za-z_][A-Za-z0-9_]*)\"")
 RUST_SERVICE_DEPS = {"axum", "actix-web", "warp", "tonic", "hyper"}
-PY_FROM_RE = re.compile(r"(?m)^from[ \t]+(\.*)([\w.]*)[ \t]+import\b")
-PY_IMPORT_RE = re.compile(r"(?m)^import[ \t]+([\w.]+)")
+PY_FROM_RE = re.compile(r"(?m)^[ \t]*from[ \t]+(\.*)([\w.]*)[ \t]+import\b")
+PY_IMPORT_RE = re.compile(r"(?m)^[ \t]*import[ \t]+([\w.]+)")
 PY_ENV_RE = re.compile(r"""os\.environ\[\s*['"]([A-Z_][A-Z0-9_]*)['"]\s*\]"""
                         r"""|os\.environ\.get\(\s*['"]([A-Z_][A-Z0-9_]*)['"]"""
                         r"""|os\.getenv\(\s*['"]([A-Z_][A-Z0-9_]*)['"]""")
@@ -571,11 +574,17 @@ class TsFile:
 
 # ----------------------------------------------------------------------------------------------- builder
 class Builder:
-    def __init__(self, tree: Tree, disabled: set[str], work_item_pattern: str):
+    def __init__(self, tree: Tree, disabled: set[str], work_item_pattern: str, *, source_repo=None, python_identity_consumers=()):
         unknown = disabled - set(EXTRACTORS)
         if unknown:
             raise SystemExit(f"unknown extractor(s): {sorted(unknown)}; known: {EXTRACTORS}")
         self.tree = tree
+        self.source_repo = source_repo
+        if (not isinstance(python_identity_consumers, (tuple, list))
+                or any(not isinstance(p, str) or p not in tree.files or not p.endswith('.py')
+                       for p in python_identity_consumers)):
+            raise ValueError('Python identity consumers require exact existing Git source paths')
+        self.python_identity_consumers = frozenset(python_identity_consumers)
         self.disabled = disabled
         self.g = Graph()
         self.work_item_re = re.compile(work_item_pattern)
@@ -652,13 +661,18 @@ class Builder:
             for ref in analysis["references"]:
                 target = ref["path"]
                 if f"code_unit:{target}" not in self.g.nodes and ref["type"] == "imports":
-                    loaded = shell_source.analyse(target, t.files[target], t.paths)
-                    self.g.node(f"code_unit:{target}", "code_unit", sha_bytes(t.files[target]), path=target,
-                                kind="bash_source", attrs={"shell_unknown": loaded["unknown"] +
-                                    ["loaded helper dialect/recursive closure requires explicit source attribution"],
-                                    "shell_test_inventory": loaded["tests"]})
+                    target_kind = shell_source.kind(target, t.files[target], t.meta.get("file_modes", {}).get(target))
+                    if target_kind:
+                        loaded = shell_source.analyse(target, t.files[target], t.paths)
+                        self.g.node(f"code_unit:{target}", "code_unit", sha_bytes(t.files[target]), path=target,
+                                    kind="bash_source", attrs={"shell_unknown": loaded["unknown"] +
+                                        ["loaded helper dialect/recursive closure requires explicit source attribution"],
+                                        "shell_test_inventory": loaded["tests"]})
+                    else:
+                        self.g.node(f"code_unit:{target}", "code_unit", sha_bytes(t.files[target]),
+                                    path=target, kind="data_file")
                 self.g.edge(f"code_unit:{p}", ref["type"], f"code_unit:{ref['path']}", ref["provenance"],
-                            via="literal-shell-reference", symbol=str(ref["line"]),
+                            via=ref.get("via", "literal-shell-reference"), symbol=str(ref["line"]),
                             **({"inferred_by": "bounded-shell-unknown-cwd-candidate"}
                                if ref["provenance"] == "inferred" else {}))
             if workflow_config.is_workflow(p):
@@ -667,6 +681,24 @@ class Builder:
                     if m and m[1][2:] in t.files:
                         self.g.edge(f"code_unit:{p}", "calls", f"code_unit:{m[1][2:]}",
                                     "deterministic", via="literal-local-workflow")
+        # Function references reuse literal source include resolution. They add
+        # physical caller/provider obligations; source binding is not behavior.
+        shell_contexts = shell_source.workflow_script_contexts(t.files)
+        for p in t.paths:
+            if not shell_source.kind(p, t.files[p], t.meta.get("file_modes", {}).get(p)):
+                continue
+            contexts = shell_contexts.get(p, set())
+            cwd = next(iter(contexts)) if len(contexts) == 1 else None
+            facts = shell_source.function_bindings(p, t.files, cwd=cwd)
+            if facts["unknown"]:
+                if facts["candidate_names"]:
+                    attrs = self.g.nodes[f"code_unit:{p}"].setdefault("attrs", {})
+                    attrs["shell_unknown"] = sorted(set(attrs.get("shell_unknown", []) +
+                        ["sourced function contract not measured: " + x for x in facts["unknown"]]))
+                continue
+            for call in facts["bindings"]:
+                self.g.edge(f"code_unit:{p}", "calls", f"code_unit:{call['provider']}",
+                            "deterministic", via="literal-sourced-function", symbol=call["name"])
         for p in t.paths:
             if p.endswith("tsconfig.json") or re.search(r"(^|/)tsconfig\.[\w.-]+\.json$", p):
                 try:
@@ -926,6 +958,13 @@ class Builder:
 
     def x_routes(self):
         t = self.tree
+        projections = {}
+        if self.source_repo and t.meta.get('source_tree') == 'git-objects':
+            for dep, bootstrap in self.bootstraps.items():
+                projections[dep] = nest_fixture_scope.project_inline_harness(
+                    t, repo=self.source_repo, commit=t.meta['source_commit'],
+                    root_module_file=bootstrap.root_file,
+                    compiler_library=nest_fixture_scope.compiler_library_for(self.source_repo, t.meta.get('subdir', '')))
         dec_arg = r"\(\s*(?:['\"]([^'\"]*)['\"]|\[\s*['\"]([^'\"]*)['\"][^\]]*\]|\{[^}]*path\s*:\s*['\"]([^'\"]*)['\"][^}]*\})?\s*[^)]*\)"
         for f in self.ts.values():
             code = f.code
@@ -951,8 +990,20 @@ class Builder:
                     except ValueError:
                         effective, route_complete = None, False
                     rid = f"route:{method} {route_path}"
+                    projection = projections.get(nest_bootstrap.deployable_of(f.path, self.package_dirs), {})
+                    facts = nest_fixture_scope.controller_at(projection, f.path, len(t.text(f.path)[:m.start()].encode('utf-8')))
+                    route_attrs = {"global_prefix": effective} if effective else {}
+                    if facts and facts['scope'] == 'fixture':
+                        rid = 'route:' + fixture_contracts.sample_namespace(facts['class_name'], f.path, 'head', rid)
+                        route_attrs['inline_harness'] = nest_fixture_scope.graph_identity(facts)
+                        for dependency in facts['physical_dependencies']:
+                            if dependency != f.path:
+                                self.g.node(f"code_unit:{dependency}", "code_unit", sha_bytes(t.files[dependency]),
+                                            path=dependency, kind="compiler_configuration" if dependency.endswith('.json') else None)
+                                self.g.edge(f"code_unit:{f.path}", "imports", f"code_unit:{dependency}",
+                                            "deterministic", via="inline-harness-compiler-dependency")
                     self.g.node(rid, "route", h, path=f.path,
-                                attrs={"global_prefix": effective} if effective else None)
+                                attrs=route_attrs or None)
                     previous = [r for r in self.routes if r['id'] == rid and r['file'] != f.path]
                     if previous:
                         # Route IDs are logical (not deployment-qualified). Keep
@@ -962,7 +1013,8 @@ class Builder:
                         attrs['nest_route_sources'] = sorted({r['file'] for r in previous} | {f.path})
                     self.g.edge(f"code_unit:{f.path}", "provides_route", rid, "deterministic", via="nest-decorator", site=f"L{code.count(chr(10), 0, m.start()) + 1}")
                     self.routes.append({"method": method, "path": route_path, "prefix": effective,
-                                        "bootstrap_complete": route_complete, "file": f.path, "id": rid})
+                                        "bootstrap_complete": route_complete, "file": f.path, "id": rid,
+                                        "fixture": bool(facts and facts["scope"] == "fixture")})
                     # handler signature → DTO parameter types
                     sig_start = code.find("(", m.end())
                     depth, j = 0, sig_start
@@ -1135,7 +1187,7 @@ class Builder:
 
     def x_python(self):
         """AUP-GRAPH-009: pyproject.toml/setup.py (tomllib for pyproject) → deployable_unit; absolute imports matched
-        against every discovered src root, relative imports resolved from the importing file's directory;
+        against bounded explicit per-file search roots followed by discovered src roots, relative imports resolved from the importing file's directory;
         os.environ/os.getenv → config_key; `@app.get(...)`-style decorators → route (same node forms as the TS
         stack). Star imports, importlib-dynamic imports and bare `from . import x` (no module name to anchor a
         file) are not resolved — recorded in limitations."""
@@ -1174,12 +1226,17 @@ class Builder:
             py_roots.add(norm_path((d + "/" if d else "") + "src"))
         py_roots_sorted = sorted(py_roots, key=len, reverse=True)
 
-        def resolve_absolute(module: str) -> str | None:
+        def resolve_absolute(module: str, local_roots: list[str] | None = ()) -> str | None:
+            if local_roots is None:
+                return None
             rel = module.replace(".", "/")
-            for root in py_roots_sorted:
+            for root in list(local_roots) + py_roots_sorted:
                 target = norm_path((root + "/" if root else "") + rel)
-                for cand in (target + ".py", target + "/__init__.py"):
+                for cand in (target + "/__init__.py", target + ".py"):
                     if t.exists(cand):
+                        # Explicit Path.resolve claims cannot treat a Git symlink as regular source.
+                        if local_roots and t.meta.get("file_modes", {}).get(cand) == "120000":
+                            return None
                         return cand
             return None
 
@@ -1190,7 +1247,7 @@ class Builder:
             for _ in range(dots - 1):
                 d = os.path.dirname(d)
             target = norm_path((d + "/" if d else "") + module.replace(".", "/"))
-            for cand in (target + ".py", target + "/__init__.py"):
+            for cand in (target + "/__init__.py", target + ".py"):
                 if t.exists(cand):
                     return cand
             return None
@@ -1210,7 +1267,20 @@ class Builder:
         is_test = lambda p: bool(re.search(r"(^|/)(test_\w+|\w+_test)\.py$", p) or "/tests/" in p or p.startswith("tests/"))  # noqa: E731
         resolved_of: dict[str, list[str]] = {}
         for p in py_files:
+            if p in self.python_identity_consumers:
+                attrs = self.g.nodes[f"code_unit:{p}"].setdefault('attrs', {})
+                attrs['python_import_source_sha256'] = hashlib.sha256(t.files[p]).hexdigest()
+                try:
+                    if t.meta.get('file_modes', {}).get(p) == '120000':
+                        raise ValueError('symlink consumer is not regular Git source')
+                    attrs['python_import_occurrences'] = python_search_path.import_occurrences(t.files[p])
+                except ValueError as exc:
+                    attrs['python_import_identity_unknown'] = str(exc)
+                    self.limitations.append(f'python: import occurrence identity unresolved at {p}: {exc}')
             code, literals = scan_python(t.text(p))
+            local_by_line, path_limitations = python_search_path.import_roots(t.text(p), p)
+            self.limitations.extend(path_limitations)
+            roots_for = lambda m: local_by_line.get(code.count("\n", 0, m.start()) + 1, [])
             # A construct QUOTED inside a string is an example, not a declaration. The guard is on the
             # match start, so the decorator's own path argument and the key of an `os.environ[...]`
             # read — both of which are literals themselves — stay readable. See scan_python.
@@ -1220,7 +1290,7 @@ class Builder:
                 if not source(m):
                     continue
                 dots, module = m.group(1), m.group(2)
-                r = resolve_relative(p, len(dots), module) if dots else (resolve_absolute(module) if module else None)
+                r = resolve_relative(p, len(dots), module) if dots else (resolve_absolute(module, roots_for(m)) if module else None)
                 if r and r != p and f"code_unit:{r}" in self.g.nodes:
                     self.g.edge(f"code_unit:{p}", "imports", f"code_unit:{r}", "deterministic",
                                 via="python-relative-import" if dots else "python-absolute-import")
@@ -1228,7 +1298,7 @@ class Builder:
             for m in PY_IMPORT_RE.finditer(code):
                 if not source(m):
                     continue
-                r = resolve_absolute(m.group(1))
+                r = resolve_absolute(m.group(1), roots_for(m))
                 if r and r != p and f"code_unit:{r}" in self.g.nodes:
                     self.g.edge(f"code_unit:{p}", "imports", f"code_unit:{r}", "deterministic", via="python-import")
                     targets.append(r)
@@ -1245,6 +1315,17 @@ class Builder:
                 rid = f"route:{m.group(1).upper()} {m.group(2)}"
                 self.g.node(rid, "route", sha_bytes(t.files[p]), path=p, kind="fastapi")
                 self.g.edge(f"code_unit:{p}", "provides_route", rid, "deterministic", via="fastapi-decorator")
+        contextual, context_limitations = python_search_path.contextual_imports(
+            {p: t.text(p) for p in py_files}, t.meta.get("file_modes", {}), py_roots_sorted)
+        self.limitations.extend(context_limitations)
+        for row in contextual:
+            frm, to = f"code_unit:{row['from']}", f"code_unit:{row['to']}"
+            if frm in self.g.nodes and to in self.g.nodes:
+                self.g.edge(frm, "imports", to, "inferred", via="python-caller-context",
+                            inferred_by="bounded-python-caller-context", site=row["contexts"])
+                if is_test(row["from"]) and not is_test(row["to"]):
+                    self.g.edge(frm, "verifies", to, "inferred", via="python-caller-context-test-import",
+                                inferred_by="bounded-python-caller-context", site=row["contexts"])
         for p in py_files:
             if not is_test(p):
                 continue
@@ -1252,8 +1333,9 @@ class Builder:
                 if not is_test(r):
                     self.g.edge(f"code_unit:{p}", "verifies", f"code_unit:{r}", "deterministic", via="python-test-import")
         if pkgs or py_files:
-            self.limitations.append("python: absolute imports are matched against every discovered src root (no per-file "
-                                     "sys.path modelling); star imports, importlib-dynamic imports and bare `from . import x` "
+            self.limitations.append("python: absolute imports use bounded explicit per-file insertions and discovered src roots (no "
+                                     "dynamic sys.path modelling; explicit bounded per-file Path(__file__) insertions are supported); "
+                                     "star imports, importlib-dynamic imports and bare `from . import x` "
                                      "are not resolved")
 
     def x_config(self):
@@ -1329,7 +1411,7 @@ class Builder:
     def x_http_client(self):
         served = {}
         for r in self.routes:
-            if r["method"] != "WS":
+            if r["method"] != "WS" and not r.get("fixture"):
                 # Match wire URLs against each route's own effective prefix; never strip
                 # another deployment's prefix from a client URL.
                 # Logical paths remain inferred candidates (clients may supply a
@@ -1627,7 +1709,7 @@ def digest_of(doc: dict) -> str:
 def build(repo: Path, *, rev="HEAD", subdir="", worktree=False, built_at=None, disabled=frozenset(),
           work_item_pattern=DEFAULT_WORK_ITEM_PATTERN) -> dict:
     tree = load_tree_worktree(repo) if worktree else load_tree_git(repo, rev, subdir)
-    return Builder(tree, set(disabled), work_item_pattern).build(built_at or now_iso())
+    return Builder(tree, set(disabled), work_item_pattern, source_repo=repo if not worktree else None).build(built_at or now_iso())
 
 
 GRAPH_AUTO = "auto"

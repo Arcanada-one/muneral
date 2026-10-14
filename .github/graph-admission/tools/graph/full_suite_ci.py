@@ -166,10 +166,32 @@ def workflow_step(raw, job_key, step_name, command, *, deployable=".", timeout=N
 
 
 def _literal_command(step, command):
-    if shlex.split(step.get("run", "")) != command:
+    raw = step.get("run", "").strip()
+    if shlex.split(raw) != command:
         raise ValueError("workflow step is not exactly the declared full_test argv")
-    if "\n" in step.get("run", "").strip() or any(x in step.get("run", "") for x in ("${{", ";", "&&", "||", "|", ">", "$", "`")):
+    # GitHub expressions expand before the shell, including inside quotes.
+    # Inner bash -c payloads remain literal arguments to the outer shell.
+    if any(x in raw for x in ("${{", "\n", "\r")) or not command or "=" in command[0]:
         raise ValueError("full-suite step must be one literal unfiltered command")
+    if command[0] in {"if", "then", "else", "elif", "fi", "for", "while", "until",
+                       "do", "done", "case", "esac", "in", "select", "function", "time", "coproc"}:
+        raise ValueError("full-suite step must invoke a literal command")
+    quote = None
+    for char in raw:
+        if quote == "'":
+            if char == "'":
+                quote = None
+        elif quote == '"':
+            if char == '"':
+                quote = None
+            elif char in "$`\\":
+                raise ValueError("full-suite double-quoted argument must be literal")
+        elif char in "'\"":
+            quote = char
+        elif not (char.isascii() and (char.isalnum() or char in "_./:=,@%+- \t")):
+            # Refuse expansion, redirection, pipelines, background jobs, comments
+            # and escapes. This bounded grammar never executes or interprets them.
+            raise ValueError("full-suite step must be one literal unfiltered command")
 
 
 def workspace_test_packages(repo, source, dep, command):
