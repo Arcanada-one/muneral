@@ -1,0 +1,59 @@
+{
+  "captured_at_utc": "2026-10-14T03:23:53Z",
+  "cleanup": "test-owned disposable database dropped; isolated PostgreSQL 16 cluster removed",
+  "command": "apps/api/node_modules/.bin/jest --passWithNoTests --runInBand test/workspace-membership.routes.e2e.spec.ts test/workspace-digest-grants.spec.ts",
+  "membership_suite": {
+    "failed": 0,
+    "passed": 5
+  },
+  "node": "v24.21.0",
+  "postgres": "isolated PostgreSQL 16 cluster via pg_virtualenv",
+  "requests": [
+    {
+      "anonymous_status": 401,
+      "assertions": "both passed",
+      "method": "POST",
+      "owner_status": 201,
+      "path": "/api/v1/workspaces/:workspaceId/members/:userId"
+    },
+    {
+      "anonymous_status": 401,
+      "assertions": "both passed",
+      "method": "PATCH",
+      "owner_status": 200,
+      "path": "/api/v1/workspaces/:workspaceId/members/:userId/role"
+    },
+    {
+      "anonymous_status": 401,
+      "assertions": "both passed",
+      "method": "GET",
+      "owner_status": 200,
+      "path": "/api/v1/workspaces/:workspaceId"
+    },
+    {
+      "anonymous_status": 401,
+      "assertions": "both passed",
+      "method": "GET",
+      "owner_status": 200,
+      "path": "/api/v1/workspaces/:workspaceId/members"
+    },
+    {
+      "anonymous_status": 401,
+      "assertions": "both passed",
+      "method": "DELETE",
+      "owner_status": 204,
+      "path": "/api/v1/workspaces/:workspaceId/members/:userId"
+    }
+  ],
+  "schema": "WorkspaceMembershipE2EExecution/v1",
+  "source_commit": "474d984827468c118d6224efac3576bb1dcbf15a",
+  "source_tree": "773243f2a8ee0396e1cf4853be0eae8f949f76ca",
+  "suites": {
+    "failed": 0,
+    "passed": 2
+  },
+  "tests": {
+    "failed": 0,
+    "passed": 18
+  }
+}

@@ -1,0 +1,209 @@
+{
+  "captured_at_utc": "2026-10-14T03:23:53Z",
+  "card": "1f99b768-65e6-4afe-93e6-611db53e3366",
+  "counters": {
+    "entities_verified": 6,
+    "failed": 0,
+    "not_measured": 0,
+    "verified": 10
+  },
+  "entity_verdicts": [
+    {
+      "entity": "route:POST /workspaces/:workspaceId/members/:userId",
+      "probe_ids": [
+        "owner-post",
+        "anonymous-post"
+      ],
+      "reason": "The owner and anonymous controls both passed for POST /workspaces/:workspaceId/members/:userId.",
+      "verdict": "verified"
+    },
+    {
+      "entity": "route:PATCH /workspaces/:workspaceId/members/:userId/role",
+      "probe_ids": [
+        "owner-patch",
+        "anonymous-patch"
+      ],
+      "reason": "The owner and anonymous controls both passed for PATCH /workspaces/:workspaceId/members/:userId/role.",
+      "verdict": "verified"
+    },
+    {
+      "entity": "route:GET /workspaces/:workspaceId",
+      "probe_ids": [
+        "owner-get-workspace",
+        "anonymous-get-workspace"
+      ],
+      "reason": "The owner and anonymous controls both passed for GET /workspaces/:workspaceId.",
+      "verdict": "verified"
+    },
+    {
+      "entity": "route:GET /workspaces/:workspaceId/members",
+      "probe_ids": [
+        "owner-get-members",
+        "anonymous-get-members"
+      ],
+      "reason": "The owner and anonymous controls both passed for GET /workspaces/:workspaceId/members.",
+      "verdict": "verified"
+    },
+    {
+      "entity": "route:DELETE /workspaces/:workspaceId/members/:userId",
+      "probe_ids": [
+        "owner-delete",
+        "anonymous-delete"
+      ],
+      "reason": "The owner and anonymous controls both passed for DELETE /workspaces/:workspaceId/members/:userId.",
+      "verdict": "verified"
+    },
+    {
+      "entity": "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
+      "probe_ids": [
+        "owner-post",
+        "anonymous-post",
+        "owner-patch",
+        "anonymous-patch",
+        "owner-get-workspace",
+        "anonymous-get-workspace",
+        "owner-get-members",
+        "anonymous-get-members",
+        "owner-delete",
+        "anonymous-delete"
+      ],
+      "reason": "Five workspace-membership controller routes were exercised through the local Nest HTTP application; this does not cover the separate workspace collection routes.",
+      "verdict": "verified"
+    }
+  ],
+  "environment": "author-local Nest HTTP application with disposable PostgreSQL 16",
+  "execution_evidence": {
+    "path": "execution-evidence.json",
+    "sha256": "80e94ddd3d0b0d9b926f9de79040312207467593c95920a0f0b43bbd16539f1d"
+  },
+  "model": "GPT-6 Luna",
+  "mutating_owner": "MUNERAL author; synthetic fixture database only, dropped after test",
+  "phase": "post",
+  "plan": {
+    "id": "pr246-workspace-membership-five-routes"
+  },
+  "probes": [
+    {
+      "executed": true,
+      "id": "owner-post",
+      "kind": "http",
+      "method": "POST",
+      "outcome": "verified",
+      "path": "/api/v1/workspaces/:workspaceId/members/:userId",
+      "reason": "Owner JWT response status 201; POST adds a workspace member test assertion passed.",
+      "status": 201
+    },
+    {
+      "executed": true,
+      "id": "anonymous-post",
+      "kind": "http",
+      "method": "POST",
+      "outcome": "verified",
+      "path": "/api/v1/workspaces/:workspaceId/members/:userId",
+      "reason": "Unauthenticated request returned 401; the corresponding regression assertion passed.",
+      "status": 401
+    },
+    {
+      "executed": true,
+      "id": "owner-patch",
+      "kind": "http",
+      "method": "PATCH",
+      "outcome": "verified",
+      "path": "/api/v1/workspaces/:workspaceId/members/:userId/role",
+      "reason": "Owner JWT response status 200; PATCH updates a workspace member role test assertion passed.",
+      "status": 200
+    },
+    {
+      "executed": true,
+      "id": "anonymous-patch",
+      "kind": "http",
+      "method": "PATCH",
+      "outcome": "verified",
+      "path": "/api/v1/workspaces/:workspaceId/members/:userId/role",
+      "reason": "Unauthenticated request returned 401; the corresponding regression assertion passed.",
+      "status": 401
+    },
+    {
+      "executed": true,
+      "id": "owner-get-workspace",
+      "kind": "http",
+      "method": "GET",
+      "outcome": "verified",
+      "path": "/api/v1/workspaces/:workspaceId",
+      "reason": "Owner JWT response status 200; GET reads workspace details test assertion passed.",
+      "status": 200
+    },
+    {
+      "executed": true,
+      "id": "anonymous-get-workspace",
+      "kind": "http",
+      "method": "GET",
+      "outcome": "verified",
+      "path": "/api/v1/workspaces/:workspaceId",
+      "reason": "Unauthenticated request returned 401; the corresponding regression assertion passed.",
+      "status": 401
+    },
+    {
+      "executed": true,
+      "id": "owner-get-members",
+      "kind": "http",
+      "method": "GET",
+      "outcome": "verified",
+      "path": "/api/v1/workspaces/:workspaceId/members",
+      "reason": "Owner JWT response status 200; GET lists workspace members test assertion passed.",
+      "status": 200
+    },
+    {
+      "executed": true,
+      "id": "anonymous-get-members",
+      "kind": "http",
+      "method": "GET",
+      "outcome": "verified",
+      "path": "/api/v1/workspaces/:workspaceId/members",
+      "reason": "Unauthenticated request returned 401; the corresponding regression assertion passed.",
+      "status": 401
+    },
+    {
+      "executed": true,
+      "id": "owner-delete",
+      "kind": "http",
+      "method": "DELETE",
+      "outcome": "verified",
+      "path": "/api/v1/workspaces/:workspaceId/members/:userId",
+      "reason": "Owner JWT response status 204; DELETE removes a workspace member test assertion passed.",
+      "status": 204
+    },
+    {
+      "executed": true,
+      "id": "anonymous-delete",
+      "kind": "http",
+      "method": "DELETE",
+      "outcome": "verified",
+      "path": "/api/v1/workspaces/:workspaceId/members/:userId",
+      "reason": "Unauthenticated request returned 401; the corresponding regression assertion passed.",
+      "status": 401
+    }
+  ],
+  "producer": {
+    "tool": "Jest",
+    "version": "workspace-membership.routes.e2e.spec.ts"
+  },
+  "read_only": false,
+  "resident_version": "0.4.6",
+  "rules": [
+    "Five owner JWT requests must match the documented success status.",
+    "Five unauthenticated controls must return 401.",
+    "Only the five membership routes and their workspace controller are listed; the web clients and workspace collection routes were not called."
+  ],
+  "schema": "CanaryResult/v1",
+  "subject": {
+    "commit": "474d984827468c118d6224efac3576bb1dcbf15a",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "892280923127daf930a9270f53e84a0b9ccbff1cb8009263078048d29544acc6",
+      "source_field": "commit"
+    },
+    "schema": "GitCanarySubject/v1",
+    "tree": "773243f2a8ee0396e1cf4853be0eae8f949f76ca"
+  }
+}
