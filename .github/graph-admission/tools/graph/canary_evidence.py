@@ -340,9 +340,11 @@ def ledger_append_errors(repo, candidate_commit, candidate_entries, path, before
     new_atts, old_atts = new.get("attachments"), old.get("attachments")
     if not isinstance(new_atts, list) or not isinstance(old_atts, list):
         return [f"{path} is evidence the gate itself reads and carries no attachments list"]
-    if {k: v for k, v in new.items() if k != "attachments"} != {k: v for k, v in old.items() if k != "attachments"} and before is not None:
+    record_fields = {"attachments", "updated_at_utc"}
+    if ({k: v for k, v in new.items() if k not in record_fields}
+            != {k: v for k, v in old.items() if k not in record_fields} and before is not None):
         return [f"{path} is evidence the gate itself reads: a record commit may append an attachment "
-                f"and change nothing else about the entry"]
+                f"and update updated_at_utc, but may change no other entry field"]
     if len(new_atts) <= len(old_atts) or new_atts[:len(old_atts)] != old_atts:
         return [f"{path} is evidence the gate itself reads: only an APPEND may be skipped over, and "
                 f"this delta rewrites, reorders or removes what was already recorded"]
