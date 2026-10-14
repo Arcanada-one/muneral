@@ -3,9 +3,9 @@
   "rule": "admitted requires every verdict = verified; failed without exemption ⇒ refused; not_measured without exemption ⇒ paused_safe; exemptions (owner + expiry) are attached by the admitting agent, never by the verifier (DEC-AUP-0008, matrix P1/P4)",
   "structural_exclusion_rule": "DEC-AUP-0034: an affected entity is NOT verdict-owing when all three hold — the verifier matrix declares neither a mandatory nor a selectable verifier for its node type (so the only verdict it could ever carry states a property of the MATRIX, not of this change), the change set does not contain it, and its bytes are identical at base and head. Each one is listed in structural_exclusions with the content hash at both revisions that proves the byte-identity, and impact_pair.receipt_problems re-derives that proof from Git rather than believing the receipt.",
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
-  "verdict": "paused_safe"
+  "verdict": "admitted"
  },
- "captured_at_utc": "2026-10-14T14:36:58Z",
+ "captured_at_utc": "2026-10-14T15:07:19Z",
  "change_set": {
   "base": "42061f8299115618bc256301c88beca02de755a9",
   "files": [
@@ -23,29 +23,158 @@
     "path": "apps/api/test/assembly/mutation-results.json",
     "status": "M",
     "uncovered": true
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/muneral-pr249-project-read-20261014/http-negative/plan.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/muneral-pr249-project-read-20261014/http-negative/result.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/muneral-pr249-project-read-20261014/http-negative/source-evidence.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/muneral-pr249-project-read-20261014/http-positive/plan.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/muneral-pr249-project-read-20261014/http-positive/result.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/muneral-pr249-project-read-20261014/http-positive/source-evidence.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/muneral-pr249-project-read-20261014/process-negative-v4/plan.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/muneral-pr249-project-read-20261014/process-negative-v4/result.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/muneral-pr249-project-read-20261014/process-negative-v4/source-evidence.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/muneral-pr249-project-read-20261014/process-positive-v2/plan.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/muneral-pr249-project-read-20261014/process-positive-v2/source-evidence.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/muneral-pr249-project-read-20261014/process-positive-v3/plan.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/muneral-pr249-project-read-20261014/process-positive-v3/result.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/muneral-pr249-project-read-20261014/process-positive-v3/source-evidence.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/muneral-pr249-project-read-20261014/process-positive-v4/plan.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/muneral-pr249-project-read-20261014/process-positive-v4/result.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/muneral-pr249-project-read-20261014/process-positive-v4/source-evidence.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/muneral-pr249-project-read-20261014/process-positive/plan.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/muneral-pr249-project-read-20261014/process-positive/result.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/muneral-pr249-project-read-20261014/process-positive/source-evidence.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/change-admission-pr249-project-read-renewal.json",
+    "node_ids": [
+     "receipt:receipts/graph/change-admission-pr249-project-read-renewal.json"
+    ],
+    "path": "receipts/graph/change-admission-pr249-project-read-renewal.json",
+    "status": "A"
    }
   ],
-  "head": "c649d12230d5589e5a8ae441f00da354e61ce526",
+  "head": "c2bfece74f83a24b2dc43e60391f681a39e5cfbf",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
  "exemptions": [],
  "graph": {
-  "builder_version": "1.0.5",
+  "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:44b10d5b9f01b765ceaadf7a8ba2b6227389dc63f8b8ce3a0c93264ad90a2aa9",
+  "graph_digest": "sha256:7a5d43f1e40622b092c16f07de15502ac46d2aa83a4e1c8250cf7a2f9b30c767",
   "path": "/tmp/arcana-verify/verifier-out/graph-42061f829911.json",
   "source_commit": "42061f8299115618bc256301c88beca02de755a9"
  },
  "head_graph": {
-  "builder_version": "1.0.5",
+  "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:2556261b01b32e2b85bd0e75f3adfb17b0f59fb960021736dcb8586f1ed4d824",
-  "path": "/tmp/arcana-verify/verifier-out/graph-head-c649d12230d5.json",
-  "source_commit": "c649d12230d5589e5a8ae441f00da354e61ce526",
+  "graph_digest": "sha256:9ae20a90a140703ef38b7f9155de88369c6deb6b3c8f5093cc294a97b6ee8e56",
+  "path": "/tmp/arcana-verify/verifier-out/graph-head-c2bfece74f83.json",
+  "source_commit": "c2bfece74f83a24b2dc43e60391f681a39e5cfbf",
   "staleness": {
-   "checked_at_utc": "2026-10-14T14:37:20Z",
-   "checked_nodes": 456,
+   "checked_at_utc": "2026-10-14T15:08:20Z",
+   "checked_nodes": 457,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -4136,14 +4265,13 @@
  },
  "notes": [
   "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
-  "profile: (auto-detected); baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none",
-  "head tree c649d12230d5 exported with git archive into /tmp/arcana-verify/export-c649d12230d5 (node_modules linked from the repository for ['.', 'apps/api', 'apps/web', 'packages/types']; workspace packages built: ['packages/types (tsc exit 0, 0.3s)']); the repository was not written"
+  "profile: (auto-detected); baseline: contracts/graph-verified-change/fitness-baseline/Arcanada-one__muneral.v1.json (valid); selected: none; disabled: none"
  ],
  "producer": {
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261014T143658Z-c649d122",
+ "receipt_id": "car-verify-20261014T150719Z-c2bfece7",
  "receipt_path": "receipts/graph/change-admission-pr249-project-read-renewal.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -4388,6 +4516,7 @@
    "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
    "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
    "receipt:receipts/graph/change-admission-pr242-ab7dc194.json",
+   "receipt:receipts/graph/change-admission-pr249-project-read-renewal.json",
    "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
    "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
    "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
@@ -4451,7 +4580,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-14T14:37:20Z",
+  "checked_at_utc": "2026-10-14T15:08:20Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -4822,6 +4951,21 @@
   },
   {
    "content_hash": {
+    "base": null,
+    "head": "sha256:e015e0f9e91a30752c41bfb1e0394f8e91a05e61a0cccfcf6aee6f1e22fae50d"
+   },
+   "entity": "receipt:receipts/graph/change-admission-pr249-project-read-renewal.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-pr249-project-read-renewal.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it; superseded by construction — this run re-issues the receipt at receipts/graph/change-admission-pr249-project-read-renewal.json for work item 971d0143-8549-47a9-b89b-19f0a4023a53",
+   "rule": "DEC-AUP-0035",
+   "superseded": {
+    "receipt_path": "receipts/graph/change-admission-pr249-project-read-renewal.json",
+    "work_item": "971d0143-8549-47a9-b89b-19f0a4023a53"
+   }
+  },
+  {
+   "content_hash": {
     "base": "sha256:8b6cdea08eb0e51062dd5cb7a903149d08ff69411f5d107b51d2dddfe5d3478c",
     "head": "sha256:8b6cdea08eb0e51062dd5cb7a903149d08ff69411f5d107b51d2dddfe5d3478c"
    },
@@ -4888,16 +5032,16 @@
   }
  ],
  "tree": {
-  "commit": "c574e6d09e51077da1ba52c960b184b875731024",
+  "commit": "c2bfece74f83a24b2dc43e60391f681a39e5cfbf",
   "dirty": false
  },
  "verdicts": [
   {
    "entity": "code_unit:apps/api/src/agents/agents.controller.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation (1 frozen: FR-01); v-canary-2: canary muneral-pr249-project-read-process-20261014-v4 (pre) on owned disposable PostgreSQL 16 on 46343, Redis on 46344, Node 24.21.0; local tests write synthetic fixtures only; @muneral/types dist inputs hash-bound: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-2",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -5006,10 +5150,10 @@
   },
   {
    "entity": "code_unit:apps/api/src/projects/projects.controller.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-2: canary muneral-pr249-project-read-process-20261014-v4 (pre) on owned disposable PostgreSQL 16 on 46343, Redis on 46344, Node 24.21.0; local tests write synthetic fixtures only; @muneral/types dist inputs hash-bound: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-2",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -5035,10 +5179,10 @@
   },
   {
    "entity": "code_unit:apps/api/src/sync/sync.controller.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation; v-canary-2: canary muneral-pr249-project-read-process-20261014-v4 (pre) on owned disposable PostgreSQL 16 on 46343, Redis on 46344, Node 24.21.0; local tests write synthetic fixtures only; @muneral/types dist inputs hash-bound: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-2",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -5064,10 +5208,10 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-fitness: no new fitness violation (1 frozen: FR-01); v-canary-2: canary muneral-pr249-project-read-process-20261014-v4 (pre) on owned disposable PostgreSQL 16 on 46343, Redis on 46344, Node 24.21.0; local tests write synthetic fixtures only; @muneral/types dist inputs hash-bound: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-2",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -5075,10 +5219,10 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-2: canary muneral-pr249-project-read-process-20261014-v4 (pre) on owned disposable PostgreSQL 16 on 46343, Redis on 46344, Node 24.21.0; local tests write synthetic fixtures only; @muneral/types dist inputs hash-bound: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-2",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -5095,10 +5239,10 @@
   },
   {
    "entity": "code_unit:apps/api/src/tasks/tasks.controller.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 9 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation; v-canary-2: canary muneral-pr249-project-read-process-20261014-v4 (pre) on owned disposable PostgreSQL 16 on 46343, Redis on 46344, Node 24.21.0; local tests write synthetic fixtures only; @muneral/types dist inputs hash-bound: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-2",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -5133,10 +5277,10 @@
   },
   {
    "entity": "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 2 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation (1 frozen: FR-01); v-canary-2: canary muneral-pr249-project-read-process-20261014-v4 (pre) on owned disposable PostgreSQL 16 on 46343, Redis on 46344, Node 24.21.0; local tests write synthetic fixtures only; @muneral/types dist inputs hash-bound: Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-2",
     "v-contract-diff",
     "v-fitness",
     "v-type-check-apps-api-tsconfig"
@@ -5411,10 +5555,10 @@
   },
   {
    "entity": "route:DELETE /agents/keys/:keyId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-01: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5422,10 +5566,10 @@
   },
   {
    "entity": "route:DELETE /agents/tasks/:taskId/assign/:agentId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-02: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5433,10 +5577,10 @@
   },
   {
    "entity": "route:DELETE /projects/:projectId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-03: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5444,10 +5588,10 @@
   },
   {
    "entity": "route:DELETE /projects/git-refs/:refId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-04: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5455,10 +5599,10 @@
   },
   {
    "entity": "route:DELETE /tasks/:taskId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-05: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5466,10 +5610,10 @@
   },
   {
    "entity": "route:DELETE /tasks/:taskId/checklist/:itemId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-06: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5477,10 +5621,10 @@
   },
   {
    "entity": "route:DELETE /tasks/:taskId/dependencies/:depId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-07: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5488,10 +5632,10 @@
   },
   {
    "entity": "route:DELETE /workspaces/:workspaceId/members/:userId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-08: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5499,10 +5643,10 @@
   },
   {
    "entity": "route:GET /agents/tasks",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-09: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5510,10 +5654,10 @@
   },
   {
    "entity": "route:GET /agents/workspace/:workspaceId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-10: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5521,10 +5665,10 @@
   },
   {
    "entity": "route:GET /projects/:projectId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-11: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5532,10 +5676,10 @@
   },
   {
    "entity": "route:GET /projects/tasks/:taskId/git-refs",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-12: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5543,10 +5687,10 @@
   },
   {
    "entity": "route:GET /projects/workspace/:workspaceId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-13: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5554,10 +5698,10 @@
   },
   {
    "entity": "route:GET /sync/datarim/:projectId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-14: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5565,10 +5709,10 @@
   },
   {
    "entity": "route:GET /tasks",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-15: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5576,10 +5720,10 @@
   },
   {
    "entity": "route:GET /tasks/:taskId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-16: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5587,10 +5731,10 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/activity",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-17: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5598,10 +5742,10 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/checklist",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-18: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5609,10 +5753,10 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/dependencies",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-19: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5620,10 +5764,10 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/dependency-graph",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-20: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5631,10 +5775,10 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/evidence",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-21: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5642,10 +5786,10 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/field-changes",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-22: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5653,10 +5797,10 @@
   },
   {
    "entity": "route:GET /tasks/:taskId/readiness",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-23: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5664,10 +5808,10 @@
   },
   {
    "entity": "route:GET /tasks/digest",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-24: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5675,10 +5819,10 @@
   },
   {
    "entity": "route:GET /tasks/project/:projectId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-25: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5686,10 +5830,10 @@
   },
   {
    "entity": "route:GET /tasks/project/:projectId/index",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-26: status 200 is neither 404 nor 405: the route is served by the resident version; key `grant` present",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5697,10 +5841,10 @@
   },
   {
    "entity": "route:GET /tasks/project/:projectId/staleness",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-27: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5708,10 +5852,10 @@
   },
   {
    "entity": "route:GET /workspaces",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-28: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5719,10 +5863,10 @@
   },
   {
    "entity": "route:GET /workspaces/:workspaceId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-29: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5730,10 +5874,10 @@
   },
   {
    "entity": "route:GET /workspaces/:workspaceId/members",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-30: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5741,10 +5885,10 @@
   },
   {
    "entity": "route:PATCH /tasks/:taskId/checklist/:itemId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-31: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5752,10 +5896,10 @@
   },
   {
    "entity": "route:PATCH /tasks/:taskId/contract",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-32: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5763,10 +5907,10 @@
   },
   {
    "entity": "route:PATCH /tasks/:taskId/status",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-33: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5774,10 +5918,10 @@
   },
   {
    "entity": "route:PATCH /workspaces/:workspaceId/members/:userId/role",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-34: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5785,10 +5929,10 @@
   },
   {
    "entity": "route:POST /agents",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-35: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5796,10 +5940,10 @@
   },
   {
    "entity": "route:POST /agents/:agentId/keys",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-36: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5807,10 +5951,10 @@
   },
   {
    "entity": "route:POST /agents/keys/:keyId/rotate",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-37: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5818,10 +5962,10 @@
   },
   {
    "entity": "route:POST /agents/keys/self/revoke",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-38: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5829,10 +5973,10 @@
   },
   {
    "entity": "route:POST /agents/tasks/:taskId/assign",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-39: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5840,10 +5984,10 @@
   },
   {
    "entity": "route:POST /projects",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-40: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5851,10 +5995,10 @@
   },
   {
    "entity": "route:POST /projects/git-refs",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-41: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5862,10 +6006,10 @@
   },
   {
    "entity": "route:POST /sync/datarim/:projectId/import",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-42: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5873,10 +6017,10 @@
   },
   {
    "entity": "route:POST /tasks",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-43: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5884,10 +6028,10 @@
   },
   {
    "entity": "route:POST /tasks/:taskId/checklist",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-44: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5895,10 +6039,10 @@
   },
   {
    "entity": "route:POST /tasks/:taskId/comments",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-45: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5906,10 +6050,10 @@
   },
   {
    "entity": "route:POST /tasks/:taskId/dependencies",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-46: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5917,10 +6061,10 @@
   },
   {
    "entity": "route:POST /tasks/:taskId/evidence",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-47: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5928,10 +6072,10 @@
   },
   {
    "entity": "route:POST /tasks/:taskId/field-ack",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-48: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5939,10 +6083,10 @@
   },
   {
    "entity": "route:POST /tasks/:taskId/redactions",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-49: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5950,10 +6094,10 @@
   },
   {
    "entity": "route:POST /workspaces",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-50: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5961,10 +6105,10 @@
   },
   {
    "entity": "route:POST /workspaces/:workspaceId/members/:userId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary muneral-pr249-project-read-http-20261014 (pre) on candidate-local Nest API on loopback; isolated PostgreSQL 16 database; synthetic agent key only; Redis isolated on loopback: route-51: status 401 is neither 404 nor 405: the route is served by the resident version",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -5979,8 +6123,8 @@
  },
  "verifiers": [
   {
-   "command": "/tmp/arcana-verify/export-c649d12230d5/apps/api/node_modules/.bin/tsc -p /tmp/arcana-verify/export-c649d12230d5/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/arcana-verify/verifier-out/type-check-6mjo5w6q/check.tsbuildinfo --listFiles",
-   "duration_s": 3.28,
+   "command": "/home/dev/aup/muneral-pr249-car-clean/apps/api/node_modules/.bin/tsc -p /home/dev/aup/muneral-pr249-car-clean/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/arcana-verify/verifier-out/type-check-k4g7phi3/check.tsbuildinfo --listFiles",
+   "duration_s": 6.36,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -6147,12 +6291,12 @@
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-10-14T14:37:24Z",
+   "started_at_utc": "2026-10-14T15:08:24Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1453 files listed"
   },
   {
-   "command": "/tmp/arcana-verify/export-c649d12230d5/apps/api/node_modules/.bin/tsc -p /tmp/arcana-verify/export-c649d12230d5/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /tmp/arcana-verify/verifier-out/type-check-ab55ghvg/check.tsbuildinfo --listFiles",
-   "duration_s": 5.85,
+   "command": "/home/dev/aup/muneral-pr249-car-clean/apps/api/node_modules/.bin/tsc -p /home/dev/aup/muneral-pr249-car-clean/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /tmp/arcana-verify/verifier-out/type-check-_v5_f732/check.tsbuildinfo --listFiles",
+   "duration_s": 8.13,
    "entities": [
     "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts",
     "code_unit:apps/api/test/agent-project-dependencies.e2e.spec.ts",
@@ -6213,12 +6357,12 @@
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-10-14T14:37:27Z",
+   "started_at_utc": "2026-10-14T15:08:31Z",
    "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1611 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=42061f829911, head=c649d12230d5, graph=head graph)",
-   "duration_s": 6.44,
+   "command": "tools/graph/contract_diff.py.run_diff(base=42061f829911, head=c2bfece74f83, graph=head graph)",
+   "duration_s": 6.34,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.service.ts",
@@ -6349,12 +6493,12 @@
    "id": "v-contract-diff",
    "kind": "contract_diff",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-contract-diff.json",
-   "started_at_utc": "2026-10-14T14:37:34Z",
+   "started_at_utc": "2026-10-14T15:08:40Z",
    "summary": "58→58 contracts, breaking 0, edges {'verified': 164}"
   },
   {
    "command": "verify.py route_config_consistency RC-01 prefix / RC-02 registration / RC-03 served",
-   "duration_s": 0.08,
+   "duration_s": 0.06,
    "entities": [
     "route:DELETE /agents/keys/:keyId",
     "route:DELETE /agents/tasks/:taskId/assign/:agentId",
@@ -6465,12 +6609,12 @@
    "id": "v-route-config",
    "kind": "config_schema",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-route-config.txt",
-   "started_at_utc": "2026-10-14T14:37:40Z",
+   "started_at_utc": "2026-10-14T15:08:46Z",
    "summary": "51 route(s), 0 failed"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.23,
+   "duration_s": 0.19,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -6585,7 +6729,7 @@
    "id": "v-fitness",
    "kind": "fitness_rules",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-fitness.json",
-   "started_at_utc": "2026-10-14T14:37:40Z",
+   "started_at_utc": "2026-10-14T15:08:46Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -6603,20 +6747,13 @@
    "id": "v-doc-reference",
    "kind": "doc_reference",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-doc-reference.txt",
-   "started_at_utc": "2026-10-14T14:37:40Z",
+   "started_at_utc": "2026-10-14T15:08:46Z",
    "summary": "2 document(s), 0 failed"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.0,
+   "duration_s": 4.61,
    "entities": [
-    "code_unit:apps/api/src/agents/agents.controller.ts",
-    "code_unit:apps/api/src/projects/projects.controller.ts",
-    "code_unit:apps/api/src/sync/sync.controller.ts",
-    "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts",
-    "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts",
-    "code_unit:apps/api/src/tasks/tasks.controller.ts",
-    "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
     "route:DELETE /agents/keys/:keyId",
     "route:DELETE /agents/tasks/:taskId/assign/:agentId",
     "route:DELETE /projects/:projectId",
@@ -6670,79 +6807,117 @@
     "route:POST /workspaces/:workspaceId/members/:userId"
    ],
    "entity_verdicts": {
-    "code_unit:apps/api/src/agents/agents.controller.ts": "not_measured",
-    "code_unit:apps/api/src/projects/projects.controller.ts": "not_measured",
-    "code_unit:apps/api/src/sync/sync.controller.ts": "not_measured",
-    "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts": "not_measured",
-    "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts": "not_measured",
-    "code_unit:apps/api/src/tasks/tasks.controller.ts": "not_measured",
-    "code_unit:apps/api/src/workspaces/workspaces.controller.ts": "not_measured",
-    "route:DELETE /agents/keys/:keyId": "not_measured",
-    "route:DELETE /agents/tasks/:taskId/assign/:agentId": "not_measured",
-    "route:DELETE /projects/:projectId": "not_measured",
-    "route:DELETE /projects/git-refs/:refId": "not_measured",
-    "route:DELETE /tasks/:taskId": "not_measured",
-    "route:DELETE /tasks/:taskId/checklist/:itemId": "not_measured",
-    "route:DELETE /tasks/:taskId/dependencies/:depId": "not_measured",
-    "route:DELETE /workspaces/:workspaceId/members/:userId": "not_measured",
-    "route:GET /agents/tasks": "not_measured",
-    "route:GET /agents/workspace/:workspaceId": "not_measured",
-    "route:GET /projects/:projectId": "not_measured",
-    "route:GET /projects/tasks/:taskId/git-refs": "not_measured",
-    "route:GET /projects/workspace/:workspaceId": "not_measured",
-    "route:GET /sync/datarim/:projectId": "not_measured",
-    "route:GET /tasks": "not_measured",
-    "route:GET /tasks/:taskId": "not_measured",
-    "route:GET /tasks/:taskId/activity": "not_measured",
-    "route:GET /tasks/:taskId/checklist": "not_measured",
-    "route:GET /tasks/:taskId/dependencies": "not_measured",
-    "route:GET /tasks/:taskId/dependency-graph": "not_measured",
-    "route:GET /tasks/:taskId/evidence": "not_measured",
-    "route:GET /tasks/:taskId/field-changes": "not_measured",
-    "route:GET /tasks/:taskId/readiness": "not_measured",
-    "route:GET /tasks/digest": "not_measured",
-    "route:GET /tasks/project/:projectId": "not_measured",
-    "route:GET /tasks/project/:projectId/index": "not_measured",
-    "route:GET /tasks/project/:projectId/staleness": "not_measured",
-    "route:GET /workspaces": "not_measured",
-    "route:GET /workspaces/:workspaceId": "not_measured",
-    "route:GET /workspaces/:workspaceId/members": "not_measured",
-    "route:PATCH /tasks/:taskId/checklist/:itemId": "not_measured",
-    "route:PATCH /tasks/:taskId/contract": "not_measured",
-    "route:PATCH /tasks/:taskId/status": "not_measured",
-    "route:PATCH /workspaces/:workspaceId/members/:userId/role": "not_measured",
-    "route:POST /agents": "not_measured",
-    "route:POST /agents/:agentId/keys": "not_measured",
-    "route:POST /agents/keys/:keyId/rotate": "not_measured",
-    "route:POST /agents/keys/self/revoke": "not_measured",
-    "route:POST /agents/tasks/:taskId/assign": "not_measured",
-    "route:POST /projects": "not_measured",
-    "route:POST /projects/git-refs": "not_measured",
-    "route:POST /sync/datarim/:projectId/import": "not_measured",
-    "route:POST /tasks": "not_measured",
-    "route:POST /tasks/:taskId/checklist": "not_measured",
-    "route:POST /tasks/:taskId/comments": "not_measured",
-    "route:POST /tasks/:taskId/dependencies": "not_measured",
-    "route:POST /tasks/:taskId/evidence": "not_measured",
-    "route:POST /tasks/:taskId/field-ack": "not_measured",
-    "route:POST /tasks/:taskId/redactions": "not_measured",
-    "route:POST /workspaces": "not_measured",
-    "route:POST /workspaces/:workspaceId/members/:userId": "not_measured"
+    "route:DELETE /agents/keys/:keyId": "verified",
+    "route:DELETE /agents/tasks/:taskId/assign/:agentId": "verified",
+    "route:DELETE /projects/:projectId": "verified",
+    "route:DELETE /projects/git-refs/:refId": "verified",
+    "route:DELETE /tasks/:taskId": "verified",
+    "route:DELETE /tasks/:taskId/checklist/:itemId": "verified",
+    "route:DELETE /tasks/:taskId/dependencies/:depId": "verified",
+    "route:DELETE /workspaces/:workspaceId/members/:userId": "verified",
+    "route:GET /agents/tasks": "verified",
+    "route:GET /agents/workspace/:workspaceId": "verified",
+    "route:GET /projects/:projectId": "verified",
+    "route:GET /projects/tasks/:taskId/git-refs": "verified",
+    "route:GET /projects/workspace/:workspaceId": "verified",
+    "route:GET /sync/datarim/:projectId": "verified",
+    "route:GET /tasks": "verified",
+    "route:GET /tasks/:taskId": "verified",
+    "route:GET /tasks/:taskId/activity": "verified",
+    "route:GET /tasks/:taskId/checklist": "verified",
+    "route:GET /tasks/:taskId/dependencies": "verified",
+    "route:GET /tasks/:taskId/dependency-graph": "verified",
+    "route:GET /tasks/:taskId/evidence": "verified",
+    "route:GET /tasks/:taskId/field-changes": "verified",
+    "route:GET /tasks/:taskId/readiness": "verified",
+    "route:GET /tasks/digest": "verified",
+    "route:GET /tasks/project/:projectId": "verified",
+    "route:GET /tasks/project/:projectId/index": "verified",
+    "route:GET /tasks/project/:projectId/staleness": "verified",
+    "route:GET /workspaces": "verified",
+    "route:GET /workspaces/:workspaceId": "verified",
+    "route:GET /workspaces/:workspaceId/members": "verified",
+    "route:PATCH /tasks/:taskId/checklist/:itemId": "verified",
+    "route:PATCH /tasks/:taskId/contract": "verified",
+    "route:PATCH /tasks/:taskId/status": "verified",
+    "route:PATCH /workspaces/:workspaceId/members/:userId/role": "verified",
+    "route:POST /agents": "verified",
+    "route:POST /agents/:agentId/keys": "verified",
+    "route:POST /agents/keys/:keyId/rotate": "verified",
+    "route:POST /agents/keys/self/revoke": "verified",
+    "route:POST /agents/tasks/:taskId/assign": "verified",
+    "route:POST /projects": "verified",
+    "route:POST /projects/git-refs": "verified",
+    "route:POST /sync/datarim/:projectId/import": "verified",
+    "route:POST /tasks": "verified",
+    "route:POST /tasks/:taskId/checklist": "verified",
+    "route:POST /tasks/:taskId/comments": "verified",
+    "route:POST /tasks/:taskId/dependencies": "verified",
+    "route:POST /tasks/:taskId/evidence": "verified",
+    "route:POST /tasks/:taskId/field-ack": "verified",
+    "route:POST /tasks/:taskId/redactions": "verified",
+    "route:POST /workspaces": "verified",
+    "route:POST /workspaces/:workspaceId/members/:userId": "verified"
    },
+   "exit_code": 0,
+   "id": "v-canary-1",
+   "kind": "canary",
+   "output_ref": "receipts/canary/muneral-pr249-project-read-20261014/http-positive/result.json",
+   "started_at_utc": "2026-10-14T15:08:46Z",
+   "summary": "receipts/canary/muneral-pr249-project-read-20261014/http-positive/result.json: 51 verified / 0 failed / 0 not_measured"
+  },
+  {
+   "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
+   "duration_s": 4.61,
+   "entities": [
+    "code_unit:apps/api/src/agents/agents.controller.ts",
+    "code_unit:apps/api/src/projects/projects.controller.ts",
+    "code_unit:apps/api/src/sync/sync.controller.ts",
+    "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts",
+    "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts",
+    "code_unit:apps/api/src/workspaces/workspaces.controller.ts"
+   ],
+   "entity_verdicts": {
+    "code_unit:apps/api/src/agents/agents.controller.ts": "verified",
+    "code_unit:apps/api/src/projects/projects.controller.ts": "verified",
+    "code_unit:apps/api/src/sync/sync.controller.ts": "verified",
+    "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts": "verified",
+    "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts": "verified",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts": "verified",
+    "code_unit:apps/api/src/workspaces/workspaces.controller.ts": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-canary-2",
+   "kind": "canary",
+   "output_ref": "receipts/canary/muneral-pr249-project-read-20261014/process-positive-v4/result.json",
+   "started_at_utc": "2026-10-14T15:08:46Z",
+   "summary": "receipts/canary/muneral-pr249-project-read-20261014/process-positive-v4/result.json: 7 verified / 0 failed / 0 not_measured"
+  },
+  {
+   "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
+   "duration_s": 4.61,
+   "entities": [],
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-canary.json",
-   "started_at_utc": "2026-10-14T14:37:40Z",
-   "summary": "0 canary result(s), 0 committed at head; 0 verified / 0 failed / 58 not_measured of 58 entities"
+   "started_at_utc": "2026-10-14T15:08:46Z",
+   "summary": "2 canary result(s), 2 committed at head; 58 verified / 0 failed / 0 not_measured of 58 entities"
   }
  ],
  "verify": {
   "events": [
    {
+    "code": "SUPERSEDED_SELF_EXCLUSION",
+    "entity": "receipt:receipts/graph/change-admission-pr249-project-read-renewal.json",
+    "rule": "DEC-AUP-0035",
+    "text": "the receipt at receipts/graph/change-admission-pr249-project-read-renewal.json is the previous version of the one this run is writing, for the same work item 971d0143-8549-47a9-b89b-19f0a4023a53 — superseded by construction, so it owes this change no verdict"
+   },
+   {
     "code": "STRUCTURAL_EXCLUSION",
     "rule": "DEC-AUP-0034",
-    "text": "39 affected entity(ies) owe no verdict (receipt: 39): unchanged at both revisions and given no verifier by the matrix"
+    "text": "40 affected entity(ies) owe no verdict (receipt: 40): unchanged at both revisions and given no verifier by the matrix"
    }
   ],
   "required_by_entity": {
@@ -7016,6 +7191,7 @@
    "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json": [],
    "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json": [],
    "receipt:receipts/graph/change-admission-pr242-ab7dc194.json": [],
+   "receipt:receipts/graph/change-admission-pr249-project-read-renewal.json": [],
    "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json": [],
    "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json": [],
    "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json": [],
@@ -7330,9 +7506,9 @@
    ]
   },
   "seconds": {
-   "prepare": 1.68,
-   "total": 42.62,
-   "verifiers": 15.88
+   "prepare": 3.74,
+   "total": 91.82,
+   "verifiers": 34.91
   }
  },
  "work_item": "971d0143-8549-47a9-b89b-19f0a4023a53"
