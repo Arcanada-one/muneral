@@ -1,0 +1,11 @@
+{
+  "schema": "MeasuredGitSource/v1",
+  "captured_at_utc": "2026-10-14T04:56:39.711Z",
+  "commit": "e759338234aac90d27598d1b31aab623a0e06f05",
+  "tree": "982ccbaed725b4f894726d6e3c94ea5d7c12bdc3",
+  "dirty": false,
+  "producer": {
+    "tool": "PR246 web read integration test",
+    "version": "Vitest 5.0.1"
+  }
+}
