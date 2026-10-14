@@ -34,6 +34,7 @@ from __future__ import annotations
 import argparse
 import fnmatch
 import hashlib
+import importlib.util
 import json
 import os
 import re
@@ -53,8 +54,17 @@ BUNDLE_FILES = [
     "tools/graph/admit_change.py",
     "tools/graph/schema_check.py",
     "tools/graph/build_graph.py",
+    "tools/graph/python_search_path.py",
+    "tools/graph/selected_dependency.py",
+    "tools/graph/selected_dependency_fitness.py",
+    "tools/graph/selected_dependency_replay.py",
+    "tools/graph/selected_dependency_runner.py",
     "tools/graph/native_projection.py",
     "tools/graph/nest_bootstrap.py",
+    # DEC0147: transitive executable inputs of compiler-bound inline harness projection.
+    "tools/graph/nest_fixture_scope.py",
+    "tools/graph/inline_nest_harness.cjs",
+    "tools/graph/fixture_contracts.py",
     # build_graph.py imports this at module scope to classify .github/workflows/* paths, so a bundle
     # without it is not merely reduced — the vendored builder raises ModuleNotFoundError on import
     # and the caller's gate cannot build a graph at all. Measured: the pre-1.0.1 builder carried no
@@ -584,9 +594,13 @@ def check_readiness_receipts(result: dict, body: str, repo: Path, files: list[st
     a pass (DEC-AUP-0008 I4). What IS decided here is the self-contradiction: a receipt that claims
     it verified a contract binding and will not say which contract.
     """
-    sys.path.insert(0, str(tools / "tools" / "graph"))
     try:
-        import readiness_check  # noqa: PLC0415 — the bundled validator, loaded from the pinned bundle
+        validator_path = tools / "tools" / "graph" / "readiness_check.py"
+        spec = importlib.util.spec_from_file_location("_aup_bundled_readiness_check", validator_path)
+        if spec is None or spec.loader is None:
+            raise ImportError(f"cannot load bundled validator at {validator_path}")
+        readiness_check = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(readiness_check)
     except Exception as e:  # pragma: no cover — a bundle without the validator
         result["checks"].append({"code": "READINESS_VALIDATOR_UNAVAILABLE", "verdict": "not_measured",
                                  "detail": f"the pinned bundle carries no usable readiness_check: {e!r}. "
@@ -1236,22 +1250,20 @@ def selftest_gate2a() -> tuple[list[dict], int]:
 
     g("init", "-q", "-b", "main")
     (repo / "src").mkdir()
-    (repo / "src/a.ts").write_text("export const a = 1;\n")
-    (repo / "src/b.ts").write_text("import { a } from './a';\nexport const b = a + 1;\n")
+    (repo / "src/a.js").write_text("export const a = 1;\n")
+    (repo / "src/b.js").write_text("import { a } from './a.js';\nexport const b = a + 1;\n")
     (repo / "package.json").write_text('{\n "name": "fixture",\n "dependencies": {"left-pad": "1.0.0"}\n}\n')
     (repo / "pnpm-lock.yaml").write_text("lockfileVersion: '9.0'\npackages:\n  left-pad@1.0.0: {}\n")
-    (repo / "tsconfig.json").write_text(json.dumps({"compilerOptions": {
-        "strict": True, "noEmit": True}, "include": ["src/**/*.ts"]}))
     (repo / ".arcana").mkdir()
     (repo / ".arcana/verify.json").write_text(json.dumps({"schema": "VerifyProfile/v1",
-        "deployables": {".": {"tsconfig": ["tsconfig.json"], "full_test":
+        "deployables": {".": {"full_test":
             [sys.executable, "-m", "unittest", "discover", "-s", "test", "-v"]}}}))
     (repo / "test").mkdir()
     (repo / "test/test_source.py").write_text(
         "import pathlib, unittest\n"
         "class Source(unittest.TestCase):\n"
-        " def test_export(self): self.assertEqual(pathlib.Path('src/a.ts').read_text(), 'export const a = 1;\\n')\n"
-        " def test_consumer(self): self.assertIn('export const b = a + 1;', pathlib.Path('src/b.ts').read_text())\n")
+        " def test_export(self): self.assertEqual(pathlib.Path('src/a.js').read_text(), 'export const a = 1;\\n')\n"
+        " def test_consumer(self): self.assertIn('export const b = a + 1;', pathlib.Path('src/b.js').read_text())\n")
 
     g("add", "-A"); g("commit", "-q", "-m", "base")
     base = g("rev-parse", "HEAD").strip()
@@ -1276,6 +1288,11 @@ def selftest_gate2a() -> tuple[list[dict], int]:
 
     DEPENDABOT = {"login": "dependabot[bot]", "id": 49699333, "type": "Bot"}
     HUMAN = {"login": "mallory", "id": 12345, "type": "User"}
+    readiness_body = "A bounded fixture measurement.\n\n```json\n" + json.dumps({
+        "schema": "ReadinessReceipt/v1",
+        "captured_at_utc": "2026-09-05T00:00:00Z",
+        "producer": "ci_gate.selftest_gate2a",
+    }, indent=2) + "\n```\n"
 
     def event(user: dict, head_ref: str) -> str:
         p = root / f"event-{user['login']}-{abs(hash(head_ref)) % 10 ** 6}.json"
@@ -1300,30 +1317,70 @@ def selftest_gate2a() -> tuple[list[dict], int]:
         doc["_rc"] = rc
         return doc
 
+    # Expired DEC-AUP-0062 makes an absent ReadinessReceipt/v1 not_measured again.
+    # Keep that behavior explicit while giving the positive author-control the valid
+    # readiness evidence it now needs; this does not synthesize a ChangeAdmissionReceipt.
+    missing_readiness: dict = {"checks": [], "reason_codes": []}
+    check_readiness_receipts(missing_readiness, "", repo, [], base,
+                             repo / ".github/graph-admission",
+                             now_utc=datetime(2026, 10, 12, tzinfo=timezone.utc))
+    missing_rows = [c for c in missing_readiness["checks"] if c.get("code") == "READINESS_RECEIPTS_NONE"]
+    check("(a0) an absent ReadinessReceipt/v1 after the DEC-AUP-0062 revisit remains not_measured",
+          missing_readiness.get("readiness_receipts", {}).get("count") == 0
+          and len(missing_rows) == 1 and missing_rows[0].get("verdict") == "not_measured",
+          rows=missing_rows)
+
     # ---------------------------------------------------------------- control (a)
     lock_head = commit({"pnpm-lock.yaml": "lockfileVersion: '9.0'\npackages:\n  left-pad@1.1.0: {}\n",
                         "package.json": '{\n "name": "fixture",\n "dependencies": {"left-pad": "1.1.0"}\n}\n'},
                        "build(deps): bump left-pad from 1.0.0 to 1.1.0", "mut-a")
     control = run(lock_head, event_file=event(DEPENDABOT, "dependabot/npm_and_yarn/left-pad-1.1.0"),
-                  conclusion="success")
+                  conclusion="success", body=readiness_body)
     au = control.get("automated_author") or {}
+    readiness_checks = [c for c in control.get("checks", [])
+                        if c.get("code") in {"READINESS_RECEIPT_CONFORMANT", "READINESS_RECEIPTS_NONE"}]
+    readiness_ok = (control.get("readiness_receipts", {}).get("count") == 1
+                    and any(c.get("code") == "READINESS_RECEIPT_CONFORMANT"
+                            and c.get("verdict") == "verified" for c in readiness_checks)
+                    and not any(c.get("code") == "READINESS_RECEIPTS_NONE" for c in readiness_checks))
     check("(a) dependabot pull request touching only dependency manifests → green with the typed exemption",
           control["_rc"] == 0 and control["verdict"] == "admitted_with_exemptions"
           and au.get("eligible") is True and au.get("exemption_code") == "AUTOMATED_DEPENDENCY_UPDATE"
-          and "AUTOMATED_AUTHOR_RECEIPT_ISSUED" in control["reason_codes"],
+          and "AUTOMATED_AUTHOR_RECEIPT_ISSUED" in control["reason_codes"] and readiness_ok,
           verdict=control["verdict"], rc=control["_rc"], codes=control["reason_codes"],
-          exemption=au.get("exemption_code"))
+          exemption=au.get("exemption_code"), readiness=readiness_checks)
+    # selftest() runs first and removes its temporary caller tree before this battery starts.
+    # The validator must be loaded from THIS fixture bundle, rather than a module cached from that
+    # removed tree, and its schema must resolve beside this bundle's tools/graph directory.
+    gate2a_bundle = repo / ".github/graph-admission"
+    gate2a_validator = importlib.util.spec_from_file_location(
+        "_aup_gate2a_readiness_check", gate2a_bundle / "tools/graph/readiness_check.py")
+    gate2a_schema_ok = False
+    if gate2a_validator is not None and gate2a_validator.loader is not None:
+        gate2a_module = importlib.util.module_from_spec(gate2a_validator)
+        gate2a_validator.loader.exec_module(gate2a_module)
+        gate2a_schema_ok = (Path(gate2a_module.__file__).resolve()
+                            == (gate2a_bundle / "tools/graph/readiness_check.py").resolve()
+                            and gate2a_module.SCHEMA_PATH.resolve()
+                            == (gate2a_bundle / "contracts/readiness-receipt-v1.schema.json").resolve()
+                            and isinstance(gate2a_module.load_schema(), dict))
+    check("(a1) gate2a loads its readiness validator and schema from its own bundle after the prior "
+          "selftest tree is removed",
+          gate2a_schema_ok and readiness_ok,
+          validator=str(gate2a_bundle / "tools/graph/readiness_check.py"),
+          schema=str(gate2a_bundle / "contracts/readiness-receipt-v1.schema.json"),
+          readiness=readiness_checks)
     check("(a2) the control's receipt states impact = whole_repository and is verified by the repository's "
           "own test job — the exemption never covers the repository entity",
-          au.get("eligible") is True and _receipt_shape_ok(root, au.get("receipt_path")),
-          receipt=au.get("receipt_path"))
+          au.get("eligible") is True and _receipt_shape_ok(root, au.get("receipt_path")) and readiness_ok,
+          receipt=au.get("receipt_path"), readiness=readiness_checks)
     check("(a3) the gate REBUILT the repository graph at the receipt's source commit and it matched",
           any(c["code"] == "GRAPH_REBUILT_MATCHES" for c in control["checks"]),
           codes=[c["code"] for c in control["checks"]])
 
     # ---------------------------------------------------------------- mutants
     src_head = commit({"pnpm-lock.yaml": "lockfileVersion: '9.0'\npackages:\n  left-pad@1.2.0: {}\n",
-                       "src/a.ts": "export const a = 99;\n"},
+                       "src/a.js": "export const a = 99;\n"},
                       "build(deps): bump left-pad, and quietly edit the source", "mut-b")
     mut_b = run(src_head, event_file=event(DEPENDABOT, "dependabot/npm_and_yarn/left-pad-1.2.0"),
                 conclusion="success")
@@ -3355,7 +3412,7 @@ def selftest_gate2b() -> tuple[list[dict], int]:
         ok_stale, _, _ = sshsig.verify_detached(msg2.read_bytes(), (d / "m.sig").read_text(),
                                                 (d / "k.pub").read_text(), SIGNING_NAMESPACE)
         check("RE-SIGN TRAP: `ssh-keygen -Y sign` over an existing .sig exits 0 and keeps the STALE signature, "
-              "which then does NOT verify over the new bytes — the defect gate3a fixes",
+              "which then does NOT verify over the new bytes — the defect gate3a fixes", 
               r_noclean.returncode == 0 and kept_stale and not ok_stale,
               exit_code=r_noclean.returncode, kept_stale=kept_stale, stale_verifies=ok_stale)
         # (b) the fix: remove the target first, exactly as cmd_bundle now does

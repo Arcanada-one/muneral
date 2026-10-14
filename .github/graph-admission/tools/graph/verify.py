@@ -72,6 +72,8 @@ sys.path.insert(0, str(HERE))
 import schema_check  # noqa: E402
 import build_graph  # noqa: E402
 import impact  # noqa: E402
+import nest_fixture_scope
+import fixture_contracts
 import impact_pair  # noqa: E402
 import contract_diff  # noqa: E402
 import native_projection  # noqa: E402
@@ -154,7 +156,7 @@ def compiler_sdk_input(a, repo, base, head):
     # A Node declaration is a resolution input, not merely executable discovery.
     # Keep legacy tsc-only inputs unchanged; never infer types from PATH or a host SDK.
     node_types = any(name.startswith("@types/node/") for name in paths)
-    type_roots = str((root / "@types").resolve()) if node_types else None
+    type_roots = ",".join(str(p.resolve()) for p in (root / "@types", root)) if node_types else None
 
     def check_resolution():
         if not node_types:
@@ -163,9 +165,13 @@ def compiler_sdk_input(a, repo, base, head):
             metadata = package + "/package.json"
             if metadata not in paths:
                 raise ValueError("compiler SDK resolution metadata undeclared: " + metadata)
-        for package in ("@types/node", "undici-types"):
+        for package in ("typescript", "@types/node", "undici-types"):
             metadata = json.loads((root / package / "package.json").read_text())
             target = metadata.get("typings", metadata.get("types"))
+            # TypeScript publishes a conventional package-relative ./ entry.
+            # Normalize that single prefix while refusing interior/parent escapes.
+            if isinstance(target, str) and target.startswith("./"):
+                target = target[2:]
             if (not isinstance(target, str) or Path(target).is_absolute()
                     or any(part in ("", ".", "..") for part in target.split("/"))
                     or package + "/" + target not in paths):
@@ -181,6 +187,22 @@ def compiler_sdk_input(a, repo, base, head):
                             raise ValueError("compiler SDK resolution member undeclared: " + relative)
         if sorted(p.name for p in (root / "@types").iterdir()) != ["node"]:
             raise ValueError("compiler SDK type root contains an undeclared ambient package")
+        # Both explicit roots are exposed to module/type resolution. Bound every
+        # physical member and namespace, before and after execution, not just .d.ts.
+        if sorted(p.name for p in root.iterdir()) != ["@types", "typescript", "undici-types"]:
+            raise ValueError("compiler SDK exposed namespace differs from declared packages")
+        inventory = set()
+        for directory, dirs, files in os.walk(root, followlinks=False):
+            for name in dirs + files:
+                member = Path(directory) / name
+                if member.is_symlink():
+                    raise ValueError("compiler SDK resolution alias refused: " + str(member))
+                if not member.is_dir() and not member.is_file():
+                    raise ValueError("compiler SDK resolution member is not a regular file")
+                if member.is_file():
+                    inventory.add(member.relative_to(root).as_posix())
+        if inventory != set(paths):
+            raise ValueError("compiler SDK complete resolution inventory differs from declaration")
 
     def check_bytes():
         if declaration.read_bytes() != raw:
@@ -774,6 +796,7 @@ def is_fixture_path(path: str) -> bool:
     return any(part in FIXTURE_DIR_NAMES for part in (path or "").split("/")[:-1])
 
 
+
 def is_test_path(path: str) -> bool:
     """The TypeScript/JavaScript test-file rule build_graph applies (TsFile.is_test). Defined once in impact_pair."""
     return impact_pair.is_test_path(path)
@@ -950,7 +973,30 @@ def fitness_violations(graph: dict, tree: build_graph.Tree, scan: TreeScan, rule
         if "fr03" in rules_on and dep_f and dep_f == dep_t:
             mf, mt = module_of(fp, dep_f), module_of(tp, dep_t)
             if mf and mt and mf != mt and BOUNDARY_TARGET_RE.search(tp):
-                add("FR-03", e["from"], f"module {mf} imports {tp} of module {mt} (controller / gateway / processor are not a module's exported surface)", tp)
+                # Inline Nest harnesses retain compiler-expanded dependencies for
+                # reverse impact. FR-03 judges authored imports, not that closure.
+                # Re-resolve the exact source, including import type: a marker
+                # cannot hide a real private import or an unknown local binding.
+                source = scan.ts.get(fp)
+                expanded_only = (
+                    e.get("via") == "inline-harness-compiler-dependency"
+                    and source is not None and tree.exists(tp)
+                    and scan.tree is tree
+                    # Escaped identifiers/literals are not decoded by IMPORT_RE.
+                    # Their presence makes this absence proof unqualified.
+                    and "\\u" not in source.code
+                    # The scanner is deliberately partial. Any import/require
+                    # token outside a recognized declaration/call means its
+                    # inventory cannot prove absence (spacing, import-equals,
+                    # nonliteral loaders, etc.). Refuse the distinction then.
+                    and not re.search(r"\b(?:import|require|export)\b",
+                                      build_graph.IMPORT_RE.sub(" ", source.code))
+                    and all(not imp["spec"].startswith(".") or imp["spec"] in source.resolved
+                            for imp in source.imports)
+                    and tp not in {source.resolved.get(imp["spec"]) for imp in source.imports}
+                )
+                if not expanded_only:
+                    add("FR-03", e["from"], f"module {mf} imports {tp} of module {mt} (controller / gateway / processor are not a module's exported surface)", tp)
         if "fr05" in rules_on and dep_f and dep_t and dep_f != dep_t and deployables[dep_t].get("kind") not in SHARED_KINDS:
             add("FR-05", e["from"], f"deployable {dep_f} imports {tp} of deployable {dep_t} ({deployables[dep_t].get('kind')})", tp)
     if "fr01" in rules_on:
@@ -1150,6 +1196,8 @@ class Verify:
         self.captured_at = now_iso()
         self.repo = impact.Repo(Path(a.repo))
         self.top = self.repo.top
+        self.scope_root = self.repo.path
+        self.scope_prefix = self.repo.prefix
         self.workdir = Path(a.workdir) if a.workdir else Path(os.environ.get("TMPDIR", "/tmp")) / "arcana-verify"
         self.workdir.mkdir(parents=True, exist_ok=True)
         # Captured verifier output and the two graph dumps go to the WORKDIR, never beside the receipt.
@@ -1159,7 +1207,7 @@ class Verify:
         # working scratch is not, and the tool must not make the author remember the difference.
         self.out_dir = Path(a.verifier_out) if a.verifier_out else self.workdir / "verifier-out"
         self.out_dir.mkdir(parents=True, exist_ok=True)
-        self.profile, self.profile_ref = load_profile(a, self.top)
+        self.profile, self.profile_ref = load_profile(a, self.scope_root)
         self.events: list[dict] = []
         self.notes: list[str] = []
         self.verifiers: list[dict] = []
@@ -1168,6 +1216,7 @@ class Verify:
         self.canary_verified: set[str] = set()
         self.canary_discharged_tests: list[str] = []   # A2-353: test code_units whose `canary` was discharged
         self.type_check_discharged_fixtures: list[str] = []   # A2-452: uncovered fixture files, type_check discharged
+        self.type_check_not_owed: list[tuple[str, dict]] = []   # d2c3de8c: declared data/vendored, type_check discharged
         self.prep_seconds = 0.0
         # DEC-AUP-0035. WHERE this run's receipt is going, expressed relative to the repository, and
         # for which work item. Both are needed to recognise the one entity a receipt can never
@@ -1211,7 +1260,7 @@ class Verify:
         else:
             rev = base if mode == "diff" else tree_commit
             with impact_pair.trace_phase("base-graph-build"):
-                doc = build_graph.build(self.top, rev=rev, built_at=build_graph.FIXED_BUILT_AT)
+                doc = build_graph.build(self.top, rev=rev, subdir=self.scope_prefix, built_at=build_graph.FIXED_BUILT_AT)
             gp = self.out_dir / f"graph-{rev[:12]}.json"
             gp.write_bytes(build_graph.dump_graph(doc))
             self.graph_path = rel_ref(gp)
@@ -1244,19 +1293,19 @@ class Verify:
     def prepare_head(self):
         t0 = time.monotonic()
         if self.mode == "worktree":
-            self.tree_head = build_graph.load_tree_worktree(self.top)
-            self.exec_root = self.top
+            self.tree_head = build_graph.load_tree_worktree(self.scope_root)
+            self.exec_root = self.scope_root
             self.exported = False
         else:
-            self.tree_head = build_graph.load_tree_git(self.top, self.head, "")
+            self.tree_head = build_graph.load_tree_git(self.top, self.head, self.scope_prefix)
             if self.head == self.repo.head() and not self.repo.dirty():
-                self.exec_root = self.top
+                self.exec_root = self.scope_root
                 self.exported = False
             else:
                 self.exec_root = self.export_head()
                 self.exported = True
-        self.tree_base = build_graph.load_tree_git(self.top, self.base, "") if self.mode == "diff" else \
-            build_graph.load_tree_git(self.top, self.repo.head(), "")
+        self.tree_base = build_graph.load_tree_git(self.top, self.base, self.scope_prefix) if self.mode == "diff" else \
+            build_graph.load_tree_git(self.top, self.repo.head(), self.scope_prefix)
         # Bootstrap selection is revision-bound. A dirty/other-head local profile
         # must not override the tracked profile of the head we are verifying.
         if not getattr(self.a, 'profile', None):
@@ -1279,8 +1328,8 @@ class Verify:
                     raise impact.Refusal("STALE_GRAPH", "prepared head graph is not bound to the verified head")
                 self.graph_head = json.loads(json.dumps(self.pair_head_idx.doc))
             else:
-                self.graph_head = build_graph.build(self.top, worktree=True, built_at=build_graph.FIXED_BUILT_AT) if self.mode == "worktree" \
-                    else build_graph.build(self.top, rev=self.head, built_at=build_graph.FIXED_BUILT_AT)
+                self.graph_head = build_graph.build(self.scope_root, worktree=True, built_at=build_graph.FIXED_BUILT_AT) if self.mode == "worktree" \
+                    else build_graph.build(self.top, rev=self.head, subdir=self.scope_prefix, built_at=build_graph.FIXED_BUILT_AT)
         self.scan_head = TreeScan(self.tree_head)
         self.head_nodes = {n["id"]: n for n in self.graph_head["nodes"]}
         self.head_rev: dict[str, list[dict]] = {}
@@ -1295,17 +1344,18 @@ class Verify:
         self.prep_seconds += round(time.monotonic() - t0, 2)
 
     def export_head(self) -> Path:
-        dest = self.workdir / f"export-{self.head[:12]}"
+        scope_key = "-" + hashlib.sha256(str(self.scope_root).encode()).hexdigest()[:16] if self.scope_prefix else ""
+        dest = self.workdir / f"export-{self.head[:12]}{scope_key}"
         if not (dest / ".arcana-export-ok").exists():
             if dest.exists():
                 shutil.rmtree(dest)
             dest.mkdir(parents=True)
-            tar = subprocess.run(["git", "archive", "--format=tar", self.head], cwd=self.top, check=True, capture_output=True).stdout
+            tar = subprocess.run(["git", "archive", "--format=tar", self.head + (":" + self.scope_prefix.rstrip("/") if self.scope_prefix else "")], cwd=self.top, check=True, capture_output=True).stdout
             subprocess.run(["tar", "-x", "-C", str(dest)], input=tar, check=True)
             linked = []
             for d in [""] + sorted(p for p in (self.tree_head.paths) if p.endswith("/package.json") and p.count("/") <= 2):
                 d = d[:-len("/package.json")] if d.endswith("/package.json") else d
-                src = self.top / d / "node_modules"
+                src = self.scope_root / d / "node_modules"
                 tgt = dest / d / "node_modules"
                 if src.is_dir() and not tgt.exists():
                     tgt.symlink_to(src, target_is_directory=True)
@@ -1314,7 +1364,7 @@ class Verify:
             for d in sorted(self.tree_head.paths):
                 if re.match(r"^packages/[^/]+/tsconfig\.json$", d):
                     pdir = dest / os.path.dirname(d)
-                    tsc = find_bin("tsc", self.a.tsc, dest, self.top, [os.path.dirname(d)])
+                    tsc = find_bin("tsc", self.a.tsc, dest, self.scope_root, [os.path.dirname(d)])
                     if tsc:
                         rc, out, secs = run_cmd([tsc, "-p", "tsconfig.json", *compiler_sdk_type_check_args(tsc)], pdir)
                         built.append(f"{os.path.dirname(d)} (tsc exit {rc}, {secs}s)")
@@ -1413,6 +1463,18 @@ class Verify:
                     and is_fixture_path(ent["node"].get("path", "")) and not self.type_project_covers(ent["node"].get("path", ""))):
                 req.discard("type_check")
                 self.type_check_discharged_fixtures.append(ent["id"])
+            # Muneral d2c3de8c. The same discharge, for trees a repository DECLARES are not a program: historical
+            # data kept for the record (the Arcanada workspace's datarim/) and vendored third-party files
+            # (.obsidian/plugins/<name>/main.js). The rule lives in impact_pair (type_check_not_owed), called here and
+            # by the gate's mandatory_by_entity, so the two can never disagree. Its limits: only type_check; only
+            # where no deployable and no tsconfig.json up the path could cover the file; enumerated paths (data:
+            # `<dir>/**`, vendored: exact files) and never a tree holding TypeScript; owner, expiry and reverse_if
+            # as on an exemption; and the SAME entry at base and head, so a change never discharges its own files.
+            if "type_check" in req and ntype in ("code_unit", "route"):
+                decl = self.declared_not_owed(ent["node"].get("path", ""))
+                if decl:
+                    req.discard("type_check")
+                    self.type_check_not_owed.append((ent["id"], decl))
             # AUP-GRAPH-010 polyglot3. A SELECTED verifier used to be demanded of every entity of a
             # node type it applies to, whether or not anything could ever produce a verdict for that
             # entity — and a demanded verifier that produces no verdict is `not_measured` (:1989).
@@ -1460,6 +1522,16 @@ class Verify:
                               f"tsconfig covers (a directory named {'/'.join(sorted(FIXTURE_DIR_NAMES))} in the path): test "
                               f"data, not a compiled project; their other verifiers still apply: "
                               + ", ".join(sorted(self.type_check_discharged_fixtures)[:10]))
+        if self.type_check_not_owed:
+            by = {}
+            for eid, d in self.type_check_not_owed:
+                by.setdefault((d["glob"], d["class"], d["reason"]), []).append(eid)
+            for (glob, cls, reason), eids in sorted(by.items()):
+                self.notes.append(f"d2c3de8c: `type_check` not owed for {len(eids)} file(s) under the declared {cls} path "
+                                  f"`{glob}` (.arcana/verify.json type_check_not_owed, identical at base and head; no "
+                                  f"tsconfig covers them): {reason} — " + ", ".join(sorted(eids)[:10]))
+        for bad in getattr(self, "_not_owed_invalid", []):
+            self.notes.append(f"d2c3de8c: type_check_not_owed entry IGNORED: {bad}")
         self.disabled_hits = sorted(v for v in self.disabled if any(v in e["required"] for e in self.entities.values()))
         if self.disabled_hits and "disabled_mandatory_event" in self.rules:
             self.events.append({"code": "MANDATORY_VERIFIER_DISABLED", "verifiers": self.disabled_hits,
@@ -1468,6 +1540,22 @@ class Verify:
     @staticmethod
     def is_ts(path: str) -> bool:
         return os.path.splitext(path)[1] in CODE_EXTS or path.endswith((".js", ".mjs", ".cjs", ".jsx"))
+
+    def declared_not_owed(self, path: str) -> dict | None:
+        """The in-force type_check_not_owed entry discharging `path`, or None — impact_pair's ONE definition, fed the
+        same inputs the gate reads from Git: the profile at base and at head, both revisions' paths, the graph deployables,
+        and this receipt's capture time."""
+        if getattr(self, "_not_owed", None) is None:
+            def profile_at(tree):
+                try:
+                    return json.loads(tree.text(impact_pair.NOT_OWED_PROFILE)) if tree.exists(impact_pair.NOT_OWED_PROFILE) else {}
+                except (ValueError, TypeError):
+                    return {}
+            self._not_owed_invalid = []
+            self._not_owed_paths = set(self.tree_base.paths) | set(self.tree_head.paths)
+            self._not_owed = impact_pair.not_owed_in_force(profile_at(self.tree_base), profile_at(self.tree_head),
+                                                           self.captured_at, self._not_owed_paths, self._not_owed_invalid)
+        return impact_pair.type_check_not_owed(path, self._not_owed, self._not_owed_paths, self.deployables.keys())
 
     def type_project_covers(self, path: str) -> bool:
         """Is some compiler project attributed to this file — the same two steps v_type_check takes?"""
@@ -1647,7 +1735,7 @@ class Verify:
                 gen = self.generated_tsconfig(dep, cfg)
                 vid = "v-type-check-" + re.sub(r"[^a-z0-9]+", "-", (dep + "-" + os.path.basename(cfg).replace(".json", "")).lower()).strip("-")
             # The nearest config project owns its compiler before ancestors and fallback.
-            tsc = find_bin("tsc", self.a.tsc, root, self.top, config_dirs(dep, cfg) + [dep])
+            tsc = find_bin("tsc", self.a.tsc, root, getattr(self, "scope_root", self.top), config_dirs(dep, cfg) + [dep])
             if not tsc:
                 self.record(vid, "type_check", f"tsc -p {gen} (tsc not found)", eids, 127, "tsc binary not found (node_modules/.bin/tsc, --tsc, PATH)",
                             started, 0.0, "not_measured: tsc unavailable", {e: ("not_measured", "tsc unavailable on this host") for e in eids})
@@ -1883,11 +1971,12 @@ class Verify:
             rev = self.repo.head()
         res["rev"] = rev
         prefix = "" if dep in ("", ".") else dep.rstrip("/") + "/"
-        dest = self.workdir / f"postbuild-{rev[:12]}-{re.sub(r'[^a-z0-9]+', '-', (dep or 'root').lower()).strip('-') or 'root'}"
+        scope_key = "-" + hashlib.sha256(str(self.scope_root).encode()).hexdigest()[:16] if self.scope_prefix else ""
+        dest = self.workdir / f"postbuild-{rev[:12]}{scope_key}-{re.sub(r'[^a-z0-9]+', '-', (dep or 'root').lower()).strip('-') or 'root'}"
         if dest.exists():
             shutil.rmtree(dest)
         dest.mkdir(parents=True)
-        tar = subprocess.run(["git", "archive", "--format=tar", rev], cwd=self.top, check=True, capture_output=True).stdout
+        tar = subprocess.run(["git", "archive", "--format=tar", rev + (":" + self.scope_prefix.rstrip("/") if self.scope_prefix else "")], cwd=self.top, check=True, capture_output=True).stdout
         subprocess.run(["tar", "-x", "-C", str(dest)], input=tar, check=True)
         removed = []
         for o in outputs:
@@ -1904,7 +1993,7 @@ class Verify:
         # build that then fails is `not_measured`, never a pass.
         linked = []
         for d in [""] + sorted(p[:-len("/package.json")] for p in self.tree_head.paths if p.endswith("/package.json") and p.count("/") <= 2):
-            src, tgt = self.top / d / "node_modules", dest / d / "node_modules"
+            src, tgt = self.scope_root / d / "node_modules", dest / d / "node_modules"
             if src.is_dir() and not tgt.exists():
                 if subprocess.run(["cp", "-al", str(src), str(tgt)], capture_output=True).returncode == 0:
                     linked.append(f"{d or '.'} (hard-link copy)")
@@ -2051,6 +2140,8 @@ class Verify:
         t0 = time.monotonic()
         bootstraps: dict[str, nest_bootstrap.Bootstrap] = {}
         registered: dict[str, tuple[set[str], list[str]]] = {}
+        inline_projections = {}
+        inline_dependency_unions = {}
         log, verdicts = [], {}
         # A2-277 defect 2. RC-01/RC-02 are NestJS rules; RC-03 (is the served route still there, and
         # does anything consume it) is a statement about the graph and holds in any language. So the
@@ -2079,12 +2170,50 @@ class Verify:
                 if eid not in self.head_nodes:
                     consumers = [e["from"] for e in self.idx.rev.get(eid, []) if e["type"] == "consumes_contract"]
                     if consumers:
-                        problems.append(f"ROUTE_REMOVED_WITH_CONSUMER: not served at head, consumers {consumers[:3]}")
+                        # A proven RC-03 refusal outranks later transport uncertainty.
+                        reason = f"ROUTE_REMOVED_WITH_CONSUMER: not served at head, consumers {consumers[:3]}"
+                        verdicts[eid] = ("failed", reason)
+                        log.append(f"{eid}: failed {reason}")
+                        continue
                     else:
                         notes.append("route no longer served at head, no consumer bound to it")
                         verdicts[eid] = ("verified", notes[-1])
                         log.append(f"{eid}: {notes[-1]}")
                         continue
+            if (n.get('attrs') or {}).get('inline_harness'):
+                # Graph attrs carry identity only. Recompute containment from immutable
+                # HEAD and the actual target compiler before changing rule applicability.
+                if dep not in inline_projections:
+                    bootstrap = nest_bootstrap.resolve(self.tree_head, dep, self.deployables, self.profile) if dep is not None else None
+                    repo = getattr(self, 'top', None)
+                    inline_projections[dep] = nest_fixture_scope.project_inline_harness(
+                        self.tree_head, repo=repo, commit=self.tree_head.meta.get('source_commit'),
+                        root_module_file=bootstrap.root_file if bootstrap else None,
+                        compiler_library=nest_fixture_scope.compiler_library_for(repo, self.tree_head.meta.get('subdir', '')) if repo else None)
+                    base_projection = {}
+                    base_tree = getattr(self, 'tree_base', None)
+                    if base_tree is not None and repo and dep is not None:
+                        base_root = nest_bootstrap.resolve(base_tree, dep, self.deployables, self.profile)
+                        base_projection = nest_fixture_scope.project_inline_harness(
+                            base_tree, repo=repo, commit=base_tree.meta.get('source_commit'),
+                            root_module_file=base_root.root_file,
+                            compiler_library=nest_fixture_scope.compiler_library_for(repo, base_tree.meta.get('subdir', '')))
+                    inline_dependency_unions[dep] = fixture_contracts.dependency_union(
+                        nest_fixture_scope.dependency_map(base_projection),
+                        nest_fixture_scope.dependency_map(inline_projections[dep]))
+                candidates = inline_projections[dep].get('controllers', [])
+                identity = (n.get('attrs') or {})['inline_harness']
+                facts = next((c for c in candidates if c['path'] == path and nest_fixture_scope.graph_identity(c) == identity), None)
+                known_nodes = set(self.head_nodes) | set(getattr(getattr(self, 'idx', None), 'nodes', {}))
+                key = path + '#' + identity.get('class_name', '') if isinstance(identity, dict) else ''
+                dependency_union = inline_dependency_unions[dep].get(key, set())
+                closure_bound = bool(dependency_union) and all('code_unit:' + p in known_nodes for p in dependency_union)
+                if facts and facts['scope'] == 'fixture' and closure_bound:
+                    verdicts[eid] = ('verified', 'compiler-bound inline test harness; BASE/HEAD physical dependency union retained; test module registration verified; production RC-01/RC-02 inapplicable')
+                else:
+                    verdicts[eid] = ('not_measured', 'INLINE_HARNESS_CONTAINMENT_UNPROVED: compiler-bound HEAD does not qualify this fixture identity')
+                log.append(f"{eid}: {verdicts[eid][0]} — {verdicts[eid][1]}")
+                continue
             if dep is None:
                 verdicts[eid] = ("not_measured", f"controller {path} lies in no deployable")
                 continue
@@ -2110,6 +2239,23 @@ class Verify:
                 route_match = re.match(r"route:(\w+):(.+)", eid)
             try:
                 effective = bootstrap.effective_prefix(*route_match.groups()) if route_match else bootstrap.prefix
+                if nest and 'rc01' in self.fr_rules and route_match and route_match.group(1) == 'WS':
+                    event = route_match.group(2)
+                    providers = [e for e in self.graph_head['edges']
+                                 if e['to'] == eid and e['type'] == 'provides_route']
+                    if n.get('kind') != 'ws_event' or len(providers) != 1:
+                        raise ValueError('ambiguous WebSocket transport/provider')
+                    namespace = nest_bootstrap.websocket_namespace(self.tree_head, path, event)
+                    base_node = self.idx.nodes.get(eid)
+                    if base_node:
+                        base_providers = [e for e in self.idx.rev.get(eid, []) if e['type'] == 'provides_route']
+                        if base_node.get('kind') != 'ws_event' or len(base_providers) != 1:
+                            raise ValueError('ambiguous base WebSocket transport/provider')
+                        before = nest_bootstrap.websocket_namespace(self.tree_base, base_node.get('path') or '', event)
+                        if before != namespace:
+                            problems.append(f'WS_NAMESPACE_CHANGED: {before!r} -> {namespace!r}')
+                    effective = None  # setGlobalPrefix configures HTTP routes only.
+                    notes.append(f'WebSocket namespace {namespace!r} source-bound; HTTP prefix inapplicable')
             except ValueError as exc:
                 verdicts[eid] = ('not_measured', 'BOOTSTRAP_UNRESOLVED: ' + str(exc))
                 continue
@@ -2123,8 +2269,9 @@ class Verify:
                     verdicts[eid] = ("not_measured", f"RC-02 not evaluable: {rnotes[0]}")
                     log.append(f"{eid}: not_measured {rnotes[0]}")
                     continue
-                if path not in reg:
-                    problems.append(f"UNREGISTERED_CONTROLLER: {path} is registered in no @Module reachable from the root module ({rnotes[-1] if rnotes else ''})")
+                provider_paths = {path} | set((n.get('attrs') or {}).get('nest_route_sources', []))
+                for provider_path in sorted(provider_paths - reg):
+                    problems.append(f"UNREGISTERED_CONTROLLER: {provider_path} is registered in no @Module reachable from the root module ({rnotes[-1] if rnotes else ''})")
             if problems:
                 verdicts[eid] = ("failed", "; ".join(problems)[:300])
             elif not nest:
@@ -2132,7 +2279,7 @@ class Verify:
                                              "INAPPLICABLE_FRAMEWORK — this tree declares no @nestjs/ package, so "
                                              "there is no bootstrap prefix and no @Module graph to check")
             else:
-                verdicts[eid] = ("verified", f"served at head, prefix {effective!r} consistent, selected bootstrap {bootstrap.root_file}, controller registered")
+                verdicts[eid] = ("verified", f"served at head, prefix {effective!r} consistent, selected bootstrap {bootstrap.root_file}, controller registered" + ('; ' + '; '.join(notes) if notes else ''))
             log.append(f"{eid}: {verdicts[eid][0]} — {verdicts[eid][1]}")
         failed = sum(1 for v in verdicts.values() if v[0] == "failed")
         self.record("v-route-config", "config_schema", "verify.py route_config_consistency RC-01 prefix / RC-02 registration / RC-03 served", ents,
@@ -2153,7 +2300,7 @@ class Verify:
             parse_err += [f"{sp}: {x}" for x in h["parse_errors"]]
             diffs[sp] = prisma_diff(b, h)
         validate = {"ran": False}
-        prisma = find_bin("prisma", self.a.prisma, self.exec_root, self.top, list(self.deployables))
+        prisma = find_bin("prisma", self.a.prisma, self.exec_root, self.scope_root, list(self.deployables))
         for sp in schemas:
             if not prisma or not self.tree_head.exists(sp):
                 continue
@@ -2312,6 +2459,57 @@ class Verify:
                     ents, 0 if verdict == "verified" else 1, output, started,
                     round(time.monotonic() - t0, 2), detail, {e: (verdict, detail) for e in ents}, "json")
 
+    def v_selected_dependency(self):
+        """DEC0146 requalification, never an author-supplied source verdict.
+
+        Foreign source nodes get dedicated dispatch instead of a fake local path.
+        Source qualification alone cannot discharge their semantic obligations.
+        Repositories/replay are native capabilities, not CLI/envelope fields.
+        """
+        import selected_dependency
+        import dataclasses
+        native = selected_dependency.current_native_configuration()
+        repositories = native['repositories'] if native else {}
+        replay = native['replay'] if native else None
+        foreign_fitness = native.get('foreign_fitness') if native else None
+        verdicts = {}
+        semantic_evidence = {}
+        for eid, ent in self.entities.items():
+            attrs = ent['node'].get('attrs', {})
+            facts = attrs.get('selected_dependencies', {})
+            if attrs.get('selected_source_identity'):
+                verdicts[eid] = ('not_measured', 'foreign source semantic verifier not configured; selection proof grants no semantic/runtime admission')
+                if foreign_fitness is not None:
+                    identity = attrs['selected_source_identity']
+                    if not selected_dependency._identity_supported(identity) or eid != selected_dependency.node_id(identity):
+                        verdicts[eid] = ('failed', 'FOREIGN_ENTITY_IDENTITY_MISMATCH')
+                    else:
+                        measured_fitness = foreign_fitness.measure(identity, repositories=repositories)
+                        verdicts[eid] = (measured_fitness.verdict, ', '.join(measured_fitness.reasons))
+                        semantic_evidence[eid] = dataclasses.asdict(measured_fitness)
+            if facts:
+                measured = [selected_dependency.qualify_selected_dependency(fact['envelope'],
+                              repositories=repositories, replay=replay) for fact in facts.values()]
+                rank = {'verified': 0, 'not_measured': 1, 'failed': 2}
+                worst = max(measured, key=lambda result: rank[result.verdict])
+                if attrs.get('selected_source_identity'):
+                    semantic = verdicts[eid]
+                    if rank[worst.verdict] > rank[semantic[0]]:
+                        verdicts[eid] = (worst.verdict, ', '.join(worst.reason_codes))
+                    elif semantic[0] == 'verified':
+                        verdicts[eid] = ('verified', semantic[1] + '; native source selection verified')
+                else:
+                    verdicts[eid] = (worst.verdict, ', '.join(worst.reason_codes))
+        if not verdicts:
+            return
+        self.record('v-selected-dependency', 'fitness_rules',
+                    'native selected_dependency exact Git/occurrence/replay binding', sorted(verdicts),
+                    1 if any(v[0] == 'failed' for v in verdicts.values()) else 0,
+                    {eid: {'verdict': v[0], 'reason': v[1],
+                           **({'native_fitness': semantic_evidence[eid]} if eid in semantic_evidence else {})}
+                     for eid, v in verdicts.items()},
+                    now_iso(), 0.0, 'source selection only; ordinary semantic/canary obligations retained', verdicts, 'json')
+
     def v_fitness(self):
         ents = self.needing("fitness_rules")
         if not ents:
@@ -2344,8 +2542,27 @@ class Verify:
             else:
                 fz = frozen_by.get(eid, [])
                 verdicts[eid] = ("verified", "no new fitness violation" + (f" ({len(fz)} frozen: {', '.join(v['rule'] for v in fz)})" if fz else ""))
+        workflow_native = {}
+        for eid in ents:
+            path = self.entity_file(eid) or ""
+            if not workflow_config.is_workflow(path):
+                continue
+            raw = self.tree_head.files.get(path)
+            expected = (self.entities[eid]["node"].get("content_hash") or "")
+            if raw is None or sha_bytes(raw) != expected:
+                native_verdict, proof = "not_measured", {"reason": "workflow bytes unavailable or differ from selected graph node"}
+            else:
+                actionlint = find_bin("actionlint", None, self.exec_root,
+                                      getattr(self, "scope_root", self.top), [])
+                native_verdict, proof = workflow_config.native_fitness(path, raw, actionlint)
+            workflow_native[eid] = {"verdict": native_verdict, **proof}
+            current, reason = verdicts[eid]
+            if current == "failed" or native_verdict == "failed":
+                verdicts[eid] = ("failed", reason if current == "failed" else proof.get("reason", "workflow fitness failed"))
+            elif current == "not_measured" or native_verdict == "not_measured":
+                verdicts[eid] = ("not_measured", reason + "; workflow actionlint NOT_MEASURED: " + proof.get("reason", "unavailable"))
         out = {"rules": self.matrix["fitness_rules"], "baseline": self.baseline_ref, "baseline_status": self.baseline_status,
-               "new": new, "frozen": frozen}
+               "new": new, "frozen": frozen, "workflow_native": workflow_native}
         failed = sum(1 for v in verdicts.values() if v[0] == "failed")
         self.record("v-fitness", "fitness_rules", "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources", ents, 1 if failed else 0, out,
                     started, round(time.monotonic() - t0, 2), f"{len(viol)} finding(s): {len(new)} new / {len(frozen)} frozen; {failed} entity(ies) failed", verdicts, "json")
@@ -2561,7 +2778,7 @@ class Verify:
                 pj = {}
         script = (pj.get("scripts") or {}).get("test", "")
         runner = "jest" if "jest" in script else ("vitest" if "vitest" in script else None)
-        bin_ = find_bin(runner, None, self.exec_root, self.top, [dep]) if runner in ("jest", "vitest") else None
+        bin_ = find_bin(runner, None, self.exec_root, getattr(self, "scope_root", self.top), [dep]) if runner in ("jest", "vitest") else None
         if runner == "jest" and bin_:
             return runner, [bin_, "--runInBand", "--ci", *rel]
         if runner == "vitest" and bin_:
@@ -2576,7 +2793,7 @@ class Verify:
         records as INAPPLICABLE_RUNNER and never as a verdict.
         """
         roots = [self.exec_root / dep] if dep not in ("", ".") else []
-        roots += [self.exec_root, self.top]
+        roots += [self.exec_root, self.scope_root]
         for root in roots:
             for rel in (".venv/bin/pytest", "venv/bin/pytest", "env/bin/pytest"):
                 cand = root / rel
@@ -2702,11 +2919,22 @@ class Verify:
                 verdict, proof = "not_measured", {"reason": "shell source missing/removed or mandatory syntax disabled"}
             else:
                 verdict, proof = shell_source.syntax(path, raw, self.tree_head.paths)
+                base_tree = getattr(self, "tree_base", None)
+                broken = shell_source.paired_function_regressions(
+                    path, base_tree.files, self.tree_head.files) if base_tree else []
+                if broken:
+                    verdict = "failed"
+                    proof["reason"] = "SHELL_SOURCED_FUNCTION_REMOVED: " + json.dumps(broken)
+                    proof["exit_code"] = 1
+                elif (verdict != "failed" and base_tree and shell_source.changed_function_uncertainty(
+                        path, base_tree.files, self.tree_head.files)):
+                    verdict = "not_measured"
+                    proof["reason"] = "SHELL_CHANGED_FUNCTION_SCOPE_NOT_MEASURED"
                 if sha_bytes(raw) != self.entities[eid]["node"].get("content_hash"):
                     verdict = "not_measured"
                     proof["reason"] = "shell head bytes differ from selected graph node"
             self.record("v-shell-syntax-" + hashlib.sha256(eid.encode()).hexdigest()[:16], "shell_syntax",
-                        "bash --noprofile --norc -n <exact bytes; Bats declarations translated, never executed>",
+                        "bash -n + pinned ShellCheck on syntax projection; no caller/Bats execution",
                         [eid], proof.get("exit_code", 125), json.dumps(proof), now_iso(), 0.0,
                         "shell syntax/closure: " + verdict, {eid: (verdict, "shell syntax/closure: " + verdict)})
             self.verifiers[-1]["scope"] = "shell_source_validation"
@@ -2830,12 +3058,12 @@ class Verify:
 
     # ---- baseline
     def load_baseline(self):
-        bl, ref = resolve_baseline(self.a, self.top, self.repo.name)
+        bl, ref = resolve_baseline(self.a, self.scope_root, self.repo.name)
         self.baseline_ref = ref
         if bl is None:
             # auto-freeze at base: pre-existing findings of the base tree are frozen for this run
             base_tree = self.tree_base
-            base_graph = self.idx.doc if self.mode == "diff" else build_graph.build(self.top, rev=self.repo.head(), built_at=build_graph.FIXED_BUILT_AT)
+            base_graph = self.idx.doc if self.mode == "diff" else build_graph.build(self.top, rev=self.repo.head(), subdir=self.scope_prefix, built_at=build_graph.FIXED_BUILT_AT)
             scan = TreeScan(base_tree)
             entries = fitness_violations(base_graph, base_tree, scan, self.fr_rules)
             cv, _, _, _ = config_violations(base_graph, base_tree, scan, self.profile.get("env_declaration_files") or [])
@@ -3410,6 +3638,7 @@ class Verify:
         for mid, fn in (("type_check", self.v_type_check), ("contract_diff", self.v_contract_diff),
                         ("route_config_consistency", self.v_route_config), ("schema_diff", self.v_schema_diff),
                         ("config_schema", self.v_config_schema), ("fitness_rules", self.v_fitness),
+                        ("fitness_rules", self.v_selected_dependency),
                         ("doc_reference", self.v_doc_reference), ("canary", self.v_canary),
                         ("shell_syntax", self.v_shell_syntax), ("shell_behavior", self.v_shell_behavior),
                         ("full_fallback_test", self.v_global_fallback_test), ("targeted_test", self.v_targeted_test), ("property_check", self.v_property_check)):
