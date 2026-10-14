@@ -1,0 +1,12 @@
+{
+  "schema": "MeasuredGitSource/v1",
+  "producer": {
+    "tool": "MUN-ARTIFACTS own source snapshot",
+    "version": "1"
+  },
+  "captured_at_utc": "2026-10-13T20:18:07.056907Z",
+  "commit": "479dc93401da2f8a3a1dd20249cbc1685dbcea72",
+  "tree": "748b659a963fe5fdde7b04ae3d36ff6a051a73bc",
+  "dirty": false,
+  "repository_path": "/home/dev/aup/mun-graphs-root1255-20261013"
+}

@@ -4,8 +4,10 @@ import { Prisma, TaskArtifactRevision } from '@prisma/client';
 import type { Actor } from '@muneral/types';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { ActivityService } from '../../activity/activity.service.js';
-import { ArtifactMetadataDto, UploadArtifactDto } from './task-content.dto.js';
+import { ArtifactMetadataDto, UploadArtifactDto, StoreGraphDto } from './task-content.dto.js';
 import { humanTaskWhere } from '../../auth/human-task-visibility.js';
+import type { GraphDocument, GraphKind } from './task-graph.schema.js';
+import { parseGraph, validateGraphReferences } from './task-graph.validation.js';
 
 export const MAX_CONTENT_BYTES = 1024 * 1024;
 const MAX_JSON_CONTENT_BYTES = 65536;
@@ -28,6 +30,11 @@ function present(row: TaskArtifactRevision, includeContent = false) {
     sizeBytes: row.sizeBytes, actorType: row.actorType, actorId: row.actorId, createdAt: row.createdAt.toISOString(),
     ...(includeContent ? { contentBase64: Buffer.from(row.content).toString('base64') } : {}),
   };
+}
+
+function graphKind(kind: string): GraphKind {
+  if (kind !== 'task_graph' && kind !== 'agent_graph') throw new BadRequestException('Unknown graph kind');
+  return kind;
 }
 
 @Injectable()
@@ -55,7 +62,32 @@ export class TaskContentService {
     return this.store(taskId, actor, 'artifact', dto.name, dto.contentType, bytes);
   }
 
-  private async store(taskId: string, actor: Actor, kind: string, name: string, contentType: string, bytes: Buffer) {
+  storeGraph(taskId: string, actor: Actor, kind: string, dto: StoreGraphDto) {
+    const document = parseGraph(graphKind(kind), taskId, dto.expectedRevision, dto.document);
+    const bytes = Buffer.from(JSON.stringify(document), 'utf8');
+    if (bytes.length > MAX_JSON_CONTENT_BYTES) throw new PayloadTooLargeException('Graph document exceeds 64 KiB');
+    return this.store(taskId, actor, kind, 'graph', 'application/json', bytes, { expectedRevision: dto.expectedRevision, document });
+  }
+
+  async getGraph(taskId: string, actor: Actor, kind: string, revision?: number) {
+    graphKind(kind);
+    if (revision !== undefined && (!Number.isSafeInteger(revision) || revision < 1)) throw new BadRequestException('Invalid graph revision');
+    return this.prisma.$transaction(async tx => {
+      await this.authorize(tx, taskId, actor);
+      const row = await tx.taskArtifactRevision.findFirst({ where: { taskId, kind, name: 'graph', ...(revision === undefined ? {} : { revision }) }, orderBy: { revision: 'desc' } });
+      if (!row) throw new NotFoundException('Graph document revision not found');
+      if (digest(row.content) !== row.sha256) throw new ConflictException('STORED_CONTENT_DIGEST_MISMATCH');
+      return { ...present(row, true), document: JSON.parse(Buffer.from(row.content).toString('utf8')) as unknown };
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead });
+  }
+
+  listGraphs(taskId: string, actor: Actor, kind: string, page: number) {
+    graphKind(kind);
+    return this.list(taskId, actor, kind, page);
+  }
+
+  private async store(taskId: string, actor: Actor, kind: string, name: string, contentType: string, bytes: Buffer,
+    graph?: { expectedRevision: number; document: GraphDocument }) {
     if (bytes.length > MAX_CONTENT_BYTES) throw new PayloadTooLargeException('Content exceeds 1 MiB');
     if (actor.type !== 'agent') throw new ForbiddenException('Artifact uploads require an assigned agent key');
     const sha256 = digest(bytes);
@@ -64,6 +96,10 @@ export class TaskContentService {
       await tx.$queryRaw`SELECT id FROM tasks WHERE id = ${taskId}::uuid FOR UPDATE`;
       const task = await this.authorize(tx, taskId, actor);
       const last = await tx.taskArtifactRevision.findFirst({ where: { taskId, kind, name }, orderBy: { revision: 'desc' } });
+      if (graph) {
+        if ((last?.revision ?? 0) !== graph.expectedRevision) throw new ConflictException('GRAPH_REVISION_CONFLICT');
+        await validateGraphReferences(tx, graph.document);
+      }
       if (last?.sha256 === sha256) {
         if (last.contentType !== contentType) throw new ConflictException('CONTENT_DIGEST_CONFLICT');
         return { ...present(last), idempotent: true };
@@ -75,7 +111,7 @@ export class TaskContentService {
       let evidence = await tx.taskEvidenceAttachment.findUnique({ where: { taskId_sha256: { taskId, sha256 } } });
       if (evidence && evidence.contentType !== contentType) throw new ConflictException('CONTENT_DIGEST_CONFLICT');
       if (!evidence) evidence = await tx.taskEvidenceAttachment.create({ data: { taskId, sha256, contentType,
-        uri: `muneral://tasks/${taskId}/artifacts/by-sha/${sha256}`, createdByAgentId: actor.id } });
+        uri: kind === 'artifact' ? `muneral://tasks/${taskId}/artifacts/by-sha/${sha256}` : `muneral://tasks/${taskId}/graphs/${kind}/${graph!.document.graph_revision}`, createdByAgentId: actor.id } });
       const row = await tx.taskArtifactRevision.create({ data: { taskId, evidenceId: evidence.id, kind, name, contentType, content: new Uint8Array(bytes),
         sha256, sizeBytes: bytes.length, revision: (last?.revision ?? 0) + 1, actorType: actor.type, actorId: actor.id } });
       await this.activity.log({ workspaceId: task.project.workspaceId, taskId, actor, action: 'task:content_uploaded',
@@ -85,7 +121,7 @@ export class TaskContentService {
   }
 
   async list(taskId: string, actor: Actor, kind: string, page = 1) {
-    if (kind !== 'artifact') throw new BadRequestException('Unknown content kind');
+    if (kind !== 'artifact') graphKind(kind);
     if (!Number.isSafeInteger(page) || page < 1 || page > 10000) throw new BadRequestException('Invalid page');
     await this.authorize(this.prisma, taskId, actor);
     const where = { taskId, kind };
@@ -99,7 +135,8 @@ export class TaskContentService {
   async get(taskId: string, actor: Actor, kind: string, value: string, bySha = false) {
     if (kind !== 'artifact') throw new BadRequestException('Unknown content kind');
     await this.authorize(this.prisma, taskId, actor);
-    const row = await this.prisma.taskArtifactRevision.findFirst({ where: { taskId, kind, ...(bySha ? { sha256: value } : { id: value }) }, orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] });
+    // ReadArtifact(ref) also resolves typed graph content by its immutable ID/hash.
+    const row = await this.prisma.taskArtifactRevision.findFirst({ where: { taskId, ...(bySha ? { sha256: value } : { id: value }) }, orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] });
     if (!row) throw new NotFoundException('Task content revision not found');
     if (digest(row.content) !== row.sha256) throw new ConflictException('STORED_CONTENT_DIGEST_MISMATCH');
     return present(row, true);

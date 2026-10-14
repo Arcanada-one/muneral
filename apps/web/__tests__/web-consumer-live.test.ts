@@ -35,6 +35,17 @@ describe.skipIf(!fixturePath)('MUN artifact actual web-to-API HTTP consumer seam
     const rows=await fetchWorkspaces();
     expect(rows.some(w=>w.id===state.fixture.workspaceId)).toBe(true);
   });
+  it.each(['task_graph', 'agent_graph'])('reads %s document content and history through the original authenticated HTTP client', async kind => {
+    if (!state.fixture.graphDocuments) throw new Error('Graph consumer fixture must contain both graph documents');
+    const row=(await apiClient.get(`/tasks/${state.fixture.taskId}/graphs/${kind}`)).data;
+    expect(row.document).toEqual(state.fixture.graphDocuments[kind]);
+    const bytes=Buffer.from(row.contentBase64,'base64');
+    expect(createHash('sha256').update(bytes).digest('hex')).toBe(row.sha256);
+    const historical=(await apiClient.get(`/tasks/${state.fixture.taskId}/graphs/${kind}/${row.revision}`)).data;
+    expect(historical.contentBase64).toBe(row.contentBase64);
+    const revisions=(await apiClient.get(`/tasks/${state.fixture.taskId}/graphs/${kind}/revisions`)).data;
+    expect(revisions.data.some((entry: { id: string })=>entry.id===row.id)).toBe(true);
+  });
   it('reads real task response through the existing React task query', async () => {
     const query=new QueryClient({defaultOptions:{queries:{retry:false}}});
     const wrapper=({children}:{children:React.ReactNode})=>React.createElement(QueryClientProvider,{client:query},children);
