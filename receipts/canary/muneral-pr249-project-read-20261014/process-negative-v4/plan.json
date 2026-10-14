@@ -1,0 +1,160 @@
+{
+  "schema": "CanaryPlan/v2",
+  "id": "muneral-pr249-project-read-process-negative-20261014-v4",
+  "owner": "MUNERAL task 971d0143-8549-47a9-b89b-19f0a4023a53",
+  "environment": "owned disposable PostgreSQL 16 on 46343, Redis on 46344, Node 24.21.0; local tests write synthetic fixtures only; @muneral/types dist inputs hash-bound",
+  "read_only": false,
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "42061f8299115618bc256301c88beca02de755a9",
+    "tree": "0807f9672781fe6cb1116447b72aead0963282c7",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "f7ff09afcc7074827a033228f1ff41fc187916f3b564efa6873f0c0c525ae8fc",
+      "source_field": "commit"
+    }
+  },
+  "purpose": "Run named real-PostgreSQL process suites for the seven measured controller code units. Runner requires the exact Jest test title and emits a fixed stdout marker only after observing it. The tasks controller suite also checks the candidate project-index grant is HTTP 200 with the DEC-AUP-0162 expiry; same task probe is the parent red control. Synthetic disposable database only.",
+  "probes": [
+    {
+      "kind": "process",
+      "id": "pr249-v4-tasks",
+      "argv": [
+        "/home/dev/aup/muneral-digest-a6-renewal/runs/node2421/node-v24.21.0-linux-x64/bin/node",
+        "/tmp/muneral-pr249-canary/run-focused-test-v3.mjs",
+        "agent-project-index.e2e.spec.ts",
+        "a granted key lists every task of the project",
+        "project-index-live-grant"
+      ],
+      "cwd": ".",
+      "env_keys": [
+        "PATH",
+        "HOME",
+        "TMPDIR",
+        "NODE_OPTIONS",
+        "DATABASE_URL",
+        "REDIS_URL",
+        "REDIS_PREFIX",
+        "JWT_SECRET",
+        "NODE_ENV",
+        "RATE_LIMIT_API_PER_SEC",
+        "PR249_JEST_CLI",
+        "PR249_HTTP_BASE_URL",
+        "MUNERAL_CANARY_API_KEY"
+      ],
+      "timeout_seconds": 120,
+      "capture_limit_bytes": 524288,
+      "executable_sha256": "7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c",
+      "execution_files": [
+        {
+          "path": "/home/dev/aup/muneral-digest-a6-renewal/runs/node2421/node-v24.21.0-linux-x64/bin/node",
+          "sha256": "7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c"
+        },
+        {
+          "path": "/tmp/muneral-pr249-canary/run-focused-test-v3.mjs",
+          "sha256": "40d58cabbeb630f075673e751ba31b3793eb94397afc25c77698031e1a52d4c2"
+        },
+        {
+          "path": "/home/dev/aup/muneral-pr249-car-clean/apps/api/node_modules/.bin/jest",
+          "sha256": "fc7909597437a5f573cea1fcc3703075f8927dd7b9818838fe79864862ab2029"
+        },
+        {
+          "path": "/tmp/muneral-pr249-parent/apps/api/test/agent-key-assign-scope.e2e.spec.ts",
+          "sha256": "d0b24fbba4872a246815f9f57c17606e9c4246c1e768e34df4147121d3fba488"
+        },
+        {
+          "path": "/tmp/muneral-pr249-parent/apps/api/test/agent-project-dependencies.e2e.spec.ts",
+          "sha256": "898a0b048016e14a77d4eb9a54194a6c9c1a589f17edce7217269e207e0e9d8c"
+        },
+        {
+          "path": "/tmp/muneral-pr249-parent/apps/api/test/sync-import-scope.e2e.spec.ts",
+          "sha256": "964a2b521418a95768a0bed7373dfa7d2ee1e3db076530db33bdbf8ece9684ef"
+        },
+        {
+          "path": "/tmp/muneral-pr249-parent/apps/api/test/field-changes.e2e.spec.ts",
+          "sha256": "175dfcba2a422df8443da5c5f17a19b400e138a41bae8e89cbe1184d6e86fa8e"
+        },
+        {
+          "path": "/tmp/muneral-pr249-parent/apps/api/test/task-contract-binding.e2e.spec.ts",
+          "sha256": "aed0dd7802eb0ef5f6cc653e3d76b0dd0151a7add66e9405b0edad474da8e004"
+        },
+        {
+          "path": "/tmp/muneral-pr249-parent/apps/api/test/agent-project-index.e2e.spec.ts",
+          "sha256": "843d69de36e185ee353529f9613b4cb9c8cea523f349e0f340493ca3a6c1e381"
+        },
+        {
+          "path": "/tmp/muneral-pr249-parent/apps/api/src/agents/agents.controller.ts",
+          "sha256": "c03bb05132a2a1754e96dd1caab54b3d9447cdcc0c85f751ddaacfa47938a252"
+        },
+        {
+          "path": "/tmp/muneral-pr249-parent/apps/api/src/projects/projects.controller.ts",
+          "sha256": "0233dd5d417e4d8da15f4ddb3d5e8c4f26893c9a250a5fe45e23aaf28e54b180"
+        },
+        {
+          "path": "/tmp/muneral-pr249-parent/apps/api/src/sync/sync.controller.ts",
+          "sha256": "c1e61ec0697e0281fe4a38853d95f60a44fac7f553931c7d724a075c63c34d5c"
+        },
+        {
+          "path": "/tmp/muneral-pr249-parent/apps/api/src/tasks/field-state/field-changes.controller.ts",
+          "sha256": "72e39e0873293af3c8abec213fc0719a5157b873128e309800efd6f062fe2865"
+        },
+        {
+          "path": "/tmp/muneral-pr249-parent/apps/api/src/tasks/task-contract-binding.controller.ts",
+          "sha256": "b807124e25d017caff483938ec8dd3b787e46b62c579a8e988329403bfc3f10a"
+        },
+        {
+          "path": "/tmp/muneral-pr249-parent/apps/api/src/tasks/tasks.controller.ts",
+          "sha256": "ab2455fce8fd80c42250af59e07d46d7183ef15a2a253db5623d43a927d5be79"
+        },
+        {
+          "path": "/tmp/muneral-pr249-parent/apps/api/src/workspaces/workspaces.controller.ts",
+          "sha256": "bc75f8a7a15f89e7401c6c76978ee57bbb753912a41df541f0f1b3fce33feaf9"
+        },
+        {
+          "path": "/tmp/muneral-pr249-parent/apps/api/src/auth/project-read-grants.ts",
+          "sha256": "56e2c663666077cbac19a70eff0f776b63d238b830e62bc17cebdca735e1b417"
+        },
+        {
+          "path": "/tmp/muneral-pr249-parent/apps/api/package.json",
+          "sha256": "919202c86e4a269cb8e4e680b9fdb768e555bbf8d7caf449adea37123657652c"
+        },
+        {
+          "path": "/tmp/muneral-pr249-parent/packages/types/package.json",
+          "sha256": "a6d65e0ae557e0fbcda43041fd23f50b566e44d898e8779ef87dadf0909cc142"
+        },
+        {
+          "path": "/tmp/muneral-pr249-parent/packages/types/tsconfig.json",
+          "sha256": "dd0d69c41d2c55b195e2c552461ab42f29373e7018453a758e25f0a85da7436b"
+        },
+        {
+          "path": "/tmp/muneral-pr249-parent/packages/types/src/index.ts",
+          "sha256": "d86f1e02f697937b39938dd405ab8639e45e9f17f7a26e3a68ac32ffd53ad741"
+        },
+        {
+          "path": "/tmp/muneral-pr249-parent/packages/types/dist/index.js",
+          "sha256": "911003e6902fbe74fc81ba5de683ee41651b5c72c39d57aa90da58f2903828b4"
+        },
+        {
+          "path": "/tmp/muneral-pr249-parent/packages/types/dist/index.d.ts",
+          "sha256": "64d28466b99ae53f81da8125ac4cc19d77a9e6b5973d18ae6476716fbd98e08a"
+        }
+      ],
+      "entities": [
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "expect": {
+        "exit_codes": [
+          0
+        ],
+        "stdout_contains": [
+          "CANARY_TEST_FILE_PASS=agent-project-index.e2e.spec.ts",
+          "CANARY_TEST_NAME_PASS=a granted key lists every task of the project",
+          "PROJECT_INDEX_HTTP_STATUS=200",
+          "PROJECT_INDEX_GRANT_UNTIL=2026-10-28T00:00:00Z"
+        ],
+        "stderr_contains": []
+      },
+      "mutating": true
+    }
+  ]
+}
