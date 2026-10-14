@@ -1,10 +1,7 @@
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
-import { createHash } from 'node:crypto';
-import { execFileSync } from 'node:child_process';
-import { mkdirSync, writeFileSync } from 'node:fs';
-import { dirname, isAbsolute, relative, resolve } from 'node:path';
+import { createServer, type Server } from 'node:http';
 import type { ReactNode } from 'react';
 
 const session = vi.hoisted(() => ({ accessToken: '' }));
@@ -13,156 +10,180 @@ vi.mock('next-auth/react', () => ({
   signOut: vi.fn(),
 }));
 
-describe('PR246 real web read adapters against the candidate API', () => {
-  let fixture: Awaited<ReturnType<(typeof import('../../../api/test/support/pr246-web-boundary-app.js'))['createPr246WebBoundaryApp']>>;
+const WORKSPACE_ID = '11111111-1111-4111-8111-111111111111';
+const PROJECT_ID = '22222222-2222-4222-8222-222222222222';
+const TASK_ID = '33333333-3333-4333-8333-333333333333';
+const OWNER_ID = '44444444-4444-4444-8444-444444444444';
+const CREATED_AT = '2026-10-14T00:00:00.000Z';
+
+const workspace = {
+  id: WORKSPACE_ID,
+  slug: 'membership-workspace',
+  name: 'Membership workspace',
+  createdAt: CREATED_AT,
+};
+const project = {
+  id: PROJECT_ID,
+  workspaceId: WORKSPACE_ID,
+  slug: 'membership-project',
+  name: 'Membership project',
+  createdAt: CREATED_AT,
+};
+const task = {
+  id: TASK_ID,
+  projectId: PROJECT_ID,
+  title: 'Membership task',
+  status: 'todo',
+  priority: 'medium',
+  actorType: 'human',
+  createdAt: CREATED_AT,
+  updatedAt: CREATED_AT,
+};
+
+describe('PR246 web membership read adapters', () => {
+  let server: Server;
+  let baseUrl: string;
   let apiClient: (typeof import('./client'))['default'];
   let useWorkspaceMembers: (typeof import('./workspaces'))['useWorkspaceMembers'];
   let useTasks: (typeof import('./tasks'))['useTasks'];
   let taskDetailReadPort: (typeof import('./task-detail-read'))['taskDetailReadPort'];
-  let activeScenario = '';
-  const completed = new Set<string>();
-  const observations: Record<string, Array<{ method: string; path: string; status: number; response_sha256: string; response_bytes: number }>> = {
-    workspaces: [], tasks: [], taskDetail: [],
-  };
+  let previousBaseUrl: string | undefined;
+  const requests: Array<{ method: string; path: string; authenticated: boolean }> = [];
 
   beforeAll(async () => {
-    let createPr246WebBoundaryApp: typeof import('../../../api/test/support/pr246-web-boundary-app.js')['createPr246WebBoundaryApp'];
-    try {
-      ({ createPr246WebBoundaryApp } = await import('../../../api/test/support/pr246-web-boundary-app.js'));
-    } catch (error) {
-      console.error(error instanceof Error ? error.stack : error);
-      throw error;
-    }
-    fixture = await createPr246WebBoundaryApp();
-    session.accessToken = fixture.ownerToken;
-    apiClient = (await import('./client')).default;
-    apiClient.defaults.baseURL = `${fixture.baseUrl}/api/v1`;
-    apiClient.defaults.adapter = 'http';
-    apiClient.defaults.headers.common.Authorization = `Bearer ${fixture.ownerToken}`;
-    const responseInterceptors = apiClient.interceptors.response as unknown as {
-      handlers: Array<unknown | null>;
-      eject: (id: number) => void;
-    };
-    responseInterceptors.handlers.forEach((handler, id) => {
-      if (handler) responseInterceptors.eject(id);
-    });
-    apiClient.interceptors.response.use((response) => {
-      if (activeScenario) {
-        const body = JSON.stringify(response.data);
-        observations[activeScenario]?.push({
-          method: (response.config.method ?? 'get').toUpperCase(),
-          path: response.config.url ?? '',
-          status: response.status,
-          response_sha256: createHash('sha256').update(body).digest('hex'),
-          response_bytes: Buffer.byteLength(body),
-        });
+    server = createServer((request, response) => {
+      const url = new URL(request.url ?? '/', 'http://127.0.0.1');
+      response.setHeader('access-control-allow-origin', 'http://localhost:3000');
+      response.setHeader('access-control-allow-headers', 'authorization, content-type');
+      response.setHeader('access-control-allow-methods', 'GET, OPTIONS');
+      if (request.method === 'OPTIONS') {
+        response.statusCode = 204;
+        response.end();
+        return;
       }
-      return response;
+      requests.push({
+        method: request.method ?? 'GET',
+        path: `${url.pathname}${url.search}`,
+        authenticated: request.headers.authorization === 'Bearer synthetic-session-token',
+      });
+      response.setHeader('content-type', 'application/json');
+      if (request.headers.authorization !== 'Bearer synthetic-session-token') {
+        response.statusCode = 401;
+        response.end(JSON.stringify({ message: 'Unauthorized' }));
+        return;
+      }
+
+      if (request.method === 'GET' && url.pathname === '/api/v1/workspaces') {
+        response.end(JSON.stringify([workspace]));
+      } else if (request.method === 'GET' && url.pathname === `/api/v1/workspaces/${WORKSPACE_ID}/members`) {
+        response.end(JSON.stringify([{
+          workspaceId: WORKSPACE_ID,
+          userId: OWNER_ID,
+          role: 'owner',
+          user: { name: 'Synthetic owner' },
+        }]));
+      } else if (request.method === 'GET' && url.pathname === '/api/v1/tasks') {
+        response.end(JSON.stringify({ items: [task], total: 1, limit: 50, offset: 0 }));
+      } else if (request.method === 'GET' && url.pathname === `/api/v1/projects/workspace/${WORKSPACE_ID}`) {
+        response.end(JSON.stringify([project]));
+      } else if (request.method === 'GET' && url.pathname === `/api/v1/tasks/${TASK_ID}`) {
+        response.end(JSON.stringify({ ...task, revision: 7 }));
+      } else {
+        response.statusCode = 404;
+        response.end(JSON.stringify({ message: 'Not found' }));
+      }
     });
+    await new Promise<void>((resolve, reject) => {
+      server.once('error', reject);
+      server.listen(0, '127.0.0.1', resolve);
+    });
+    const address = server.address();
+    if (!address || typeof address === 'string') throw new Error('web test server did not bind a TCP port');
+    baseUrl = `http://127.0.0.1:${address.port}/api/v1`;
+
+    session.accessToken = 'synthetic-session-token';
+    apiClient = (await import('./client')).default;
+    previousBaseUrl = apiClient.defaults.baseURL;
+    apiClient.defaults.baseURL = baseUrl;
     ({ useWorkspaceMembers } = await import('./workspaces'));
     ({ useTasks } = await import('./tasks'));
     ({ taskDetailReadPort } = await import('./task-detail-read'));
-  }, 120_000);
+  }, 15_000);
+
+  beforeEach(() => {
+    requests.length = 0;
+  });
 
   afterAll(async () => {
     session.accessToken = '';
-    await fixture?.close();
-    const out = process.env.PR246_CANARY_OUT;
-    if (out) writeWebCanaryResult(resolve(out));
-  }, 30_000);
+    if (apiClient) apiClient.defaults.baseURL = previousBaseUrl;
+    await new Promise<void>((resolve, reject) => {
+      if (!server?.listening) return resolve();
+      server.close((error) => error ? reject(error) : resolve());
+    });
+  });
 
-  function writeWebCanaryResult(out: string) {
-    if (completed.size !== 3 || Object.values(observations).some((rows) => rows.length === 0)) {
-      throw new Error('PR246 web canary output requires all three passing read scenarios');
+  function wrapper(query: QueryClient) {
+    function QueryWrapper({ children }: { children: ReactNode }) {
+      return (
+      <QueryClientProvider client={query}>{children}</QueryClientProvider>
+      );
     }
-    if (!isAbsolute(out)) throw new Error('PR246_CANARY_OUT must be absolute');
-    const repo = execFileSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim();
-    const rel = relative(repo, out).split('\\').join('/');
-    if (!rel.startsWith('receipts/canary/pr246-workspace-membership/') || rel.startsWith('../')) {
-      throw new Error('PR246_CANARY_OUT must stay under the PR246 canary evidence directory');
-    }
-    const commit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: repo, encoding: 'utf8' }).trim();
-    const tree = execFileSync('git', ['rev-parse', `${commit}^{tree}`], { cwd: repo, encoding: 'utf8' }).trim();
-    const capturedAt = new Date().toISOString();
-    const evidencePath = `${rel.slice(0, rel.lastIndexOf('/') + 1)}membership-web-read-adapters-source-evidence.json`;
-    const evidence = {
-      schema: 'MeasuredGitSource/v1', captured_at_utc: capturedAt, commit, tree, dirty: false,
-      producer: { tool: 'PR246 web read integration test', version: 'Vitest 5.0.1' },
-    };
-    const evidenceBytes = `${JSON.stringify(evidence, null, 2)}\n`;
-    const sourceSha = createHash('sha256').update(evidenceBytes).digest('hex');
-    const subject = {
-      schema: 'GitCanarySubject/v1', commit, tree,
-      evidence: { path: evidencePath, sha256: sourceSha, source_field: 'commit' },
-    };
-    const probes = Object.entries(observations).flatMap(([scenario, rows]) => rows.map((row, index) => ({
-      id: `${scenario}-${index + 1}`, kind: 'http', ...row, expected: 200,
-      outcome: row.status === 200 ? 'verified' : 'failed', executed: true,
-    })));
-    const probeIds = (scenario: string) => observations[scenario].map((_, index) => `${scenario}-${index + 1}`);
-    const result = {
-      schema: 'CanaryResult/v1', captured_at_utc: capturedAt, card: '1f99b768-65e6-4afe-93e6-611db53e3366',
-      phase: 'post', plan: { id: 'pr246-web-read-adapters-candidate-local-v1' }, subject,
-      environment: 'candidate-local Nest HTTP application on loopback with private disposable PostgreSQL 16 and synthetic owner principal',
-      producer: { tool: 'Vitest real HTTP web read integration test', version: '5.0.1' },
-      model: 'none: deterministic HTTP read controls', resident_version: commit,
-      mutating_owner: 'MUNERAL test author; synthetic disposable PostgreSQL only', read_only: false,
-      counters: { entities_verified: 3, failed: 0, not_measured: 0 },
-      entity_verdicts: [
-        { entity: 'code_unit:apps/web/lib/api/workspaces.ts', verdict: 'verified', reason: 'slug lookup and member read passed against the candidate API', probe_ids: probeIds('workspaces') },
-        { entity: 'code_unit:apps/web/lib/api/tasks.ts', verdict: 'verified', reason: 'project task read passed through useTasks against the candidate API', probe_ids: probeIds('tasks') },
-        { entity: 'code_unit:apps/web/lib/api/task-detail-read.ts', verdict: 'verified', reason: 'workspace, project, and task reads passed through the detail adapter against the candidate API', probe_ids: probeIds('taskDetail') },
-      ],
-      probes,
-    };
-    mkdirSync(dirname(out), { recursive: true });
-    writeFileSync(evidencePath.startsWith('/') ? evidencePath : resolve(repo, evidencePath), evidenceBytes, { flag: 'wx' });
-    writeFileSync(out, `${JSON.stringify(result, null, 2)}\n`, { flag: 'wx' });
+    QueryWrapper.displayName = 'Pr246QueryWrapper';
+    return QueryWrapper;
   }
 
-  it('loads the current workspace members through the scoped web read hook', async () => {
-    activeScenario = 'workspaces';
+  it('resolves a workspace slug before reading its members and preserves the owner role', async () => {
     const query = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    const wrapper = ({ children }: { children: ReactNode }) => (
-      <QueryClientProvider client={query}>{children}</QueryClientProvider>
+    const { result, unmount } = renderHook(
+      () => useWorkspaceMembers('membership-workspace'),
+      { wrapper: wrapper(query) },
     );
-    const { result, unmount } = renderHook(() => useWorkspaceMembers(fixture.workspaceSlug), { wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data?.some((member) => member.userId === fixture.ownerId)).toBe(true);
+    expect(result.current.data).toEqual([{
+      id: OWNER_ID,
+      userId: OWNER_ID,
+      userName: 'Synthetic owner',
+      role: 'owner',
+    }]);
+    expect(requests.map(({ method, path, authenticated }) => [method, path, authenticated])).toEqual([
+      ['GET', '/api/v1/workspaces', true],
+      ['GET', `/api/v1/workspaces/${WORKSPACE_ID}/members`, true],
+    ]);
     unmount();
     query.clear();
-    activeScenario = '';
-    completed.add('workspaces');
-  }, 20_000);
+  });
 
-  it('loads the owner project task through useTasks after membership authorization', async () => {
-    activeScenario = 'tasks';
+  it('binds the task query to the requested project and valid pagination', async () => {
     const query = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    const wrapper = ({ children }: { children: ReactNode }) => (
-      <QueryClientProvider client={query}>{children}</QueryClientProvider>
-    );
-    const { result, unmount } = renderHook(() => useTasks(fixture.projectId), { wrapper });
+    const { result, unmount } = renderHook(() => useTasks(PROJECT_ID), { wrapper: wrapper(query) });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data?.data.map((task) => task.id)).toContain(fixture.taskId);
+    expect(result.current.data?.data.map(({ id }) => id)).toEqual([TASK_ID]);
+    expect(requests).toEqual([{
+      method: 'GET',
+      path: `/api/v1/tasks?projectId=${PROJECT_ID}&limit=50&offset=0`,
+      authenticated: true,
+    }]);
     unmount();
     query.clear();
-    activeScenario = '';
-    completed.add('tasks');
-  }, 20_000);
+  });
 
-  it('loads task detail through the read adapter after membership authorization', async () => {
-    activeScenario = 'taskDetail';
+  it('loads task detail only after the workspace and project bind to the selected task', async () => {
     const query = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const port = taskDetailReadPort(query);
-    const task = await port.load({
-      workspaceSlug: fixture.workspaceSlug,
-      projectSlug: fixture.projectSlug,
-      taskId: fixture.taskId,
+    const loaded = await port.load({
+      workspaceSlug: 'membership-workspace',
+      projectSlug: 'membership-project',
+      taskId: TASK_ID,
     }, new AbortController().signal);
-    expect(task.id).toBe(fixture.taskId);
-    expect(task.projectId).toBe(fixture.projectId);
+    expect(loaded.id).toBe(TASK_ID);
+    expect(loaded.projectId).toBe(PROJECT_ID);
+    expect(loaded.revision).toBe(7);
+    expect(requests.map(({ method, path, authenticated }) => [method, path, authenticated])).toEqual([
+      ['GET', '/api/v1/workspaces', true],
+      ['GET', `/api/v1/projects/workspace/${WORKSPACE_ID}`, true],
+      ['GET', `/api/v1/tasks/${TASK_ID}`, true],
+    ]);
     query.clear();
-    activeScenario = '';
-    completed.add('taskDetail');
-  }, 20_000);
+  });
 });
