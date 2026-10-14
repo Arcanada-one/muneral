@@ -1,0 +1,223 @@
+{
+  "schema": "CanaryResult/v1",
+  "captured_at_utc": "2026-10-14T04:21:53.703Z",
+  "card": "1f99b768-65e6-4afe-93e6-611db53e3366",
+  "phase": "post",
+  "plan": {
+    "id": "pr246-candidate-local-membership-routes"
+  },
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "9a9ab598dca360df86c588b06fb0cf533c1d5e5a",
+    "tree": "49951edec04bb0309e6ee5369b89fec562037a2f",
+    "evidence": {
+      "path": "receipts/canary/pr246-workspace-membership/membership-post-fix-source-evidence.json",
+      "sha256": "0516eea0be6184bd08306ccb9905e5705d9e157be241183e4b03f5f8315e3769",
+      "source_field": "commit"
+    }
+  },
+  "environment": "candidate-local Nest HTTP application on loopback with private disposable PostgreSQL 16 and synthetic owner/target users",
+  "producer": {
+    "tool": "bounded candidate-local Jest/Supertest membership canary",
+    "version": "PR246 MUNERAL membership runner v1"
+  },
+  "model": "none: deterministic HTTP route controls",
+  "resident_version": "0.4.6",
+  "mutating_owner": "MUNERAL author; private synthetic PostgreSQL only",
+  "read_only": false,
+  "counters": {
+    "entities_verified": 6,
+    "failed": 0,
+    "not_measured": 0
+  },
+  "entity_verdicts": [
+    {
+      "entity": "route:GET /workspaces/:workspaceId",
+      "verdict": "verified",
+      "reason": "candidate HTTP owner and anonymous controls passed",
+      "probe_ids": [
+        "member-owner-get-workspace",
+        "anonymous-member-get-workspace"
+      ]
+    },
+    {
+      "entity": "route:GET /workspaces/:workspaceId/members",
+      "verdict": "verified",
+      "reason": "candidate HTTP owner and anonymous controls passed",
+      "probe_ids": [
+        "member-owner-get-members",
+        "anonymous-member-get-members"
+      ]
+    },
+    {
+      "entity": "route:POST /workspaces/:workspaceId/members/:userId",
+      "verdict": "verified",
+      "reason": "candidate HTTP owner and anonymous controls passed",
+      "probe_ids": [
+        "member-owner-post-member",
+        "anonymous-member-post-member"
+      ]
+    },
+    {
+      "entity": "route:PATCH /workspaces/:workspaceId/members/:userId/role",
+      "verdict": "verified",
+      "reason": "candidate HTTP owner and anonymous controls passed",
+      "probe_ids": [
+        "member-owner-patch-role",
+        "anonymous-member-patch-role"
+      ]
+    },
+    {
+      "entity": "route:DELETE /workspaces/:workspaceId/members/:userId",
+      "verdict": "verified",
+      "reason": "candidate HTTP owner and anonymous controls passed",
+      "probe_ids": [
+        "member-owner-delete-member",
+        "anonymous-member-delete-member"
+      ]
+    },
+    {
+      "entity": "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
+      "verdict": "verified",
+      "reason": "all five workspace membership route controls passed on candidate source",
+      "probe_ids": [
+        "member-owner-get-workspace",
+        "anonymous-member-get-workspace",
+        "member-owner-get-members",
+        "anonymous-member-get-members",
+        "member-owner-post-member",
+        "anonymous-member-post-member",
+        "member-owner-patch-role",
+        "anonymous-member-patch-role",
+        "member-owner-delete-member",
+        "anonymous-member-delete-member"
+      ]
+    }
+  ],
+  "probes": [
+    {
+      "id": "member-owner-get-workspace",
+      "kind": "http",
+      "method": "GET",
+      "path": "/workspaces/257e959e-d1b3-4923-9c6d-4177701a1bb0",
+      "status": 200,
+      "expected": 200,
+      "outcome": "verified",
+      "response_sha256": "9cfae39c285cda1c68076ae87d0a29c7e52571fdd6028c859b39655cd9e8ed10",
+      "response_bytes": 229,
+      "executed": true
+    },
+    {
+      "id": "anonymous-member-get-workspace",
+      "kind": "http",
+      "method": "GET",
+      "path": "/workspaces/257e959e-d1b3-4923-9c6d-4177701a1bb0",
+      "status": 401,
+      "expected": "401|403",
+      "outcome": "verified",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43,
+      "executed": true
+    },
+    {
+      "id": "member-owner-get-members",
+      "kind": "http",
+      "method": "GET",
+      "path": "/workspaces/257e959e-d1b3-4923-9c6d-4177701a1bb0/members",
+      "status": 200,
+      "expected": 200,
+      "outcome": "verified",
+      "response_sha256": "2c40b2892d6ecc8f6571f0c9eded0c9ae5d56e7f12fcc998f28b809428a90b99",
+      "response_bytes": 342,
+      "executed": true
+    },
+    {
+      "id": "anonymous-member-get-members",
+      "kind": "http",
+      "method": "GET",
+      "path": "/workspaces/257e959e-d1b3-4923-9c6d-4177701a1bb0/members",
+      "status": 401,
+      "expected": "401|403",
+      "outcome": "verified",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43,
+      "executed": true
+    },
+    {
+      "id": "member-owner-post-member",
+      "kind": "http",
+      "method": "POST",
+      "path": "/workspaces/257e959e-d1b3-4923-9c6d-4177701a1bb0/members/3e6eaff4-70fb-45ff-95b3-2a6dcdd12dac",
+      "status": 201,
+      "expected": 201,
+      "outcome": "verified",
+      "response_sha256": "d46d3f8a5493ed2a26fe70998447e1dcad085e56112d793ff6e1a635f5b8a8d7",
+      "response_bytes": 121,
+      "executed": true
+    },
+    {
+      "id": "anonymous-member-post-member",
+      "kind": "http",
+      "method": "POST",
+      "path": "/workspaces/257e959e-d1b3-4923-9c6d-4177701a1bb0/members/3e6eaff4-70fb-45ff-95b3-2a6dcdd12dac",
+      "status": 401,
+      "expected": "401|403",
+      "outcome": "verified",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43,
+      "executed": true
+    },
+    {
+      "id": "member-owner-patch-role",
+      "kind": "http",
+      "method": "PATCH",
+      "path": "/workspaces/257e959e-d1b3-4923-9c6d-4177701a1bb0/members/3e6eaff4-70fb-45ff-95b3-2a6dcdd12dac/role",
+      "status": 200,
+      "expected": 200,
+      "outcome": "verified",
+      "response_sha256": "99de6338a89ec7ce118445eb6d0cbdfc0ac58b37ec59b82e04dd05729c5295b1",
+      "response_bytes": 119,
+      "executed": true
+    },
+    {
+      "id": "anonymous-member-patch-role",
+      "kind": "http",
+      "method": "PATCH",
+      "path": "/workspaces/257e959e-d1b3-4923-9c6d-4177701a1bb0/members/3e6eaff4-70fb-45ff-95b3-2a6dcdd12dac/role",
+      "status": 401,
+      "expected": "401|403",
+      "outcome": "verified",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43,
+      "executed": true
+    },
+    {
+      "id": "member-owner-delete-member",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/workspaces/257e959e-d1b3-4923-9c6d-4177701a1bb0/members/3e6eaff4-70fb-45ff-95b3-2a6dcdd12dac",
+      "status": 204,
+      "expected": 204,
+      "outcome": "verified",
+      "response_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "response_bytes": 0,
+      "executed": true
+    },
+    {
+      "id": "anonymous-member-delete-member",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/workspaces/257e959e-d1b3-4923-9c6d-4177701a1bb0/members/3e6eaff4-70fb-45ff-95b3-2a6dcdd12dac",
+      "status": 401,
+      "expected": "401|403",
+      "outcome": "verified",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43,
+      "executed": true
+    }
+  ],
+  "execution_evidence": {
+    "path": "receipts/canary/pr246-workspace-membership/membership-post-fix-route-sweep-execution.json",
+    "sha256": "447ea4c618160917bc1981902b56ef9a2eabcbbddf94f9327d64d94bc68aaa14"
+  }
+}

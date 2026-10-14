@@ -1,0 +1,136 @@
+{
+  "schema": "CanaryResult/v1",
+  "captured_at_utc": "2026-10-14T04:56:39.711Z",
+  "card": "1f99b768-65e6-4afe-93e6-611db53e3366",
+  "phase": "post",
+  "plan": {
+    "id": "pr246-web-read-adapters-candidate-local-v1"
+  },
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "e759338234aac90d27598d1b31aab623a0e06f05",
+    "tree": "982ccbaed725b4f894726d6e3c94ea5d7c12bdc3",
+    "evidence": {
+      "path": "receipts/canary/pr246-workspace-membership/membership-web-read-adapters-source-evidence.json",
+      "sha256": "eeee20c8f076a37d4e797b890549dc166e9f517da4788a37adc627c9138b3539",
+      "source_field": "commit"
+    }
+  },
+  "environment": "candidate-local Nest HTTP application on loopback with private disposable PostgreSQL 16 and synthetic owner principal",
+  "producer": {
+    "tool": "Vitest real HTTP web read integration test",
+    "version": "5.0.1"
+  },
+  "model": "none: deterministic HTTP read controls",
+  "resident_version": "e759338234aac90d27598d1b31aab623a0e06f05",
+  "mutating_owner": "MUNERAL test author; synthetic disposable PostgreSQL only",
+  "read_only": false,
+  "counters": {
+    "entities_verified": 3,
+    "failed": 0,
+    "not_measured": 0
+  },
+  "entity_verdicts": [
+    {
+      "entity": "code_unit:apps/web/lib/api/workspaces.ts",
+      "verdict": "verified",
+      "reason": "slug lookup and member read passed against the candidate API",
+      "probe_ids": [
+        "workspaces-1",
+        "workspaces-2"
+      ]
+    },
+    {
+      "entity": "code_unit:apps/web/lib/api/tasks.ts",
+      "verdict": "verified",
+      "reason": "project task read passed through useTasks against the candidate API",
+      "probe_ids": [
+        "tasks-1"
+      ]
+    },
+    {
+      "entity": "code_unit:apps/web/lib/api/task-detail-read.ts",
+      "verdict": "verified",
+      "reason": "workspace, project, and task reads passed through the detail adapter against the candidate API",
+      "probe_ids": [
+        "taskDetail-1",
+        "taskDetail-2",
+        "taskDetail-3"
+      ]
+    }
+  ],
+  "probes": [
+    {
+      "id": "workspaces-1",
+      "kind": "http",
+      "method": "GET",
+      "path": "/workspaces",
+      "status": 200,
+      "response_sha256": "ad25c63a9df7355624c4c52dad869556baac1e748eef23febeab94fb78226059",
+      "response_bytes": 209,
+      "expected": 200,
+      "outcome": "verified",
+      "executed": true
+    },
+    {
+      "id": "workspaces-2",
+      "kind": "http",
+      "method": "GET",
+      "path": "/workspaces/24af5b7b-fc62-411e-9c69-892eb824ea05/members",
+      "status": 200,
+      "response_sha256": "d8aa3d33aaac03d65b365e127bab233e90b667ae49b418a434f0e881ab822425",
+      "response_bytes": 331,
+      "expected": 200,
+      "outcome": "verified",
+      "executed": true
+    },
+    {
+      "id": "tasks-1",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks?projectId=88446e33-2865-4fa9-ae47-41689b8184af&limit=50&offset=0",
+      "status": 200,
+      "response_sha256": "fbe2b1ae2771a650b03ab1aa0200736ead758cf36c838a7da3032a2d551460c9",
+      "response_bytes": 513,
+      "expected": 200,
+      "outcome": "verified",
+      "executed": true
+    },
+    {
+      "id": "taskDetail-1",
+      "kind": "http",
+      "method": "GET",
+      "path": "/workspaces",
+      "status": 200,
+      "response_sha256": "ad25c63a9df7355624c4c52dad869556baac1e748eef23febeab94fb78226059",
+      "response_bytes": 209,
+      "expected": 200,
+      "outcome": "verified",
+      "executed": true
+    },
+    {
+      "id": "taskDetail-2",
+      "kind": "http",
+      "method": "GET",
+      "path": "/projects/workspace/24af5b7b-fc62-411e-9c69-892eb824ea05",
+      "status": 200,
+      "response_sha256": "54e0d1e56714af145459f6b599faae289464d60bb7b6890fea1fbf0d1087de1d",
+      "response_bytes": 225,
+      "expected": 200,
+      "outcome": "verified",
+      "executed": true
+    },
+    {
+      "id": "taskDetail-3",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/e2bccd5d-f9e5-4762-bb35-99836a56e439",
+      "status": 200,
+      "response_sha256": "080164b1197be4cb4ec129dd6f3f94333af79360f1c4d9e7f2f5dc309308f8a4",
+      "response_bytes": 469,
+      "expected": 200,
+      "outcome": "verified",
+      "executed": true
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "schema": "MeasuredGitSource/v1",
+  "captured_at_utc": "2026-10-14T04:17:02.440Z",
+  "commit": "9a9ab598dca360df86c588b06fb0cf533c1d5e5a",
+  "tree": "49951edec04bb0309e6ee5369b89fec562037a2f",
+  "dirty": false,
+  "producer": {
+    "tool": "git rev-parse",
+    "version": "author measurement"
+  }
+}

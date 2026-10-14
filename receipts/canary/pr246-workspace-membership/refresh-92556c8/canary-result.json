@@ -1,0 +1,196 @@
+{
+  "schema": "CanaryResult/v1",
+  "captured_at_utc": "2026-10-14T08:28:38Z",
+  "card": "1f99b768-65e6-4afe-93e6-611db53e3366",
+  "phase": "post",
+  "plan": {
+    "id": "pr246-membership-e2e-92556c8"
+  },
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "92556c81b2e4b6e878b52f2feb8e595b1dc26eb2",
+    "tree": "7a777c096a60762c37a46f71f74e69386eb7bb0d",
+    "evidence": {
+      "path": "receipts/canary/pr246-workspace-membership/refresh-92556c8/source-evidence.json",
+      "sha256": "9f5893b8c0fd7a4e7f94d79c5e7acf04903e27a862809fa1c92002afb79180d7",
+      "source_field": "commit"
+    }
+  },
+  "environment": "candidate-local Nest HTTP application with real middleware/controllers and synthetic owner JWT; isolated PostgreSQL 16 on private loopback port 56000",
+  "producer": {
+    "tool": "Jest/Supertest exact-head route e2e",
+    "version": "workspace-membership.routes.e2e.spec.ts"
+  },
+  "model": "none: deterministic synthetic HTTP controls",
+  "resident_version": "candidate-local head 92556c8",
+  "mutating_owner": "MUNERAL author; disposable synthetic PostgreSQL only",
+  "read_only": false,
+  "counters": {
+    "entities_verified": 5,
+    "failed": 0,
+    "not_measured": 0
+  },
+  "entity_verdicts": [
+    {
+      "entity": "route:POST /workspaces/:workspaceId/members/:userId",
+      "probe_ids": [
+        "workspace-member-post-owner",
+        "workspace-member-post-anonymous"
+      ],
+      "verdict": "verified",
+      "reason": "exact-head Jest/Supertest authenticated-owner and anonymous assertions both passed on private disposable PostgreSQL"
+    },
+    {
+      "entity": "route:PATCH /workspaces/:workspaceId/members/:userId/role",
+      "probe_ids": [
+        "workspace-member-role-patch-owner",
+        "workspace-member-role-patch-anonymous"
+      ],
+      "verdict": "verified",
+      "reason": "exact-head Jest/Supertest authenticated-owner and anonymous assertions both passed on private disposable PostgreSQL"
+    },
+    {
+      "entity": "route:GET /workspaces/:workspaceId",
+      "probe_ids": [
+        "workspace-get-owner",
+        "workspace-get-anonymous"
+      ],
+      "verdict": "verified",
+      "reason": "exact-head Jest/Supertest authenticated-owner and anonymous assertions both passed on private disposable PostgreSQL"
+    },
+    {
+      "entity": "route:GET /workspaces/:workspaceId/members",
+      "probe_ids": [
+        "workspace-members-get-owner",
+        "workspace-members-get-anonymous"
+      ],
+      "verdict": "verified",
+      "reason": "exact-head Jest/Supertest authenticated-owner and anonymous assertions both passed on private disposable PostgreSQL"
+    },
+    {
+      "entity": "route:DELETE /workspaces/:workspaceId/members/:userId",
+      "probe_ids": [
+        "workspace-member-delete-owner",
+        "workspace-member-delete-anonymous"
+      ],
+      "verdict": "verified",
+      "reason": "exact-head Jest/Supertest authenticated-owner and anonymous assertions both passed on private disposable PostgreSQL"
+    }
+  ],
+  "probes": [
+    {
+      "id": "workspace-member-post-owner",
+      "kind": "http",
+      "method": "POST",
+      "path": "/workspaces/:workspaceId/members/:userId",
+      "status": 201,
+      "expected": 201,
+      "outcome": "verified",
+      "executed": true,
+      "offline": false
+    },
+    {
+      "id": "workspace-member-post-anonymous",
+      "kind": "http",
+      "method": "POST",
+      "path": "/workspaces/:workspaceId/members/:userId",
+      "status": 401,
+      "expected": 401,
+      "outcome": "verified",
+      "executed": true,
+      "offline": false
+    },
+    {
+      "id": "workspace-member-role-patch-owner",
+      "kind": "http",
+      "method": "PATCH",
+      "path": "/workspaces/:workspaceId/members/:userId/role",
+      "status": 200,
+      "expected": 200,
+      "outcome": "verified",
+      "executed": true,
+      "offline": false
+    },
+    {
+      "id": "workspace-member-role-patch-anonymous",
+      "kind": "http",
+      "method": "PATCH",
+      "path": "/workspaces/:workspaceId/members/:userId/role",
+      "status": 401,
+      "expected": 401,
+      "outcome": "verified",
+      "executed": true,
+      "offline": false
+    },
+    {
+      "id": "workspace-get-owner",
+      "kind": "http",
+      "method": "GET",
+      "path": "/workspaces/:workspaceId",
+      "status": 200,
+      "expected": 200,
+      "outcome": "verified",
+      "executed": true,
+      "offline": false
+    },
+    {
+      "id": "workspace-get-anonymous",
+      "kind": "http",
+      "method": "GET",
+      "path": "/workspaces/:workspaceId",
+      "status": 401,
+      "expected": 401,
+      "outcome": "verified",
+      "executed": true,
+      "offline": false
+    },
+    {
+      "id": "workspace-members-get-owner",
+      "kind": "http",
+      "method": "GET",
+      "path": "/workspaces/:workspaceId/members",
+      "status": 200,
+      "expected": 200,
+      "outcome": "verified",
+      "executed": true,
+      "offline": false
+    },
+    {
+      "id": "workspace-members-get-anonymous",
+      "kind": "http",
+      "method": "GET",
+      "path": "/workspaces/:workspaceId/members",
+      "status": 401,
+      "expected": 401,
+      "outcome": "verified",
+      "executed": true,
+      "offline": false
+    },
+    {
+      "id": "workspace-member-delete-owner",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/workspaces/:workspaceId/members/:userId",
+      "status": 204,
+      "expected": 204,
+      "outcome": "verified",
+      "executed": true,
+      "offline": false
+    },
+    {
+      "id": "workspace-member-delete-anonymous",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/workspaces/:workspaceId/members/:userId",
+      "status": 401,
+      "expected": 401,
+      "outcome": "verified",
+      "executed": true,
+      "offline": false
+    }
+  ],
+  "execution_evidence": {
+    "path": "receipts/canary/pr246-workspace-membership/refresh-92556c8/execution.json",
+    "sha256": "ead62af22776e15c351acceb2739d12a7931a601945e854a311aaf9b19fd31a8"
+  }
+}

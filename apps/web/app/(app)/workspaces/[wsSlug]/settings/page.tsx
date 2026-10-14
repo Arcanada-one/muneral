@@ -79,9 +79,6 @@ export default function SettingsPage() {
                     </Avatar>
                     <div className="flex-1">
                       <p className="text-sm font-medium">{member.userName}</p>
-                      <p className="text-xs text-muted-foreground">
-                        Joined {new Date(member.joinedAt).toLocaleDateString()}
-                      </p>
                     </div>
                     <Badge variant={ROLE_COLORS[member.role as keyof typeof ROLE_COLORS] ?? 'secondary'}>
                       {member.role}

@@ -111,10 +111,14 @@ export const MAX_DIGEST_GRANT_WINDOW_DAYS = MAX_GRANT_WINDOW_DAYS;
  * `fields_not_withheld: 0` against the deployed API before this merges. Measured
  * before #172: 926 plaintext titles and 892 plaintext descriptions.
  *
- * `until` is 14 days, not the 30-day ceiling: the ceiling was set for the
- * NARROWER project index, this read's only no-merge reversal is `until` passing
- * (agent-key revocation is JWT-only), and 2026-10-09 lands before DEC-AUP-0033's
- * 2026-10-14 so the workspace's two grants do not outlive each other unobserved.
+ * Renewal under Program DEC-AUP-0049 A6 proposes a fixed `until` of 2026-10-27T00:00:00Z,
+ * within 14 days of the amendment date; the source literal and Program
+ * decision must remain identical. A6 applies only after admission on Program main,
+ * only to the exact seven-column emitted projection. The title slice scanned 6602/6602
+ * tasks with zero hits and a passing red-proof. The full workspace scan still FAILS
+ * on 96 description rows; description is neither selected nor returned, and those
+ * findings remain separate. Scope and expiry-only reversal are unchanged; no rolling
+ * renewal is allowed.
  */
 export const WORKSPACE_DIGEST_GRANT_LIST: readonly WorkspaceDigestGrantEntry[] =
   [
@@ -122,15 +126,17 @@ export const WORKSPACE_DIGEST_GRANT_LIST: readonly WorkspaceDigestGrantEntry[] =
       agentId: "565171f7-a3ca-45a4-b50e-4d8b07cf0b86",
       agentName: "arcanada-assistant",
       workspaceId: "05f8cddf-e91f-430b-81e3-d67965aa4de3",
-      until: "2026-10-09T00:00:00Z",
+      until: "2026-10-27T00:00:00Z",
       decision: "DEC-AUP-0049",
       evidence:
-        "Live 2026-09-24/25: this key reads GET /tasks/digest -> 403 DIGEST_GRANT_REQUIRED and " +
-        "GET /agents/tasks -> 200, so the credential is valid and the refusal is real. Its measured " +
-        "alternative, GET /tasks/project/:id, answers 200 [] on a board of 880+ rows — an authorised, " +
-        'well-formed, completely false "nothing happened today" (runs/A2-281/probe-routes.txt). The three ' +
-        "KBSYNC-0 secret-bearing titles were re-read live on 2026-09-25 and each is still redacted " +
-        "(runs/A2-294/out/titles-today-*.json), discharging the DEC-AUP-0029 R7 title precondition.",
+        "Proposed under Program DEC-AUP-0049 A6, pending its admission on Program main. The " +
+        "digest row is pinned to id, projectId, title, status, priority, createdAt and updatedAt; " +
+        "the 2026-10-13 title slice scanned 6602/6602 tasks with zero hits and red-proof PASS. " +
+        "The authoritative full-workspace scan remains FAIL: 96 description rows and 136 " +
+        "generic-entropy spans; description is not selected or emitted and those findings remain " +
+        "separate. Proposed until 2026-10-27T00:00:00Z (14 days), replacement-only, no rolling " +
+        "renewal. Evidence: Program PR445 and Muneral task 7b3b4703, A6 scan comment " +
+        "f1b062b4-1e05-4d16-a9c8-f5cf5509dc5e.",
     },
   ];
 
