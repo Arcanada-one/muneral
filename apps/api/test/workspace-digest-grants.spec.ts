@@ -36,7 +36,7 @@ const evidenceSha256Of = (evidence: string) =>
  * passed whatever `evidence` said. This is the sha256 prefix of the evidence
  * proposed by A6; editing the recorded basis fails the equality below.
  */
-const EVIDENCE_SHA256_PREFIX = "7152b9e03f76a5a1";
+const EVIDENCE_SHA256_PREFIX = "c9dba15d1136978b";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

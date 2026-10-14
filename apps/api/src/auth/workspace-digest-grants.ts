@@ -113,9 +113,10 @@ export const MAX_DIGEST_GRANT_WINDOW_DAYS = MAX_GRANT_WINDOW_DAYS;
  *
  * Renewal under Program DEC-AUP-0049 A6 proposes a fixed `until` of 2026-10-27T00:00:00Z,
  * within 14 days of the amendment date; the source literal and Program
- * decision must remain identical. A6 applies only after admission on Program main,
- * only to the exact seven-column emitted projection. The title slice scanned 6602/6602
- * tasks with zero hits and a passing red-proof. The full workspace scan still FAILS
+ * decision must remain identical. A6 was admitted on Program main in PR445
+ * (merge d0a60fdc) and applies only to the exact seven-column projection. The
+ * title slice scanned 6602/6602 tasks with zero hits and a passing red-proof.
+ * The full workspace scan still FAILS
  * on 96 description rows; description is neither selected nor returned, and those
  * findings remain separate. Scope and expiry-only reversal are unchanged; no rolling
  * renewal is allowed.
@@ -129,7 +130,7 @@ export const WORKSPACE_DIGEST_GRANT_LIST: readonly WorkspaceDigestGrantEntry[] =
       until: "2026-10-27T00:00:00Z",
       decision: "DEC-AUP-0049",
       evidence:
-        "Proposed under Program DEC-AUP-0049 A6, pending its admission on Program main. The " +
+        "Admitted on Program main under DEC-AUP-0049 A6 (PR445 merge d0a60fdc). The " +
         "digest row is pinned to id, projectId, title, status, priority, createdAt and updatedAt; " +
         "the 2026-10-13 title slice scanned 6602/6602 tasks with zero hits and red-proof PASS. " +
         "The authoritative full-workspace scan remains FAIL: 96 description rows and 136 " +
