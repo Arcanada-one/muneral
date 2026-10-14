@@ -5,7 +5,7 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "refused"
  },
- "captured_at_utc": "2026-10-14T07:53:37Z",
+ "captured_at_utc": "2026-10-14T08:36:43Z",
  "change_set": {
   "base": "840e3be216844d57c163daf14ec0a5d51657f963",
   "files": [
@@ -51,15 +51,6 @@
     "path": "apps/api/test/assembly/mutation-results.json",
     "status": "M",
     "uncovered": true
-   },
-   {
-    "kind": "test",
-    "node_id": "code_unit:apps/api/test/support/pr246-web-boundary-app.ts",
-    "node_ids": [
-     "code_unit:apps/api/test/support/pr246-web-boundary-app.ts"
-    ],
-    "path": "apps/api/test/support/pr246-web-boundary-app.ts",
-    "status": "A"
    },
    {
     "kind": "test",
@@ -253,6 +244,30 @@
    {
     "kind": "receipt",
     "new": true,
+    "path": "receipts/canary/pr246-workspace-membership/refresh-92556c8/canary-result.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/pr246-workspace-membership/refresh-92556c8/execution.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/pr246-workspace-membership/refresh-92556c8/plan.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/pr246-workspace-membership/refresh-92556c8/source-evidence.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
     "path": "receipts/canary/pr246-workspace-membership/result.json",
     "status": "A"
    },
@@ -260,6 +275,15 @@
     "kind": "receipt",
     "new": true,
     "path": "receipts/canary/pr246-workspace-membership/source-evidence.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/change-admission-pr246-55623d8.json",
+    "node_ids": [
+     "receipt:receipts/graph/change-admission-pr246-55623d8.json"
+    ],
+    "path": "receipts/graph/change-admission-pr246-55623d8.json",
     "status": "A"
    },
    {
@@ -272,7 +296,7 @@
     "status": "A"
    }
   ],
-  "head": "2d3d20e0e1d506151689ae38d1f3bf166c579d6b",
+  "head": "d84f156c3d46b435201a04aa30ee8005da528755",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -281,17 +305,17 @@
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
   "graph_digest": "sha256:bf33296cc766a1f737cca68db94703420616a99c3e9468d82952a3c28c00821f",
-  "path": "/home/dev/aup/claude-work/munera-pr246/receipts/graph/verifier-out/pr246-canonical-2d3d20e-20261014/graph-840e3be21684.json",
+  "path": "/tmp/arcana-verify/verifier-out/graph-840e3be21684.json",
   "source_commit": "840e3be216844d57c163daf14ec0a5d51657f963"
  },
  "head_graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:4cbdfb923e399c2152a79124dfb956bc6405a9308a63f9c0dafa818589dcfdc4",
-  "path": "/home/dev/aup/claude-work/munera-pr246/receipts/graph/verifier-out/pr246-canonical-2d3d20e-20261014/graph-head-2d3d20e0e1d5.json",
-  "source_commit": "2d3d20e0e1d506151689ae38d1f3bf166c579d6b",
+  "graph_digest": "sha256:c86d64941cbd38540e8a1451a48c71d7e77ee11f269774b77979485ef9b3d9bf",
+  "path": "/tmp/arcana-verify/verifier-out/graph-head-d84f156c3d46.json",
+  "source_commit": "d84f156c3d46b435201a04aa30ee8005da528755",
   "staleness": {
-   "checked_at_utc": "2026-10-14T07:54:06Z",
+   "checked_at_utc": "2026-10-14T08:37:22Z",
    "checked_nodes": 457,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
@@ -12522,14 +12546,13 @@
  "notes": [
   "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
   "profile: (auto-detected); baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none",
-  "head tree 2d3d20e0e1d5 exported with git archive into /tmp/arcana-verify/export-2d3d20e0e1d5 (node_modules linked from the repository for ['.', 'apps/api', 'apps/web', 'packages/types']; workspace packages built: ['packages/types (tsc exit 0, 1.54s)']); the repository was not written",
-  "A2-353: `canary` discharged for 2 test code_unit(s) — a canary lists live-contour entities and can never name a test file; their other verifiers (config_schema, type_check, fitness) still apply: code_unit:apps/api/test/support/pr246-web-boundary-app.ts, code_unit:apps/api/test/workspace-membership.routes.e2e.spec.ts"
+  "A2-353: `canary` discharged for 1 test code_unit(s) — a canary lists live-contour entities and can never name a test file; their other verifiers (config_schema, type_check, fitness) still apply: code_unit:apps/api/test/workspace-membership.routes.e2e.spec.ts"
  ],
  "producer": {
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261014T075337Z-2d3d20e0",
+ "receipt_id": "car-verify-20261014T083643Z-d84f156c",
  "receipt_path": "receipts/graph/pr246-workspace-membership-change-admission.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -13308,7 +13331,6 @@
    "code_unit:apps/api/test/status-map-rev3.spec.ts",
    "code_unit:apps/api/test/status-map-rev4.spec.ts",
    "code_unit:apps/api/test/support/disposable-postgres.ts",
-   "code_unit:apps/api/test/support/pr246-web-boundary-app.ts",
    "code_unit:apps/api/test/support/throttler-test-double.ts",
    "code_unit:apps/api/test/sync-import-scope.e2e.spec.ts",
    "code_unit:apps/api/test/sync.service.spec.ts",
@@ -13525,6 +13547,7 @@
    "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json",
    "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
    "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+   "receipt:receipts/graph/change-admission-pr246-55623d8.json",
    "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
    "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
    "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
@@ -13621,7 +13644,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-14T07:54:06Z",
+  "checked_at_utc": "2026-10-14T08:37:21Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -14279,7 +14302,7 @@
   {
    "content_hash": {
     "base": null,
-    "head": "sha256:8e904d39f3734a8d378ec31a6b1258b78431563203dee40cd26ea79367d85e89"
+    "head": "sha256:4ff12035237c6dfd73ae52b70c57c92ed624fa7dec6bc99635f28506f7a5bb09"
    },
    "entity": "receipt:receipts/graph/pr246-workspace-membership-change-admission.json",
    "node_type": "receipt",
@@ -14315,7 +14338,7 @@
   }
  ],
  "tree": {
-  "commit": "2df4ab270a105c85ce13ac91540631a882433677",
+  "commit": "d84f156c3d46b435201a04aa30ee8005da528755",
   "dirty": false
  },
  "verdicts": [
@@ -15773,8 +15796,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/activity.service.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/activity.service.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -15782,8 +15805,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/agent-key-assign-scope.e2e.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -15791,8 +15814,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/agent-project-dependencies.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/agent-project-dependencies.e2e.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -15800,8 +15823,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/agent-project-index.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/agent-project-index.e2e.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -15809,8 +15832,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/agent-task-scope.guard.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/agent-task-scope.guard.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -15818,8 +15841,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/agent-workspace-digest.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/agent-workspace-digest.e2e.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -15827,8 +15850,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/app-module-boot.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/app-module-boot.e2e.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -15836,8 +15859,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/archived-status.migration.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/archived-status.migration.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -15845,8 +15868,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/assembly/assembly.boundary.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/assembly/assembly.boundary.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -15854,8 +15877,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/assembly/assembly.bounds.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/assembly/assembly.bounds.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -15863,8 +15886,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/assembly/assembly.canonical.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/assembly/assembly.canonical.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -15872,8 +15895,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/assembly/assembly.closedschema.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/assembly/assembly.closedschema.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -15881,8 +15904,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/assembly/assembly.compiler.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/assembly/assembly.compiler.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -15890,8 +15913,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/assembly/assembly.credential-policy.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/assembly/assembly.credential-policy.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -15899,8 +15922,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/assembly/assembly.errors.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/assembly/assembly.errors.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-contract-diff",
     "v-fitness",
@@ -15909,8 +15932,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/assembly/assembly.f10.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/assembly/assembly.f10.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -15918,8 +15941,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/assembly/assembly.falsification.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/assembly/assembly.falsification.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -15927,8 +15950,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/assembly/assembly.generator.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/assembly/assembly.generator.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -15936,8 +15959,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/assembly/assembly.instant.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/assembly/assembly.instant.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -15945,8 +15968,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/assembly/assembly.keyorder.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/assembly/assembly.keyorder.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -15954,8 +15977,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/assembly/assembly.lexical.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/assembly/assembly.lexical.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -15963,8 +15986,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/assembly/assembly.parity.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/assembly/assembly.parity.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -15972,8 +15995,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/assembly/assembly.purity.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/assembly/assembly.purity.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -15981,8 +16004,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/assembly/assembly.rejectionsites.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/assembly/assembly.rejectionsites.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -15990,8 +16013,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/assembly/assembly.rereview-regressions.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/assembly/assembly.rereview-regressions.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -15999,8 +16022,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/assembly/assembly.types.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/assembly/assembly.types.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-contract-diff",
     "v-fitness",
@@ -16009,8 +16032,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/assembly/assembly.validator.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/assembly/assembly.validator.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16018,8 +16041,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/assembly/assembly.validatorcli.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/assembly/assembly.validatorcli.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16035,8 +16058,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/assembly/fixture-instant.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/assembly/fixture-instant.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16044,8 +16067,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/assembly/generate-credential-policy.js",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/assembly/generate-credential-policy.js",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16053,8 +16076,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/assembly/generate-fixtures.js",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/assembly/generate-fixtures.js",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16062,8 +16085,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/assembly/mutation-harness.js",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/assembly/mutation-harness.js",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16079,8 +16102,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/assign-compat-window.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/assign-compat-window.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16088,8 +16111,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/auth.service.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/auth.service.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16097,8 +16120,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/bind-host.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/bind-host.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16106,8 +16129,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/build-info.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/build-info.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16115,8 +16138,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/deploy-bind.contract.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/deploy-bind.contract.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16124,8 +16147,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/execution-authority.canonical-json.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/execution-authority.canonical-json.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16133,8 +16156,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/execution-authority.evidence-ref.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/execution-authority.evidence-ref.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16142,8 +16165,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/execution-authority.migration.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/execution-authority.migration.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16151,8 +16174,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/execution-authority.reducer.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/execution-authority.reducer.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16160,8 +16183,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/execution-authority.replay.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/execution-authority.replay.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16169,8 +16192,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/execution-authority.service-smoke.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/execution-authority.service-smoke.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16178,8 +16201,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/execution-authority.service.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/execution-authority.service.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16187,8 +16210,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/execution-authority.types.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/execution-authority.types.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16196,8 +16219,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/field-changes.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/field-changes.e2e.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16205,8 +16228,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/health.controller.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/health.controller.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16214,8 +16237,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/human-task-read-isolation.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/human-task-read-isolation.e2e.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16223,8 +16246,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/jwt-or-api-key.guard.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/jwt-or-api-key.guard.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16232,8 +16255,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/migration-workspace-scope.e2e.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16241,8 +16264,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/migration.archive-projection.postgres.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/migration.archive-projection.postgres.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-contract-diff",
     "v-fitness",
@@ -16251,8 +16274,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/migration.controller.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/migration.controller.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16260,8 +16283,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/migration.migration.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/migration.migration.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16269,8 +16292,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/migration.postgres.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/migration.postgres.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-contract-diff",
     "v-fitness",
@@ -16279,8 +16302,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/migration.status-mutation.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/migration.status-mutation.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16288,8 +16311,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/migration.status.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/migration.status.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16297,8 +16320,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/muneral-kb-change-registry.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/muneral-kb-change-registry.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16306,8 +16329,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/mutation-evidence.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/mutation-evidence.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16315,8 +16338,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/outbox-relay-probe.postgres.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/outbox-relay-probe.postgres.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16324,8 +16347,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/outbox-relay-wired.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/outbox-relay-wired.e2e.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16333,8 +16356,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/outbox.migration.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/outbox.migration.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16342,8 +16365,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/outbox.relay.postgres.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/outbox.relay.postgres.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16351,8 +16374,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/outbox.relay.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/outbox.relay.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16360,8 +16383,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/outbox.replay-harness.postgres.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/outbox.replay-harness.postgres.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16369,8 +16392,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/project-index.service.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/project-index.service.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16378,8 +16401,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/project-read-grants.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/project-read-grants.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16387,8 +16410,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/rbac.guard.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/rbac.guard.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16396,8 +16419,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/result-authority.contract.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/result-authority.contract.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16405,8 +16428,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/result-authority.migration.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/result-authority.migration.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16414,8 +16437,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/result-authority.postgres.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/result-authority.postgres.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16423,8 +16446,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/secret-rules.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/secret-rules.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16432,8 +16455,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/setup-env.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/setup-env.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16441,8 +16464,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/solution-log-head.contract.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/solution-log-head.contract.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16450,8 +16473,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/solution-log-head.controller.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/solution-log-head.controller.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16459,8 +16482,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/solution-log-head.migration.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/solution-log-head.migration.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16468,8 +16491,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/solution-log-head.postgres.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/solution-log-head.postgres.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16477,8 +16500,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/solution-log-head.service.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/solution-log-head.service.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16486,8 +16509,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/status-map-rev3.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/status-map-rev3.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16495,8 +16518,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/status-map-rev4.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/status-map-rev4.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16504,8 +16527,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/support/disposable-postgres.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/support/disposable-postgres.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-contract-diff: 1 contract edge(s) verified (consumer ⊆ provider); v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-contract-diff",
     "v-fitness",
@@ -16513,19 +16536,9 @@
    ]
   },
   {
-   "entity": "code_unit:apps/api/test/support/pr246-web-boundary-app.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: TS2307 L6: Cannot find module '../../dist/auth/auth.module.js' or its corresponding type declarations.; TS2307 L7: Cannot find module '../../dist/auth/auth.service.js' or its corresponding type declarations.; TS2307 L8: Cannot find module '../../dist/prisma/prisma.module.js' or its corresponding type declarations.",
-   "verdict": "failed",
-   "verifier_ids": [
-    "v-config-schema",
-    "v-fitness",
-    "v-type-check-apps-api-tsconfig-test"
-   ]
-  },
-  {
    "entity": "code_unit:apps/api/test/support/throttler-test-double.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/support/throttler-test-double.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16533,8 +16546,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/sync-import-scope.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/sync-import-scope.e2e.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16542,8 +16555,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/sync.service.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/sync.service.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16551,8 +16564,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/task-contract-binding.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/task-contract-binding.e2e.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16560,8 +16573,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/task-contract-digest.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/task-contract-digest.e2e.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16569,8 +16582,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/task-contract-digest.migration.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/task-contract-digest.migration.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16578,8 +16591,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/task-delete-audit.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/task-delete-audit.e2e.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16587,8 +16600,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/task-evidence.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/task-evidence.e2e.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16596,8 +16609,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/task-evidence.migration.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/task-evidence.migration.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16605,8 +16618,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/task-execution-recorder.service.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/task-execution-recorder.service.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16614,8 +16627,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/task-field-state.service.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/task-field-state.service.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16623,8 +16636,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/task-redaction.service.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/task-redaction.service.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16632,8 +16645,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/task-redactions.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/task-redactions.e2e.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16641,8 +16654,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/task-redactions.migration.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/task-redactions.migration.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16650,8 +16663,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/task-staleness.service.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/task-staleness.service.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16659,8 +16672,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/task-state-machine.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/task-state-machine.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16668,8 +16681,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/tasks-agent-scope.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/tasks-agent-scope.e2e.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16677,8 +16690,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/tasks-agent-status.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/tasks-agent-status.e2e.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16686,8 +16699,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/tasks.query.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/tasks.query.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16695,8 +16708,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/tasks.service.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/tasks.service.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16704,8 +16717,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/work-outcome-ledger.ac014.postgres.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/work-outcome-ledger.ac014.postgres.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16713,8 +16726,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/workspace-digest-grants.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/workspace-digest-grants.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16722,8 +16735,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/workspace-digest.unit.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/workspace-digest.unit.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
     "v-type-check-apps-api-tsconfig-test"
@@ -16731,8 +16744,8 @@
   },
   {
    "entity": "code_unit:apps/api/test/workspace-membership.routes.e2e.spec.ts",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in other files (apps/api/test/support/pr246-web-boundary-app.ts); not attributable to apps/api/test/workspace-membership.routes.e2e.spec.ts",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-config-schema: every key read is declared; v-fitness: no new fitness violation",
+   "verdict": "verified",
    "verifier_ids": [
     "v-config-schema",
     "v-fitness",
@@ -17793,11 +17806,11 @@
   },
   {
    "entity": "deployable_unit:apps/api",
-   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: 8 error(s) in 1 file(s)",
-   "verdict": "failed",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: 0 errors; v-fitness: no new violation in apps/api (5 frozen)",
+   "verdict": "verified",
    "verifier_ids": [
     "v-fitness",
-    "v-type-check-apps-api-tsconfig-test"
+    "v-type-check-apps-api-tsconfig"
    ]
   },
   {
@@ -17904,6 +17917,11 @@
    "verifier_ids": [
     "v-doc-reference"
    ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-pr246-55623d8.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "verdict": "not_measured"
   },
   {
    "entity": "route:DELETE /agents/keys/:keyId",
@@ -18017,10 +18035,10 @@
   },
   {
    "entity": "route:DELETE /workspaces/:workspaceId/members/:userId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-membership-e2e-92556c8 (post) on candidate-local Nest HTTP application with real middleware/controllers and synthetic owner JWT; isolated PostgreSQL 16 on private loopback port 56000: exact-head Jest/Supertest authenticated-owner and anonymous assertions both passed on private disposab",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -18380,10 +18398,10 @@
   },
   {
    "entity": "route:GET /workspaces/:workspaceId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-membership-e2e-92556c8 (post) on candidate-local Nest HTTP application with real middleware/controllers and synthetic owner JWT; isolated PostgreSQL 16 on private loopback port 56000: exact-head Jest/Supertest authenticated-owner and anonymous assertions both passed on private disposab",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -18391,10 +18409,10 @@
   },
   {
    "entity": "route:GET /workspaces/:workspaceId/members",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-membership-e2e-92556c8 (post) on candidate-local Nest HTTP application with real middleware/controllers and synthetic owner JWT; isolated PostgreSQL 16 on private loopback port 56000: exact-head Jest/Supertest authenticated-owner and anonymous assertions both passed on private disposab",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -18457,10 +18475,10 @@
   },
   {
    "entity": "route:PATCH /workspaces/:workspaceId/members/:userId/role",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-membership-e2e-92556c8 (post) on candidate-local Nest HTTP application with real middleware/controllers and synthetic owner JWT; isolated PostgreSQL 16 on private loopback port 56000: exact-head Jest/Supertest authenticated-owner and anonymous assertions both passed on private disposab",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -18754,10 +18772,10 @@
   },
   {
    "entity": "route:POST /workspaces/:workspaceId/members/:userId",
-   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
-   "verdict": "not_measured",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: project compiles, 0 errors; v-contract-diff: no contract edge from this entity at head; nothing to project; v-route-config: served at head, prefix '/api/v1' consistent, selected bootstrap apps/api/src/main.ts, controller registered; v-canary-1: canary pr246-membership-e2e-92556c8 (post) on candidate-local Nest HTTP application with real middleware/controllers and synthetic owner JWT; isolated PostgreSQL 16 on private loopback port 56000: exact-head Jest/Supertest authenticated-owner and anonymous assertions both passed on private disposab",
+   "verdict": "verified",
    "verifier_ids": [
-    "v-canary",
+    "v-canary-1",
     "v-contract-diff",
     "v-route-config",
     "v-type-check-apps-api-tsconfig"
@@ -18794,8 +18812,8 @@
  },
  "verifiers": [
   {
-   "command": "/tmp/arcana-verify/export-2d3d20e0e1d5/apps/api/node_modules/.bin/tsc -p /tmp/arcana-verify/export-2d3d20e0e1d5/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/claude-work/munera-pr246/receipts/graph/verifier-out/pr246-canonical-2d3d20e-20261014/type-check-cf7ekh9l/check.tsbuildinfo --listFiles",
-   "duration_s": 4.98,
+   "command": "/home/dev/aup/claude-work/munera-pr246/apps/api/node_modules/.bin/tsc -p /home/dev/aup/claude-work/munera-pr246/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/arcana-verify/verifier-out/type-check-6b8aloow/check.tsbuildinfo --listFiles",
+   "duration_s": 5.8,
    "entities": [
     "code_unit:apps/api/eslint.config.mjs",
     "code_unit:apps/api/scripts/outbox-reconcile.mjs",
@@ -19251,13 +19269,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/claude-work/munera-pr246/receipts/graph/verifier-out/pr246-canonical-2d3d20e-20261014/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-10-14T07:54:11Z",
+   "output_ref": "/tmp/arcana-verify/verifier-out/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-10-14T08:37:27Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1453 files listed"
   },
   {
-   "command": "/tmp/arcana-verify/export-2d3d20e0e1d5/apps/api/node_modules/.bin/tsc -p /tmp/arcana-verify/export-2d3d20e0e1d5/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/claude-work/munera-pr246/receipts/graph/verifier-out/pr246-canonical-2d3d20e-20261014/type-check-8rayiogu/check.tsbuildinfo --listFiles",
-   "duration_s": 6.34,
+   "command": "/home/dev/aup/claude-work/munera-pr246/apps/api/node_modules/.bin/tsc -p /home/dev/aup/claude-work/munera-pr246/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /tmp/arcana-verify/verifier-out/type-check-q8zo6xy6/check.tsbuildinfo --listFiles",
+   "duration_s": 13.92,
    "entities": [
     "code_unit:apps/api/scripts/semantic-aggregate-readback.test.mjs",
     "code_unit:apps/api/test/activity.service.spec.ts",
@@ -19340,7 +19358,6 @@
     "code_unit:apps/api/test/status-map-rev3.spec.ts",
     "code_unit:apps/api/test/status-map-rev4.spec.ts",
     "code_unit:apps/api/test/support/disposable-postgres.ts",
-    "code_unit:apps/api/test/support/pr246-web-boundary-app.ts",
     "code_unit:apps/api/test/support/throttler-test-double.ts",
     "code_unit:apps/api/test/sync-import-scope.e2e.spec.ts",
     "code_unit:apps/api/test/sync.service.spec.ts",
@@ -19369,123 +19386,122 @@
    ],
    "entity_verdicts": {
     "code_unit:apps/api/scripts/semantic-aggregate-readback.test.mjs": "not_measured",
-    "code_unit:apps/api/test/activity.service.spec.ts": "not_measured",
-    "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/agent-project-dependencies.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/agent-project-index.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/agent-task-scope.guard.spec.ts": "not_measured",
-    "code_unit:apps/api/test/agent-workspace-digest.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/app-module-boot.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/archived-status.migration.spec.ts": "not_measured",
-    "code_unit:apps/api/test/assembly/assembly.boundary.spec.ts": "not_measured",
-    "code_unit:apps/api/test/assembly/assembly.bounds.spec.ts": "not_measured",
-    "code_unit:apps/api/test/assembly/assembly.canonical.spec.ts": "not_measured",
-    "code_unit:apps/api/test/assembly/assembly.closedschema.spec.ts": "not_measured",
-    "code_unit:apps/api/test/assembly/assembly.compiler.spec.ts": "not_measured",
-    "code_unit:apps/api/test/assembly/assembly.credential-policy.spec.ts": "not_measured",
-    "code_unit:apps/api/test/assembly/assembly.errors.spec.ts": "not_measured",
-    "code_unit:apps/api/test/assembly/assembly.f10.spec.ts": "not_measured",
-    "code_unit:apps/api/test/assembly/assembly.falsification.spec.ts": "not_measured",
-    "code_unit:apps/api/test/assembly/assembly.generator.spec.ts": "not_measured",
-    "code_unit:apps/api/test/assembly/assembly.instant.spec.ts": "not_measured",
-    "code_unit:apps/api/test/assembly/assembly.keyorder.spec.ts": "not_measured",
-    "code_unit:apps/api/test/assembly/assembly.lexical.spec.ts": "not_measured",
-    "code_unit:apps/api/test/assembly/assembly.parity.spec.ts": "not_measured",
-    "code_unit:apps/api/test/assembly/assembly.purity.spec.ts": "not_measured",
-    "code_unit:apps/api/test/assembly/assembly.rejectionsites.spec.ts": "not_measured",
-    "code_unit:apps/api/test/assembly/assembly.rereview-regressions.spec.ts": "not_measured",
-    "code_unit:apps/api/test/assembly/assembly.types.spec.ts": "not_measured",
-    "code_unit:apps/api/test/assembly/assembly.validator.spec.ts": "not_measured",
-    "code_unit:apps/api/test/assembly/assembly.validatorcli.spec.ts": "not_measured",
-    "code_unit:apps/api/test/assembly/fixture-instant.ts": "not_measured",
-    "code_unit:apps/api/test/assembly/generate-credential-policy.js": "not_measured",
-    "code_unit:apps/api/test/assembly/generate-fixtures.js": "not_measured",
-    "code_unit:apps/api/test/assembly/mutation-harness.js": "not_measured",
-    "code_unit:apps/api/test/assign-compat-window.spec.ts": "not_measured",
-    "code_unit:apps/api/test/auth.service.spec.ts": "not_measured",
-    "code_unit:apps/api/test/bind-host.spec.ts": "not_measured",
-    "code_unit:apps/api/test/build-info.spec.ts": "not_measured",
-    "code_unit:apps/api/test/deploy-bind.contract.spec.ts": "not_measured",
-    "code_unit:apps/api/test/execution-authority.canonical-json.spec.ts": "not_measured",
-    "code_unit:apps/api/test/execution-authority.evidence-ref.spec.ts": "not_measured",
-    "code_unit:apps/api/test/execution-authority.migration.spec.ts": "not_measured",
-    "code_unit:apps/api/test/execution-authority.reducer.spec.ts": "not_measured",
-    "code_unit:apps/api/test/execution-authority.replay.spec.ts": "not_measured",
-    "code_unit:apps/api/test/execution-authority.service-smoke.spec.ts": "not_measured",
-    "code_unit:apps/api/test/execution-authority.service.spec.ts": "not_measured",
-    "code_unit:apps/api/test/execution-authority.types.spec.ts": "not_measured",
-    "code_unit:apps/api/test/field-changes.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/health.controller.spec.ts": "not_measured",
-    "code_unit:apps/api/test/human-task-read-isolation.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/jwt-or-api-key.guard.spec.ts": "not_measured",
-    "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/migration.archive-projection.postgres.spec.ts": "not_measured",
-    "code_unit:apps/api/test/migration.controller.spec.ts": "not_measured",
-    "code_unit:apps/api/test/migration.migration.spec.ts": "not_measured",
-    "code_unit:apps/api/test/migration.postgres.spec.ts": "not_measured",
-    "code_unit:apps/api/test/migration.status-mutation.spec.ts": "not_measured",
-    "code_unit:apps/api/test/migration.status.spec.ts": "not_measured",
-    "code_unit:apps/api/test/muneral-kb-change-registry.spec.ts": "not_measured",
-    "code_unit:apps/api/test/mutation-evidence.spec.ts": "not_measured",
-    "code_unit:apps/api/test/outbox-relay-probe.postgres.spec.ts": "not_measured",
-    "code_unit:apps/api/test/outbox-relay-wired.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/outbox.migration.spec.ts": "not_measured",
-    "code_unit:apps/api/test/outbox.relay.postgres.spec.ts": "not_measured",
-    "code_unit:apps/api/test/outbox.relay.spec.ts": "not_measured",
-    "code_unit:apps/api/test/outbox.replay-harness.postgres.spec.ts": "not_measured",
-    "code_unit:apps/api/test/project-index.service.spec.ts": "not_measured",
-    "code_unit:apps/api/test/project-read-grants.spec.ts": "not_measured",
-    "code_unit:apps/api/test/rbac.guard.spec.ts": "not_measured",
-    "code_unit:apps/api/test/result-authority.contract.spec.ts": "not_measured",
-    "code_unit:apps/api/test/result-authority.migration.spec.ts": "not_measured",
-    "code_unit:apps/api/test/result-authority.postgres.spec.ts": "not_measured",
-    "code_unit:apps/api/test/secret-rules.spec.ts": "not_measured",
-    "code_unit:apps/api/test/setup-env.ts": "not_measured",
-    "code_unit:apps/api/test/solution-log-head.contract.spec.ts": "not_measured",
-    "code_unit:apps/api/test/solution-log-head.controller.spec.ts": "not_measured",
-    "code_unit:apps/api/test/solution-log-head.migration.spec.ts": "not_measured",
-    "code_unit:apps/api/test/solution-log-head.postgres.spec.ts": "not_measured",
-    "code_unit:apps/api/test/solution-log-head.service.spec.ts": "not_measured",
-    "code_unit:apps/api/test/status-map-rev3.spec.ts": "not_measured",
-    "code_unit:apps/api/test/status-map-rev4.spec.ts": "not_measured",
-    "code_unit:apps/api/test/support/disposable-postgres.ts": "not_measured",
-    "code_unit:apps/api/test/support/pr246-web-boundary-app.ts": "failed",
-    "code_unit:apps/api/test/support/throttler-test-double.ts": "not_measured",
-    "code_unit:apps/api/test/sync-import-scope.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/sync.service.spec.ts": "not_measured",
-    "code_unit:apps/api/test/task-contract-binding.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/task-contract-digest.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/task-contract-digest.migration.spec.ts": "not_measured",
-    "code_unit:apps/api/test/task-delete-audit.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/task-evidence.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/task-evidence.migration.spec.ts": "not_measured",
-    "code_unit:apps/api/test/task-execution-recorder.service.spec.ts": "not_measured",
-    "code_unit:apps/api/test/task-field-state.service.spec.ts": "not_measured",
-    "code_unit:apps/api/test/task-redaction.service.spec.ts": "not_measured",
-    "code_unit:apps/api/test/task-redactions.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/task-redactions.migration.spec.ts": "not_measured",
-    "code_unit:apps/api/test/task-staleness.service.spec.ts": "not_measured",
-    "code_unit:apps/api/test/task-state-machine.spec.ts": "not_measured",
-    "code_unit:apps/api/test/tasks-agent-scope.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/tasks-agent-status.e2e.spec.ts": "not_measured",
-    "code_unit:apps/api/test/tasks.query.spec.ts": "not_measured",
-    "code_unit:apps/api/test/tasks.service.spec.ts": "not_measured",
-    "code_unit:apps/api/test/work-outcome-ledger.ac014.postgres.spec.ts": "not_measured",
-    "code_unit:apps/api/test/workspace-digest-grants.spec.ts": "not_measured",
-    "code_unit:apps/api/test/workspace-digest.unit.spec.ts": "not_measured",
-    "code_unit:apps/api/test/workspace-membership.routes.e2e.spec.ts": "not_measured",
-    "deployable_unit:apps/api": "failed"
+    "code_unit:apps/api/test/activity.service.spec.ts": "verified",
+    "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/agent-project-dependencies.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/agent-project-index.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/agent-task-scope.guard.spec.ts": "verified",
+    "code_unit:apps/api/test/agent-workspace-digest.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/app-module-boot.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/archived-status.migration.spec.ts": "verified",
+    "code_unit:apps/api/test/assembly/assembly.boundary.spec.ts": "verified",
+    "code_unit:apps/api/test/assembly/assembly.bounds.spec.ts": "verified",
+    "code_unit:apps/api/test/assembly/assembly.canonical.spec.ts": "verified",
+    "code_unit:apps/api/test/assembly/assembly.closedschema.spec.ts": "verified",
+    "code_unit:apps/api/test/assembly/assembly.compiler.spec.ts": "verified",
+    "code_unit:apps/api/test/assembly/assembly.credential-policy.spec.ts": "verified",
+    "code_unit:apps/api/test/assembly/assembly.errors.spec.ts": "verified",
+    "code_unit:apps/api/test/assembly/assembly.f10.spec.ts": "verified",
+    "code_unit:apps/api/test/assembly/assembly.falsification.spec.ts": "verified",
+    "code_unit:apps/api/test/assembly/assembly.generator.spec.ts": "verified",
+    "code_unit:apps/api/test/assembly/assembly.instant.spec.ts": "verified",
+    "code_unit:apps/api/test/assembly/assembly.keyorder.spec.ts": "verified",
+    "code_unit:apps/api/test/assembly/assembly.lexical.spec.ts": "verified",
+    "code_unit:apps/api/test/assembly/assembly.parity.spec.ts": "verified",
+    "code_unit:apps/api/test/assembly/assembly.purity.spec.ts": "verified",
+    "code_unit:apps/api/test/assembly/assembly.rejectionsites.spec.ts": "verified",
+    "code_unit:apps/api/test/assembly/assembly.rereview-regressions.spec.ts": "verified",
+    "code_unit:apps/api/test/assembly/assembly.types.spec.ts": "verified",
+    "code_unit:apps/api/test/assembly/assembly.validator.spec.ts": "verified",
+    "code_unit:apps/api/test/assembly/assembly.validatorcli.spec.ts": "verified",
+    "code_unit:apps/api/test/assembly/fixture-instant.ts": "verified",
+    "code_unit:apps/api/test/assembly/generate-credential-policy.js": "verified",
+    "code_unit:apps/api/test/assembly/generate-fixtures.js": "verified",
+    "code_unit:apps/api/test/assembly/mutation-harness.js": "verified",
+    "code_unit:apps/api/test/assign-compat-window.spec.ts": "verified",
+    "code_unit:apps/api/test/auth.service.spec.ts": "verified",
+    "code_unit:apps/api/test/bind-host.spec.ts": "verified",
+    "code_unit:apps/api/test/build-info.spec.ts": "verified",
+    "code_unit:apps/api/test/deploy-bind.contract.spec.ts": "verified",
+    "code_unit:apps/api/test/execution-authority.canonical-json.spec.ts": "verified",
+    "code_unit:apps/api/test/execution-authority.evidence-ref.spec.ts": "verified",
+    "code_unit:apps/api/test/execution-authority.migration.spec.ts": "verified",
+    "code_unit:apps/api/test/execution-authority.reducer.spec.ts": "verified",
+    "code_unit:apps/api/test/execution-authority.replay.spec.ts": "verified",
+    "code_unit:apps/api/test/execution-authority.service-smoke.spec.ts": "verified",
+    "code_unit:apps/api/test/execution-authority.service.spec.ts": "verified",
+    "code_unit:apps/api/test/execution-authority.types.spec.ts": "verified",
+    "code_unit:apps/api/test/field-changes.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/health.controller.spec.ts": "verified",
+    "code_unit:apps/api/test/human-task-read-isolation.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/jwt-or-api-key.guard.spec.ts": "verified",
+    "code_unit:apps/api/test/migration-workspace-scope.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/migration.archive-projection.postgres.spec.ts": "verified",
+    "code_unit:apps/api/test/migration.controller.spec.ts": "verified",
+    "code_unit:apps/api/test/migration.migration.spec.ts": "verified",
+    "code_unit:apps/api/test/migration.postgres.spec.ts": "verified",
+    "code_unit:apps/api/test/migration.status-mutation.spec.ts": "verified",
+    "code_unit:apps/api/test/migration.status.spec.ts": "verified",
+    "code_unit:apps/api/test/muneral-kb-change-registry.spec.ts": "verified",
+    "code_unit:apps/api/test/mutation-evidence.spec.ts": "verified",
+    "code_unit:apps/api/test/outbox-relay-probe.postgres.spec.ts": "verified",
+    "code_unit:apps/api/test/outbox-relay-wired.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/outbox.migration.spec.ts": "verified",
+    "code_unit:apps/api/test/outbox.relay.postgres.spec.ts": "verified",
+    "code_unit:apps/api/test/outbox.relay.spec.ts": "verified",
+    "code_unit:apps/api/test/outbox.replay-harness.postgres.spec.ts": "verified",
+    "code_unit:apps/api/test/project-index.service.spec.ts": "verified",
+    "code_unit:apps/api/test/project-read-grants.spec.ts": "verified",
+    "code_unit:apps/api/test/rbac.guard.spec.ts": "verified",
+    "code_unit:apps/api/test/result-authority.contract.spec.ts": "verified",
+    "code_unit:apps/api/test/result-authority.migration.spec.ts": "verified",
+    "code_unit:apps/api/test/result-authority.postgres.spec.ts": "verified",
+    "code_unit:apps/api/test/secret-rules.spec.ts": "verified",
+    "code_unit:apps/api/test/setup-env.ts": "verified",
+    "code_unit:apps/api/test/solution-log-head.contract.spec.ts": "verified",
+    "code_unit:apps/api/test/solution-log-head.controller.spec.ts": "verified",
+    "code_unit:apps/api/test/solution-log-head.migration.spec.ts": "verified",
+    "code_unit:apps/api/test/solution-log-head.postgres.spec.ts": "verified",
+    "code_unit:apps/api/test/solution-log-head.service.spec.ts": "verified",
+    "code_unit:apps/api/test/status-map-rev3.spec.ts": "verified",
+    "code_unit:apps/api/test/status-map-rev4.spec.ts": "verified",
+    "code_unit:apps/api/test/support/disposable-postgres.ts": "verified",
+    "code_unit:apps/api/test/support/throttler-test-double.ts": "verified",
+    "code_unit:apps/api/test/sync-import-scope.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/sync.service.spec.ts": "verified",
+    "code_unit:apps/api/test/task-contract-binding.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/task-contract-digest.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/task-contract-digest.migration.spec.ts": "verified",
+    "code_unit:apps/api/test/task-delete-audit.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/task-evidence.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/task-evidence.migration.spec.ts": "verified",
+    "code_unit:apps/api/test/task-execution-recorder.service.spec.ts": "verified",
+    "code_unit:apps/api/test/task-field-state.service.spec.ts": "verified",
+    "code_unit:apps/api/test/task-redaction.service.spec.ts": "verified",
+    "code_unit:apps/api/test/task-redactions.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/task-redactions.migration.spec.ts": "verified",
+    "code_unit:apps/api/test/task-staleness.service.spec.ts": "verified",
+    "code_unit:apps/api/test/task-state-machine.spec.ts": "verified",
+    "code_unit:apps/api/test/tasks-agent-scope.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/tasks-agent-status.e2e.spec.ts": "verified",
+    "code_unit:apps/api/test/tasks.query.spec.ts": "verified",
+    "code_unit:apps/api/test/tasks.service.spec.ts": "verified",
+    "code_unit:apps/api/test/work-outcome-ledger.ac014.postgres.spec.ts": "verified",
+    "code_unit:apps/api/test/workspace-digest-grants.spec.ts": "verified",
+    "code_unit:apps/api/test/workspace-digest.unit.spec.ts": "verified",
+    "code_unit:apps/api/test/workspace-membership.routes.e2e.spec.ts": "verified",
+    "deployable_unit:apps/api": "verified"
    },
-   "exit_code": 2,
+   "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/claude-work/munera-pr246/receipts/graph/verifier-out/pr246-canonical-2d3d20e-20261014/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-10-14T07:54:17Z",
-   "summary": "apps/api/tsconfig.test.json: exit 2, 8 error(s), 1614 files listed"
+   "output_ref": "/tmp/arcana-verify/verifier-out/v-type-check-apps-api-tsconfig-test.txt",
+   "started_at_utc": "2026-10-14T08:37:33Z",
+   "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1617 files listed"
   },
   {
-   "command": "/tmp/arcana-verify/export-2d3d20e0e1d5/apps/web/node_modules/.bin/tsc -p /tmp/arcana-verify/export-2d3d20e0e1d5/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/claude-work/munera-pr246/receipts/graph/verifier-out/pr246-canonical-2d3d20e-20261014/type-check-snfjyaz5/check.tsbuildinfo --listFiles",
-   "duration_s": 6.64,
+   "command": "/home/dev/aup/claude-work/munera-pr246/apps/web/node_modules/.bin/tsc -p /home/dev/aup/claude-work/munera-pr246/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/arcana-verify/verifier-out/type-check-525hfz1l/check.tsbuildinfo --listFiles",
+   "duration_s": 8.5,
    "entities": [
     "code_unit:apps/web/__tests__/kanban-board.test.ts",
     "code_unit:apps/web/__tests__/project-repository.test.tsx",
@@ -19567,13 +19583,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/claude-work/munera-pr246/receipts/graph/verifier-out/pr246-canonical-2d3d20e-20261014/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-10-14T07:54:23Z",
-   "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1313 files listed"
+   "output_ref": "/tmp/arcana-verify/verifier-out/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-10-14T08:37:48Z",
+   "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1317 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=840e3be21684, head=2d3d20e0e1d5, graph=head graph)",
-   "duration_s": 5.26,
+   "command": "tools/graph/contract_diff.py.run_diff(base=840e3be21684, head=d84f156c3d46, graph=head graph)",
+   "duration_s": 7.98,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.service.ts",
@@ -20001,13 +20017,13 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "/home/dev/aup/claude-work/munera-pr246/receipts/graph/verifier-out/pr246-canonical-2d3d20e-20261014/v-contract-diff.json",
-   "started_at_utc": "2026-10-14T07:54:31Z",
+   "output_ref": "/tmp/arcana-verify/verifier-out/v-contract-diff.json",
+   "started_at_utc": "2026-10-14T08:37:57Z",
    "summary": "58→59 contracts, breaking 0, edges {'verified': 165}"
   },
   {
    "command": "verify.py route_config_consistency RC-01 prefix / RC-02 registration / RC-03 served",
-   "duration_s": 0.07,
+   "duration_s": 0.1,
    "entities": [
     "route:DELETE /agents/keys/:keyId",
     "route:DELETE /agents/tasks/:taskId/assign/:agentId",
@@ -20175,13 +20191,13 @@
    "exit_code": 1,
    "id": "v-route-config",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/claude-work/munera-pr246/receipts/graph/verifier-out/pr246-canonical-2d3d20e-20261014/v-route-config.txt",
-   "started_at_utc": "2026-10-14T07:54:36Z",
+   "output_ref": "/tmp/arcana-verify/verifier-out/v-route-config.txt",
+   "started_at_utc": "2026-10-14T08:38:05Z",
    "summary": "80 route(s), 2 failed"
   },
   {
-   "command": "verify.py prisma-lite diff base→head + /tmp/arcana-verify/export-2d3d20e0e1d5/node_modules/.bin/prisma validate",
-   "duration_s": 1.32,
+   "command": "verify.py prisma-lite diff base→head + /home/dev/aup/claude-work/munera-pr246/node_modules/.bin/prisma validate",
+   "duration_s": 2.07,
    "entities": [
     "data_model:ActivityLog",
     "data_model:Agent",
@@ -20269,8 +20285,8 @@
    "exit_code": 0,
    "id": "v-schema-diff",
    "kind": "schema_diff",
-   "output_ref": "/home/dev/aup/claude-work/munera-pr246/receipts/graph/verifier-out/pr246-canonical-2d3d20e-20261014/v-schema-diff.json",
-   "started_at_utc": "2026-10-14T07:54:36Z",
+   "output_ref": "/tmp/arcana-verify/verifier-out/v-schema-diff.json",
+   "started_at_utc": "2026-10-14T08:38:05Z",
    "summary": "1 schema(s), 0 change(s), 0 failed, validate exit 0"
   },
   {
@@ -20285,8 +20301,8 @@
    "exit_code": 1,
    "id": "v-workflow-config-b803fcb7f17ed923",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/claude-work/munera-pr246/receipts/graph/verifier-out/pr246-canonical-2d3d20e-20261014/v-workflow-config-b803fcb7f17ed923.txt",
-   "started_at_utc": "2026-10-14T07:54:37Z",
+   "output_ref": "/tmp/arcana-verify/verifier-out/v-workflow-config-b803fcb7f17ed923.txt",
+   "started_at_utc": "2026-10-14T08:38:07Z",
    "summary": "PyYAML unavailable; workflow configuration not measured"
   },
   {
@@ -20301,8 +20317,8 @@
    "exit_code": 1,
    "id": "v-workflow-config-2fe48d1021006468",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/claude-work/munera-pr246/receipts/graph/verifier-out/pr246-canonical-2d3d20e-20261014/v-workflow-config-2fe48d1021006468.txt",
-   "started_at_utc": "2026-10-14T07:54:37Z",
+   "output_ref": "/tmp/arcana-verify/verifier-out/v-workflow-config-2fe48d1021006468.txt",
+   "started_at_utc": "2026-10-14T08:38:07Z",
    "summary": "PyYAML unavailable; workflow configuration not measured"
   },
   {
@@ -20317,8 +20333,8 @@
    "exit_code": 1,
    "id": "v-workflow-config-5844296ae241614c",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/claude-work/munera-pr246/receipts/graph/verifier-out/pr246-canonical-2d3d20e-20261014/v-workflow-config-5844296ae241614c.txt",
-   "started_at_utc": "2026-10-14T07:54:37Z",
+   "output_ref": "/tmp/arcana-verify/verifier-out/v-workflow-config-5844296ae241614c.txt",
+   "started_at_utc": "2026-10-14T08:38:07Z",
    "summary": "PyYAML unavailable; workflow configuration not measured"
   },
   {
@@ -20333,8 +20349,8 @@
    "exit_code": 1,
    "id": "v-workflow-config-dc49cc771602c92b",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/claude-work/munera-pr246/receipts/graph/verifier-out/pr246-canonical-2d3d20e-20261014/v-workflow-config-dc49cc771602c92b.txt",
-   "started_at_utc": "2026-10-14T07:54:37Z",
+   "output_ref": "/tmp/arcana-verify/verifier-out/v-workflow-config-dc49cc771602c92b.txt",
+   "started_at_utc": "2026-10-14T08:38:07Z",
    "summary": "PyYAML unavailable; workflow configuration not measured"
   },
   {
@@ -20349,31 +20365,29 @@
    "exit_code": 1,
    "id": "v-workflow-config-f2afde09eeffcba0",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/claude-work/munera-pr246/receipts/graph/verifier-out/pr246-canonical-2d3d20e-20261014/v-workflow-config-f2afde09eeffcba0.txt",
-   "started_at_utc": "2026-10-14T07:54:37Z",
+   "output_ref": "/tmp/arcana-verify/verifier-out/v-workflow-config-f2afde09eeffcba0.txt",
+   "started_at_utc": "2026-10-14T08:38:07Z",
    "summary": "PyYAML unavailable; workflow configuration not measured"
   },
   {
    "command": "verify.py config_schema: keys read at head ⊆ declared keys",
-   "duration_s": 0.73,
+   "duration_s": 0.68,
    "entities": [
-    "code_unit:apps/api/test/support/pr246-web-boundary-app.ts",
     "code_unit:apps/api/test/workspace-membership.routes.e2e.spec.ts"
    ],
    "entity_verdicts": {
-    "code_unit:apps/api/test/support/pr246-web-boundary-app.ts": "verified",
     "code_unit:apps/api/test/workspace-membership.routes.e2e.spec.ts": "verified"
    },
    "exit_code": 0,
    "id": "v-config-schema",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/claude-work/munera-pr246/receipts/graph/verifier-out/pr246-canonical-2d3d20e-20261014/v-config-schema.json",
-   "started_at_utc": "2026-10-14T07:54:37Z",
+   "output_ref": "/tmp/arcana-verify/verifier-out/v-config-schema.json",
+   "started_at_utc": "2026-10-14T08:38:07Z",
    "summary": "2 source(s), 0 new / 3 frozen undeclared reads, 0 failed; 4 vendored file(s) not attributed to this repository (Arcanada-one/arcanada-universal-program)"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.23,
+   "duration_s": 0.22,
    "entities": [
     "code_unit:.github/workflows/ci.yml",
     "code_unit:.github/workflows/dependabot-auto-merge.yml",
@@ -20609,7 +20623,6 @@
     "code_unit:apps/api/test/status-map-rev3.spec.ts",
     "code_unit:apps/api/test/status-map-rev4.spec.ts",
     "code_unit:apps/api/test/support/disposable-postgres.ts",
-    "code_unit:apps/api/test/support/pr246-web-boundary-app.ts",
     "code_unit:apps/api/test/support/throttler-test-double.ts",
     "code_unit:apps/api/test/sync-import-scope.e2e.spec.ts",
     "code_unit:apps/api/test/sync.service.spec.ts",
@@ -20908,7 +20921,6 @@
     "code_unit:apps/api/test/status-map-rev3.spec.ts": "verified",
     "code_unit:apps/api/test/status-map-rev4.spec.ts": "verified",
     "code_unit:apps/api/test/support/disposable-postgres.ts": "verified",
-    "code_unit:apps/api/test/support/pr246-web-boundary-app.ts": "verified",
     "code_unit:apps/api/test/support/throttler-test-double.ts": "verified",
     "code_unit:apps/api/test/sync-import-scope.e2e.spec.ts": "verified",
     "code_unit:apps/api/test/sync.service.spec.ts": "verified",
@@ -20975,13 +20987,13 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/home/dev/aup/claude-work/munera-pr246/receipts/graph/verifier-out/pr246-canonical-2d3d20e-20261014/v-fitness.json",
-   "started_at_utc": "2026-10-14T07:54:38Z",
+   "output_ref": "/tmp/arcana-verify/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-10-14T08:38:08Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
    "command": "verify.py doc_reference: path / route / model references of affected documents resolve at head",
-   "duration_s": 0.01,
+   "duration_s": 0.02,
    "entities": [
     "document:README.md",
     "document:SECURITY.md",
@@ -21013,13 +21025,37 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/home/dev/aup/claude-work/munera-pr246/receipts/graph/verifier-out/pr246-canonical-2d3d20e-20261014/v-doc-reference.txt",
-   "started_at_utc": "2026-10-14T07:54:38Z",
+   "output_ref": "/tmp/arcana-verify/verifier-out/v-doc-reference.txt",
+   "started_at_utc": "2026-10-14T08:38:08Z",
    "summary": "12 document(s), 0 failed"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 0.0,
+   "duration_s": 0.09,
+   "entities": [
+    "route:DELETE /workspaces/:workspaceId/members/:userId",
+    "route:GET /workspaces/:workspaceId",
+    "route:GET /workspaces/:workspaceId/members",
+    "route:PATCH /workspaces/:workspaceId/members/:userId/role",
+    "route:POST /workspaces/:workspaceId/members/:userId"
+   ],
+   "entity_verdicts": {
+    "route:DELETE /workspaces/:workspaceId/members/:userId": "verified",
+    "route:GET /workspaces/:workspaceId": "verified",
+    "route:GET /workspaces/:workspaceId/members": "verified",
+    "route:PATCH /workspaces/:workspaceId/members/:userId/role": "verified",
+    "route:POST /workspaces/:workspaceId/members/:userId": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-canary-1",
+   "kind": "canary",
+   "output_ref": "receipts/canary/pr246-workspace-membership/refresh-92556c8/canary-result.json",
+   "started_at_utc": "2026-10-14T08:38:08Z",
+   "summary": "receipts/canary/pr246-workspace-membership/refresh-92556c8/canary-result.json: 5 verified / 0 failed / 0 not_measured"
+  },
+  {
+   "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
+   "duration_s": 0.09,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/auth/auth.controller.ts",
@@ -21047,7 +21083,6 @@
     "route:DELETE /tasks/:taskId/checklist/:itemId",
     "route:DELETE /tasks/:taskId/dependencies/:depId",
     "route:DELETE /webhooks/:webhookId",
-    "route:DELETE /workspaces/:workspaceId/members/:userId",
     "route:GET /agents/tasks",
     "route:GET /agents/workspace/:workspaceId",
     "route:GET /auth/github",
@@ -21080,14 +21115,11 @@
     "route:GET /tasks/project/:projectId/staleness",
     "route:GET /webhooks/workspace/:workspaceId",
     "route:GET /workspaces",
-    "route:GET /workspaces/:workspaceId",
-    "route:GET /workspaces/:workspaceId/members",
     "route:PATCH /tasks/:taskId/checklist/:itemId",
     "route:PATCH /tasks/:taskId/contract",
     "route:PATCH /tasks/:taskId/status",
     "route:PATCH /webhooks/:webhookId/activate",
     "route:PATCH /webhooks/:webhookId/deactivate",
-    "route:PATCH /workspaces/:workspaceId/members/:userId/role",
     "route:POST /agents",
     "route:POST /agents/:agentId/keys",
     "route:POST /agents/keys/:keyId/rotate",
@@ -21114,7 +21146,6 @@
     "route:POST /tasks/:taskId/redactions",
     "route:POST /webhooks",
     "route:POST /workspaces",
-    "route:POST /workspaces/:workspaceId/members/:userId",
     "route:WS join:project",
     "route:WS leave:project"
    ],
@@ -21145,7 +21176,6 @@
     "route:DELETE /tasks/:taskId/checklist/:itemId": "not_measured",
     "route:DELETE /tasks/:taskId/dependencies/:depId": "not_measured",
     "route:DELETE /webhooks/:webhookId": "not_measured",
-    "route:DELETE /workspaces/:workspaceId/members/:userId": "not_measured",
     "route:GET /agents/tasks": "not_measured",
     "route:GET /agents/workspace/:workspaceId": "not_measured",
     "route:GET /auth/github": "not_measured",
@@ -21178,14 +21208,11 @@
     "route:GET /tasks/project/:projectId/staleness": "not_measured",
     "route:GET /webhooks/workspace/:workspaceId": "not_measured",
     "route:GET /workspaces": "not_measured",
-    "route:GET /workspaces/:workspaceId": "not_measured",
-    "route:GET /workspaces/:workspaceId/members": "not_measured",
     "route:PATCH /tasks/:taskId/checklist/:itemId": "not_measured",
     "route:PATCH /tasks/:taskId/contract": "not_measured",
     "route:PATCH /tasks/:taskId/status": "not_measured",
     "route:PATCH /webhooks/:webhookId/activate": "not_measured",
     "route:PATCH /webhooks/:webhookId/deactivate": "not_measured",
-    "route:PATCH /workspaces/:workspaceId/members/:userId/role": "not_measured",
     "route:POST /agents": "not_measured",
     "route:POST /agents/:agentId/keys": "not_measured",
     "route:POST /agents/keys/:keyId/rotate": "not_measured",
@@ -21212,16 +21239,15 @@
     "route:POST /tasks/:taskId/redactions": "not_measured",
     "route:POST /webhooks": "not_measured",
     "route:POST /workspaces": "not_measured",
-    "route:POST /workspaces/:workspaceId/members/:userId": "not_measured",
     "route:WS join:project": "not_measured",
     "route:WS leave:project": "not_measured"
    },
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/home/dev/aup/claude-work/munera-pr246/receipts/graph/verifier-out/pr246-canonical-2d3d20e-20261014/v-canary.json",
-   "started_at_utc": "2026-10-14T07:54:38Z",
-   "summary": "0 canary result(s), 0 committed at head; 0 verified / 0 failed / 96 not_measured of 96 entities"
+   "output_ref": "/tmp/arcana-verify/verifier-out/v-canary.json",
+   "started_at_utc": "2026-10-14T08:38:08Z",
+   "summary": "1 canary result(s), 1 committed at head; 5 verified / 0 failed / 91 not_measured of 96 entities"
   },
   {
    "command": "bash --noprofile --norc -n <exact bytes; Bats declarations translated, never executed>",
@@ -21235,9 +21261,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-69892b0aac323a92",
    "kind": "shell_syntax",
-   "output_ref": "/home/dev/aup/claude-work/munera-pr246/receipts/graph/verifier-out/pr246-canonical-2d3d20e-20261014/v-shell-syntax-69892b0aac323a92.txt",
+   "output_ref": "/tmp/arcana-verify/verifier-out/v-shell-syntax-69892b0aac323a92.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-14T07:54:38Z",
+   "started_at_utc": "2026-10-14T08:38:08Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -21252,9 +21278,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-7cbee4d32b13c205",
    "kind": "shell_syntax",
-   "output_ref": "/home/dev/aup/claude-work/munera-pr246/receipts/graph/verifier-out/pr246-canonical-2d3d20e-20261014/v-shell-syntax-7cbee4d32b13c205.txt",
+   "output_ref": "/tmp/arcana-verify/verifier-out/v-shell-syntax-7cbee4d32b13c205.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-14T07:54:38Z",
+   "started_at_utc": "2026-10-14T08:38:08Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -21269,9 +21295,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-69892b0aac323a92",
    "kind": "shell_behavior",
-   "output_ref": "/home/dev/aup/claude-work/munera-pr246/receipts/graph/verifier-out/pr246-canonical-2d3d20e-20261014/v-shell-behavior-69892b0aac323a92.txt",
+   "output_ref": "/tmp/arcana-verify/verifier-out/v-shell-behavior-69892b0aac323a92.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-14T07:54:38Z",
+   "started_at_utc": "2026-10-14T08:38:08Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: directory transition has unresolved execution cwd; line 10: dynamic load/substitution; line 137: heredoc data/generation closure not measured; line 178: multiline/opaque shell statement; line 179: multiline/opaque shell statement; line 208: dynamic load/substitution; line 209: multiline/opaque shell statement; line 238: multiline/opaque shell statement; line 23: wrapper execution scope/options unresolved; line 241: multiline/opaque shell statement; line 29: wrapper execution scope/options unresolved; line 47: multiline/opaque shell statement; line 48: multiline/opaque shell statement; line 49: multiline/opaque shell statement; line 50: multiline/opaque shell statement; line 51: multiline/opaque shell statement; line 52: multiline/opaque shell statement; line 53: multiline/opaque shell statement; line 60: dynamic load/substitution; line 61: wrapper execution scope/options unresolved; line 63: multiline/opaque shell statement; line 76: multiline/opaque shell statement"
   },
   {
@@ -21286,9 +21312,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-7cbee4d32b13c205",
    "kind": "shell_behavior",
-   "output_ref": "/home/dev/aup/claude-work/munera-pr246/receipts/graph/verifier-out/pr246-canonical-2d3d20e-20261014/v-shell-behavior-7cbee4d32b13c205.txt",
+   "output_ref": "/tmp/arcana-verify/verifier-out/v-shell-behavior-7cbee4d32b13c205.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-14T07:54:38Z",
+   "started_at_utc": "2026-10-14T08:38:08Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: directory transition has unresolved execution cwd; line 104: multiline/opaque shell statement; line 105: dynamic command/alias/eval; line 110: multiline/opaque shell statement; line 111: multiline/opaque shell statement; line 121: multiline/opaque shell statement; line 122: multiline/opaque shell statement; line 138: dynamic command/alias/eval; line 143: multiline/opaque shell statement; line 144: multiline/opaque shell statement; line 156: multiline/opaque shell statement; line 157: multiline/opaque shell statement; line 172: multiline/opaque shell statement; line 173: multiline/opaque shell statement; line 202: multiline/opaque shell statement; line 203: multiline/opaque shell statement; line 224: multiline/opaque shell statement; line 225: multiline/opaque shell statement; line 238: multiline/opaque shell statement; line 240: multiline/opaque shell statement; line 242: multiline/opaque shell statement; line 244: multiline/opaque shell statement; line 246: multiline/opaque shell statement; line 249: multiline/opaque shell statement; line 250: multiline/opaque shell statement; line 252: multiline/opaque shell statement; line 253: multiline/opaque shell statement; line 35: multiline/opaque shell statement; line 36: multiline/opaque shell statement; line 43: multiline/opaque shell statement; line 44: multiline/opaque shell statement; line 51: multiline/opaque shell statement; line 52: multiline/opaque shell statement; line 56: multiline/opaque shell statement; line 57: multiline/opaque shell statement; line 65: multiline/opaque shell statement; line 66: multiline/opaque shell statement; line 84: multiline/opaque shell statement; line 85: dynamic command/alias/eval; line 88: multiline/opaque shell statement; line 89: dynamic command/alias/eval; line 8: dynamic load/substitution; line 90: multiline/opaque shell statement; line 91: dynamic command/alias/eval; line 92: multiline/opaque shell statement; line 93: dynamic command/alias/eval; line 94: multiline/opaque shell statement; line 95: dynamic command/alias/eval; line 97: multiline/opaque shell statement; line 98: multiline/opaque shell statement"
   }
  ],
@@ -22330,11 +22356,6 @@
     "fitness_rules",
     "type_check"
    ],
-   "code_unit:apps/api/test/support/pr246-web-boundary-app.ts": [
-    "config_schema",
-    "fitness_rules",
-    "type_check"
-   ],
    "code_unit:apps/api/test/support/throttler-test-double.ts": [
     "fitness_rules",
     "type_check"
@@ -22950,6 +22971,7 @@
    "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json": [],
    "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json": [],
    "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json": [],
+   "receipt:receipts/graph/change-admission-pr246-55623d8.json": [],
    "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json": [],
    "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json": [],
    "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json": [],
@@ -23442,9 +23464,9 @@
    ]
   },
   "seconds": {
-   "prepare": 2.16,
-   "total": 61.36,
-   "verifiers": 25.58
+   "prepare": 2.23,
+   "total": 85.1,
+   "verifiers": 39.47
   }
  },
  "work_item": "1f99b768-65e6-4afe-93e6-611db53e3366"
