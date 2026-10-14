@@ -1,0 +1,760 @@
+{
+  "schema": "CanaryPlan/v1",
+  "id": "pr242-exact-head-51-route-7-controller-sweep-ffec65c",
+  "environment": "candidate-local Nest API on loopback with disposable PostgreSQL 16 and private Redis; synthetic owner and agent principals",
+  "base_url": "http://127.0.0.1:35542/api/v1",
+  "head_sha": "ffec65c87af8dcd4bbad5f9a40924bc74b685d02",
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "ffec65c87af8dcd4bbad5f9a40924bc74b685d02",
+    "tree": "718e7f30f371d9c217b1c54031282fc55faab604",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "136dc0b6b550cbc40d072ba44afcd6d5409762d5635486005d25f57a5d47657a",
+      "source_field": "commit"
+    }
+  },
+  "read_only": false,
+  "owner": "MUNERAL; disposable synthetic PostgreSQL only",
+  "mutating_owner": "MUNERAL; disposable synthetic PostgreSQL only",
+  "routes": [
+    "route:POST /agents",
+    "route:POST /agents/:agentId/keys",
+    "route:POST /agents/keys/:keyId/rotate",
+    "route:POST /agents/tasks/:taskId/assign",
+    "route:POST /projects",
+    "route:POST /projects/git-refs",
+    "route:POST /sync/datarim/:projectId/import",
+    "route:POST /tasks",
+    "route:POST /tasks/:taskId/checklist",
+    "route:POST /tasks/:taskId/comments",
+    "route:POST /tasks/:taskId/dependencies",
+    "route:POST /tasks/:taskId/evidence",
+    "route:POST /tasks/:taskId/field-ack",
+    "route:POST /tasks/:taskId/redactions",
+    "route:POST /workspaces",
+    "route:POST /workspaces/:workspaceId/members/:userId",
+    "route:PATCH /tasks/:taskId/checklist/:itemId",
+    "route:PATCH /tasks/:taskId/contract",
+    "route:PATCH /tasks/:taskId/status",
+    "route:PATCH /workspaces/:workspaceId/members/:userId/role",
+    "route:GET /agents/tasks",
+    "route:GET /agents/workspace/:workspaceId",
+    "route:GET /projects/:projectId",
+    "route:GET /projects/tasks/:taskId/git-refs",
+    "route:GET /projects/workspace/:workspaceId",
+    "route:GET /sync/datarim/:projectId",
+    "route:GET /tasks",
+    "route:GET /tasks/:taskId",
+    "route:GET /tasks/:taskId/activity",
+    "route:GET /tasks/:taskId/checklist",
+    "route:GET /tasks/:taskId/dependencies",
+    "route:GET /tasks/:taskId/dependency-graph",
+    "route:GET /tasks/:taskId/evidence",
+    "route:GET /tasks/:taskId/field-changes",
+    "route:GET /tasks/:taskId/readiness",
+    "route:GET /tasks/digest",
+    "route:GET /tasks/project/:projectId",
+    "route:GET /tasks/project/:projectId/index",
+    "route:GET /tasks/project/:projectId/staleness",
+    "route:GET /workspaces",
+    "route:GET /workspaces/:workspaceId",
+    "route:GET /workspaces/:workspaceId/members",
+    "route:DELETE /agents/keys/:keyId",
+    "route:DELETE /agents/tasks/:taskId/assign/:agentId",
+    "route:DELETE /projects/:projectId",
+    "route:DELETE /projects/git-refs/:refId",
+    "route:DELETE /tasks/:taskId",
+    "route:DELETE /tasks/:taskId/checklist/:itemId",
+    "route:DELETE /tasks/:taskId/dependencies/:depId",
+    "route:DELETE /workspaces/:workspaceId/members/:userId",
+    "route:POST /agents/keys/self/revoke"
+  ],
+  "controller_bindings": {
+    "code_unit:apps/api/src/agents/agents.controller.ts": [
+      "route:POST /agents",
+      "route:POST /agents/:agentId/keys",
+      "route:POST /agents/keys/:keyId/rotate",
+      "route:POST /agents/tasks/:taskId/assign",
+      "route:GET /agents/tasks",
+      "route:GET /agents/workspace/:workspaceId",
+      "route:DELETE /agents/keys/:keyId",
+      "route:DELETE /agents/tasks/:taskId/assign/:agentId",
+      "route:POST /agents/keys/self/revoke"
+    ],
+    "code_unit:apps/api/src/projects/projects.controller.ts": [
+      "route:POST /projects",
+      "route:POST /projects/git-refs",
+      "route:GET /projects/:projectId",
+      "route:GET /projects/tasks/:taskId/git-refs",
+      "route:GET /projects/workspace/:workspaceId",
+      "route:DELETE /projects/:projectId",
+      "route:DELETE /projects/git-refs/:refId"
+    ],
+    "code_unit:apps/api/src/sync/sync.controller.ts": [
+      "route:POST /sync/datarim/:projectId/import",
+      "route:GET /sync/datarim/:projectId"
+    ],
+    "code_unit:apps/api/src/tasks/tasks.controller.ts": [
+      "route:POST /tasks",
+      "route:POST /tasks/:taskId/checklist",
+      "route:POST /tasks/:taskId/comments",
+      "route:POST /tasks/:taskId/dependencies",
+      "route:POST /tasks/:taskId/evidence",
+      "route:POST /tasks/:taskId/redactions",
+      "route:PATCH /tasks/:taskId/checklist/:itemId",
+      "route:PATCH /tasks/:taskId/status",
+      "route:GET /tasks",
+      "route:GET /tasks/:taskId",
+      "route:GET /tasks/:taskId/activity",
+      "route:GET /tasks/:taskId/checklist",
+      "route:GET /tasks/:taskId/dependencies",
+      "route:GET /tasks/:taskId/dependency-graph",
+      "route:GET /tasks/:taskId/evidence",
+      "route:GET /tasks/:taskId/readiness",
+      "route:GET /tasks/digest",
+      "route:GET /tasks/project/:projectId",
+      "route:GET /tasks/project/:projectId/index",
+      "route:GET /tasks/project/:projectId/staleness",
+      "route:DELETE /tasks/:taskId",
+      "route:DELETE /tasks/:taskId/checklist/:itemId",
+      "route:DELETE /tasks/:taskId/dependencies/:depId"
+    ],
+    "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts": [
+      "route:POST /tasks/:taskId/field-ack",
+      "route:GET /tasks/:taskId/field-changes"
+    ],
+    "code_unit:apps/api/src/workspaces/workspaces.controller.ts": [
+      "route:POST /workspaces",
+      "route:POST /workspaces/:workspaceId/members/:userId",
+      "route:PATCH /workspaces/:workspaceId/members/:userId/role",
+      "route:GET /workspaces",
+      "route:GET /workspaces/:workspaceId",
+      "route:GET /workspaces/:workspaceId/members",
+      "route:DELETE /workspaces/:workspaceId/members/:userId"
+    ],
+    "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts": [
+      "route:PATCH /tasks/:taskId/contract"
+    ]
+  },
+  "probes": [
+    {
+      "id": "owner-001",
+      "kind": "http",
+      "method": "POST",
+      "path": "/agents"
+    },
+    {
+      "id": "anonymous-002",
+      "kind": "http",
+      "method": "POST",
+      "path": "/agents"
+    },
+    {
+      "id": "owner-003",
+      "kind": "http",
+      "method": "POST",
+      "path": "/agents/af32cee8-2de3-459b-9244-2f35addaaeec/keys"
+    },
+    {
+      "id": "anonymous-004",
+      "kind": "http",
+      "method": "POST",
+      "path": "/agents/af32cee8-2de3-459b-9244-2f35addaaeec/keys"
+    },
+    {
+      "id": "owner-005",
+      "kind": "http",
+      "method": "POST",
+      "path": "/agents/keys/bac2fb69-7c62-4fed-a539-2e2650b1d26c/rotate"
+    },
+    {
+      "id": "anonymous-006",
+      "kind": "http",
+      "method": "POST",
+      "path": "/agents/keys/bac2fb69-7c62-4fed-a539-2e2650b1d26c/rotate"
+    },
+    {
+      "id": "owner-007",
+      "kind": "http",
+      "method": "POST",
+      "path": "/agents/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/assign"
+    },
+    {
+      "id": "anonymous-008",
+      "kind": "http",
+      "method": "POST",
+      "path": "/agents/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/assign"
+    },
+    {
+      "id": "owner-009",
+      "kind": "http",
+      "method": "POST",
+      "path": "/projects"
+    },
+    {
+      "id": "anonymous-010",
+      "kind": "http",
+      "method": "POST",
+      "path": "/projects"
+    },
+    {
+      "id": "owner-011",
+      "kind": "http",
+      "method": "POST",
+      "path": "/projects/git-refs"
+    },
+    {
+      "id": "anonymous-012",
+      "kind": "http",
+      "method": "POST",
+      "path": "/projects/git-refs"
+    },
+    {
+      "id": "agent-013",
+      "kind": "http",
+      "method": "POST",
+      "path": "/sync/datarim/9f47d33d-6989-40da-8036-61b7e2791795/import"
+    },
+    {
+      "id": "anonymous-014",
+      "kind": "http",
+      "method": "POST",
+      "path": "/sync/datarim/9f47d33d-6989-40da-8036-61b7e2791795/import"
+    },
+    {
+      "id": "owner-015",
+      "kind": "http",
+      "method": "POST",
+      "path": "/tasks"
+    },
+    {
+      "id": "anonymous-016",
+      "kind": "http",
+      "method": "POST",
+      "path": "/tasks"
+    },
+    {
+      "id": "owner-017",
+      "kind": "http",
+      "method": "POST",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/checklist"
+    },
+    {
+      "id": "anonymous-018",
+      "kind": "http",
+      "method": "POST",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/checklist"
+    },
+    {
+      "id": "owner-019",
+      "kind": "http",
+      "method": "POST",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/comments"
+    },
+    {
+      "id": "anonymous-020",
+      "kind": "http",
+      "method": "POST",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/comments"
+    },
+    {
+      "id": "owner-021",
+      "kind": "http",
+      "method": "POST",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/dependencies"
+    },
+    {
+      "id": "anonymous-022",
+      "kind": "http",
+      "method": "POST",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/dependencies"
+    },
+    {
+      "id": "agent-023",
+      "kind": "http",
+      "method": "POST",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/evidence"
+    },
+    {
+      "id": "anonymous-024",
+      "kind": "http",
+      "method": "POST",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/evidence"
+    },
+    {
+      "id": "agent-025",
+      "kind": "http",
+      "method": "POST",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/field-ack"
+    },
+    {
+      "id": "anonymous-026",
+      "kind": "http",
+      "method": "POST",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/field-ack"
+    },
+    {
+      "id": "owner-027",
+      "kind": "http",
+      "method": "POST",
+      "path": "/tasks/578faff8-31d9-4c81-a1b7-9c6182d6825a/redactions"
+    },
+    {
+      "id": "anonymous-028",
+      "kind": "http",
+      "method": "POST",
+      "path": "/tasks/578faff8-31d9-4c81-a1b7-9c6182d6825a/redactions"
+    },
+    {
+      "id": "owner-029",
+      "kind": "http",
+      "method": "POST",
+      "path": "/workspaces"
+    },
+    {
+      "id": "anonymous-030",
+      "kind": "http",
+      "method": "POST",
+      "path": "/workspaces"
+    },
+    {
+      "id": "owner-031",
+      "kind": "http",
+      "method": "POST",
+      "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members/ee26a59b-3648-4b6d-a62c-d79f01dc84f5"
+    },
+    {
+      "id": "anonymous-032",
+      "kind": "http",
+      "method": "POST",
+      "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members/ee26a59b-3648-4b6d-a62c-d79f01dc84f5"
+    },
+    {
+      "id": "owner-033",
+      "kind": "http",
+      "method": "PATCH",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/checklist/c46ce3c9-30d8-49ec-ad9f-76767b0ccc21"
+    },
+    {
+      "id": "anonymous-034",
+      "kind": "http",
+      "method": "PATCH",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/checklist/c46ce3c9-30d8-49ec-ad9f-76767b0ccc21"
+    },
+    {
+      "id": "agent-035",
+      "kind": "http",
+      "method": "PATCH",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/contract"
+    },
+    {
+      "id": "anonymous-036",
+      "kind": "http",
+      "method": "PATCH",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/contract"
+    },
+    {
+      "id": "agent-037",
+      "kind": "http",
+      "method": "PATCH",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/status"
+    },
+    {
+      "id": "anonymous-038",
+      "kind": "http",
+      "method": "PATCH",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/status"
+    },
+    {
+      "id": "owner-039",
+      "kind": "http",
+      "method": "PATCH",
+      "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members/ee26a59b-3648-4b6d-a62c-d79f01dc84f5/role"
+    },
+    {
+      "id": "anonymous-040",
+      "kind": "http",
+      "method": "PATCH",
+      "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members/ee26a59b-3648-4b6d-a62c-d79f01dc84f5/role"
+    },
+    {
+      "id": "agent-041",
+      "kind": "http",
+      "method": "GET",
+      "path": "/agents/tasks"
+    },
+    {
+      "id": "anonymous-042",
+      "kind": "http",
+      "method": "GET",
+      "path": "/agents/tasks"
+    },
+    {
+      "id": "owner-043",
+      "kind": "http",
+      "method": "GET",
+      "path": "/agents/workspace/05f8cddf-e91f-430b-81e3-d67965aa4de3"
+    },
+    {
+      "id": "anonymous-044",
+      "kind": "http",
+      "method": "GET",
+      "path": "/agents/workspace/05f8cddf-e91f-430b-81e3-d67965aa4de3"
+    },
+    {
+      "id": "owner-045",
+      "kind": "http",
+      "method": "GET",
+      "path": "/projects/9f47d33d-6989-40da-8036-61b7e2791795"
+    },
+    {
+      "id": "anonymous-046",
+      "kind": "http",
+      "method": "GET",
+      "path": "/projects/9f47d33d-6989-40da-8036-61b7e2791795"
+    },
+    {
+      "id": "owner-047",
+      "kind": "http",
+      "method": "GET",
+      "path": "/projects/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/git-refs"
+    },
+    {
+      "id": "anonymous-048",
+      "kind": "http",
+      "method": "GET",
+      "path": "/projects/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/git-refs"
+    },
+    {
+      "id": "owner-049",
+      "kind": "http",
+      "method": "GET",
+      "path": "/projects/workspace/05f8cddf-e91f-430b-81e3-d67965aa4de3"
+    },
+    {
+      "id": "anonymous-050",
+      "kind": "http",
+      "method": "GET",
+      "path": "/projects/workspace/05f8cddf-e91f-430b-81e3-d67965aa4de3"
+    },
+    {
+      "id": "owner-051",
+      "kind": "http",
+      "method": "GET",
+      "path": "/sync/datarim/9f47d33d-6989-40da-8036-61b7e2791795"
+    },
+    {
+      "id": "anonymous-052",
+      "kind": "http",
+      "method": "GET",
+      "path": "/sync/datarim/9f47d33d-6989-40da-8036-61b7e2791795"
+    },
+    {
+      "id": "owner-053",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks"
+    },
+    {
+      "id": "anonymous-054",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks"
+    },
+    {
+      "id": "owner-055",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2"
+    },
+    {
+      "id": "anonymous-056",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2"
+    },
+    {
+      "id": "owner-057",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/activity"
+    },
+    {
+      "id": "anonymous-058",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/activity"
+    },
+    {
+      "id": "owner-059",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/checklist"
+    },
+    {
+      "id": "anonymous-060",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/checklist"
+    },
+    {
+      "id": "owner-061",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/dependencies"
+    },
+    {
+      "id": "anonymous-062",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/dependencies"
+    },
+    {
+      "id": "owner-063",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/dependency-graph"
+    },
+    {
+      "id": "anonymous-064",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/dependency-graph"
+    },
+    {
+      "id": "owner-065",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/evidence"
+    },
+    {
+      "id": "anonymous-066",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/evidence"
+    },
+    {
+      "id": "agent-067",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/field-changes"
+    },
+    {
+      "id": "anonymous-068",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/field-changes"
+    },
+    {
+      "id": "owner-069",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/readiness"
+    },
+    {
+      "id": "anonymous-070",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/readiness"
+    },
+    {
+      "id": "digest-071",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/digest"
+    },
+    {
+      "id": "agent-072",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/digest"
+    },
+    {
+      "id": "anonymous-073",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/digest"
+    },
+    {
+      "id": "owner-074",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/project/9f47d33d-6989-40da-8036-61b7e2791795"
+    },
+    {
+      "id": "anonymous-075",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/project/9f47d33d-6989-40da-8036-61b7e2791795"
+    },
+    {
+      "id": "agent-076",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/project/9f47d33d-6989-40da-8036-61b7e2791795/index"
+    },
+    {
+      "id": "anonymous-077",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/project/9f47d33d-6989-40da-8036-61b7e2791795/index"
+    },
+    {
+      "id": "owner-078",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/project/9f47d33d-6989-40da-8036-61b7e2791795/staleness"
+    },
+    {
+      "id": "anonymous-079",
+      "kind": "http",
+      "method": "GET",
+      "path": "/tasks/project/9f47d33d-6989-40da-8036-61b7e2791795/staleness"
+    },
+    {
+      "id": "owner-080",
+      "kind": "http",
+      "method": "GET",
+      "path": "/workspaces"
+    },
+    {
+      "id": "anonymous-081",
+      "kind": "http",
+      "method": "GET",
+      "path": "/workspaces"
+    },
+    {
+      "id": "owner-082",
+      "kind": "http",
+      "method": "GET",
+      "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3"
+    },
+    {
+      "id": "anonymous-083",
+      "kind": "http",
+      "method": "GET",
+      "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3"
+    },
+    {
+      "id": "owner-084",
+      "kind": "http",
+      "method": "GET",
+      "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members"
+    },
+    {
+      "id": "anonymous-085",
+      "kind": "http",
+      "method": "GET",
+      "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members"
+    },
+    {
+      "id": "owner-086",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/agents/keys/4337f2fc-04ff-45a3-b358-66063b3b0bd1"
+    },
+    {
+      "id": "anonymous-087",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/agents/keys/4337f2fc-04ff-45a3-b358-66063b3b0bd1"
+    },
+    {
+      "id": "owner-088",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/agents/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/assign/af32cee8-2de3-459b-9244-2f35addaaeec"
+    },
+    {
+      "id": "anonymous-089",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/agents/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/assign/af32cee8-2de3-459b-9244-2f35addaaeec"
+    },
+    {
+      "id": "owner-090",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/projects/92a6bee1-becd-4afa-8160-2516e7e7efd1"
+    },
+    {
+      "id": "anonymous-091",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/projects/92a6bee1-becd-4afa-8160-2516e7e7efd1"
+    },
+    {
+      "id": "owner-092",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/projects/git-refs/6a71be8d-6a16-457c-98f6-38283e224763"
+    },
+    {
+      "id": "anonymous-093",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/projects/git-refs/6a71be8d-6a16-457c-98f6-38283e224763"
+    },
+    {
+      "id": "owner-094",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/tasks/578faff8-31d9-4c81-a1b7-9c6182d6825a"
+    },
+    {
+      "id": "anonymous-095",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/tasks/578faff8-31d9-4c81-a1b7-9c6182d6825a"
+    },
+    {
+      "id": "owner-096",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/checklist/c46ce3c9-30d8-49ec-ad9f-76767b0ccc21"
+    },
+    {
+      "id": "anonymous-097",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/checklist/c46ce3c9-30d8-49ec-ad9f-76767b0ccc21"
+    },
+    {
+      "id": "owner-098",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/dependencies/b776ca84-424f-4503-824c-258d68f614f7"
+    },
+    {
+      "id": "anonymous-099",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/tasks/f7f1a5c3-e29c-49a8-ab33-51b9a9c4cae2/dependencies/b776ca84-424f-4503-824c-258d68f614f7"
+    },
+    {
+      "id": "owner-100",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members/ee26a59b-3648-4b6d-a62c-d79f01dc84f5"
+    },
+    {
+      "id": "anonymous-101",
+      "kind": "http",
+      "method": "DELETE",
+      "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members/ee26a59b-3648-4b6d-a62c-d79f01dc84f5"
+    },
+    {
+      "id": "rotated-102",
+      "kind": "http",
+      "method": "POST",
+      "path": "/agents/keys/self/revoke"
+    },
+    {
+      "id": "anonymous-103",
+      "kind": "http",
+      "method": "POST",
+      "path": "/agents/keys/self/revoke"
+    }
+  ]
+}

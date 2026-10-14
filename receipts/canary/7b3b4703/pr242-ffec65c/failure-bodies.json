@@ -1,0 +1,61 @@
+[
+  {
+    "id": "owner-031",
+    "method": "POST",
+    "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members/dfdc5589-ba86-42bb-9ad6-64eae569378c",
+    "status": 403,
+    "body": {
+      "error": "Forbidden",
+      "message": "Human authentication required"
+    }
+  },
+  {
+    "id": "owner-039",
+    "method": "PATCH",
+    "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members/dfdc5589-ba86-42bb-9ad6-64eae569378c/role",
+    "status": 403,
+    "body": {
+      "error": "Forbidden",
+      "message": "Human authentication required"
+    }
+  },
+  {
+    "id": "owner-082",
+    "method": "GET",
+    "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3",
+    "status": 403,
+    "body": {
+      "error": "Forbidden",
+      "message": "Human authentication required"
+    }
+  },
+  {
+    "id": "owner-084",
+    "method": "GET",
+    "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members",
+    "status": 403,
+    "body": {
+      "error": "Forbidden",
+      "message": "Human authentication required"
+    }
+  },
+  {
+    "id": "owner-094",
+    "method": "DELETE",
+    "path": "/tasks/7bfff47f-1240-4dcd-9963-b3ba23cf9684",
+    "status": 500,
+    "body": {
+      "message": "Internal server error"
+    }
+  },
+  {
+    "id": "owner-100",
+    "method": "DELETE",
+    "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members/dfdc5589-ba86-42bb-9ad6-64eae569378c",
+    "status": 403,
+    "body": {
+      "error": "Forbidden",
+      "message": "Human authentication required"
+    }
+  }
+]
