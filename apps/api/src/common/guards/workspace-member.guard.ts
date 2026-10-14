@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { PrismaService } from '../../prisma/prisma.service.js';
-import type { Actor } from '@muneral/types';
+import type { User } from '@prisma/client';
 
 /**
  * WorkspaceMemberGuard — verifies the caller is a member of the workspace
@@ -21,14 +21,17 @@ export class WorkspaceMemberGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<
       Request & {
-        actor?: Actor;
+        user?: User;
         workspaceMember?: object;
         params: { workspaceId?: string };
       }
     >();
 
-    const actor = req.actor;
-    if (!actor || actor.type !== 'human') {
+    // Guards run before interceptors. ActorInterceptor populates req.actor,
+    // so this guard must use the authenticated user that JwtOrApiKeyGuard
+    // already placed on req.user rather than relying on req.actor here.
+    const user = req.user;
+    if (!user) {
       throw new ForbiddenException('Human authentication required');
     }
 
@@ -38,7 +41,7 @@ export class WorkspaceMemberGuard implements CanActivate {
     }
 
     const member = await this.prisma.workspaceMember.findUnique({
-      where: { workspaceId_userId: { workspaceId, userId: actor.id } },
+      where: { workspaceId_userId: { workspaceId, userId: user.id } },
     });
 
     if (!member) {
