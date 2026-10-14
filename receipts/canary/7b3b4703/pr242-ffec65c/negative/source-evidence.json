@@ -1,0 +1,11 @@
+{
+  "schema": "MeasuredGitSource/v1",
+  "commit": "ffec65c87af8dcd4bbad5f9a40924bc74b685d02",
+  "tree": "718e7f30f371d9c217b1c54031282fc55faab604",
+  "dirty": false,
+  "producer": {
+    "tool": "bounded PR246 private-PG HTTP route-sweep runner",
+    "version": "MUNERAL runner v2"
+  },
+  "captured_at_utc": "2026-10-14T11:03:11Z"
+}

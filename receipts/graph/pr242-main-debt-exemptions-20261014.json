@@ -1,0 +1,68 @@
+{
+  "exemptions": [
+    {
+      "entity": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+      "code": "PREEXISTING_MAIN_FAILURE",
+      "owner": "MUNERAL",
+      "expires_at_utc": "2026-10-21T00:00:00Z",
+      "reason": "The task controller aggregate includes the DELETE /tasks/:taskId failure: authenticated owner status 500, anonymous status 401; the server log identifies Prisma P2003 activity_log_task_id_fkey. The same request failed on origin/main 840e3be216844d57c163daf14ec0a5d51657f963 under the identical isolated PostgreSQL 16 and Redis harness. PR246 contains the planned audit-before-delete transaction fix. Parity report SHA-256 fb1a21612b7b56f41b5668142ac6ce51172a884cc3a3d244422be09f55c9d792; Muneral task 7b3b4703 comment e41dabb2-6f8f-4768-84ca-3894904432f5. Tracked main-debt card 85190709-51ce-437d-9740-0096389dbb2c. Reverse if the failure is not parity-identical on main, if PR246 does not fix the named cause, or at expiry.",
+      "ref": "85190709-51ce-437d-9740-0096389dbb2c"
+    },
+    {
+      "entity": "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
+      "code": "PREEXISTING_MAIN_FAILURE",
+      "owner": "MUNERAL",
+      "expires_at_utc": "2026-10-21T00:00:00Z",
+      "reason": "The workspace controller aggregate includes five owner-authenticated membership routes returning 403, with anonymous controls returning 401. The same outcomes were measured on origin/main 840e3be216844d57c163daf14ec0a5d51657f963 using the identical isolated PostgreSQL 16 and Redis harness. PR246 contains the planned WorkspaceMemberGuard actor-resolution fix. Parity report SHA-256 fb1a21612b7b56f41b5668142ac6ce51172a884cc3a3d244422be09f55c9d792; Muneral task 7b3b4703 comment e41dabb2-6f8f-4768-84ca-3894904432f5. Tracked main-debt card 85190709-51ce-437d-9740-0096389dbb2c. Reverse if the failure is not parity-identical on main, if PR246 does not fix the named cause, or at expiry.",
+      "ref": "85190709-51ce-437d-9740-0096389dbb2c"
+    },
+    {
+      "entity": "route:DELETE /tasks/:taskId",
+      "code": "PREEXISTING_MAIN_FAILURE",
+      "owner": "MUNERAL",
+      "expires_at_utc": "2026-10-21T00:00:00Z",
+      "reason": "Authenticated owner request returned 500 and anonymous request returned 401; server log identifies Prisma P2003 activity_log_task_id_fkey. This exact result matched origin/main 840e3be216844d57c163daf14ec0a5d51657f963 in the identical isolated PostgreSQL 16 and Redis harness. PR246 contains the planned audit-before-delete transaction fix. Parity report SHA-256 fb1a21612b7b56f41b5668142ac6ce51172a884cc3a3d244422be09f55c9d792; Muneral task 7b3b4703 comment e41dabb2-6f8f-4768-84ca-3894904432f5. Tracked main-debt card 85190709-51ce-437d-9740-0096389dbb2c. Reverse if the failure is not parity-identical on main, if PR246 does not fix the named cause, or at expiry.",
+      "ref": "85190709-51ce-437d-9740-0096389dbb2c"
+    },
+    {
+      "entity": "route:DELETE /workspaces/:workspaceId/members/:userId",
+      "code": "PREEXISTING_MAIN_FAILURE",
+      "owner": "MUNERAL",
+      "expires_at_utc": "2026-10-21T00:00:00Z",
+      "reason": "Authenticated owner returned 403 and anonymous returned 401 on both PR242 and origin/main 840e3be216844d57c163daf14ec0a5d51657f963 in the identical isolated PostgreSQL 16 and Redis harness. PR246 contains the planned WorkspaceMemberGuard actor-resolution fix. Parity report SHA-256 fb1a21612b7b56f41b5668142ac6ce51172a884cc3a3d244422be09f55c9d792; Muneral task 7b3b4703 comment e41dabb2-6f8f-4768-84ca-3894904432f5. Tracked main-debt card 85190709-51ce-437d-9740-0096389dbb2c. Reverse if the failure is not parity-identical on main, if PR246 does not fix the named cause, or at expiry.",
+      "ref": "85190709-51ce-437d-9740-0096389dbb2c"
+    },
+    {
+      "entity": "route:GET /workspaces/:workspaceId",
+      "code": "PREEXISTING_MAIN_FAILURE",
+      "owner": "MUNERAL",
+      "expires_at_utc": "2026-10-21T00:00:00Z",
+      "reason": "Authenticated owner returned 403 and anonymous returned 401 on both PR242 and origin/main 840e3be216844d57c163daf14ec0a5d51657f963 in the identical isolated PostgreSQL 16 and Redis harness. PR246 contains the planned WorkspaceMemberGuard actor-resolution fix. Parity report SHA-256 fb1a21612b7b56f41b5668142ac6ce51172a884cc3a3d244422be09f55c9d792; Muneral task 7b3b4703 comment e41dabb2-6f8f-4768-84ca-3894904432f5. Tracked main-debt card 85190709-51ce-437d-9740-0096389dbb2c. Reverse if the failure is not parity-identical on main, if PR246 does not fix the named cause, or at expiry.",
+      "ref": "85190709-51ce-437d-9740-0096389dbb2c"
+    },
+    {
+      "entity": "route:GET /workspaces/:workspaceId/members",
+      "code": "PREEXISTING_MAIN_FAILURE",
+      "owner": "MUNERAL",
+      "expires_at_utc": "2026-10-21T00:00:00Z",
+      "reason": "Authenticated owner returned 403 and anonymous returned 401 on both PR242 and origin/main 840e3be216844d57c163daf14ec0a5d51657f963 in the identical isolated PostgreSQL 16 and Redis harness. PR246 contains the planned WorkspaceMemberGuard actor-resolution fix. Parity report SHA-256 fb1a21612b7b56f41b5668142ac6ce51172a884cc3a3d244422be09f55c9d792; Muneral task 7b3b4703 comment e41dabb2-6f8f-4768-84ca-3894904432f5. Tracked main-debt card 85190709-51ce-437d-9740-0096389dbb2c. Reverse if the failure is not parity-identical on main, if PR246 does not fix the named cause, or at expiry.",
+      "ref": "85190709-51ce-437d-9740-0096389dbb2c"
+    },
+    {
+      "entity": "route:PATCH /workspaces/:workspaceId/members/:userId/role",
+      "code": "PREEXISTING_MAIN_FAILURE",
+      "owner": "MUNERAL",
+      "expires_at_utc": "2026-10-21T00:00:00Z",
+      "reason": "Authenticated owner returned 403 and anonymous returned 401 on both PR242 and origin/main 840e3be216844d57c163daf14ec0a5d51657f963 in the identical isolated PostgreSQL 16 and Redis harness. PR246 contains the planned WorkspaceMemberGuard actor-resolution fix. Parity report SHA-256 fb1a21612b7b56f41b5668142ac6ce51172a884cc3a3d244422be09f55c9d792; Muneral task 7b3b4703 comment e41dabb2-6f8f-4768-84ca-3894904432f5. Tracked main-debt card 85190709-51ce-437d-9740-0096389dbb2c. Reverse if the failure is not parity-identical on main, if PR246 does not fix the named cause, or at expiry.",
+      "ref": "85190709-51ce-437d-9740-0096389dbb2c"
+    },
+    {
+      "entity": "route:POST /workspaces/:workspaceId/members/:userId",
+      "code": "PREEXISTING_MAIN_FAILURE",
+      "owner": "MUNERAL",
+      "expires_at_utc": "2026-10-21T00:00:00Z",
+      "reason": "Authenticated owner returned 403 and anonymous returned 401 on both PR242 and origin/main 840e3be216844d57c163daf14ec0a5d51657f963 in the identical isolated PostgreSQL 16 and Redis harness. PR246 contains the planned WorkspaceMemberGuard actor-resolution fix. Parity report SHA-256 fb1a21612b7b56f41b5668142ac6ce51172a884cc3a3d244422be09f55c9d792; Muneral task 7b3b4703 comment e41dabb2-6f8f-4768-84ca-3894904432f5. Tracked main-debt card 85190709-51ce-437d-9740-0096389dbb2c. Reverse if the failure is not parity-identical on main, if PR246 does not fix the named cause, or at expiry.",
+      "ref": "85190709-51ce-437d-9740-0096389dbb2c"
+    }
+  ]
+}

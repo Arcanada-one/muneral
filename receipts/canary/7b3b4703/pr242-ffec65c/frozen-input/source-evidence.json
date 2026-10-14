@@ -1,0 +1,8 @@
+{
+  "schema": "MeasuredGitSource/v1",
+  "commit": "ffec65c87af8dcd4bbad5f9a40924bc74b685d02",
+  "tree": "718e7f30f371d9c217b1c54031282fc55faab604",
+  "dirty": false,
+  "producer": "git-source-observer/v1 (commit/tree/status read from this checkout)",
+  "captured_at_utc": "2026-10-14T10:55:37Z"
+}
