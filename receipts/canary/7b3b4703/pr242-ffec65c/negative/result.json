@@ -1,0 +1,75 @@
+{
+  "schema": "CanaryResult/v1",
+  "captured_at_utc": "2026-10-14T11:03:11Z",
+  "card": "7b3b4703-23d9-4a50-a4bd-f43b1efda0ab",
+  "phase": "pre",
+  "plan": {
+    "id": "pr242-digest-denial-controls",
+    "path": "plan.json",
+    "digest": "sha256:8ae13ac823132b20c5a22a9b1f0ab372dd68dc123f381b3bed250d5dd6dc1117"
+  },
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "ffec65c87af8dcd4bbad5f9a40924bc74b685d02",
+    "tree": "718e7f30f371d9c217b1c54031282fc55faab604",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "915f6b1c9ff25df795871bc05ef88dccdf32e0dfb18d8e1c9149cb7feeace999",
+      "source_field": "commit"
+    }
+  },
+  "environment": "candidate-local Nest API on loopback with disposable PostgreSQL 16 and private Redis; synthetic owner and agent principals",
+  "producer": {
+    "tool": "bounded PR246 private-PG HTTP route-sweep runner",
+    "version": "MUNERAL runner v2"
+  },
+  "read_only": true,
+  "resident_version": null,
+  "model": "deterministic synthetic HTTP runner",
+  "entity_verdicts": [
+    {
+      "entity": "route:GET /tasks/digest",
+      "probe_ids": [
+        "agent-072",
+        "anonymous-073"
+      ],
+      "verdict": "verified",
+      "reason": "non-granted synthetic key received DIGEST_GRANT_REQUIRED; anonymous request was refused"
+    }
+  ],
+  "probes": [
+    {
+      "id": "agent-072",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/digest",
+      "status": 403,
+      "outcome": "verified",
+      "reason": "non-granted synthetic key denied; expected 403, received 403, code=DIGEST_GRANT_REQUIRED",
+      "response_sha256": "b7eae9b2e426ccc7f911c26b1d9f395ed4c61304a2f1fc49554d85126c15e2a0",
+      "response_bytes": 348,
+      "response_code": "DIGEST_GRANT_REQUIRED"
+    },
+    {
+      "id": "anonymous-073",
+      "kind": "http",
+      "executed": true,
+      "method": "GET",
+      "path": "/tasks/digest",
+      "status": 401,
+      "outcome": "verified",
+      "reason": "anonymous digest request denied; expected 401|403, received 401",
+      "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+      "response_bytes": 43
+    }
+  ],
+  "counters": {
+    "entities_verified": 1,
+    "failed": 0,
+    "not_measured": 0
+  },
+  "rules": [
+    "Negative controls use only synthetic credentials and disposable local data."
+  ]
+}
