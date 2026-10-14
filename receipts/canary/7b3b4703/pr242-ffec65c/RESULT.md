@@ -9,3 +9,5 @@ Result: 50 verified, 8 failed, 0 not measured across 51 routes plus 7 derived co
 Cleanup: the first wrapper exit left the isolated PostgreSQL daemon running because its cleanup check referenced the wrong data-directory path. I stopped that exact cluster, dropped only the synthetic `pr242_candidate_ffec65c` database, stopped the cluster, and verified there was no listener on the API, PostgreSQL or Redis ports. The route harness itself was unchanged; no retry was made.
 
 This result is candidate-local source evidence only. It does not establish production deployment, renewal, or live consumer behavior.
+
+Verifier correction: the first CAR attempt remained PAUSED_SAFE because the verifier rejected `SHA256SUMS` as a non-record document. The refusal receipt is preserved outside the PR tree; the manifest is now `SHA256SUMS.txt`, an allowed record-document suffix, and the receipt will be reissued from this clean record head. No canary rerun or exemption change was made.
