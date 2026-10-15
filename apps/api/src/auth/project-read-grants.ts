@@ -69,10 +69,10 @@ export const PROJECT_READ_GRANT_LIST: readonly ProjectReadGrantEntry[] = [
     agentId: '9437639a-5f7c-4fe4-be04-18112ba0bada',
     agentName: 'aup-orchestrator',
     projectId: '08a50f9a-a735-4605-91ce-ce4a41193fbb',
-    until: '2026-10-14T00:00:00Z',
-    decision: 'DEC-AUP-0033',
+    until: '2026-10-28T00:00:00Z',
+    decision: 'DEC-AUP-0162',
     evidence:
-      'DEC-AUP-0029 renewal: the first window (until 2026-09-21) was used — two live readings 886/887 rows an hour apart and the step-13 status parity re-run, receipts/mun0052/live-reading{1,2}-20260914T*.json and status-parity-20260914T111224Z.md — then lapsed silently. 2026-10-14 is the ceiling DEC-AUP-0029 R1 set for this entry.',
+      'DEC-AUP-0162: same-key project-index GET returned 403 GRANT_EXPIRED after the prior window ended; controlled requests and Root-reported D5A/TALOMNIA backlog-read failures are recorded in Muneral task 971d0143-8549-47a9-b89b-19f0a4023a53 comment d8e9d0f2-db1e-4278-80b5-589858c26905. This replaces the prior entry only; MUN-0054 remains separate and open.',
   },
   {
     agentId: '9437639a-5f7c-4fe4-be04-18112ba0bada',
