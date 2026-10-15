@@ -5,7 +5,7 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "admitted"
  },
- "captured_at_utc": "2026-10-14T15:16:46Z",
+ "captured_at_utc": "2026-10-15T16:39:15Z",
  "change_set": {
   "base": "42061f8299115618bc256301c88beca02de755a9",
   "files": [
@@ -154,7 +154,7 @@
     "status": "A"
    }
   ],
-  "head": "fdbcadd441aaa14335c404de7066ece4f84d2783",
+  "head": "c332aa2247e9986c6fe86c18d990e3427c6e4423",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -162,18 +162,18 @@
  "graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:44b10d5b9f01b765ceaadf7a8ba2b6227389dc63f8b8ce3a0c93264ad90a2aa9",
+  "graph_digest": "sha256:01b7bb6daf8ecb44cdb23a5f37bc146b5f61349ca2ae046fede029e3817606c9",
   "path": "/tmp/arcana-verify/verifier-out/graph-42061f829911.json",
   "source_commit": "42061f8299115618bc256301c88beca02de755a9"
  },
  "head_graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:b3d030982f85b282c8e2c71a97246afdcc80c85da7f1e1e0bc0e16b8e5be9e25",
-  "path": "/tmp/arcana-verify/verifier-out/graph-head-fdbcadd441aa.json",
-  "source_commit": "fdbcadd441aaa14335c404de7066ece4f84d2783",
+  "graph_digest": "sha256:dfd555eeb832ba1cb64cb04a51b557d517e7fe749e7daba37d3c8f2edbf4285e",
+  "path": "/tmp/arcana-verify/verifier-out/graph-head-c332aa2247e9.json",
+  "source_commit": "c332aa2247e9986c6fe86c18d990e3427c6e4423",
   "staleness": {
-   "checked_at_utc": "2026-10-14T15:17:10Z",
+   "checked_at_utc": "2026-10-15T16:39:41Z",
    "checked_nodes": 457,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
@@ -4271,11 +4271,11 @@
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261014T151646Z-fdbcadd4",
+ "receipt_id": "car-verify-20261015T163915Z-c332aa22",
  "receipt_path": "receipts/graph/change-admission-pr249-project-read-renewal.json",
  "repo": {
   "name": "Arcanada-one/muneral",
-  "path": "/home/dev/aup/muneral-pr249-car-clean"
+  "path": "/home/dev/aup/claude-work/arc2-muneral-971-author"
  },
  "revision_selection": {
   "base": [
@@ -4580,7 +4580,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-14T15:17:10Z",
+  "checked_at_utc": "2026-10-15T16:39:40Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -4952,7 +4952,7 @@
   {
    "content_hash": {
     "base": null,
-    "head": "sha256:13ebd7b53a12fe5d269a2828ba1f9dce815e4c5cf941224f3192277f7e94afbb"
+    "head": "sha256:f33c6f9b2019491ffcb4a6edb00b3d0b88dbd9944b4d4c94c50638dd3e5bb0ca"
    },
    "entity": "receipt:receipts/graph/change-admission-pr249-project-read-renewal.json",
    "node_type": "receipt",
@@ -5032,7 +5032,7 @@
   }
  ],
  "tree": {
-  "commit": "fdbcadd441aaa14335c404de7066ece4f84d2783",
+  "commit": "c332aa2247e9986c6fe86c18d990e3427c6e4423",
   "dirty": false
  },
  "verdicts": [
@@ -6123,8 +6123,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/aup/muneral-pr249-car-clean/apps/api/node_modules/.bin/tsc -p /home/dev/aup/muneral-pr249-car-clean/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/arcana-verify/verifier-out/type-check-w58mnx0y/check.tsbuildinfo --listFiles",
-   "duration_s": 6.77,
+   "command": "/home/dev/aup/claude-work/arc2-muneral-971-author/apps/api/node_modules/.bin/tsc -p /home/dev/aup/claude-work/arc2-muneral-971-author/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/arcana-verify/verifier-out/type-check-v930rezi/check.tsbuildinfo --listFiles",
+   "duration_s": 3.72,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -6291,12 +6291,12 @@
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-10-14T15:17:16Z",
+   "started_at_utc": "2026-10-15T16:39:45Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1453 files listed"
   },
   {
-   "command": "/home/dev/aup/muneral-pr249-car-clean/apps/api/node_modules/.bin/tsc -p /home/dev/aup/muneral-pr249-car-clean/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /tmp/arcana-verify/verifier-out/type-check-0pk3ktgh/check.tsbuildinfo --listFiles",
-   "duration_s": 12.35,
+   "command": "/home/dev/aup/claude-work/arc2-muneral-971-author/apps/api/node_modules/.bin/tsc -p /home/dev/aup/claude-work/arc2-muneral-971-author/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /tmp/arcana-verify/verifier-out/type-check-p71at68k/check.tsbuildinfo --listFiles",
+   "duration_s": 6.21,
    "entities": [
     "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts",
     "code_unit:apps/api/test/agent-project-dependencies.e2e.spec.ts",
@@ -6357,12 +6357,12 @@
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-10-14T15:17:23Z",
+   "started_at_utc": "2026-10-15T16:39:49Z",
    "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1611 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=42061f829911, head=fdbcadd441aa, graph=head graph)",
-   "duration_s": 7.56,
+   "command": "tools/graph/contract_diff.py.run_diff(base=42061f829911, head=c332aa2247e9, graph=head graph)",
+   "duration_s": 4.7,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.service.ts",
@@ -6493,12 +6493,12 @@
    "id": "v-contract-diff",
    "kind": "contract_diff",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-contract-diff.json",
-   "started_at_utc": "2026-10-14T15:17:36Z",
+   "started_at_utc": "2026-10-15T16:39:55Z",
    "summary": "58→58 contracts, breaking 0, edges {'verified': 164}"
   },
   {
    "command": "verify.py route_config_consistency RC-01 prefix / RC-02 registration / RC-03 served",
-   "duration_s": 0.08,
+   "duration_s": 0.06,
    "entities": [
     "route:DELETE /agents/keys/:keyId",
     "route:DELETE /agents/tasks/:taskId/assign/:agentId",
@@ -6609,12 +6609,12 @@
    "id": "v-route-config",
    "kind": "config_schema",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-route-config.txt",
-   "started_at_utc": "2026-10-14T15:17:44Z",
+   "started_at_utc": "2026-10-15T16:40:00Z",
    "summary": "51 route(s), 0 failed"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.22,
+   "duration_s": 0.14,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -6729,7 +6729,7 @@
    "id": "v-fitness",
    "kind": "fitness_rules",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-fitness.json",
-   "started_at_utc": "2026-10-14T15:17:44Z",
+   "started_at_utc": "2026-10-15T16:40:00Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -6747,12 +6747,12 @@
    "id": "v-doc-reference",
    "kind": "doc_reference",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-doc-reference.txt",
-   "started_at_utc": "2026-10-14T15:17:44Z",
+   "started_at_utc": "2026-10-15T16:40:00Z",
    "summary": "2 document(s), 0 failed"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 5.32,
+   "duration_s": 0.15,
    "entities": [
     "route:DELETE /agents/keys/:keyId",
     "route:DELETE /agents/tasks/:taskId/assign/:agentId",
@@ -6863,12 +6863,12 @@
    "id": "v-canary-1",
    "kind": "canary",
    "output_ref": "receipts/canary/muneral-pr249-project-read-20261014/http-positive/result.json",
-   "started_at_utc": "2026-10-14T15:17:44Z",
+   "started_at_utc": "2026-10-15T16:40:00Z",
    "summary": "receipts/canary/muneral-pr249-project-read-20261014/http-positive/result.json: 51 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 5.32,
+   "duration_s": 0.15,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/projects/projects.controller.ts",
@@ -6891,18 +6891,18 @@
    "id": "v-canary-2",
    "kind": "canary",
    "output_ref": "receipts/canary/muneral-pr249-project-read-20261014/process-positive-v4/result.json",
-   "started_at_utc": "2026-10-14T15:17:44Z",
+   "started_at_utc": "2026-10-15T16:40:00Z",
    "summary": "receipts/canary/muneral-pr249-project-read-20261014/process-positive-v4/result.json: 7 verified / 0 failed / 0 not_measured"
   },
   {
    "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
-   "duration_s": 5.32,
+   "duration_s": 0.15,
    "entities": [],
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
    "output_ref": "/tmp/arcana-verify/verifier-out/v-canary.json",
-   "started_at_utc": "2026-10-14T15:17:44Z",
+   "started_at_utc": "2026-10-15T16:40:00Z",
    "summary": "2 canary result(s), 2 committed at head; 58 verified / 0 failed / 0 not_measured of 58 entities"
   }
  ],
@@ -7506,9 +7506,9 @@
    ]
   },
   "seconds": {
-   "prepare": 2.56,
-   "total": 63.14,
-   "verifiers": 42.94
+   "prepare": 1.81,
+   "total": 45.19,
+   "verifiers": 15.28
   }
  },
  "work_item": "971d0143-8549-47a9-b89b-19f0a4023a53"
