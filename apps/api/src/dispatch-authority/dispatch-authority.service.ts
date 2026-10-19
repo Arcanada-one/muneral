@@ -131,6 +131,7 @@ export class DispatchAuthorityService {
       const result = await this.db.$transaction(async (tx) => {
         const task = await this.lockTask(tx, taskId);
         await this.assertActorCanDispatch(tx, task, actor);
+        assertCurrentTask(task, input.expectedTaskRevision, input.expectedTaskStatus, expectedUpdatedAt);
 
         const existing = await this.findIdempotent(tx, taskId, actor, input.idempotencyKey);
         if (existing) {
@@ -141,7 +142,6 @@ export class DispatchAuthorityService {
           return { row: existing, idempotent: true };
         }
 
-        assertCurrentTask(task, input.expectedTaskRevision, input.expectedTaskStatus, expectedUpdatedAt);
         const [launchAttemptId, dispatchId] = this.issueDistinctIdentities();
         const created = await tx.taskDispatchReservation.create({
           data: {
@@ -168,12 +168,21 @@ export class DispatchAuthorityService {
       return present(result.row, result.idempotent);
     } catch (error) {
       if (!isUniqueViolation(error)) throw error;
-      const existing = await this.findIdempotent(this.db, taskId, actor, input.idempotencyKey);
-      if (existing) {
-        assertStoredIntegrity(existing);
-        if (sameIssue(existing, input, request.sha256, executionContext.sha256, expectedUpdatedAt)) {
-          return present(existing, true);
+      const existing = await this.db.$transaction(async (tx) => {
+        const task = await this.lockTask(tx, taskId);
+        await this.assertActorCanDispatch(tx, task, actor);
+        assertCurrentTask(task, input.expectedTaskRevision, input.expectedTaskStatus, expectedUpdatedAt);
+
+        const row = await this.findIdempotent(tx, taskId, actor, input.idempotencyKey);
+        if (!row) return null;
+        assertStoredIntegrity(row);
+        if (!sameIssue(row, input, request.sha256, executionContext.sha256, expectedUpdatedAt)) {
+          return null;
         }
+        return row;
+      }, TRANSACTION_OPTIONS);
+      if (existing) {
+        return present(existing, true);
       }
       throw new ConflictException('Dispatch identity or idempotency key collided; no reservation was issued.');
     }
@@ -196,7 +205,26 @@ export class DispatchAuthorityService {
     if (current.state === 'bound' && current.terminalDeclarationId === terminalDeclarationId &&
         current.terminalContextSha256 === current.executionContextSha256 &&
         SHA256.test(current.terminalDeclarationSha256 ?? '') && current.terminalAuthorityRef) {
-      return present(current, true);
+      const replay = await this.db.$transaction(async (tx) => {
+        const task = await this.lockTask(tx, taskId);
+        await this.assertActorCanDispatch(tx, task, actor);
+        const latest = await this.findByDispatch(tx, taskId, launchAttemptId, dispatchId);
+        assertOwned(latest, actor);
+        assertStoredIntegrity(latest);
+        assertCurrentTask(
+          task,
+          latest.expectedTaskRevision,
+          latest.expectedTaskStatus as TaskStatus,
+          asDate(latest.expectedTaskUpdatedAt),
+        );
+        if (latest.state !== 'bound' || latest.terminalDeclarationId !== terminalDeclarationId ||
+            latest.terminalContextSha256 !== latest.executionContextSha256 ||
+            !SHA256.test(latest.terminalDeclarationSha256 ?? '') || !latest.terminalAuthorityRef) {
+          throw new ConflictException('Terminal binding changed before idempotent replay.');
+        }
+        return latest;
+      }, TRANSACTION_OPTIONS);
+      return present(replay, true);
     }
     if (current.state !== 'reserved') {
       throw new ConflictException('Only an unbound reservation can bind a terminal declaration.');

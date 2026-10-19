@@ -74,6 +74,13 @@ function makeDatabase() {
   const unique = new Map<string, string>();
   let membershipRole: string | null = 'developer';
   let agentTaskAuthorized = true;
+  // This deterministic mock inserts the competing row and raises P2002; it
+  // does not model PostgreSQL transaction isolation or concurrent execution.
+  let nextUniqueConflict: {
+    taskChanges?: Partial<typeof task>;
+    membershipRole?: string | null;
+    rowOverrides?: Record<string, unknown>;
+  } | null = null;
 
   const reservation = {
     findUnique: jest.fn(async (args: { where: Record<string, unknown> }) => {
@@ -98,6 +105,19 @@ function makeDatabase() {
         terminalContextSha256: null,
         terminalAuthorityRef: null,
       };
+      const conflict = nextUniqueConflict;
+      if (conflict) {
+        nextUniqueConflict = null;
+        Object.assign(row, conflict.rowOverrides ?? {});
+        rows.set(String(row['dispatchId']), row);
+        const compound = `${row['taskId']}|${row['actorType']}|${row['actorId']}|${row['idempotencyKey']}`;
+        unique.set(compound, String(row['dispatchId']));
+        Object.assign(task, conflict.taskChanges ?? {});
+        if (Object.prototype.hasOwnProperty.call(conflict, 'membershipRole')) {
+          membershipRole = conflict.membershipRole ?? null;
+        }
+        throw Object.assign(new Error('simulated concurrent unique insert'), { code: 'P2002' });
+      }
       rows.set(String(row['dispatchId']), row);
       const compound = `${row['taskId']}|${row['actorType']}|${row['actorId']}|${row['idempotencyKey']}`;
       unique.set(compound, String(row['dispatchId']));
@@ -132,6 +152,7 @@ function makeDatabase() {
     changeTask: (changes: Partial<typeof task>) => void;
     setMembershipRole: (role: string | null) => void;
     setAgentTaskAuthorized: (authorized: boolean) => void;
+    setNextUniqueConflict: (conflict: NonNullable<typeof nextUniqueConflict>) => void;
     getRows: () => Map<string, Record<string, unknown>>;
   };
   const db: MockDatabase = {
@@ -150,6 +171,7 @@ function makeDatabase() {
     changeTask: (changes: Partial<typeof task>) => Object.assign(task, changes),
     setMembershipRole: (role: string | null) => { membershipRole = role; },
     setAgentTaskAuthorized: (authorized: boolean) => { agentTaskAuthorized = authorized; },
+    setNextUniqueConflict: (conflict: NonNullable<typeof nextUniqueConflict>) => { nextUniqueConflict = conflict; },
     getRows: () => rows,
   };
   return db;
@@ -197,6 +219,49 @@ describe('Muneral per-dispatch authority source controls (repository and termina
     expect(retry.launchAttemptId).not.toBe(first.launchAttemptId);
   });
 
+  it('refuses an otherwise identical issue replay after the task tuple becomes stale', async () => {
+    const db = makeDatabase();
+    const { service } = serviceFor(db);
+    await issueOne(service);
+    db.changeTask({ revision: 4, updatedAt: new Date('2026-10-19T00:00:01.000Z') });
+
+    await expect(issueOne(service)).rejects.toBeInstanceOf(ConflictException);
+    expect(db.taskDispatchReservation.create).toHaveBeenCalledTimes(1);
+  });
+
+  it('revalidates task, caller and exact input after a simulated P2002 collision', async () => {
+    const currentDb = makeDatabase();
+    currentDb.setNextUniqueConflict({});
+    const currentService = serviceFor(currentDb).service;
+    const replay = await issueOne(currentService);
+    expect(replay.idempotent).toBe(true);
+    expect(currentDb.$queryRaw).toHaveBeenCalledTimes(2);
+    expect(currentDb.workspaceMember.findUnique).toHaveBeenCalledTimes(2);
+
+    const staleDb = makeDatabase();
+    staleDb.setNextUniqueConflict({
+      taskChanges: { revision: 4, updatedAt: new Date('2026-10-19T00:00:01.000Z') },
+    });
+    const staleService = serviceFor(staleDb).service;
+    await expect(issueOne(staleService)).rejects.toBeInstanceOf(ConflictException);
+    expect(staleDb.$queryRaw).toHaveBeenCalledTimes(2);
+    expect(staleDb.workspaceMember.findUnique).toHaveBeenCalledTimes(2);
+
+    const revokedDb = makeDatabase();
+    revokedDb.setNextUniqueConflict({ membershipRole: 'viewer' });
+    const revokedService = serviceFor(revokedDb).service;
+    await expect(issueOne(revokedService)).rejects.toBeInstanceOf(ForbiddenException);
+    expect(revokedDb.$queryRaw).toHaveBeenCalledTimes(2);
+    expect(revokedDb.workspaceMember.findUnique).toHaveBeenCalledTimes(2);
+
+    const differentInputDb = makeDatabase();
+    differentInputDb.setNextUniqueConflict({ rowOverrides: { expectedTaskRevision: 4 } });
+    const differentInputService = serviceFor(differentInputDb).service;
+    await expect(issueOne(differentInputService)).rejects.toBeInstanceOf(ConflictException);
+    expect(differentInputDb.$queryRaw).toHaveBeenCalledTimes(2);
+    expect(differentInputDb.workspaceMember.findUnique).toHaveBeenCalledTimes(2);
+  });
+
   it('requires verified terminal binding, then consumes a dispatch exactly once', async () => {
     const db = makeDatabase();
     const { service, terminal } = serviceFor(db);
@@ -212,6 +277,37 @@ describe('Muneral per-dispatch authority source controls (repository and termina
     expect(consumed.state).toBe('consumed');
     expect(consumed.consumedAt).not.toBeNull();
     await expect(service.consumeForStart(...path, human)).rejects.toBeInstanceOf(ConflictException);
+  });
+
+  it('rechecks task tuple and caller authorization before replaying a terminal bind', async () => {
+    const staleDb = makeDatabase();
+    const { service: staleService, terminal: staleTerminal } = serviceFor(staleDb);
+    const staleReservation = await issueOne(staleService);
+    const stalePath = [TASK_ID, staleReservation.launchAttemptId, staleReservation.dispatchId] as const;
+    const firstBind = await staleService.bindTerminal(...stalePath, human, TERMINAL_ID);
+    const currentReplay = await staleService.bindTerminal(...stalePath, human, TERMINAL_ID);
+    expect(firstBind.idempotent).toBe(false);
+    expect(currentReplay.idempotent).toBe(true);
+    staleDb.changeTask({ revision: 4, updatedAt: new Date('2026-10-19T00:00:01.000Z') });
+
+    await expect(staleService.bindTerminal(...stalePath, human, TERMINAL_ID))
+      .rejects.toBeInstanceOf(ConflictException);
+    expect(staleDb.$queryRaw).toHaveBeenCalledTimes(4);
+    expect(staleDb.workspaceMember.findUnique).toHaveBeenCalledTimes(4);
+    expect(staleTerminal.calls).toHaveLength(1);
+
+    const revokedDb = makeDatabase();
+    const { service: revokedService, terminal: revokedTerminal } = serviceFor(revokedDb);
+    const revokedReservation = await issueOne(revokedService);
+    const revokedPath = [TASK_ID, revokedReservation.launchAttemptId, revokedReservation.dispatchId] as const;
+    await revokedService.bindTerminal(...revokedPath, human, TERMINAL_ID);
+    revokedDb.setMembershipRole('viewer');
+
+    await expect(revokedService.bindTerminal(...revokedPath, human, TERMINAL_ID))
+      .rejects.toBeInstanceOf(ForbiddenException);
+    expect(revokedDb.$queryRaw).toHaveBeenCalledTimes(3);
+    expect(revokedDb.workspaceMember.findUnique).toHaveBeenCalledTimes(3);
+    expect(revokedTerminal.calls).toHaveLength(1);
   });
 
   it('revokes reservations idempotently and refuses later binding or consumption', async () => {
