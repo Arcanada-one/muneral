@@ -15,9 +15,10 @@ import { TaskExecutionRecorderService } from '../execution-authority/task-execut
 import { TaskStalenessService } from '../execution-authority/task-staleness.service.js';
 import { TaskRedactionService } from './redactions/task-redaction.service.js';
 import { TaskEvidenceService } from './evidence/task-evidence.service.js';
+import { DispatchAuthorityModule } from '../dispatch-authority/dispatch-authority.module.js';
 
 @Module({
-  imports: [ActivityModule, WsModule, AuthModule, ExecutionAuthorityModule],
+  imports: [ActivityModule, WsModule, AuthModule, ExecutionAuthorityModule, DispatchAuthorityModule],
   controllers: [TasksController, FieldChangesController, TaskContractBindingController],
   providers: [
     HumanTaskReadGuard,
