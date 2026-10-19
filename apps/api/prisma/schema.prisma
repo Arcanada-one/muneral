@@ -97,6 +97,7 @@ model Project {
   milestones Milestone[]
   sprints    Sprint[]
   tasks      Task[]
+  dispatchReservations TaskDispatchReservation[]
   migrationBatches MigrationBatch[]
 
   @@map("projects")
@@ -203,6 +204,7 @@ model Task {
   legacyIdentities        LegacyIdentity[]
   redactions              TaskRedaction[]
   evidence                TaskEvidenceAttachment[]
+  dispatchReservations    TaskDispatchReservation[]
 
   @@index([projectId], name: "idx_tasks_project_id")
   @@index([sprintId], name: "idx_tasks_sprint_id")
@@ -575,6 +577,43 @@ model TaskExecutionTransition {
   @@index([taskId])
   @@index([attemptId])
   @@map("task_execution_transitions")
+}
+
+// MUN-0064 — an independent, per-dispatch launch authority record. It is not
+// an execution episode or TaskExecutionAttempt: those remain task-scoped and
+// preserve their existing event/payload semantics. This model is only the
+// durable Muneral side of a future authenticated terminal adapter boundary.
+model TaskDispatchReservation {
+  dispatchId                 String    @id @map("dispatch_id") @db.Uuid
+  launchAttemptId            String    @unique(map: "uq_task_dispatch_launch_attempt") @map("launch_attempt_id") @db.Uuid
+  taskId                     String    @map("task_id") @db.Uuid
+  projectId                  String    @map("project_id") @db.Uuid
+  actorType                  String    @map("actor_type") @db.VarChar(16)
+  actorId                    String    @map("actor_id") @db.Uuid
+  idempotencyKey             String    @map("idempotency_key") @db.VarChar(128)
+  expectedTaskRevision       Int       @map("expected_task_revision")
+  expectedTaskStatus         String    @map("expected_task_status") @db.VarChar(32)
+  expectedTaskUpdatedAt      DateTime  @map("expected_task_updated_at") @db.Timestamptz()
+  requestBytes               Bytes     @map("request_bytes") @db.ByteA
+  requestSha256              String    @map("request_sha256") @db.VarChar(64)
+  executionContextBytes      Bytes     @map("execution_context_bytes") @db.ByteA
+  executionContextSha256     String    @map("execution_context_sha256") @db.VarChar(64)
+  state                      String    @db.VarChar(16)
+  terminalDeclarationId     String?   @map("terminal_declaration_id") @db.VarChar(256)
+  terminalDeclarationSha256 String?   @map("terminal_declaration_sha256") @db.VarChar(64)
+  terminalContextSha256     String?   @map("terminal_context_sha256") @db.VarChar(64)
+  terminalAuthorityRef      String?   @map("terminal_authority_ref") @db.VarChar(256)
+  createdAt                  DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  boundAt                    DateTime? @map("bound_at") @db.Timestamptz()
+  consumedAt                 DateTime? @map("consumed_at") @db.Timestamptz()
+  revokedAt                  DateTime? @map("revoked_at") @db.Timestamptz()
+
+  task    Task    @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Restrict)
+
+  @@unique([taskId, actorType, actorId, idempotencyKey], name: "taskDispatchIdempotency", map: "uq_task_dispatch_idempotency")
+  @@index([taskId, state], map: "idx_task_dispatch_task_state")
+  @@map("task_dispatch_reservations")
 }
 
 // ---------------------------------------------------------------------------
