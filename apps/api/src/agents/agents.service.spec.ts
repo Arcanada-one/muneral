@@ -32,7 +32,9 @@ describe('AgentsService API key ownership and requested expiry', () => {
       apiKey: { findUnique: jestRuntime.fn() },
     };
     auth = {
-      createApiKey: jestRuntime.fn().mockResolvedValue({ keyId: 'key-1', key: 'one-time-secret' }),
+      createApiKey: jestRuntime.fn<
+        (agentId: string, label?: string, expiresAt?: Date) => Promise<{ key: string; keyId: string }>
+      >().mockResolvedValue({ keyId: 'key-1', key: 'one-time-secret' }),
       rotateApiKey: jestRuntime.fn(),
       revokeApiKey: jestRuntime.fn(),
       revokeOwnApiKey: jestRuntime.fn(),
