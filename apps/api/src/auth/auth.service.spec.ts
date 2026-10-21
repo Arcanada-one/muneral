@@ -45,6 +45,11 @@ describe('AuthService finite API key lifecycle', () => {
     expect(prisma.apiKey.create).not.toHaveBeenCalled();
   });
 
+  it('refuses an omitted expiry before generating or storing a key', async () => {
+    await expect(service.createApiKey('agent-1', 'test')).rejects.toThrow(BadRequestException);
+    expect(prisma.apiKey.create).not.toHaveBeenCalled();
+  });
+
   it('keeps both the replacement and grace period within the original expiry cutoff', async () => {
     const originalExpiry = new Date(Date.now() + 60 * 60 * 1000);
     prisma.apiKey.findUnique.mockResolvedValue({

@@ -129,10 +129,10 @@ export class AuthService {
     requestedExpiresAt?: Date,
   ): Promise<{ key: string; keyId: string }> {
     const now = new Date();
-    // The JWT-facing AgentsService requires an explicit request expiry. Keep
-    // existing trusted internal callers bounded as well: omission can never
-    // create an unbounded key.
-    const expiresAt = requestedExpiresAt ?? new Date(now.getTime() + MAX_API_KEY_LIFETIME_MS);
+    if (!(requestedExpiresAt instanceof Date)) {
+      throw new BadRequestException('API key expiry must be explicit');
+    }
+    const expiresAt = requestedExpiresAt;
     const expiresAtMs = expiresAt instanceof Date ? expiresAt.getTime() : Number.NaN;
     if (
       !Number.isFinite(expiresAtMs) ||
