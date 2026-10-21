@@ -5,7 +5,7 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "paused_safe"
  },
- "captured_at_utc": "2026-10-21T20:15:55Z",
+ "captured_at_utc": "2026-10-21T20:33:51Z",
  "change_set": {
   "base": "4146eb7be5d1f8c2db6862ab5c1be1cc4e1dcc73",
   "files": [
@@ -73,18 +73,18 @@
  "graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:6ee6c530ba31a4cc6ca22dfd9d67a3c37d0ec668849ab84e3ab1d908af1d00b0",
-  "path": "/tmp/verify-node-workdir2/verifier-out/graph-4146eb7be5d1.json",
+  "graph_digest": "sha256:59af1fdce7ea008ec804ffc9e80cb8299e0fd8eec6929f9f0e1b5310ad3e5da0",
+  "path": "/tmp/verify-node-workdir3/verifier-out/graph-4146eb7be5d1.json",
   "source_commit": "4146eb7be5d1f8c2db6862ab5c1be1cc4e1dcc73"
  },
  "head_graph": {
   "builder_version": "1.0.5",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:bc80fa1fac2db6468eb2b8466dc0ddedd2ea0ba1553f33b9dcdb2fc6c509f332",
-  "path": "/tmp/verify-node-workdir2/verifier-out/graph-head-a574daa21102.json",
+  "graph_digest": "sha256:987b9213eb963bdb97b566d3946546c7e5fc6ef91b60e85c9617957ab4b806d3",
+  "path": "/tmp/verify-node-workdir3/verifier-out/graph-head-a574daa21102.json",
   "source_commit": "a574daa211028e7f92c32b4e59800cb9369f2283",
   "staleness": {
-   "checked_at_utc": "2026-10-21T20:16:10Z",
+   "checked_at_utc": "2026-10-21T20:34:06Z",
    "checked_nodes": 457,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
@@ -13731,13 +13731,14 @@
  },
  "notes": [
   "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
-  "profile: (auto-detected); baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none"
+  "profile: (auto-detected); baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none",
+  "head tree a574daa21102 exported with git archive into /tmp/verify-node-workdir3/export-a574daa21102 (node_modules linked from the repository for ['.', 'apps/api', 'apps/web', 'packages/types']; workspace packages built: ['packages/types (tsc exit 0, 0.22s)']); the repository was not written"
  ],
  "producer": {
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261021T201555Z-a574daa2",
+ "receipt_id": "car-verify-20261021T203351Z-a574daa2",
  "repo": {
   "name": "Arcanada-one/muneral",
   "path": "/workspace"
@@ -13918,7 +13919,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-21T20:16:10Z",
+  "checked_at_utc": "2026-10-21T20:34:06Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -14344,7 +14345,7 @@
   }
  ],
  "tree": {
-  "commit": "a574daa211028e7f92c32b4e59800cb9369f2283",
+  "commit": "9d0b829f91f4a4a640ee6af9d5eb2a576ba406ed",
   "dirty": false
  },
  "verdicts": [
@@ -14540,7 +14541,7 @@
   },
   {
    "entity": "code_unit:.github/workflows/ci.yml",
-   "reason": "v-workflow-config-b803fcb7f17ed923: workflow configuration not measured: reusable workflow input expression value/type unresolved",
+   "reason": "v-workflow-config-b803fcb7f17ed923: PyYAML unavailable; workflow configuration not measured",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-fitness",
@@ -14549,7 +14550,7 @@
   },
   {
    "entity": "code_unit:.github/workflows/dependabot-auto-merge.yml",
-   "reason": "v-workflow-config-2fe48d1021006468: workflow shell caller closure not measured: job auto-merge step 0: line 10: dynamic load/substitution; job auto-merge step 0: line 11: dynamic load/substitution; job auto-merge step 0: line 12: dynamic load/substitution; job auto-merge step 0: line 13: dynamic load/substitution; job auto-merge step 0: line 3: multiline/opaque shell statement; job auto-merge step 0: line 4: wrapper options/child command unresolved; job auto-merge step 0: line 57: dynamic load/substitution; job auto-merge step 0: line 58: multiline/opaque shell statement; job auto-merge step 0",
+   "reason": "v-workflow-config-2fe48d1021006468: PyYAML unavailable; workflow configuration not measured; v-global-fallback-test-root: complete fallback suite: not_measured",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-fitness",
@@ -14559,7 +14560,7 @@
   },
   {
    "entity": "code_unit:.github/workflows/governance.yml",
-   "reason": "v-global-fallback-test-root: complete fallback suite: not_measured",
+   "reason": "v-workflow-config-5844296ae241614c: PyYAML unavailable; workflow configuration not measured; v-global-fallback-test-root: complete fallback suite: not_measured",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-fitness",
@@ -14569,7 +14570,7 @@
   },
   {
    "entity": "code_unit:.github/workflows/graph-admission.yml",
-   "reason": "v-workflow-config-dc49cc771602c92b: workflow shell caller closure not measured: job graph-admission step 2: line 19: dynamic load/substitution; job graph-admission step 7: line 11: multiline/opaque shell statement; job graph-admission step 7: line 12: wrapper options/child command unresolved; job graph-admission step 7: line 3: multiline/opaque shell statement; job graph-admission step 7: line 4: wrapper options/child command unresolved; job graph-admission step 8: line 14: multiline/opaque shell statement; job graph-admission step 8: line 15: multiline/opaque shell statement; job graph-admiss",
+   "reason": "v-workflow-config-dc49cc771602c92b: PyYAML unavailable; workflow configuration not measured; v-global-fallback-test-root: complete fallback suite: not_measured",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-fitness",
@@ -14579,7 +14580,7 @@
   },
   {
    "entity": "code_unit:.github/workflows/regenerate-derived-artefacts.yml",
-   "reason": "v-workflow-config-f2afde09eeffcba0: workflow shell caller closure not measured: job regenerate step 0: line 2: multiline/opaque shell statement; job regenerate step 0: line 3: wrapper options/child command unresolved; job regenerate step 0: line 5: dynamic load/substitution; job regenerate step 0: line 6: dynamic load/substitution; job regenerate step 0: line 7: dynamic load/substitution; job regenerate step 0: line 8: dynamic load/substitution; job regenerate step 2: line 3: dynamic load/substitution; job regenerate step 3: line 10: dynamic load/substitution; job regenerate step 3: line 11: d",
+   "reason": "v-workflow-config-f2afde09eeffcba0: PyYAML unavailable; workflow configuration not measured; v-global-fallback-test-root: complete fallback suite: not_measured",
    "verdict": "not_measured",
    "verifier_ids": [
     "v-fitness",
@@ -14800,13 +14801,13 @@
    "exit_code": 127,
    "id": "v-type-check-uncovered",
    "kind": "type_check",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-type-check-uncovered.txt",
-   "started_at_utc": "2026-10-21T20:16:13Z",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-type-check-uncovered.txt",
+   "started_at_utc": "2026-10-21T20:34:09Z",
    "summary": "not_measured: 2 entity(ies) no tsconfig covers"
   },
   {
-   "command": "/workspace/apps/api/node_modules/.bin/tsc -p /workspace/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/verify-node-workdir2/verifier-out/type-check-bilaql1t/check.tsbuildinfo --listFiles",
-   "duration_s": 2.55,
+   "command": "/tmp/verify-node-workdir3/export-a574daa21102/apps/api/node_modules/.bin/tsc -p /tmp/verify-node-workdir3/export-a574daa21102/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/verify-node-workdir3/verifier-out/type-check-r7enunpp/check.tsbuildinfo --listFiles",
+   "duration_s": 2.52,
    "entities": [
     "deployable_unit:apps/api"
    ],
@@ -14816,13 +14817,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-10-21T20:16:13Z",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-10-21T20:34:09Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1453 files listed"
   },
   {
-   "command": "/workspace/apps/api/node_modules/.bin/tsc -p /workspace/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /tmp/verify-node-workdir2/verifier-out/type-check-kvui48ef/check.tsbuildinfo --listFiles",
-   "duration_s": 3.81,
+   "command": "/tmp/verify-node-workdir3/export-a574daa21102/apps/api/node_modules/.bin/tsc -p /tmp/verify-node-workdir3/export-a574daa21102/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /tmp/verify-node-workdir3/verifier-out/type-check-1glarf7c/check.tsbuildinfo --listFiles",
+   "duration_s": 4.12,
    "entities": [
     "code_unit:apps/api/test/deploy-bind.contract.spec.ts",
     "deployable_unit:apps/api"
@@ -14834,12 +14835,12 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-10-21T20:16:15Z",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-type-check-apps-api-tsconfig-test.txt",
+   "started_at_utc": "2026-10-21T20:34:11Z",
    "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1611 files listed"
   },
   {
-   "command": "/workspace/apps/web/node_modules/.bin/tsc -p /workspace/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/verify-node-workdir2/verifier-out/type-check-vf_4i_ap/check.tsbuildinfo --listFiles",
+   "command": "/tmp/verify-node-workdir3/export-a574daa21102/apps/web/node_modules/.bin/tsc -p /tmp/verify-node-workdir3/export-a574daa21102/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/verify-node-workdir3/verifier-out/type-check-498dhavu/check.tsbuildinfo --listFiles",
    "duration_s": 2.98,
    "entities": [
     "deployable_unit:apps/web"
@@ -14850,13 +14851,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-10-21T20:16:19Z",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-10-21T20:34:15Z",
    "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1312 files listed"
   },
   {
-   "command": "/workspace/packages/types/node_modules/.bin/tsc -p /workspace/packages/types/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/verify-node-workdir2/verifier-out/type-check-4dpb7_ws/check.tsbuildinfo --listFiles",
-   "duration_s": 0.2,
+   "command": "/tmp/verify-node-workdir3/export-a574daa21102/packages/types/node_modules/.bin/tsc -p /tmp/verify-node-workdir3/export-a574daa21102/packages/types/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/verify-node-workdir3/verifier-out/type-check-03rcp785/check.tsbuildinfo --listFiles",
+   "duration_s": 0.18,
    "entities": [
     "deployable_unit:packages/types"
    ],
@@ -14866,8 +14867,8 @@
    "exit_code": 0,
    "id": "v-type-check-packages-types-tsconfig",
    "kind": "type_check",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-type-check-packages-types-tsconfig.txt",
-   "started_at_utc": "2026-10-21T20:16:22Z",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-type-check-packages-types-tsconfig.txt",
+   "started_at_utc": "2026-10-21T20:34:19Z",
    "summary": "packages/types/tsconfig.json: exit 0, 0 error(s), 58 files listed"
   },
   {
@@ -14882,9 +14883,9 @@
    "exit_code": 1,
    "id": "v-workflow-config-b803fcb7f17ed923",
    "kind": "config_schema",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-workflow-config-b803fcb7f17ed923.txt",
-   "started_at_utc": "2026-10-21T20:16:22Z",
-   "summary": "workflow configuration not measured: reusable workflow input expression value/type unresolved"
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-workflow-config-b803fcb7f17ed923.txt",
+   "started_at_utc": "2026-10-21T20:34:19Z",
+   "summary": "PyYAML unavailable; workflow configuration not measured"
   },
   {
    "command": "workflow_config.validate exact head bytes",
@@ -14898,9 +14899,9 @@
    "exit_code": 1,
    "id": "v-workflow-config-2fe48d1021006468",
    "kind": "config_schema",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-workflow-config-2fe48d1021006468.txt",
-   "started_at_utc": "2026-10-21T20:16:22Z",
-   "summary": "workflow shell caller closure not measured: job auto-merge step 0: line 10: dynamic load/substitution; job auto-merge step 0: line 11: dynamic load/substitution; job auto-merge step 0: line 12: dynamic load/substitution; job auto-merge step 0: line 13: dynamic load/substitution; job auto-merge step 0: line 3: multiline/opaque shell statement; job auto-merge step 0: line 4: wrapper options/child command unresolved; job auto-merge step 0: line 57: dynamic load/substitution; job auto-merge step 0: line 58: multiline/opaque shell statement; job auto-merge step 0: line 65: multiline/opaque shell statement; job auto-merge step 0: line 66: wrapper options/child command unresolved; job auto-merge step 0: line 67: dynamic load/substitution; job auto-merge step 0: line 68: dynamic load/substitution; job auto-merge step 0: line 69: dynamic load/substitution; job auto-merge step 0: line 82: dynamic command/alias/eval; job auto-merge step 0: line 82: dynamic load/substitution; job auto-merge step 0: line 9: dynamic load/substitution"
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-workflow-config-2fe48d1021006468.txt",
+   "started_at_utc": "2026-10-21T20:34:19Z",
+   "summary": "PyYAML unavailable; workflow configuration not measured"
   },
   {
    "command": "workflow_config.validate exact head bytes",
@@ -14909,14 +14910,14 @@
     "code_unit:.github/workflows/governance.yml"
    ],
    "entity_verdicts": {
-    "code_unit:.github/workflows/governance.yml": "verified"
+    "code_unit:.github/workflows/governance.yml": "not_measured"
    },
-   "exit_code": 0,
+   "exit_code": 1,
    "id": "v-workflow-config-5844296ae241614c",
    "kind": "config_schema",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-workflow-config-5844296ae241614c.txt",
-   "started_at_utc": "2026-10-21T20:16:22Z",
-   "summary": "bounded workflow configuration shape valid; expressions, shell, actions, callee interface compatibility and hosted execution NOT_MEASURED"
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-workflow-config-5844296ae241614c.txt",
+   "started_at_utc": "2026-10-21T20:34:19Z",
+   "summary": "PyYAML unavailable; workflow configuration not measured"
   },
   {
    "command": "workflow_config.validate exact head bytes",
@@ -14930,9 +14931,9 @@
    "exit_code": 1,
    "id": "v-workflow-config-dc49cc771602c92b",
    "kind": "config_schema",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-workflow-config-dc49cc771602c92b.txt",
-   "started_at_utc": "2026-10-21T20:16:22Z",
-   "summary": "workflow shell caller closure not measured: job graph-admission step 2: line 19: dynamic load/substitution; job graph-admission step 7: line 11: multiline/opaque shell statement; job graph-admission step 7: line 12: wrapper options/child command unresolved; job graph-admission step 7: line 3: multiline/opaque shell statement; job graph-admission step 7: line 4: wrapper options/child command unresolved; job graph-admission step 8: line 14: multiline/opaque shell statement; job graph-admission step 8: line 15: multiline/opaque shell statement; job graph-admission step 8: line 16: multiline/opaque shell statement; job graph-admission step 8: line 17: multiline/opaque shell statement; job graph-admission step 8: line 18: multiline/opaque shell statement; job graph-admission step 8: line 19: multiline/opaque shell statement; job graph-admission step 8: line 20: multiline/opaque shell statement; job graph-admission step 8: line 21: multiline/opaque shell statement; job graph-admission step 8: line 22: multiline/opaque shell statement; job graph-admission step 8: line 23: multiline/opaque shell statement; job graph-admission step 8: line 24: multiline/opaque shell statement; job graph-admission step 8: line 25: multiline/opaque shell statement; job graph-admission step 8: line 26: dynamic command/alias/eval; job graph-admission step 9: local action/checkout path scope unresolved"
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-workflow-config-dc49cc771602c92b.txt",
+   "started_at_utc": "2026-10-21T20:34:19Z",
+   "summary": "PyYAML unavailable; workflow configuration not measured"
   },
   {
    "command": "workflow_config.validate exact head bytes",
@@ -14946,9 +14947,9 @@
    "exit_code": 1,
    "id": "v-workflow-config-f2afde09eeffcba0",
    "kind": "config_schema",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-workflow-config-f2afde09eeffcba0.txt",
-   "started_at_utc": "2026-10-21T20:16:22Z",
-   "summary": "workflow shell caller closure not measured: job regenerate step 0: line 2: multiline/opaque shell statement; job regenerate step 0: line 3: wrapper options/child command unresolved; job regenerate step 0: line 5: dynamic load/substitution; job regenerate step 0: line 6: dynamic load/substitution; job regenerate step 0: line 7: dynamic load/substitution; job regenerate step 0: line 8: dynamic load/substitution; job regenerate step 2: line 3: dynamic load/substitution; job regenerate step 3: line 10: dynamic load/substitution; job regenerate step 3: line 11: dynamic load/substitution; job regenerate step 4: line 10: dynamic load/substitution; job regenerate step 4: line 18: dynamic load/substitution; job regenerate step 4: line 21: dynamic command/alias/eval; job regenerate step 4: line 22: dynamic load/substitution; job regenerate step 4: line 5: dynamic load/substitution; job regenerate step 4: line 8: dynamic load/substitution; job regenerate step 4: line 9: dynamic load/substitution; job regenerate step 7: line 2: multiline/opaque shell statement; job regenerate step 7: line 3: wrapper options/child command unresolved; job regenerate step 8: line 26: dynamic load/substitution; job regenerate step 8: line 38: heredoc data/generation closure not measured; job regenerate step 8: line 52: dynamic load/substitution; job regenerate step 8: line 5: dynamic load/substitution; job regenerate step 8: line 68: multiline/opaque shell statement"
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-workflow-config-f2afde09eeffcba0.txt",
+   "started_at_utc": "2026-10-21T20:34:19Z",
+   "summary": "PyYAML unavailable; workflow configuration not measured"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
@@ -15046,8 +15047,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-fitness.json",
-   "started_at_utc": "2026-10-21T20:16:22Z",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-10-21T20:34:19Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -15064,8 +15065,8 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-doc-reference.txt",
-   "started_at_utc": "2026-10-21T20:16:23Z",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-doc-reference.txt",
+   "started_at_utc": "2026-10-21T20:34:19Z",
    "summary": "2 document(s), 0 failed"
   },
   {
@@ -15080,9 +15081,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-8510dad442972b20",
    "kind": "shell_syntax",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-shell-syntax-8510dad442972b20.txt",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-shell-syntax-8510dad442972b20.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-21T20:16:23Z",
+   "started_at_utc": "2026-10-21T20:34:19Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -15097,9 +15098,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-83ef9d3b99092081",
    "kind": "shell_syntax",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-shell-syntax-83ef9d3b99092081.txt",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-shell-syntax-83ef9d3b99092081.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-21T20:16:23Z",
+   "started_at_utc": "2026-10-21T20:34:19Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -15114,9 +15115,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-11784c754a05e4be",
    "kind": "shell_syntax",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-shell-syntax-11784c754a05e4be.txt",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-shell-syntax-11784c754a05e4be.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-21T20:16:23Z",
+   "started_at_utc": "2026-10-21T20:34:19Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -15131,9 +15132,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-8c31e335c6c5ebab",
    "kind": "shell_syntax",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-shell-syntax-8c31e335c6c5ebab.txt",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-shell-syntax-8c31e335c6c5ebab.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-21T20:16:23Z",
+   "started_at_utc": "2026-10-21T20:34:19Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -15148,9 +15149,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-4b1446736a74bcbc",
    "kind": "shell_syntax",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-shell-syntax-4b1446736a74bcbc.txt",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-shell-syntax-4b1446736a74bcbc.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-21T20:16:23Z",
+   "started_at_utc": "2026-10-21T20:34:19Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -15165,9 +15166,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-85b3438308b0c1fe",
    "kind": "shell_syntax",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-shell-syntax-85b3438308b0c1fe.txt",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-shell-syntax-85b3438308b0c1fe.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-21T20:16:23Z",
+   "started_at_utc": "2026-10-21T20:34:19Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -15182,9 +15183,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-a582a36e78fe3ccf",
    "kind": "shell_syntax",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-shell-syntax-a582a36e78fe3ccf.txt",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-shell-syntax-a582a36e78fe3ccf.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-21T20:16:23Z",
+   "started_at_utc": "2026-10-21T20:34:19Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -15199,9 +15200,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-519064afc564b0e8",
    "kind": "shell_syntax",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-shell-syntax-519064afc564b0e8.txt",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-shell-syntax-519064afc564b0e8.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-21T20:16:23Z",
+   "started_at_utc": "2026-10-21T20:34:19Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -15216,9 +15217,9 @@
    "exit_code": 0,
    "id": "v-shell-syntax-b792645f8cae2d8c",
    "kind": "shell_syntax",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-shell-syntax-b792645f8cae2d8c.txt",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-shell-syntax-b792645f8cae2d8c.txt",
    "scope": "shell_source_validation",
-   "started_at_utc": "2026-10-21T20:16:23Z",
+   "started_at_utc": "2026-10-21T20:34:19Z",
    "summary": "shell syntax/closure: not_measured"
   },
   {
@@ -15233,9 +15234,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-8510dad442972b20",
    "kind": "shell_behavior",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-shell-behavior-8510dad442972b20.txt",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-shell-behavior-8510dad442972b20.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-21T20:16:23Z",
+   "started_at_utc": "2026-10-21T20:34:19Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: line 14: dynamic command/alias/eval"
   },
   {
@@ -15250,9 +15251,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-83ef9d3b99092081",
    "kind": "shell_behavior",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-shell-behavior-83ef9d3b99092081.txt",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-shell-behavior-83ef9d3b99092081.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-21T20:16:23Z",
+   "started_at_utc": "2026-10-21T20:34:19Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: directory transition has unresolved execution cwd; line 14: dynamic command/alias/eval; line 25: dynamic command/alias/eval; line 38: multiline/opaque shell statement; line 39: dynamic command/alias/eval; line 40: multiline/opaque shell statement; line 41: dynamic command/alias/eval; line 43: multiline/opaque shell statement; line 44: dynamic command/alias/eval; line 49: multiline/opaque shell statement; line 4: dynamic load/substitution; line 50: dynamic command/alias/eval"
   },
   {
@@ -15267,9 +15268,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-11784c754a05e4be",
    "kind": "shell_behavior",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-shell-behavior-11784c754a05e4be.txt",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-shell-behavior-11784c754a05e4be.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-21T20:16:23Z",
+   "started_at_utc": "2026-10-21T20:34:19Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: directory transition has unresolved execution cwd; line 106: dynamic load/substitution; line 116: multiline/opaque shell statement; line 117: multiline/opaque shell statement; line 118: dynamic command/alias/eval; line 121: multiline/opaque shell statement; line 122: multiline/opaque shell statement; line 123: dynamic command/alias/eval; line 125: multiline/opaque shell statement; line 126: multiline/opaque shell statement; line 127: dynamic command/alias/eval; line 129: multiline/opaque shell statement; line 130: multiline/opaque shell statement; line 131: dynamic command/alias/eval; line 133: multiline/opaque shell statement; line 134: multiline/opaque shell statement; line 135: dynamic command/alias/eval; line 137: multiline/opaque shell statement; line 138: multiline/opaque shell statement; line 139: dynamic command/alias/eval; line 142: multiline/opaque shell statement; line 145: multiline/opaque shell statement; line 14: dynamic load/substitution; line 27: heredoc data/generation closure not measured; line 57: multiline/opaque shell statement; line 62: multiline/opaque shell statement; line 63: dynamic command/alias/eval; line 66: dynamic load/substitution; line 81: dynamic load/substitution; line 94: multiline/opaque shell statement"
   },
   {
@@ -15284,9 +15285,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-8c31e335c6c5ebab",
    "kind": "shell_behavior",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-shell-behavior-8c31e335c6c5ebab.txt",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-shell-behavior-8c31e335c6c5ebab.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-21T20:16:23Z",
+   "started_at_utc": "2026-10-21T20:34:19Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: directory transition has unresolved execution cwd; line 114: multiline/opaque shell statement; line 128: dynamic load/substitution; line 136: multiline/opaque shell statement; line 137: multiline/opaque shell statement; line 141: multiline/opaque shell statement; line 142: multiline/opaque shell statement; line 145: multiline/opaque shell statement; line 146: multiline/opaque shell statement; line 149: multiline/opaque shell statement; line 150: multiline/opaque shell statement; line 153: multiline/opaque shell statement; line 154: multiline/opaque shell statement; line 158: multiline/opaque shell statement; line 159: multiline/opaque shell statement; line 162: multiline/opaque shell statement; line 163: multiline/opaque shell statement; line 166: multiline/opaque shell statement; line 167: multiline/opaque shell statement; line 170: multiline/opaque shell statement; line 171: multiline/opaque shell statement; line 175: multiline/opaque shell statement; line 176: multiline/opaque shell statement; line 177: dynamic command/alias/eval; line 179: multiline/opaque shell statement; line 180: multiline/opaque shell statement; line 181: dynamic command/alias/eval; line 183: multiline/opaque shell statement; line 184: multiline/opaque shell statement; line 185: dynamic command/alias/eval; line 18: dynamic load/substitution; line 31: heredoc data/generation closure not measured; line 65: multiline/opaque shell statement; line 73: dynamic load/substitution; line 91: dynamic load/substitution"
   },
   {
@@ -15301,9 +15302,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-4b1446736a74bcbc",
    "kind": "shell_behavior",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-shell-behavior-4b1446736a74bcbc.txt",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-shell-behavior-4b1446736a74bcbc.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-21T20:16:23Z",
+   "started_at_utc": "2026-10-21T20:34:19Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: line 38: dynamic load/substitution; line 40: dynamic load/substitution; line 51: dynamic command/alias/eval; line 56: multiline/opaque shell statement; line 57: dynamic command/alias/eval; line 64: wrapper execution scope/options unresolved"
   },
   {
@@ -15318,9 +15319,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-85b3438308b0c1fe",
    "kind": "shell_behavior",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-shell-behavior-85b3438308b0c1fe.txt",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-shell-behavior-85b3438308b0c1fe.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-21T20:16:23Z",
+   "started_at_utc": "2026-10-21T20:34:19Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: directory transition has unresolved execution cwd; line 20: dynamic load/substitution; line 36: dynamic command/alias/eval; line 36: dynamic load/substitution; line 37: dynamic command/alias/eval; line 37: dynamic load/substitution; line 42: multiline/opaque shell statement; line 43: multiline/opaque shell statement; line 44: multiline/opaque shell statement; line 45: multiline/opaque shell statement; line 46: multiline/opaque shell statement; line 47: multiline/opaque shell statement; line 48: multiline/opaque shell statement; line 49: dynamic command/alias/eval; line 54: dynamic command/alias/eval; line 64: dynamic command/alias/eval; line 6: dynamic load/substitution; line 88: multiline/opaque shell statement; line 90: multiline/opaque shell statement; line 96: multiline/opaque shell statement"
   },
   {
@@ -15335,9 +15336,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-a582a36e78fe3ccf",
    "kind": "shell_behavior",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-shell-behavior-a582a36e78fe3ccf.txt",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-shell-behavior-a582a36e78fe3ccf.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-21T20:16:23Z",
+   "started_at_utc": "2026-10-21T20:34:19Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: line 13: wrapper options/child command unresolved; line 18: multiline/opaque shell statement; line 28: dynamic load/substitution"
   },
   {
@@ -15352,9 +15353,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-519064afc564b0e8",
    "kind": "shell_behavior",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-shell-behavior-519064afc564b0e8.txt",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-shell-behavior-519064afc564b0e8.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-21T20:16:23Z",
+   "started_at_utc": "2026-10-21T20:34:19Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: directory transition has unresolved execution cwd; line 10: heredoc data/generation closure not measured; line 26: multiline/opaque shell statement; line 27: dynamic command/alias/eval; line 37: multiline/opaque shell statement; line 38: dynamic command/alias/eval; line 4: dynamic load/substitution"
   },
   {
@@ -15369,9 +15370,9 @@
    "exit_code": 0,
    "id": "v-shell-behavior-b792645f8cae2d8c",
    "kind": "shell_behavior",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-shell-behavior-b792645f8cae2d8c.txt",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-shell-behavior-b792645f8cae2d8c.txt",
    "scope": "shell_fixture_behavior",
-   "started_at_utc": "2026-10-21T20:16:23Z",
+   "started_at_utc": "2026-10-21T20:34:19Z",
    "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: line 134: multiline/opaque shell statement; line 155: multiline/opaque shell statement; line 201: multiline/opaque shell statement; line 253: multiline/opaque shell statement; line 290: multiline/opaque shell statement; line 53: wrapper options/child command unresolved; line 54: wrapper options/child command unresolved; line 55: wrapper options/child command unresolved; line 56: wrapper options/child command unresolved; line 57: wrapper options/child command unresolved; line 75: dynamic load/substitution; line 76: dynamic load/substitution; line 77: dynamic load/substitution; line 79: heredoc data/generation closure not measured; line 94: wrapper options/child command unresolved; line 98: dynamic command/alias/eval; line 98: dynamic load/substitution"
   },
   {
@@ -15460,9 +15461,9 @@
    "exit_code": 127,
    "id": "v-global-fallback-test-root",
    "kind": "targeted_test",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-global-fallback-test-root.txt",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-global-fallback-test-root.txt",
    "scope": "global_fallback_full_suite",
-   "started_at_utc": "2026-10-21T20:16:23Z",
+   "started_at_utc": "2026-10-21T20:34:19Z",
    "summary": "complete fallback suite: not_measured",
    "timeout_seconds": 900
   },
@@ -15478,9 +15479,9 @@
    "exit_code": 127,
    "id": "v-global-fallback-test-apps-api",
    "kind": "targeted_test",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-global-fallback-test-apps-api.txt",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-global-fallback-test-apps-api.txt",
    "scope": "global_fallback_full_suite",
-   "started_at_utc": "2026-10-21T20:16:23Z",
+   "started_at_utc": "2026-10-21T20:34:19Z",
    "summary": "complete fallback suite: not_measured",
    "timeout_seconds": 900
   },
@@ -15496,9 +15497,9 @@
    "exit_code": 127,
    "id": "v-global-fallback-test-apps-web",
    "kind": "targeted_test",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-global-fallback-test-apps-web.txt",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-global-fallback-test-apps-web.txt",
    "scope": "global_fallback_full_suite",
-   "started_at_utc": "2026-10-21T20:16:23Z",
+   "started_at_utc": "2026-10-21T20:34:19Z",
    "summary": "complete fallback suite: not_measured",
    "timeout_seconds": 900
   },
@@ -15514,9 +15515,9 @@
    "exit_code": 127,
    "id": "v-global-fallback-test-packages-types",
    "kind": "targeted_test",
-   "output_ref": "/tmp/verify-node-workdir2/verifier-out/v-global-fallback-test-packages-types.txt",
+   "output_ref": "/tmp/verify-node-workdir3/verifier-out/v-global-fallback-test-packages-types.txt",
    "scope": "global_fallback_full_suite",
-   "started_at_utc": "2026-10-21T20:16:23Z",
+   "started_at_utc": "2026-10-21T20:34:19Z",
    "summary": "complete fallback suite: not_measured",
    "timeout_seconds": 900
   }
@@ -15775,9 +15776,9 @@
    "receipt:receipts/graph/pin-repair-muneral213r2-20261007.json": []
   },
   "seconds": {
-   "prepare": 1.2,
-   "total": 27.39,
-   "verifiers": 9.63
+   "prepare": 1.47,
+   "total": 27.81,
+   "verifiers": 9.89
   }
  },
  "work_item": "collective-2090"
