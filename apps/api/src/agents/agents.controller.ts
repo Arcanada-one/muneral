@@ -22,8 +22,9 @@ import { AgentTaskScopeGuard } from '../auth/guards/agent-task-scope.guard.js';
 import type { AgentScopedRequest } from '../auth/guards/agent-task-scope.guard.js';
 import { AgentScope } from '../auth/agent-scope.decorator.js';
 import { ActorInterceptor } from '../common/interceptors/actor.interceptor.js';
-import { Agent } from '@prisma/client';
+import type { Agent, User } from '@prisma/client';
 import type { Actor } from '@muneral/types';
+import { CreateAgentKeyDto } from './dto/create-agent-key.dto.js';
 
 /**
  * Agents management, task assignment, and API key lifecycle.
@@ -89,15 +90,16 @@ export class AgentsController {
   @UseGuards(JwtAuthGuard)
   createApiKey(
     @Param('agentId') agentId: string,
-    @Body() body: { label?: string },
+    @Body() body: CreateAgentKeyDto,
+    @Req() req: Request & { user: User },
   ) {
-    return this.agentsService.createApiKey(agentId, body.label);
+    return this.agentsService.createApiKey(agentId, body, req.user.id);
   }
 
   @Post('keys/:keyId/rotate')
   @UseGuards(JwtAuthGuard)
-  rotateApiKey(@Param('keyId') keyId: string) {
-    return this.agentsService.rotateApiKey(keyId);
+  rotateApiKey(@Param('keyId') keyId: string, @Req() req: Request & { user: User }) {
+    return this.agentsService.rotateApiKey(keyId, req.user.id);
   }
 
   /**
@@ -115,7 +117,7 @@ export class AgentsController {
   @Delete('keys/:keyId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
-  revokeApiKey(@Param('keyId') keyId: string) {
-    return this.agentsService.revokeApiKey(keyId);
+  revokeApiKey(@Param('keyId') keyId: string, @Req() req: Request & { user: User }) {
+    return this.agentsService.revokeApiKey(keyId, req.user.id);
   }
 }

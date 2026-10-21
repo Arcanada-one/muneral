@@ -13,6 +13,7 @@ import { TelegramLoginDto } from './dto/telegram-login.dto.js';
 
 const API_KEY_PREFIX = 'mun_sk_';
 const BCRYPT_ROUNDS = 12;
+const MAX_API_KEY_LIFETIME_MS = 7 * 24 * 60 * 60 * 1000;
 /** Grace period for rotated keys: 24 hours in milliseconds */
 const ROTATION_GRACE_MS = 24 * 60 * 60 * 1000;
 
@@ -122,7 +123,25 @@ export class AuthService {
   }
 
   /** Create new API key for an agent. Returns the raw key (stored only once). */
-  async createApiKey(agentId: string, label?: string): Promise<{ key: string; keyId: string }> {
+  async createApiKey(
+    agentId: string,
+    label?: string,
+    requestedExpiresAt?: Date,
+  ): Promise<{ key: string; keyId: string }> {
+    const now = new Date();
+    // The JWT-facing AgentsService requires an explicit request expiry. Keep
+    // existing trusted internal callers bounded as well: omission can never
+    // create an unbounded key.
+    const expiresAt = requestedExpiresAt ?? new Date(now.getTime() + MAX_API_KEY_LIFETIME_MS);
+    const expiresAtMs = expiresAt instanceof Date ? expiresAt.getTime() : Number.NaN;
+    if (
+      !Number.isFinite(expiresAtMs) ||
+      expiresAtMs <= now.getTime() ||
+      expiresAtMs > now.getTime() + MAX_API_KEY_LIFETIME_MS
+    ) {
+      throw new BadRequestException('API key expiry must be explicit, in the future, and no more than 7 days away');
+    }
+
     const rawKey = `${API_KEY_PREFIX}${uuidv4().replace(/-/g, '')}`;
     const keyHash = await bcrypt.hash(rawKey, BCRYPT_ROUNDS);
 
@@ -132,6 +151,7 @@ export class AuthService {
         keyHash,
         lookupHash: apiKeyLookupHash(rawKey),
         label: label ?? null,
+        expiresAt,
       },
     });
 
@@ -151,14 +171,33 @@ export class AuthService {
     if (existing.revokedAt) {
       throw new BadRequestException('Cannot rotate a revoked API key');
     }
+    const now = new Date();
+    const originalExpiry = existing.expiresAt ?? null;
+    if (originalExpiry && originalExpiry.getTime() <= now.getTime()) {
+      throw new BadRequestException('Cannot rotate an expired API key');
+    }
+
+    const maximumReplacementExpiry = new Date(now.getTime() + MAX_API_KEY_LIFETIME_MS);
+    const replacementExpiry = originalExpiry && originalExpiry < maximumReplacementExpiry
+      ? originalExpiry
+      : maximumReplacementExpiry;
+    const maximumGraceExpiry = new Date(now.getTime() + ROTATION_GRACE_MS);
+    const oldKeyGraceExpiry = originalExpiry && originalExpiry < maximumGraceExpiry
+      ? originalExpiry
+      : maximumGraceExpiry;
 
     // Create new key first
-    const result = await this.createApiKey(existing.agentId, existing.label ?? undefined);
+    const result = await this.createApiKey(
+      existing.agentId,
+      existing.label ?? undefined,
+      replacementExpiry,
+    );
 
-    // Set old key to expire after grace period
+    // The grace period can shorten an older key's life, never extend its
+    // original cutoff. The replacement above is also finite and cutoff-bound.
     await this.prisma.apiKey.update({
       where: { id: keyId },
-      data: { expiresAt: new Date(Date.now() + ROTATION_GRACE_MS) },
+      data: { expiresAt: oldKeyGraceExpiry },
     });
 
     return result;
