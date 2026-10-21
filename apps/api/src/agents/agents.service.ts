@@ -1,5 +1,11 @@
 import { Prisma } from '@prisma/client';
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type { Actor } from '@muneral/types';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateAgentDto } from './dto/create-agent.dto.js';
@@ -7,6 +13,11 @@ import { AssignAgentDto } from './dto/assign-agent.dto.js';
 import { AuthService } from '../auth/auth.service.js';
 import { ActivityService } from '../activity/activity.service.js';
 import type { AssignBasis } from '../auth/guards/agent-task-scope.guard.js';
+import type { CreateAgentKeyDto } from './dto/create-agent-key.dto.js';
+
+const MAX_AGENT_KEY_LIFETIME_MS = 7 * 24 * 60 * 60 * 1000;
+const EXPLICIT_EXPIRY_WITH_ZONE =
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
 
 /** MUN-0051: the activity row every assignment writes. */
 export const AGENT_ASSIGNED_ACTION = 'task:agent_assigned';
@@ -116,12 +127,20 @@ export class AgentsService {
 
   // --- API Key lifecycle (delegates to AuthService) ---
 
-  async createApiKey(agentId: string, label?: string) {
-    await this.findOne(agentId);
-    return this.authService.createApiKey(agentId, label);
+  async createApiKey(agentId: string, dto: CreateAgentKeyDto, ownerUserId: string) {
+    const agent = await this.prisma.agent.findUnique({
+      where: { id: agentId },
+      select: { id: true, workspace: { select: { ownerId: true } } },
+    });
+    if (!agent) throw new NotFoundException('Agent not found');
+    this.assertWorkspaceOwner(ownerUserId, agent.workspace.ownerId);
+
+    const expiresAt = this.parseExplicitExpiry(dto?.expiresAt);
+    return this.authService.createApiKey(agentId, dto.label, expiresAt);
   }
 
-  async rotateApiKey(keyId: string) {
+  async rotateApiKey(keyId: string, ownerUserId: string) {
+    await this.assertApiKeyWorkspaceOwner(keyId, ownerUserId);
     return this.authService.rotateApiKey(keyId);
   }
 
@@ -129,7 +148,39 @@ export class AgentsService {
     return this.authService.revokeOwnApiKey(keyId, agent);
   }
 
-  async revokeApiKey(keyId: string) {
+  async revokeApiKey(keyId: string, ownerUserId: string) {
+    await this.assertApiKeyWorkspaceOwner(keyId, ownerUserId);
     return this.authService.revokeApiKey(keyId);
+  }
+
+  private assertWorkspaceOwner(ownerUserId: string, workspaceOwnerId: string): void {
+    if (!ownerUserId || ownerUserId !== workspaceOwnerId) {
+      throw new ForbiddenException('Workspace owner required');
+    }
+  }
+
+  private async assertApiKeyWorkspaceOwner(keyId: string, ownerUserId: string): Promise<void> {
+    const key = await this.prisma.apiKey.findUnique({
+      where: { id: keyId },
+      select: { id: true, agent: { select: { workspace: { select: { ownerId: true } } } } },
+    });
+    if (!key) throw new NotFoundException('API key not found');
+    this.assertWorkspaceOwner(ownerUserId, key.agent.workspace.ownerId);
+  }
+
+  private parseExplicitExpiry(value: unknown): Date {
+    if (typeof value !== 'string' || !EXPLICIT_EXPIRY_WITH_ZONE.test(value)) {
+      throw new BadRequestException('expiresAt must be an ISO-8601 timestamp with a timezone');
+    }
+    const expiryMs = Date.parse(value);
+    const nowMs = Date.now();
+    if (
+      !Number.isFinite(expiryMs) ||
+      expiryMs <= nowMs ||
+      expiryMs > nowMs + MAX_AGENT_KEY_LIFETIME_MS
+    ) {
+      throw new BadRequestException('expiresAt must be in the future and no more than 7 days away');
+    }
+    return new Date(expiryMs);
   }
 }
