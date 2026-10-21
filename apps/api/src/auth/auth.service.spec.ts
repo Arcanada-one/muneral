@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { jest } from '@jest/globals';
+import { jest as jestRuntime } from '@jest/globals';
 import { AuthService } from './auth.service.js';
 import type { PrismaService } from '../prisma/prisma.service.js';
 import type { JwtService } from '@nestjs/jwt';
@@ -17,9 +17,9 @@ describe('AuthService finite API key lifecycle', () => {
   beforeEach(() => {
     prisma = {
       apiKey: {
-        create: jest.fn(async ({ data }) => ({ id: 'new-key', ...data })),
-        findUnique: jest.fn(),
-        update: jest.fn(async ({ where, data }) => ({ id: where.id, ...data })),
+        create: jestRuntime.fn(async ({ data }) => ({ id: 'new-key', ...data })),
+        findUnique: jestRuntime.fn(),
+        update: jestRuntime.fn(async ({ where, data }) => ({ id: where.id, ...data })),
       },
     };
     service = new AuthService({} as JwtService, prisma as unknown as PrismaService);

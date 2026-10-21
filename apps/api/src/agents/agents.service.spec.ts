@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { jest } from '@jest/globals';
+import { jest as jestRuntime } from '@jest/globals';
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { GUARDS_METADATA } from '@nestjs/common/constants';
 import type { Request } from 'express';
@@ -28,14 +28,14 @@ describe('AgentsService API key ownership and requested expiry', () => {
 
   beforeEach(() => {
     prisma = {
-      agent: { findUnique: jest.fn() },
-      apiKey: { findUnique: jest.fn() },
+      agent: { findUnique: jestRuntime.fn() },
+      apiKey: { findUnique: jestRuntime.fn() },
     };
     auth = {
-      createApiKey: jest.fn().mockResolvedValue({ keyId: 'key-1', key: 'one-time-secret' }),
-      rotateApiKey: jest.fn(),
-      revokeApiKey: jest.fn(),
-      revokeOwnApiKey: jest.fn(),
+      createApiKey: jestRuntime.fn().mockResolvedValue({ keyId: 'key-1', key: 'one-time-secret' }),
+      rotateApiKey: jestRuntime.fn(),
+      revokeApiKey: jestRuntime.fn(),
+      revokeOwnApiKey: jestRuntime.fn(),
     };
     service = new AgentsService(
       prisma as unknown as PrismaService,
@@ -147,7 +147,7 @@ describe('AgentsService API key ownership and requested expiry', () => {
   });
 
   it('passes only the authenticated JWT user id as the owner identity', async () => {
-    const createApiKey = jest.fn();
+    const createApiKey = jestRuntime.fn();
     const controller = new AgentsController({ createApiKey } as unknown as AgentsService);
     const dto = { label: 'test', expiresAt: futureExpiry() };
 
