@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import { jest } from '@jest/globals';
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { GUARDS_METADATA } from '@nestjs/common/constants';
 import type { Request } from 'express';

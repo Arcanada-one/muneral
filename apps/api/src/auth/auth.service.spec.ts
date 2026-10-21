@@ -1,4 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
+import { jest } from '@jest/globals';
 import { AuthService } from './auth.service.js';
 import type { PrismaService } from '../prisma/prisma.service.js';
 import type { JwtService } from '@nestjs/jwt';
