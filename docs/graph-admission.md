@@ -89,16 +89,16 @@ installed — and unlike the 335 errors it announces itself honestly (A2-236).
 
 ### The Node version
 
-`package.json:18` and `.github/workflows/ci.yml:80` pin Node **24.21.0**, and `--verify-structure` refuses before it
-checks anything when the running version differs: `TOOLCHAIN_MISMATCH recorded={"node":"v24.21.0"…}
-actual={"node":"v24.20.0"…}`. That refusal is correct — the evidence records the toolchain that produced it — but
+`package.json:18` and `.github/workflows/ci.yml:100` pin Node **24.22.1**, and `--verify-structure` refuses before it
+checks anything when the running version differs at major.minor: `TOOLCHAIN_MISMATCH recorded={"node":"v24.22.1"…}
+actual={"node":"v24.21.0"…}`. That refusal is correct — the evidence records the toolchain that produced it — but
 arcana-devs carries 24.20.0 and has neither nvm nor fnm. Fetch the pinned version **into the run directory** and put
 it first on `PATH` for that run; never change the system Node on a shared host:
 
 ```bash
-curl -fsSL https://nodejs.org/dist/v24.21.0/node-v24.21.0-linux-x64.tar.xz -o runs/<ID>/node.tar.xz
+curl -fsSL https://nodejs.org/dist/v24.22.1/node-v24.22.1-linux-x64.tar.xz -o runs/<ID>/node.tar.xz
 tar -xJf runs/<ID>/node.tar.xz -C runs/<ID>/
-export PATH="$PWD/runs/<ID>/node-v24.21.0-linux-x64/bin:$PATH"   # this shell only
+export PATH="$PWD/runs/<ID>/node-v24.22.1-linux-x64/bin:$PATH"   # this shell only
 ```
 
 `admit_change.py gate` needs the same `PATH`: it re-runs the declared artefact's own verifier on the head tree, as
