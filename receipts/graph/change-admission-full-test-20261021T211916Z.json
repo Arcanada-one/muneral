@@ -1,0 +1,1184 @@
+{
+ "admission": {
+  "rule": "admitted requires every verdict = verified; failed without exemption ⇒ refused; not_measured without exemption ⇒ paused_safe; exemptions (owner + expiry) are attached by the admitting agent, never by the verifier (DEC-AUP-0008, matrix P1/P4)",
+  "structural_exclusion_rule": "DEC-AUP-0034: an affected entity is NOT verdict-owing when all three hold — the verifier matrix declares neither a mandatory nor a selectable verifier for its node type (so the only verdict it could ever carry states a property of the MATRIX, not of this change), the change set does not contain it, and its bytes are identical at base and head. Each one is listed in structural_exclusions with the content hash at both revisions that proves the byte-identity, and impact_pair.receipt_problems re-derives that proof from Git rather than believing the receipt.",
+  "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
+  "verdict": "admitted"
+ },
+ "captured_at_utc": "2026-10-21T21:19:16Z",
+ "change_set": {
+  "base": "a2f7d9edd1f2a84e91b601ff680105d55ee08bdb",
+  "files": [
+   {
+    "kind": "config",
+    "new": true,
+    "path": ".arcana/verify.json",
+    "status": "A"
+   },
+   {
+    "kind": "test",
+    "path": "apps/api/test/assembly/mutation-results.json",
+    "status": "M",
+    "uncovered": true
+   },
+   {
+    "kind": "doc",
+    "node_id": "document:docs/graph-admission.md",
+    "node_ids": [
+     "document:docs/graph-admission.md"
+    ],
+    "path": "docs/graph-admission.md",
+    "status": "M"
+   }
+  ],
+  "head": "6a4224ae896020dbdab8bd400bca04430a581ba3",
+  "mode": "diff"
+ },
+ "decision_ref": "DEC-AUP-0008",
+ "exemptions": [],
+ "graph": {
+  "builder_version": "1.0.5",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:8bb824bf59268de34411878f119d4326fc7463de47215c79cbccd2523305fc07",
+  "path": "/tmp/verify-full-test/verifier-out/graph-a2f7d9edd1f2.json",
+  "source_commit": "a2f7d9edd1f2a84e91b601ff680105d55ee08bdb"
+ },
+ "head_graph": {
+  "builder_version": "1.0.5",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:6e8f2d0eeb733cf03205fb517cf5b246ce39a74eebcec1ab9cc995745c7d2867",
+  "path": "/tmp/verify-full-test/verifier-out/graph-head-6a4224ae8960.json",
+  "source_commit": "6a4224ae896020dbdab8bd400bca04430a581ba3",
+  "staleness": {
+   "checked_at_utc": "2026-10-21T21:19:31Z",
+   "checked_nodes": 458,
+   "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+   "mismatched_nodes": [],
+   "verdict": "fresh"
+  }
+ },
+ "host": "admission-runner",
+ "host_redacted": true,
+ "host_sha256": "8eecae4254b30f710a9d1b7a52921814259453a3be61d365e0bdbae8c1dcdcf8",
+ "impact_set": {
+  "deterministic_core": [
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/A2-330-muneral-canary.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/A2-330-muneral-canary.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/A2-384-deploy-gate-lane.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/A2-384-deploy-gate-lane.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/a2-304-dependabot-group.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/a2-304-dependabot-group.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/a2-320-web-eslint10.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/a2-320-web-eslint10.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/bundle-refresh-8681292.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/bundle-refresh-8681292.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-a2275-20260924T172252Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-a2275-20260924T172252Z.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-bundle-46cbdc0-a2-291c.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-bundle-46cbdc0-a2-291c.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-bundle-515c-20261003.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-bundle-515c-20261003.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-bundle-5fde907.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-bundle-5fde907.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-bundle-966bcf3.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-bundle-966bcf3.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-bundle-a81a6d5.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-bundle-a81a6d5.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-ci-pr-concurrency-454a9f0.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-ci-pr-concurrency-454a9f0.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-gateorder0-proof-20260914T172339Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-gateorder0-proof-20260914T172339Z.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-infra0417-muneral-20260916T100801Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-infra0417-muneral-20260916T100801Z.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/ctl-bundle-refresh-20260925.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/ctl-bundle-refresh-20260925.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/pin-repair-muneral-20261007.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/pin-repair-muneral-20261007.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/pin-repair-muneral213r2-20261007.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/pin-repair-muneral213r2-20261007.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   }
+  ],
+  "edge_types": "all",
+  "global_fallback": {
+   "triggered": false
+  },
+  "inferred_tail": [],
+  "max_depth": 3,
+  "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
+  "total": 30
+ },
+ "notes": [
+  "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
+  "profile: .arcana/verify.json at verified head; baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none"
+ ],
+ "producer": {
+  "tool": "tools/graph/verify.py",
+  "version": "1.4.1"
+ },
+ "receipt_id": "car-verify-20261021T211916Z-6a4224ae",
+ "repo": {
+  "name": "Arcanada-one/muneral",
+  "path": "/workspace"
+ },
+ "revision_selection": {
+  "base": [
+   "document:docs/graph-admission.md",
+   "receipt:receipts/graph/A2-330-muneral-canary.json",
+   "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+   "receipt:receipts/graph/A2-384-deploy-gate-lane.json",
+   "receipt:receipts/graph/a2-304-dependabot-group.json",
+   "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json",
+   "receipt:receipts/graph/a2-320-web-eslint10.json",
+   "receipt:receipts/graph/bundle-refresh-8681292.json",
+   "receipt:receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json",
+   "receipt:receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json",
+   "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
+   "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
+   "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json",
+   "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
+   "receipt:receipts/graph/change-admission-a2275-20260924T172252Z.json",
+   "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
+   "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+   "receipt:receipts/graph/change-admission-bundle-46cbdc0-a2-291c.json",
+   "receipt:receipts/graph/change-admission-bundle-515c-20261003.json",
+   "receipt:receipts/graph/change-admission-bundle-5fde907.json",
+   "receipt:receipts/graph/change-admission-bundle-966bcf3.json",
+   "receipt:receipts/graph/change-admission-bundle-a81a6d5.json",
+   "receipt:receipts/graph/change-admission-ci-pr-concurrency-454a9f0.json",
+   "receipt:receipts/graph/change-admission-gateorder0-proof-20260914T172339Z.json",
+   "receipt:receipts/graph/change-admission-infra0417-muneral-20260916T100801Z.json",
+   "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+   "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json",
+   "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json",
+   "receipt:receipts/graph/ctl-bundle-refresh-20260925.json",
+   "receipt:receipts/graph/pin-repair-muneral-20261007.json",
+   "receipt:receipts/graph/pin-repair-muneral213r2-20261007.json"
+  ],
+  "head": [
+   "document:docs/graph-admission.md",
+   "receipt:receipts/graph/A2-330-muneral-canary.json",
+   "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+   "receipt:receipts/graph/A2-384-deploy-gate-lane.json",
+   "receipt:receipts/graph/a2-304-dependabot-group.json",
+   "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json",
+   "receipt:receipts/graph/a2-320-web-eslint10.json",
+   "receipt:receipts/graph/bundle-refresh-8681292.json",
+   "receipt:receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json",
+   "receipt:receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json",
+   "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
+   "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
+   "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json",
+   "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
+   "receipt:receipts/graph/change-admission-a2275-20260924T172252Z.json",
+   "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
+   "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+   "receipt:receipts/graph/change-admission-bundle-46cbdc0-a2-291c.json",
+   "receipt:receipts/graph/change-admission-bundle-515c-20261003.json",
+   "receipt:receipts/graph/change-admission-bundle-5fde907.json",
+   "receipt:receipts/graph/change-admission-bundle-966bcf3.json",
+   "receipt:receipts/graph/change-admission-bundle-a81a6d5.json",
+   "receipt:receipts/graph/change-admission-ci-pr-concurrency-454a9f0.json",
+   "receipt:receipts/graph/change-admission-gateorder0-proof-20260914T172339Z.json",
+   "receipt:receipts/graph/change-admission-infra0417-muneral-20260916T100801Z.json",
+   "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+   "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json",
+   "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json",
+   "receipt:receipts/graph/ctl-bundle-refresh-20260925.json",
+   "receipt:receipts/graph/pin-repair-muneral-20261007.json",
+   "receipt:receipts/graph/pin-repair-muneral213r2-20261007.json"
+  ],
+  "schema": "RevisionImpactSelection/v1",
+  "unmeasured_head_files": []
+ },
+ "schema": "ChangeAdmissionReceipt/v1",
+ "staleness": {
+  "checked_at_utc": "2026-10-21T21:19:31Z",
+  "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+  "mismatched_nodes": [],
+  "verdict": "fresh"
+ },
+ "structural_exclusions": [
+  {
+   "content_hash": {
+    "base": "sha256:a73540259214a704ad157daae543068ebaf78c3102d33b45fed9abb53a0cccb5",
+    "head": "sha256:a73540259214a704ad157daae543068ebaf78c3102d33b45fed9abb53a0cccb5"
+   },
+   "entity": "receipt:receipts/graph/A2-330-muneral-canary.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/A2-330-muneral-canary.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:d3f5ed8037490d1f8fb3eaad1764945d4dbabc6fcb6a88a3be173bdba9bd3441",
+    "head": "sha256:d3f5ed8037490d1f8fb3eaad1764945d4dbabc6fcb6a88a3be173bdba9bd3441"
+   },
+   "entity": "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/A2-370-outbox-relay-wired.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:31c031bd384d5474befe3418d95773c3b865553231303d39ef66539557b55e72",
+    "head": "sha256:31c031bd384d5474befe3418d95773c3b865553231303d39ef66539557b55e72"
+   },
+   "entity": "receipt:receipts/graph/A2-384-deploy-gate-lane.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/A2-384-deploy-gate-lane.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:a65b6d3576871c8a70f92d12964fcb9fc207f2d1bbe31957d1ef39dc447746d5",
+    "head": "sha256:a65b6d3576871c8a70f92d12964fcb9fc207f2d1bbe31957d1ef39dc447746d5"
+   },
+   "entity": "receipt:receipts/graph/a2-304-dependabot-group.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/a2-304-dependabot-group.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:8a4fdf5800473569189c0535b08fbf9d59970a1fc6cb4587d61e8ca88eec89e3",
+    "head": "sha256:8a4fdf5800473569189c0535b08fbf9d59970a1fc6cb4587d61e8ca88eec89e3"
+   },
+   "entity": "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/a2-307-scoped-mutation-evidence.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:49723617cfe868e4f813fb76a1faba259cf30f63411c1e6618d103276d1bed08",
+    "head": "sha256:49723617cfe868e4f813fb76a1faba259cf30f63411c1e6618d103276d1bed08"
+   },
+   "entity": "receipt:receipts/graph/a2-320-web-eslint10.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/a2-320-web-eslint10.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:7ae2451fc38e3cbd1214a7ab874f14bd9a6eb1a04873a477175ae4803bb86c17",
+    "head": "sha256:7ae2451fc38e3cbd1214a7ab874f14bd9a6eb1a04873a477175ae4803bb86c17"
+   },
+   "entity": "receipt:receipts/graph/bundle-refresh-8681292.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/bundle-refresh-8681292.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:38d90ac106910780419665124dc15f9add77b173e1600b6d3bb0befc30373f7d",
+    "head": "sha256:38d90ac106910780419665124dc15f9add77b173e1600b6d3bb0befc30373f7d"
+   },
+   "entity": "receipt:receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:f9b6c3baf08919477d75899363b56cce00d2c29778d0bc5602d12048fd733cc8",
+    "head": "sha256:f9b6c3baf08919477d75899363b56cce00d2c29778d0bc5602d12048fd733cc8"
+   },
+   "entity": "receipt:receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:7f85569fb7a596227cbfe13b36d2e3dd2fb46b2b2b890b00cc5d4691225d79e0",
+    "head": "sha256:7f85569fb7a596227cbfe13b36d2e3dd2fb46b2b2b890b00cc5d4691225d79e0"
+   },
+   "entity": "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:a5fd852388f96c3125f826be256162e094dd908a532cc59d657cfc68e2d18a31",
+    "head": "sha256:a5fd852388f96c3125f826be256162e094dd908a532cc59d657cfc68e2d18a31"
+   },
+   "entity": "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-a2255-20260924T033607Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:f27383ec4780b9f37b17e7f38a659722a9c21763c2130dd40d829e3daa7d5261",
+    "head": "sha256:f27383ec4780b9f37b17e7f38a659722a9c21763c2130dd40d829e3daa7d5261"
+   },
+   "entity": "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-a2267-20260924T132227Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:a4accf806cd2431f41b9e85fbe5d0261215d7a39b9247bd656b451fec81a27f5",
+    "head": "sha256:a4accf806cd2431f41b9e85fbe5d0261215d7a39b9247bd656b451fec81a27f5"
+   },
+   "entity": "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-a2274-20260924T164654Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:98121427551aed4ffe3972d102e94896011465bf483ed6358c49de94178ee217",
+    "head": "sha256:98121427551aed4ffe3972d102e94896011465bf483ed6358c49de94178ee217"
+   },
+   "entity": "receipt:receipts/graph/change-admission-a2275-20260924T172252Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-a2275-20260924T172252Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:0258e398331acfcb9ff6a2e1b9ac8cd9841639b5888692919e48b210dd23dce1",
+    "head": "sha256:0258e398331acfcb9ff6a2e1b9ac8cd9841639b5888692919e48b210dd23dce1"
+   },
+   "entity": "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-a2284-20260924T201424Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:2b6726e41ade2d88298595746039bb79441f86d4a8196aa8562436cf2db1ac7a",
+    "head": "sha256:2b6726e41ade2d88298595746039bb79441f86d4a8196aa8562436cf2db1ac7a"
+   },
+   "entity": "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:5c80ad2b4969169062280777360588286fcb1b98545f70f3fbdeea0e862a45b4",
+    "head": "sha256:5c80ad2b4969169062280777360588286fcb1b98545f70f3fbdeea0e862a45b4"
+   },
+   "entity": "receipt:receipts/graph/change-admission-bundle-46cbdc0-a2-291c.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-bundle-46cbdc0-a2-291c.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:b400407f288da6983f75afd7c9e5c4f9247ec28e6259a947377417795f9ce71a",
+    "head": "sha256:b400407f288da6983f75afd7c9e5c4f9247ec28e6259a947377417795f9ce71a"
+   },
+   "entity": "receipt:receipts/graph/change-admission-bundle-515c-20261003.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-bundle-515c-20261003.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:72a007da29724339945b73809d737ddab10e25173f0c362509e3850aded11af0",
+    "head": "sha256:72a007da29724339945b73809d737ddab10e25173f0c362509e3850aded11af0"
+   },
+   "entity": "receipt:receipts/graph/change-admission-bundle-5fde907.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-bundle-5fde907.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:fcc17b785aad4f0779f92472380a078da2434c2c4aa186153af1ccaacf31dbb6",
+    "head": "sha256:fcc17b785aad4f0779f92472380a078da2434c2c4aa186153af1ccaacf31dbb6"
+   },
+   "entity": "receipt:receipts/graph/change-admission-bundle-966bcf3.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-bundle-966bcf3.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:c71c1f1d46ebb09f6ce8dff8a8862b839423a976bb29e52e10ac425c78afc820",
+    "head": "sha256:c71c1f1d46ebb09f6ce8dff8a8862b839423a976bb29e52e10ac425c78afc820"
+   },
+   "entity": "receipt:receipts/graph/change-admission-bundle-a81a6d5.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-bundle-a81a6d5.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:e99afecd9e01da14081728b16bcba56c1429ffd4f5fc216e14d9e5634c9e3db6",
+    "head": "sha256:e99afecd9e01da14081728b16bcba56c1429ffd4f5fc216e14d9e5634c9e3db6"
+   },
+   "entity": "receipt:receipts/graph/change-admission-ci-pr-concurrency-454a9f0.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-ci-pr-concurrency-454a9f0.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:5bea2b2061e183e5df6cd1505a6f157f2a71b76d96a418c6eedfeb879c6ae9f4",
+    "head": "sha256:5bea2b2061e183e5df6cd1505a6f157f2a71b76d96a418c6eedfeb879c6ae9f4"
+   },
+   "entity": "receipt:receipts/graph/change-admission-gateorder0-proof-20260914T172339Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-gateorder0-proof-20260914T172339Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:b72061b5f55e32eaaabe2099d25a5ce8c36d96c0efc11e6c0a69001e43fa2752",
+    "head": "sha256:b72061b5f55e32eaaabe2099d25a5ce8c36d96c0efc11e6c0a69001e43fa2752"
+   },
+   "entity": "receipt:receipts/graph/change-admission-infra0417-muneral-20260916T100801Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-infra0417-muneral-20260916T100801Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:1e3f90014eaded028ebc824b9fb7ff3aeb5d3329bf6939e03e28672bd8fbdc4f",
+    "head": "sha256:1e3f90014eaded028ebc824b9fb7ff3aeb5d3329bf6939e03e28672bd8fbdc4f"
+   },
+   "entity": "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:370802f139dd66a6b18776e14854c6a15cc4ec16d90c028f56fa67f9956cde32",
+    "head": "sha256:370802f139dd66a6b18776e14854c6a15cc4ec16d90c028f56fa67f9956cde32"
+   },
+   "entity": "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-mun0063-20260923T132257Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:c6bb244a2bff2d9e89a0dd6edb65a5f25606e9e7cd710c9e1ebce0426f3c1b6e",
+    "head": "sha256:c6bb244a2bff2d9e89a0dd6edb65a5f25606e9e7cd710c9e1ebce0426f3c1b6e"
+   },
+   "entity": "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-node24221-20261021T203351Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:4906e0dd4306bc264b49e9f9bd8d9120a53ca81e47f6ab758e80bfd0ea4b8d0d",
+    "head": "sha256:4906e0dd4306bc264b49e9f9bd8d9120a53ca81e47f6ab758e80bfd0ea4b8d0d"
+   },
+   "entity": "receipt:receipts/graph/ctl-bundle-refresh-20260925.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/ctl-bundle-refresh-20260925.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:652db131952a0d6b139ea22c55c2a7a85c16556907252264dd466df150c6412f",
+    "head": "sha256:652db131952a0d6b139ea22c55c2a7a85c16556907252264dd466df150c6412f"
+   },
+   "entity": "receipt:receipts/graph/pin-repair-muneral-20261007.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/pin-repair-muneral-20261007.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:06ce1576cfe83c8b254b6337110adafce489a3a5d19a95d9cb9b58d3b2d5438c",
+    "head": "sha256:06ce1576cfe83c8b254b6337110adafce489a3a5d19a95d9cb9b58d3b2d5438c"
+   },
+   "entity": "receipt:receipts/graph/pin-repair-muneral213r2-20261007.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/pin-repair-muneral213r2-20261007.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  }
+ ],
+ "tree": {
+  "commit": "6a4224ae896020dbdab8bd400bca04430a581ba3",
+  "dirty": false
+ },
+ "verdicts": [
+  {
+   "entity": "document:docs/graph-admission.md",
+   "reason": "v-doc-reference: 4 reference(s) resolve at head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-doc-reference"
+   ]
+  }
+ ],
+ "verifier_selection": {
+  "applied": {},
+  "not_applied": [],
+  "requested": [],
+  "schema": "VerifierSelection/v1"
+ },
+ "verifiers": [
+  {
+   "command": "verify.py doc_reference: path / route / model references of affected documents resolve at head",
+   "duration_s": 0.0,
+   "entities": [
+    "document:docs/graph-admission.md"
+   ],
+   "entity_verdicts": {
+    "document:docs/graph-admission.md": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-doc-reference",
+   "kind": "doc_reference",
+   "output_ref": "/tmp/verify-full-test/verifier-out/v-doc-reference.txt",
+   "started_at_utc": "2026-10-21T21:19:34Z",
+   "summary": "1 document(s), 0 failed"
+  }
+ ],
+ "verify": {
+  "events": [
+   {
+    "code": "STRUCTURAL_EXCLUSION",
+    "rule": "DEC-AUP-0034",
+    "text": "30 affected entity(ies) owe no verdict (receipt: 30): unchanged at both revisions and given no verifier by the matrix"
+   }
+  ],
+  "required_by_entity": {
+   "document:docs/graph-admission.md": [
+    "doc_reference"
+   ],
+   "receipt:receipts/graph/A2-330-muneral-canary.json": [],
+   "receipt:receipts/graph/A2-370-outbox-relay-wired.json": [],
+   "receipt:receipts/graph/A2-384-deploy-gate-lane.json": [],
+   "receipt:receipts/graph/a2-304-dependabot-group.json": [],
+   "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json": [],
+   "receipt:receipts/graph/a2-320-web-eslint10.json": [],
+   "receipt:receipts/graph/bundle-refresh-8681292.json": [],
+   "receipt:receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json": [],
+   "receipt:receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json": [],
+   "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json": [],
+   "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json": [],
+   "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json": [],
+   "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json": [],
+   "receipt:receipts/graph/change-admission-a2275-20260924T172252Z.json": [],
+   "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json": [],
+   "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json": [],
+   "receipt:receipts/graph/change-admission-bundle-46cbdc0-a2-291c.json": [],
+   "receipt:receipts/graph/change-admission-bundle-515c-20261003.json": [],
+   "receipt:receipts/graph/change-admission-bundle-5fde907.json": [],
+   "receipt:receipts/graph/change-admission-bundle-966bcf3.json": [],
+   "receipt:receipts/graph/change-admission-bundle-a81a6d5.json": [],
+   "receipt:receipts/graph/change-admission-ci-pr-concurrency-454a9f0.json": [],
+   "receipt:receipts/graph/change-admission-gateorder0-proof-20260914T172339Z.json": [],
+   "receipt:receipts/graph/change-admission-infra0417-muneral-20260916T100801Z.json": [],
+   "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json": [],
+   "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json": [],
+   "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json": [],
+   "receipt:receipts/graph/ctl-bundle-refresh-20260925.json": [],
+   "receipt:receipts/graph/pin-repair-muneral-20261007.json": [],
+   "receipt:receipts/graph/pin-repair-muneral213r2-20261007.json": []
+  },
+  "seconds": {
+   "prepare": 1.1,
+   "total": 17.48,
+   "verifiers": 0.0
+  }
+ }
+}

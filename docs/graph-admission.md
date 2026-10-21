@@ -107,6 +107,26 @@ export PATH="$PWD/runs/<ID>/node-v24.22.1-linux-x64/bin:$PATH"   # this shell on
 with the pinned 24.21.0 first the same range answered `ADMIT`. The refusal is correct and it is about the toolchain,
 not about the change — read the tail of the message, not the code.
 
+## Full fallback suite
+
+A lockfile or root global config (`package.json`, `.nvmrc`, `turbo.json`, `pnpm-workspace.yaml`, …) triggers the
+whole-repository fallback. `verify.py` then runs `deployables.<unit>.full_test` from `.arcana/verify.json` and
+records the row as `global_fallback_full_suite`. `scripts.test` is not inferred: an absent `full_test` is
+`not_measured` (`FULL_FALLBACK_TEST_NOT_MEASURED`), and that pauses admission (`NOT_MEASURED_WITHOUT_EXEMPTION`).
+
+The declared commands are the scripts CI already runs (`pnpm test` at the root is `turbo run test`):
+
+| deployable | argv | what it executes |
+| --- | --- | --- |
+| `.` | `pnpm test` | root `turbo run test` |
+| `apps/api` | `pnpm test` | `@muneral/api` jest (`--runInBand`) |
+| `apps/web` | `pnpm test` | `@muneral/web` `vitest run` |
+| `packages/types` | `pnpm --dir ../.. test` | the same root suite; this package has no `test` script of its own |
+
+`full_test_timeout_seconds` is 3600 for the jest/turbo commands and 1800 for vitest (the verifier allows 1..7200;
+the default 900 is shorter than this repository's suite). A positive pass count and exit 0 are what count as
+measured. This declaration does not exempt shell, workflow, or type-check obligations those entities still carry.
+
 ## `not_measured`, and the exemption that carries it
 
 `not_measured` is the third verdict: the verifier that owns the entity could not attribute a result to it. It is
