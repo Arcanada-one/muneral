@@ -136,6 +136,9 @@ jobs:
   # cross-repo checkout would need a credential this rule does not create). DEC-AUP-0007 keeps CI
   # post-hoc: the authoritative run is the local `admit_change.py gate` of the agent that changed the code.
   graph-admission:
+    permissions:
+      contents: read
+      actions: read
     # Pull requests only: this gate is about MERGES. On a push to main there is no pull-request body
     # to read a receipt from, and `deploy` must not gain a dependency that is skipped there (a skipped
     # need skips the dependent). "Required for merge" is enforced where it belongs — as a required
@@ -158,7 +161,7 @@ jobs:
     # and no retrievable annotation. Recorded as a hole, not as a solved problem.
     uses: ./.github/workflows/graph-admission.yml
     with:
-      program_ref: 'd2394005efaaaaaadd92d655f6a119663b868d1b'
+      program_ref: 'f8dd37a1478d70a66a97aae229d1cc61a4c8c1e6'
       verifier_job: 'lint-and-test'
       verifier_conclusion: ${{ needs.lint-and-test.result }}
       # AUP-GRAPH-006:gate2b. The fingerprint of the Ed25519 key that signs the vendored bundle's

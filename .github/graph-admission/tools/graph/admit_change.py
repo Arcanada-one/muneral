@@ -640,6 +640,16 @@ def pin_only_edit(repo: Path, base: str, head: str, path: str, expect_ref: str |
             return True, scoped_why
         # Preserve the existing strictly line-bound pin-only case. A permission-bearing change
         # cannot fall through this grammar because every non-pin changed line is refused below.
+    if path == ".github/workflows/ci.yml":
+        origin = subprocess.run(["git", "-C", str(repo), "remote", "get-url", "origin"],
+                                capture_output=True, text=True)
+        if origin.returncode == 0 and _canonical_muneral_origin(origin.stdout.strip()):
+            scoped_ok, scoped_why = _canonical_muneral_pin_and_read_scope_edit(old, new, expect_ref)
+        else:
+            scoped_ok, scoped_why = False, "read-scope amendment is limited to the canonical Muneral GitHub origin"
+        if scoped_ok:
+            return True, scoped_why
+        # Any non-pin change remains refused by the original line-bound grammar below.
     if not isinstance(expect_ref, str) or not re.fullmatch(r"[0-9a-f]{40}", expect_ref):
         return False, "no full40 program_ref from the head bundle — canonical pin replacements are unbound"
     before, after = old.splitlines(keepends=True), new.splitlines(keepends=True)
@@ -706,6 +716,90 @@ def _canonical_auth_origin(origin: str) -> bool:
         r"ssh://git@github\.com/Arcanada-one/auth-arcana(?:\.git)?|"
         r"git@github\.com:Arcanada-one/auth-arcana(?:\.git)?)",
         origin))
+
+
+def _canonical_muneral_origin(origin: str) -> bool:
+    """Accept only the canonical Muneral repository on github.com, in HTTPS or SSH form."""
+    return bool(re.fullmatch(
+        r"(?:https://github\.com/Arcanada-one/muneral(?:\.git)?|"
+        r"ssh://git@github\.com/Arcanada-one/muneral(?:\.git)?|"
+        r"git@github\.com:Arcanada-one/muneral(?:\.git)?)",
+        origin))
+
+
+def _canonical_muneral_pin_and_read_scope_edit(old: str, new: str,
+                                                expect_ref: str | None) -> tuple[bool, str]:
+    """Accept only Muneral's paired bundle input and exact graph-job read-map addition.
+
+    The local reusable workflow is already selected by the Muneral caller and remains byte-for-byte
+    the same scalar. The YAML is inert data: ambiguous mappings and YAML indirection are refused.
+    """
+    if not isinstance(expect_ref, str) or not re.fullmatch(r"[0-9a-f]{40}", expect_ref):
+        return False, "no full40 program_ref from the head bundle — canonical Muneral input is unbound"
+    try:
+        import yaml
+
+        def parse(raw: str):
+            try:
+                for token in yaml.scan(raw):
+                    if isinstance(token, (yaml.tokens.AliasToken, yaml.tokens.AnchorToken,
+                                          yaml.tokens.TagToken, yaml.tokens.DirectiveToken)):
+                        raise ValueError("workflow aliases/tags/directives unsupported")
+
+                class UniqueLoader(yaml.BaseLoader):
+                    pass
+
+                def unique_mapping(loader, node):
+                    result = {}
+                    for key_node, value_node in node.value:
+                        key = loader.construct_object(key_node)
+                        if key in result:
+                            raise ValueError("duplicate workflow mapping key")
+                        result[key] = loader.construct_object(value_node)
+                    return result
+
+                UniqueLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, unique_mapping)
+                value = yaml.load(raw, Loader=UniqueLoader)
+            except yaml.YAMLError as exc:
+                raise ValueError("malformed workflow YAML") from exc
+            if not isinstance(value, dict):
+                raise ValueError("caller workflow is not a YAML mapping")
+            return value
+
+        before, after = parse(old), parse(new)
+        before_jobs, after_jobs = before.get("jobs"), after.get("jobs")
+        before_job = before_jobs.get("graph-admission") if isinstance(before_jobs, dict) else None
+        after_job = after_jobs.get("graph-admission") if isinstance(after_jobs, dict) else None
+        if not isinstance(before_job, dict) or not isinstance(after_job, dict):
+            return False, "canonical Muneral graph-admission job is absent or malformed"
+        if "permissions" in before_job:
+            return False, "base Muneral graph-admission job already declares permissions; exact amendment is ambiguous"
+        if after_job.get("permissions") != {"contents": "read", "actions": "read"}:
+            return False, "Muneral graph-admission job must add exactly contents: read and actions: read"
+        local_uses = "./.github/workflows/graph-admission.yml"
+        if before_job.get("uses") != local_uses or after_job.get("uses") != local_uses:
+            return False, "Muneral graph-admission job must retain its exact local reusable-workflow uses"
+        old_inputs, new_inputs = before_job.get("with"), after_job.get("with")
+        if not isinstance(old_inputs, dict) or not isinstance(new_inputs, dict):
+            return False, "Muneral graph-admission input map is absent or malformed"
+        old_ref, new_ref = old_inputs.get("program_ref"), new_inputs.get("program_ref")
+        if not isinstance(old_ref, str) or not re.fullmatch(r"[0-9a-f]{40}", old_ref):
+            return False, "BASE Muneral program_ref is not a canonical full40 input"
+        if new_ref != expect_ref:
+            return False, "Muneral program_ref input must equal the head bundle program_ref"
+        if old_ref == new_ref:
+            return False, "read-scope addition must accompany an actual paired program_ref update"
+
+        before_cmp, after_cmp = copy.deepcopy(before), copy.deepcopy(after)
+        before_cmp["jobs"]["graph-admission"]["with"]["program_ref"] = "<paired-program-pin>"
+        after_cmp["jobs"]["graph-admission"]["with"]["program_ref"] = "<paired-program-pin>"
+        del after_cmp["jobs"]["graph-admission"]["permissions"]
+        if before_cmp != after_cmp:
+            return False, "Muneral caller change includes fields beyond the paired input and exact job read-map"
+    except (ImportError, ValueError, TypeError, KeyError) as exc:
+        return False, "Muneral caller workflow cannot be safely classified: " + str(exc)
+    return True, ("canonical Muneral graph-admission job retains local uses; its program_ref is paired to the "
+                  "head bundle; the only additional caller change is job permissions contents: read and actions: read")
 
 
 def _canonical_caller_pin_and_read_scope_edit(old: str, new: str,
