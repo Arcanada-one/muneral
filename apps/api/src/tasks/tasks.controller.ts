@@ -172,6 +172,20 @@ export class TasksController {
   }
 
   /**
+   * MUN-0064 — exact-task identity without returning the task card. The existing
+   * `task` guard retains the same creator/assignment/workspace boundary as the
+   * other task reads; ordinary authentication bookkeeping remains unchanged.
+   */
+  @Get(':taskId/identity')
+  @AgentScope('task')
+  getIdentity(@Param('taskId') taskId: string, @Req() req: AuthRequest) {
+    return this.tasksService.findIdentity(
+      taskId,
+      req.actor.type === 'human' ? req.actor.id : undefined,
+    );
+  }
+
+  /**
    * Readable by the assigned agent's API key (MUN-0043) or by a JWT.
    *
    * MUN-0054 — this route returns the task ROW and has never carried the task's

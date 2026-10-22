@@ -35,6 +35,7 @@ const makePrisma = () => {
   };
   const task = {
     create: jest.fn(),
+    findFirst: jest.fn(),
     findUnique: jest.fn(),
     findMany: jest.fn().mockResolvedValue([]),
     update: jest.fn(),
@@ -187,6 +188,33 @@ describe('TasksService', () => {
       await service.create(humanActor, { projectId: 'proj-1', title: 'Test' });
 
       expect(fieldStateService.recompute).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('findIdentity', () => {
+    it('selects exactly id, projectId, and status for an agent task read', async () => {
+      const identity = { id: 'task-1', projectId: 'proj-1', status: 'todo' as const };
+      prisma.task.findUnique.mockResolvedValue(identity);
+
+      await expect(service.findIdentity('task-1')).resolves.toEqual(identity);
+      expect(prisma.task.findUnique).toHaveBeenCalledWith({
+        where: { id: 'task-1' },
+        select: { id: true, projectId: true, status: true },
+      });
+    });
+
+    it('uses the same exact select while retaining human workspace membership filtering', async () => {
+      const identity = { id: 'task-1', projectId: 'proj-1', status: 'todo' as const };
+      prisma.task.findFirst.mockResolvedValue(identity);
+
+      await expect(service.findIdentity('task-1', 'user-1')).resolves.toEqual(identity);
+      expect(prisma.task.findFirst).toHaveBeenCalledWith({
+        where: {
+          id: 'task-1',
+          project: { workspace: { members: { some: { userId: 'user-1' } } } },
+        },
+        select: { id: true, projectId: true, status: true },
+      });
     });
   });
 

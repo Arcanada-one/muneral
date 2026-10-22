@@ -155,6 +155,7 @@ secondary data source.
 | Route | Agent key | Scope |
 |---|---|---|
 | `GET /tasks/:id` | yes | `task` (assigned) |
+| `GET /tasks/:id/identity` | yes | `task` (only `id`, `projectId`, `status`) |
 | `GET /tasks/:id/readiness` | yes | `task` |
 | `GET /tasks/:id/dependency-graph` | yes | `task` |
 | `GET /tasks/:id/dependencies` | yes | `task` |
