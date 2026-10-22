@@ -165,22 +165,33 @@ jobs:
           PROGRAM_REF: ${{ inputs.program_ref }}
           SIGNING_KEY_FINGERPRINT: ${{ inputs.signing_key_fingerprint }}
           ACTIVE_WORKFLOW_CONTEXT: ${{ toJSON(job) }}
+          CALLER_REPOSITORY: ${{ github.repository }}
+          CALLER_REF: ${{ github.ref }}
+          CALLER_SHA: ${{ github.sha }}
+          CALLER_EVENT_NAME: ${{ github.event_name }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           python3 -I - <<'PY'
           import hashlib
+          import base64
           import json
           import os
           import re
           import stat
           import subprocess
           import sys
+          import urllib.error
+          import urllib.parse
+          import urllib.request
           from pathlib import Path, PurePosixPath
 
           WORKFLOW_PATH = ".github/workflows/graph-admission.yml"
           MANIFEST_NAME = "BUNDLE.json"
           NAMESPACE = "graph-admission-bundle"
           PROGRAM_REPO = "Arcanada-one/arcanada-universal-program"
+          API_BASE = "https://api.github.com"
+          MAX_ACTIVE_WORKFLOW_BYTES = 1024 * 1024
           MAX_SIGNERS = 4
 
           def refuse(message):
@@ -266,9 +277,10 @@ jobs:
               if not re.fullmatch(r"[0-9a-f]{40}", program_ref):
                   refuse("caller program_ref is not an exact lowercase commit id")
 
-              # GitHub's job context identifies the reusable workflow that defined this job.
-              # Restrict this preflight to the canonical remote SHA route: the signed manifest's
-              # workflow entry and the workflow GitHub loaded must name the same Program commit.
+              # GitHub's job context identifies the reusable workflow GitHub loaded. A remote
+              # Program call is bound by its exact immutable Program SHA. A local caller route is
+              # bound independently to that caller's exact event SHA/ref and authenticated file
+              # bytes from the immutable commit GitHub loaded.
               try:
                   active_job = json.loads(os.environ.get("ACTIVE_WORKFLOW_CONTEXT", ""))
               except (TypeError, json.JSONDecodeError) as exc:
@@ -276,18 +288,110 @@ jobs:
               if not isinstance(active_job, dict):
                   refuse("BUNDLE_ACTIVE_WORKFLOW_UNBOUND: GitHub job context is not an object")
               active_repository = active_job.get("workflow_repository", "")
+              active_path = active_job.get("workflow_file_path", "")
               active_sha = active_job.get("workflow_sha", "")
               active_ref = active_job.get("workflow_ref", "")
-              active_path = active_job.get("workflow_file_path", "")
-              expected_workflow_ref = f"{PROGRAM_REPO}/{WORKFLOW_PATH}@{program_ref}"
-              if active_repository != PROGRAM_REPO:
-                  refuse("BUNDLE_ACTIVE_WORKFLOW_UNBOUND: reusable workflow repository is not the canonical Program")
-              if active_sha != program_ref:
-                  refuse("BUNDLE_ACTIVE_WORKFLOW_REF_MISMATCH: active workflow SHA differs from caller program_ref")
-              if active_ref != expected_workflow_ref:
-                  refuse("BUNDLE_ACTIVE_WORKFLOW_REF_MISMATCH: active workflow ref is not the exact caller-pinned Program SHA")
-              if active_path != WORKFLOW_PATH:
-                  refuse("BUNDLE_ACTIVE_WORKFLOW_PATH_MISMATCH: active workflow path is not canonical")
+              if (not isinstance(active_repository, str)
+                      or not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", active_repository)
+                      or not isinstance(active_path, str) or active_path != WORKFLOW_PATH):
+                  refuse("BUNDLE_ACTIVE_WORKFLOW_UNBOUND: repository/path is unavailable or noncanonical")
+              if (not isinstance(active_sha, str)
+                      or not re.fullmatch(r"[0-9a-f]{40}", active_sha)
+                      or not isinstance(active_ref, str) or "@" not in active_ref):
+                  refuse("BUNDLE_ACTIVE_WORKFLOW_UNBOUND: immutable workflow SHA/ref is unavailable")
+              active_source, _, loaded_ref = active_ref.rpartition("@")
+              remote_source = f"{PROGRAM_REPO}/{WORKFLOW_PATH}"
+              caller_repository = os.environ.get("CALLER_REPOSITORY", "")
+              caller_source = f"{caller_repository}/{WORKFLOW_PATH}"
+              loaded_workflow_bytes = None
+
+              if active_source == remote_source:
+                  if (active_repository != PROGRAM_REPO
+                          or active_path != WORKFLOW_PATH
+                          or active_sha != program_ref or loaded_ref != program_ref):
+                      refuse("BUNDLE_ACTIVE_WORKFLOW_REF_MISMATCH: remote workflow is not the exact caller-pinned Program SHA")
+              else:
+                  if (not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", caller_repository)
+                          or active_repository != caller_repository
+                          or active_path != WORKFLOW_PATH
+                          or active_source != caller_source
+                          or caller_repository != os.environ.get("GITHUB_REPOSITORY", "")):
+                      refuse("BUNDLE_ACTIVE_WORKFLOW_UNBOUND: local workflow repository/path is not the exact caller source")
+                  caller_ref = os.environ.get("CALLER_REF", "")
+                  caller_sha = os.environ.get("CALLER_SHA", "")
+                  caller_event = os.environ.get("CALLER_EVENT_NAME", "")
+                  if (not caller_ref or not isinstance(loaded_ref, str) or loaded_ref != caller_ref
+                          or caller_ref != os.environ.get("GITHUB_REF", "")
+                          or not re.fullmatch(r"[0-9a-f]{40}", caller_sha)
+                          or active_sha != caller_sha
+                          or caller_sha != os.environ.get("GITHUB_SHA", "")
+                          or not re.fullmatch(r"[A-Za-z0-9_]+", caller_event)
+                          or caller_event != os.environ.get("GITHUB_EVENT_NAME", "")):
+                      refuse("BUNDLE_ACTIVE_WORKFLOW_REF_MISMATCH: local workflow SHA/ref/event does not match the caller event context")
+                  token = os.environ.get("GH_TOKEN", "")
+                  if not token:
+                      refuse("BUNDLE_ACTIVE_WORKFLOW_UNBOUND: explicit GitHub contents-read token is unavailable")
+                  api_path = "/repos/" + "/".join(
+                      urllib.parse.quote(part, safe="") for part in caller_repository.split("/")
+                  ) + "/contents/" + "/".join(
+                      urllib.parse.quote(part, safe="") for part in WORKFLOW_PATH.split("/")
+                  )
+                  api_url = API_BASE + api_path + "?" + urllib.parse.urlencode({"ref": active_sha})
+                  request = urllib.request.Request(api_url, headers={
+                      "Accept": "application/vnd.github+json",
+                      "Authorization": "Bearer " + token,
+                      "User-Agent": "AUP-graph-admission-active-workflow",
+                      "X-GitHub-Api-Version": "2022-11-28",
+                  })
+
+                  class NoRedirect(urllib.request.HTTPRedirectHandler):
+                      def redirect_request(self, req, fp, code, msg, headers, newurl):
+                          return None
+
+                  try:
+                      with urllib.request.build_opener(NoRedirect).open(request, timeout=20) as response:
+                          if response.status != 200:
+                              refuse(f"BUNDLE_ACTIVE_WORKFLOW_SOURCE_UNAVAILABLE: GitHub API returned HTTP {response.status}")
+                          api_bytes = response.read(MAX_ACTIVE_WORKFLOW_BYTES + 1)
+                  except urllib.error.HTTPError as exc:
+                      refuse(f"BUNDLE_ACTIVE_WORKFLOW_SOURCE_UNAVAILABLE: GitHub API returned HTTP {exc.code}")
+                  except (urllib.error.URLError, TimeoutError, OSError) as exc:
+                      refuse(f"BUNDLE_ACTIVE_WORKFLOW_SOURCE_UNAVAILABLE: GitHub API request failed ({type(exc).__name__})")
+                  if len(api_bytes) > MAX_ACTIVE_WORKFLOW_BYTES:
+                      refuse("BUNDLE_ACTIVE_WORKFLOW_SOURCE_INVALID: API response exceeds the 1 MiB limit")
+                  try:
+                      api_document = json.loads(api_bytes.decode("utf-8"))
+                  except (UnicodeDecodeError, json.JSONDecodeError):
+                      refuse("BUNDLE_ACTIVE_WORKFLOW_SOURCE_INVALID: GitHub API response is not JSON")
+                  if not isinstance(api_document, dict):
+                      refuse("BUNDLE_ACTIVE_WORKFLOW_SOURCE_INVALID: GitHub API response is not an object")
+                  encoded = api_document.get("content")
+                  if (api_document.get("path") != WORKFLOW_PATH
+                          or api_document.get("type") != "file"
+                          or api_document.get("encoding") != "base64"
+                          or isinstance(api_document.get("size"), bool)
+                          or not isinstance(api_document.get("size"), int)
+                          or not isinstance(encoded, str)):
+                      refuse("BUNDLE_ACTIVE_WORKFLOW_SOURCE_INVALID: GitHub API path/encoding/size is invalid")
+                  compact = encoded.replace("\r", "").replace("\n", "")
+                  if not re.fullmatch(r"[A-Za-z0-9+/]*={0,2}", compact):
+                      refuse("BUNDLE_ACTIVE_WORKFLOW_SOURCE_INVALID: GitHub API content is not canonical base64")
+                  try:
+                      loaded_workflow_bytes = base64.b64decode(compact, validate=True)
+                  except (ValueError, base64.binascii.Error):
+                      refuse("BUNDLE_ACTIVE_WORKFLOW_SOURCE_INVALID: GitHub API content cannot be decoded")
+                  if (len(loaded_workflow_bytes) != api_document["size"]
+                          or api_document["size"] > MAX_ACTIVE_WORKFLOW_BYTES):
+                      refuse("BUNDLE_ACTIVE_WORKFLOW_SOURCE_INVALID: GitHub API content size is inconsistent")
+                  active_blob_oid = api_document.get("sha")
+                  if (not isinstance(active_blob_oid, str)
+                          or not re.fullmatch(r"[0-9a-f]{40}", active_blob_oid)):
+                      refuse("BUNDLE_ACTIVE_WORKFLOW_SOURCE_INVALID: GitHub API blob id is invalid")
+                  actual_active_blob = hashlib.sha1(
+                      b"blob " + str(len(loaded_workflow_bytes)).encode("ascii")
+                      + b"\0" + loaded_workflow_bytes).hexdigest()
+                  if actual_active_blob != active_blob_oid:
+                      refuse("BUNDLE_ACTIVE_WORKFLOW_SOURCE_INVALID: GitHub API bytes do not match its blob id")
 
               manifest_path = regular_file(bundle / MANIFEST_NAME, MANIFEST_NAME)
               if manifest_path.stat().st_size > 16 * 1024 * 1024:
@@ -410,6 +514,14 @@ jobs:
               if len(workflow_entries) != 1:
                   refuse("BUNDLE_WORKFLOW_ENTRY_MISSING_OR_REPEATED: manifest must contain exactly one canonical workflow entry")
               workflow_entry = workflow_entries[0]
+              if loaded_workflow_bytes is not None:
+                  actual_loaded_sha = "sha256:" + hashlib.sha256(loaded_workflow_bytes).hexdigest()
+                  actual_loaded_blob = hashlib.sha1(
+                      b"blob " + str(len(loaded_workflow_bytes)).encode("ascii")
+                      + b"\0" + loaded_workflow_bytes).hexdigest()
+                  if (actual_loaded_sha != workflow_entry.get("sha256")
+                          or actual_loaded_blob != workflow_entry.get("blob_oid")):
+                      refuse("BUNDLE_ACTIVE_WORKFLOW_BYTES_MISMATCH: authenticated loaded caller workflow differs from the signed canonical workflow entry")
               workflow_path = safe_path(workspace, WORKFLOW_PATH, "vendored workflow")
               regular_file(workflow_path, "vendored workflow")
               actual_sha, size = file_digests(workflow_path)
