@@ -573,6 +573,11 @@ LOCAL_WORKFLOW_PIN_RE = re.compile(
     r"^[ \t]*uses:[ \t]*(?P<quote>['\"]?)"
     r"(?P<target>\./\.github/workflows/graph-admission\.yml)(?P=quote)[ \t]*(?:#.*)?$")
 
+# Muneral's one explicit finished-stage input. The caller may leave it absent during bootstrap;
+# when supplied it is a committed, repo-relative StageEvidence/v1 document under this same root.
+MUNERAL_STAGE_EVIDENCE_PATH = "receipts/graph/stage-evidence/muneral.json"
+MUNERAL_STAGE_EVIDENCE_ROOT = "receipts/graph/stage-evidence"
+
 
 def base_local_workflow_is_manifest_bound(repo: Path, base: str) -> tuple[bool, str]:
     """Prove the exact legacy workflow named by BASE's bundle manifest is a regular Git blob.
@@ -729,7 +734,7 @@ def _canonical_muneral_origin(origin: str) -> bool:
 
 def _canonical_muneral_pin_and_read_scope_edit(old: str, new: str,
                                                 expect_ref: str | None) -> tuple[bool, str]:
-    """Accept only Muneral's paired bundle input and exact graph-job read-map addition.
+    """Accept the paired Muneral bundle input, read map, and narrow StageEvidence fields.
 
     The local reusable workflow is already selected by the Muneral caller and remains byte-for-byte
     the same scalar. The YAML is inert data: ambiguous mappings and YAML indirection are refused.
@@ -738,6 +743,8 @@ def _canonical_muneral_pin_and_read_scope_edit(old: str, new: str,
         return False, "no full40 program_ref from the head bundle — canonical Muneral input is unbound"
     try:
         import yaml
+        stage_keys = ("stage_evidence_path", "stage_evidence_root", "stage_evidence_required")
+        read_permissions = {"contents": "read", "actions": "read"}
 
         def parse(raw: str):
             try:
@@ -760,28 +767,97 @@ def _canonical_muneral_pin_and_read_scope_edit(old: str, new: str,
 
                 UniqueLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, unique_mapping)
                 value = yaml.load(raw, Loader=UniqueLoader)
+                root_node = yaml.compose(raw, Loader=yaml.BaseLoader)
             except yaml.YAMLError as exc:
                 raise ValueError("malformed workflow YAML") from exc
             if not isinstance(value, dict):
                 raise ValueError("caller workflow is not a YAML mapping")
-            return value
+            return value, root_node
 
-        before, after = parse(old), parse(new)
+        def node_at(root_node, *keys):
+            node = root_node
+            for key in keys:
+                if not isinstance(node, yaml.nodes.MappingNode):
+                    return None
+                matches = [value_node for key_node, value_node in node.value
+                           if isinstance(key_node, yaml.nodes.ScalarNode) and key_node.value == key]
+                if len(matches) != 1:
+                    return None
+                node = matches[0]
+            return node
+
+        def stage_state(workflow, root_node):
+            jobs = workflow.get("jobs")
+            job = jobs.get("graph-admission") if isinstance(jobs, dict) else None
+            inputs = job.get("with") if isinstance(job, dict) else None
+            if not isinstance(inputs, dict):
+                return None, False, "Muneral graph-admission input map is absent or malformed"
+            present = set(stage_keys) & set(inputs)
+            if not present:
+                return "absent", False, ""
+            if present != set(stage_keys):
+                return None, True, "StageEvidence inputs must be supplied as the exact three-field tuple"
+
+            path, root, required = (inputs.get(key) for key in stage_keys)
+            path_node = node_at(root_node, "jobs", "graph-admission", "with", stage_keys[0])
+            root_value_node = node_at(root_node, "jobs", "graph-admission", "with", stage_keys[1])
+            required_node = node_at(root_node, "jobs", "graph-admission", "with", stage_keys[2])
+            string_tag = "tag:yaml.org,2002:str"
+            if (not isinstance(path_node, yaml.nodes.ScalarNode) or path_node.tag != string_tag
+                    or not isinstance(root_value_node, yaml.nodes.ScalarNode)
+                    or root_value_node.tag != string_tag):
+                return None, True, "StageEvidence path and root must be scalar strings"
+            if (not isinstance(required_node, yaml.nodes.ScalarNode) or required_node.tag != string_tag
+                    or required_node.style is not None or required_node.value not in {"true", "false"}
+                    or required != required_node.value):
+                return None, True, "stage_evidence_required must be an unquoted native true or false boolean"
+            if not isinstance(path, str) or not isinstance(root, str):
+                return None, True, "StageEvidence path and root must be strings"
+            if path == "" and root == "" and required == "false":
+                return "absent", True, ""
+            if (path == MUNERAL_STAGE_EVIDENCE_PATH and root == MUNERAL_STAGE_EVIDENCE_ROOT
+                    and required == "true"):
+                return "present", True, ""
+            return None, True, ("StageEvidence must be either empty/empty/false or the fixed repo-relative "
+                                f"{MUNERAL_STAGE_EVIDENCE_PATH} under {MUNERAL_STAGE_EVIDENCE_ROOT} with true")
+
+        before, before_node = parse(old)
+        after, after_node = parse(new)
         before_jobs, after_jobs = before.get("jobs"), after.get("jobs")
         before_job = before_jobs.get("graph-admission") if isinstance(before_jobs, dict) else None
         after_job = after_jobs.get("graph-admission") if isinstance(after_jobs, dict) else None
         if not isinstance(before_job, dict) or not isinstance(after_job, dict):
             return False, "canonical Muneral graph-admission job is absent or malformed"
-        if "permissions" in before_job:
-            return False, "base Muneral graph-admission job already declares permissions; exact amendment is ambiguous"
-        if after_job.get("permissions") != {"contents": "read", "actions": "read"}:
-            return False, "Muneral graph-admission job must add exactly contents: read and actions: read"
         local_uses = "./.github/workflows/graph-admission.yml"
         if before_job.get("uses") != local_uses or after_job.get("uses") != local_uses:
             return False, "Muneral graph-admission job must retain its exact local reusable-workflow uses"
         old_inputs, new_inputs = before_job.get("with"), after_job.get("with")
         if not isinstance(old_inputs, dict) or not isinstance(new_inputs, dict):
             return False, "Muneral graph-admission input map is absent or malformed"
+
+        old_stage, old_has_stage_fields, old_stage_error = stage_state(before, before_node)
+        new_stage, new_has_stage_fields, new_stage_error = stage_state(after, after_node)
+        if old_stage_error:
+            return False, old_stage_error
+        if new_stage_error:
+            return False, new_stage_error
+        if old_stage == "present" and new_stage != "present":
+            return False, "a required StageEvidence input cannot be removed or made optional by a pin refresh"
+
+        old_permissions = before_job.get("permissions")
+        new_permissions = after_job.get("permissions")
+        stage_fields_in_scope = old_has_stage_fields or new_has_stage_fields
+        if stage_fields_in_scope:
+            if "permissions" in before_job and old_permissions != read_permissions:
+                return False, "base Muneral graph-admission permissions are not the exact read-only map"
+            if new_permissions != read_permissions:
+                return False, "StageEvidence inputs require the exact contents: read and actions: read job map"
+        else:
+            if "permissions" in before_job:
+                return False, "base Muneral graph-admission job already declares permissions; exact amendment is ambiguous"
+            if new_permissions != read_permissions:
+                return False, "Muneral graph-admission job must add exactly contents: read and actions: read"
+
         old_ref, new_ref = old_inputs.get("program_ref"), new_inputs.get("program_ref")
         if not isinstance(old_ref, str) or not re.fullmatch(r"[0-9a-f]{40}", old_ref):
             return False, "BASE Muneral program_ref is not a canonical full40 input"
@@ -793,13 +869,19 @@ def _canonical_muneral_pin_and_read_scope_edit(old: str, new: str,
         before_cmp, after_cmp = copy.deepcopy(before), copy.deepcopy(after)
         before_cmp["jobs"]["graph-admission"]["with"]["program_ref"] = "<paired-program-pin>"
         after_cmp["jobs"]["graph-admission"]["with"]["program_ref"] = "<paired-program-pin>"
-        del after_cmp["jobs"]["graph-admission"]["permissions"]
+        for key in stage_keys:
+            before_cmp["jobs"]["graph-admission"]["with"].pop(key, None)
+            after_cmp["jobs"]["graph-admission"]["with"].pop(key, None)
+        if "permissions" not in before_job:
+            del after_cmp["jobs"]["graph-admission"]["permissions"]
         if before_cmp != after_cmp:
-            return False, "Muneral caller change includes fields beyond the paired input and exact job read-map"
+            return False, ("Muneral caller change includes fields beyond the paired input, exact job read-map, "
+                           "and validated StageEvidence tuple")
     except (ImportError, ValueError, TypeError, KeyError) as exc:
         return False, "Muneral caller workflow cannot be safely classified: " + str(exc)
     return True, ("canonical Muneral graph-admission job retains local uses; its program_ref is paired to the "
-                  "head bundle; the only additional caller change is job permissions contents: read and actions: read")
+                  "head bundle; caller changes are limited to the exact read-only job map and validated "
+                  "StageEvidence input tuple")
 
 
 def _canonical_caller_pin_and_read_scope_edit(old: str, new: str,

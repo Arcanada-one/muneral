@@ -142,6 +142,26 @@ def candidate_cli_outcome(repo: Path, repo_name: str, base: str, head: str,
                    str(candidate_root / "work"), "--verifier-out", str(candidate_root / "verifier-out"),
                    "--phase-log", str(candidate_root / "phase.jsonl")],
     }
+    explanation_path = candidate_root / "empty-impact-explanation.json"
+    explanation_digest_path = candidate_root / "empty-impact-explanation.sha256"
+    explanation_input = None
+    explanation_present = (explanation_path.exists() or explanation_path.is_symlink()
+                           or explanation_digest_path.exists() or explanation_digest_path.is_symlink())
+    if explanation_present:
+        if (explanation_path.is_symlink() or not explanation_path.is_file()
+                or explanation_digest_path.is_symlink() or not explanation_digest_path.is_file()):
+            raise ValueError("current-source empty-impact explanation input is missing or unsafe")
+        explanation_raw = explanation_path.read_bytes()
+        if len(explanation_raw) > 65536:
+            raise ValueError("current-source empty-impact explanation input exceeds the size limit")
+        expected_digest = sha256(explanation_raw)
+        if explanation_digest_path.read_text(encoding="ascii") != expected_digest + "\n":
+            raise ValueError("current-source empty-impact explanation bytes differ from their pre-verify digest")
+        try:
+            explanation_input = json.loads(explanation_raw.decode("utf-8"))
+        except (UnicodeError, json.JSONDecodeError):
+            raise ValueError("current-source empty-impact explanation input is not UTF-8 JSON") from None
+        expected_scripts["verify"].extend(["--empty-impact-explanation", str(explanation_path)])
     commands = []
     for name in ("build", "verify"):
         argv_path = candidate_root / f"{name}.argv.nul"
@@ -185,6 +205,21 @@ def candidate_cli_outcome(repo: Path, repo_name: str, base: str, head: str,
             item = candidate_root / filename
             if item.is_file() and not item.is_symlink():
                 artifacts[label] = file_ref(item, evidence_root)
+        if name == "verify" and explanation_input is not None:
+            receipt_path = candidate_root / "receipt.json"
+            if receipt_path.is_symlink() or not receipt_path.is_file():
+                raise ValueError("current-source verifier did not retain a regular raw CAR for its explanation input")
+            try:
+                receipt_doc = json.loads(receipt_path.read_text(encoding="utf-8"))
+            except (OSError, UnicodeError, json.JSONDecodeError):
+                raise ValueError("current-source raw CAR is unavailable for explanation input binding") from None
+            explanation_doc = (receipt_doc.get("empty_impact_explanation")
+                               if isinstance(receipt_doc, dict) else None)
+            binding = explanation_doc.get("binding") if isinstance(explanation_doc, dict) else None
+            if not isinstance(binding, dict) or binding.get("input") != explanation_input:
+                raise ValueError("current-source explanation bytes do not match the native raw CAR binding")
+            artifacts["explanation_input"] = file_ref(explanation_path, evidence_root)
+            artifacts["explanation_input_sha256"] = file_ref(explanation_digest_path, evidence_root)
         commands.append({"id": name, "argv": argv, "cwd": cwd, "pid": int(pid_text),
                          "start_utc": start, "end_utc": end, "exit_code": int(exit_text),
                          "capture_refs": {"argv": file_ref(argv_path, evidence_root),

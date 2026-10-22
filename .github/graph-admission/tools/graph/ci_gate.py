@@ -893,6 +893,12 @@ def validate_current_source_cli_outcome(outcome: object, root: Path, repo: Path,
                    str(candidate_root / "work"), "--verifier-out", str(candidate_root / "verifier-out"),
                    "--phase-log", str(candidate_root / "phase.jsonl")],
     }
+    explanation_path = candidate_root / "empty-impact-explanation.json"
+    explanation_digest_path = candidate_root / "empty-impact-explanation.sha256"
+    explanation_present = (explanation_path.exists() or explanation_path.is_symlink()
+                           or explanation_digest_path.exists() or explanation_digest_path.is_symlink())
+    if explanation_present:
+        expected_argv["verify"].extend(["--empty-impact-explanation", str(explanation_path)])
     resolved_outputs = {}
     for name, row in command_by_id.items():
         if (set(row) != {"id", "argv", "cwd", "pid", "start_utc", "end_utc", "exit_code",
@@ -953,12 +959,16 @@ def validate_current_source_cli_outcome(outcome: object, root: Path, repo: Path,
                 problems.append(f"current-source {name} process capture bytes are malformed")
         artifacts = row.get("artifacts")
         expected_labels = {"base_graph"} if name == "build" else {"raw_candidate_car", "phase_log"}
+        if name == "verify" and explanation_present:
+            expected_labels.update({"explanation_input", "explanation_input_sha256"})
         if not isinstance(artifacts, dict) or set(artifacts) != expected_labels:
             problems.append(f"current-source {name} artifact inventory is incomplete")
             continue
         for label, descriptor in artifacts.items():
             expected_artifact_name = {"base_graph": "base-graph.json", "raw_candidate_car": "receipt.json",
-                                      "phase_log": "phase.jsonl"}[label]
+                                      "phase_log": "phase.jsonl",
+                                      "explanation_input": "empty-impact-explanation.json",
+                                      "explanation_input_sha256": "empty-impact-explanation.sha256"}[label]
             if (not isinstance(descriptor, dict)
                     or descriptor.get("path") != f"current-candidate/{expected_artifact_name}"):
                 problems.append(f"current-source {name} {label} is not the fresh named process artifact")
@@ -992,6 +1002,47 @@ def validate_current_source_cli_outcome(outcome: object, root: Path, repo: Path,
         verify = command_by_id["verify"]
         if verify.get("exit_code") == 0 and car_path is None:
             problems.append("zero-exit current-source verifier has no raw CAR")
+        if explanation_present:
+            explanation_capture = resolved_outputs.get(("verify", "explanation_input"))
+            explanation_digest_capture = resolved_outputs.get(("verify", "explanation_input_sha256"))
+            if (explanation_capture is None or explanation_capture != explanation_path
+                    or explanation_digest_capture is None or explanation_digest_capture != explanation_digest_path):
+                problems.append("current-source explanation input is not the exact fixed same-run file")
+            elif car_path is not None:
+                try:
+                    explanation_raw = explanation_capture.read_bytes()
+                    if len(explanation_raw) > 65536:
+                        raise ValueError("input exceeds the size limit")
+                    if explanation_digest_capture.read_text(encoding="ascii") != hashlib.sha256(explanation_raw).hexdigest() + "\n":
+                        raise ValueError("input differs from its pre-verify digest")
+                    explanation_doc = json.loads(explanation_raw.decode("utf-8"))
+                    car_doc = json.loads(car_path.read_bytes())
+                    explanation_binding = (car_doc.get("empty_impact_explanation")
+                                           if isinstance(car_doc, dict) else None)
+                    bound = (explanation_binding.get("binding")
+                             if isinstance(explanation_binding, dict) else None)
+                    change = car_doc.get("change_set") if isinstance(car_doc, dict) else None
+                    base_graph = car_doc.get("graph") if isinstance(car_doc, dict) else None
+                    head_graph = car_doc.get("head_graph") if isinstance(car_doc, dict) else None
+                    impact_set = car_doc.get("impact_set") if isinstance(car_doc, dict) else None
+                    selection = car_doc.get("revision_selection") if isinstance(car_doc, dict) else None
+                    fallback = impact_set.get("global_fallback") if isinstance(impact_set, dict) else None
+                    if (not isinstance(explanation_doc, dict)
+                            or not isinstance(bound, dict) or bound.get("input") != explanation_doc
+                            or not isinstance(change, dict) or change.get("mode") != "diff"
+                            or explanation_doc.get("base") != change.get("base")
+                            or explanation_doc.get("head") != change.get("head")
+                            or not isinstance(base_graph, dict) or not isinstance(head_graph, dict)
+                            or explanation_doc.get("base_graph_digest") != base_graph.get("graph_digest")
+                            or explanation_doc.get("head_graph_digest") != head_graph.get("graph_digest")
+                            or explanation_doc.get("scope") != "graph_non_seed_dependents"
+                            or not isinstance(impact_set, dict) or impact_set.get("total") != 0
+                            or not isinstance(fallback, dict) or fallback.get("triggered") is not False
+                            or not isinstance(selection, dict)
+                            or selection.get("unmeasured_head_files") != []):
+                        problems.append("current-source explanation input does not bind the exact empty paired CAR measurement")
+                except (OSError, UnicodeError, json.JSONDecodeError, ValueError):
+                    problems.append("current-source explanation input or raw CAR binding is unavailable or malformed")
     elif raw_car is not None:
         problems.append("current-source raw CAR exists without a captured verify process")
     if outcome.get("admission") != "not_claimed_by_process_outcome":

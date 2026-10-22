@@ -79,6 +79,14 @@ on:
         required: false
         default: false
         type: boolean
+      empty_impact_explanation:
+        description: >-
+          Optional exact EmptyImpactExplanation/v1 JSON claim for the current candidate range and its
+          paired graph digests. The claim is captured as a fixed same-run input file and passed to the
+          native verifier; an empty value supplies no explanation and grants no admission.
+        required: false
+        default: ''
+        type: string
       enforcement:
         description: 'Work-item evidence enforcement of the gate: off | ledger | muneral. The evidence ledger lives in the program repository, so a caller repository uses `off` and the local gate enforces it.'
         required: false
@@ -863,6 +871,7 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           VERIFIER_JOB: ${{ inputs.verifier_job }}
           VERIFIER_CONCLUSION: ${{ inputs.verifier_conclusion }}
+          EMPTY_IMPACT_EXPLANATION: ${{ inputs.empty_impact_explanation }}
           GH_TOKEN: ${{ github.token }}
         run: |
           set -uo pipefail
@@ -884,6 +893,21 @@ jobs:
             exit 2
           fi
           mkdir -p "$CANDIDATE_ROOT/work" "$CANDIDATE_ROOT/verifier-out"
+          EMPTY_IMPACT_PATH="$CANDIDATE_ROOT/empty-impact-explanation.json"
+          if [ -n "${EMPTY_IMPACT_EXPLANATION:-}" ]; then
+            if [ "$CANDIDATE_SOURCE_OUTCOME_REQUIRED" != "true" ]; then
+              echo "::error::empty-impact explanation requires same-run current-source outcome capture" >&2
+              exit 2
+            fi
+            if ! (umask 077; set -C; printf '%s' "$EMPTY_IMPACT_EXPLANATION" > "$EMPTY_IMPACT_PATH"); then
+              echo "::error::empty-impact explanation input could not be captured safely" >&2
+              exit 2
+            fi
+            if ! (umask 077; set -C; sha256sum "$EMPTY_IMPACT_PATH" | cut -d ' ' -f 1 > "$CANDIDATE_ROOT/empty-impact-explanation.sha256"); then
+              echo "::error::empty-impact explanation input digest could not be captured safely" >&2
+              exit 2
+            fi
+          fi
           export PYTHONDONTWRITEBYTECODE=1
           if [ "$GITHUB_REPOSITORY" = "Arcanada-one/auth-arcana" ]; then
             TYPECHECK_ARGV=(python3 -I -B "$GRAPH_TOOLS_ROOT/tools/graph/full_suite_ci.py" collect-root-typecheck
@@ -920,6 +944,9 @@ jobs:
               --graph "$CANDIDATE_ROOT/base-graph.json" --out "$CANDIDATE_ROOT/receipt.json" --json
               --workdir "$CANDIDATE_ROOT/work" --verifier-out "$CANDIDATE_ROOT/verifier-out"
               --phase-log "$CANDIDATE_ROOT/phase.jsonl")
+            if [ -n "${EMPTY_IMPACT_EXPLANATION:-}" ]; then
+              VERIFY_ARGV+=(--empty-impact-explanation "$EMPTY_IMPACT_PATH")
+            fi
             if [ "$GITHUB_REPOSITORY" = "Arcanada-one/auth-arcana" ]; then
               VERIFY_ARGV+=(--root-typecheck-ci-root "$CANDIDATE_ROOT/ci-typecheck")
             fi
