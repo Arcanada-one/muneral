@@ -1,11 +1,11 @@
 {
- "bundle_digest": "sha256:f863dd42ec935a13a225d8f09ea8277a5a1ab380c6eb63b87c41548e79f13306",
+ "bundle_digest": "sha256:cfba319484d4f6a90bcb8aa2bd0d2d05a8a397566a6f200b4d24ba2c1b117eca",
  "files": [
   {
-   "blob_oid": "6cab2a1c89d15e7809b4e5ef33ec018c6e9abc97",
+   "blob_oid": "f9c9b159e750b6797acaf2839c608f218362b228",
    "note": "the workflow file itself; it is already running by the time the job checks the bundle \u2014 so THIS run cannot vouch for it. The next run's verify_bundle hashes it against this entry (BUNDLE_WORKFLOW_DIGEST_MISMATCH) and the self-update battery's B8 refuses a change to it that this manifest does not attest (KB-039, DEC-AUP-0036)",
    "path": ".github/workflows/graph-admission.yml",
-   "sha256": "sha256:be287fc9286c8c6e8dc4a4cafec99572a2558ed97d55a2f89008d9ff6566a4f6",
+   "sha256": "sha256:f3b91b4e384283a44946a178a469d5317322a192c727ceb114e3de034a027406",
    "vendored_to": "graph-admission.yml",
    "verified_by_the_job": false
   },
@@ -216,7 +216,7 @@
   "tool": "tools/graph/ci_gate.py",
   "version": "1.0.0"
  },
- "program_ref": "7351d25380191ae9d5c65b6c614ba2b2cbefdd8b",
+ "program_ref": "884d78cbf67fd51f2ab635cb4205391a4f396d32",
  "program_repo": "Arcanada-one/arcanada-universal-program",
  "provisional_until_fable_review": true,
  "rule": "The workflow refuses unless every file's sha256 matches this manifest AND the caller's `program_ref` input matches `program_ref` here. The bundle is a VENDORED copy of one pinned program-repo SHA (the program repository is private and no shared credential exists to check it out from a caller's CI). A pull request that changes anything under the bundle directory is refused by the gate job \u2014 a bundle refresh is its own pull request. Each entry's `blob_oid` is the git object id the bytes were read at: `git hash-object <file>` must equal it, which is how a caller with no credential for the program repository can CONTRADICT this manifest offline (DEC-AUP-0036 R2). Every byte here was read from the object store at program_ref, never from a working tree (R1).",
