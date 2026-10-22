@@ -363,7 +363,7 @@ jobs:
           artifact_dir="${RUNNER_TEMP}/muneral-mutation-artifact"
           mkdir -p "${artifact_dir}/logs"
           cat > "${artifact_dir}/run-manifest.json" <<'JSON'
-          {"schema":"MUN0064MutationRun/v1","state":"preflight-incomplete"}
+          {"schema":"MUN0064MutationRun/v1","state":"preflight-incomplete","source_boundary":{"verdict":"NOT_MEASURED","reason":"source checkout observation has not occurred"}}
           JSON
 
           expected_repo='Arcanada-one/muneral'
@@ -427,6 +427,10 @@ jobs:
                       "node/24.22.1/x64/bin/node",
                   ),
                   "node_version": os.environ["NODE_VERSION"],
+              },
+              "source_boundary": {
+                  "verdict": "NOT_MEASURED",
+                  "reason": "source checkout observation has not occurred",
               },
               "phases": [],
           }
@@ -507,9 +511,61 @@ jobs:
           EXPECTED_NODE_PATH: ${{ steps.preflight.outputs.expected_node_path }}
         run: |
           set -euo pipefail
+          boundary_dir="${ARTIFACT_DIR}/logs/source-boundary"
+          mkdir -p "${boundary_dir}"
+          boundary_observed=0
+          boundary_verdict='NOT_MEASURED'
+          observe_boundary() {
+            local label="$1"
+            local prefix="${boundary_dir}/${label}"
+            local head tree status diff paths untracked
+            set +e
+            git rev-parse HEAD > "${prefix}.head" 2> "${prefix}.git-error"
+            head_status=$?
+            git rev-parse HEAD^{tree} > "${prefix}.tree" 2>> "${prefix}.git-error"
+            tree_status=$?
+            git status --porcelain=v1 --untracked-files=all > \
+              "${prefix}.status" 2>> "${prefix}.git-error"
+            status_status=$?
+            git diff --binary HEAD > "${prefix}.diff" 2>> "${prefix}.git-error"
+            diff_status=$?
+            git diff --name-only HEAD > "${prefix}.tracked-paths" \
+              2>> "${prefix}.git-error"
+            paths_status=$?
+            git ls-files --others --exclude-standard > \
+              "${prefix}.untracked-paths" 2>> "${prefix}.git-error"
+            untracked_status=$?
+            set -e
+            if (( head_status == 0 && tree_status == 0 && status_status == 0 && \
+                  diff_status == 0 && paths_status == 0 && untracked_status == 0 )); then
+              sha256sum "${prefix}.diff" > "${prefix}.diff.sha256"
+              boundary_observed=1
+              return 0
+            fi
+            boundary_observed=0
+            return 1
+          }
           finish_run() {
-            local exit_code=$?
+            local original_exit=$?
             trap - EXIT
+            set +e
+            local final_observed=0
+            if observe_boundary final; then
+              final_observed=1
+            fi
+            if (( boundary_observed == 1 && final_observed == 1 )); then
+              export BOUNDARY_VERDICT='PASS'
+              export BOUNDARY_REASON='checkout and final observations completed; path and tree constraints evaluated'
+            else
+              export BOUNDARY_VERDICT='NOT_MEASURED'
+              export BOUNDARY_REASON='checkout or final source-boundary observation was incomplete'
+            fi
+            export ORIGINAL_EXIT_CODE="${original_exit}"
+            export RUN_ENDED_UTC="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            export FINAL_HEAD="$(cat "${boundary_dir}/final.head" 2>/dev/null || true)"
+            export FINAL_TREE="$(cat "${boundary_dir}/final.tree" 2>/dev/null || true)"
+            export SOURCE_SHA EXPECTED_NODE_PATH ARTIFACT_DIR
+            export MANIFEST_PATH="${ARTIFACT_DIR}/run-manifest.json"
             if [[ -f apps/api/test/assembly/mutation-results.json && \
                   -f "${ARTIFACT_DIR}/mutation-results.before.json" ]]; then
               cp apps/api/test/assembly/mutation-results.json \
@@ -517,33 +573,88 @@ jobs:
               sha256sum "${ARTIFACT_DIR}/mutation-results.generated.json" > \
                 "${ARTIFACT_DIR}/mutation-results.generated.sha256"
             fi
-            export RUN_EXIT_CODE="${exit_code}"
-            export RUN_ENDED_UTC="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-            export MANIFEST_PATH="${ARTIFACT_DIR}/run-manifest.json"
             python3 - <<'PY'
-          import json, os
-          path = os.environ["MANIFEST_PATH"]
-          exit_code = os.environ["RUN_EXIT_CODE"]
-          ended = os.environ["RUN_ENDED_UTC"]
-          with open(path, encoding="utf-8") as f:
+          import hashlib, json, os
+          from pathlib import Path
+          artifact_dir = Path(os.environ["ARTIFACT_DIR"])
+          boundary_dir = artifact_dir / "logs/source-boundary"
+          manifest_path = Path(os.environ["MANIFEST_PATH"])
+          original_exit = int(os.environ["ORIGINAL_EXIT_CODE"])
+          observed = os.environ["BOUNDARY_VERDICT"] == "PASS"
+          def lines(name):
+              path = boundary_dir / name
+              return path.read_text(encoding="utf-8").splitlines() if path.exists() else []
+          final_paths = lines("final.tracked-paths")
+          final_untracked = lines("final.untracked-paths")
+          initial_head = (boundary_dir / "checkout.head").read_text().strip() if (boundary_dir / "checkout.head").exists() else ""
+          initial_tree = (boundary_dir / "checkout.tree").read_text().strip() if (boundary_dir / "checkout.tree").exists() else ""
+          final_head = os.environ.get("FINAL_HEAD", "")
+          final_tree = os.environ.get("FINAL_TREE", "")
+          allowed = {"apps/api/test/assembly/mutation-results.json"}
+          violations = []
+          if not observed:
+              violations.append("source boundary observation incomplete")
+          if initial_head != os.environ["SOURCE_SHA"] or final_head != os.environ["SOURCE_SHA"]:
+              violations.append("checked-out HEAD differs from validated source SHA")
+          if not initial_tree or final_tree != initial_tree:
+              violations.append("committed source tree changed or was not observed")
+          if any(path not in allowed for path in final_paths):
+              violations.append("tracked changes exceeded allocated output path")
+          if final_untracked:
+              violations.append("untracked files were present")
+          if (boundary_dir / "checkout.status").exists() and (boundary_dir / "checkout.status").read_text().strip():
+              violations.append("checkout was not initially clean")
+          boundary_verdict = "NOT_MEASURED" if not observed else ("FAIL" if violations else "PASS")
+          with manifest_path.open(encoding="utf-8") as f:
               manifest = json.load(f)
-          manifest["state"] = "completed" if int(exit_code) == 0 else "failed"
-          manifest["exit_code"] = int(exit_code)
-          manifest["ended_utc"] = ended
-          with open(path, "w", encoding="utf-8") as f:
+          manifest["state"] = "completed" if original_exit == 0 and boundary_verdict == "PASS" else "failed"
+          manifest["exit_code"] = original_exit if original_exit != 0 else (0 if boundary_verdict == "PASS" else 1)
+          manifest["original_exit_code"] = original_exit
+          manifest["ended_utc"] = os.environ["RUN_ENDED_UTC"]
+          manifest["source_boundary"] = {
+              "verdict": boundary_verdict,
+              "reason": os.environ["BOUNDARY_REASON"],
+              "violations": violations,
+              "validated_source_sha": os.environ["SOURCE_SHA"],
+              "checkout_head": initial_head or None,
+              "final_head": final_head or None,
+              "checkout_tree": initial_tree or None,
+              "final_tree": final_tree or None,
+              "tracked_paths": final_paths if (boundary_dir / "final.tracked-paths").exists() else None,
+              "untracked_paths": final_untracked if (boundary_dir / "final.untracked-paths").exists() else None,
+              "observations": {
+                  "checkout": "complete" if (boundary_dir / "checkout.status").exists() else "NOT_MEASURED",
+                  "final": "complete" if (boundary_dir / "final.status").exists() else "NOT_MEASURED",
+              },
+          }
+          (boundary_dir / "verdict").write_text(boundary_verdict + "\n", encoding="utf-8")
+          if original_exit == 0 and boundary_verdict != "PASS":
+              manifest["exit_code"] = 1
+          with manifest_path.open("w", encoding="utf-8") as f:
               json.dump(manifest, f, indent=2, sort_keys=True)
               f.write("\n")
           PY
-            exit "${exit_code}"
+            local final_exit="${original_exit}"
+            BOUNDARY_VERDICT="$(cat "${boundary_dir}/verdict" 2>/dev/null || echo NOT_MEASURED)"
+            if (( original_exit == 0 )) && [[ "${BOUNDARY_VERDICT}" != 'PASS' ]]; then
+              final_exit=1
+            fi
+            exit "${final_exit}"
           }
           trap finish_run EXIT
+          if ! observe_boundary checkout; then
+            export BOUNDARY_VERDICT='NOT_MEASURED'
+            export BOUNDARY_REASON='initial checkout observation failed'
+            exit 1
+          fi
+          export BOUNDARY_VERDICT='PASS'
+          export BOUNDARY_REASON='checkout and final source-boundary observations completed'
           exec 9>"${RUNNER_TEMP}/m0064-native-mutation.lock"
           flock -n 9
 
           [[ "$(git rev-parse HEAD)" == "${SOURCE_SHA}" ]]
           [[ "$(git rev-parse HEAD^)" == \
             'd337c52b7ed72e143d0fe2c410ec48eac57ff6d5' ]]
-          [[ -z "$(git status --porcelain --untracked-files=all)" ]]
           [[ "$(command -v node)" == "${EXPECTED_NODE_PATH}" ]]
           [[ "$(node --version)" == 'v24.22.1' ]]
           [[ "$(pnpm --version)" == '11.5.2' ]]
@@ -559,7 +670,7 @@ jobs:
           export CHECKOUT_HEAD="$(git rev-parse HEAD)"
           export CHECKOUT_PARENT="$(git rev-parse HEAD^)"
           export CHECKOUT_TREE="$(git rev-parse HEAD^{tree})"
-          checkout_status=$(git status --porcelain --untracked-files=all)
+          checkout_status=$(cat "${boundary_dir}/checkout.status")
           export CHECKOUT_STATUS="${checkout_status}"
           export ARTIFACT_NAME
           python3 - <<'PY'
@@ -659,35 +770,52 @@ jobs:
             --verify-structure \
             apps/api/test/assembly/mutation-results.json || exit $?
 
-          git diff --exit-code HEAD -- . \
-            ':(exclude)apps/api/test/assembly/mutation-results.json'
-          [[ -z "$(git ls-files --others --exclude-standard)" ]]
-          changed_paths=$(git diff --name-only HEAD)
-          CHANGED_PATHS="${changed_paths}" python3 - <<'PY'
-          import sys
-          import os
-          changed = [p for p in os.environ["CHANGED_PATHS"].splitlines() if p]
-          allowed = {"apps/api/test/assembly/mutation-results.json"}
-          if any(p not in allowed for p in changed):
-              raise SystemExit(f"unexpected tracked output paths: {changed}")
-          PY
-          export HEAD_TREE_AFTER="$(git rev-parse HEAD^{tree})"
-          export TRACKED_CHANGES="$(git diff --name-only HEAD)"
-          export MANIFEST_PATH="${ARTIFACT_DIR}/run-manifest.json"
-          python3 - <<'PY'
+      - name: Record boundary when checkout succeeded but producer step did not run
+        if: always()
+        env:
+          ARTIFACT_DIR: ${{ steps.preflight.outputs.artifact_dir }}
+          SOURCE_SHA: ${{ steps.preflight.outputs.source_sha }}
+        run: |
+          set -euo pipefail
+          manifest_path="${ARTIFACT_DIR}/run-manifest.json"
+          [[ -f "${manifest_path}" ]] || exit 0
+          boundary_dir="${ARTIFACT_DIR}/logs/source-boundary"
+          mkdir -p "${boundary_dir}"
+          [[ -f "${boundary_dir}/final.status" ]] && exit 0
+          if [[ ! -e .git ]]; then
+            exit 0
+          fi
+          set +e
+          git rev-parse HEAD > "${boundary_dir}/final.head" 2> "${boundary_dir}/final.git-error"
+          head_status=$?
+          git rev-parse HEAD^{tree} > "${boundary_dir}/final.tree" 2>> "${boundary_dir}/final.git-error"
+          tree_status=$?
+          git status --porcelain=v1 --untracked-files=all > "${boundary_dir}/final.status" 2>> "${boundary_dir}/final.git-error"
+          status_status=$?
+          git diff --binary HEAD > "${boundary_dir}/final.diff" 2>> "${boundary_dir}/final.git-error"
+          diff_status=$?
+          git diff --name-only HEAD > "${boundary_dir}/final.tracked-paths" 2>> "${boundary_dir}/final.git-error"
+          paths_status=$?
+          git ls-files --others --exclude-standard > "${boundary_dir}/final.untracked-paths" 2>> "${boundary_dir}/final.git-error"
+          untracked_status=$?
+          set -e
+          if (( head_status == 0 && tree_status == 0 && status_status == 0 && diff_status == 0 && paths_status == 0 && untracked_status == 0 )); then
+            sha256sum "${boundary_dir}/final.diff" > "${boundary_dir}/final.diff.sha256"
+          fi
+          MANIFEST_PATH="${manifest_path}" SOURCE_SHA="${SOURCE_SHA:-}" python3 - <<'PY'
           import json, os
-          path = os.environ["MANIFEST_PATH"]
-          tree_after = os.environ["HEAD_TREE_AFTER"]
-          changed = os.environ["TRACKED_CHANGES"]
-          with open(path, encoding="utf-8") as f:
+          from pathlib import Path
+          manifest_path = Path(os.environ["MANIFEST_PATH"])
+          with manifest_path.open(encoding="utf-8") as f:
               manifest = json.load(f)
-          manifest["restoration_check"] = {
-              "tree_after": tree_after,
-              "tracked_changes": [p for p in changed.splitlines() if p],
-              "only_allocated_output_path_changed": True,
-              "untracked_files": [],
+          manifest["source_boundary"] = {
+              "verdict": "NOT_MEASURED",
+              "reason": "checkout completed but the producer step did not capture its initial and final boundary",
+              "validated_source_sha": os.environ.get("SOURCE_SHA") or None,
+              "final_observation": "complete" if (manifest_path.parent / "logs/source-boundary/final.status").exists() else "NOT_MEASURED",
           }
-          with open(path, "w", encoding="utf-8") as f:
+          manifest["state"] = "failed"
+          with manifest_path.open("w", encoding="utf-8") as f:
               json.dump(manifest, f, indent=2, sort_keys=True)
               f.write("\n")
           PY
