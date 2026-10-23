@@ -60,7 +60,7 @@ describe('GET /tasks/project/:projectId/staleness threshold (HTTP)', () => {
       '?thresholdHours=abc', '?thresholdHours=NaN', '?thresholdHours=Infinity',
       '?thresholdHours=', '?thresholdHours=%20%20', '?thresholdHours=0',
       '?thresholdHours=-1', '?thresholdHours=1&thresholdHours=2',
-      '?thresholdHours%5Bvalue%5D=1', '?thresholdHours=1e309',
+      '?thresholdHours%5Bvalue%5D=1', '?thresholdHours=1e302', '?thresholdHours=1e309',
     ]) {
       await supertest(app.getHttpServer())
         .get(`/tasks/project/project-1/staleness${query}`)
