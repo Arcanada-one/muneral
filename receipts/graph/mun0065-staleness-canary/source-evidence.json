@@ -1,0 +1,12 @@
+{
+  "captured_at_utc": "2026-10-23T18:46:28.795654390Z",
+  "commit": "4496ea16546bd23040eb966e6473d0792f33d7a6",
+  "dirty": false,
+  "producer": {
+    "tool": "git rev-parse HEAD^{tree}; git status --porcelain",
+    "version": "native source-pin measurement"
+  },
+  "repository_path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage",
+  "schema": "MeasuredGitSource/v1",
+  "tree": "88f904e43919b3b9c0fb450d32971ad03e7c3761"
+}

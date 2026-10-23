@@ -1,0 +1,275 @@
+{
+  "environment": "Bubblewrap private user/net/PID namespaces; read-only source and dependency mounts; clear environment with HOME and TMPDIR pinned to private tmpfs /tmp; Unix-domain HTTP only; synthetic human actor and mocked guards/evaluator; no production credentials or database.",
+  "id": "mun0065-staleness-http-unix-4496ea1-jest-test-count-pinned",
+  "owner": "MUN-HYG MUN0065 author",
+  "probes": [
+    {
+      "argv": [
+        "/usr/bin/bwrap",
+        "--unshare-user",
+        "--unshare-net",
+        "--unshare-pid",
+        "--die-with-parent",
+        "--dir",
+        "/workspace",
+        "--dir",
+        "/workspace/apps",
+        "--ro-bind",
+        "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/apps/api",
+        "/workspace/apps/api",
+        "--dir",
+        "/workspace/packages",
+        "--ro-bind",
+        "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/packages/types",
+        "/workspace/packages/types",
+        "--ro-bind",
+        "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/node_modules",
+        "/workspace/node_modules",
+        "--ro-bind",
+        "/usr",
+        "/usr",
+        "--symlink",
+        "usr/lib",
+        "/lib",
+        "--symlink",
+        "usr/lib64",
+        "/lib64",
+        "--dir",
+        "/etc",
+        "--ro-bind",
+        "/etc/ld.so.cache",
+        "/etc/ld.so.cache",
+        "--tmpfs",
+        "/tmp",
+        "--dev",
+        "/dev",
+        "--ro-bind",
+        "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/evidence/canary-plan-unix-http-01/driver.sh",
+        "/driver.sh",
+        "--ro-bind",
+        "/home/dev/.local/share/pnpm/store/v11/links/@/node/24.22.1/be6982d3d35d848b6e20caedef7aad9a17d6a15add9b0f563d4149f2aaf71567/node_modules/node/bin/node",
+        "/node",
+        "--clearenv",
+        "--setenv",
+        "HOME",
+        "/tmp",
+        "--setenv",
+        "TMPDIR",
+        "/tmp",
+        "--setenv",
+        "PATH",
+        "/usr/bin",
+        "--setenv",
+        "LC_ALL",
+        "C",
+        "--setenv",
+        "TZ",
+        "UTC",
+        "--chdir",
+        "/workspace/apps/api",
+        "--",
+        "/usr/bin/dash",
+        "/driver.sh",
+        "/node",
+        "--experimental-vm-modules",
+        "/workspace/apps/api/node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "--no-cache",
+        "--silent",
+        "--runTestsByPath",
+        "test/task-staleness.controller.e2e.spec.ts",
+        "--config",
+        "{\"rootDir\":\".\",\"moduleFileExtensions\":[\"js\",\"json\",\"ts\"],\"transform\":{\"^.+\\\\.ts$\":[\"ts-jest\",{\"tsconfig\":\"<rootDir>/tsconfig.test.json\",\"useESM\":true}]},\"testEnvironment\":\"node\",\"moduleNameMapper\":{\"^@muneral/types$\":\"<rootDir>/../../packages/types/dist/index.js\",\"^(\\\\.{1,2}/.*)\\\\.js$\":\"$1\",\"^@nestjs/throttler$\":\"<rootDir>/test/support/throttler-test-double.ts\"},\"preset\":\"ts-jest/presets/default-esm\",\"extensionsToTreatAsEsm\":[\".ts\"],\"setupFiles\":[]}"
+      ],
+      "artifacts": [],
+      "capture_limit_bytes": 65536,
+      "cwd": "apps/api",
+      "entities": [
+        "code_unit:apps/api/src/tasks/tasks.controller.ts"
+      ],
+      "env_keys": [],
+      "executable_sha256": "e318903862396f96de3df57264e0158682b952fd3fb53ac23d876413e7b30f71",
+      "execution_files": [
+        {
+          "path": "/home/dev/.local/share/pnpm/store/v11/links/@/node/24.22.1/be6982d3d35d848b6e20caedef7aad9a17d6a15add9b0f563d4149f2aaf71567/node_modules/node/bin/node",
+          "sha256": "e32e2d16081cf644f88392934288086e7662529d0d43277c34f7aad2207cfafb"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/apps/api/node_modules/@nestjs/common/package.json",
+          "sha256": "7ac7e54dc5d8fc3f1f9691fa97ac8a1c82fa36e5f7359cdc662580d3e885026e"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/apps/api/node_modules/@nestjs/core/package.json",
+          "sha256": "04e7898c21c9881299385f2ed5b671638baec0a2198646caeb5513f492b89545"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/apps/api/node_modules/@nestjs/testing/package.json",
+          "sha256": "5fec5086a9432dfe6bf6388dcb8c804f87e2599928e0de93b1cd61dd8d86ee24"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/apps/api/node_modules/@nestjs/platform-express/package.json",
+          "sha256": "91ed368b7994ff90833fda21d2053e1f1f03d69bf33053aaa8c23b06db1ea5da"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/node_modules/.pnpm/express@5.2.1/node_modules/express/package.json",
+          "sha256": "2980b885bad92f757a2d44674e905cf875867d5685111d8ab8f285635b11367d"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/apps/api/node_modules/jest/bin/jest.js",
+          "sha256": "2a9b435eab8a343bd09fe285b2e2043ff9ff89fae4e1d1f46ba3df28659d8a2c"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/apps/api/node_modules/jest/package.json",
+          "sha256": "679fd6f49e8dcb1fd82b7d610c5d555b70204ad2e5e5092e284e9bc10eb9f353"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/apps/api/node_modules/ts-jest/package.json",
+          "sha256": "ea0c1a5f1f279caedbc9e4634ddaa0fc9ac6ce09124e742557ff32881b53f2f2"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/apps/api/node_modules/typescript/package.json",
+          "sha256": "822ef7ca6452205657b6288b066481ecf508bfbf43455d715cf7d3ec457561e6"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/apps/api/node_modules/@jest/globals/package.json",
+          "sha256": "fef3ee8342600d1c392b88d48677e2b870cc711bf4ce358d60181e822b8086bd"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/apps/api/node_modules/@prisma/client/package.json",
+          "sha256": "a64669ec1b457f2651b3de564db6b9604e89460cb349641afffa73b0bbf3939a"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/node_modules/.pnpm/@prisma+client@7.8.0_prisma@7.10.0_@types+node@24.13.4_@types+react-dom@19.3.0_@types+r_5ac432156b9097bb79ad37885e6c07e8/node_modules/.prisma/client/index.js",
+          "sha256": "5371a604a596ed375f9c941516dcfe37fd60fb48263c4e3054f170ea2b1e98fb"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/node_modules/.pnpm/@prisma+client@7.8.0_prisma@7.10.0_@types+node@24.13.4_@types+react-dom@19.3.0_@types+r_5ac432156b9097bb79ad37885e6c07e8/node_modules/.prisma/client/index.d.ts",
+          "sha256": "581600d070a617db2cc289540c348c5c30c6837f3f6ff36ca9b4b83a36a7d52f"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/node_modules/.pnpm/@prisma+client@7.8.0_prisma@7.10.0_@types+node@24.13.4_@types+react-dom@19.3.0_@types+r_5ac432156b9097bb79ad37885e6c07e8/node_modules/.prisma/client/default.js",
+          "sha256": "27f67f5742440cc51256289d9122f2acb0715fbc346e2fd8fa9f1d9dc8c6e38d"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/node_modules/.pnpm/@prisma+client@7.8.0_prisma@7.10.0_@types+node@24.13.4_@types+react-dom@19.3.0_@types+r_5ac432156b9097bb79ad37885e6c07e8/node_modules/.prisma/client/default.d.ts",
+          "sha256": "d5eb5865d4cbaa9985cc3cfb920b230cdcf3363f1e70903a08dc4baab80b0ce1"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/apps/api/package.json",
+          "sha256": "919202c86e4a269cb8e4e680b9fdb768e555bbf8d7caf449adea37123657652c"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/apps/api/tsconfig.test.json",
+          "sha256": "b45b51f10e6897b5fa212f421842c1334c9e1f7942e446dcf278bb08b9c55d1d"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/apps/api/src/tasks/tasks.controller.ts",
+          "sha256": "4f3eb6c9176b47e27226b88efce7b5eef280e6376cb3627f982467b004198938"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/apps/api/src/tasks/tasks.service.ts",
+          "sha256": "34225bb4e255b2d90a8a3d9a37258ea9f1d2bb6ce1b7fb2bdf8d2c0bf254d152"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/apps/api/src/execution-authority/task-staleness.service.ts",
+          "sha256": "9334ed1b3ddd66c4f4dd575b6c668c84a39e63064240acb2959412d6934531a5"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/apps/api/src/auth/guards/jwt-or-api-key.guard.ts",
+          "sha256": "a7732bb3f90512742415b9b44eb1bec26be7e3b45073ed1f94eb84144d20af58"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/apps/api/src/auth/guards/agent-task-scope.guard.ts",
+          "sha256": "69c460ff0e71095474ae4b16803e090e5ab8812c91fd1e0dcf6d055dfce7fb5a"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/apps/api/src/auth/guards/human-task-read.guard.ts",
+          "sha256": "cb8de58d5c5480fb8621522d4799cb2938af2bae8ddc43ba84562ca6883b2dcc"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/apps/api/src/common/interceptors/actor.interceptor.ts",
+          "sha256": "d93afcbb6733a31becef0fc72a6c4863905d2e8ca6f02cb52a64cb5029ab0cbf"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/apps/api/test/task-staleness.controller.e2e.spec.ts",
+          "sha256": "d6a729368dca2ac4e145c98023bd8345a20eedec5d0e145dadac94c1571dad14"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/packages/types/package.json",
+          "sha256": "a6d65e0ae557e0fbcda43041fd23f50b566e44d898e8779ef87dadf0909cc142"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/packages/types/dist/index.js",
+          "sha256": "911003e6902fbe74fc81ba5de683ee41651b5c72c39d57aa90da58f2903828b4"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/packages/types/dist/index.d.ts",
+          "sha256": "64d28466b99ae53f81da8125ac4cc19d77a9e6b5973d18ae6476716fbd98e08a"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/pnpm-lock.yaml",
+          "sha256": "b9fd7a00c104eccb56944baa49ef119aee98792efb68467fd6018cfae5d84978"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/node_modules/.pnpm/lock.yaml",
+          "sha256": "b9fd7a00c104eccb56944baa49ef119aee98792efb68467fd6018cfae5d84978"
+        },
+        {
+          "path": "/usr/bin/bwrap",
+          "sha256": "e318903862396f96de3df57264e0158682b952fd3fb53ac23d876413e7b30f71"
+        },
+        {
+          "path": "/usr/bin/dash",
+          "sha256": "86d31f6fb799e91fa21bad341484564510ca287703a16e9e46c53338776f4f42"
+        },
+        {
+          "path": "/usr/bin/id",
+          "sha256": "0e967a87e22a60b330c6dbdc7affe1dda41f342f14d20877725f0486d8777df2"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/evidence/canary-plan-unix-http-01/driver.sh",
+          "sha256": "355d73f833d51c365a8d1df96faae9afb6a3b9d286b2a8d953edfe2eeafb7aaf"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/node_modules/.pnpm/@jest+reporters@29.7.0/node_modules/@jest/reporters/package.json",
+          "sha256": "9e1b4a70da9be69419f2ba6478891277a7c324a8497d648346c8927c329fd9e7"
+        },
+        {
+          "path": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage/node_modules/.pnpm/@jest+reporters@29.7.0/node_modules/@jest/reporters/build/getSummary.js",
+          "sha256": "881a038400ce54f5a109b10f53bf24d54ece13a581f330acc35bb775bbe884ba"
+        }
+      ],
+      "expect": {
+        "exit_codes": [
+          0
+        ],
+        "stdout_contains": [
+          "MUN0065_SANDBOX_UID="
+        ],
+        "stderr_contains": [
+          "PASS test/task-staleness.controller.e2e.spec.ts",
+          "Test Suites: 1 passed, 1 total",
+          "2 passed, 2 total"
+        ]
+      },
+      "id": "staleness-http-focused-jest-unix",
+      "kind": "process",
+      "mutating": false,
+      "timeout_seconds": 120
+    }
+  ],
+  "producer_repository": "/home/dev/aup/claude-work/mun-hyg-20261022/product-order-20261023-staleness/muneral-staleness-stage",
+  "purpose": "Exercise the actual Nest staleness controller over its focused HTTP test with Unix-domain socket transport. Check invalid inputs return 400 before evaluator invocation, omitted threshold uses default, fractional threshold converts to milliseconds. Database, production ACL, and route-entity coverage remain NOT_MEASURED.",
+  "read_only": true,
+  "schema": "CanaryPlan/v2",
+  "subject": {
+    "commit": "4496ea16546bd23040eb966e6473d0792f33d7a6",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "0914f51f77b9514fa4295706546735249098162fb8c2377c77eb55ae4c6d17e1",
+      "source_field": "commit"
+    },
+    "schema": "GitCanarySubject/v1",
+    "tree": "88f904e43919b3b9c0fb450d32971ad03e7c3761"
+  }
+}
