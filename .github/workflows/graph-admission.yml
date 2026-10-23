@@ -1266,6 +1266,17 @@ jobs:
           STAGE_EVIDENCE_PATH: ${{ inputs.stage_evidence_path }}
           STAGE_EVIDENCE_ROOT: ${{ inputs.stage_evidence_root }}
           STAGE_EVIDENCE_REQUIRED: ${{ inputs.stage_evidence_required }}
+          CURRENT_EVALUATOR_RUN_ID: ${{ github.run_id }}
+          CURRENT_EVALUATOR_ATTEMPT: ${{ github.run_attempt }}
+          CURRENT_EVALUATOR_CHECK_RUN_ID: ${{ job.check_run_id }}
+          CURRENT_EVALUATOR_JOB_KEY: ${{ github.job }}
+          CURRENT_EVALUATOR_REPOSITORY: ${{ github.repository }}
+          CURRENT_EVALUATOR_CALLER_WORKFLOW_REF: ${{ github.workflow_ref }}
+          CURRENT_EVALUATOR_CALLER_WORKFLOW_SHA: ${{ github.workflow_sha }}
+          CURRENT_EVALUATOR_WORKFLOW_REPOSITORY: ${{ job.workflow_repository }}
+          CURRENT_EVALUATOR_WORKFLOW_FILE_PATH: ${{ job.workflow_file_path }}
+          CURRENT_EVALUATOR_WORKFLOW_REF: ${{ job.workflow_ref }}
+          CURRENT_EVALUATOR_WORKFLOW_SHA: ${{ job.workflow_sha }}
           STAGE_USERPATH_RESULT: ${{ steps.stage_userpath.outputs.result }}
           STAGE_USERPATH_ROOT: ${{ steps.stage_userpath.outputs.root }}
           STAGE_USERPATH_REQUIRED: ${{ inputs.stage_userpath_required }}
@@ -1296,6 +1307,19 @@ jobs:
           if [ -n "${STAGE_EVIDENCE_PATH:-}" ]; then ARGS+=(--stage-evidence "$STAGE_EVIDENCE_PATH"); fi
           if [ -n "${STAGE_EVIDENCE_ROOT:-}" ]; then ARGS+=(--stage-evidence-root "$STAGE_EVIDENCE_ROOT"); fi
           if [ "${STAGE_EVIDENCE_REQUIRED:-false}" = "true" ]; then ARGS+=(--stage-evidence-required); fi
+          if [ -n "${STAGE_EVIDENCE_PATH:-}" ]; then
+            ARGS+=(--current-evaluator-run-id "$CURRENT_EVALUATOR_RUN_ID"
+              --current-evaluator-attempt "$CURRENT_EVALUATOR_ATTEMPT"
+              --current-evaluator-check-run-id "$CURRENT_EVALUATOR_CHECK_RUN_ID"
+              --current-evaluator-job-key "$CURRENT_EVALUATOR_JOB_KEY"
+              --current-evaluator-repository "$CURRENT_EVALUATOR_REPOSITORY"
+              --current-evaluator-caller-workflow-ref "$CURRENT_EVALUATOR_CALLER_WORKFLOW_REF"
+              --current-evaluator-caller-workflow-sha "$CURRENT_EVALUATOR_CALLER_WORKFLOW_SHA"
+              --current-evaluator-workflow-repository "$CURRENT_EVALUATOR_WORKFLOW_REPOSITORY"
+              --current-evaluator-workflow-file-path "$CURRENT_EVALUATOR_WORKFLOW_FILE_PATH"
+              --current-evaluator-workflow-ref "$CURRENT_EVALUATOR_WORKFLOW_REF"
+              --current-evaluator-workflow-sha "$CURRENT_EVALUATOR_WORKFLOW_SHA")
+          fi
           if [ -n "${STAGE_USERPATH_RESULT:-}" ]; then ARGS+=(--stage-userpath-result "$STAGE_USERPATH_RESULT"); fi
           if [ -n "${STAGE_USERPATH_ROOT:-}" ]; then ARGS+=(--stage-userpath-root "$STAGE_USERPATH_ROOT"); fi
           if [ "${STAGE_USERPATH_REQUIRED:-false}" = "true" ]; then ARGS+=(--stage-userpath-required); fi
@@ -1317,7 +1341,7 @@ jobs:
             --enforcement "$ENFORCEMENT" --workdir "${RUNNER_TEMP}/graph-admission"
             --out "${RUNNER_TEMP}/graph-admission/graph-admission-result.json"
             --summary "${GITHUB_STEP_SUMMARY}" "${ARGS[@]}")
-          if [ "$REPO_NAME" = "Arcanada-one/auth-arcana" ] && [ -n "$TYPECHECK_TOKEN" ]; then
+          if [ -n "$TYPECHECK_TOKEN" ] && { [ "$REPO_NAME" = "Arcanada-one/auth-arcana" ] || [ -n "${STAGE_EVIDENCE_PATH:-}" ]; }; then
             GH_TOKEN="$TYPECHECK_TOKEN" "${GATE_ARGV[@]}"
           else
             "${GATE_ARGV[@]}"

@@ -1742,6 +1742,7 @@ def cmd_run(a) -> int:
     stage_evidence_root = getattr(a, "stage_evidence_root", None) or None
     stage_evidence_required = bool(getattr(a, "stage_evidence_required", False))
     stage_requested = bool(stage_evidence_path or stage_evidence_root or stage_evidence_required)
+    stage_route = {"verdict": "not_requested"}
     if stage_requested:
         receipts, stage_route = select_stage_receipt(
             receipts, stage_evidence_path, stage_evidence_root, stage_evidence_required,
@@ -1753,6 +1754,29 @@ def cmd_run(a) -> int:
                                      "the explicit finished-stage input did not identify exactly one raw CAR"})
         elif stage_route.get("verdict") == "selected":
             result["stage_result_input"].update({"repository": result["repo"], "base": base, "head": head})
+    current_evaluator_fields = (
+        "current_evaluator_run_id", "current_evaluator_attempt", "current_evaluator_check_run_id",
+        "current_evaluator_job_key", "current_evaluator_repository", "current_evaluator_caller_workflow_ref",
+        "current_evaluator_caller_workflow_sha", "current_evaluator_workflow_repository",
+        "current_evaluator_workflow_file_path", "current_evaluator_workflow_ref",
+        "current_evaluator_workflow_sha",
+    )
+    current_evaluator_values = {name: getattr(a, name, None) for name in current_evaluator_fields}
+    current_evaluator_supplied = any(value is not None for value in current_evaluator_values.values())
+    if current_evaluator_supplied:
+        if not all(value is not None for value in current_evaluator_values.values()):
+            return fail("CURRENT_EVALUATOR_CONTEXT_INCOMPLETE",
+                        "current run, attempt, check-run, caller and canonical workflow fields must be supplied together")
+        if stage_route.get("verdict") != "selected":
+            return fail("CURRENT_EVALUATOR_STAGE_INPUT_REQUIRED",
+                        "current evaluator context is valid only for the selected explicit StageEvidence route")
+        if not isinstance(getattr(a, "_github_token", None), str) or not a._github_token:
+            return fail("CURRENT_EVALUATOR_TOKEN_MISSING",
+                        "the current evaluator route requires the explicitly forwarded workflow token")
+        if (not isinstance(man, dict) or not isinstance(man.get("program_ref"), str)
+                or current_evaluator_values["current_evaluator_workflow_sha"] != man["program_ref"]):
+            return fail("CURRENT_EVALUATOR_WORKFLOW_PIN_MISMATCH",
+                        "the executing reusable workflow SHA does not match the verified bundle program_ref")
     result["receipt_sources"]["tree"] = [str(p.relative_to(repo)) if p.is_relative_to(repo) else str(p)
                                            for p in receipts if p in tree_receipts]
     result["receipt_sources"]["pr_body"] = [p.name for p in receipts if p in body_receipts]
@@ -1801,6 +1825,23 @@ def cmd_run(a) -> int:
     if stage_requested and stage_route.get("verdict") == "selected":
         cmd += ["--stage-evidence", str(Path(stage_evidence_path).resolve()),
                 "--stage-evidence-root", str(Path(stage_evidence_root).resolve())]
+    if current_evaluator_supplied:
+        current_evaluator_args = (
+            ("--current-evaluator-run-id", "current_evaluator_run_id"),
+            ("--current-evaluator-attempt", "current_evaluator_attempt"),
+            ("--current-evaluator-check-run-id", "current_evaluator_check_run_id"),
+            ("--current-evaluator-job-key", "current_evaluator_job_key"),
+            ("--current-evaluator-repository", "current_evaluator_repository"),
+            ("--current-evaluator-caller-workflow-ref", "current_evaluator_caller_workflow_ref"),
+            ("--current-evaluator-caller-workflow-sha", "current_evaluator_caller_workflow_sha"),
+            ("--current-evaluator-workflow-repository", "current_evaluator_workflow_repository"),
+            ("--current-evaluator-workflow-file-path", "current_evaluator_workflow_file_path"),
+            ("--current-evaluator-workflow-ref", "current_evaluator_workflow_ref"),
+            ("--current-evaluator-workflow-sha", "current_evaluator_workflow_sha"),
+        )
+        for flag, name in current_evaluator_args:
+            cmd += [flag, str(current_evaluator_values[name])]
+        cmd += ["--current-evaluator-program-ref", str(man["program_ref"])]
     if candidate_source_outcome_required:
         # The native gate revalidates this exact process outcome at the point where it makes
         # DEC-AUP-0167 eligibility decisions. The fixture gate remains a separate measurement.
@@ -4407,6 +4448,17 @@ def main(argv=None) -> int:
     r.add_argument("--candidate-source-outcome-required", action="store_true",
                    help="require ProgramStageUserpath to bind same-run current-source CLI captures to the selected CAR")
     r.add_argument("--root-typecheck-ci-root", help="fresh external current-candidate GitHubTypecheckEvidence/v1 root")
+    r.add_argument("--current-evaluator-run-id", type=int)
+    r.add_argument("--current-evaluator-attempt", type=int)
+    r.add_argument("--current-evaluator-check-run-id", type=int)
+    r.add_argument("--current-evaluator-job-key")
+    r.add_argument("--current-evaluator-repository")
+    r.add_argument("--current-evaluator-caller-workflow-ref")
+    r.add_argument("--current-evaluator-caller-workflow-sha")
+    r.add_argument("--current-evaluator-workflow-repository")
+    r.add_argument("--current-evaluator-workflow-file-path")
+    r.add_argument("--current-evaluator-workflow-ref")
+    r.add_argument("--current-evaluator-workflow-sha")
     r.add_argument("--enforcement", default="off", choices=["off", "ledger", "muneral"])
     r.add_argument("--build-graph", action="store_true")
     r.add_argument("--workdir", default=os.environ.get("RUNNER_TEMP", "/tmp") + "/graph-admission")
