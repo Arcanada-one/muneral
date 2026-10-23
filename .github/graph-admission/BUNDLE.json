@@ -1,5 +1,5 @@
 {
- "bundle_digest": "sha256:cfba319484d4f6a90bcb8aa2bd0d2d05a8a397566a6f200b4d24ba2c1b117eca",
+ "bundle_digest": "sha256:1a67da95a2a245e482e434ef9b6aaab711da7daa71c7d2d8ecb6a1a3d226fefc",
  "files": [
   {
    "blob_oid": "f9c9b159e750b6797acaf2839c608f218362b228",
@@ -33,6 +33,11 @@
    "blob_oid": "d944a24c0f763068663acaecca86902d7ad510e0",
    "path": "tools/graph/admit_change.py",
    "sha256": "sha256:3e9c82925a7ef4981bb8bcaf5de4ad32882490ab72187f1eb6f5fb26036f9638"
+  },
+  {
+   "blob_oid": "0ecd68b4d73437c73dab4b156f4bf57e42eb5277",
+   "path": "contracts/graph-verified-change/stage-evidence.v1.json",
+   "sha256": "sha256:339dcff4cd1e1915b9712387658f5ba9bee1667240f3f1d593423cd97d33d65e"
   },
   {
    "blob_oid": "b07cee814cefe2c00de8e9dfa025af6d2ff0eabd",
@@ -175,9 +180,9 @@
    "sha256": "sha256:bcc2b9c986588c689a9ef015e04dcaf2e69971cf64c69e761138de70c19258a7"
   },
   {
-   "blob_oid": "4477c25609d83f358963fa9be97ad6980041e8a5",
+   "blob_oid": "006a2ba922b96f230fc0fe96f2be069882747566",
    "path": "tools/graph/ci_gate.py",
-   "sha256": "sha256:98c99bf35027ac163fb166fad05a8d8aa7f001d20ecada44711385ac284bffee"
+   "sha256": "sha256:406dc4afdaab5eec6b4f2c7a13b9c0dec56437e9c14b9494c13e5a0e1ca0d500"
   },
   {
    "blob_oid": "f97c4273c635f3e3215c13a0e063930951d7b48d",
@@ -216,7 +221,7 @@
   "tool": "tools/graph/ci_gate.py",
   "version": "1.0.0"
  },
- "program_ref": "884d78cbf67fd51f2ab635cb4205391a4f396d32",
+ "program_ref": "3e26691bc26d4037757a7992021f43ebfd161e19",
  "program_repo": "Arcanada-one/arcanada-universal-program",
  "provisional_until_fable_review": true,
  "rule": "The workflow refuses unless every file's sha256 matches this manifest AND the caller's `program_ref` input matches `program_ref` here. The bundle is a VENDORED copy of one pinned program-repo SHA (the program repository is private and no shared credential exists to check it out from a caller's CI). A pull request that changes anything under the bundle directory is refused by the gate job \u2014 a bundle refresh is its own pull request. Each entry's `blob_oid` is the git object id the bytes were read at: `git hash-object <file>` must equal it, which is how a caller with no credential for the program repository can CONTRADICT this manifest offline (DEC-AUP-0036 R2). Every byte here was read from the object store at program_ref, never from a working tree (R1).",

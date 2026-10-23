@@ -57,6 +57,9 @@ BUNDLE_FILES = [
     "tools/graph/full_suite_ci.py",
     "tools/graph/shell_source.py",
     "tools/graph/admit_change.py",
+    # The StageEvidence validator reads this committed contract relative to the bundle root.
+    # Without it, a vendored admission tool cannot validate the explicit finished-stage input.
+    "contracts/graph-verified-change/stage-evidence.v1.json",
     "tools/graph/schema_check.py",
     "tools/graph/build_graph.py",
     # build_graph.py imports this at module scope to add declared source-input edges.
