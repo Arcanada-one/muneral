@@ -1,6 +1,9 @@
 import { type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import supertest from 'supertest';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { request as httpRequest } from 'node:http';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { jest } from '@jest/globals';
 import { TasksController } from '../src/tasks/tasks.controller.js';
 import { TasksService } from '../src/tasks/tasks.service.js';
@@ -25,8 +28,29 @@ const actor = {
   },
 };
 
+function getOverUnixSocket(socketPath: string, path: string): Promise<{ statusCode: number; body: unknown }> {
+  return new Promise((resolve, reject) => {
+    const request = httpRequest({ socketPath, path, method: 'GET', headers: { accept: 'application/json' } }, (response) => {
+      let body = '';
+      response.setEncoding('utf8');
+      response.on('data', (chunk: string) => { body += chunk; });
+      response.on('end', () => {
+        try {
+          resolve({ statusCode: response.statusCode ?? 0, body: JSON.parse(body) as unknown });
+        } catch (error) {
+          reject(error);
+        }
+      });
+    });
+    request.on('error', reject);
+    request.end();
+  });
+}
+
 describe('GET /tasks/project/:projectId/staleness threshold (HTTP)', () => {
   let app: INestApplication;
+  let socketDir: string;
+  let socketPath: string;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -46,14 +70,19 @@ describe('GET /tasks/project/:projectId/staleness threshold (HTTP)', () => {
       .compile();
     app = moduleRef.createNestApplication();
     app.getHttpAdapter().getInstance().set('query parser', 'extended');
-    await app.init();
+    socketDir = mkdtempSync(join(tmpdir(), 'muneral-staleness-http-'));
+    socketPath = join(socketDir, 'app.sock');
+    await app.listen(socketPath);
   });
 
   beforeEach(() => staleness.reportForProject.mockReset().mockResolvedValue([
     { taskId: 'task-1', priority: 'high', verdict: 'not_measured', ageMs: null, reason: 'no attempt' },
   ]));
 
-  afterAll(async () => { if (app) await app.close(); });
+  afterAll(async () => {
+    if (app) await app.close();
+    if (socketDir) rmSync(socketDir, { recursive: true, force: true });
+  });
 
   it('rejects malformed, blank, non-positive, repeated, structured, and overflowing values before evaluation', async () => {
     for (const query of [
@@ -62,24 +91,23 @@ describe('GET /tasks/project/:projectId/staleness threshold (HTTP)', () => {
       '?thresholdHours=-1', '?thresholdHours=1&thresholdHours=2',
       '?thresholdHours%5Bvalue%5D=1', '?thresholdHours=1e302', '?thresholdHours=1e309',
     ]) {
-      await supertest(app.getHttpServer())
-        .get(`/tasks/project/project-1/staleness${query}`)
-        .expect(400);
+      const response = await getOverUnixSocket(socketPath, `/tasks/project/project-1/staleness${query}`);
+      expect(response.statusCode).toBe(400);
     }
     expect(staleness.reportForProject).not.toHaveBeenCalled();
   });
 
   it('uses the 24-hour service default when omitted and converts valid fractional hours', async () => {
-    const defaulted = await supertest(app.getHttpServer())
-      .get('/tasks/project/project-1/staleness').expect(200);
-    expect(defaulted.body[0].verdict).toBe('not_measured');
+    const defaulted = await getOverUnixSocket(socketPath, '/tasks/project/project-1/staleness');
+    expect(defaulted.statusCode).toBe(200);
+    expect((defaulted.body as Array<{ verdict: string }>)[0].verdict).toBe('not_measured');
     expect(staleness.reportForProject).toHaveBeenLastCalledWith(
       'project-1', undefined, undefined, undefined, 'human-1',
     );
 
-    const fractional = await supertest(app.getHttpServer())
-      .get('/tasks/project/project-1/staleness?thresholdHours=0.5').expect(200);
-    expect(fractional.body[0].verdict).toBe('not_measured');
+    const fractional = await getOverUnixSocket(socketPath, '/tasks/project/project-1/staleness?thresholdHours=0.5');
+    expect(fractional.statusCode).toBe(200);
+    expect((fractional.body as Array<{ verdict: string }>)[0].verdict).toBe('not_measured');
     expect(staleness.reportForProject).toHaveBeenLastCalledWith(
       'project-1', 30 * 60_000, undefined, undefined, 'human-1',
     );
