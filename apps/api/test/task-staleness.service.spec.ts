@@ -31,6 +31,15 @@ describe('TaskStalenessService', () => {
   });
 
   describe('evaluateTask', () => {
+    it('rejects a non-finite or non-positive threshold before reading execution state', async () => {
+      for (const thresholdMs of [Number.NaN, Number.POSITIVE_INFINITY, 0, -1]) {
+        await expect(service.evaluateTask('t1', 'high', thresholdMs, NOW)).rejects.toMatchObject({
+          status: 400,
+        });
+      }
+      expect(prisma.taskExecutionState.findUnique).not.toHaveBeenCalled();
+    });
+
     it('is not_measured when no TaskExecutionState row exists', async () => {
       prisma.taskExecutionState.findUnique.mockResolvedValue(null);
 
@@ -91,6 +100,28 @@ describe('TaskStalenessService', () => {
 
       expect(result.verdict).toBe('healthy');
       expect(result.ageMs).toBe(2 * HOUR);
+    });
+
+    it('keeps the omitted threshold at 24 hours and applies a fractional threshold at its strict boundary', async () => {
+      prisma.taskExecutionState.findUnique.mockResolvedValue({ taskId: 't1', currentAttemptId: 'att-1' });
+      prisma.taskExecutionAttempt.findUnique.mockResolvedValue({
+        attemptId: 'att-1', status: 'running',
+        startedAt: new Date(NOW.getTime() - 12 * HOUR), issuedAt: new Date(NOW.getTime() - 12 * HOUR),
+      });
+
+      expect((await service.evaluateTask('t1', 'high', undefined, NOW)).verdict).toBe('healthy');
+
+      prisma.taskExecutionAttempt.findUnique.mockResolvedValue({
+        attemptId: 'att-1', status: 'running',
+        startedAt: new Date(NOW.getTime() - 30 * 60_000), issuedAt: new Date(NOW.getTime() - 30 * 60_000),
+      });
+      expect((await service.evaluateTask('t1', 'high', 0.5 * HOUR, NOW)).verdict).toBe('healthy');
+
+      prisma.taskExecutionAttempt.findUnique.mockResolvedValue({
+        attemptId: 'att-1', status: 'running',
+        startedAt: new Date(NOW.getTime() - 30 * 60_000 - 1), issuedAt: new Date(NOW.getTime() - 30 * 60_000 - 1),
+      });
+      expect((await service.evaluateTask('t1', 'high', 0.5 * HOUR, NOW)).verdict).toBe('stalled');
     });
 
     it('is stalled when the running attempt is older than the threshold', async () => {
