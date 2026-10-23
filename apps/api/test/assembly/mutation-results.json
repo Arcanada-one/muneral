@@ -1,6 +1,6 @@
 {
   "formatVersion": "assembly-mutation-evidence-v4",
-  "generatedAt": "2026-10-02T21:00:36.695Z",
+  "generatedAt": "2026-10-11T08:23:20.124Z",
   "invocation": {
     "cwd": ".",
     "argv": [
@@ -575,8 +575,8 @@
       "pristineSha256": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "mutantSha256": "86b3e5525fa79263a253b1d416f8979ad69571508b2e3c7058b90c0ff703a893",
       "outcome": "KILLED_BY_TYPECHECK",
-      "detail": "error TS18047: 'req.candidateSet.candidates' is possibly 'null'. | error TS2339: Property 'some' does not exist on type 'string | number | boolean | CanonicalJsonV1Array | CanonicalJsonV1Object'. | error TS7006: Parameter 'candidate' implicitly has an 'any' type.",
-      "detailSha256": "354e3dc18fa59407bb15624feeddb2e870c9e65dc637355825d3e0db379a6edd"
+      "detail": "error TS18047: 'req.candidateSet.candidates' is possibly 'null'. | error TS2339: Property 'some' does not exist on type 'string | number | boolean | CanonicalJsonV1Object | CanonicalJsonV1Array'. | error TS7006: Parameter 'candidate' implicitly has an 'any' type.",
+      "detailSha256": "671b976543ce451eaa6c160f8a9ae490c3145c280087b7e731983469bc1d5cb4"
     },
     {
       "id": 17,

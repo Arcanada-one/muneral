@@ -197,7 +197,7 @@ jobs:
       # the version from the base branch and proved it matches ci.yml; pass that through.
       - name: Node toolchain the workflow pins
         if: steps.pr.outputs.skip == 'false'
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: ${{ steps.pin.outputs.node }}
 
