@@ -13,6 +13,15 @@ function formatRelativeTime(dateStr: string): string {
   const date = new Date(dateStr);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
+  if (diffMs < 0) {
+    const timeUntil = -diffMs;
+    if (timeUntil < 60_000) return 'just now';
+    const minutesUntil = Math.ceil(timeUntil / 60_000);
+    if (minutesUntil < 60) return `in ${minutesUntil}m`;
+    const hoursUntil = Math.ceil(minutesUntil / 60);
+    if (hoursUntil < 24) return `in ${hoursUntil}h`;
+    return date.toLocaleDateString();
+  }
   const diffMins = Math.floor(diffMs / 60_000);
   if (diffMins < 1) return 'just now';
   if (diffMins < 60) return `${diffMins}m ago`;
