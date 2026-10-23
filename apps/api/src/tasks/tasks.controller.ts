@@ -15,6 +15,7 @@ import {
   Headers,
   Res,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { TasksService } from './tasks.service.js';
@@ -285,11 +286,28 @@ export class TasksController {
   getStalenessReport(
     @Param('projectId') projectId: string,
     @Req() req: AuthRequest,
-    @Query('thresholdHours') thresholdHours?: string,
+    @Query() query: Record<string, unknown>,
   ) {
-    const thresholdMs = thresholdHours
-      ? Number(thresholdHours) * 3_600_000
-      : undefined;
+    const thresholdKeys = Object.keys(query).filter(
+      (key) => key === 'thresholdHours' || key.startsWith('thresholdHours['),
+    );
+    if (thresholdKeys.some((key) => key !== 'thresholdHours')) {
+      throw new BadRequestException('thresholdHours must be a single positive finite number of hours.');
+    }
+
+    const rawThreshold = query.thresholdHours;
+    let thresholdMs: number | undefined;
+    if (rawThreshold !== undefined) {
+      if (typeof rawThreshold !== 'string' || !/^\+?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i.test(rawThreshold.trim())) {
+        throw new BadRequestException('thresholdHours must be a single positive finite number of hours.');
+      }
+      const hours = Number(rawThreshold.trim());
+      thresholdMs = hours * 3_600_000;
+      if (!Number.isFinite(hours) || hours <= 0 || !Number.isFinite(thresholdMs) || thresholdMs <= 0) {
+        throw new BadRequestException('thresholdHours must be a single positive finite number of hours.');
+      }
+    }
+
     return this.stalenessService.reportForProject(
       projectId,
       thresholdMs,
