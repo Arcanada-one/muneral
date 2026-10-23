@@ -2,11 +2,22 @@
 
 import { useState } from 'react';
 import { Bot, User, Clock } from 'lucide-react';
+import { TASK_STATUSES, type TaskStatus } from '@muneral/types';
 import { useActivity } from '@/lib/api/tasks';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 const ACTIVITY_PAGE_SIZE = 20;
+
+const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
+  todo: 'To Do',
+  in_progress: 'In Progress',
+  review: 'Review',
+  blocked: 'Blocked',
+  done: 'Done',
+  cancelled: 'Cancelled',
+  archived: 'Archived',
+};
 
 interface AuditLogProps {
   taskId: string;
@@ -22,6 +33,21 @@ function formatRelativeTime(dateStr: string): string {
   const diffHours = Math.floor(diffMins / 60);
   if (diffHours < 24) return `${diffHours}h ago`;
   return date.toLocaleDateString();
+}
+
+function isTaskStatus(value: unknown): value is TaskStatus {
+  return typeof value === 'string' && TASK_STATUSES.includes(value as TaskStatus);
+}
+
+function formatStatusChange(action: string, payload: unknown): string | null {
+  if (action !== 'task:status_changed' || payload === null || typeof payload !== 'object' || Array.isArray(payload)) {
+    return null;
+  }
+
+  const transition = payload as { from?: unknown; to?: unknown };
+  if (!isTaskStatus(transition.from) || !isTaskStatus(transition.to)) return null;
+
+  return `Status changed: ${TASK_STATUS_LABELS[transition.from]} → ${TASK_STATUS_LABELS[transition.to]}`;
 }
 
 export function AuditLog({ taskId }: AuditLogProps) {
@@ -106,7 +132,9 @@ function TaskActivityLog({ taskId }: AuditLogProps) {
                       agent
                     </span>
                   )}
-                  <span className="text-xs text-muted-foreground">{entry.action}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {formatStatusChange(entry.action, entry.payload) ?? entry.action}
+                  </span>
                 </div>
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   {formatRelativeTime(entry.createdAt)}

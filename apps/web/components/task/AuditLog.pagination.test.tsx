@@ -36,6 +36,26 @@ function responseFor(taskId: string, page: number) {
   };
 }
 
+function statusChangeResponse(payload: unknown, action = 'task:status_changed') {
+  return {
+    data: {
+      data: [{
+        id: '00000000-0000-4000-8000-000000000099',
+        taskId: taskA,
+        actorId,
+        actorType: 'human',
+        actorName: 'Status actor',
+        action,
+        payload,
+        createdAt: '2026-10-23T12:00:00.000Z',
+      }],
+      total: 1,
+      page: 1,
+      limit: 20,
+    },
+  };
+}
+
 function renderAuditLog(taskId = taskA) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false, gcTime: 0 } },
@@ -61,6 +81,39 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('AuditLog activity history pagination', () => {
+  it.each([
+    ['todo', 'To Do'],
+    ['in_progress', 'In Progress'],
+    ['review', 'Review'],
+    ['blocked', 'Blocked'],
+    ['done', 'Done'],
+    ['cancelled', 'Cancelled'],
+    ['archived', 'Archived'],
+  ])('shows a status transition from %s using its readable label', async (status, label) => {
+    apiGet.mockResolvedValue(statusChangeResponse({ from: status, to: 'done' }));
+    renderAuditLog();
+
+    expect(await screen.findByText(`Status changed: ${label} → Done`)).toBeInTheDocument();
+    expect(screen.queryByText('task:status_changed')).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ['null payload', null],
+    ['missing transition field', { from: 'todo' }],
+    ['non-string transition field', { from: 'todo', to: 42 }],
+    ['unknown source status', { from: 'unknown', to: 'done' }],
+    ['unknown destination status', { from: 'todo', to: '<img src=x onerror=alert(1)>' }],
+    ['non-status action with status-like payload', { from: 'todo', to: 'done' }, 'task:updated'],
+  ])('falls back to the action for %s without rendering payload markup', async (_description, payload, action = 'task:status_changed') => {
+    apiGet.mockResolvedValue(statusChangeResponse(payload, action));
+    renderAuditLog();
+
+    expect(await screen.findByText(action)).toBeInTheDocument();
+    expect(screen.queryByText(/Status changed:/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    expect(screen.queryByText(/unknown|<img/)).not.toBeInTheDocument();
+  });
+
   it('reaches the older 21st event and returns to the newest page', async () => {
     const user = userEvent.setup();
     renderAuditLog();
