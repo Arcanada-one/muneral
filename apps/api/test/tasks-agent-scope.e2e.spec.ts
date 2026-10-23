@@ -44,6 +44,8 @@ describe('Agent-key scope on /tasks (e2e)', () => {
   let otherWorkspaceId: string;
   let projectId: string;
   let otherProjectId: string;
+  let memberUserId: string;
+  let outsiderUserId: string | undefined;
   let assignedAgentId: string;
   let assignedKey: string;
   let strangerKey: string;
@@ -74,10 +76,12 @@ describe('Agent-key scope on /tasks (e2e)', () => {
     const id = uuidv4().slice(0, 8);
 
     const user = await prisma.user.create({ data: { name: `mun0043-${id}` } });
+    memberUserId = user.id;
     const workspace = await prisma.workspace.create({
       data: { slug: `ws-${id}`, name: `WS ${id}`, ownerId: user.id },
     });
     workspaceId = workspace.id;
+    await prisma.workspaceMember.create({ data: { workspaceId, userId: memberUserId, role: 'owner' } });
     const other = await prisma.workspace.create({
       data: { slug: `ws-other-${id}`, name: `Other ${id}`, ownerId: user.id },
     });
@@ -151,6 +155,10 @@ describe('Agent-key scope on /tasks (e2e)', () => {
       await prisma.activityLog.deleteMany({ where: { workspaceId: wid } });
       await prisma.workspace.delete({ where: { id: wid } }).catch(() => void 0);
     }
+    if (outsiderUserId) {
+      await prisma.user.delete({ where: { id: outsiderUserId } }).catch(() => void 0);
+      outsiderUserId = undefined;
+    }
   });
 
   async function createTask(overrides: { status?: string; projectId?: string } = {}) {
@@ -188,6 +196,76 @@ describe('Agent-key scope on /tasks (e2e)', () => {
 
     expect(res.body.id).toBe(task.id);
     expect(res.body.status).toBe('todo');
+  });
+
+  it('returns only exact task identity for an assigned agent and does not write task activity', async () => {
+    const task = await createTask();
+    await assign(task.id);
+    const activityBefore = await prisma.activityLog.count({ where: { taskId: task.id } });
+    const assignmentsBefore = await prisma.taskAgent.count({ where: { taskId: task.id } });
+    const fieldStateBefore = await prisma.taskFieldState.count({ where: { taskId: task.id } });
+    const evidenceBefore = await prisma.taskEvidenceAttachment.count({ where: { taskId: task.id } });
+
+    const res = await supertest(app.getHttpServer())
+      .get(`/tasks/${task.id}/identity`)
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .expect(200);
+
+    expect(res.body).toStrictEqual({ id: task.id, projectId, status: 'todo' });
+    expect(await prisma.activityLog.count({ where: { taskId: task.id } })).toBe(activityBefore);
+    expect(await prisma.taskAgent.count({ where: { taskId: task.id } })).toBe(assignmentsBefore);
+    expect(await prisma.taskFieldState.count({ where: { taskId: task.id } })).toBe(fieldStateBefore);
+    expect(await prisma.taskEvidenceAttachment.count({ where: { taskId: task.id } })).toBe(evidenceBefore);
+    expect(await prisma.task.findUniqueOrThrow({ where: { id: task.id } })).toMatchObject({ status: 'todo' });
+  });
+
+  it('keeps the existing creator branch and JWT membership boundary for identity reads', async () => {
+    const createdByAgent = await prisma.task.create({
+      data: {
+        projectId,
+        title: 'agent-created identity fixture',
+        status: 'todo',
+        priority: 'medium',
+        actorType: 'agent',
+        createdById: assignedAgentId,
+      },
+    });
+    await prisma.$transaction(async (tx) => fsSvc.recompute(tx, createdByAgent));
+
+    const agentRes = await supertest(app.getHttpServer())
+      .get(`/tasks/${createdByAgent.id}/identity`)
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .expect(200);
+    expect(agentRes.body).toStrictEqual({ id: createdByAgent.id, projectId, status: 'todo' });
+
+    const task = await createTask();
+    const memberRes = await supertest(app.getHttpServer())
+      .get(`/tasks/${task.id}/identity`)
+      .set('Authorization', `Bearer ${authSvc.signAccess(memberUserId)}`)
+      .expect(200);
+    expect(memberRes.body).toStrictEqual({ id: task.id, projectId, status: 'todo' });
+
+    const outsider = await prisma.user.create({ data: { name: `identity-outsider-${uuidv4().slice(0, 8)}` } });
+    outsiderUserId = outsider.id;
+    await supertest(app.getHttpServer())
+      .get(`/tasks/${task.id}/identity`)
+      .set('Authorization', `Bearer ${authSvc.signAccess(outsider.id)}`)
+      .expect(403);
+  });
+
+  it('preserves task-scope 403 for non-owned, foreign, missing, and malformed identity ids', async () => {
+    const task = await createTask();
+    await assign(task.id);
+    const attempts = [
+      supertest(app.getHttpServer()).get(`/tasks/${task.id}/identity`).set('Authorization', `Bearer ${strangerKey}`),
+      supertest(app.getHttpServer()).get(`/tasks/${task.id}/identity`).set('Authorization', `Bearer ${foreignKey}`),
+      supertest(app.getHttpServer()).get(`/tasks/${uuidv4()}/identity`).set('Authorization', `Bearer ${assignedKey}`),
+      supertest(app.getHttpServer()).get('/tasks/not-a-uuid/identity').set('Authorization', `Bearer ${assignedKey}`),
+    ];
+    for (const request of attempts) {
+      const res = await request.expect(403);
+      expect(res.body).not.toHaveProperty('projectId');
+    }
   });
 
   it('refuses an agent that is not assigned to the task', async () => {
