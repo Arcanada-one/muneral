@@ -164,6 +164,31 @@ a task's history is bounded by the same assignment as acting on it:
 |---|---|
 | `GET /tasks/:taskId/activity` | the task's `ActivityLog` entries, if the agent is assigned to the task — otherwise `403` |
 
+### Paging and consistency
+
+The route is relative to `/api/v1`. It accepts `page` and `limit` query parameters; when omitted, they default to
+`page=1` and `limit=20`:
+
+```http
+GET /api/v1/tasks/550e8400-e29b-41d4-a716-446655440000/activity?page=2&limit=20
+Authorization: Bearer mun_sk_<key>
+```
+
+The response envelope is `{ "data": [...], "total": 42, "page": 2, "limit": 20 }`. `data` contains activity rows
+for the task, and `total` is the count for that task. Pages use offset pagination: the requested offset is
+`(page - 1) * limit`. The current query orders rows by `createdAt` descending only; it does not define a unique
+tie-breaker for rows with the same timestamp.
+
+Treat this as a live, best-effort page, not a snapshot. The row query and count query run separately, and each page
+request is separate. Activity added or removed between requests can change `total` or shift rows across offsets, so a
+multi-page walk can miss or repeat rows. Rows with equal `createdAt` values also have no guaranteed relative order.
+This endpoint provides no cursor or snapshot token.
+
+Send positive base-10 integer values and use a modest `limit`. The controller parses both values with `parseInt`, and
+the current controller/service path has no explicit integer, range, or maximum-`limit` validation. Do not rely on a
+particular HTTP response for malformed, zero, negative, or excessively large values; those cases are not a documented
+input contract.
+
 `ActivityService.findForTask` returns the full stored row, so a `comment`
 action's response includes `payload.body` verbatim — the same content
 `POST .../comments` accepted. **This is why no dedicated `GET
