@@ -1,12 +1,46 @@
 'use client';
 
 import { Bot, User, Clock } from 'lucide-react';
+import { TASK_STATUSES, type TaskStatus } from '@muneral/types';
 import { useActivity } from '@/lib/api/tasks';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface AuditLogProps {
   taskId: string;
+}
+
+const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
+  todo: 'To Do',
+  in_progress: 'In Progress',
+  review: 'Review',
+  blocked: 'Blocked',
+  done: 'Done',
+  cancelled: 'Cancelled',
+  archived: 'Archived',
+};
+
+function isTaskStatus(value: unknown): value is TaskStatus {
+  return TASK_STATUSES.some((status) => status === value);
+}
+
+function isStatusTransitionPayload(
+  value: unknown,
+): value is { from: unknown; to: unknown } {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    Object.prototype.hasOwnProperty.call(value, 'from') &&
+    Object.prototype.hasOwnProperty.call(value, 'to')
+  );
+}
+
+function formatStatusTransition(payload: unknown): string | undefined {
+  if (!isStatusTransitionPayload(payload)) return undefined;
+  if (!isTaskStatus(payload.from) || !isTaskStatus(payload.to)) return undefined;
+
+  return `${TASK_STATUS_LABELS[payload.from]} → ${TASK_STATUS_LABELS[payload.to]}`;
 }
 
 function formatRelativeTime(dateStr: string): string {
@@ -74,7 +108,11 @@ export function AuditLog({ taskId }: AuditLogProps) {
                       agent
                     </span>
                   )}
-                  <span className="text-xs text-muted-foreground">{entry.action}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {entry.action === 'task:status_changed'
+                      ? formatStatusTransition(entry.payload) ?? entry.action
+                      : entry.action}
+                  </span>
                 </div>
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   {formatRelativeTime(entry.createdAt)}
