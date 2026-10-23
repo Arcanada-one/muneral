@@ -53,6 +53,16 @@ on:
     # job below verifies the two stay in step, so this cannot rot silently again.
     workflows: ['CI & Deploy']
     types: [completed]
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact reviewed MUN-0064 source commit
+        required: true
+        type: string
+      task_uuid:
+        description: Exact Muneral task bound to this generation
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -324,3 +334,520 @@ jobs:
           sleep 3
           gh api -X PATCH "repos/${REPO}/pulls/${NUM}" -f state=open  >/dev/null
           echo "reopened; CI will now report on the head this workflow pushed"
+
+  native-mutation-artifact:
+    name: m0064-native-mutation-artifact
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: [self-hosted, linux, ci-general]
+    timeout-minutes: 60
+    concurrency:
+      group: m0064-native-mutation-generation
+      cancel-in-progress: false
+    permissions:
+      contents: read
+    steps:
+      - name: Validate exact caller, task, source, and cached runtime
+        id: preflight
+        env:
+          REPOSITORY: ${{ github.repository }}
+          REF: ${{ github.ref }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          WORKFLOW_REF: ${{ github.workflow_ref }}
+          SOURCE_SHA_INPUT: ${{ inputs.source_sha }}
+          TASK_UUID_INPUT: ${{ inputs.task_uuid }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          WORKFLOW_SHA: ${{ github.workflow_sha }}
+        run: |
+          set -euo pipefail
+          artifact_dir="${RUNNER_TEMP}/muneral-mutation-artifact"
+          mkdir -p "${artifact_dir}/logs"
+          cat > "${artifact_dir}/run-manifest.json" <<'JSON'
+          {"schema":"MUN0064MutationRun/v1","state":"preflight-incomplete","source_boundary":{"verdict":"NOT_MEASURED","reason":"source checkout observation has not occurred"}}
+          JSON
+
+          expected_repo='Arcanada-one/muneral'
+          expected_source='385002a3bc00c93b67d0a544a40038e96e8b7825'
+          expected_task='f79ec1a5-c927-415e-8caf-fb0cdca3361c'
+          [[ "${REPOSITORY}" == "${expected_repo}" ]]
+          [[ "${REF}" == 'refs/heads/main' ]]
+          [[ "${DEFAULT_BRANCH}" == 'main' ]]
+          expected_workflow_ref="${expected_repo}/.github/workflows/regenerate-derived-artefacts.yml@refs/heads/main"
+          [[ "${WORKFLOW_REF}" == "${expected_workflow_ref}" ]]
+          [[ "${SOURCE_SHA_INPUT}" =~ ^[0-9a-f]{40}$ ]]
+          [[ "${SOURCE_SHA_INPUT}" == "${expected_source}" ]]
+          [[ "${TASK_UUID_INPUT}" == "${expected_task}" ]]
+          [[ "${RUNNER_TOOL_CACHE:-}" == /* ]]
+
+          node_dir="${RUNNER_TOOL_CACHE}/node/24.22.1/x64"
+          [[ -f "${node_dir}.complete" ]]
+          [[ -x "${node_dir}/bin/node" ]]
+          node_version=$("${node_dir}/bin/node" --version)
+          [[ "${node_version}" == 'v24.22.1' ]]
+          command -v python3 >/dev/null
+
+          artifact_name="m0064-native-mutation-${RUN_ID}"
+          export MANIFEST_PATH="${artifact_dir}/run-manifest.json"
+          export ARTIFACT_NAME="${artifact_name}"
+          export NODE_VERSION="${node_version}"
+          python3 - <<'PY'
+          import datetime, json, os
+          manifest = {
+              "schema": "MUN0064MutationRun/v1",
+              "state": "preflight-passed",
+              "repository": os.environ["REPOSITORY"],
+              "task_uuid": os.environ["TASK_UUID_INPUT"],
+              "source_sha": os.environ["SOURCE_SHA_INPUT"],
+              "workflow_ref": os.environ["WORKFLOW_REF"],
+              "workflow_sha": os.environ["WORKFLOW_SHA"],
+              "dispatch_ref": os.environ["REF"],
+              "run_id": os.environ["RUN_ID"],
+              "run_attempt": os.environ["RUN_ATTEMPT"],
+              "run_started_utc": datetime.datetime.now(
+                  datetime.timezone.utc
+              ).isoformat(),
+              "artifact_name": os.environ["ARTIFACT_NAME"],
+              "actions": {
+                  "setup_node": (
+                      "actions/setup-node@"
+                      "820762786026740c76f36085b0efc47a31fe5020"
+                  ),
+                  "checkout": (
+                      "actions/checkout@"
+                      "3d3c42e5aac5ba805825da76410c181273ba90b1"
+                  ),
+                  "upload_artifact": (
+                      "actions/upload-artifact@"
+                      "ea165f8d65b6e75b540449e92b4886f43607fa02"
+                  ),
+              },
+              "runtime_precheck": {
+                  "node_path": os.path.join(
+                      os.environ["RUNNER_TOOL_CACHE"],
+                      "node/24.22.1/x64/bin/node",
+                  ),
+                  "node_version": os.environ["NODE_VERSION"],
+              },
+              "source_boundary": {
+                  "verdict": "NOT_MEASURED",
+                  "reason": "source checkout observation has not occurred",
+              },
+              "phases": [],
+          }
+          with open(os.environ["MANIFEST_PATH"], "w", encoding="utf-8") as f:
+              json.dump(manifest, f, indent=2, sort_keys=True)
+              f.write("\n")
+          PY
+          {
+            echo "source_sha=${SOURCE_SHA_INPUT}"
+            echo "task_uuid=${TASK_UUID_INPUT}"
+            echo "artifact_dir=${artifact_dir}"
+            echo "artifact_name=${artifact_name}"
+            echo "expected_node_path=${node_dir}/bin/node"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Select the already cached Node runtime
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24.22.1
+          check-latest: false
+
+      - name: Checkout the exact reviewed source without persisted credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: Arcanada-one/muneral
+          ref: ${{ steps.preflight.outputs.source_sha }}
+          fetch-depth: 2
+          persist-credentials: false
+
+      - name: Require existing offline Corepack pnpm
+        env:
+          COREPACK_ENABLE_NETWORK: '0'
+          EXPECTED_NODE_PATH: ${{ steps.preflight.outputs.expected_node_path }}
+          ARTIFACT_DIR: ${{ steps.preflight.outputs.artifact_dir }}
+        run: |
+          set -euo pipefail
+          [[ "$(command -v node)" == "${EXPECTED_NODE_PATH}" ]]
+          [[ "$(node --version)" == 'v24.22.1' ]]
+          [[ -x "$(command -v corepack)" ]]
+          pnpm_bin="${RUNNER_TEMP}/m0064-corepack-bin"
+          mkdir -p "${pnpm_bin}"
+          corepack enable --install-directory "${pnpm_bin}"
+          echo "${pnpm_bin}" >> "${GITHUB_PATH}"
+          export PATH="${pnpm_bin}:${PATH}"
+          COREPACK_ENABLE_NETWORK=0 pnpm --version > \
+            "${ARTIFACT_DIR}/pnpm-version.txt"
+          [[ "$(cat "${ARTIFACT_DIR}/pnpm-version.txt")" == '11.5.2' ]]
+          pnpm_path="${pnpm_bin}/pnpm"
+          [[ -x "${pnpm_path}" ]]
+          export MANIFEST_PATH="${ARTIFACT_DIR}/run-manifest.json"
+          export NODE_PATH="$(command -v node)"
+          export NODE_VERSION="$(node --version)"
+          export PNPM_PATH="${pnpm_path}"
+          export PNPM_VERSION="$(cat "${ARTIFACT_DIR}/pnpm-version.txt")"
+          python3 - <<'PY'
+          import json, os
+          with open(os.environ["MANIFEST_PATH"], encoding="utf-8") as f:
+              manifest = json.load(f)
+          manifest["runtime"] = {
+              "node_path": os.environ["NODE_PATH"],
+              "node_version": os.environ["NODE_VERSION"],
+              "pnpm_path": os.environ["PNPM_PATH"],
+              "pnpm_version": os.environ["PNPM_VERSION"],
+              "corepack_network": "disabled",
+          }
+          with open(os.environ["MANIFEST_PATH"], "w", encoding="utf-8") as f:
+              json.dump(manifest, f, indent=2, sort_keys=True)
+              f.write("\n")
+          PY
+
+      - name: Install and run native mutation producer/consumer
+        env:
+          COREPACK_ENABLE_NETWORK: '0'
+          SOURCE_SHA: ${{ steps.preflight.outputs.source_sha }}
+          TASK_UUID: ${{ steps.preflight.outputs.task_uuid }}
+          ARTIFACT_DIR: ${{ steps.preflight.outputs.artifact_dir }}
+          ARTIFACT_NAME: ${{ steps.preflight.outputs.artifact_name }}
+          EXPECTED_NODE_PATH: ${{ steps.preflight.outputs.expected_node_path }}
+        run: |
+          set -euo pipefail
+          boundary_dir="${ARTIFACT_DIR}/logs/source-boundary"
+          mkdir -p "${boundary_dir}"
+          boundary_observed=0
+          boundary_verdict='NOT_MEASURED'
+          observe_boundary() {
+            local label="$1"
+            local prefix="${boundary_dir}/${label}"
+            local head tree status diff paths untracked
+            set +e
+            git rev-parse HEAD > "${prefix}.head" 2> "${prefix}.git-error"
+            head_status=$?
+            git rev-parse HEAD^{tree} > "${prefix}.tree" 2>> "${prefix}.git-error"
+            tree_status=$?
+            git status --porcelain=v1 --untracked-files=all > \
+              "${prefix}.status" 2>> "${prefix}.git-error"
+            status_status=$?
+            git diff --binary HEAD > "${prefix}.diff" 2>> "${prefix}.git-error"
+            diff_status=$?
+            git diff --name-only HEAD > "${prefix}.tracked-paths" \
+              2>> "${prefix}.git-error"
+            paths_status=$?
+            git ls-files --others --exclude-standard > \
+              "${prefix}.untracked-paths" 2>> "${prefix}.git-error"
+            untracked_status=$?
+            set -e
+            if (( head_status == 0 && tree_status == 0 && status_status == 0 && \
+                  diff_status == 0 && paths_status == 0 && untracked_status == 0 )); then
+              sha256sum "${prefix}.diff" > "${prefix}.diff.sha256"
+              boundary_observed=1
+              return 0
+            fi
+            boundary_observed=0
+            return 1
+          }
+          finish_run() {
+            local original_exit=$?
+            trap - EXIT
+            set +e
+            local final_observed=0
+            if observe_boundary final; then
+              final_observed=1
+            fi
+            if (( boundary_observed == 1 && final_observed == 1 )); then
+              export BOUNDARY_VERDICT='PASS'
+              export BOUNDARY_REASON='checkout and final observations completed; path and tree constraints evaluated'
+            else
+              export BOUNDARY_VERDICT='NOT_MEASURED'
+              export BOUNDARY_REASON='checkout or final source-boundary observation was incomplete'
+            fi
+            export ORIGINAL_EXIT_CODE="${original_exit}"
+            export RUN_ENDED_UTC="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            export FINAL_HEAD="$(cat "${boundary_dir}/final.head" 2>/dev/null || true)"
+            export FINAL_TREE="$(cat "${boundary_dir}/final.tree" 2>/dev/null || true)"
+            export SOURCE_SHA EXPECTED_NODE_PATH ARTIFACT_DIR
+            export MANIFEST_PATH="${ARTIFACT_DIR}/run-manifest.json"
+            if [[ -f apps/api/test/assembly/mutation-results.json && \
+                  -f "${ARTIFACT_DIR}/mutation-results.before.json" ]]; then
+              cp apps/api/test/assembly/mutation-results.json \
+                "${ARTIFACT_DIR}/mutation-results.generated.json"
+              sha256sum "${ARTIFACT_DIR}/mutation-results.generated.json" > \
+                "${ARTIFACT_DIR}/mutation-results.generated.sha256"
+            fi
+            python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          artifact_dir = Path(os.environ["ARTIFACT_DIR"])
+          boundary_dir = artifact_dir / "logs/source-boundary"
+          manifest_path = Path(os.environ["MANIFEST_PATH"])
+          original_exit = int(os.environ["ORIGINAL_EXIT_CODE"])
+          observed = os.environ["BOUNDARY_VERDICT"] == "PASS"
+          def lines(name):
+              path = boundary_dir / name
+              return path.read_text(encoding="utf-8").splitlines() if path.exists() else []
+          final_paths = lines("final.tracked-paths")
+          final_untracked = lines("final.untracked-paths")
+          initial_head = (boundary_dir / "checkout.head").read_text().strip() if (boundary_dir / "checkout.head").exists() else ""
+          initial_tree = (boundary_dir / "checkout.tree").read_text().strip() if (boundary_dir / "checkout.tree").exists() else ""
+          final_head = os.environ.get("FINAL_HEAD", "")
+          final_tree = os.environ.get("FINAL_TREE", "")
+          allowed = {"apps/api/test/assembly/mutation-results.json"}
+          violations = []
+          if not observed:
+              violations.append("source boundary observation incomplete")
+          if initial_head != os.environ["SOURCE_SHA"] or final_head != os.environ["SOURCE_SHA"]:
+              violations.append("checked-out HEAD differs from validated source SHA")
+          if not initial_tree or final_tree != initial_tree:
+              violations.append("committed source tree changed or was not observed")
+          if any(path not in allowed for path in final_paths):
+              violations.append("tracked changes exceeded allocated output path")
+          if final_untracked:
+              violations.append("untracked files were present")
+          if (boundary_dir / "checkout.status").exists() and (boundary_dir / "checkout.status").read_text().strip():
+              violations.append("checkout was not initially clean")
+          boundary_verdict = "NOT_MEASURED" if not observed else ("FAIL" if violations else "PASS")
+          with manifest_path.open(encoding="utf-8") as f:
+              manifest = json.load(f)
+          manifest["state"] = "completed" if original_exit == 0 and boundary_verdict == "PASS" else "failed"
+          manifest["exit_code"] = original_exit if original_exit != 0 else (0 if boundary_verdict == "PASS" else 1)
+          manifest["original_exit_code"] = original_exit
+          manifest["ended_utc"] = os.environ["RUN_ENDED_UTC"]
+          manifest["source_boundary"] = {
+              "verdict": boundary_verdict,
+              "reason": os.environ["BOUNDARY_REASON"],
+              "violations": violations,
+              "validated_source_sha": os.environ["SOURCE_SHA"],
+              "checkout_head": initial_head or None,
+              "final_head": final_head or None,
+              "checkout_tree": initial_tree or None,
+              "final_tree": final_tree or None,
+              "tracked_paths": final_paths if (boundary_dir / "final.tracked-paths").exists() else None,
+              "untracked_paths": final_untracked if (boundary_dir / "final.untracked-paths").exists() else None,
+              "observations": {
+                  "checkout": "complete" if (boundary_dir / "checkout.status").exists() else "NOT_MEASURED",
+                  "final": "complete" if (boundary_dir / "final.status").exists() else "NOT_MEASURED",
+              },
+          }
+          (boundary_dir / "verdict").write_text(boundary_verdict + "\n", encoding="utf-8")
+          if original_exit == 0 and boundary_verdict != "PASS":
+              manifest["exit_code"] = 1
+          with manifest_path.open("w", encoding="utf-8") as f:
+              json.dump(manifest, f, indent=2, sort_keys=True)
+              f.write("\n")
+          PY
+            local final_exit="${original_exit}"
+            BOUNDARY_VERDICT="$(cat "${boundary_dir}/verdict" 2>/dev/null || echo NOT_MEASURED)"
+            if (( original_exit == 0 )) && [[ "${BOUNDARY_VERDICT}" != 'PASS' ]]; then
+              final_exit=1
+            fi
+            exit "${final_exit}"
+          }
+          trap finish_run EXIT
+          if ! observe_boundary checkout; then
+            export BOUNDARY_VERDICT='NOT_MEASURED'
+            export BOUNDARY_REASON='initial checkout observation failed'
+            exit 1
+          fi
+          export BOUNDARY_VERDICT='PASS'
+          export BOUNDARY_REASON='checkout and final source-boundary observations completed'
+          exec 9>"${RUNNER_TEMP}/m0064-native-mutation.lock"
+          flock -n 9
+
+          [[ "$(git rev-parse HEAD)" == "${SOURCE_SHA}" ]]
+          [[ "$(git rev-parse HEAD^)" == \
+            'd337c52b7ed72e143d0fe2c410ec48eac57ff6d5' ]]
+          [[ "$(command -v node)" == "${EXPECTED_NODE_PATH}" ]]
+          [[ "$(node --version)" == 'v24.22.1' ]]
+          [[ "$(pnpm --version)" == '11.5.2' ]]
+          command -v flock >/dev/null
+          command -v nice >/dev/null
+          command -v ionice >/dev/null
+
+          cp apps/api/test/assembly/mutation-results.json \
+            "${ARTIFACT_DIR}/mutation-results.before.json"
+          sha256sum "${ARTIFACT_DIR}/mutation-results.before.json" > \
+            "${ARTIFACT_DIR}/mutation-results.before.sha256"
+          export MANIFEST_PATH="${ARTIFACT_DIR}/run-manifest.json"
+          export CHECKOUT_HEAD="$(git rev-parse HEAD)"
+          export CHECKOUT_PARENT="$(git rev-parse HEAD^)"
+          export CHECKOUT_TREE="$(git rev-parse HEAD^{tree})"
+          checkout_status=$(cat "${boundary_dir}/checkout.status")
+          export CHECKOUT_STATUS="${checkout_status}"
+          export ARTIFACT_NAME
+          python3 - <<'PY'
+          import json, os
+          with open(os.environ["MANIFEST_PATH"], encoding="utf-8") as f:
+              manifest = json.load(f)
+          manifest["checkout"] = {
+              "head": os.environ["CHECKOUT_HEAD"],
+              "parent": os.environ["CHECKOUT_PARENT"],
+              "tree_before": os.environ["CHECKOUT_TREE"],
+              "working_tree_before": os.environ["CHECKOUT_STATUS"],
+              "artifact_name": os.environ["ARTIFACT_NAME"],
+          }
+          with open(os.environ["MANIFEST_PATH"], "w", encoding="utf-8") as f:
+              json.dump(manifest, f, indent=2, sort_keys=True)
+              f.write("\n")
+          PY
+
+          record_phase() {
+            local phase="$1"; shift
+            local start end pid status
+            local log_base="${ARTIFACT_DIR}/logs/${phase}"
+            start=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+            if [[ "${phase}" == 'prisma-generate' ]]; then
+              env DATABASE_URL='postgresql://unused:unused@localhost:'\
+                '5432/unused' \
+                nice -n 10 ionice -c 3 "$@" > "${log_base}.stdout" \
+                2> "${log_base}.stderr" &
+            else
+              nice -n 10 ionice -c 3 "$@" > "${log_base}.stdout" \
+                2> "${log_base}.stderr" &
+            fi
+            pid=$!
+            set +e
+            wait "${pid}"
+            status=$?
+            set -e
+            end=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+            PHASE_NAME="${phase}" \
+              PHASE_START="${start}" \
+              PHASE_END="${end}" \
+              PHASE_PID="${pid}" \
+              PHASE_EXIT="${status}" \
+              PHASE_CWD="$PWD" \
+              MANIFEST_PATH="${ARTIFACT_DIR}/run-manifest.json" \
+              python3 - "$@" <<'PY'
+          import json, os, sys
+          phase = os.environ["PHASE_NAME"]
+          start = os.environ["PHASE_START"]
+          end = os.environ["PHASE_END"]
+          pid = os.environ["PHASE_PID"]
+          exit_code = os.environ["PHASE_EXIT"]
+          cwd = os.environ["PHASE_CWD"]
+          argv = sys.argv[1:]
+          path = os.environ["MANIFEST_PATH"]
+          with open(path, encoding="utf-8") as f:
+              manifest = json.load(f)
+          phase_env = {"COREPACK_ENABLE_NETWORK": "0"}
+          process_argv = ["nice", "-n", "10", "ionice", "-c", "3", *argv]
+          if phase == "prisma-generate":
+              database_url = "postgresql://unused:unused@localhost:5432/unused"
+              phase_env["DATABASE_URL"] = database_url
+              process_argv = [
+                  "env",
+                  f"DATABASE_URL={database_url}",
+                  *process_argv,
+              ]
+          manifest["phases"].append({
+              "phase": phase,
+              "argv": argv,
+              "process_argv": process_argv,
+              "env": phase_env,
+              "cwd": cwd,
+              "pid": int(pid),
+              "started_utc": start,
+              "ended_utc": end,
+              "exit_code": int(exit_code),
+              "stdout": f"logs/{phase}.stdout",
+              "stderr": f"logs/{phase}.stderr",
+          })
+          with open(path, "w", encoding="utf-8") as f:
+              json.dump(manifest, f, indent=2, sort_keys=True)
+              f.write("\n")
+          PY
+            return "${status}"
+          }
+
+          record_phase install pnpm install \
+            --frozen-lockfile --ignore-scripts || exit $?
+          record_phase prisma-generate pnpm exec prisma generate || exit $?
+          record_phase build pnpm build || exit $?
+          record_phase mutation-producer node \
+            apps/api/test/assembly/mutation-harness.js \
+            --json apps/api/test/assembly/mutation-results.json || exit $?
+          record_phase mutation-structure-consumer node \
+            apps/api/test/assembly/mutation-harness.js \
+            --verify-structure \
+            apps/api/test/assembly/mutation-results.json || exit $?
+
+      - name: Record boundary when checkout succeeded but producer step did not run
+        if: always()
+        env:
+          ARTIFACT_DIR: ${{ steps.preflight.outputs.artifact_dir }}
+          SOURCE_SHA: ${{ steps.preflight.outputs.source_sha }}
+        run: |
+          set -euo pipefail
+          manifest_path="${ARTIFACT_DIR}/run-manifest.json"
+          [[ -f "${manifest_path}" ]] || exit 0
+          boundary_dir="${ARTIFACT_DIR}/logs/source-boundary"
+          mkdir -p "${boundary_dir}"
+          [[ -f "${boundary_dir}/final.status" ]] && exit 0
+          if [[ ! -e .git ]]; then
+            exit 0
+          fi
+          set +e
+          git rev-parse HEAD > "${boundary_dir}/final.head" 2> "${boundary_dir}/final.git-error"
+          head_status=$?
+          git rev-parse HEAD^{tree} > "${boundary_dir}/final.tree" 2>> "${boundary_dir}/final.git-error"
+          tree_status=$?
+          git status --porcelain=v1 --untracked-files=all > "${boundary_dir}/final.status" 2>> "${boundary_dir}/final.git-error"
+          status_status=$?
+          git diff --binary HEAD > "${boundary_dir}/final.diff" 2>> "${boundary_dir}/final.git-error"
+          diff_status=$?
+          git diff --name-only HEAD > "${boundary_dir}/final.tracked-paths" 2>> "${boundary_dir}/final.git-error"
+          paths_status=$?
+          git ls-files --others --exclude-standard > "${boundary_dir}/final.untracked-paths" 2>> "${boundary_dir}/final.git-error"
+          untracked_status=$?
+          set -e
+          if (( head_status == 0 && tree_status == 0 && status_status == 0 && diff_status == 0 && paths_status == 0 && untracked_status == 0 )); then
+            sha256sum "${boundary_dir}/final.diff" > "${boundary_dir}/final.diff.sha256"
+          fi
+          MANIFEST_PATH="${manifest_path}" SOURCE_SHA="${SOURCE_SHA:-}" python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          manifest_path = Path(os.environ["MANIFEST_PATH"])
+          with manifest_path.open(encoding="utf-8") as f:
+              manifest = json.load(f)
+          manifest["source_boundary"] = {
+              "verdict": "NOT_MEASURED",
+              "reason": "checkout completed but the producer step did not capture its initial and final boundary",
+              "validated_source_sha": os.environ.get("SOURCE_SHA") or None,
+              "final_observation": "complete" if (manifest_path.parent / "logs/source-boundary/final.status").exists() else "NOT_MEASURED",
+          }
+          manifest["state"] = "failed"
+          with manifest_path.open("w", encoding="utf-8") as f:
+              json.dump(manifest, f, indent=2, sort_keys=True)
+              f.write("\n")
+          PY
+
+      - name: Upload exact producer output and run manifest
+        id: upload
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: m0064-native-mutation-${{ github.run_id }}
+          path: ${{ runner.temp }}/muneral-mutation-artifact/
+          if-no-files-found: error
+
+      - name: Record artifact return tuple
+        if: always() && steps.upload.outputs.artifact-id != ''
+        env:
+          ARTIFACT_ID: ${{ steps.upload.outputs.artifact-id }}
+          ARTIFACT_URL: ${{ steps.upload.outputs.artifact-url }}
+          ARTIFACT_DIGEST: ${{ steps.upload.outputs.artifact-digest }}
+          ARTIFACT_NAME: m0064-native-mutation-${{ github.run_id }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          SOURCE_SHA: ${{ steps.preflight.outputs.source_sha }}
+        run: |
+          set -euo pipefail
+          {
+            echo '### MUN-0064 native mutation artifact'
+            echo
+            echo "- Run/attempt: ${RUN_ID}/${RUN_ATTEMPT}"
+            echo "- Source: ${SOURCE_SHA}"
+            echo "- Artifact name: ${ARTIFACT_NAME}"
+            echo "- Artifact ID: ${ARTIFACT_ID}"
+            echo "- Artifact URL: ${ARTIFACT_URL}"
+            echo "- Artifact digest: ${ARTIFACT_DIGEST}"
+          } >> "${GITHUB_STEP_SUMMARY}"
