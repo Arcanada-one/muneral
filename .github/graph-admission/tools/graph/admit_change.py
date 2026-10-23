@@ -3492,6 +3492,7 @@ def gate(repo: Path, base: str, head: str, receipt_paths: list[Path], policy: di
          current_source_program_ref: str | None = None,
          current_source_signing_key_fingerprint: str | None = None,
          root_typecheck_ci_root: Path | None = None,
+         current_evaluator: dict | None = None,
          github_token: str | None = None) -> dict:
     checks: list[dict] = []
     # A2-238. The policy's own words: `off` means "the attachment is not required (never used in a
@@ -3648,7 +3649,8 @@ def gate(repo: Path, base: str, head: str, receipt_paths: list[Path], policy: di
             stage_doc, stage_problems = stage_evidence_for_receipt(
                 Path(rec["path"]), doc, repo, base, head, stage_evidence_path,
                 stage_evidence_root or Path(stage_evidence_path).parent,
-                expected_repo_name=repo_name or repo_remote_name(repo))
+                expected_repo_name=repo_name or repo_remote_name(repo),
+                current_evaluator=current_evaluator, github_token=github_token)
             preexisting_failed = (stage_doc.get("pre_existing_failed", [])
                                   if isinstance(stage_doc, dict) else [])
             if preexisting_failed:
@@ -3666,9 +3668,13 @@ def gate(repo: Path, base: str, head: str, receipt_paths: list[Path], policy: di
                                           "not_measured_entities": stage_doc["nm_entities"],
                                           "path_coverage": stage_doc["path_coverage"],
                                           "entity_coverage": stage_doc["entity_coverage"]}
+                if "current_evaluator_check" in stage_doc:
+                    rec["stage_evidence"]["current_evaluator_check"] = stage_doc["current_evaluator_check"]
                 checks.append({"id": "STAGE-EVIDENCE", "code": "STAGE_EVIDENCE_ELIGIBLE", "verdict": "admit",
                                "detail": (f"{stage_doc['stage_id']} binds this exact CAR/range; stage evidence satisfies only "
-                                          "C09/C11 and null-work-item C13 while raw CAR verdicts remain unchanged"),
+                                          "C09/C11 and null-work-item C13 while raw CAR verdicts remain unchanged"
+                                          + ("; current required evaluator remains PENDING_CURRENT_EVALUATOR"
+                                             if "current_evaluator_check" in stage_doc else "")),
                                "receipt": Path(rec["path"]).name})
 
         if any((current_source_userpath_result, current_source_userpath_root,
@@ -5395,6 +5401,27 @@ def cmd_gate(a) -> int:
     current_program_values = (getattr(a, "current_source_program_tools_root", None),
                               getattr(a, "current_source_program_ref", None),
                               getattr(a, "current_source_signing_key_fingerprint", None))
+    current_evaluator_names = (
+        "current_evaluator_run_id", "current_evaluator_attempt", "current_evaluator_check_run_id",
+        "current_evaluator_job_key", "current_evaluator_repository", "current_evaluator_caller_workflow_ref",
+        "current_evaluator_caller_workflow_sha", "current_evaluator_workflow_repository",
+        "current_evaluator_workflow_file_path", "current_evaluator_workflow_ref",
+        "current_evaluator_workflow_sha", "current_evaluator_program_ref",
+    )
+    current_evaluator_values = tuple(getattr(a, name, None) for name in current_evaluator_names)
+    current_evaluator = None
+    if any(value is not None for value in current_evaluator_values):
+        if not all(value is not None for value in current_evaluator_values):
+            raise UsageError("current evaluator run, attempt, job, caller and canonical workflow identity must be supplied together")
+        if not getattr(a, "stage_evidence", None):
+            raise UsageError("current evaluator identity is only valid with explicit StageEvidence/v1")
+        if not isinstance(getattr(a, "_github_token", None), str) or not a._github_token:
+            raise UsageError("current evaluator validation requires the explicitly forwarded GitHub token")
+        current_evaluator = dict(zip((
+            "run_id", "attempt", "check_run_id", "job_key", "repository", "caller_workflow_ref",
+            "caller_workflow_sha", "workflow_repository", "workflow_file_path", "workflow_ref",
+            "workflow_sha", "program_ref",
+        ), current_evaluator_values))
     if any(value is not None for value in current_values) and not all(value is not None for value in current_values):
         raise UsageError("current-source stage result, root, userpath exit, and producer exit must be supplied together")
     actual_repo_name = getattr(a, "repo_name", None) or repo_remote_name(Path(a.repo).resolve())
@@ -5457,6 +5484,7 @@ def cmd_gate(a) -> int:
                current_source_signing_key_fingerprint=getattr(a, "current_source_signing_key_fingerprint", None),
                root_typecheck_ci_root=(Path(a.root_typecheck_ci_root)
                                        if getattr(a, "root_typecheck_ci_root", None) else None),
+               current_evaluator=current_evaluator,
                github_token=getattr(a, "_github_token", None))
     if a.out:
         command_output_json(a, Path(a.out), doc)
@@ -5848,18 +5876,36 @@ def _stage_preexisting_failed(receipt: dict, repo: Path, base: str, head: str,
 
 
 def _stage_authenticated_github_problems(repo_name: str, base: str, head: str,
-                                         pull_number: int, review_comment_id: int) -> list[str]:
+                                         pull_number: int, review_comment_id: int, *,
+                                         current_evaluator: dict | None = None,
+                                         github_token: str | None = None,
+                                         pending_current_evaluator: list[dict] | None = None) -> list[str]:
     """Re-read PR approval and required checks from authenticated GitHub for this exact range."""
     if (not isinstance(repo_name, str) or not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repo_name)
             or type(pull_number) is not int or pull_number < 1
             or type(review_comment_id) is not int or review_comment_id < 1):
         return ["stage pull request identity is invalid"]
+    canonical_caller_path = {
+        "Arcanada-one/muneral": ".github/workflows/ci.yml",
+    }.get(repo_name)
 
     def get(endpoint, expected_type):
+        if current_evaluator is not None and (not isinstance(github_token, str) or not github_token):
+            raise ValueError("explicit forwarded GitHub token is required for current-evaluator validation")
+        had_token = "GH_TOKEN" in os.environ
+        previous_token = os.environ.get("GH_TOKEN")
         try:
+            if current_evaluator is not None:
+                os.environ["GH_TOKEN"] = github_token
             value = json.loads(full_suite_ci.github(endpoint))
         except (OSError, ValueError, TypeError, json.JSONDecodeError, subprocess.SubprocessError):
             raise ValueError("authenticated GitHub evidence is unavailable or malformed")
+        finally:
+            if current_evaluator is not None:
+                if had_token:
+                    os.environ["GH_TOKEN"] = previous_token
+                else:
+                    os.environ.pop("GH_TOKEN", None)
         if not isinstance(value, expected_type):
             raise ValueError("authenticated GitHub evidence has an unexpected response shape")
         return value
@@ -5923,20 +5969,170 @@ def _stage_authenticated_github_problems(repo_name: str, base: str, head: str,
         if not required or len({name for name, _ in required}) != len(required):
             return ["branch protection has no unambiguous required checks"]
 
+        evaluator_check = None
+        if current_evaluator is not None:
+            if pending_current_evaluator is None:
+                return ["current evaluator requires a pending-result capture target"]
+            if canonical_caller_path is None:
+                return ["current evaluator repository has no supported canonical caller workflow binding"]
+            expected_fields = ("run_id", "attempt", "check_run_id", "job_key", "repository",
+                               "caller_workflow_ref", "caller_workflow_sha", "workflow_repository",
+                               "workflow_file_path", "workflow_ref", "workflow_sha", "program_ref")
+            if (not isinstance(current_evaluator, dict)
+                    or set(current_evaluator) != set(expected_fields)
+                    or any(type(current_evaluator.get(name)) is not int
+                           or current_evaluator[name] < 1 for name in ("run_id", "attempt", "check_run_id"))
+                    or any(not isinstance(current_evaluator.get(name), str) or not current_evaluator[name]
+                           for name in expected_fields[3:])):
+                return ["current evaluator identity is incomplete or malformed"]
+            if (current_evaluator["repository"] != repo_name
+                    or current_evaluator["job_key"] != "graph-admission"
+                    or current_evaluator["workflow_repository"] != "Arcanada-one/arcanada-universal-program"
+                    or current_evaluator["workflow_file_path"] != ".github/workflows/graph-admission.yml"):
+                return ["current evaluator is not the canonical repository workflow job"]
+            for sha_name in ("caller_workflow_sha", "workflow_sha", "program_ref"):
+                if not re.fullmatch(r"[0-9a-f]{40}", current_evaluator[sha_name]):
+                    return ["current evaluator workflow source SHA is malformed"]
+            if current_evaluator["workflow_sha"] != current_evaluator["program_ref"]:
+                return ["current reusable workflow SHA does not match the verified bundle program_ref"]
+            caller_prefix = repo_name + "/"
+            workflow_prefix = "Arcanada-one/arcanada-universal-program/"
+            caller_ref = current_evaluator["caller_workflow_ref"]
+            job_ref = current_evaluator["workflow_ref"]
+            if (not caller_ref.startswith(caller_prefix) or "@" not in caller_ref
+                    or not job_ref.startswith(workflow_prefix) or "@" not in job_ref):
+                return ["current evaluator workflow refs are not repository-qualified"]
+            caller_path_ref = caller_ref[len(caller_prefix):]
+            caller_path, caller_sep, caller_ref_name = caller_path_ref.rpartition("@")
+            job_path_ref = job_ref[len(workflow_prefix):]
+            job_path, job_sep, job_ref_name = job_path_ref.rpartition("@")
+            if (not caller_sep or not job_sep
+                    or not caller_path.startswith(".github/workflows/")
+                    or not caller_path.endswith((".yml", ".yaml"))
+                    or caller_ref_name != f"refs/pull/{pull_number}/merge"
+                    or job_path != current_evaluator["workflow_file_path"]
+                    or job_ref_name != current_evaluator["program_ref"]):
+                return ["current evaluator caller or reusable workflow path is not canonical"]
+            if not any(name == "graph-admission" and app_id == 15368 for name, app_id in required):
+                return ["protected checks do not contain the canonical graph evaluator"]
+            evaluator_check = {
+                "run_id": current_evaluator["run_id"],
+                "attempt": current_evaluator["attempt"],
+                "check_run_id": current_evaluator["check_run_id"],
+                "job_key": current_evaluator["job_key"],
+            }
+            run_prefix = f"{prefix}/actions/runs/{evaluator_check['run_id']}"
+            run_doc = get(run_prefix, dict)
+            run_repo = run_doc.get("repository")
+            pr_merge_sha = pr.get("merge_commit_sha")
+            allowed_caller_workflow_shas = {base, head}
+            allowed_run_head_shas = {head}
+            if isinstance(pr_merge_sha, str) and re.fullmatch(r"[0-9a-f]{40}", pr_merge_sha):
+                allowed_caller_workflow_shas.add(pr_merge_sha)
+                allowed_run_head_shas.add(pr_merge_sha)
+            run_path = caller_path + "@" + caller_ref_name
+            run_pull_requests = run_doc.get("pull_requests")
+            run_pull_matches = ([row for row in run_pull_requests if isinstance(row, dict)
+                                 and row.get("number") == pull_number
+                                 and isinstance(row.get("head"), dict)
+                                 and row["head"].get("sha") == head
+                                 and isinstance(row.get("base"), dict)
+                                 and row["base"].get("sha") == base]
+                                if isinstance(run_pull_requests, list) else [])
+            if (type(run_doc.get("id")) is not int
+                    or run_doc["id"] != evaluator_check["run_id"]
+                    or type(run_doc.get("run_attempt")) is not int
+                    or run_doc["run_attempt"] != evaluator_check["attempt"]
+                    or not isinstance(run_repo, dict) or run_repo.get("full_name") != repo_name
+                    or run_doc.get("head_sha") not in allowed_run_head_shas
+                    or run_doc.get("event") != "pull_request"
+                    or run_doc.get("status") != "in_progress" or run_doc.get("conclusion") is not None
+                    or run_doc.get("path") != run_path
+                    or current_evaluator["caller_workflow_sha"] not in allowed_caller_workflow_shas
+                    or len(run_pull_matches) != 1):
+                return ["authenticated current run does not bind the exact PR head and workflow source"]
+            jobs_doc = get(f"{run_prefix}/attempts/{evaluator_check['attempt']}/jobs?per_page=100", dict)
+            jobs = jobs_doc.get("jobs")
+            if (not isinstance(jobs, list) or type(jobs_doc.get("total_count")) is not int
+                    or jobs_doc["total_count"] != len(jobs) or len(jobs) >= 100
+                    or any(not isinstance(job, dict) for job in jobs)):
+                return ["authenticated current-attempt job inventory is incomplete or malformed"]
+            job_check_url = (f"https://api.github.com/repos/{repo_name}/check-runs/"
+                             f"{evaluator_check['check_run_id']}")
+            current_jobs = [job for job in jobs if job.get("check_run_url") == job_check_url]
+            named_jobs = [job for job in jobs if job.get("name") == evaluator_check["job_key"]]
+            if len(current_jobs) != 1 or len(named_jobs) != 1 or current_jobs != named_jobs:
+                return ["authenticated current attempt does not uniquely map the current job to its check run"]
+            job = current_jobs[0]
+            if (type(job.get("id")) is not int or job["id"] < 1
+                    or type(job.get("run_id")) is not int
+                    or job["run_id"] != evaluator_check["run_id"]
+                    or job.get("head_sha") != run_doc.get("head_sha")
+                    or job.get("head_sha") not in allowed_run_head_shas
+                    or job.get("name") != evaluator_check["job_key"]
+                    or job.get("status") != "in_progress" or job.get("conclusion") is not None):
+                return ["authenticated current evaluator job is not in progress on the exact candidate"]
+            from urllib.parse import urlsplit
+            parsed_check_url = urlsplit(job.get("check_run_url", ""))
+            if (parsed_check_url.scheme != "https" or parsed_check_url.netloc != "api.github.com"
+                    or parsed_check_url.path != f"/repos/{repo_name}/check-runs/{evaluator_check['check_run_id']}"
+                    or parsed_check_url.query or parsed_check_url.fragment or parsed_check_url.username
+                    or parsed_check_url.password):
+                return ["authenticated current job check-run URL is not the exact GitHub API resource"]
+
         check_doc = get(f"{prefix}/commits/{head}/check-runs?per_page=100", dict)
         runs = check_doc.get("check_runs")
         if (not isinstance(runs, list) or type(check_doc.get("total_count")) is not int
-                or check_doc["total_count"] != len(runs) or len(runs) >= 100):
+                or check_doc["total_count"] != len(runs) or len(runs) >= 100
+                or any(not isinstance(row, dict) or type(row.get("id")) is not int
+                       or row["id"] < 1 or not isinstance(row.get("name"), str)
+                       or not isinstance(row.get("head_sha"), str) for row in runs)):
             return ["exact-head check-run inventory is incomplete or malformed"]
+        if current_evaluator is not None and evaluator_check is not None:
+            current_rows = [row for row in runs if isinstance(row, dict)
+                            and row.get("id") == evaluator_check["check_run_id"]]
+            if len(current_rows) != 1:
+                return ["current job check_run_url does not identify one exact-head check run"]
+            current_row = current_rows[0]
+            current_app = current_row.get("app")
+            if (type(current_row.get("id")) is not int or current_row["id"] < 1
+                    or current_row.get("name") != evaluator_check["job_key"]
+                    or current_row.get("head_sha") != head
+                    or not isinstance(current_app, dict) or current_app.get("id") != 15368
+                    or current_row.get("status") != "in_progress"
+                    or current_row.get("conclusion") is not None):
+                return ["current job check run does not match the exact protected pending check"]
+            if caller_path != canonical_caller_path:
+                return ["authenticated current evaluator does not use the canonical repository caller workflow"]
+        current_pending_record = None
         for name, app_id in required:
             matches = [r for r in runs if isinstance(r, dict) and r.get("name") == name
                        and r.get("head_sha") == head
                        and (app_id is None or (isinstance(r.get("app"), dict)
                                                and r["app"].get("id") == app_id))]
             if matches:
+                if any(type(item.get("id")) is not int or item["id"] < 1 for item in matches):
+                    return [f"required exact-head check {name!r} has a malformed check-run identity"]
                 latest = max(matches, key=lambda item: item.get("id", -1)
                              if type(item.get("id")) is int else -1)
                 if latest.get("status") != "completed" or latest.get("conclusion") != "success":
+                    if (current_evaluator is not None and evaluator_check is not None
+                            and name == "graph-admission" and app_id == 15368
+                            and latest.get("id") == evaluator_check["check_run_id"]
+                            and latest.get("head_sha") == head
+                            and latest.get("status") == "in_progress"
+                            and latest.get("conclusion") is None):
+                        current_pending_record = {
+                            "state": "PENDING_CURRENT_EVALUATOR",
+                            "check_run_id": evaluator_check["check_run_id"],
+                            "name": name,
+                            "app_id": app_id,
+                            "head_sha": head,
+                            "run_id": evaluator_check["run_id"],
+                            "attempt": evaluator_check["attempt"],
+                            "job_id": job["id"],
+                        }
+                        continue
                     return [f"required exact-head check {name!r} is not successful"]
                 continue
             if app_id is not None:
@@ -5955,6 +6151,8 @@ def _stage_authenticated_github_problems(repo_name: str, base: str, head: str,
                                 if type(item.get("id")) is int else -1)
             if latest_status.get("state") != "success":
                 return [f"required exact-head status {name!r} is not successful"]
+        if current_pending_record is not None:
+            pending_current_evaluator.append(current_pending_record)
         return []
     except (ValueError, KeyError, TypeError, OSError, subprocess.SubprocessError) as exc:
         return ["authenticated GitHub stage evidence refused: " + str(exc)[:240]]
@@ -6338,7 +6536,9 @@ def _stage_input_problems(receipt: dict, evidence: dict, receipt_digest: str,
 
 def stage_evidence_for_receipt(receipt_path: Path, receipt: dict, repo: Path, base: str, head: str,
                                evidence_path: Path, evidence_root: Path,
-                               expected_repo_name: str | None = None) -> tuple[dict, list[str]]:
+                               expected_repo_name: str | None = None,
+                               current_evaluator: dict | None = None,
+                               github_token: str | None = None) -> tuple[dict, list[str]]:
     """Return a verified stage record only for the exact stock CAR and native gate range."""
     problems = []
     try:
@@ -6387,13 +6587,22 @@ def stage_evidence_for_receipt(receipt_path: Path, receipt: dict, repo: Path, ba
             problems.extend(_stage_input_problems(
                 receipt, evidence, receipt_digest, actual_paths, verified_runs, preexisting_failed))
         pull = evidence.get("pull_request") if isinstance(evidence, dict) else None
+        pending_current_evaluator: list[dict] = []
         if (isinstance(binding, dict) and actual_paths is not None
                 and _stage_exact_keys(pull, ("number", "review_comment_id"))):
             problems.extend(_stage_authenticated_github_problems(
-                actual_repo_name, base, head, pull["number"], pull["review_comment_id"]))
+                actual_repo_name, base, head, pull["number"], pull["review_comment_id"],
+                current_evaluator=current_evaluator,
+                github_token=github_token,
+                pending_current_evaluator=pending_current_evaluator))
         stage_record = dict(evidence) if isinstance(evidence, dict) else {}
         if actual_paths is not None and preexisting_failed:
             stage_record["pre_existing_failed"] = preexisting_failed
+        if pending_current_evaluator:
+            if len(pending_current_evaluator) != 1:
+                problems.append("more than one required current evaluator was classified pending")
+            else:
+                stage_record["current_evaluator_check"] = pending_current_evaluator[0]
         return stage_record, sorted(set(problems))
     except (OSError, UnicodeError, json.JSONDecodeError, ValueError, TypeError, KeyError) as exc:
         return {}, ["stage evidence unavailable or malformed: " + str(exc)[:300]]
@@ -6976,6 +7185,18 @@ def main(argv=None) -> int:
                    help="the caller-owned existing pin required to verify the Program bundle")
     g.add_argument("--root-typecheck-ci-root", type=Path,
                    help="fresh external candidate directory containing authenticated Auth GitHubTypecheckEvidence/v1")
+    g.add_argument("--current-evaluator-run-id", type=int)
+    g.add_argument("--current-evaluator-attempt", type=int)
+    g.add_argument("--current-evaluator-check-run-id", type=int)
+    g.add_argument("--current-evaluator-job-key")
+    g.add_argument("--current-evaluator-repository")
+    g.add_argument("--current-evaluator-caller-workflow-ref")
+    g.add_argument("--current-evaluator-caller-workflow-sha")
+    g.add_argument("--current-evaluator-workflow-repository")
+    g.add_argument("--current-evaluator-workflow-file-path")
+    g.add_argument("--current-evaluator-workflow-ref")
+    g.add_argument("--current-evaluator-workflow-sha")
+    g.add_argument("--current-evaluator-program-ref")
     g.add_argument("--policy", type=Path)
     g.add_argument("--out")
     g.add_argument("--json", action="store_true")
