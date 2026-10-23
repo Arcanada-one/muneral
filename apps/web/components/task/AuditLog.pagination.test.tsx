@@ -160,4 +160,42 @@ describe('AuditLog activity history pagination', () => {
     expect(await screen.findByText('Task A event 1')).toBeInTheDocument();
     expect(screen.getByText('Showing 1–1 of 1 activity')).toBeInTheDocument();
   });
+
+  it('returns to page one when the current page becomes out of range', async () => {
+    const user = userEvent.setup();
+    apiGet.mockImplementation(async (url: string) => {
+      const parsed = new URL(url, 'http://muneral.test');
+      const page = Number(parsed.searchParams.get('page'));
+      if (page === 2) {
+        return {
+          data: {
+            ...responseFor(taskA, 2).data,
+            data: Array.from({ length: 20 }, (_, index) => ({
+              ...responseFor(taskA, 2).data.data[0],
+              id: `00000000-0000-4000-8000-${String(index + 21).padStart(12, '0')}`,
+              action: `Task A event ${index + 21}`,
+            })),
+            total: 41,
+          },
+        };
+      }
+      if (page === 3) {
+        return { data: { data: [], total: 21, page: 3, limit: 20 } };
+      }
+      return responseFor(taskA, 1);
+    });
+    renderAuditLog();
+    expect(await screen.findByText('Task A event 1')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Older activity' }));
+    expect(await screen.findByText('Task A event 21')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Older activity' }));
+    await waitFor(() => expect(apiGet).toHaveBeenCalledWith(`/tasks/${taskA}/activity?page=3&limit=20`));
+    expect(await screen.findByText('Activity changed. Return to the newest available page.')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Show newest activity' }));
+    expect(await screen.findByText('Task A event 1')).toBeInTheDocument();
+    expect(apiGet).toHaveBeenCalledWith(`/tasks/${taskA}/activity?page=1&limit=20`);
+    expect(screen.queryByText('Activity changed. Return to the newest available page.')).not.toBeInTheDocument();
+  });
 });

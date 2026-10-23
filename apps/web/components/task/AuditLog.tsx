@@ -66,7 +66,7 @@ function TaskActivityLog({ taskId }: AuditLogProps) {
           <button
             type="button"
             aria-label="Show newest activity"
-            onClick={() => setPage(pageCount)}
+            onClick={() => setPage(1)}
             disabled={isFetching}
             className="min-h-11 rounded border px-3 text-xs font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
