@@ -101,6 +101,8 @@ describe('AuditLog activity history pagination', () => {
     ['null payload', null],
     ['missing transition field', { from: 'todo' }],
     ['non-string transition field', { from: 'todo', to: 42 }],
+    ['primitive type-test token', { from: 'string', to: 'done' }],
+    ['boxed string status', { from: 'todo', to: new String('done') }],
     ['unknown source status', { from: 'unknown', to: 'done' }],
     ['unknown destination status', { from: 'todo', to: '<img src=x onerror=alert(1)>' }],
     ['non-status action with status-like payload', { from: 'todo', to: 'done' }, 'task:updated'],

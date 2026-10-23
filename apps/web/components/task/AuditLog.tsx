@@ -36,7 +36,7 @@ function formatRelativeTime(dateStr: string): string {
 }
 
 function isTaskStatus(value: unknown): value is TaskStatus {
-  return typeof value === 'string' && TASK_STATUSES.includes(value as TaskStatus);
+  return TASK_STATUSES.some((status) => status === value);
 }
 
 function formatStatusChange(action: string, payload: unknown): string | null {
