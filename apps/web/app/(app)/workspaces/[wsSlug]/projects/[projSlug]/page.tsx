@@ -23,7 +23,7 @@ function formatBacklogDueDate(value: string): string {
 
 export default function ProjectPage() {
   const { wsSlug, projSlug } = useParams<{ wsSlug: string; projSlug: string }>();
-  const { data: project, isLoading } = useProject(wsSlug, projSlug);
+  const { data: project, isError } = useProject(wsSlug, projSlug);
   const { setCurrentProject } = useProjectStore();
   const { data: tasksResult } = useTasks(project?.id ?? '', {});
   const allTasks = tasksResult?.data ?? [];
@@ -34,10 +34,20 @@ export default function ProjectPage() {
     }
   }, [project, setCurrentProject]);
 
-  if (isLoading || !project) {
+  if (!project && !isError) {
     return (
       <div className="flex h-64 items-center justify-center">
         <p className="text-muted-foreground">Loading project...</p>
+      </div>
+    );
+  }
+
+  if (!project) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <p role="alert" className="text-sm text-destructive">
+          Project details are unavailable.
+        </p>
       </div>
     );
   }
