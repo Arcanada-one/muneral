@@ -64,6 +64,11 @@ export function TaskDetail({ task }: TaskDetailProps) {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight">{task.title}</h1>
+        {task.parentId && (
+          <p className="mt-1 text-sm text-muted-foreground">
+            Parent task: <span className="font-mono">{task.parentId}</span>
+          </p>
+        )}
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <TaskStatusAction key={`${task.id}:${task.status}:${task.updatedAt}`} task={task} />
           <Badge variant={pConfig.variant}>{pConfig.label}</Badge>
