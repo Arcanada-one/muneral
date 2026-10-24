@@ -13,6 +13,7 @@ const queries = vi.hoisted(() => ({
   tasks: { data: undefined as unknown, isLoading: false, isError: false },
   checklist: { data: undefined as unknown, isLoading: false, isError: false },
   activity: { data: undefined as unknown, isLoading: false, isError: false },
+  readiness: { data: undefined as unknown, isLoading: true, isError: false },
 }));
 
 vi.mock('@/lib/api/tasks', () => ({
@@ -20,6 +21,7 @@ vi.mock('@/lib/api/tasks', () => ({
   useTasks: () => queries.tasks,
   useChecklist: () => queries.checklist,
   useActivity: () => queries.activity,
+  useTaskReadiness: () => queries.readiness,
   useToggleChecklistItem: () => ({ mutate: vi.fn() }),
   useUpdateTaskStatus: () => ({ mutate: vi.fn() }),
 }));
@@ -42,6 +44,7 @@ beforeEach(() => {
   queries.tasks = { data: undefined, isLoading: false, isError: false };
   queries.checklist = { data: undefined, isLoading: false, isError: false };
   queries.activity = { data: undefined, isLoading: false, isError: false };
+  queries.readiness = { data: undefined, isLoading: true, isError: false };
 });
 afterEach(cleanup);
 
@@ -118,6 +121,7 @@ describe('persisted task and additional read boundaries', () => {
   it('renders real task scalar projection without optional tags', () => {
     render(<TaskDetail task={persisted} />);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(persisted.title);
+    expect(screen.getByText('Dependency readiness is unknown while it loads.')).toBeInTheDocument();
   });
   it('preserves decimal estimate and source date text without inventing a null actor', () => {
     render(<TaskDetail task={{ ...persisted, estimateHours: '1.25', dueDate: 'source due text', actorType: null }} />);
