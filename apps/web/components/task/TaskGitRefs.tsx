@@ -1,6 +1,8 @@
 'use client';
 
-import { GitBranch, GitCommit, ExternalLink } from 'lucide-react';
+import { useState } from 'react';
+import { Copy, GitBranch, GitCommit, ExternalLink } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useTaskGitRefs } from '@/lib/api/tasks';
 import { safeRepositoryUrl } from '@/components/project/ProjectRepository';
 
@@ -9,6 +11,54 @@ const iconMap = {
   branch: GitBranch,
   commit: GitCommit,
 };
+
+const referenceLabels = {
+  repo: 'repository',
+  branch: 'branch',
+  commit: 'commit',
+};
+
+function CopyGitReference({ value, label }: { value: string; label: string }) {
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const [isCopying, setIsCopying] = useState(false);
+
+  const copyReference = async () => {
+    setCopyState('idle');
+    setIsCopying(true);
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopyState('copied');
+    } catch {
+      setCopyState('failed');
+    } finally {
+      setIsCopying(false);
+    }
+  };
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="h-7 w-7 shrink-0"
+        onClick={copyReference}
+        disabled={isCopying}
+        aria-label={`Copy ${label} reference ${value}`}
+      >
+        <Copy className="h-3 w-3" />
+      </Button>
+      {copyState === 'copied' && (
+        <span role="status" className="basis-full text-xs text-green-700">Git reference copied.</span>
+      )}
+      {copyState === 'failed' && (
+        <span role="alert" className="basis-full text-xs text-destructive">
+          Could not copy Git reference. Try copying it manually.
+        </span>
+      )}
+    </>
+  );
+}
 
 export function TaskGitRefs({ taskId }: { taskId: string }) {
   const { data: refs, isLoading, isError } = useTaskGitRefs(taskId);
@@ -37,17 +87,22 @@ export function TaskGitRefs({ taskId }: { taskId: string }) {
             }
 
             return (
-              <li key={ref.id}>
+              <li key={ref.id} className="flex flex-wrap items-center gap-2">
                 <a
                   href={ref.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm text-primary hover:underline"
+                  className="flex min-w-0 flex-1 items-center gap-2 text-sm text-primary hover:underline"
                 >
                   <Icon className="h-4 w-4 flex-shrink-0" />
                   <span className="truncate font-mono text-xs">{ref.ref || ref.url}</span>
                   <ExternalLink className="h-3 w-3 flex-shrink-0 opacity-50" />
                 </a>
+                <CopyGitReference
+                  key={`${taskId}:${ref.id}:${ref.ref || ref.url}`}
+                  value={ref.ref || ref.url}
+                  label={referenceLabels[ref.type]}
+                />
               </li>
             );
           })}
