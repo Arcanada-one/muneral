@@ -10,6 +10,17 @@ import { useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { ProjectRepository } from '@/components/project/ProjectRepository';
 
+function formatBacklogDueDate(value: string): string {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const date = new Date(`${value}T00:00:00.000Z`);
+    if (!Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value) {
+      return date.toLocaleDateString(undefined, { timeZone: 'UTC' });
+    }
+  }
+
+  return new Date(value).toLocaleDateString();
+}
+
 export default function ProjectPage() {
   const { wsSlug, projSlug } = useParams<{ wsSlug: string; projSlug: string }>();
   const { data: project, isLoading } = useProject(wsSlug, projSlug);
@@ -90,7 +101,7 @@ export default function ProjectPage() {
                     </td>
                     <td className="px-4 py-2.5 text-muted-foreground">
                       {task.dueDate
-                        ? new Date(task.dueDate).toLocaleDateString()
+                        ? formatBacklogDueDate(task.dueDate)
                         : '—'}
                     </td>
                   </tr>
