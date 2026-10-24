@@ -53,6 +53,14 @@ export const readWorkspaces = (value: unknown) => read(z.array(workspace), value
 export const readProjects = (value: unknown) => read(z.array(project), value, 'Projects');
 export const readDependencies = (value: unknown) => read(z.array(dependency), value, 'Dependencies');
 export const readDependencyGraph = (value: unknown) => read(z.array(dependencyGraphEntry), value, 'Dependencies');
+export function readTaskReadiness(value: unknown) {
+  return read(z.object({
+    taskId: id,
+    dependencyCount: z.number().int().nonnegative(),
+    blockedBy: z.array(dependencyGraphEntry),
+    ready: z.boolean(),
+  }), value, 'Task readiness');
+}
 export const readTaskGitRefs = (value: unknown) => read(z.array(taskGitRef), value, 'Git references');
 export function readChecklist(value: unknown) {
   return read(z.array(checklist), value, 'Checklist').map(({ text, position, ...item }) =>
