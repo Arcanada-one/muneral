@@ -17,6 +17,7 @@ export function TaskChecklist({ taskId }: TaskChecklistProps) {
   const completed = items.filter((i) => i.checked).length;
   const total = items.length;
   const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const toggleFailedForTask = toggle.isError && toggle.variables?.taskId === taskId;
 
   if (isError) return <div role="alert" className="rounded-lg border p-4 text-sm text-muted-foreground">Checklist is unavailable. Try again later.</div>;
 
@@ -75,6 +76,12 @@ export function TaskChecklist({ taskId }: TaskChecklistProps) {
             </li>
           ))}
         </ul>
+      )}
+
+      {toggleFailedForTask && (
+        <p role="alert" className="mt-3 rounded-lg border p-3 text-sm text-destructive">
+          Unable to update checklist. Please try again.
+        </p>
       )}
     </div>
   );
