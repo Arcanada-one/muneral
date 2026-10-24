@@ -25,6 +25,8 @@ interface ActivityState {
   data: ActivityResult | undefined;
   isLoading: boolean;
   isError: boolean;
+  isFetching?: boolean;
+  refetch?: () => Promise<unknown>;
 }
 
 const state = vi.hoisted(() => ({
@@ -39,6 +41,8 @@ vi.mock('@/lib/api/tasks', () => ({
       data: undefined,
       isLoading: false,
       isError: false,
+      isFetching: false,
+      refetch: vi.fn().mockResolvedValue(undefined),
     };
   },
 }));
@@ -78,6 +82,8 @@ function ready(taskId: string, number: number, total: number, limit = 20) {
     data: page(taskId, number, total, limit),
     isLoading: false,
     isError: false,
+    isFetching: false,
+    refetch: vi.fn().mockResolvedValue(undefined),
   });
 }
 
@@ -153,15 +159,153 @@ describe('AuditLog activity pagination', () => {
   });
 
   it('keeps navigation disabled while loading and preserves the error state', () => {
-    state.results.set(`${taskA}:1`, { data: undefined, isLoading: true, isError: false });
+    state.results.set(`${taskA}:1`, { data: undefined, isLoading: true, isError: false, isFetching: true });
     const loading = render(<AuditLog taskId={taskA} />);
     expect(screen.getByText('Loading...')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Next activity page' })).not.toBeInTheDocument();
     loading.unmount();
 
-    state.results.set(`${taskA}:1`, { data: undefined, isLoading: false, isError: true });
+    state.results.set(`${taskA}:1`, { data: undefined, isLoading: false, isError: true, isFetching: false });
     render(<AuditLog taskId={taskA} />);
     expect(screen.getByRole('alert')).toHaveTextContent('Activity is unavailable. Try again later.');
+  });
+
+  it('offers page recovery after an older activity page fails', () => {
+    ready(taskA, 1, 21);
+    const retryPageTwo = vi.fn().mockResolvedValue(undefined);
+    state.results.set(`${taskA}:2`, {
+      data: page(taskA, 2, 21),
+      isLoading: false,
+      isError: true,
+      isFetching: false,
+      refetch: retryPageTwo,
+    });
+
+    render(<AuditLog taskId={taskA} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Next activity page' }));
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Activity is unavailable. Try again later.');
+    expect(screen.getByRole('button', { name: 'Retry activity' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Show newest activity' })).toBeEnabled();
+    expect(screen.queryByText('event-21')).not.toBeInTheDocument();
+  });
+
+  it('retries the failed first-page query and renders its recovered result', async () => {
+    const retryFirstPage = vi.fn().mockResolvedValue(undefined);
+    state.results.set(`${taskA}:1`, {
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      isFetching: false,
+      refetch: retryFirstPage,
+    });
+
+    const view = render(<AuditLog taskId={taskA} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Retry activity' }));
+    expect(retryFirstPage).toHaveBeenCalledOnce();
+    expect(screen.queryByRole('button', { name: 'Show newest activity' })).not.toBeInTheDocument();
+
+    ready(taskA, 1, 1);
+    view.rerender(<AuditLog taskId={taskA} />);
+    expect(screen.getByText('event-1')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('retries the same failed older-page query without showing stale rows', () => {
+    ready(taskA, 1, 21);
+    const retryPageTwo = vi.fn().mockResolvedValue(undefined);
+    state.results.set(`${taskA}:2`, {
+      data: page(taskA, 2, 21),
+      isLoading: false,
+      isError: true,
+      isFetching: false,
+      refetch: retryPageTwo,
+    });
+
+    render(<AuditLog taskId={taskA} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Next activity page' }));
+    expect(screen.queryByText('event-21')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Retry activity' }));
+    expect(retryPageTwo).toHaveBeenCalledOnce();
+    expect(state.requested.at(-1)).toEqual({ taskId: taskA, page: 2 });
+    expect(screen.getByRole('alert')).toHaveTextContent('Activity is unavailable. Try again later.');
+  });
+
+  it('escapes an older-page error by returning to the newest page', () => {
+    ready(taskA, 1, 21);
+    state.results.set(`${taskA}:2`, {
+      data: page(taskA, 2, 21),
+      isLoading: false,
+      isError: true,
+      isFetching: false,
+      refetch: vi.fn().mockResolvedValue(undefined),
+    });
+
+    render(<AuditLog taskId={taskA} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Next activity page' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Show newest activity' }));
+
+    expect(state.requested.at(-1)).toEqual({ taskId: taskA, page: 1 });
+    expect(screen.getByText('event-1')).toBeInTheDocument();
+    expect(screen.queryByText('event-21')).not.toBeInTheDocument();
+  });
+
+  it('disables retry and newest-page recovery while a failed query is fetching', () => {
+    ready(taskA, 1, 21);
+    const retryPageTwo = vi.fn().mockResolvedValue(undefined);
+    state.results.set(`${taskA}:2`, {
+      data: page(taskA, 2, 21),
+      isLoading: false,
+      isError: true,
+      isFetching: true,
+      refetch: retryPageTwo,
+    });
+
+    render(<AuditLog taskId={taskA} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Next activity page' }));
+    const retry = screen.getByRole('button', { name: 'Retry activity' });
+    const newest = screen.getByRole('button', { name: 'Show newest activity' });
+    expect(retry).toBeDisabled();
+    expect(newest).toBeDisabled();
+
+    fireEvent.click(retry);
+    fireEvent.click(newest);
+    expect(retryPageTwo).not.toHaveBeenCalled();
+    expect(state.requested.at(-1)).toEqual({ taskId: taskA, page: 2 });
+  });
+
+  it('uses only the current task query for error recovery after a task switch', () => {
+    ready(taskA, 1, 21);
+    const retryTaskA = vi.fn().mockResolvedValue(undefined);
+    state.results.set(`${taskA}:2`, {
+      data: page(taskA, 2, 21),
+      isLoading: false,
+      isError: true,
+      isFetching: false,
+      refetch: retryTaskA,
+    });
+    const retryTaskB = vi.fn().mockResolvedValue(undefined);
+    state.results.set(`${taskB}:1`, {
+      data: { ...page(taskB, 1, 1), data: [entry(taskA, 99)] },
+      isLoading: false,
+      isError: true,
+      isFetching: false,
+      refetch: retryTaskB,
+    });
+
+    const view = render(<AuditLog taskId={taskA} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Next activity page' }));
+    expect(screen.getByRole('button', { name: 'Show newest activity' })).toBeInTheDocument();
+
+    view.rerender(<AuditLog taskId={taskB} />);
+    expect(state.requested.at(-1)).toEqual({ taskId: taskB, page: 1 });
+    expect(screen.queryByRole('button', { name: 'Show newest activity' })).not.toBeInTheDocument();
+    expect(screen.queryByText('event-99')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Retry activity' }));
+    expect(retryTaskB).toHaveBeenCalledOnce();
+    expect(retryTaskA).not.toHaveBeenCalled();
   });
 
   it('shows an empty state and disables both boundaries when there are no entries', () => {

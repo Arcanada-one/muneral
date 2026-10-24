@@ -69,7 +69,7 @@ export function AuditLog({ taskId }: AuditLogProps) {
   const [pageState, setPageState] = useState({ taskId, page: 1 });
   if (pageState.taskId !== taskId) setPageState({ taskId, page: 1 });
   const page = pageState.taskId === taskId ? pageState.page : 1;
-  const { data, isLoading, isError } = useActivity(taskId, page);
+  const { data, isLoading, isError, isFetching, refetch } = useActivity(taskId, page);
   const total = data !== undefined && Number.isSafeInteger(data.total) && data.total >= 0
     ? data.total
     : undefined;
@@ -89,7 +89,35 @@ export function AuditLog({ taskId }: AuditLogProps) {
 
   const setPage = (nextPage: number) => setPageState({ taskId, page: nextPage });
 
-  if (isError) return <div role="alert" className="rounded-lg border p-4 text-sm text-muted-foreground">Activity is unavailable. Try again later.</div>;
+  if (isError) {
+    return (
+      <div role="alert" className="rounded-lg border p-4 text-sm text-muted-foreground">
+        <p>Activity is unavailable. Try again later.</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button
+            type="button"
+            aria-label="Retry activity"
+            disabled={isFetching}
+            onClick={() => { void refetch().catch(() => undefined); }}
+            className="rounded border px-2 py-1 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Retry
+          </button>
+          {page > 1 && (
+            <button
+              type="button"
+              aria-label="Show newest activity"
+              disabled={isFetching}
+              onClick={() => setPage(1)}
+              className="rounded border px-2 py-1 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Show newest activity
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
