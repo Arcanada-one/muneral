@@ -28,6 +28,7 @@ export function TaskChecklist({ taskId }: TaskChecklistProps) {
     <div className="rounded-lg border p-4">
       <button
         onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
         className="flex w-full items-center justify-between text-sm font-medium"
       >
         <span className="flex items-center gap-2">
