@@ -1,13 +1,14 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import { Bot, User, AlertCircle, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { TaskChecklist } from './TaskChecklist';
 import { TaskDependencies } from './TaskDependencies';
 import { AuditLog } from './AuditLog';
 import { TaskGitRefs } from './TaskGitRefs';
-import type { Task } from '@/lib/api/tasks';
-import type { TaskStatus } from '@muneral/types';
+import { useUpdateTaskStatus, type Task } from '@/lib/api/tasks';
+import { TASK_STATUSES, TASK_TRANSITIONS, type TaskStatus } from '@muneral/types';
 import { cn } from '@/lib/utils';
 
 interface TaskDetailProps {
@@ -39,8 +40,11 @@ const priorityConfig = {
   low: { label: 'Low', variant: 'secondary' as const },
 };
 
+function isTaskStatus(value: string): value is TaskStatus {
+  return TASK_STATUSES.some((status) => status === value);
+}
+
 export function TaskDetail({ task }: TaskDetailProps) {
-  const sConfig = statusConfig[task.status];
   const pConfig = priorityConfig[task.priority];
 
   return (
@@ -49,7 +53,7 @@ export function TaskDetail({ task }: TaskDetailProps) {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">{task.title}</h1>
         <div className="mt-3 flex flex-wrap items-center gap-3">
-          <Badge variant={sConfig.variant}>{sConfig.label}</Badge>
+          <TaskStatusAction key={`${task.id}:${task.status}:${task.updatedAt}`} task={task} />
           <Badge variant={pConfig.variant}>{pConfig.label}</Badge>
 
           {task.actorType === 'agent' ? (
@@ -124,5 +128,100 @@ export function TaskDetail({ task }: TaskDetailProps) {
       {/* Audit log */}
       <AuditLog taskId={task.id} />
     </div>
+  );
+}
+
+function TaskStatusAction({ task }: TaskDetailProps) {
+  const [confirmedStatus, setConfirmedStatus] = useState<TaskStatus | null>(null);
+  const [isPending, setIsPending] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const pendingRef = useRef(false);
+  const currentVisitRef = useRef(true);
+  const statusMutation = useUpdateTaskStatus();
+  const currentStatus = confirmedStatus ?? task.status;
+  const currentConfig = statusConfig[currentStatus];
+  const allowedTargets = TASK_TRANSITIONS[currentStatus];
+
+  useEffect(() => {
+    currentVisitRef.current = true;
+    return () => {
+      currentVisitRef.current = false;
+    };
+  }, []);
+
+  const updateTaskStatus = (nextStatus: string) => {
+    if (!isTaskStatus(nextStatus) || !allowedTargets.includes(nextStatus) || pendingRef.current) {
+      return;
+    }
+
+    pendingRef.current = true;
+    setIsPending(true);
+    setHasError(false);
+    statusMutation.mutate(
+      { taskId: task.id, status: nextStatus },
+      {
+        onSuccess: (updatedTask) => {
+          if (!currentVisitRef.current) return;
+          const responseStatusIsKnown = TASK_STATUSES.some(
+            (status) => status === updatedTask.status,
+          );
+          if (
+            updatedTask.id !== task.id ||
+            !responseStatusIsKnown ||
+            updatedTask.status !== nextStatus
+          ) {
+            setHasError(true);
+            return;
+          }
+          setConfirmedStatus(updatedTask.status);
+        },
+        onError: () => {
+          if (currentVisitRef.current) setHasError(true);
+        },
+        onSettled: () => {
+          pendingRef.current = false;
+          if (currentVisitRef.current) setIsPending(false);
+        },
+      },
+    );
+  };
+
+  return (
+    <>
+      <Badge variant={currentConfig.variant}>{currentConfig.label}</Badge>
+      {allowedTargets.length > 0 ? (
+        <div className="flex items-center gap-2">
+          <label htmlFor={`task-status-${task.id}`} className="text-sm text-muted-foreground">
+            Change task status
+          </label>
+          <select
+            id={`task-status-${task.id}`}
+            value={currentStatus}
+            disabled={isPending}
+            onChange={(event) => updateTaskStatus(event.currentTarget.value)}
+            className="h-9 rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <option value={currentStatus}>Current: {currentConfig.label}</option>
+            {allowedTargets.map((status) => (
+              <option key={status} value={status}>
+                {statusConfig[status].label}
+              </option>
+            ))}
+          </select>
+          {isPending && (
+            <span aria-live="polite" className="text-sm text-muted-foreground">
+              Updating status…
+            </span>
+          )}
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground">No status changes are available.</p>
+      )}
+      {hasError && (
+        <p role="alert" className="text-sm text-destructive">
+          Could not update status. Reload the task to confirm its current status before trying again.
+        </p>
+      )}
+    </>
   );
 }
