@@ -1,10 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from './client';
-import { readTask, readTaskPage, readChecklist, readDependencies, readActivity } from './read-contract';
+import { readTask, readTaskPage, readChecklist, readDependencies, readActivity, readTaskGitRefs } from './read-contract';
 import type {
   TaskStatus,
   TaskPriority,
   ActorType,
+  GitRefType,
   PaginatedResult,
 } from '@muneral/types';
 
@@ -45,6 +46,15 @@ export interface TaskDependency {
   fromTaskId: string;
   toTaskId: string;
   type: string;
+}
+
+export interface TaskGitRef {
+  id: string;
+  taskId: string;
+  type: GitRefType;
+  url: string;
+  ref: string | null;
+  createdAt: string;
 }
 
 export interface ActivityLogEntry {
@@ -92,6 +102,15 @@ async function fetchDependencies(taskId: string): Promise<TaskDependency[]> {
   return readDependencies(res.data);
 }
 
+async function fetchTaskGitRefs(taskId: string): Promise<TaskGitRef[]> {
+  const res = await apiClient.get<unknown>(`/projects/tasks/${taskId}/git-refs`);
+  const refs = readTaskGitRefs(res.data);
+  if (refs.some((ref) => ref.taskId !== taskId)) {
+    throw new Error('Git references response is unavailable: invalid task binding');
+  }
+  return refs;
+}
+
 async function fetchActivity(
   taskId: string,
   page = 1,
@@ -131,6 +150,14 @@ export function useDependencies(taskId: string) {
   return useQuery({
     queryKey: ['tasks', taskId, 'dependencies'],
     queryFn: () => fetchDependencies(taskId),
+    enabled: Boolean(taskId),
+  });
+}
+
+export function useTaskGitRefs(taskId: string) {
+  return useQuery({
+    queryKey: ['tasks', taskId, 'git-refs'],
+    queryFn: () => fetchTaskGitRefs(taskId),
     enabled: Boolean(taskId),
   });
 }

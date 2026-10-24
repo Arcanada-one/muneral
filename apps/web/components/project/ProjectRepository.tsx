@@ -1,4 +1,4 @@
-function safeRepositoryUrl(value: string): boolean {
+export function safeRepositoryUrl(value: string): boolean {
   try {
     const url = new URL(value);
     return /^https:\/\/[^/\\?#]+(?:\/|$)/i.test(value)

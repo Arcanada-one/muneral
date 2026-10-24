@@ -23,6 +23,14 @@ const activity = z.object({ id, taskId: id, actorId: id, actorType: z.enum(['hum
   actorName: z.string().optional(), action: z.string(), createdAt: timestamp,
   payload: z.record(z.unknown()).nullable().optional() });
 const dependency = z.object({ id, fromTaskId: id, toTaskId: id, type: z.string() });
+const taskGitRef = z.object({
+  id,
+  taskId: id,
+  type: z.enum(['repo', 'branch', 'commit']),
+  url: z.string().min(1),
+  ref: z.string().nullable(),
+  createdAt: timestamp,
+});
 
 function read<T>(schema: z.ZodType<T, z.ZodTypeDef, unknown>, value: unknown, label: string): T {
   const parsed = schema.safeParse(value);
@@ -33,6 +41,7 @@ export const readTask = (value: unknown) => read(task, value, 'Task');
 export const readWorkspaces = (value: unknown) => read(z.array(workspace), value, 'Workspaces');
 export const readProjects = (value: unknown) => read(z.array(project), value, 'Projects');
 export const readDependencies = (value: unknown) => read(z.array(dependency), value, 'Dependencies');
+export const readTaskGitRefs = (value: unknown) => read(z.array(taskGitRef), value, 'Git references');
 export function readChecklist(value: unknown) {
   return read(z.array(checklist), value, 'Checklist').map(({ text, position, ...item }) =>
     ({ ...item, label: text, order: position }));
