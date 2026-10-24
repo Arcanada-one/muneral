@@ -122,8 +122,8 @@ export function TaskDetail({ task }: TaskDetailProps) {
       {/* Dependencies */}
       <TaskDependencies taskId={task.id} />
 
-      {/* Git refs — empty by default (would be loaded separately) */}
-      <TaskGitRefs refs={[]} />
+      {/* Git refs are scoped to the task and loaded through the read API. */}
+      <TaskGitRefs taskId={task.id} />
 
       {/* Audit log */}
       <AuditLog taskId={task.id} />
