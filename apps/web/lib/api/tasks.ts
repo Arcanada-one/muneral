@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from './client';
-import { readTask, readTaskPage, readChecklist, readDependencies, readActivity, readTaskGitRefs } from './read-contract';
+import { readTask, readTaskPage, readChecklist, readDependencies, readDependencyGraph, readActivity, readTaskGitRefs } from './read-contract';
 import type {
   TaskStatus,
   TaskPriority,
@@ -46,6 +46,14 @@ export interface TaskDependency {
   fromTaskId: string;
   toTaskId: string;
   type: string;
+}
+
+export interface TaskDependencyGraphEntry extends TaskDependency {
+  direction: 'incoming' | 'outgoing';
+  otherTaskId: string;
+  otherTaskTitle: string | null;
+  otherTaskTitleWithheld?: true;
+  otherTaskStatus: string;
 }
 
 export interface TaskGitRef {
@@ -102,6 +110,21 @@ async function fetchDependencies(taskId: string): Promise<TaskDependency[]> {
   return readDependencies(res.data);
 }
 
+async function fetchDependencyGraph(taskId: string): Promise<TaskDependencyGraphEntry[]> {
+  const res = await apiClient.get<unknown>(`/tasks/${taskId}/dependency-graph`);
+  const graph = readDependencyGraph(res.data);
+  if (graph.some((edge) => {
+    const outgoing = edge.fromTaskId === taskId;
+    const incoming = edge.toTaskId === taskId;
+    const expectedDirection = outgoing ? 'outgoing' : 'incoming';
+    const expectedOtherTaskId = outgoing ? edge.toTaskId : edge.fromTaskId;
+    return outgoing === incoming || edge.direction !== expectedDirection || edge.otherTaskId !== expectedOtherTaskId;
+  })) {
+    throw new Error('Dependencies response is unavailable: invalid task binding');
+  }
+  return graph;
+}
+
 async function fetchTaskGitRefs(taskId: string): Promise<TaskGitRef[]> {
   const res = await apiClient.get<unknown>(`/projects/tasks/${taskId}/git-refs`);
   const refs = readTaskGitRefs(res.data);
@@ -150,6 +173,14 @@ export function useDependencies(taskId: string) {
   return useQuery({
     queryKey: ['tasks', taskId, 'dependencies'],
     queryFn: () => fetchDependencies(taskId),
+    enabled: Boolean(taskId),
+  });
+}
+
+export function useDependencyGraph(taskId: string) {
+  return useQuery({
+    queryKey: ['tasks', taskId, 'dependency-graph'],
+    queryFn: () => fetchDependencyGraph(taskId),
     enabled: Boolean(taskId),
   });
 }

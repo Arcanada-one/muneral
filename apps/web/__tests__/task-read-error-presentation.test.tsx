@@ -16,7 +16,7 @@ const queries = vi.hoisted(() => ({
 }));
 
 vi.mock('@/lib/api/tasks', () => ({
-  useDependencies: () => queries.dependencies,
+  useDependencyGraph: () => queries.dependencies,
   useTasks: () => queries.tasks,
   useChecklist: () => queries.checklist,
   useActivity: () => queries.activity,
@@ -29,6 +29,8 @@ vi.mock('@/components/task/TaskGitRefs', () => ({ TaskGitRefs: () => null }));
 const edge = {
   id: 'synthetic-edge', type: 'blocks',
   fromTaskId: 'synthetic-root', toTaskId: 'synthetic-other',
+  direction: 'outgoing', otherTaskId: 'synthetic-other', otherTaskTitle: 'Synthetic other',
+  otherTaskStatus: 'todo',
 };
 const task = { id: 'synthetic-task', title: 'Synthetic blocker', dueDate: null };
 const blockers = () => render(
