@@ -48,6 +48,19 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('AuditLog task field changes', () => {
+  it.each([
+    ['critical', 'Critical'],
+    ['high', 'High'],
+    ['medium', 'Medium'],
+    ['low', 'Low'],
+  ])('renders the existing %s priority label', (priority, label) => {
+    activityState.data = [updatedEntry({ priority })];
+
+    render(<AuditLog taskId={taskId} />);
+
+    expect(screen.getByText(`Priority set to ${label}`)).toBeInTheDocument();
+  });
+
   it('shows known priority and due-date values from a task update beside its context', () => {
     const dueDate = '2026-10-28T00:00:00.000Z';
     activityState.data = [updatedEntry({ priority: 'high', dueDate })];
@@ -55,8 +68,9 @@ describe('AuditLog task field changes', () => {
     render(<AuditLog taskId={taskId} />);
 
     expect(screen.getByText('Task editor')).toBeInTheDocument();
-    expect(screen.getByText('Priority set to High')).toBeInTheDocument();
-    expect(screen.getByText(`Due date set to ${new Date(dueDate).toLocaleDateString()}`)).toBeInTheDocument();
+    expect(screen.getByText(
+      `Priority set to High · Due date set to ${new Date(dueDate).toLocaleDateString()}`,
+    )).toBeInTheDocument();
     expect(screen.getByText('task:updated')).toBeInTheDocument();
   });
 
