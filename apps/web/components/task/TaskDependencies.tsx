@@ -1,6 +1,8 @@
 'use client';
 
-import { ArrowRight, Link2 } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowRight, Copy, Link2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useDependencyGraph } from '@/lib/api/tasks';
 
 interface TaskDependenciesProps {
@@ -13,6 +15,47 @@ const typeLabels: Record<string, { incoming: string; outgoing: string; className
   related_to: { incoming: 'Related to', outgoing: 'Related to', className: 'text-gray-600' },
   duplicates: { incoming: 'Duplicates', outgoing: 'Duplicates', className: 'text-amber-600' },
 };
+
+function CopyTaskIdButton({ taskId }: { taskId: string }) {
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const [isCopying, setIsCopying] = useState(false);
+
+  const copyTaskId = async () => {
+    setCopyState('idle');
+    setIsCopying(true);
+
+    try {
+      await navigator.clipboard.writeText(taskId);
+      setCopyState('copied');
+    } catch {
+      setCopyState('failed');
+    } finally {
+      setIsCopying(false);
+    }
+  };
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="h-7 w-7 shrink-0"
+        onClick={copyTaskId}
+        disabled={isCopying}
+        aria-label={`Copy task ID ${taskId}`}
+      >
+        <Copy className="h-3 w-3" />
+      </Button>
+      {copyState === 'copied' && (
+        <span role="status" className="basis-full text-xs text-green-700">Task ID copied.</span>
+      )}
+      {copyState === 'failed' && (
+        <span role="alert" className="basis-full text-xs text-destructive">Could not copy task ID. Try copying it manually.</span>
+      )}
+    </>
+  );
+}
 
 export function TaskDependencies({ taskId }: TaskDependenciesProps) {
   const { data: deps = [], isLoading, isError } = useDependencyGraph(taskId);
@@ -40,7 +83,7 @@ export function TaskDependencies({ taskId }: TaskDependenciesProps) {
           const label = config?.[dep.direction] ?? dep.type;
 
           return (
-            <li key={dep.id} className="flex items-center gap-2 text-sm">
+            <li key={dep.id} className="flex flex-wrap items-center gap-2 text-sm">
               <span className={(config?.className ?? 'text-gray-600') + ' text-xs font-medium min-w-[80px]'}>
                 {label}
               </span>
@@ -48,6 +91,7 @@ export function TaskDependencies({ taskId }: TaskDependenciesProps) {
               <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono">
                 {dep.otherTaskId.slice(0, 8)}
               </code>
+              <CopyTaskIdButton key={`${taskId}:${dep.id}:${dep.otherTaskId}`} taskId={dep.otherTaskId} />
             </li>
           );
         })}
