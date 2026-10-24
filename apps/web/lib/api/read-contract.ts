@@ -23,6 +23,17 @@ const activity = z.object({ id, taskId: id, actorId: id, actorType: z.enum(['hum
   actorName: z.string().optional(), action: z.string(), createdAt: timestamp,
   payload: z.record(z.unknown()).nullable().optional() });
 const dependency = z.object({ id, fromTaskId: id, toTaskId: id, type: z.string() });
+const dependencyGraphEntry = z.object({
+  id,
+  type: z.string(),
+  direction: z.enum(['incoming', 'outgoing']),
+  fromTaskId: id,
+  toTaskId: id,
+  otherTaskId: id,
+  otherTaskTitle: z.string().nullable(),
+  otherTaskTitleWithheld: z.literal(true).optional(),
+  otherTaskStatus: z.string(),
+});
 const taskGitRef = z.object({
   id,
   taskId: id,
@@ -41,6 +52,7 @@ export const readTask = (value: unknown) => read(task, value, 'Task');
 export const readWorkspaces = (value: unknown) => read(z.array(workspace), value, 'Workspaces');
 export const readProjects = (value: unknown) => read(z.array(project), value, 'Projects');
 export const readDependencies = (value: unknown) => read(z.array(dependency), value, 'Dependencies');
+export const readDependencyGraph = (value: unknown) => read(z.array(dependencyGraphEntry), value, 'Dependencies');
 export const readTaskGitRefs = (value: unknown) => read(z.array(taskGitRef), value, 'Git references');
 export function readChecklist(value: unknown) {
   return read(z.array(checklist), value, 'Checklist').map(({ text, position, ...item }) =>
