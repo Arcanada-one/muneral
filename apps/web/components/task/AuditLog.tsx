@@ -51,6 +51,32 @@ function formatStatusTransition(payload: unknown): string | undefined {
   return `${TASK_STATUS_LABELS[payload.from]} → ${TASK_STATUS_LABELS[payload.to]}`;
 }
 
+function formatTaskCreated(payload: unknown): string | undefined {
+  if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) {
+    return undefined;
+  }
+
+  const prototype = Object.getPrototypeOf(payload);
+  if (prototype !== Object.prototype && prototype !== null) return undefined;
+
+  const keys = Object.keys(payload);
+  if (keys.length !== 2 || keys.some((key) => key !== 'title' && key !== 'status')) {
+    return undefined;
+  }
+
+  const title = Object.getOwnPropertyDescriptor(payload, 'title');
+  const status = Object.getOwnPropertyDescriptor(payload, 'status');
+  if (
+    title === undefined || !('value' in title) || typeof title.value !== 'string' ||
+    title.value.length === 0 ||
+    status === undefined || !('value' in status) || !isTaskStatus(status.value)
+  ) {
+    return undefined;
+  }
+
+  return `Created “${title.value}” · Status: ${TASK_STATUS_LABELS[status.value]}`;
+}
+
 function isTaskPriority(value: unknown): value is TaskPriority {
   return value === 'critical' || value === 'high' || value === 'medium' || value === 'low';
 }
@@ -320,6 +346,9 @@ export function AuditLog({ taskId }: AuditLogProps) {
             const commentBody = entry.action === 'comment'
               ? getCommentBody(entry.payload)
               : undefined;
+            const taskCreatedDetails = entry.action === 'task:created'
+              ? formatTaskCreated(entry.payload)
+              : undefined;
             const taskUpdateDetails = entry.action === 'task:updated'
               ? formatTaskUpdate(entry.payload)
               : undefined;
@@ -356,6 +385,11 @@ export function AuditLog({ taskId }: AuditLogProps) {
                   <p className="mt-0.5 text-xs text-muted-foreground">
                     {formatRelativeTime(entry.createdAt)}
                   </p>
+                  {taskCreatedDetails !== undefined && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {taskCreatedDetails}
+                    </p>
+                  )}
                   {taskUpdateDetails !== undefined && (
                     <p className="mt-1 text-xs text-muted-foreground">
                       {taskUpdateDetails.join(' · ')}
