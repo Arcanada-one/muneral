@@ -136,6 +136,44 @@ describe('task dependency directions', () => {
     }
     expect(screen.getByText('Required by').closest('li')).toHaveTextContent(otherIds[1].slice(0, 8));
     expect(screen.getByText('Blocked by').closest('li')).toHaveTextContent(otherIds[3].slice(0, 8));
+    expect(screen.getByText('Prerequisite task').closest('li')).toHaveTextContent('In Progress');
+    expect(screen.getByText('Dependent task').closest('li')).toHaveTextContent('To Do');
+  });
+
+  it('shows the counterpart title returned by the dependency graph', async () => {
+    renderDependencies();
+
+    expect(await screen.findByText('Prerequisite task')).toBeInTheDocument();
+  });
+
+  it('shows the counterpart status using the task status label', async () => {
+    renderDependencies();
+
+    const title = await screen.findByText('Prerequisite task');
+    expect(title.closest('li')).toHaveTextContent('In Progress');
+  });
+
+  it('keeps the validated UUID fallback when the API withholds a counterpart title', async () => {
+    vi.mocked(apiClient.get).mockResolvedValueOnce({
+      data: [{ ...graph[0], otherTaskTitle: null, otherTaskTitleWithheld: true }],
+    } as never);
+    renderDependencies();
+
+    const id = await screen.findByText(otherIds[0].slice(0, 8));
+    expect(id.closest('li')).toHaveTextContent('In Progress');
+    expect(screen.getByRole('button', { name: `Copy task ID ${otherIds[0]}` })).toBeInTheDocument();
+    expect(screen.queryByText('Prerequisite task')).not.toBeInTheDocument();
+  });
+
+  it('renders a returned title as inert text', async () => {
+    const untrustedTitle = '<img src=x onerror=alert(1)>';
+    vi.mocked(apiClient.get).mockResolvedValueOnce({
+      data: [{ ...graph[0], otherTaskTitle: untrustedTitle }],
+    } as never);
+    const view = renderDependencies();
+
+    expect(await screen.findByText(untrustedTitle)).toBeInTheDocument();
+    expect(view.container.querySelector('img')).not.toBeInTheDocument();
   });
 
   it('lets the user copy the full counterpart task ID instead of only seeing its abbreviated prefix', async () => {
