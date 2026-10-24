@@ -56,12 +56,23 @@ export default function TaskPage() {
   }
 
   if (!task) {
+    const canRetryRead = session.active && snapshot.outcome === 'unavailable';
     return (
       <div className="rounded-lg border p-8 text-center">
         <p role="alert" className="text-muted-foreground">{
           !session.active || snapshot.outcome === 'denied' ? 'Task access denied' :
             snapshot.outcome === 'missing' ? 'Task not found' : 'Task is unavailable'
         }</p>
+        {canRetryRead && (
+          <Button
+            type="button"
+            variant="ghost"
+            className="mt-4"
+            onClick={() => controller.openTask(selection, false)}
+          >
+            Retry loading task
+          </Button>
+        )}
         <Button variant="ghost" className="mt-4" asChild>
           <Link href={`/workspaces/${wsSlug}/projects/${projSlug}`}>
             Back to project
