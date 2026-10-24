@@ -5,9 +5,9 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "admitted"
  },
- "captured_at_utc": "2026-10-24T10:27:17Z",
+ "captured_at_utc": "2026-10-24T12:03:42Z",
  "change_set": {
-  "base": "884905513db8b3092e623af295955d43537b6c8c",
+  "base": "f83231286d8b5f0df5fef401edd07d116ff23117",
   "files": [
    {
     "kind": "doc",
@@ -23,24 +23,33 @@
     "path": "apps/api/test/assembly/mutation-results.json",
     "status": "M",
     "uncovered": true
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/change-admission-muneral-human-task-comment-policy-20261024.json",
+    "node_ids": [
+     "receipt:receipts/graph/change-admission-muneral-human-task-comment-policy-20261024.json"
+    ],
+    "path": "receipts/graph/change-admission-muneral-human-task-comment-policy-20261024.json",
+    "status": "A"
    }
   ],
-  "head": "76675d4e73724eca5fd24d46c4f89e5950a94595",
+  "head": "846bfe60e00ef1e176b78e9d55bc18540068cf02",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
  "empty_impact_explanation": {
   "binding": {
    "input": {
-    "base": "884905513db8b3092e623af295955d43537b6c8c",
-    "base_graph_digest": "sha256:693f3dedb1b4c6e6649edb4cbd2989dd13aeedf1953f36d2de2babedba4d3967",
-    "head": "76675d4e73724eca5fd24d46c4f89e5950a94595",
-    "head_graph_digest": "sha256:98c8ab5bd8b03b0d3cdf37eb876303e75dc535e81883f0d391ddbfef6d323929",
-    "reason": "The only changed graph-known node is the proposed policy document, whose seven references were verified. The other changed path is the generated mutation-results.json receipt: the accepted gitSupplement helper recomputed only its two derived fields while all 61 assembly inputs, 85 source and mutant fingerprints, and the recorded 76 test, 9 typecheck, and 0 survived outcomes stayed unchanged; the updated receipt passed the 30-test mutation-evidence suite. The graph has no node for that receipt, so no graph-declared non-seed dependents are predicted. This explanation does not claim runtime authorization or policy implementation.",
+    "base": "f83231286d8b5f0df5fef401edd07d116ff23117",
+    "base_graph_digest": "sha256:c5375dd19afdd0936b42f16f7b6dc7b00e993f2b923a14c6a4ae4ecf10cc2af8",
+    "head": "846bfe60e00ef1e176b78e9d55bc18540068cf02",
+    "head_graph_digest": "sha256:74e5e189ae13121931017e5015b258f145b2613de322780cd384ed48e8d84f8c",
+    "reason": "For this exact paired graph measurement, no non-seed dependent nodes were predicted: the policy document is a seed and its seven references resolve at the head. The changed mutation-results.json is an assembly record with no graph node under the current language coverage; it remains uncovered and is not counted as a verified runtime effect or as proof of zero impact. The accepted composition evidence records only two supplemental Git binding changes, with the remaining 61 bindings and all 85 recorded site outcomes unchanged; no 85-site rerun is claimed. The policy remains proposed and unimplemented, so this graph result does not establish authorization behavior or grant access.",
     "schema": "EmptyImpactExplanation/v1",
     "scope": "graph_non_seed_dependents"
    },
-   "input_sha256": "sha256:d688ceaf9cd9cd7d1cc44cd63b355e2a17a5f93f76f3701c5da210fb6a016e3e",
+   "input_sha256": "sha256:27a8cd72a79d16d93c06f3a5f4d833edeb4f053eb22ac80ee9014f84a607a78e",
    "schema": "BoundEmptyImpactExplanation/v1"
   },
   "graph_metadata": {
@@ -80,9 +89,15 @@
        "path": "apps/api/test/assembly/mutation-results.json",
        "status": "M",
        "uncovered": true
+      },
+      {
+       "kind": "receipt",
+       "new": true,
+       "path": "receipts/graph/change-admission-muneral-human-task-comment-policy-20261024.json",
+       "status": "A"
       }
      ],
-     "graph_digest": "sha256:693f3dedb1b4c6e6649edb4cbd2989dd13aeedf1953f36d2de2babedba4d3967",
+     "graph_digest": "sha256:c5375dd19afdd0936b42f16f7b6dc7b00e993f2b923a14c6a4ae4ecf10cc2af8",
      "internal_reverse_edges": 0,
      "language_coverage": [
       "typescript",
@@ -97,7 +112,7 @@
      ],
      "max_depth": 3,
      "seeds": [],
-     "source_commit": "884905513db8b3092e623af295955d43537b6c8c"
+     "source_commit": "f83231286d8b5f0df5fef401edd07d116ff23117"
     },
     "head": {
      "changed_node_known_to_graph": true,
@@ -137,10 +152,19 @@
        "path": "apps/api/test/assembly/mutation-results.json",
        "status": "M",
        "uncovered": true
+      },
+      {
+       "kind": "receipt",
+       "node_id": "receipt:receipts/graph/change-admission-muneral-human-task-comment-policy-20261024.json",
+       "node_ids": [
+        "receipt:receipts/graph/change-admission-muneral-human-task-comment-policy-20261024.json"
+       ],
+       "path": "receipts/graph/change-admission-muneral-human-task-comment-policy-20261024.json",
+       "status": "A"
       }
      ],
-     "graph_digest": "sha256:98c8ab5bd8b03b0d3cdf37eb876303e75dc535e81883f0d391ddbfef6d323929",
-     "internal_reverse_edges": 0,
+     "graph_digest": "sha256:74e5e189ae13121931017e5015b258f145b2613de322780cd384ed48e8d84f8c",
+     "internal_reverse_edges": 1,
      "language_coverage": [
       "typescript",
       "javascript",
@@ -154,33 +178,34 @@
      ],
      "max_depth": 3,
      "seeds": [
-      "document:apps/api/docs/human-task-comment-create-policy-v1.md"
+      "document:apps/api/docs/human-task-comment-create-policy-v1.md",
+      "receipt:receipts/graph/change-admission-muneral-human-task-comment-policy-20261024.json"
      ],
-     "source_commit": "76675d4e73724eca5fd24d46c4f89e5950a94595"
+     "source_commit": "846bfe60e00ef1e176b78e9d55bc18540068cf02"
     }
    },
    "scope": "graph_non_seed_dependents"
   },
-  "reason": "The only changed graph-known node is the proposed policy document, whose seven references were verified. The other changed path is the generated mutation-results.json receipt: the accepted gitSupplement helper recomputed only its two derived fields while all 61 assembly inputs, 85 source and mutant fingerprints, and the recorded 76 test, 9 typecheck, and 0 survived outcomes stayed unchanged; the updated receipt passed the 30-test mutation-evidence suite. The graph has no node for that receipt, so no graph-declared non-seed dependents are predicted. This explanation does not claim runtime authorization or policy implementation.",
+  "reason": "For this exact paired graph measurement, no non-seed dependent nodes were predicted: the policy document is a seed and its seven references resolve at the head. The changed mutation-results.json is an assembly record with no graph node under the current language coverage; it remains uncovered and is not counted as a verified runtime effect or as proof of zero impact. The accepted composition evidence records only two supplemental Git binding changes, with the remaining 61 bindings and all 85 recorded site outcomes unchanged; no 85-site rerun is claimed. The policy remains proposed and unimplemented, so this graph result does not establish authorization behavior or grant access.",
   "schema": "BoundEmptyImpactExplanation/v1"
  },
  "exemptions": [],
  "graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:693f3dedb1b4c6e6649edb4cbd2989dd13aeedf1953f36d2de2babedba4d3967",
-  "path": "/out/verifier-out/graph-884905513db8.json",
-  "source_commit": "884905513db8b3092e623af295955d43537b6c8c"
+  "graph_digest": "sha256:c5375dd19afdd0936b42f16f7b6dc7b00e993f2b923a14c6a4ae4ecf10cc2af8",
+  "path": "/out/tmp/arcana-verify/verifier-out/graph-f83231286d8b.json",
+  "source_commit": "f83231286d8b5f0df5fef401edd07d116ff23117"
  },
  "head_graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:98c8ab5bd8b03b0d3cdf37eb876303e75dc535e81883f0d391ddbfef6d323929",
-  "path": "/out/verifier-out/graph-head-76675d4e7372.json",
-  "source_commit": "76675d4e73724eca5fd24d46c4f89e5950a94595",
+  "graph_digest": "sha256:74e5e189ae13121931017e5015b258f145b2613de322780cd384ed48e8d84f8c",
+  "path": "/out/tmp/arcana-verify/verifier-out/graph-head-846bfe60e00e.json",
+  "source_commit": "846bfe60e00ef1e176b78e9d55bc18540068cf02",
   "staleness": {
-   "checked_at_utc": "2026-10-24T10:27:54Z",
-   "checked_nodes": 492,
+   "checked_at_utc": "2026-10-24T12:04:20Z",
+   "checked_nodes": 495,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -188,7 +213,7 @@
  },
  "host": "muneral-human-task-policy-stage",
  "host_redacted": true,
- "host_sha256": "67adc835c9aa9892fa0031da5dae07a73a4b66ad7514d1210e95ba5045c89767",
+ "host_sha256": "af686791a16cbdca392a0378bd10a9fbcf706374924656827db186afe55d25b8",
  "impact_set": {
   "deterministic_core": [],
   "edge_types": "all",
@@ -208,7 +233,8 @@
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261024T102717Z-76675d4e",
+ "receipt_id": "car-verify-20261024T120342Z-846bfe60",
+ "receipt_path": "receipts/graph/change-admission-muneral-human-task-comment-policy-20261024.json",
  "repo": {
   "name": "Arcanada-one/muneral",
   "path": "/repo"
@@ -216,21 +242,38 @@
  "revision_selection": {
   "base": [],
   "head": [
-   "document:apps/api/docs/human-task-comment-create-policy-v1.md"
+   "document:apps/api/docs/human-task-comment-create-policy-v1.md",
+   "receipt:receipts/graph/change-admission-muneral-human-task-comment-policy-20261024.json"
   ],
   "schema": "RevisionImpactSelection/v1",
   "unmeasured_head_files": []
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-24T10:27:54Z",
+  "checked_at_utc": "2026-10-24T12:04:20Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
  },
- "structural_exclusions": [],
+ "structural_exclusions": [
+  {
+   "content_hash": {
+    "base": null,
+    "head": "sha256:1e1b882e2a14375951dc2296340925adab8eba3d037c403c4be84586eab15106"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-human-task-comment-policy-20261024.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-human-task-comment-policy-20261024.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it; superseded by construction — this run re-issues the receipt at receipts/graph/change-admission-muneral-human-task-comment-policy-20261024.json for work item c158f59d-ea3a-407b-a76a-f46aecb52aac",
+   "rule": "DEC-AUP-0035",
+   "superseded": {
+    "receipt_path": "receipts/graph/change-admission-muneral-human-task-comment-policy-20261024.json",
+    "work_item": "c158f59d-ea3a-407b-a76a-f46aecb52aac"
+   }
+  }
+ ],
  "tree": {
-  "commit": "76675d4e73724eca5fd24d46c4f89e5950a94595",
+  "commit": "846bfe60e00ef1e176b78e9d55bc18540068cf02",
   "dirty": false
  },
  "verdicts": [
@@ -262,13 +305,24 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/out/verifier-out/v-doc-reference.txt",
-   "started_at_utc": "2026-10-24T10:27:59Z",
+   "output_ref": "/out/tmp/arcana-verify/verifier-out/v-doc-reference.txt",
+   "started_at_utc": "2026-10-24T12:04:25Z",
    "summary": "1 document(s), 0 failed"
   }
  ],
  "verify": {
   "events": [
+   {
+    "code": "SUPERSEDED_SELF_EXCLUSION",
+    "entity": "receipt:receipts/graph/change-admission-muneral-human-task-comment-policy-20261024.json",
+    "rule": "DEC-AUP-0035",
+    "text": "the receipt at receipts/graph/change-admission-muneral-human-task-comment-policy-20261024.json is the previous version of the one this run is writing, for the same work item c158f59d-ea3a-407b-a76a-f46aecb52aac — superseded by construction, so it owes this change no verdict"
+   },
+   {
+    "code": "STRUCTURAL_EXCLUSION",
+    "rule": "DEC-AUP-0034",
+    "text": "1 affected entity(ies) owe no verdict (receipt: 1): unchanged at both revisions and given no verifier by the matrix"
+   },
    {
     "code": {
      "code": "EMPTY_IMPACT_REQUIRES_EXPLANATION",
@@ -287,11 +341,12 @@
   "required_by_entity": {
    "document:apps/api/docs/human-task-comment-create-policy-v1.md": [
     "doc_reference"
-   ]
+   ],
+   "receipt:receipts/graph/change-admission-muneral-human-task-comment-policy-20261024.json": []
   },
   "seconds": {
-   "prepare": 2.12,
-   "total": 42.2,
+   "prepare": 2.14,
+   "total": 43.26,
    "verifiers": 0.0
   }
  },
