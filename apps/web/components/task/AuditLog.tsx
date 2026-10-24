@@ -101,6 +101,79 @@ function getCommentBody(payload: unknown): string | undefined {
     : undefined;
 }
 
+interface EvidenceActivityDetails {
+  uri: string;
+  sha256: string;
+  contentType: string;
+}
+
+const EVIDENCE_URI_PATTERN = /^[a-z][a-z0-9+.-]*:[^\s\u0000-\u001f\u007f]+$/i;
+const EVIDENCE_URI_USERINFO_PATTERN = /^[a-z][a-z0-9+.-]*:\/\/[^/?#]*@/i;
+const EVIDENCE_SHA256_PATTERN = /^[0-9a-f]{64}$/;
+const EVIDENCE_CONTENT_TYPE_PATTERN =
+  /^[a-z0-9][a-z0-9!#$&^_.+-]*\/[a-z0-9][a-z0-9!#$&^_.+-]*(?:; ?[a-z0-9!#$&^_.+\-]+=[a-z0-9!#$&^_.+"-]+)*$/;
+
+function getEvidenceActivityDetails(payload: unknown): EvidenceActivityDetails | undefined {
+  if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) {
+    return undefined;
+  }
+
+  const prototype = Object.getPrototypeOf(payload);
+  if (prototype !== Object.prototype && prototype !== null) return undefined;
+
+  const keys = Object.keys(payload);
+  const expectedKeys = ['content_type', 'evidence_id', 'sha256', 'uri'];
+  if (
+    keys.length !== expectedKeys.length ||
+    expectedKeys.some((key) => !Object.prototype.hasOwnProperty.call(payload, key))
+  ) {
+    return undefined;
+  }
+
+  const evidenceId = Object.getOwnPropertyDescriptor(payload, 'evidence_id');
+  const uri = Object.getOwnPropertyDescriptor(payload, 'uri');
+  const sha256 = Object.getOwnPropertyDescriptor(payload, 'sha256');
+  const contentType = Object.getOwnPropertyDescriptor(payload, 'content_type');
+  if (
+    evidenceId === undefined || !('value' in evidenceId) ||
+    typeof evidenceId.value !== 'string' || evidenceId.value.length === 0 ||
+    uri === undefined || !('value' in uri) || typeof uri.value !== 'string' ||
+    uri.value.length > 2048 || !EVIDENCE_URI_PATTERN.test(uri.value) ||
+    EVIDENCE_URI_USERINFO_PATTERN.test(uri.value) ||
+    sha256 === undefined || !('value' in sha256) ||
+    typeof sha256.value !== 'string' || !EVIDENCE_SHA256_PATTERN.test(sha256.value) ||
+    contentType === undefined || !('value' in contentType) ||
+    typeof contentType.value !== 'string' || contentType.value.length > 128 ||
+    !EVIDENCE_CONTENT_TYPE_PATTERN.test(contentType.value)
+  ) {
+    return undefined;
+  }
+
+  return {
+    uri: uri.value,
+    sha256: sha256.value,
+    contentType: contentType.value,
+  };
+}
+
+function EvidenceActivityDetailsView({ details }: { details: EvidenceActivityDetails }) {
+  return (
+    <details className="mt-1 min-w-0">
+      <summary tabIndex={0} className="cursor-pointer text-xs text-muted-foreground">
+        Evidence details
+      </summary>
+      <dl className="mt-1 grid min-w-0 grid-cols-[max-content_minmax(0,1fr)] gap-x-2 gap-y-1 text-xs">
+        <dt className="text-muted-foreground">URI</dt>
+        <dd dir="auto" className="min-w-0 break-all">{details.uri}</dd>
+        <dt className="text-muted-foreground">SHA-256</dt>
+        <dd className="min-w-0 break-all">{details.sha256}</dd>
+        <dt className="text-muted-foreground">Content type</dt>
+        <dd className="min-w-0 break-words">{details.contentType}</dd>
+      </dl>
+    </details>
+  );
+}
+
 function CommentBody({ body }: { body: string }) {
   const content = (
     <p className="whitespace-pre-wrap break-words text-xs text-muted-foreground">
@@ -242,6 +315,9 @@ export function AuditLog({ taskId }: AuditLogProps) {
             const taskUpdateDetails = entry.action === 'task:updated'
               ? formatTaskUpdate(entry.payload)
               : undefined;
+            const evidenceDetails = entry.action === 'task:evidence_attached'
+              ? getEvidenceActivityDetails(entry.payload)
+              : undefined;
 
             return (
               <li key={entry.id} className="flex gap-3">
@@ -278,6 +354,9 @@ export function AuditLog({ taskId }: AuditLogProps) {
                     </p>
                   )}
                   {commentBody !== undefined && <CommentBody body={commentBody} />}
+                  {evidenceDetails !== undefined && (
+                    <EvidenceActivityDetailsView details={evidenceDetails} />
+                  )}
                 </div>
               </li>
             );
