@@ -3,7 +3,9 @@
 import { useState } from 'react';
 import { ArrowRight, Copy, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useDependencyGraph } from '@/lib/api/tasks';
+import { getTaskStatusLabel } from '@/lib/task-status-labels';
 
 interface TaskDependenciesProps {
   taskId: string;
@@ -81,6 +83,8 @@ export function TaskDependencies({ taskId }: TaskDependenciesProps) {
         {deps.map((dep) => {
           const config = typeLabels[dep.type];
           const label = config?.[dep.direction] ?? dep.type;
+          const statusLabel = getTaskStatusLabel(dep.otherTaskStatus);
+          const counterpartTitle = dep.otherTaskTitleWithheld === true ? null : dep.otherTaskTitle;
 
           return (
             <li key={dep.id} className="flex flex-wrap items-center gap-2 text-sm">
@@ -88,9 +92,13 @@ export function TaskDependencies({ taskId }: TaskDependenciesProps) {
                 {label}
               </span>
               <ArrowRight className="h-3 w-3 text-muted-foreground" />
+              {counterpartTitle !== null && (
+                <span className="min-w-0 break-words font-medium">{counterpartTitle}</span>
+              )}
               <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono">
                 {dep.otherTaskId.slice(0, 8)}
               </code>
+              {statusLabel && <Badge variant="secondary">{statusLabel}</Badge>}
               <CopyTaskIdButton key={`${taskId}:${dep.id}:${dep.otherTaskId}`} taskId={dep.otherTaskId} />
             </li>
           );

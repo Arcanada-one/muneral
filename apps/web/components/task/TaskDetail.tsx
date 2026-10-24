@@ -9,6 +9,7 @@ import { AuditLog } from './AuditLog';
 import { TaskGitRefs } from './TaskGitRefs';
 import { useUpdateTaskStatus, type Task } from '@/lib/api/tasks';
 import { TASK_STATUSES, TASK_TRANSITIONS, type TaskStatus } from '@muneral/types';
+import { TASK_STATUS_LABELS } from '@/lib/task-status-labels';
 import { cn } from '@/lib/utils';
 
 interface TaskDetailProps {
@@ -20,17 +21,17 @@ interface TaskDetailProps {
 // an untyped object literal and adding `archived` broke `statusConfig[task.status]`.
 const statusConfig: Record<
   TaskStatus,
-  { label: string; variant: 'secondary' | 'info' | 'warning' | 'destructive' | 'success' | 'outline' }
+  { variant: 'secondary' | 'info' | 'warning' | 'destructive' | 'success' | 'outline' }
 > = {
-  todo: { label: 'To Do', variant: 'secondary' },
-  in_progress: { label: 'In Progress', variant: 'info' },
-  review: { label: 'Review', variant: 'warning' },
-  blocked: { label: 'Blocked', variant: 'destructive' },
-  done: { label: 'Done', variant: 'success' },
-  cancelled: { label: 'Cancelled', variant: 'outline' },
+  todo: { variant: 'secondary' },
+  in_progress: { variant: 'info' },
+  review: { variant: 'warning' },
+  blocked: { variant: 'destructive' },
+  done: { variant: 'success' },
+  cancelled: { variant: 'outline' },
   // archived is terminal and distinct from done (status map rev 3): it is rendered,
   // never dropped, and never styled as a success.
-  archived: { label: 'Archived', variant: 'outline' },
+  archived: { variant: 'outline' },
 };
 
 const priorityConfig = {
@@ -139,7 +140,7 @@ function TaskStatusAction({ task }: TaskDetailProps) {
   const currentVisitRef = useRef(true);
   const statusMutation = useUpdateTaskStatus();
   const currentStatus = confirmedStatus ?? task.status;
-  const currentConfig = statusConfig[currentStatus];
+  const currentStatusConfig = statusConfig[currentStatus];
   const allowedTargets = TASK_TRANSITIONS[currentStatus];
 
   useEffect(() => {
@@ -188,7 +189,7 @@ function TaskStatusAction({ task }: TaskDetailProps) {
 
   return (
     <>
-      <Badge variant={currentConfig.variant}>{currentConfig.label}</Badge>
+      <Badge variant={currentStatusConfig.variant}>{TASK_STATUS_LABELS[currentStatus]}</Badge>
       {allowedTargets.length > 0 ? (
         <div className="flex items-center gap-2">
           <label htmlFor={`task-status-${task.id}`} className="text-sm text-muted-foreground">
@@ -201,10 +202,10 @@ function TaskStatusAction({ task }: TaskDetailProps) {
             onChange={(event) => updateTaskStatus(event.currentTarget.value)}
             className="h-9 rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <option value={currentStatus}>Current: {currentConfig.label}</option>
+            <option value={currentStatus}>Current: {TASK_STATUS_LABELS[currentStatus]}</option>
             {allowedTargets.map((status) => (
               <option key={status} value={status}>
-                {statusConfig[status].label}
+                {TASK_STATUS_LABELS[status]}
               </option>
             ))}
           </select>
