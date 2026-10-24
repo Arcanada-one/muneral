@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom/vitest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { AuditLog } from './AuditLog';
 
 interface ActivityFixture {
@@ -96,21 +97,28 @@ describe('AuditLog comment bodies', () => {
     expect(container.textContent).toContain(body);
   });
 
-  it('keeps a long comment complete in a native disclosure', () => {
+  it('opens the complete long comment from its keyboard-accessible disclosure', async () => {
     const body = `Start\n${'evidence '.repeat(180)}<script>alert(1)</script> End`;
     ready(taskA, [commentEntry(taskA, { body })]);
 
     render(<AuditLog taskId={taskA} />);
 
-    const disclosure = screen.getByText('Read full comment').closest('details');
+    const user = userEvent.setup();
+    const summary = screen.getByText('Read full comment');
+    expect(summary.tagName).toBe('SUMMARY');
+    expect(summary).toHaveTextContent('Read full comment');
+    const disclosure = summary.closest('details');
     expect(disclosure).not.toBeNull();
     expect(disclosure).not.toHaveAttribute('open');
-    fireEvent.click(screen.getByText('Read full comment'));
+    await user.tab();
+    expect(summary).toHaveFocus();
+    fireEvent.click(summary);
     expect(disclosure).toHaveAttribute('open');
     const renderedBody = within(disclosure as HTMLDetailsElement).getByText((text) =>
       text.startsWith('Start evidence evidence'),
     );
     expect(renderedBody.textContent).toBe(body);
+    expect(renderedBody.parentElement).not.toHaveClass(/max-h-|overflow-y-auto/);
     expect(document.querySelector('script')).toBeNull();
   });
 

@@ -69,10 +69,10 @@ function CommentBody({ body }: { body: string }) {
   if (body.length > 1_000) {
     return (
       <details className="mt-1 min-w-0">
-        <summary className="cursor-pointer text-xs text-muted-foreground">
+        <summary tabIndex={0} className="cursor-pointer text-xs text-muted-foreground">
           Read full comment
         </summary>
-        <div className="mt-1 max-h-48 overflow-y-auto rounded border p-2">
+        <div className="mt-1">
           {content}
         </div>
       </details>
