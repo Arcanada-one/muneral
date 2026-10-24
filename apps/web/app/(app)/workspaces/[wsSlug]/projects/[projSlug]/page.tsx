@@ -9,6 +9,7 @@ import { useProjectStore } from '@/store/project';
 import { useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { ProjectRepository } from '@/components/project/ProjectRepository';
+import { TASK_STATUS_LABELS } from '@/lib/task-status-labels';
 
 function formatBacklogDueDate(value: string): string {
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
@@ -101,7 +102,7 @@ export default function ProjectPage() {
                     </td>
                     <td className="px-4 py-2.5">
                       <Badge variant="outline" className="text-xs">
-                        {task.status}
+                        {TASK_STATUS_LABELS[task.status]}
                       </Badge>
                     </td>
                     <td className="px-4 py-2.5">
