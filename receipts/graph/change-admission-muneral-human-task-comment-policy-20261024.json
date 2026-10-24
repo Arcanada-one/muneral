@@ -5,9 +5,9 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "admitted"
  },
- "captured_at_utc": "2026-10-24T12:03:42Z",
+ "captured_at_utc": "2026-10-24T12:17:26Z",
  "change_set": {
-  "base": "f83231286d8b5f0df5fef401edd07d116ff23117",
+  "base": "109a1f459cd3594184c54f7ae17312a006721749",
   "files": [
    {
     "kind": "doc",
@@ -34,22 +34,22 @@
     "status": "A"
    }
   ],
-  "head": "846bfe60e00ef1e176b78e9d55bc18540068cf02",
+  "head": "3d856d778eeb2cfa270144cc781cf626d3f2959b",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
  "empty_impact_explanation": {
   "binding": {
    "input": {
-    "base": "f83231286d8b5f0df5fef401edd07d116ff23117",
-    "base_graph_digest": "sha256:c5375dd19afdd0936b42f16f7b6dc7b00e993f2b923a14c6a4ae4ecf10cc2af8",
-    "head": "846bfe60e00ef1e176b78e9d55bc18540068cf02",
-    "head_graph_digest": "sha256:74e5e189ae13121931017e5015b258f145b2613de322780cd384ed48e8d84f8c",
-    "reason": "For this exact paired graph measurement, no non-seed dependent nodes were predicted: the policy document is a seed and its seven references resolve at the head. The changed mutation-results.json is an assembly record with no graph node under the current language coverage; it remains uncovered and is not counted as a verified runtime effect or as proof of zero impact. The accepted composition evidence records only two supplemental Git binding changes, with the remaining 61 bindings and all 85 recorded site outcomes unchanged; no 85-site rerun is claimed. The policy remains proposed and unimplemented, so this graph result does not establish authorization behavior or grant access.",
+    "base": "109a1f459cd3594184c54f7ae17312a006721749",
+    "base_graph_digest": "sha256:9078f50440e1a2d71473e0036f4d298a6849c1ecb3cd1e56b3dbb97d7c533df0",
+    "head": "3d856d778eeb2cfa270144cc781cf626d3f2959b",
+    "head_graph_digest": "sha256:bab3f9ab0d5751de4bb605793efbc7920cc448b50f0b1deaa2816e52a135e4e0",
+    "reason": "For this exact graph pair, the changed policy document is a seed and its seven cited references resolve. The changed mutation-results.json is an assembly record with no graph node under current language coverage; it remains uncovered. The source-qualified exporter and accepted composition show only supplemental Git snapshot fields changed: all 61 assembly binding entries and all 85 recorded mutation outcomes remain unchanged, and the re-computed supplemental snapshot matches the current tracked source. The policy remains proposed and unimplemented. This explanation addresses only the empty non-seed dependent prediction; it does not assert runtime authorization, coverage of the mutation artifact, or task acceptance.",
     "schema": "EmptyImpactExplanation/v1",
     "scope": "graph_non_seed_dependents"
    },
-   "input_sha256": "sha256:27a8cd72a79d16d93c06f3a5f4d833edeb4f053eb22ac80ee9014f84a607a78e",
+   "input_sha256": "sha256:991d78c002325d926b2113982e4cd04fa03a64aaf9ccc9681b6b6411f7542093",
    "schema": "BoundEmptyImpactExplanation/v1"
   },
   "graph_metadata": {
@@ -97,7 +97,7 @@
        "status": "A"
       }
      ],
-     "graph_digest": "sha256:c5375dd19afdd0936b42f16f7b6dc7b00e993f2b923a14c6a4ae4ecf10cc2af8",
+     "graph_digest": "sha256:9078f50440e1a2d71473e0036f4d298a6849c1ecb3cd1e56b3dbb97d7c533df0",
      "internal_reverse_edges": 0,
      "language_coverage": [
       "typescript",
@@ -112,7 +112,7 @@
      ],
      "max_depth": 3,
      "seeds": [],
-     "source_commit": "f83231286d8b5f0df5fef401edd07d116ff23117"
+     "source_commit": "109a1f459cd3594184c54f7ae17312a006721749"
     },
     "head": {
      "changed_node_known_to_graph": true,
@@ -163,7 +163,7 @@
        "status": "A"
       }
      ],
-     "graph_digest": "sha256:74e5e189ae13121931017e5015b258f145b2613de322780cd384ed48e8d84f8c",
+     "graph_digest": "sha256:bab3f9ab0d5751de4bb605793efbc7920cc448b50f0b1deaa2816e52a135e4e0",
      "internal_reverse_edges": 1,
      "language_coverage": [
       "typescript",
@@ -181,31 +181,31 @@
       "document:apps/api/docs/human-task-comment-create-policy-v1.md",
       "receipt:receipts/graph/change-admission-muneral-human-task-comment-policy-20261024.json"
      ],
-     "source_commit": "846bfe60e00ef1e176b78e9d55bc18540068cf02"
+     "source_commit": "3d856d778eeb2cfa270144cc781cf626d3f2959b"
     }
    },
    "scope": "graph_non_seed_dependents"
   },
-  "reason": "For this exact paired graph measurement, no non-seed dependent nodes were predicted: the policy document is a seed and its seven references resolve at the head. The changed mutation-results.json is an assembly record with no graph node under the current language coverage; it remains uncovered and is not counted as a verified runtime effect or as proof of zero impact. The accepted composition evidence records only two supplemental Git binding changes, with the remaining 61 bindings and all 85 recorded site outcomes unchanged; no 85-site rerun is claimed. The policy remains proposed and unimplemented, so this graph result does not establish authorization behavior or grant access.",
+  "reason": "For this exact graph pair, the changed policy document is a seed and its seven cited references resolve. The changed mutation-results.json is an assembly record with no graph node under current language coverage; it remains uncovered. The source-qualified exporter and accepted composition show only supplemental Git snapshot fields changed: all 61 assembly binding entries and all 85 recorded mutation outcomes remain unchanged, and the re-computed supplemental snapshot matches the current tracked source. The policy remains proposed and unimplemented. This explanation addresses only the empty non-seed dependent prediction; it does not assert runtime authorization, coverage of the mutation artifact, or task acceptance.",
   "schema": "BoundEmptyImpactExplanation/v1"
  },
  "exemptions": [],
  "graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:c5375dd19afdd0936b42f16f7b6dc7b00e993f2b923a14c6a4ae4ecf10cc2af8",
-  "path": "/out/tmp/arcana-verify/verifier-out/graph-f83231286d8b.json",
-  "source_commit": "f83231286d8b5f0df5fef401edd07d116ff23117"
+  "graph_digest": "sha256:9078f50440e1a2d71473e0036f4d298a6849c1ecb3cd1e56b3dbb97d7c533df0",
+  "path": "/out/tmp/arcana-verify/verifier-out/graph-109a1f459cd3.json",
+  "source_commit": "109a1f459cd3594184c54f7ae17312a006721749"
  },
  "head_graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:74e5e189ae13121931017e5015b258f145b2613de322780cd384ed48e8d84f8c",
-  "path": "/out/tmp/arcana-verify/verifier-out/graph-head-846bfe60e00e.json",
-  "source_commit": "846bfe60e00ef1e176b78e9d55bc18540068cf02",
+  "graph_digest": "sha256:bab3f9ab0d5751de4bb605793efbc7920cc448b50f0b1deaa2816e52a135e4e0",
+  "path": "/out/tmp/arcana-verify/verifier-out/graph-head-3d856d778eeb.json",
+  "source_commit": "3d856d778eeb2cfa270144cc781cf626d3f2959b",
   "staleness": {
-   "checked_at_utc": "2026-10-24T12:04:20Z",
-   "checked_nodes": 495,
+   "checked_at_utc": "2026-10-24T12:18:06Z",
+   "checked_nodes": 496,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -213,7 +213,7 @@
  },
  "host": "muneral-human-task-policy-stage",
  "host_redacted": true,
- "host_sha256": "af686791a16cbdca392a0378bd10a9fbcf706374924656827db186afe55d25b8",
+ "host_sha256": "c23169dc3e496678a341f777112388ff39961916b07f547c4602c448b114a502",
  "impact_set": {
   "deterministic_core": [],
   "edge_types": "all",
@@ -233,7 +233,7 @@
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261024T120342Z-846bfe60",
+ "receipt_id": "car-verify-20261024T121726Z-3d856d77",
  "receipt_path": "receipts/graph/change-admission-muneral-human-task-comment-policy-20261024.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -250,7 +250,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-24T12:04:20Z",
+  "checked_at_utc": "2026-10-24T12:18:06Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -259,7 +259,7 @@
   {
    "content_hash": {
     "base": null,
-    "head": "sha256:1e1b882e2a14375951dc2296340925adab8eba3d037c403c4be84586eab15106"
+    "head": "sha256:00787a2641a00c757b2deb19cd60a499980046e46c51ba0450320d790cf20d83"
    },
    "entity": "receipt:receipts/graph/change-admission-muneral-human-task-comment-policy-20261024.json",
    "node_type": "receipt",
@@ -273,7 +273,7 @@
   }
  ],
  "tree": {
-  "commit": "846bfe60e00ef1e176b78e9d55bc18540068cf02",
+  "commit": "3d856d778eeb2cfa270144cc781cf626d3f2959b",
   "dirty": false
  },
  "verdicts": [
@@ -306,7 +306,7 @@
    "id": "v-doc-reference",
    "kind": "doc_reference",
    "output_ref": "/out/tmp/arcana-verify/verifier-out/v-doc-reference.txt",
-   "started_at_utc": "2026-10-24T12:04:25Z",
+   "started_at_utc": "2026-10-24T12:18:11Z",
    "summary": "1 document(s), 0 failed"
   }
  ],
@@ -345,8 +345,8 @@
    "receipt:receipts/graph/change-admission-muneral-human-task-comment-policy-20261024.json": []
   },
   "seconds": {
-   "prepare": 2.14,
-   "total": 43.26,
+   "prepare": 2.1,
+   "total": 45.01,
    "verifiers": 0.0
   }
  },
