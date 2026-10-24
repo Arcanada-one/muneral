@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Bot, User, Clock } from 'lucide-react';
-import { TASK_STATUSES, type TaskStatus } from '@muneral/types';
+import { TASK_STATUSES, type TaskPriority, type TaskStatus } from '@muneral/types';
 import { useActivity } from '@/lib/api/tasks';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -19,6 +19,13 @@ const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   done: 'Done',
   cancelled: 'Cancelled',
   archived: 'Archived',
+};
+
+const TASK_PRIORITY_LABELS: Record<TaskPriority, string> = {
+  critical: 'Critical',
+  high: 'High',
+  medium: 'Medium',
+  low: 'Low',
 };
 
 function isTaskStatus(value: unknown): value is TaskStatus {
@@ -42,6 +49,41 @@ function formatStatusTransition(payload: unknown): string | undefined {
   if (!isTaskStatus(payload.from) || !isTaskStatus(payload.to)) return undefined;
 
   return `${TASK_STATUS_LABELS[payload.from]} → ${TASK_STATUS_LABELS[payload.to]}`;
+}
+
+function isTaskPriority(value: unknown): value is TaskPriority {
+  return value === 'critical' || value === 'high' || value === 'medium' || value === 'low';
+}
+
+function formatTaskUpdate(payload: unknown): string[] | undefined {
+  if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) {
+    return undefined;
+  }
+
+  const prototype = Object.getPrototypeOf(payload);
+  if (prototype !== Object.prototype && prototype !== null) return undefined;
+
+  const keys = Object.keys(payload);
+  if (keys.length === 0 || keys.some((key) => key !== 'priority' && key !== 'dueDate')) {
+    return undefined;
+  }
+
+  const details: string[] = [];
+  const priority = Object.getOwnPropertyDescriptor(payload, 'priority');
+  if (priority !== undefined) {
+    if (!('value' in priority) || !isTaskPriority(priority.value)) return undefined;
+    details.push(`Priority set to ${TASK_PRIORITY_LABELS[priority.value]}`);
+  }
+
+  const dueDate = Object.getOwnPropertyDescriptor(payload, 'dueDate');
+  if (dueDate !== undefined) {
+    if (!('value' in dueDate) || typeof dueDate.value !== 'string') return undefined;
+    const timestamp = Date.parse(dueDate.value);
+    if (!Number.isFinite(timestamp)) return undefined;
+    details.push(`Due date set to ${new Date(timestamp).toLocaleDateString()}`);
+  }
+
+  return details.length > 0 ? details : undefined;
 }
 
 function getCommentBody(payload: unknown): string | undefined {
@@ -197,6 +239,9 @@ export function AuditLog({ taskId }: AuditLogProps) {
             const commentBody = entry.action === 'comment'
               ? getCommentBody(entry.payload)
               : undefined;
+            const taskUpdateDetails = entry.action === 'task:updated'
+              ? formatTaskUpdate(entry.payload)
+              : undefined;
 
             return (
               <li key={entry.id} className="flex gap-3">
@@ -227,6 +272,11 @@ export function AuditLog({ taskId }: AuditLogProps) {
                   <p className="mt-0.5 text-xs text-muted-foreground">
                     {formatRelativeTime(entry.createdAt)}
                   </p>
+                  {taskUpdateDetails !== undefined && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {taskUpdateDetails.join(' · ')}
+                    </p>
+                  )}
                   {commentBody !== undefined && <CommentBody body={commentBody} />}
                 </div>
               </li>
