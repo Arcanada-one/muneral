@@ -44,6 +44,44 @@ function formatStatusTransition(payload: unknown): string | undefined {
   return `${TASK_STATUS_LABELS[payload.from]} → ${TASK_STATUS_LABELS[payload.to]}`;
 }
 
+function getCommentBody(payload: unknown): string | undefined {
+  if (
+    typeof payload !== 'object' ||
+    payload === null ||
+    Array.isArray(payload)
+  ) {
+    return undefined;
+  }
+
+  const body = Object.getOwnPropertyDescriptor(payload, 'body');
+  return body && 'value' in body && typeof body.value === 'string'
+    ? body.value
+    : undefined;
+}
+
+function CommentBody({ body }: { body: string }) {
+  const content = (
+    <p className="whitespace-pre-wrap break-words text-xs text-muted-foreground">
+      {body}
+    </p>
+  );
+
+  if (body.length > 1_000) {
+    return (
+      <details className="mt-1 min-w-0">
+        <summary className="cursor-pointer text-xs text-muted-foreground">
+          Read full comment
+        </summary>
+        <div className="mt-1 max-h-48 overflow-y-auto rounded border p-2">
+          {content}
+        </div>
+      </details>
+    );
+  }
+
+  return <div className="mt-1 min-w-0">{content}</div>;
+}
+
 function formatRelativeTime(dateStr: string): string {
   const date = new Date(dateStr);
   const now = new Date();
@@ -155,38 +193,45 @@ export function AuditLog({ taskId }: AuditLogProps) {
 
       <ScrollArea className="h-64">
         <ul className="space-y-3">
-          {entries.map((entry) => (
-            <li key={entry.id} className="flex gap-3">
-              <Avatar className="h-6 w-6 flex-shrink-0 mt-0.5">
-                <AvatarFallback className="text-xs">
-                  {entry.actorType === 'agent' ? (
-                    <Bot className="h-3 w-3" />
-                  ) : (
-                    <User className="h-3 w-3" />
-                  )}
-                </AvatarFallback>
-              </Avatar>
+          {entries.map((entry) => {
+            const commentBody = entry.action === 'comment'
+              ? getCommentBody(entry.payload)
+              : undefined;
 
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-xs font-medium">{entry.actorName}</span>
-                  {entry.actorType === 'agent' && (
-                    <span className="rounded bg-blue-100 px-1 py-0.5 text-xs text-blue-700">
-                      agent
+            return (
+              <li key={entry.id} className="flex gap-3">
+                <Avatar className="h-6 w-6 flex-shrink-0 mt-0.5">
+                  <AvatarFallback className="text-xs">
+                    {entry.actorType === 'agent' ? (
+                      <Bot className="h-3 w-3" />
+                    ) : (
+                      <User className="h-3 w-3" />
+                    )}
+                  </AvatarFallback>
+                </Avatar>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-xs font-medium">{entry.actorName}</span>
+                    {entry.actorType === 'agent' && (
+                      <span className="rounded bg-blue-100 px-1 py-0.5 text-xs text-blue-700">
+                        agent
+                      </span>
+                    )}
+                    <span className="text-xs text-muted-foreground">
+                      {entry.action === 'task:status_changed'
+                        ? formatStatusTransition(entry.payload) ?? entry.action
+                        : entry.action}
                     </span>
-                  )}
-                  <span className="text-xs text-muted-foreground">
-                    {entry.action === 'task:status_changed'
-                      ? formatStatusTransition(entry.payload) ?? entry.action
-                      : entry.action}
-                  </span>
+                  </div>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {formatRelativeTime(entry.createdAt)}
+                  </p>
+                  {commentBody !== undefined && <CommentBody body={commentBody} />}
                 </div>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  {formatRelativeTime(entry.createdAt)}
-                </p>
-              </div>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
         {entries.length === 0 && (
           <p className="py-3 text-xs text-muted-foreground">No activity on this page.</p>
