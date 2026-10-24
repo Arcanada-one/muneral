@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Bot, User, Clock } from 'lucide-react';
 import { TASK_STATUSES, type TaskStatus } from '@muneral/types';
 import { useActivity } from '@/lib/api/tasks';
@@ -65,8 +66,28 @@ function formatRelativeTime(dateStr: string): string {
 }
 
 export function AuditLog({ taskId }: AuditLogProps) {
-  const { data, isLoading, isError } = useActivity(taskId);
-  const entries = data?.data ?? [];
+  const [pageState, setPageState] = useState({ taskId, page: 1 });
+  if (pageState.taskId !== taskId) setPageState({ taskId, page: 1 });
+  const page = pageState.taskId === taskId ? pageState.page : 1;
+  const { data, isLoading, isError } = useActivity(taskId, page);
+  const total = data !== undefined && Number.isSafeInteger(data.total) && data.total >= 0
+    ? data.total
+    : undefined;
+  const limit = data !== undefined && Number.isSafeInteger(data.limit) && data.limit > 0
+    ? data.limit
+    : undefined;
+  const responsePageMatches = data !== undefined && Number.isSafeInteger(data.page) && data.page === page;
+  const responsePageIsUsable = data?.page === undefined || responsePageMatches;
+  const pageCount = total !== undefined && limit !== undefined
+    ? Math.max(1, Math.ceil(total / limit))
+    : undefined;
+  const pageOutOfRange = responsePageMatches && pageCount !== undefined && page > pageCount;
+  if (pageOutOfRange) setPageState({ taskId, page: 1 });
+  const entries = responsePageIsUsable && !pageOutOfRange
+    ? (data?.data ?? []).filter((entry) => !entry.taskId || entry.taskId === taskId)
+    : [];
+
+  const setPage = (nextPage: number) => setPageState({ taskId, page: nextPage });
 
   if (isError) return <div role="alert" className="rounded-lg border p-4 text-sm text-muted-foreground">Activity is unavailable. Try again later.</div>;
 
@@ -78,6 +99,24 @@ export function AuditLog({ taskId }: AuditLogProps) {
       </div>
     );
   }
+
+  if (pageOutOfRange) {
+    return (
+      <div className="rounded-lg border p-4" aria-live="polite">
+        <h4 className="mb-3 text-sm font-medium">Activity Log</h4>
+        <p className="text-xs text-muted-foreground">Showing the newest activity...</p>
+      </div>
+    );
+  }
+
+  const firstEntry = total === undefined || total === 0 || limit === undefined
+    ? 0
+    : (page - 1) * limit + 1;
+  const lastEntry = total === undefined || limit === undefined
+    ? 0
+    : Math.min(page * limit, total);
+  const canGoPrevious = !isLoading && responsePageMatches && page > 1;
+  const canGoNext = !isLoading && responsePageMatches && pageCount !== undefined && page < pageCount;
 
   return (
     <div className="rounded-lg border p-4">
@@ -121,7 +160,39 @@ export function AuditLog({ taskId }: AuditLogProps) {
             </li>
           ))}
         </ul>
+        {entries.length === 0 && (
+          <p className="py-3 text-xs text-muted-foreground">No activity on this page.</p>
+        )}
       </ScrollArea>
+
+      <nav aria-label="Activity pagination" className="mt-3 flex items-center justify-between gap-3 text-xs">
+        <span aria-live="polite" className="text-muted-foreground">
+          {total !== undefined && limit !== undefined && responsePageMatches
+            ? `Showing ${firstEntry}–${lastEntry} of ${total}`
+            : `Page ${page}`}
+        </span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            aria-label="Previous activity page"
+            disabled={!canGoPrevious}
+            onClick={() => setPage(page - 1)}
+            className="rounded border px-2 py-1 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Newer
+          </button>
+          {pageCount !== undefined && <span>Page {page} of {pageCount}</span>}
+          <button
+            type="button"
+            aria-label="Next activity page"
+            disabled={!canGoNext}
+            onClick={() => setPage(page + 1)}
+            className="rounded border px-2 py-1 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Older
+          </button>
+        </div>
+      </nav>
     </div>
   );
 }
