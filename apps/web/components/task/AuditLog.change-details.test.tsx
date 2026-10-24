@@ -74,6 +74,18 @@ describe('AuditLog task field changes', () => {
     expect(screen.getByText('task:updated')).toBeInTheDocument();
   });
 
+  it('keeps a date-only due-date update on its calendar day west of UTC', () => {
+    const dueDate = '2026-10-08';
+    activityState.data = [updatedEntry({ dueDate })];
+
+    render(<AuditLog taskId={taskId} />);
+
+    const expectedDate = new Date(`${dueDate}T00:00:00.000Z`).toLocaleDateString(undefined, {
+      timeZone: 'UTC',
+    });
+    expect(screen.getByText(`Due date set to ${expectedDate}`)).toBeInTheDocument();
+  });
+
   it('keeps unknown or free-text update payload fields hidden and falls back to the action', () => {
     activityState.data = [updatedEntry({
       priority: 'urgent',
@@ -89,5 +101,14 @@ describe('AuditLog task field changes', () => {
     expect(screen.queryByText('not-a-date')).not.toBeInTheDocument();
     expect(screen.queryByText('Private title must not be repeated in activity')).not.toBeInTheDocument();
     expect(screen.queryByText('Private description must not be repeated in activity')).not.toBeInTheDocument();
+  });
+
+  it('falls back to the action for an invalid date-only due-date update', () => {
+    activityState.data = [updatedEntry({ dueDate: '2026-02-30' })];
+
+    render(<AuditLog taskId={taskId} />);
+
+    expect(screen.getByText('task:updated')).toBeInTheDocument();
+    expect(screen.queryByText(/Due date set to/)).not.toBeInTheDocument();
   });
 });
