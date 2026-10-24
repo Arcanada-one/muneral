@@ -21,6 +21,7 @@ vi.mock('@/lib/api/tasks', () => ({
   useChecklist: () => queries.checklist,
   useActivity: () => queries.activity,
   useToggleChecklistItem: () => ({ mutate: vi.fn() }),
+  useUpdateTaskStatus: () => ({ mutate: vi.fn() }),
 }));
 
 vi.mock('@/components/task/TaskGitRefs', () => ({ TaskGitRefs: () => null }));
