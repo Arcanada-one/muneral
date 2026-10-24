@@ -1,11 +1,13 @@
 import '@testing-library/jest-dom/vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import apiClient from '@/lib/api/client';
 import { TaskDependencies } from './TaskDependencies';
 
 const taskId = '11111111-1111-4111-8111-111111111111';
+const secondTaskId = '99999999-9999-4999-8999-999999999999';
+const secondOtherId = '88888888-8888-4888-8888-888888888888';
 const otherIds = [
   '22222222-2222-4222-8222-222222222222',
   '33333333-3333-4333-8333-333333333333',
@@ -78,15 +80,27 @@ const graph = [
   },
 ];
 
-function renderDependencies() {
+function renderDependencies(currentTaskId = taskId) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
-  return render(
+  const renderForTask = (id: string) => (
     <QueryClientProvider client={queryClient}>
-      <TaskDependencies taskId={taskId} />
-    </QueryClientProvider>,
+      <TaskDependencies taskId={id} />
+    </QueryClientProvider>
   );
+  const view = render(renderForTask(currentTaskId));
+  return { ...view, rerenderTask: (id: string) => view.rerender(renderForTask(id)) };
+}
+
+const originalClipboardDescriptor = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
+
+function installClipboard(writeText: ReturnType<typeof vi.fn>) {
+  Object.defineProperty(navigator, 'clipboard', {
+    configurable: true,
+    value: { writeText },
+  });
+  return writeText;
 }
 
 beforeEach(() => {
@@ -96,6 +110,11 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
+  if (originalClipboardDescriptor) {
+    Object.defineProperty(navigator, 'clipboard', originalClipboardDescriptor);
+  } else {
+    Reflect.deleteProperty(navigator, 'clipboard');
+  }
 });
 
 describe('task dependency directions', () => {
@@ -119,6 +138,56 @@ describe('task dependency directions', () => {
     expect(screen.getByText('Blocked by').closest('li')).toHaveTextContent(otherIds[3].slice(0, 8));
   });
 
+  it('lets the user copy the full counterpart task ID instead of only seeing its abbreviated prefix', async () => {
+    const fullId = '22222222-2222-4222-8222-222222222222';
+    const writeText = installClipboard(vi.fn().mockResolvedValue(undefined));
+    renderDependencies();
+
+    const copyButton = await screen.findByRole('button', { name: `Copy task ID ${fullId}` });
+    expect(screen.getByText(fullId.slice(0, 8))).toBeInTheDocument();
+    expect(writeText).not.toHaveBeenCalled();
+
+    fireEvent.click(copyButton);
+
+    expect(writeText).toHaveBeenCalledTimes(1);
+    expect(writeText).toHaveBeenCalledWith(fullId);
+    expect(await screen.findByRole('status')).toHaveTextContent('Task ID copied.');
+  });
+
+  it('reports clipboard failures without exposing the browser error', async () => {
+    const writeText = installClipboard(vi.fn().mockRejectedValue(new Error('clipboard permission details')));
+    renderDependencies();
+
+    fireEvent.click(await screen.findByRole('button', { name: `Copy task ID ${otherIds[0]}` }));
+
+    const error = await screen.findByRole('alert');
+    expect(error).toHaveTextContent('Could not copy task ID. Try copying it manually.');
+    expect(error).not.toHaveTextContent('clipboard permission details');
+    expect(writeText).toHaveBeenCalledTimes(1);
+    expect(writeText).toHaveBeenCalledWith(otherIds[0]);
+  });
+
+  it('clears copy feedback when the displayed task changes', async () => {
+    const writeText = installClipboard(vi.fn().mockResolvedValue(undefined));
+    const view = renderDependencies();
+
+    fireEvent.click(await screen.findByRole('button', { name: `Copy task ID ${otherIds[0]}` }));
+    expect(await screen.findByRole('status')).toHaveTextContent('Task ID copied.');
+
+    vi.mocked(apiClient.get).mockImplementation(async (url) => ({
+      data: url === `/tasks/${secondTaskId}/dependency-graph`
+        ? [{ ...graph[0], id: '99999999-aaaa-4999-8999-999999999999', fromTaskId: secondTaskId, toTaskId: secondOtherId, otherTaskId: secondOtherId }]
+        : graph,
+    }) as never);
+    view.rerenderTask(secondTaskId);
+
+    expect(await screen.findByRole('button', { name: `Copy task ID ${secondOtherId}` })).toBeInTheDocument();
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: `Copy task ID ${otherIds[0]}` })).not.toBeInTheDocument();
+    expect(writeText).toHaveBeenCalledTimes(1);
+    expect(writeText).toHaveBeenCalledWith(otherIds[0]);
+  });
+
   it('rejects a graph row that is not bound to the requested task', async () => {
     vi.mocked(apiClient.get).mockResolvedValueOnce({
       data: [{ ...graph[0], fromTaskId: otherIds[2], toTaskId: otherIds[3] }],
@@ -127,5 +196,6 @@ describe('task dependency directions', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Dependencies are unavailable');
     expect(screen.queryByText('Depends on')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: `Copy task ID ${otherIds[2]}` })).not.toBeInTheDocument();
   });
 });
