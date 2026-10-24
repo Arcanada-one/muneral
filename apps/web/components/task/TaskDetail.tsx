@@ -5,6 +5,7 @@ import { Bot, User, AlertCircle, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { TaskChecklist } from './TaskChecklist';
 import { TaskDependencies } from './TaskDependencies';
+import { TaskReadiness } from './TaskReadiness';
 import { AuditLog } from './AuditLog';
 import { TaskGitRefs } from './TaskGitRefs';
 import { useUpdateTaskStatus, type Task } from '@/lib/api/tasks';
@@ -137,6 +138,7 @@ export function TaskDetail({ task }: TaskDetailProps) {
       <TaskChecklist taskId={task.id} />
 
       {/* Dependencies */}
+      <TaskReadiness taskId={task.id} />
       <TaskDependencies taskId={task.id} />
 
       {/* Git refs are scoped to the task and loaded through the read API. */}

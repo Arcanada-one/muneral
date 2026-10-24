@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from './client';
-import { readTask, readTaskPage, readChecklist, readDependencies, readDependencyGraph, readActivity, readTaskGitRefs } from './read-contract';
+import { readTask, readTaskPage, readChecklist, readDependencies, readDependencyGraph, readTaskReadiness, readActivity, readTaskGitRefs } from './read-contract';
 import type {
   TaskStatus,
   TaskPriority,
@@ -54,6 +54,13 @@ export interface TaskDependencyGraphEntry extends TaskDependency {
   otherTaskTitle: string | null;
   otherTaskTitleWithheld?: true;
   otherTaskStatus: string;
+}
+
+export interface TaskReadiness {
+  taskId: string;
+  dependencyCount: number;
+  blockedBy: TaskDependencyGraphEntry[];
+  ready: boolean;
 }
 
 export interface TaskGitRef {
@@ -125,6 +132,27 @@ async function fetchDependencyGraph(taskId: string): Promise<TaskDependencyGraph
   return graph;
 }
 
+async function fetchTaskReadiness(taskId: string): Promise<TaskReadiness> {
+  const res = await apiClient.get<unknown>(`/tasks/${taskId}/readiness`);
+  const result = readTaskReadiness(res.data);
+  const invalidBlocker = result.blockedBy.some((edge) => {
+    const outgoing = edge.fromTaskId === taskId;
+    const incoming = edge.toTaskId === taskId;
+    const expectedDirection = outgoing ? 'outgoing' : 'incoming';
+    const expectedOtherTaskId = outgoing ? edge.toTaskId : edge.fromTaskId;
+    const isBlockingRelation = (edge.type === 'depends_on' && edge.direction === 'outgoing') ||
+      (edge.type === 'blocks' && edge.direction === 'incoming');
+    return outgoing === incoming || edge.direction !== expectedDirection ||
+      edge.otherTaskId !== expectedOtherTaskId || !isBlockingRelation ||
+      ['done', 'cancelled', 'archived'].includes(edge.otherTaskStatus);
+  });
+  if (result.taskId !== taskId || result.dependencyCount < result.blockedBy.length ||
+      result.ready !== (result.blockedBy.length === 0) || invalidBlocker) {
+    throw new Error('Task readiness response is unavailable: invalid task binding');
+  }
+  return result;
+}
+
 async function fetchTaskGitRefs(taskId: string): Promise<TaskGitRef[]> {
   const res = await apiClient.get<unknown>(`/projects/tasks/${taskId}/git-refs`);
   const refs = readTaskGitRefs(res.data);
@@ -181,6 +209,14 @@ export function useDependencyGraph(taskId: string) {
   return useQuery({
     queryKey: ['tasks', taskId, 'dependency-graph'],
     queryFn: () => fetchDependencyGraph(taskId),
+    enabled: Boolean(taskId),
+  });
+}
+
+export function useTaskReadiness(taskId: string) {
+  return useQuery({
+    queryKey: ['tasks', taskId, 'readiness'],
+    queryFn: () => fetchTaskReadiness(taskId),
     enabled: Boolean(taskId),
   });
 }
