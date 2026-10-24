@@ -78,9 +78,17 @@ function formatTaskUpdate(payload: unknown): string[] | undefined {
   const dueDate = Object.getOwnPropertyDescriptor(payload, 'dueDate');
   if (dueDate !== undefined) {
     if (!('value' in dueDate) || typeof dueDate.value !== 'string') return undefined;
-    const timestamp = Date.parse(dueDate.value);
-    if (!Number.isFinite(timestamp)) return undefined;
-    details.push(`Due date set to ${new Date(timestamp).toLocaleDateString()}`);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dueDate.value)) {
+      const date = new Date(`${dueDate.value}T00:00:00.000Z`);
+      if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== dueDate.value) {
+        return undefined;
+      }
+      details.push(`Due date set to ${date.toLocaleDateString(undefined, { timeZone: 'UTC' })}`);
+    } else {
+      const timestamp = Date.parse(dueDate.value);
+      if (!Number.isFinite(timestamp)) return undefined;
+      details.push(`Due date set to ${new Date(timestamp).toLocaleDateString()}`);
+    }
   }
 
   return details.length > 0 ? details : undefined;
