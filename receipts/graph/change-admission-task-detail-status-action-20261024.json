@@ -5,10 +5,19 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "admitted"
  },
- "captured_at_utc": "2026-10-24T06:37:27Z",
+ "captured_at_utc": "2026-10-24T07:36:58Z",
  "change_set": {
   "base": "6ed1bbbec486a3019ce19edcc69f9c66b5ad617d",
   "files": [
+   {
+    "kind": "test",
+    "node_id": "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
+    "node_ids": [
+     "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx"
+    ],
+    "path": "apps/web/__tests__/task-read-error-presentation.test.tsx",
+    "status": "M"
+   },
    {
     "kind": "test",
     "node_id": "code_unit:apps/web/components/task/TaskDetail.status-action.test.tsx",
@@ -26,9 +35,18 @@
     ],
     "path": "apps/web/components/task/TaskDetail.tsx",
     "status": "M"
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/change-admission-task-detail-status-action-20261024.json",
+    "node_ids": [
+     "receipt:receipts/graph/change-admission-task-detail-status-action-20261024.json"
+    ],
+    "path": "receipts/graph/change-admission-task-detail-status-action-20261024.json",
+    "status": "A"
    }
   ],
-  "head": "b891b1e978ed133d8e4c24032214d6d522741eb7",
+  "head": "691e4402a87692edb899edefd9807f5f0d3d89d7",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -43,12 +61,12 @@
  "head_graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:365352bdbb950b782e14de8537f529fd3707dcf3b521e79beff86285220e8a0a",
-  "path": "/out/verifier-out/graph-head-b891b1e978ed.json",
-  "source_commit": "b891b1e978ed133d8e4c24032214d6d522741eb7",
+  "graph_digest": "sha256:d2274edcbf6fd5f7bc8c501724ffdd0eb7ca66b41280f6c6247844c492bcd0cb",
+  "path": "/out/verifier-out/graph-head-691e4402a876.json",
+  "source_commit": "691e4402a87692edb899edefd9807f5f0d3d89d7",
   "staleness": {
-   "checked_at_utc": "2026-10-24T06:38:11Z",
-   "checked_nodes": 486,
+   "checked_at_utc": "2026-10-24T07:37:45Z",
+   "checked_nodes": 487,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -56,7 +74,7 @@
  },
  "host": "stage-runner",
  "host_redacted": true,
- "host_sha256": "7334348427e0572f007aa54f8cf1c919b418ba6e68e55f58165b665eafb45846",
+ "host_sha256": "59ddd91ea72ef5a1340025cb01ff506c0c0f9b594ccab548d34dbe9b9bbbaa02",
  "impact_set": {
   "deterministic_core": [
    {
@@ -77,26 +95,6 @@
       "from": "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
       "provenance": "deterministic",
       "to": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
-      "via": "tsconfig-paths"
-     }
-    ],
-    "revisions": [
-     "base",
-     "head"
-    ],
-    "verifier_hint": "type-check / compile of the importer"
-   },
-   {
-    "boundary": "intra_unit",
-    "depth": 1,
-    "entity": "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
-    "node_type": "code_unit",
-    "path": [
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
       "via": "tsconfig-paths"
      }
     ],
@@ -134,49 +132,15 @@
     "path": [
      {
       "edge_type": "deploys_to",
-      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "from": "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
       "provenance": "deterministic",
       "to": "deployable_unit:apps/web",
       "via": "containment"
      }
     ],
-    "revision_paths": [
-     {
-      "boundary": "intra_unit",
-      "depth": 1,
-      "entity": "deployable_unit:apps/web",
-      "node_type": "deployable_unit",
-      "path": [
-       {
-        "edge_type": "deploys_to",
-        "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
-        "provenance": "deterministic",
-        "to": "deployable_unit:apps/web",
-        "via": "containment"
-       }
-      ],
-      "revision": "base",
-      "section": "deterministic_core",
-      "verifier_hint": "can-i-deploy gate (GRAPH-008)"
-     },
-     {
-      "boundary": "intra_unit",
-      "depth": 1,
-      "entity": "deployable_unit:apps/web",
-      "node_type": "deployable_unit",
-      "path": [
-       {
-        "edge_type": "deploys_to",
-        "from": "code_unit:apps/web/components/task/TaskDetail.status-action.test.tsx",
-        "provenance": "deterministic",
-        "to": "deployable_unit:apps/web",
-        "via": "containment"
-       }
-      ],
-      "revision": "head",
-      "section": "deterministic_core",
-      "verifier_hint": "can-i-deploy gate (GRAPH-008)"
-     }
+    "revisions": [
+     "base",
+     "head"
     ],
     "verifier_hint": "can-i-deploy gate (GRAPH-008)"
    },
@@ -250,7 +214,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/backend-workspace-isolation-20261008.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "to": "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
       "via": "explicit-path"
      }
     ],
@@ -390,7 +354,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-i05-adapter-20261008.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "to": "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
       "via": "explicit-path"
      }
     ],
@@ -430,7 +394,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-mun0008-repository-link-20261008.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "to": "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
       "via": "explicit-path"
      }
     ],
@@ -570,7 +534,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-mun0065-task-read-future-time-20261023.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "to": "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
       "via": "explicit-path"
      }
     ],
@@ -590,7 +554,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-muneral-auditlog-change-details-20261024.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "to": "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
       "via": "explicit-path"
      }
     ],
@@ -610,7 +574,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-muneral-auditlog-comments-20261024.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "to": "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
       "via": "explicit-path"
      }
     ],
@@ -630,7 +594,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-muneral-auditlog-evidence-details-20261024.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "to": "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
       "via": "explicit-path"
      }
     ],
@@ -650,7 +614,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-muneral-auditlog-pagination-20261024.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "to": "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
       "via": "explicit-path"
      }
     ],
@@ -670,7 +634,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-muneral-auditlog-recovery-20261024.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "to": "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
       "via": "explicit-path"
      }
     ],
@@ -690,7 +654,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-muneral-auditlog-status-20261023.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "to": "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
       "via": "explicit-path"
      }
     ],
@@ -750,7 +714,7 @@
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "to": "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
       "via": "explicit-path"
      }
     ],
@@ -848,24 +812,18 @@
   "inferred_tail": [],
   "max_depth": 3,
   "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
-  "total": 37
+  "total": 36
  },
  "notes": [
   "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
-  "profile: .arcana/verify.json at verified head; baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none",
-  "DEC-AUP-0035 not applied to receipt:receipts/graph/change-admission-mun0065-task-read-future-time-20261023.json: it declares this run's work item c158f59d-ea3a-407b-a76a-f46aecb52aac, but the receipt is being written to /out/CAR.json, which is outside this repository, so no path in the tree is the one this run supersedes.",
-  "DEC-AUP-0035 not applied to receipt:receipts/graph/change-admission-muneral-auditlog-change-details-20261024.json: it declares this run's work item c158f59d-ea3a-407b-a76a-f46aecb52aac, but the receipt is being written to /out/CAR.json, which is outside this repository, so no path in the tree is the one this run supersedes.",
-  "DEC-AUP-0035 not applied to receipt:receipts/graph/change-admission-muneral-auditlog-comments-20261024.json: it declares this run's work item c158f59d-ea3a-407b-a76a-f46aecb52aac, but the receipt is being written to /out/CAR.json, which is outside this repository, so no path in the tree is the one this run supersedes.",
-  "DEC-AUP-0035 not applied to receipt:receipts/graph/change-admission-muneral-auditlog-evidence-details-20261024.json: it declares this run's work item c158f59d-ea3a-407b-a76a-f46aecb52aac, but the receipt is being written to /out/CAR.json, which is outside this repository, so no path in the tree is the one this run supersedes.",
-  "DEC-AUP-0035 not applied to receipt:receipts/graph/change-admission-muneral-auditlog-pagination-20261024.json: it declares this run's work item c158f59d-ea3a-407b-a76a-f46aecb52aac, but the receipt is being written to /out/CAR.json, which is outside this repository, so no path in the tree is the one this run supersedes.",
-  "DEC-AUP-0035 not applied to receipt:receipts/graph/change-admission-muneral-auditlog-recovery-20261024.json: it declares this run's work item c158f59d-ea3a-407b-a76a-f46aecb52aac, but the receipt is being written to /out/CAR.json, which is outside this repository, so no path in the tree is the one this run supersedes.",
-  "DEC-AUP-0035 not applied to receipt:receipts/graph/change-admission-muneral-auditlog-status-20261023.json: it declares this run's work item c158f59d-ea3a-407b-a76a-f46aecb52aac, but the receipt is being written to /out/CAR.json, which is outside this repository, so no path in the tree is the one this run supersedes."
+  "profile: .arcana/verify.json at verified head; baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none"
  ],
  "producer": {
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261024T063727Z-b891b1e9",
+ "receipt_id": "car-verify-20261024T073658Z-691e4402",
+ "receipt_path": "receipts/graph/change-admission-task-detail-status-action-20261024.json",
  "repo": {
   "name": "Arcanada-one/muneral",
   "path": "/repo"
@@ -948,6 +906,7 @@
    "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
    "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json",
    "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+   "receipt:receipts/graph/change-admission-task-detail-status-action-20261024.json",
    "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
    "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
    "receipt:receipts/graph/security-api959a-caller788.json"
@@ -957,7 +916,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-24T06:38:10Z",
+  "checked_at_utc": "2026-10-24T07:37:45Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -1295,6 +1254,21 @@
   },
   {
    "content_hash": {
+    "base": null,
+    "head": "sha256:3e6eb6502e4ea5fe0096ff9737a8d05ad70f03407a2d2bae8ef351d0fa7b0805"
+   },
+   "entity": "receipt:receipts/graph/change-admission-task-detail-status-action-20261024.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-task-detail-status-action-20261024.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it; superseded by construction — this run re-issues the receipt at receipts/graph/change-admission-task-detail-status-action-20261024.json for work item c158f59d-ea3a-407b-a76a-f46aecb52aac",
+   "rule": "DEC-AUP-0035",
+   "superseded": {
+    "receipt_path": "receipts/graph/change-admission-task-detail-status-action-20261024.json",
+    "work_item": "c158f59d-ea3a-407b-a76a-f46aecb52aac"
+   }
+  },
+  {
+   "content_hash": {
     "base": "sha256:a6107936a5b0f4e1f7c0c0ecf75c8f2557da15e932e40afc37215ff2328b88a2",
     "head": "sha256:a6107936a5b0f4e1f7c0c0ecf75c8f2557da15e932e40afc37215ff2328b88a2"
    },
@@ -1328,7 +1302,7 @@
   }
  ],
  "tree": {
-  "commit": "b891b1e978ed133d8e4c24032214d6d522741eb7",
+  "commit": "691e4402a87692edb899edefd9807f5f0d3d89d7",
   "dirty": false
  },
  "verdicts": [
@@ -1397,8 +1371,8 @@
  },
  "verifiers": [
   {
-   "command": "/repo/apps/web/node_modules/.bin/tsc -p /repo/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /out/verifier-out/type-check-uv059wqq/check.tsbuildinfo --listFiles",
-   "duration_s": 4.59,
+   "command": "/repo/apps/web/node_modules/.bin/tsc -p /repo/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /out/verifier-out/type-check-t7r7yv50/check.tsbuildinfo --listFiles",
+   "duration_s": 5.67,
    "entities": [
     "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
     "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
@@ -1419,12 +1393,12 @@
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
    "output_ref": "/out/verifier-out/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-10-24T06:38:16Z",
+   "started_at_utc": "2026-10-24T07:37:52Z",
    "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1400 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=6ed1bbbec486, head=b891b1e978ed, graph=head graph)",
-   "duration_s": 4.67,
+   "command": "tools/graph/contract_diff.py.run_diff(base=6ed1bbbec486, head=691e4402a876, graph=head graph)",
+   "duration_s": 4.99,
    "entities": [
     "code_unit:apps/web/components/task/TaskDetail.status-action.test.tsx",
     "code_unit:apps/web/components/task/TaskDetail.tsx"
@@ -1437,12 +1411,12 @@
    "id": "v-contract-diff",
    "kind": "contract_diff",
    "output_ref": "/out/verifier-out/v-contract-diff.json",
-   "started_at_utc": "2026-10-24T06:38:21Z",
+   "started_at_utc": "2026-10-24T07:37:57Z",
    "summary": "58→58 contracts, breaking 0, edges {'verified': 168}"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.16,
+   "duration_s": 0.15,
    "entities": [
     "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
     "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
@@ -1463,51 +1437,22 @@
    "id": "v-fitness",
    "kind": "fitness_rules",
    "output_ref": "/out/verifier-out/v-fitness.json",
-   "started_at_utc": "2026-10-24T06:38:25Z",
+   "started_at_utc": "2026-10-24T07:38:02Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   }
  ],
  "verify": {
   "events": [
    {
-    "code": "SUPERSEDED_SELF_NOT_APPLICABLE",
+    "code": "SUPERSEDED_SELF_EXCLUSION",
+    "entity": "receipt:receipts/graph/change-admission-task-detail-status-action-20261024.json",
     "rule": "DEC-AUP-0035",
-    "text": "DEC-AUP-0035 not applied to receipt:receipts/graph/change-admission-mun0065-task-read-future-time-20261023.json: it declares this run's work item c158f59d-ea3a-407b-a76a-f46aecb52aac, but the receipt is being written to /out/CAR.json, which is outside this repository, so no path in the tree is the one this run supersedes."
-   },
-   {
-    "code": "SUPERSEDED_SELF_NOT_APPLICABLE",
-    "rule": "DEC-AUP-0035",
-    "text": "DEC-AUP-0035 not applied to receipt:receipts/graph/change-admission-muneral-auditlog-change-details-20261024.json: it declares this run's work item c158f59d-ea3a-407b-a76a-f46aecb52aac, but the receipt is being written to /out/CAR.json, which is outside this repository, so no path in the tree is the one this run supersedes."
-   },
-   {
-    "code": "SUPERSEDED_SELF_NOT_APPLICABLE",
-    "rule": "DEC-AUP-0035",
-    "text": "DEC-AUP-0035 not applied to receipt:receipts/graph/change-admission-muneral-auditlog-comments-20261024.json: it declares this run's work item c158f59d-ea3a-407b-a76a-f46aecb52aac, but the receipt is being written to /out/CAR.json, which is outside this repository, so no path in the tree is the one this run supersedes."
-   },
-   {
-    "code": "SUPERSEDED_SELF_NOT_APPLICABLE",
-    "rule": "DEC-AUP-0035",
-    "text": "DEC-AUP-0035 not applied to receipt:receipts/graph/change-admission-muneral-auditlog-evidence-details-20261024.json: it declares this run's work item c158f59d-ea3a-407b-a76a-f46aecb52aac, but the receipt is being written to /out/CAR.json, which is outside this repository, so no path in the tree is the one this run supersedes."
-   },
-   {
-    "code": "SUPERSEDED_SELF_NOT_APPLICABLE",
-    "rule": "DEC-AUP-0035",
-    "text": "DEC-AUP-0035 not applied to receipt:receipts/graph/change-admission-muneral-auditlog-pagination-20261024.json: it declares this run's work item c158f59d-ea3a-407b-a76a-f46aecb52aac, but the receipt is being written to /out/CAR.json, which is outside this repository, so no path in the tree is the one this run supersedes."
-   },
-   {
-    "code": "SUPERSEDED_SELF_NOT_APPLICABLE",
-    "rule": "DEC-AUP-0035",
-    "text": "DEC-AUP-0035 not applied to receipt:receipts/graph/change-admission-muneral-auditlog-recovery-20261024.json: it declares this run's work item c158f59d-ea3a-407b-a76a-f46aecb52aac, but the receipt is being written to /out/CAR.json, which is outside this repository, so no path in the tree is the one this run supersedes."
-   },
-   {
-    "code": "SUPERSEDED_SELF_NOT_APPLICABLE",
-    "rule": "DEC-AUP-0035",
-    "text": "DEC-AUP-0035 not applied to receipt:receipts/graph/change-admission-muneral-auditlog-status-20261023.json: it declares this run's work item c158f59d-ea3a-407b-a76a-f46aecb52aac, but the receipt is being written to /out/CAR.json, which is outside this repository, so no path in the tree is the one this run supersedes."
+    "text": "the receipt at receipts/graph/change-admission-task-detail-status-action-20261024.json is the previous version of the one this run is writing, for the same work item c158f59d-ea3a-407b-a76a-f46aecb52aac — superseded by construction, so it owes this change no verdict"
    },
    {
     "code": "STRUCTURAL_EXCLUSION",
     "rule": "DEC-AUP-0034",
-    "text": "33 affected entity(ies) owe no verdict (receipt: 33): unchanged at both revisions and given no verifier by the matrix"
+    "text": "34 affected entity(ies) owe no verdict (receipt: 34): unchanged at both revisions and given no verifier by the matrix"
    }
   ],
   "required_by_entity": {
@@ -1567,14 +1512,15 @@
    "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json": [],
    "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json": [],
    "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json": [],
+   "receipt:receipts/graph/change-admission-task-detail-status-action-20261024.json": [],
    "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json": [],
    "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json": [],
    "receipt:receipts/graph/security-api959a-caller788.json": []
   },
   "seconds": {
-   "prepare": 2.37,
-   "total": 58.66,
-   "verifiers": 9.42
+   "prepare": 3.12,
+   "total": 65.16,
+   "verifiers": 10.81
   }
  },
  "work_item": "c158f59d-ea3a-407b-a76a-f46aecb52aac"
