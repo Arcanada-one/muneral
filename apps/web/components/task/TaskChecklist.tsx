@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useChecklist, useToggleChecklistItem } from '@/lib/api/tasks';
@@ -13,6 +13,8 @@ interface TaskChecklistProps {
 export function TaskChecklist({ taskId }: TaskChecklistProps) {
   const [expanded, setExpanded] = useState(true);
   const [retryingTaskId, setRetryingTaskId] = useState<string | null>(null);
+  const pendingToggleKeysRef = useRef(new Set<string>());
+  const [pendingToggleKeys, setPendingToggleKeys] = useState<Set<string>>(new Set());
   const { data: items = [], isLoading, isError, isFetching, refetch } = useChecklist(taskId);
   const toggle = useToggleChecklistItem();
 
@@ -21,6 +23,24 @@ export function TaskChecklist({ taskId }: TaskChecklistProps) {
   const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
   const toggleFailedForTask = toggle.isError && toggle.variables?.taskId === taskId;
   const isRetrying = retryingTaskId === taskId;
+
+  const toggleChecklistItem = (itemId: string, checked: boolean) => {
+    const key = `${taskId}:${itemId}`;
+    if (pendingToggleKeysRef.current.has(key)) return;
+
+    pendingToggleKeysRef.current.add(key);
+    setPendingToggleKeys(new Set(pendingToggleKeysRef.current));
+
+    const releasePending = () => {
+      if (!pendingToggleKeysRef.current.delete(key)) return;
+      setPendingToggleKeys(new Set(pendingToggleKeysRef.current));
+    };
+
+    void toggle.mutateAsync({ taskId, itemId, checked }).then(
+      releasePending,
+      releasePending,
+    );
+  };
 
   const retryChecklist = () => {
     if (isFetching || isRetrying) return;
@@ -88,14 +108,17 @@ export function TaskChecklist({ taskId }: TaskChecklistProps) {
       {expanded && (
         <ul className="mt-3 space-y-2">
           {items.map((item) => (
-            <li key={item.id} className="flex items-center gap-2">
+            <li
+              key={item.id}
+              className="flex items-center gap-2"
+              aria-busy={pendingToggleKeys.has(`${taskId}:${item.id}`)}
+            >
               <input
                 type="checkbox"
                 id={`checklist-${item.id}`}
                 checked={item.checked}
-                onChange={(e) =>
-                  toggle.mutate({ taskId, itemId: item.id, checked: e.target.checked })
-                }
+                disabled={pendingToggleKeys.has(`${taskId}:${item.id}`)}
+                onChange={(e) => toggleChecklistItem(item.id, e.target.checked)}
                 className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
               />
               <label
