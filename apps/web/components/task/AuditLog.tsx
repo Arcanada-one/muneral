@@ -370,7 +370,9 @@ export function AuditLog({ taskId }: AuditLogProps) {
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-xs font-medium">{entry.actorName}</span>
+                    <span className="text-xs font-medium">
+                      {entry.actorName || `Actor ID: ${entry.actorId}`}
+                    </span>
                     {entry.actorType === 'agent' && (
                       <span className="rounded bg-blue-100 px-1 py-0.5 text-xs text-blue-700">
                         agent
