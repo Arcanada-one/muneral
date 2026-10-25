@@ -15,7 +15,8 @@ export function TaskChecklist({ taskId }: TaskChecklistProps) {
   const [retryingTaskId, setRetryingTaskId] = useState<string | null>(null);
   const pendingToggleKeysRef = useRef(new Set<string>());
   const [pendingToggleKeys, setPendingToggleKeys] = useState<Set<string>>(new Set());
-  const { data: items = [], isLoading, isError, isFetching, refetch } = useChecklist(taskId);
+  const { data, isPending, isError, isFetching, refetch } = useChecklist(taskId);
+  const items = data ?? [];
   const toggle = useToggleChecklistItem();
 
   const completed = items.filter((i) => i.checked).length;
@@ -74,7 +75,14 @@ export function TaskChecklist({ taskId }: TaskChecklistProps) {
     );
   }
 
-  if (isLoading) return null;
+  if (taskId && data === undefined && isPending) {
+    return (
+      <div className="rounded-lg border p-4 text-sm text-muted-foreground">
+        <p role="status">Loading checklist…</p>
+      </div>
+    );
+  }
+
   if (total === 0) return null;
 
   return (
