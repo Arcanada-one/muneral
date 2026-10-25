@@ -46,6 +46,7 @@ describe('AuditLog actor identity', () => {
 
     expect(screen.getByText('Task owner')).toBeInTheDocument();
     expect(screen.queryByText(`Actor ID: ${actorId}`)).not.toBeInTheDocument();
+    expect(screen.getByText('human')).toBeInTheDocument();
   });
 
   it('shows the full recorded actor ID when the response has no actor name', () => {

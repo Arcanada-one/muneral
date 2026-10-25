@@ -373,11 +373,11 @@ export function AuditLog({ taskId }: AuditLogProps) {
                     <span className="text-xs font-medium">
                       {entry.actorName || `Actor ID: ${entry.actorId}`}
                     </span>
-                    {entry.actorType === 'agent' && (
-                      <span className="rounded bg-blue-100 px-1 py-0.5 text-xs text-blue-700">
-                        agent
-                      </span>
-                    )}
+                    <span className={entry.actorType === 'agent'
+                      ? 'rounded bg-blue-100 px-1 py-0.5 text-xs text-blue-700'
+                      : 'rounded bg-muted px-1 py-0.5 text-xs text-muted-foreground'}>
+                      {entry.actorType}
+                    </span>
                     <span className="text-xs text-muted-foreground">
                       {entry.action === 'task:status_changed'
                         ? formatStatusTransition(entry.payload) ?? entry.action
