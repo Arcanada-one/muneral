@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { onlineManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import apiClient from '@/lib/api/client';
@@ -90,7 +90,7 @@ function renderDependencies(currentTaskId = taskId) {
     </QueryClientProvider>
   );
   const view = render(renderForTask(currentTaskId));
-  return { ...view, rerenderTask: (id: string) => view.rerender(renderForTask(id)) };
+  return { ...view, queryClient, rerenderTask: (id: string) => view.rerender(renderForTask(id)) };
 }
 
 const originalClipboardDescriptor = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
@@ -104,11 +104,13 @@ function installClipboard(writeText: ReturnType<typeof vi.fn>) {
 }
 
 beforeEach(() => {
+  onlineManager.setOnline(true);
   vi.spyOn(apiClient, 'get').mockResolvedValue({ data: graph } as never);
 });
 
 afterEach(() => {
   cleanup();
+  onlineManager.setOnline(true);
   vi.restoreAllMocks();
   if (originalClipboardDescriptor) {
     Object.defineProperty(navigator, 'clipboard', originalClipboardDescriptor);
@@ -151,6 +153,61 @@ describe('task dependency directions', () => {
 
     const title = await screen.findByText('Prerequisite task');
     expect(title.closest('li')).toHaveTextContent('In Progress');
+  });
+
+  it('shows an empty state only after the validated graph read succeeds with no rows', async () => {
+    let resolveGraph: ((response: { data: [] }) => void) | undefined;
+    vi.mocked(apiClient.get).mockImplementationOnce(() => new Promise((resolve) => {
+      resolveGraph = resolve;
+    }) as never);
+    renderDependencies();
+
+    await waitFor(() => {
+      expect(apiClient.get).toHaveBeenCalledWith(`/tasks/${taskId}/dependency-graph`);
+    });
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.queryByText('No dependencies.')).not.toBeInTheDocument();
+    await act(async () => {
+      resolveGraph?.({ data: [] });
+    });
+    expect(await screen.findByRole('status')).toHaveTextContent('No dependencies.');
+  });
+
+  it('does not claim an empty graph while the initial read is paused', async () => {
+    onlineManager.setOnline(false);
+    const { queryClient, container } = renderDependencies();
+
+    await waitFor(() => {
+      expect(queryClient.getQueryState(['tasks', taskId, 'dependency-graph'])).toMatchObject({
+        status: 'pending',
+        fetchStatus: 'paused',
+        data: undefined,
+      });
+    });
+    expect(container).toBeEmptyDOMElement();
+    expect(screen.queryByText('No dependencies.')).not.toBeInTheDocument();
+    expect(apiClient.get).not.toHaveBeenCalled();
+  });
+
+  it('does not claim an empty graph when the query is disabled without a task ID', () => {
+    const { queryClient, container } = renderDependencies('');
+
+    expect(queryClient.getQueryState(['tasks', '', 'dependency-graph'])).toMatchObject({
+      status: 'pending',
+      fetchStatus: 'idle',
+      data: undefined,
+    });
+    expect(container).toBeEmptyDOMElement();
+    expect(screen.queryByText('No dependencies.')).not.toBeInTheDocument();
+    expect(apiClient.get).not.toHaveBeenCalled();
+  });
+
+  it('keeps malformed graph responses in the existing unavailable state', async () => {
+    vi.mocked(apiClient.get).mockResolvedValueOnce({ data: { rows: [] } } as never);
+    renderDependencies();
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Dependencies are unavailable.');
+    expect(screen.queryByText('No dependencies.')).not.toBeInTheDocument();
   });
 
   it('keeps the validated UUID fallback when the API withholds a counterpart title', async () => {
@@ -242,6 +299,7 @@ describe('task dependency directions', () => {
     renderDependencies();
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Dependencies are unavailable.');
+    expect(screen.queryByText('No dependencies.')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Retry dependencies' }));
 
     expect(await screen.findByText('Prerequisite task')).toBeInTheDocument();

@@ -71,10 +71,11 @@ describe('task read error presentation', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
-  it('keeps successful empty dependencies distinct from errors', () => {
+  it('shows the empty dependency state only for successful empty data', () => {
     queries.dependencies.data = [];
-    const { container } = render(<TaskDependencies taskId="synthetic-root" />);
-    expect(container).toBeEmptyDOMElement();
+    render(<TaskDependencies taskId="synthetic-root" />);
+    expect(screen.getByRole('status')).toHaveTextContent('No dependencies.');
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
   it('does not render empty-success wording for a denied blockers read', () => {
