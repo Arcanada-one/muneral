@@ -8,7 +8,7 @@ import { TaskDependencies } from './TaskDependencies';
 import { TaskReadiness } from './TaskReadiness';
 import { AuditLog } from './AuditLog';
 import { TaskGitRefs } from './TaskGitRefs';
-import { useUpdateTaskStatus, type Task } from '@/lib/api/tasks';
+import { useTask, useUpdateTaskStatus, type Task } from '@/lib/api/tasks';
 import { TASK_STATUSES, TASK_TRANSITIONS, type TaskStatus } from '@muneral/types';
 import { TASK_STATUS_LABELS } from '@/lib/task-status-labels';
 import { cn } from '@/lib/utils';
@@ -65,11 +65,7 @@ export function TaskDetail({ task }: TaskDetailProps) {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight">{task.title}</h1>
-        {task.parentId && (
-          <p className="mt-1 text-sm text-muted-foreground">
-            Parent task: <span className="font-mono">{task.parentId}</span>
-          </p>
-        )}
+        {task.parentId && <ParentTaskReference parentId={task.parentId} />}
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <TaskStatusAction key={`${task.id}:${task.status}:${task.updatedAt}`} task={task} />
           <Badge variant={pConfig.variant}>{pConfig.label}</Badge>
@@ -147,6 +143,27 @@ export function TaskDetail({ task }: TaskDetailProps) {
       {/* Audit log */}
       <AuditLog taskId={task.id} />
     </div>
+  );
+}
+
+function ParentTaskReference({ parentId }: { parentId: string }) {
+  const parentTaskQuery = useTask(parentId);
+  const parentTitle =
+    parentTaskQuery.isSuccess &&
+    parentTaskQuery.fetchStatus === 'idle' &&
+    parentTaskQuery.data.id === parentId
+      ? parentTaskQuery.data.title
+      : null;
+
+  return (
+    <p className="mt-1 text-sm text-muted-foreground">
+      Parent task:{' '}
+      {parentTitle !== null ? (
+        <span>{parentTitle}</span>
+      ) : (
+        <span className="font-mono">{parentId}</span>
+      )}
+    </p>
   );
 }
 
