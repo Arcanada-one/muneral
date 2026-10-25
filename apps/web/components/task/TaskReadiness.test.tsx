@@ -14,8 +14,10 @@ vi.mock('./TaskGitRefs', () => ({ TaskGitRefs: () => null }));
 
 const taskId = '11111111-1111-4111-8111-111111111111';
 const otherTaskId = '22222222-2222-4222-8222-222222222222';
+const secondTaskId = '99999999-9999-4999-8999-999999999999';
 const edgeId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const queryClients: QueryClient[] = [];
+const originalClipboardDescriptor = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
 const task: Task = {
   id: taskId,
   title: 'Readiness task',
@@ -60,10 +62,23 @@ function blocker(overrides: Record<string, unknown> = {}) {
   };
 }
 
+function installClipboard(writeText: ReturnType<typeof vi.fn>) {
+  Object.defineProperty(navigator, 'clipboard', {
+    configurable: true,
+    value: { writeText },
+  });
+  return writeText;
+}
+
 afterEach(() => {
   cleanup();
   queryClients.splice(0).forEach((queryClient) => queryClient.clear());
   vi.restoreAllMocks();
+  if (originalClipboardDescriptor) {
+    Object.defineProperty(navigator, 'clipboard', originalClipboardDescriptor);
+  } else {
+    Reflect.deleteProperty(navigator, 'clipboard');
+  }
 });
 
 describe('TaskDetail dependency readiness summary', () => {
@@ -106,6 +121,90 @@ describe('TaskDetail dependency readiness summary', () => {
     expect(screen.getByText('Release prerequisite')).toBeInTheDocument();
     expect(screen.getByText('In Progress')).toBeInTheDocument();
     expect(screen.getByText('Blocked')).toBeInTheDocument();
+  });
+
+  it.each([
+    ['outgoing dependency', blocker()],
+    ['incoming blocking dependency', blocker({
+      type: 'blocks',
+      direction: 'incoming',
+      fromTaskId: otherTaskId,
+      toTaskId: taskId,
+    })],
+  ])('copies the exact server-provided UUID for an %s only after a user click', async (_relation, row) => {
+    const writeText = installClipboard(vi.fn().mockResolvedValue(undefined));
+    vi.spyOn(apiClient, 'get').mockResolvedValueOnce({
+      data: readiness({ ready: false, dependencyCount: 1, blockedBy: [row] }),
+    } as never);
+    renderReadiness();
+
+    expect(await screen.findByText('Release prerequisite')).toBeInTheDocument();
+    const copy = await screen.findByRole('button', { name: `Copy blocker task ID ${otherTaskId}` });
+    expect(writeText).not.toHaveBeenCalled();
+
+    fireEvent.click(copy);
+
+    expect(writeText).toHaveBeenCalledTimes(1);
+    expect(writeText).toHaveBeenCalledWith(otherTaskId);
+    expect(await screen.findByRole('status')).toHaveTextContent('Blocker task ID copied.');
+  });
+
+  it('suppresses duplicate pending copies and isolates a late result after a task switch', async () => {
+    let resolveClipboard: (() => void) | undefined;
+    const writeText = installClipboard(vi.fn(() => new Promise<void>((resolve) => {
+      resolveClipboard = resolve;
+    })));
+    const secondBlocker = blocker({
+      id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+      fromTaskId: secondTaskId,
+      toTaskId: otherTaskId,
+      otherTaskId,
+      otherTaskTitle: 'Other current blocker',
+    });
+    vi.spyOn(apiClient, 'get').mockImplementation(async (url) => ({
+      data: url === `/tasks/${secondTaskId}/readiness`
+        ? readiness({
+          taskId: secondTaskId,
+          ready: false,
+          dependencyCount: 1,
+          blockedBy: [secondBlocker],
+        })
+        : readiness({ ready: false, dependencyCount: 1, blockedBy: [blocker()] }),
+    }) as never);
+    const view = renderReadiness();
+
+    const firstCopy = await screen.findByRole('button', { name: `Copy blocker task ID ${otherTaskId}` });
+    fireEvent.click(firstCopy);
+    expect(firstCopy).toBeDisabled();
+    fireEvent.click(firstCopy);
+    expect(writeText).toHaveBeenCalledTimes(1);
+
+    view.rerenderTask(secondTaskId);
+    expect(await screen.findByText('Other current blocker')).toBeInTheDocument();
+    const currentCopy = screen.getByRole('button', { name: `Copy blocker task ID ${otherTaskId}` });
+    expect(currentCopy).toBeEnabled();
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+
+    await act(async () => resolveClipboard?.());
+
+    expect(currentCopy).toBeEnabled();
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
+
+  it('reports blocker UUID clipboard failure without exposing browser details', async () => {
+    const writeText = installClipboard(vi.fn().mockRejectedValue(new Error('clipboard permission details')));
+    vi.spyOn(apiClient, 'get').mockResolvedValueOnce({
+      data: readiness({ ready: false, dependencyCount: 1, blockedBy: [blocker()] }),
+    } as never);
+    renderReadiness();
+
+    fireEvent.click(await screen.findByRole('button', { name: `Copy blocker task ID ${otherTaskId}` }));
+
+    const error = await screen.findByRole('alert');
+    expect(error).toHaveTextContent('Could not copy blocker task ID. Try copying it manually.');
+    expect(error).not.toHaveTextContent('clipboard permission details');
+    expect(writeText).toHaveBeenCalledTimes(1);
+    expect(writeText).toHaveBeenCalledWith(otherTaskId);
   });
 
   it('keeps readiness unknown while loading or when the request fails', async () => {

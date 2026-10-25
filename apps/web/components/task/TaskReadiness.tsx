@@ -1,11 +1,56 @@
 'use client';
 
+import { useState } from 'react';
+import { Copy } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTaskReadiness } from '@/lib/api/tasks';
 import { getTaskStatusLabel } from '@/lib/task-status-labels';
 
 interface TaskReadinessProps {
   taskId: string;
+}
+
+function CopyBlockerTaskIdButton({ blockerTaskId }: { blockerTaskId: string }) {
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const [isCopying, setIsCopying] = useState(false);
+
+  const copyBlockerTaskId = async () => {
+    if (isCopying) return;
+    setCopyState('idle');
+    setIsCopying(true);
+
+    try {
+      await navigator.clipboard.writeText(blockerTaskId);
+      setCopyState('copied');
+    } catch {
+      setCopyState('failed');
+    } finally {
+      setIsCopying(false);
+    }
+  };
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="h-7 w-7 shrink-0"
+        onClick={copyBlockerTaskId}
+        disabled={isCopying}
+        aria-label={`Copy blocker task ID ${blockerTaskId}`}
+      >
+        <Copy className="h-3 w-3" />
+      </Button>
+      {copyState === 'copied' && (
+        <span role="status" className="text-xs text-green-700">Blocker task ID copied.</span>
+      )}
+      {copyState === 'failed' && (
+        <span role="alert" className="text-xs text-destructive">Could not copy blocker task ID. Try copying it manually.</span>
+      )}
+    </>
+  );
 }
 
 export function TaskReadiness({ taskId }: TaskReadinessProps) {
@@ -33,9 +78,12 @@ export function TaskReadiness({ taskId }: TaskReadinessProps) {
             const title = edge.otherTaskTitleWithheld === true ? null : edge.otherTaskTitle;
             const status = getTaskStatusLabel(edge.otherTaskStatus);
             return (
-              <li key={edge.id} className="break-words">
+              <li key={`${taskId}:${edge.id}:${edge.otherTaskId}`} className="break-words">
                 {title || edge.otherTaskId}
                 {status ? <Badge className="ml-2" variant="secondary">{status}</Badge> : null}
+                <CopyBlockerTaskIdButton
+                  blockerTaskId={edge.otherTaskId}
+                />
               </li>
             );
           })}
