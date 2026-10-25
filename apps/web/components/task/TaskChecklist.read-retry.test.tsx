@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { onlineManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createElement, type PropsWithChildren } from 'react';
@@ -40,6 +40,7 @@ function wrapper({ children }: PropsWithChildren) {
 }
 
 beforeEach(() => {
+  onlineManager.setOnline(true);
   api.get.mockReset();
   api.patch.mockReset();
   client = new QueryClient({
@@ -53,15 +54,51 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   client.clear();
+  onlineManager.setOnline(true);
 });
 
 describe('TaskChecklist read recovery', () => {
+  it('shows progress while the current initial checklist read is pending', async () => {
+    api.get.mockImplementationOnce(() => new Promise(() => {}));
+
+    render(<TaskChecklist taskId={taskId} />, { wrapper });
+
+    expect(await screen.findByRole('status')).toHaveTextContent('Loading checklist…');
+    expect(api.get).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows progress for a paused current initial read without claiming data exists', async () => {
+    onlineManager.setOnline(false);
+
+    render(<TaskChecklist taskId={taskId} />, { wrapper });
+
+    await waitFor(() => {
+      expect(client.getQueryState(['tasks', taskId, 'checklist'])).toMatchObject({
+        status: 'pending',
+        fetchStatus: 'paused',
+      });
+    });
+    expect(screen.getByRole('status')).toHaveTextContent('Loading checklist…');
+    expect(api.get).not.toHaveBeenCalled();
+  });
+
+  it('does not claim loading when an empty task ID disables the query', () => {
+    render(<TaskChecklist taskId="" />, { wrapper });
+
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(api.get).not.toHaveBeenCalled();
+  });
+
   it('keeps a successful empty checklist distinct from a failed read', async () => {
     api.get.mockResolvedValueOnce({ data: [] });
 
     render(<TaskChecklist taskId={taskId} />, { wrapper });
 
     await waitFor(() => expect(api.get).toHaveBeenCalledWith(`/tasks/${taskId}/checklist`));
+    await waitFor(() => {
+      expect(client.getQueryState(['tasks', taskId, 'checklist'])?.status).toBe('success');
+    });
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Retry checklist' })).not.toBeInTheDocument();
   });
