@@ -72,7 +72,13 @@ function ParentTaskProbe({ id }: { id: string }) {
 }
 
 function parentText(value: string) {
-  return screen.getByText((_, node) => node?.textContent === `Parent task: ${value}`);
+  return screen.getByText((_, node) =>
+    node?.tagName === 'P' && node.textContent === `Parent task: ${value}`,
+  );
+}
+
+function expectNoParentStatus() {
+  expect(screen.queryByText(/^Parent status:/)).not.toBeInTheDocument();
 }
 
 describe('TaskDetail parent reference', () => {
@@ -194,8 +200,39 @@ describe('TaskDetail parent reference', () => {
 
     renderTask({ ...baseTask, parentId }, queryClient);
 
-    expect(await screen.findByText((_, node) => node?.textContent === 'Parent task: Parent title from API')).toBeInTheDocument();
+    expect(await screen.findByText((_, node) =>
+      node?.tagName === 'P' && node.textContent === 'Parent task: Parent title from API',
+    )).toBeInTheDocument();
     expect(state.get).toHaveBeenCalledWith(`/tasks/${parentId}`);
+  });
+
+  it('shows the canonical status from the matching parent read', async () => {
+    state.get.mockResolvedValue({
+      data: { ...baseTask, id: parentId, title: 'Parent title from API', status: 'done' },
+    });
+
+    renderTask({ ...baseTask, parentId });
+
+    expect(await screen.findByText('Parent status: Done')).toBeInTheDocument();
+    expect(screen.queryByText('Parent status: To Do')).not.toBeInTheDocument();
+  });
+
+  it('does not show parent status from an unrecognized cached value', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false, gcTime: Infinity, staleTime: Infinity } },
+    });
+    queryClients.add(queryClient);
+    queryClient.setQueryData(['tasks', parentId], {
+      ...baseTask,
+      id: parentId,
+      title: 'Parent title',
+      status: 'unknown-status',
+    });
+
+    renderTask({ ...baseTask, parentId }, queryClient);
+
+    expect(parentText(parentId)).toBeInTheDocument();
+    expectNoParentStatus();
   });
 
   it('keeps the full parent UUID while the parent read is unresolved', () => {
@@ -206,6 +243,7 @@ describe('TaskDetail parent reference', () => {
     expect(
       parentText(parentId),
     ).toBeInTheDocument();
+    expectNoParentStatus();
     expect(screen.queryByText('Parent title from API')).not.toBeInTheDocument();
   });
 
@@ -217,6 +255,7 @@ describe('TaskDetail parent reference', () => {
     expect(
       parentText(parentId),
     ).toBeInTheDocument();
+    expectNoParentStatus();
     expect(state.get).not.toHaveBeenCalledWith(`/tasks/${parentId}`);
   });
 
@@ -234,8 +273,11 @@ describe('TaskDetail parent reference', () => {
     renderTask({ ...baseTask, parentId });
 
     expect(
-      await screen.findByText((_, node) => node?.textContent === `Parent task: ${parentId}`),
+      await screen.findByText((_, node) =>
+        node?.tagName === 'P' && node.textContent === `Parent task: ${parentId}`,
+      ),
     ).toBeInTheDocument();
+    expectNoParentStatus();
     expect(screen.queryByText('private server detail')).not.toBeInTheDocument();
   });
 
@@ -247,8 +289,11 @@ describe('TaskDetail parent reference', () => {
     renderTask({ ...baseTask, parentId });
 
     expect(
-      await screen.findByText((_, node) => node?.textContent === `Parent task: ${parentId}`),
+      await screen.findByText((_, node) =>
+        node?.tagName === 'P' && node.textContent === `Parent task: ${parentId}`,
+      ),
     ).toBeInTheDocument();
+    expectNoParentStatus();
     expect(screen.queryByText('Unrelated task title')).not.toBeInTheDocument();
   });
 
@@ -266,6 +311,7 @@ describe('TaskDetail parent reference', () => {
     renderTask({ ...baseTask, parentId }, queryClient);
 
     expect(parentText(parentId)).toBeInTheDocument();
+    expectNoParentStatus();
     expect(screen.queryByText('Cached unrelated title')).not.toBeInTheDocument();
     expect(state.get).not.toHaveBeenCalledWith(`/tasks/${parentId}`);
   });
@@ -277,7 +323,9 @@ describe('TaskDetail parent reference', () => {
     renderTask({ ...baseTask, parentId });
 
     expect(
-      await screen.findByText((_, node) => node?.textContent === `Parent task: ${title}`),
+      await screen.findByText((_, node) =>
+        node?.tagName === 'P' && node.textContent === `Parent task: ${title}`,
+      ),
     ).toBeInTheDocument();
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
   });
@@ -288,8 +336,11 @@ describe('TaskDetail parent reference', () => {
     renderTask({ ...baseTask, parentId });
 
     expect(
-      await screen.findByText((_, node) => node?.textContent === `Parent task: ${parentId}`),
+      await screen.findByText((_, node) =>
+        node?.tagName === 'P' && node.textContent === `Parent task: ${parentId}`,
+      ),
     ).toBeInTheDocument();
+    expectNoParentStatus();
   });
 
   it('does not show an old parent title after the child changes parent while reads are in flight', async () => {
@@ -319,16 +370,20 @@ describe('TaskDetail parent reference', () => {
     );
     await waitFor(() => expect(state.get).toHaveBeenCalledWith(`/tasks/${otherParentId}`));
 
-    resolveFirst({ data: { ...baseTask, id: parentId, title: 'Old parent title' } });
+    resolveFirst({ data: { ...baseTask, id: parentId, title: 'Old parent title', status: 'done' } });
     await waitFor(() => expect(screen.queryByText('Old parent title')).not.toBeInTheDocument());
     expect(
       parentText(otherParentId),
     ).toBeInTheDocument();
+    expectNoParentStatus();
 
-    resolveSecond({ data: { ...baseTask, id: otherParentId, title: 'Current parent title' } });
+    resolveSecond({ data: { ...baseTask, id: otherParentId, title: 'Current parent title', status: 'blocked' } });
     expect(
-      await screen.findByText((_, node) => node?.textContent === 'Parent task: Current parent title'),
+      await screen.findByText((_, node) =>
+        node?.tagName === 'P' && node.textContent === 'Parent task: Current parent title',
+      ),
     ).toBeInTheDocument();
+    expect(await screen.findByText('Parent status: Blocked')).toBeInTheDocument();
   });
 
   it.each([
