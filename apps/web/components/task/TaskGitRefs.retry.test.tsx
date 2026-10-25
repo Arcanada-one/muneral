@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { onlineManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createElement, type PropsWithChildren } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -47,6 +47,36 @@ afterEach(() => {
 });
 
 describe('task Git reference read recovery', () => {
+  it('does not claim empty while the first read is paused before data', async () => {
+    onlineManager.setOnline(false);
+    const view = renderRefs();
+
+    try {
+      await waitFor(() => {
+        expect(view.client.getQueryState(['tasks', taskId, 'git-refs'])).toMatchObject({
+          status: 'pending',
+          fetchStatus: 'paused',
+        });
+      });
+      expect(screen.queryByText('No Git references.')).not.toBeInTheDocument();
+      expect(api.get).not.toHaveBeenCalled();
+    } finally {
+      view.unmount();
+      onlineManager.setOnline(true);
+    }
+  });
+
+  it('does not claim empty when the task-scoped read is disabled without data', () => {
+    const view = renderRefs('');
+
+    expect(view.client.getQueryState(['tasks', '', 'git-refs'])).toMatchObject({
+      status: 'pending',
+      fetchStatus: 'idle',
+    });
+    expect(screen.queryByText('No Git references.')).not.toBeInTheDocument();
+    expect(api.get).not.toHaveBeenCalled();
+  });
+
   it('retries the same task-scoped read and renders its validated response', async () => {
     api.get.mockRejectedValueOnce(new Error('Synthetic private server detail'));
     api.get.mockResolvedValueOnce({ data: [taskRef] });
