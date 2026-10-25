@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import apiClient from '@/lib/api/client';
 import { TaskDependencies } from './TaskDependencies';
@@ -235,5 +235,62 @@ describe('task dependency directions', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Dependencies are unavailable');
     expect(screen.queryByText('Depends on')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: `Copy task ID ${otherIds[2]}` })).not.toBeInTheDocument();
+  });
+
+  it('retries the same failed dependency graph read and renders its successful response', async () => {
+    vi.mocked(apiClient.get).mockRejectedValueOnce(new Error('private server detail'));
+    renderDependencies();
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Dependencies are unavailable.');
+    fireEvent.click(screen.getByRole('button', { name: 'Retry dependencies' }));
+
+    expect(await screen.findByText('Prerequisite task')).toBeInTheDocument();
+    expect(apiClient.get).toHaveBeenCalledTimes(2);
+    expect(screen.queryByText('private server detail')).not.toBeInTheDocument();
+  });
+
+  it('disables duplicate retry and keeps a late result bound to the original task', async () => {
+    let firstTaskCalls = 0;
+    let resolveRetry: ((response: { data: typeof graph }) => void) | undefined;
+    const secondTaskGraph = [{
+      ...graph[0],
+      id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaab',
+      fromTaskId: secondTaskId,
+      toTaskId: secondOtherId,
+      otherTaskId: secondOtherId,
+      otherTaskTitle: 'Second task dependency',
+    }];
+    vi.mocked(apiClient.get).mockImplementation((url) => {
+      if (url === `/tasks/${taskId}/dependency-graph`) {
+        firstTaskCalls += 1;
+        if (firstTaskCalls === 1) return Promise.reject(new Error('private server detail'));
+        return new Promise((resolve) => { resolveRetry = resolve; }) as never;
+      }
+      if (url === `/tasks/${secondTaskId}/dependency-graph`) {
+        return Promise.resolve({ data: secondTaskGraph }) as never;
+      }
+      return Promise.resolve({ data: [] }) as never;
+    });
+
+    const view = renderDependencies();
+    expect(await screen.findByRole('alert')).toHaveTextContent('Dependencies are unavailable.');
+
+    const retry = screen.getByRole('button', { name: 'Retry dependencies' });
+    fireEvent.click(retry);
+    expect(await screen.findByRole('status')).toHaveTextContent('Retrying dependencies…');
+    expect(retry).toBeDisabled();
+    fireEvent.click(retry);
+    expect(firstTaskCalls).toBe(2);
+
+    view.rerenderTask(secondTaskId);
+    expect(await screen.findByText('Second task dependency')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+
+    await act(async () => {
+      resolveRetry?.({ data: graph });
+    });
+    expect(screen.getByText('Second task dependency')).toBeInTheDocument();
+    expect(screen.queryByText('Prerequisite task')).not.toBeInTheDocument();
   });
 });
