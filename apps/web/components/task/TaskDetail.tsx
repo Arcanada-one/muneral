@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 
 interface TaskDetailProps {
   task: Task;
+  onReloadCurrentTask?: () => void;
 }
 
 // MUN-0043: typed Record<TaskStatus, ...> so a status added to the union fails the
@@ -58,7 +59,7 @@ function isTaskStatus(value: string): value is TaskStatus {
   return TASK_STATUSES.some((status) => status === value);
 }
 
-export function TaskDetail({ task }: TaskDetailProps) {
+export function TaskDetail({ task, onReloadCurrentTask }: TaskDetailProps) {
   const pConfig = priorityConfig[task.priority];
 
   return (
@@ -68,7 +69,11 @@ export function TaskDetail({ task }: TaskDetailProps) {
         <h1 className="text-2xl font-bold tracking-tight">{task.title}</h1>
         {task.parentId && <ParentTaskReference parentId={task.parentId} />}
         <div className="mt-3 flex flex-wrap items-center gap-3">
-          <TaskStatusAction key={`${task.id}:${task.status}:${task.updatedAt}`} task={task} />
+          <TaskStatusAction
+            key={`${task.id}:${task.status}:${task.updatedAt}`}
+            task={task}
+            onReloadCurrentTask={onReloadCurrentTask}
+          />
           <Badge variant={pConfig.variant}>{pConfig.label}</Badge>
 
           {task.actorType === 'agent' ? (
@@ -228,7 +233,7 @@ function CopyCurrentTaskId({ taskId }: { taskId: string }) {
   );
 }
 
-function TaskStatusAction({ task }: TaskDetailProps) {
+function TaskStatusAction({ task, onReloadCurrentTask }: TaskDetailProps) {
   const [confirmedStatus, setConfirmedStatus] = useState<TaskStatus | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -315,9 +320,16 @@ function TaskStatusAction({ task }: TaskDetailProps) {
         <p className="text-sm text-muted-foreground">No status changes are available.</p>
       )}
       {hasError && (
-        <p role="alert" className="text-sm text-destructive">
-          Could not update status. Reload the task to confirm its current status before trying again.
-        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <p role="alert" className="text-sm text-destructive">
+            Could not update status. Reload the task to confirm its current status before trying again.
+          </p>
+          {onReloadCurrentTask && (
+            <Button type="button" variant="ghost" onClick={onReloadCurrentTask}>
+              Reload task
+            </Button>
+          )}
+        </div>
       )}
     </>
   );

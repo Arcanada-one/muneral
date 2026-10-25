@@ -92,6 +92,43 @@ describe('I05 replace-read contract', () => {
     await vi.advanceTimersByTimeAsync(1000);expect(f.controller.snapshot().outcome).toBe('unavailable');
     f.loads[1].resolve(task(a));await flush();expect(f.controller.taskFor(a)).toBeUndefined();f.controller.dispose();
   });
+  it('refreshes only the exact ready route and publishes status from the new read', async () => {
+    const f=fixture();f.controller.openTask(a);f.loads[0].resolve(task(a));await flush();
+    const clearsBeforeRefresh=f.read.clear.mock.calls.length;
+    f.controller.refreshTask(a);
+    expect(f.read.load).toHaveBeenCalledTimes(2);
+    expect(f.read.clear).toHaveBeenCalledTimes(clearsBeforeRefresh);
+    expect(f.controller.snapshot().outcome).toBe('loading');
+    expect(f.controller.taskFor(a)).toBeUndefined();
+    f.controller.refreshTask(a);
+    expect(f.read.load).toHaveBeenCalledTimes(2);
+    const confirmed={...task(a),status:'review' as const,updatedAt:'2026-10-25T01:00:00Z'};
+    f.loads[1].resolve(confirmed);await flush();
+    expect(f.controller.snapshot().outcome).toBe('ready');
+    expect(f.controller.taskFor(a)?.status).toBe('review');
+    f.controller.dispose();
+  });
+  it('does not publish a refresh response after switching task routes', async () => {
+    const f=fixture();f.controller.openTask(a);f.loads[0].resolve(task(a));await flush();
+    f.controller.refreshTask(a);f.controller.openTask(b);
+    expect(f.loads[1].signal.aborted).toBe(true);
+    f.loads[1].resolve({...task(a),status:'review'});await flush();
+    expect(f.controller.snapshot().selection).toEqual(b);
+    expect(f.controller.snapshot().outcome).toBe('loading');
+    expect(f.controller.taskFor(a)).toBeUndefined();
+    f.loads[2].resolve(task(b));await flush();
+    expect(f.controller.taskFor(b)?.id).toBe(b.taskId);
+    f.controller.dispose();
+  });
+  it('does not publish a refresh response after the session leaves the task', async () => {
+    const f=fixture();f.controller.openTask(a);f.loads[0].resolve(task(a));await flush();
+    f.controller.refreshTask(a);f.controller.leave();
+    f.loads[1].resolve({...task(a),status:'review'});await flush();
+    expect(f.controller.snapshot().outcome).toBe('idle');
+    expect(f.controller.snapshot().selection).toBeNull();
+    expect(f.controller.taskFor(a)).toBeUndefined();
+    f.controller.dispose();
+  });
   it('duplicate command is idempotent and double disposal leaves no observers', async () => {
     const f=fixture();const observed=vi.fn();const unsubscribe=f.controller.subscribe(observed);
     f.controller.openTask(a);f.controller.openTask(a);expect(f.read.load).toHaveBeenCalledTimes(1);

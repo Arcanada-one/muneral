@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest';
-import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AxiosError } from 'axios';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -11,12 +11,17 @@ const state = vi.hoisted(() => ({
   route: { wsSlug: 'own', projSlug: 'project', taskId: '33333333-3333-4333-8333-333333333333' },
   push: vi.fn(),
   get: vi.fn(),
+  patch: vi.fn(),
 }));
 
 vi.mock('next-auth/react', () => ({ useSession: () => state.session }));
 vi.mock('next/navigation', () => ({ useParams: () => state.route, useRouter: () => ({ push: state.push }) }));
-vi.mock('@/lib/api/client', () => ({ default: { get: state.get } }));
-vi.mock('@/components/task/TaskDetail', () => ({ TaskDetail: ({ task }: { task: { title: string } }) => <h1>{task.title}</h1> }));
+vi.mock('@/lib/api/client', () => ({ default: { get: state.get, patch: state.patch } }));
+vi.mock('@/components/task/TaskChecklist', () => ({ TaskChecklist: () => null }));
+vi.mock('@/components/task/TaskDependencies', () => ({ TaskDependencies: () => null }));
+vi.mock('@/components/task/TaskReadiness', () => ({ TaskReadiness: () => null }));
+vi.mock('@/components/task/AuditLog', () => ({ AuditLog: () => null }));
+vi.mock('@/components/task/TaskGitRefs', () => ({ TaskGitRefs: () => null }));
 
 const workspaceId = '11111111-1111-4111-8111-111111111111';
 const projectId = '22222222-2222-4222-8222-222222222222';
@@ -61,6 +66,7 @@ beforeEach(() => {
   state.session = { data: { accessToken: 'synthetic-session' }, status: 'authenticated' };
   state.route = { wsSlug: 'own', projSlug: 'project', taskId };
   state.push.mockReset();
+  state.patch.mockReset();
   taskReads = 0;
   taskResult = async (requestedTaskId) => ({ data: { ...task, id: requestedTaskId } });
   state.get.mockImplementation(async (url: string) => {
@@ -79,6 +85,30 @@ afterEach(() => {
 });
 
 describe('TaskPage transient read recovery', () => {
+  it('reloads the current task after a rejected status PATCH and never retries the mutation', async () => {
+    taskResult = async (requestedTaskId) => ({
+      data: { ...task, id: requestedTaskId, status: taskReads === 1 ? 'todo' : 'review' },
+    });
+    state.patch.mockRejectedValue(new Error('private server response detail'));
+    renderPage();
+
+    const status = await screen.findByRole('combobox', { name: 'Change task status' });
+    expect(status).toHaveValue('todo');
+    fireEvent.change(status, { target: { value: 'in_progress' } });
+    expect(await screen.findByRole('button', { name: 'Reload task' })).toBeInTheDocument();
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Could not update status. Reload the task to confirm its current status before trying again.',
+    );
+    expect(screen.queryByText('private server response detail')).not.toBeInTheDocument();
+    expect(state.patch).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reload task' }));
+    await waitFor(() => expect(taskReads).toBe(2));
+    await waitFor(() => expect(screen.getByRole('combobox', { name: 'Change task status' })).toHaveValue('review'));
+    expect(state.patch).toHaveBeenCalledTimes(1);
+    expect(state.get).toHaveBeenCalledWith(`/tasks/${taskId}`, expect.any(Object));
+  });
+
   it('lets the user retry an unavailable task read and renders the confirmed response', async () => {
     let resolveRetry: ((value: unknown) => void) | undefined;
     taskResult = async () => {

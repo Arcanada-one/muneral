@@ -60,20 +60,16 @@ export class TaskDetailController {
       generation: this.state.generation, serverUpdatedAt, revision, freshness: outcome === 'ready' ? 'readback' : 'unknown'});
     this.observers.forEach(fn => fn());
   }
-  private invalidate() {
+  private invalidate(clearRead = true) {
     this.pending?.abort();
     this.pending = undefined;
     clearTimeout(this.timer);
     this.timer = undefined;
     this.state = {...this.state, generation: this.state.generation + 1};
-    this.read.clear();
+    if (clearRead) this.read.clear();
   }
-  /** Caller may request navigation; only the committed route can receive the loaded projection. */
-  openTask(selection: TaskSelection, navigate = true): void {
-    if (this.disposed) return;
-    if (!valid(selection)) { this.invalidate(); this.publish('denied', null); return; }
-    if (sameSelection(this.state.selection, selection) && ['loading', 'ready'].includes(this.state.outcome)) return;
-    this.invalidate();
+  private beginRead(selection: TaskSelection, navigate: boolean, clearRead: boolean) {
+    this.invalidate(clearRead);
     const chosen = {...selection};
     const generation = this.state.generation;
     const request = new AbortController();
@@ -112,6 +108,19 @@ export class TaskDetailController {
       }
     };
     void run();
+  }
+  /** Caller may request navigation; only the committed route can receive the loaded projection. */
+  openTask(selection: TaskSelection, navigate = true): void {
+    if (this.disposed) return;
+    if (!valid(selection)) { this.invalidate(); this.publish('denied', null); return; }
+    if (sameSelection(this.state.selection, selection) && ['loading', 'ready'].includes(this.state.outcome)) return;
+    this.beginRead(selection, navigate, true);
+  }
+  /** Explicit user refresh for the exact ready route; it reads again without navigating or resending a mutation. */
+  refreshTask(selection: TaskSelection): void {
+    if (this.disposed || !valid(selection) || this.state.outcome !== 'ready' ||
+      !sameSelection(this.state.selection, selection) || !sameSelection(this.navigation.current(), selection)) return;
+    this.beginRead(selection, false, false);
   }
   /** A caller cannot render cached content for a different committed route. */
   taskFor(selection: TaskSelection): Task | undefined {
