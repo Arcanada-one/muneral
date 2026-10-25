@@ -295,6 +295,48 @@ function CopyActivityActorId({ actorId }: { actorId: string }) {
   );
 }
 
+function CopyActivityTimestamp({ timestamp }: { timestamp: string }) {
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const [isCopying, setIsCopying] = useState(false);
+
+  const copyTimestamp = async () => {
+    setCopyState('idle');
+    setIsCopying(true);
+    try {
+      await navigator.clipboard.writeText(timestamp);
+      setCopyState('copied');
+    } catch {
+      setCopyState('failed');
+    } finally {
+      setIsCopying(false);
+    }
+  };
+
+  return (
+    <span className="inline-flex flex-wrap items-center gap-1">
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="h-6 w-6 shrink-0"
+        aria-label="Copy recorded activity timestamp"
+        onClick={copyTimestamp}
+        disabled={isCopying}
+      >
+        <Copy className="h-3 w-3" />
+      </Button>
+      {copyState === 'copied' && (
+        <span role="status" className="text-xs text-green-700">Timestamp copied.</span>
+      )}
+      {copyState === 'failed' && (
+        <span role="alert" className="text-xs text-destructive">
+          Could not copy timestamp. Try copying it manually.
+        </span>
+      )}
+    </span>
+  );
+}
+
 export function AuditLog({ taskId }: AuditLogProps) {
   const [pageState, setPageState] = useState({ taskId, page: 1 });
   if (pageState.taskId !== taskId) setPageState({ taskId, page: 1 });
@@ -427,9 +469,15 @@ export function AuditLog({ taskId }: AuditLogProps) {
                         : entry.action}
                     </span>
                   </div>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    {formatRelativeTime(entry.createdAt)}
-                  </p>
+                  <div className="mt-0.5 flex flex-wrap items-center gap-1">
+                    <time dateTime={entry.createdAt} className="text-xs text-muted-foreground">
+                      {formatRelativeTime(entry.createdAt)}
+                    </time>
+                    <CopyActivityTimestamp
+                      key={`${taskId}:${entry.id}:${entry.createdAt}`}
+                      timestamp={entry.createdAt}
+                    />
+                  </div>
                   {taskCreatedDetails !== undefined && (
                     <p className="mt-1 text-xs text-muted-foreground">
                       {taskCreatedDetails}
