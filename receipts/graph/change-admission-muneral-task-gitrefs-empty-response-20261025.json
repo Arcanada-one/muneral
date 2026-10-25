@@ -1,0 +1,2918 @@
+{
+ "admission": {
+  "rule": "admitted requires every verdict = verified; failed without exemption ⇒ refused; not_measured without exemption ⇒ paused_safe; exemptions (owner + expiry) are attached by the admitting agent, never by the verifier (DEC-AUP-0008, matrix P1/P4)",
+  "structural_exclusion_rule": "DEC-AUP-0034: an affected entity is NOT verdict-owing when all three hold — the verifier matrix declares neither a mandatory nor a selectable verifier for its node type (so the only verdict it could ever carry states a property of the MATRIX, not of this change), the change set does not contain it, and its bytes are identical at base and head. Each one is listed in structural_exclusions with the content hash at both revisions that proves the byte-identity, and impact_pair.receipt_problems re-derives that proof from Git rather than believing the receipt.",
+  "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
+  "verdict": "admitted"
+ },
+ "captured_at_utc": "2026-10-25T12:33:57Z",
+ "change_set": {
+  "base": "fd1feb408458d25c3c114260a1b84399a5695dc6",
+  "files": [
+   {
+    "kind": "test",
+    "node_id": "code_unit:apps/web/components/task/TaskGitRefs.retry.test.tsx",
+    "node_ids": [
+     "code_unit:apps/web/components/task/TaskGitRefs.retry.test.tsx"
+    ],
+    "path": "apps/web/components/task/TaskGitRefs.retry.test.tsx",
+    "status": "M"
+   },
+   {
+    "kind": "code",
+    "node_id": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+    "node_ids": [
+     "code_unit:apps/web/components/task/TaskGitRefs.tsx"
+    ],
+    "path": "apps/web/components/task/TaskGitRefs.tsx",
+    "status": "M"
+   }
+  ],
+  "head": "ee1136d007a6f1106dc98f21488e43dbe7b7018a",
+  "mode": "diff"
+ },
+ "decision_ref": "DEC-AUP-0008",
+ "exemptions": [],
+ "graph": {
+  "builder_version": "1.0.6",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:8a95461d7e152071f07977ddcc2b93187303e292bb6dae80d48884073d80ff0e",
+  "path": "/out/verifier-out/graph-fd1feb408458.json",
+  "source_commit": "fd1feb408458d25c3c114260a1b84399a5695dc6"
+ },
+ "head_graph": {
+  "builder_version": "1.0.6",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:8ac9a69a727a4ffe9d1299649e34262fd06bd42d5109379bbdc85fd051a90f0b",
+  "path": "/out/verifier-out/graph-head-ee1136d007a6.json",
+  "source_commit": "ee1136d007a6f1106dc98f21488e43dbe7b7018a",
+  "staleness": {
+   "checked_at_utc": "2026-10-25T12:34:35Z",
+   "checked_nodes": 534,
+   "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+   "mismatched_nodes": [],
+   "verdict": "fresh"
+  }
+ },
+ "host": "public-stage",
+ "host_redacted": true,
+ "host_sha256": "918393e2dabb3f41721661a708798e3666f5262f9509ef156da119da55a1f0f5",
+ "impact_set": {
+  "deterministic_core": [
+   {
+    "boundary": "intra_unit",
+    "depth": 3,
+    "entity": "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "tsconfig-paths"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 3,
+    "entity": "code_unit:apps/web/__tests__/task-detail-retry.test.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "tsconfig-paths"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/__tests__/task-detail-retry.test.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "tsconfig-paths"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/components/task/TaskDetail.current-id.test.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.current-id.test.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "relative"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/components/task/TaskDetail.due-date.test.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.due-date.test.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "relative"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/components/task/TaskDetail.git-refs.test.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.git-refs.test.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "relative"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/components/task/TaskDetail.parent-reference.test.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.parent-reference.test.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "relative"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/components/task/TaskDetail.status-action.test.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.status-action.test.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "relative"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/web/components/task/TaskDetail.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:apps/web/components/task/TaskGitRefs.copy.test.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskGitRefs.copy.test.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:apps/web/components/task/TaskReadiness.test.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskReadiness.test.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "relative"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "deployable_unit:apps/web",
+    "node_type": "deployable_unit",
+    "path": [
+     {
+      "edge_type": "deploys_to",
+      "from": "code_unit:apps/web/components/task/TaskGitRefs.retry.test.tsx",
+      "provenance": "deterministic",
+      "to": "deployable_unit:apps/web",
+      "via": "containment"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "can-i-deploy gate (GRAPH-008)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/a2-304-dependabot-group.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/a2-304-dependabot-group.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/a2-320-web-eslint10.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/a2-320-web-eslint10.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/backend-workspace-isolation-20261008.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/backend-workspace-isolation-20261008.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-i05-adapter-20261008.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-i05-adapter-20261008.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-integration-batch1.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-integration-batch1.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-mun0008-repository-link-20261008.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun0008-repository-link-20261008.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-mun0048-rescue-20260915T070641Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun0048-rescue-20260915T070641Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-mun0049-20260913T182304Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun0049-20260913T182304Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-mun0050-20260914T075259Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun0050-20260914T075259Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-mun0052-20260914T103558Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun0052-20260914T103558Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-mun0054-deps-20260918T170850Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun0054-deps-20260918T170850Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-mun0065-task-read-future-time-20261023.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun0065-task-read-future-time-20261023.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-muneral-auditlog-actor-id-20261025.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-auditlog-actor-id-20261025.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-muneral-auditlog-actor-type-20261025.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-auditlog-actor-type-20261025.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-muneral-auditlog-change-details-20261024.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-auditlog-change-details-20261024.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-muneral-auditlog-comments-20261024.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-auditlog-comments-20261024.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-muneral-auditlog-date-only-20261024.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-auditlog-date-only-20261024.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-muneral-auditlog-evidence-details-20261024.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-auditlog-evidence-details-20261024.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-muneral-auditlog-pagination-20261024.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-auditlog-pagination-20261024.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-muneral-auditlog-recovery-20261024.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-auditlog-recovery-20261024.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-muneral-auditlog-status-20261023.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-auditlog-status-20261023.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-muneral-dependency-context-ui-20261024.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-dependency-context-ui-20261024.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-muneral-task-checklist-disclosure-20261024.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-task-checklist-disclosure-20261024.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-muneral-task-checklist-feedback-20261024.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-task-checklist-feedback-20261024.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-muneral-task-checklist-read-retry-20261025.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-task-checklist-read-retry-20261025.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-muneral-task-created-history-20261024.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-task-created-history-20261024.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-muneral-task-dependency-copy-20261024.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-task-dependency-copy-20261024.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-muneral-task-dependency-directions-20261024.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-task-dependency-directions-20261024.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-muneral-task-dependency-read-retry-main-afb4114-20261025.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-task-dependency-read-retry-main-afb4114-20261025.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-muneral-task-detail-current-task-id-20261025.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-task-detail-current-task-id-20261025.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-muneral-task-due-date-display-20261024.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-task-due-date-display-20261024.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-muneral-task-git-ref-copy-20261024.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-task-git-ref-copy-20261024.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-muneral-task-gitrefs-read-20261024.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-task-gitrefs-read-20261024.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-muneral-task-gitrefs-read-retry-20261025.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-task-gitrefs-read-retry-20261025.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.retry.test.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-muneral-task-parent-reference-20261024.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-task-parent-reference-20261024.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-muneral-task-parent-reference-uuid-copy-20261025.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-task-parent-reference-uuid-copy-20261025.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-muneral-task-readiness-retry-20261025.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-task-readiness-retry-20261025.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-muneral-task-readiness-summary-20261024.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-task-readiness-summary-20261024.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-muneral-task-status-transition-confirmation-20261025.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-task-status-transition-confirmation-20261025.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-task-detail-status-action-20261024.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-task-detail-status-action-20261024.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/security-api959a-caller788.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/security-api959a-caller788.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDetail.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   }
+  ],
+  "edge_types": "all",
+  "global_fallback": {
+   "triggered": false
+  },
+  "inferred_tail": [],
+  "max_depth": 3,
+  "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
+  "total": 68
+ },
+ "notes": [
+  "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
+  "profile: .arcana/verify.json at verified head; baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none"
+ ],
+ "producer": {
+  "tool": "tools/graph/verify.py",
+  "version": "1.4.1"
+ },
+ "receipt_id": "car-verify-20261025T123357Z-ee1136d0",
+ "repo": {
+  "name": "Arcanada-one/muneral",
+  "path": "/repo"
+ },
+ "revision_selection": {
+  "base": [
+   "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
+   "code_unit:apps/web/__tests__/task-detail-retry.test.tsx",
+   "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+   "code_unit:apps/web/components/task/TaskDetail.current-id.test.tsx",
+   "code_unit:apps/web/components/task/TaskDetail.due-date.test.tsx",
+   "code_unit:apps/web/components/task/TaskDetail.git-refs.test.tsx",
+   "code_unit:apps/web/components/task/TaskDetail.parent-reference.test.tsx",
+   "code_unit:apps/web/components/task/TaskDetail.status-action.test.tsx",
+   "code_unit:apps/web/components/task/TaskDetail.tsx",
+   "code_unit:apps/web/components/task/TaskGitRefs.copy.test.tsx",
+   "code_unit:apps/web/components/task/TaskGitRefs.retry.test.tsx",
+   "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+   "code_unit:apps/web/components/task/TaskReadiness.test.tsx",
+   "deployable_unit:apps/web",
+   "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+   "receipt:receipts/graph/a2-304-dependabot-group.json",
+   "receipt:receipts/graph/a2-320-web-eslint10.json",
+   "receipt:receipts/graph/backend-workspace-isolation-20261008.json",
+   "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json",
+   "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
+   "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
+   "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
+   "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+   "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+   "receipt:receipts/graph/change-admission-i05-adapter-20261008.json",
+   "receipt:receipts/graph/change-admission-integration-batch1.json",
+   "receipt:receipts/graph/change-admission-mun0008-repository-link-20261008.json",
+   "receipt:receipts/graph/change-admission-mun0048-rescue-20260915T070641Z.json",
+   "receipt:receipts/graph/change-admission-mun0049-20260913T182304Z.json",
+   "receipt:receipts/graph/change-admission-mun0050-20260914T075259Z.json",
+   "receipt:receipts/graph/change-admission-mun0052-20260914T103558Z.json",
+   "receipt:receipts/graph/change-admission-mun0054-deps-20260918T170850Z.json",
+   "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+   "receipt:receipts/graph/change-admission-mun0065-task-read-future-time-20261023.json",
+   "receipt:receipts/graph/change-admission-muneral-auditlog-actor-id-20261025.json",
+   "receipt:receipts/graph/change-admission-muneral-auditlog-actor-type-20261025.json",
+   "receipt:receipts/graph/change-admission-muneral-auditlog-change-details-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-auditlog-comments-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-auditlog-date-only-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-auditlog-evidence-details-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-auditlog-pagination-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-auditlog-recovery-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-auditlog-status-20261023.json",
+   "receipt:receipts/graph/change-admission-muneral-dependency-context-ui-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-task-checklist-disclosure-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-task-checklist-feedback-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-task-checklist-read-retry-20261025.json",
+   "receipt:receipts/graph/change-admission-muneral-task-created-history-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-task-dependency-copy-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-task-dependency-directions-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-task-dependency-read-retry-main-afb4114-20261025.json",
+   "receipt:receipts/graph/change-admission-muneral-task-detail-current-task-id-20261025.json",
+   "receipt:receipts/graph/change-admission-muneral-task-due-date-display-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-task-git-ref-copy-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-task-gitrefs-read-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-task-gitrefs-read-retry-20261025.json",
+   "receipt:receipts/graph/change-admission-muneral-task-parent-reference-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-task-parent-reference-uuid-copy-20261025.json",
+   "receipt:receipts/graph/change-admission-muneral-task-readiness-retry-20261025.json",
+   "receipt:receipts/graph/change-admission-muneral-task-readiness-summary-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-task-status-transition-confirmation-20261025.json",
+   "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+   "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+   "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json",
+   "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+   "receipt:receipts/graph/change-admission-task-detail-status-action-20261024.json",
+   "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+   "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+   "receipt:receipts/graph/security-api959a-caller788.json"
+  ],
+  "head": [
+   "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
+   "code_unit:apps/web/__tests__/task-detail-retry.test.tsx",
+   "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+   "code_unit:apps/web/components/task/TaskDetail.current-id.test.tsx",
+   "code_unit:apps/web/components/task/TaskDetail.due-date.test.tsx",
+   "code_unit:apps/web/components/task/TaskDetail.git-refs.test.tsx",
+   "code_unit:apps/web/components/task/TaskDetail.parent-reference.test.tsx",
+   "code_unit:apps/web/components/task/TaskDetail.status-action.test.tsx",
+   "code_unit:apps/web/components/task/TaskDetail.tsx",
+   "code_unit:apps/web/components/task/TaskGitRefs.copy.test.tsx",
+   "code_unit:apps/web/components/task/TaskGitRefs.retry.test.tsx",
+   "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+   "code_unit:apps/web/components/task/TaskReadiness.test.tsx",
+   "deployable_unit:apps/web",
+   "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+   "receipt:receipts/graph/a2-304-dependabot-group.json",
+   "receipt:receipts/graph/a2-320-web-eslint10.json",
+   "receipt:receipts/graph/backend-workspace-isolation-20261008.json",
+   "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json",
+   "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
+   "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
+   "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
+   "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+   "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+   "receipt:receipts/graph/change-admission-i05-adapter-20261008.json",
+   "receipt:receipts/graph/change-admission-integration-batch1.json",
+   "receipt:receipts/graph/change-admission-mun0008-repository-link-20261008.json",
+   "receipt:receipts/graph/change-admission-mun0048-rescue-20260915T070641Z.json",
+   "receipt:receipts/graph/change-admission-mun0049-20260913T182304Z.json",
+   "receipt:receipts/graph/change-admission-mun0050-20260914T075259Z.json",
+   "receipt:receipts/graph/change-admission-mun0052-20260914T103558Z.json",
+   "receipt:receipts/graph/change-admission-mun0054-deps-20260918T170850Z.json",
+   "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+   "receipt:receipts/graph/change-admission-mun0065-task-read-future-time-20261023.json",
+   "receipt:receipts/graph/change-admission-muneral-auditlog-actor-id-20261025.json",
+   "receipt:receipts/graph/change-admission-muneral-auditlog-actor-type-20261025.json",
+   "receipt:receipts/graph/change-admission-muneral-auditlog-change-details-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-auditlog-comments-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-auditlog-date-only-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-auditlog-evidence-details-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-auditlog-pagination-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-auditlog-recovery-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-auditlog-status-20261023.json",
+   "receipt:receipts/graph/change-admission-muneral-dependency-context-ui-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-task-checklist-disclosure-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-task-checklist-feedback-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-task-checklist-read-retry-20261025.json",
+   "receipt:receipts/graph/change-admission-muneral-task-created-history-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-task-dependency-copy-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-task-dependency-directions-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-task-dependency-read-retry-main-afb4114-20261025.json",
+   "receipt:receipts/graph/change-admission-muneral-task-detail-current-task-id-20261025.json",
+   "receipt:receipts/graph/change-admission-muneral-task-due-date-display-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-task-git-ref-copy-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-task-gitrefs-read-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-task-gitrefs-read-retry-20261025.json",
+   "receipt:receipts/graph/change-admission-muneral-task-parent-reference-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-task-parent-reference-uuid-copy-20261025.json",
+   "receipt:receipts/graph/change-admission-muneral-task-readiness-retry-20261025.json",
+   "receipt:receipts/graph/change-admission-muneral-task-readiness-summary-20261024.json",
+   "receipt:receipts/graph/change-admission-muneral-task-status-transition-confirmation-20261025.json",
+   "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+   "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+   "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json",
+   "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+   "receipt:receipts/graph/change-admission-task-detail-status-action-20261024.json",
+   "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+   "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+   "receipt:receipts/graph/security-api959a-caller788.json"
+  ],
+  "schema": "RevisionImpactSelection/v1",
+  "unmeasured_head_files": []
+ },
+ "schema": "ChangeAdmissionReceipt/v1",
+ "staleness": {
+  "checked_at_utc": "2026-10-25T12:34:35Z",
+  "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+  "mismatched_nodes": [],
+  "verdict": "fresh"
+ },
+ "structural_exclusions": [
+  {
+   "content_hash": {
+    "base": "sha256:d3f5ed8037490d1f8fb3eaad1764945d4dbabc6fcb6a88a3be173bdba9bd3441",
+    "head": "sha256:d3f5ed8037490d1f8fb3eaad1764945d4dbabc6fcb6a88a3be173bdba9bd3441"
+   },
+   "entity": "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/A2-370-outbox-relay-wired.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:a65b6d3576871c8a70f92d12964fcb9fc207f2d1bbe31957d1ef39dc447746d5",
+    "head": "sha256:a65b6d3576871c8a70f92d12964fcb9fc207f2d1bbe31957d1ef39dc447746d5"
+   },
+   "entity": "receipt:receipts/graph/a2-304-dependabot-group.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/a2-304-dependabot-group.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:49723617cfe868e4f813fb76a1faba259cf30f63411c1e6618d103276d1bed08",
+    "head": "sha256:49723617cfe868e4f813fb76a1faba259cf30f63411c1e6618d103276d1bed08"
+   },
+   "entity": "receipt:receipts/graph/a2-320-web-eslint10.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/a2-320-web-eslint10.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:9e8cd835911bd3c7f2e61b023c67aa004bf0c2e8207176470dd2f3516a7e49cb",
+    "head": "sha256:9e8cd835911bd3c7f2e61b023c67aa004bf0c2e8207176470dd2f3516a7e49cb"
+   },
+   "entity": "receipt:receipts/graph/backend-workspace-isolation-20261008.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/backend-workspace-isolation-20261008.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:bd5f160945334359817620023e2ead14018a99597509515bcc5ecf5967998192",
+    "head": "sha256:bd5f160945334359817620023e2ead14018a99597509515bcc5ecf5967998192"
+   },
+   "entity": "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-MUNERAL210-075162f.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:a5fd852388f96c3125f826be256162e094dd908a532cc59d657cfc68e2d18a31",
+    "head": "sha256:a5fd852388f96c3125f826be256162e094dd908a532cc59d657cfc68e2d18a31"
+   },
+   "entity": "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-a2255-20260924T033607Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:a4accf806cd2431f41b9e85fbe5d0261215d7a39b9247bd656b451fec81a27f5",
+    "head": "sha256:a4accf806cd2431f41b9e85fbe5d0261215d7a39b9247bd656b451fec81a27f5"
+   },
+   "entity": "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-a2274-20260924T164654Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:0258e398331acfcb9ff6a2e1b9ac8cd9841639b5888692919e48b210dd23dce1",
+    "head": "sha256:0258e398331acfcb9ff6a2e1b9ac8cd9841639b5888692919e48b210dd23dce1"
+   },
+   "entity": "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-a2284-20260924T201424Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:2b6726e41ade2d88298595746039bb79441f86d4a8196aa8562436cf2db1ac7a",
+    "head": "sha256:2b6726e41ade2d88298595746039bb79441f86d4a8196aa8562436cf2db1ac7a"
+   },
+   "entity": "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:7c0106e923b4851943e03d34cfec67b80ee496a7580f4ca92c7aaf72a25f7a89",
+    "head": "sha256:7c0106e923b4851943e03d34cfec67b80ee496a7580f4ca92c7aaf72a25f7a89"
+   },
+   "entity": "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:6ba6d889406621f9cb0b9839c438c4905ce0dcea3fe9331f4615695b16f91744",
+    "head": "sha256:6ba6d889406621f9cb0b9839c438c4905ce0dcea3fe9331f4615695b16f91744"
+   },
+   "entity": "receipt:receipts/graph/change-admission-i05-adapter-20261008.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-i05-adapter-20261008.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:1defa236ec84c05632f4ca842b4c2715e15a0311a0eb3ea9828e4c23a3cc582b",
+    "head": "sha256:1defa236ec84c05632f4ca842b4c2715e15a0311a0eb3ea9828e4c23a3cc582b"
+   },
+   "entity": "receipt:receipts/graph/change-admission-integration-batch1.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-integration-batch1.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:44fda018e31e0f681c3c1de598f17c8c9756158668e5c2918fde5086befbd204",
+    "head": "sha256:44fda018e31e0f681c3c1de598f17c8c9756158668e5c2918fde5086befbd204"
+   },
+   "entity": "receipt:receipts/graph/change-admission-mun0008-repository-link-20261008.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-mun0008-repository-link-20261008.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:d75da3efcea75673c9b8a6f46f0fab9a970690ee25a5e27185a177556f7dec4a",
+    "head": "sha256:d75da3efcea75673c9b8a6f46f0fab9a970690ee25a5e27185a177556f7dec4a"
+   },
+   "entity": "receipt:receipts/graph/change-admission-mun0048-rescue-20260915T070641Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-mun0048-rescue-20260915T070641Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:87a7671a79648e11450d0b718422b40e2423856709736592a3c57605eb9964d3",
+    "head": "sha256:87a7671a79648e11450d0b718422b40e2423856709736592a3c57605eb9964d3"
+   },
+   "entity": "receipt:receipts/graph/change-admission-mun0049-20260913T182304Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-mun0049-20260913T182304Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:c45d35be69fc268cd671b68a833497b7b22e4692ee2150d5e38664203a576885",
+    "head": "sha256:c45d35be69fc268cd671b68a833497b7b22e4692ee2150d5e38664203a576885"
+   },
+   "entity": "receipt:receipts/graph/change-admission-mun0050-20260914T075259Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-mun0050-20260914T075259Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:aaa19b64f90550eb9a4bdfc07cae3d7e7f28500684bbfeba34ece0c2641eaa14",
+    "head": "sha256:aaa19b64f90550eb9a4bdfc07cae3d7e7f28500684bbfeba34ece0c2641eaa14"
+   },
+   "entity": "receipt:receipts/graph/change-admission-mun0052-20260914T103558Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-mun0052-20260914T103558Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:edda022f2de32ee2f621c1fc71e7b648926c971fd170357337c61844e859db67",
+    "head": "sha256:edda022f2de32ee2f621c1fc71e7b648926c971fd170357337c61844e859db67"
+   },
+   "entity": "receipt:receipts/graph/change-admission-mun0054-deps-20260918T170850Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-mun0054-deps-20260918T170850Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:1e3f90014eaded028ebc824b9fb7ff3aeb5d3329bf6939e03e28672bd8fbdc4f",
+    "head": "sha256:1e3f90014eaded028ebc824b9fb7ff3aeb5d3329bf6939e03e28672bd8fbdc4f"
+   },
+   "entity": "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:401c3bfffcf43cc7130fb43f9267ecebea199d1bfc70809ed1696ddfbc4e96de",
+    "head": "sha256:401c3bfffcf43cc7130fb43f9267ecebea199d1bfc70809ed1696ddfbc4e96de"
+   },
+   "entity": "receipt:receipts/graph/change-admission-mun0065-task-read-future-time-20261023.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-mun0065-task-read-future-time-20261023.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:95bb97a4f60ccb7cd285e19aaef1c19e91d9e88d4bd962ed0eb0c957853b2c08",
+    "head": "sha256:95bb97a4f60ccb7cd285e19aaef1c19e91d9e88d4bd962ed0eb0c957853b2c08"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-auditlog-actor-id-20261025.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-auditlog-actor-id-20261025.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:a83495d9f8ed3d4ae7796af68a73be15dc3494cc5c7898134ebea9490ae709eb",
+    "head": "sha256:a83495d9f8ed3d4ae7796af68a73be15dc3494cc5c7898134ebea9490ae709eb"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-auditlog-actor-type-20261025.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-auditlog-actor-type-20261025.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:2ba268e366b630fa9b7663fb4d575370a83b75f83695e52dda8ac9d66637d2f1",
+    "head": "sha256:2ba268e366b630fa9b7663fb4d575370a83b75f83695e52dda8ac9d66637d2f1"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-auditlog-change-details-20261024.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-auditlog-change-details-20261024.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:782ba3e3bf1857ee7a0dc49544648b4f43de4f230536f9425ae6d1dc5ceb1def",
+    "head": "sha256:782ba3e3bf1857ee7a0dc49544648b4f43de4f230536f9425ae6d1dc5ceb1def"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-auditlog-comments-20261024.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-auditlog-comments-20261024.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:5000e87e4235f2cdf00eb4a6595811113e41dd90199648d6501fffbdb24f6e04",
+    "head": "sha256:5000e87e4235f2cdf00eb4a6595811113e41dd90199648d6501fffbdb24f6e04"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-auditlog-date-only-20261024.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-auditlog-date-only-20261024.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:62bbaeebcc53f69d060cac1732a7fb9dc30ff05269834070966240a75b02b887",
+    "head": "sha256:62bbaeebcc53f69d060cac1732a7fb9dc30ff05269834070966240a75b02b887"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-auditlog-evidence-details-20261024.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-auditlog-evidence-details-20261024.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:02d5ff5c215a6299e1cedac70feadd44e8cc7bcf31e68efed6cf700a3cbf8125",
+    "head": "sha256:02d5ff5c215a6299e1cedac70feadd44e8cc7bcf31e68efed6cf700a3cbf8125"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-auditlog-pagination-20261024.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-auditlog-pagination-20261024.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:8a7439797c259409a9a8e4852214f544942859216ffda613a486c5320522127f",
+    "head": "sha256:8a7439797c259409a9a8e4852214f544942859216ffda613a486c5320522127f"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-auditlog-recovery-20261024.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-auditlog-recovery-20261024.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:001582513f72694d3e85995770080e139d1b1fb36ec71cff61ecc8e6f42c896b",
+    "head": "sha256:001582513f72694d3e85995770080e139d1b1fb36ec71cff61ecc8e6f42c896b"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-auditlog-status-20261023.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-auditlog-status-20261023.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:28c7de6b28555d61a6794aaa725b931783d2fc43a9679f98908732f10a7c1699",
+    "head": "sha256:28c7de6b28555d61a6794aaa725b931783d2fc43a9679f98908732f10a7c1699"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-dependency-context-ui-20261024.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-dependency-context-ui-20261024.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:67f372a6a7454e7bc7d980bd471ddca7dfd6cd7941ef229e1b824b51e68a5b0d",
+    "head": "sha256:67f372a6a7454e7bc7d980bd471ddca7dfd6cd7941ef229e1b824b51e68a5b0d"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-task-checklist-disclosure-20261024.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-task-checklist-disclosure-20261024.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:01dcb45bbb83cfca2864e6187564a9bc854e09b46bc9602903ffea717998eb69",
+    "head": "sha256:01dcb45bbb83cfca2864e6187564a9bc854e09b46bc9602903ffea717998eb69"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-task-checklist-feedback-20261024.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-task-checklist-feedback-20261024.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:5d67d879b01065b1f3ff8097773690772b227ac4769d89096091390e91e4e6a9",
+    "head": "sha256:5d67d879b01065b1f3ff8097773690772b227ac4769d89096091390e91e4e6a9"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-task-checklist-read-retry-20261025.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-task-checklist-read-retry-20261025.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:05b2d584f2a3af47264f12bf2cf455e063468419ff02dd640e228142bcecd679",
+    "head": "sha256:05b2d584f2a3af47264f12bf2cf455e063468419ff02dd640e228142bcecd679"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-task-created-history-20261024.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-task-created-history-20261024.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:a10d9075bbdfa11fb8fc59d096da20f71ed58ae4fa704fa7f4b84298325c07d0",
+    "head": "sha256:a10d9075bbdfa11fb8fc59d096da20f71ed58ae4fa704fa7f4b84298325c07d0"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-task-dependency-copy-20261024.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-task-dependency-copy-20261024.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:4ff149d2df82df4757b6f8466bbeecfb99d0050fc622f7b533e0d01a781a362e",
+    "head": "sha256:4ff149d2df82df4757b6f8466bbeecfb99d0050fc622f7b533e0d01a781a362e"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-task-dependency-directions-20261024.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-task-dependency-directions-20261024.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:d2144b3ab9677ec391544ab347d432fddc3d0ea0604ba88e3d01226efd4fc0ad",
+    "head": "sha256:d2144b3ab9677ec391544ab347d432fddc3d0ea0604ba88e3d01226efd4fc0ad"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-task-dependency-read-retry-main-afb4114-20261025.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-task-dependency-read-retry-main-afb4114-20261025.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:856325665f8409b2f419de3e85e3c421e30b64bb3383cab95884338516204bcc",
+    "head": "sha256:856325665f8409b2f419de3e85e3c421e30b64bb3383cab95884338516204bcc"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-task-detail-current-task-id-20261025.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-task-detail-current-task-id-20261025.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:43969d55b11a0bd6ab2e0509598467c41bedab184325127ee1f950e4434be8c7",
+    "head": "sha256:43969d55b11a0bd6ab2e0509598467c41bedab184325127ee1f950e4434be8c7"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-task-due-date-display-20261024.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-task-due-date-display-20261024.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:0f0c26b47399f485c77cdb6eaec586bda905e7fe7846fc20b84f0867ea265d72",
+    "head": "sha256:0f0c26b47399f485c77cdb6eaec586bda905e7fe7846fc20b84f0867ea265d72"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-task-git-ref-copy-20261024.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-task-git-ref-copy-20261024.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:3ad9b2dcac55eea4ecebb5f272bcbd0084ec99765e181ba4289ec3d630cc0405",
+    "head": "sha256:3ad9b2dcac55eea4ecebb5f272bcbd0084ec99765e181ba4289ec3d630cc0405"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-task-gitrefs-read-20261024.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-task-gitrefs-read-20261024.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:7d936891c8a9b4574c140b744e835f491db9141fbc0ef333aa1dbeac11d9864a",
+    "head": "sha256:7d936891c8a9b4574c140b744e835f491db9141fbc0ef333aa1dbeac11d9864a"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-task-gitrefs-read-retry-20261025.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-task-gitrefs-read-retry-20261025.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:832dabd092ce390e4ffc202ce0d435b0f1d9dd8c60d8b0fe84df227cba7a778e",
+    "head": "sha256:832dabd092ce390e4ffc202ce0d435b0f1d9dd8c60d8b0fe84df227cba7a778e"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-task-parent-reference-20261024.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-task-parent-reference-20261024.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:f0ffc542748a7f4d612bd112680ab5c6d6e3a07cd5887c940c941ca9448b1c66",
+    "head": "sha256:f0ffc542748a7f4d612bd112680ab5c6d6e3a07cd5887c940c941ca9448b1c66"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-task-parent-reference-uuid-copy-20261025.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-task-parent-reference-uuid-copy-20261025.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:18216073eeb9d567d014e5f58dbc213ea491f9aa1bdb864f951e75da5d8a735b",
+    "head": "sha256:18216073eeb9d567d014e5f58dbc213ea491f9aa1bdb864f951e75da5d8a735b"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-task-readiness-retry-20261025.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-task-readiness-retry-20261025.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:5d85104064eab99820ca19ac477c2974cf64adb0c489d422a724c0931bf00e9d",
+    "head": "sha256:5d85104064eab99820ca19ac477c2974cf64adb0c489d422a724c0931bf00e9d"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-task-readiness-summary-20261024.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-task-readiness-summary-20261024.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:fa8d244fa4a6f4758a71057948e0c3e47ac093734b924fff192f0f70923beaad",
+    "head": "sha256:fa8d244fa4a6f4758a71057948e0c3e47ac093734b924fff192f0f70923beaad"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-task-status-transition-confirmation-20261025.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-task-status-transition-confirmation-20261025.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:fae981897af83ddb9d208799d4c7e167c569b3cf5468e811641689be25a1023e",
+    "head": "sha256:fae981897af83ddb9d208799d4c7e167c569b3cf5468e811641689be25a1023e"
+   },
+   "entity": "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:1203469bfc87fde2407f5126a4bc488d133ca964ca607463028fcf0bf4bc31a2",
+    "head": "sha256:1203469bfc87fde2407f5126a4bc488d133ca964ca607463028fcf0bf4bc31a2"
+   },
+   "entity": "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-node2421-20260914T000213Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:c6bb244a2bff2d9e89a0dd6edb65a5f25606e9e7cd710c9e1ebce0426f3c1b6e",
+    "head": "sha256:c6bb244a2bff2d9e89a0dd6edb65a5f25606e9e7cd710c9e1ebce0426f3c1b6e"
+   },
+   "entity": "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-node24221-20261021T203351Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:8b6cdea08eb0e51062dd5cb7a903149d08ff69411f5d107b51d2dddfe5d3478c",
+    "head": "sha256:8b6cdea08eb0e51062dd5cb7a903149d08ff69411f5d107b51d2dddfe5d3478c"
+   },
+   "entity": "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:85ea7e61a1fc40910c8c419ce4284678333dc9490f2608fd774b8e47ee5542b6",
+    "head": "sha256:85ea7e61a1fc40910c8c419ce4284678333dc9490f2608fd774b8e47ee5542b6"
+   },
+   "entity": "receipt:receipts/graph/change-admission-task-detail-status-action-20261024.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-task-detail-status-action-20261024.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:a6107936a5b0f4e1f7c0c0ecf75c8f2557da15e932e40afc37215ff2328b88a2",
+    "head": "sha256:a6107936a5b0f4e1f7c0c0ecf75c8f2557da15e932e40afc37215ff2328b88a2"
+   },
+   "entity": "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:02def6da178ea3d331171574bb64bb2c56ae0d8163b3cc013b0dcb743c556283",
+    "head": "sha256:02def6da178ea3d331171574bb64bb2c56ae0d8163b3cc013b0dcb743c556283"
+   },
+   "entity": "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:32fe4de334dfc155b83c1147706675b80eed51426cee16655ce78ab1aaf5fa90",
+    "head": "sha256:32fe4de334dfc155b83c1147706675b80eed51426cee16655ce78ab1aaf5fa90"
+   },
+   "entity": "receipt:receipts/graph/security-api959a-caller788.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/security-api959a-caller788.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  }
+ ],
+ "tree": {
+  "commit": "ee1136d007a6f1106dc98f21488e43dbe7b7018a",
+  "dirty": false
+ },
+ "verdicts": [
+  {
+   "entity": "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/__tests__/task-detail-retry.test.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/task/TaskDetail.current-id.test.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/task/TaskDetail.due-date.test.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/task/TaskDetail.git-refs.test.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/task/TaskDetail.parent-reference.test.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/task/TaskDetail.status-action.test.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/task/TaskDetail.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/task/TaskGitRefs.copy.test.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/task/TaskGitRefs.retry.test.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "code_unit:apps/web/components/task/TaskReadiness.test.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "deployable_unit:apps/web",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: 0 errors; v-fitness: no new violation in apps/web",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  }
+ ],
+ "verifier_selection": {
+  "applied": {},
+  "not_applied": [],
+  "requested": [],
+  "schema": "VerifierSelection/v1"
+ },
+ "verifiers": [
+  {
+   "command": "/repo/apps/web/node_modules/.bin/tsc -p /repo/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /out/verifier-out/type-check-8f5jamri/check.tsbuildinfo --listFiles",
+   "duration_s": 4.09,
+   "entities": [
+    "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
+    "code_unit:apps/web/__tests__/task-detail-retry.test.tsx",
+    "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+    "code_unit:apps/web/components/task/TaskDetail.current-id.test.tsx",
+    "code_unit:apps/web/components/task/TaskDetail.due-date.test.tsx",
+    "code_unit:apps/web/components/task/TaskDetail.git-refs.test.tsx",
+    "code_unit:apps/web/components/task/TaskDetail.parent-reference.test.tsx",
+    "code_unit:apps/web/components/task/TaskDetail.status-action.test.tsx",
+    "code_unit:apps/web/components/task/TaskDetail.tsx",
+    "code_unit:apps/web/components/task/TaskGitRefs.copy.test.tsx",
+    "code_unit:apps/web/components/task/TaskGitRefs.retry.test.tsx",
+    "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+    "code_unit:apps/web/components/task/TaskReadiness.test.tsx",
+    "deployable_unit:apps/web"
+   ],
+   "entity_verdicts": {
+    "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx": "verified",
+    "code_unit:apps/web/__tests__/task-detail-retry.test.tsx": "verified",
+    "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskDetail.current-id.test.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskDetail.due-date.test.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskDetail.git-refs.test.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskDetail.parent-reference.test.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskDetail.status-action.test.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskDetail.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskGitRefs.copy.test.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskGitRefs.retry.test.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskGitRefs.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskReadiness.test.tsx": "verified",
+    "deployable_unit:apps/web": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-type-check-apps-web-tsconfig",
+   "kind": "type_check",
+   "output_ref": "/out/verifier-out/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-10-25T12:34:41Z",
+   "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1415 files listed"
+  },
+  {
+   "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
+   "duration_s": 0.11,
+   "entities": [
+    "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
+    "code_unit:apps/web/__tests__/task-detail-retry.test.tsx",
+    "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx",
+    "code_unit:apps/web/components/task/TaskDetail.current-id.test.tsx",
+    "code_unit:apps/web/components/task/TaskDetail.due-date.test.tsx",
+    "code_unit:apps/web/components/task/TaskDetail.git-refs.test.tsx",
+    "code_unit:apps/web/components/task/TaskDetail.parent-reference.test.tsx",
+    "code_unit:apps/web/components/task/TaskDetail.status-action.test.tsx",
+    "code_unit:apps/web/components/task/TaskDetail.tsx",
+    "code_unit:apps/web/components/task/TaskGitRefs.copy.test.tsx",
+    "code_unit:apps/web/components/task/TaskGitRefs.retry.test.tsx",
+    "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+    "code_unit:apps/web/components/task/TaskReadiness.test.tsx",
+    "deployable_unit:apps/web"
+   ],
+   "entity_verdicts": {
+    "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx": "verified",
+    "code_unit:apps/web/__tests__/task-detail-retry.test.tsx": "verified",
+    "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx": "verified",
+    "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskDetail.current-id.test.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskDetail.due-date.test.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskDetail.git-refs.test.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskDetail.parent-reference.test.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskDetail.status-action.test.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskDetail.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskGitRefs.copy.test.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskGitRefs.retry.test.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskGitRefs.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskReadiness.test.tsx": "verified",
+    "deployable_unit:apps/web": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-fitness",
+   "kind": "fitness_rules",
+   "output_ref": "/out/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-10-25T12:34:45Z",
+   "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
+  }
+ ],
+ "verify": {
+  "events": [
+   {
+    "code": "STRUCTURAL_EXCLUSION",
+    "rule": "DEC-AUP-0034",
+    "text": "55 affected entity(ies) owe no verdict (receipt: 55): unchanged at both revisions and given no verifier by the matrix"
+   }
+  ],
+  "required_by_entity": {
+   "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/__tests__/task-detail-retry.test.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/app/(app)/workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]/page.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/components/task/TaskDetail.current-id.test.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/components/task/TaskDetail.due-date.test.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/components/task/TaskDetail.git-refs.test.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/components/task/TaskDetail.parent-reference.test.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/components/task/TaskDetail.status-action.test.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/components/task/TaskDetail.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/components/task/TaskGitRefs.copy.test.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/components/task/TaskGitRefs.retry.test.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/components/task/TaskGitRefs.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:apps/web/components/task/TaskReadiness.test.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "deployable_unit:apps/web": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "receipt:receipts/graph/A2-370-outbox-relay-wired.json": [],
+   "receipt:receipts/graph/a2-304-dependabot-group.json": [],
+   "receipt:receipts/graph/a2-320-web-eslint10.json": [],
+   "receipt:receipts/graph/backend-workspace-isolation-20261008.json": [],
+   "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json": [],
+   "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json": [],
+   "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json": [],
+   "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json": [],
+   "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json": [],
+   "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json": [],
+   "receipt:receipts/graph/change-admission-i05-adapter-20261008.json": [],
+   "receipt:receipts/graph/change-admission-integration-batch1.json": [],
+   "receipt:receipts/graph/change-admission-mun0008-repository-link-20261008.json": [],
+   "receipt:receipts/graph/change-admission-mun0048-rescue-20260915T070641Z.json": [],
+   "receipt:receipts/graph/change-admission-mun0049-20260913T182304Z.json": [],
+   "receipt:receipts/graph/change-admission-mun0050-20260914T075259Z.json": [],
+   "receipt:receipts/graph/change-admission-mun0052-20260914T103558Z.json": [],
+   "receipt:receipts/graph/change-admission-mun0054-deps-20260918T170850Z.json": [],
+   "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json": [],
+   "receipt:receipts/graph/change-admission-mun0065-task-read-future-time-20261023.json": [],
+   "receipt:receipts/graph/change-admission-muneral-auditlog-actor-id-20261025.json": [],
+   "receipt:receipts/graph/change-admission-muneral-auditlog-actor-type-20261025.json": [],
+   "receipt:receipts/graph/change-admission-muneral-auditlog-change-details-20261024.json": [],
+   "receipt:receipts/graph/change-admission-muneral-auditlog-comments-20261024.json": [],
+   "receipt:receipts/graph/change-admission-muneral-auditlog-date-only-20261024.json": [],
+   "receipt:receipts/graph/change-admission-muneral-auditlog-evidence-details-20261024.json": [],
+   "receipt:receipts/graph/change-admission-muneral-auditlog-pagination-20261024.json": [],
+   "receipt:receipts/graph/change-admission-muneral-auditlog-recovery-20261024.json": [],
+   "receipt:receipts/graph/change-admission-muneral-auditlog-status-20261023.json": [],
+   "receipt:receipts/graph/change-admission-muneral-dependency-context-ui-20261024.json": [],
+   "receipt:receipts/graph/change-admission-muneral-task-checklist-disclosure-20261024.json": [],
+   "receipt:receipts/graph/change-admission-muneral-task-checklist-feedback-20261024.json": [],
+   "receipt:receipts/graph/change-admission-muneral-task-checklist-read-retry-20261025.json": [],
+   "receipt:receipts/graph/change-admission-muneral-task-created-history-20261024.json": [],
+   "receipt:receipts/graph/change-admission-muneral-task-dependency-copy-20261024.json": [],
+   "receipt:receipts/graph/change-admission-muneral-task-dependency-directions-20261024.json": [],
+   "receipt:receipts/graph/change-admission-muneral-task-dependency-read-retry-main-afb4114-20261025.json": [],
+   "receipt:receipts/graph/change-admission-muneral-task-detail-current-task-id-20261025.json": [],
+   "receipt:receipts/graph/change-admission-muneral-task-due-date-display-20261024.json": [],
+   "receipt:receipts/graph/change-admission-muneral-task-git-ref-copy-20261024.json": [],
+   "receipt:receipts/graph/change-admission-muneral-task-gitrefs-read-20261024.json": [],
+   "receipt:receipts/graph/change-admission-muneral-task-gitrefs-read-retry-20261025.json": [],
+   "receipt:receipts/graph/change-admission-muneral-task-parent-reference-20261024.json": [],
+   "receipt:receipts/graph/change-admission-muneral-task-parent-reference-uuid-copy-20261025.json": [],
+   "receipt:receipts/graph/change-admission-muneral-task-readiness-retry-20261025.json": [],
+   "receipt:receipts/graph/change-admission-muneral-task-readiness-summary-20261024.json": [],
+   "receipt:receipts/graph/change-admission-muneral-task-status-transition-confirmation-20261025.json": [],
+   "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json": [],
+   "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json": [],
+   "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json": [],
+   "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json": [],
+   "receipt:receipts/graph/change-admission-task-detail-status-action-20261024.json": [],
+   "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json": [],
+   "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json": [],
+   "receipt:receipts/graph/security-api959a-caller788.json": []
+  },
+  "seconds": {
+   "prepare": 2.21,
+   "total": 48.33,
+   "verifiers": 4.2
+  }
+ }
+}
