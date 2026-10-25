@@ -9,7 +9,7 @@ interface TaskReadinessProps {
 }
 
 export function TaskReadiness({ taskId }: TaskReadinessProps) {
-  const { data, isLoading, isError } = useTaskReadiness(taskId);
+  const { data, isLoading, isError, isFetching, refetch } = useTaskReadiness(taskId);
 
   let content;
   if (!taskId || isError) {
@@ -53,6 +53,17 @@ export function TaskReadiness({ taskId }: TaskReadinessProps) {
         </Badge>}
       </div>
       {content}
+      {taskId && isError && (
+        <button
+          type="button"
+          aria-label="Retry dependency readiness"
+          className="mt-2 rounded text-sm text-foreground underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={isFetching}
+          onClick={() => { void refetch(); }}
+        >
+          Retry
+        </button>
+      )}
     </section>
   );
 }

@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import apiClient from '@/lib/api/client';
 import type { Task } from '@/lib/api/tasks';
@@ -122,6 +122,65 @@ describe('TaskDetail dependency readiness summary', () => {
     expect(screen.queryByText('Ready (dependencies)')).not.toBeInTheDocument();
     expect(get).toHaveBeenCalledWith(`/tasks/${taskId}/readiness`);
     view.unmount();
+  });
+
+  it('lets the user retry an unavailable readiness read and uses the server result', async () => {
+    let resolveRetry: ((value: unknown) => void) | undefined;
+    const get = vi.spyOn(apiClient, 'get')
+      .mockRejectedValueOnce(new Error('synthetic transient failure'))
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveRetry = resolve; }) as never);
+    renderReadiness();
+
+    expect(await screen.findByText('Dependency readiness is unavailable.')).toBeInTheDocument();
+    const retry = screen.getByRole('button', { name: 'Retry dependency readiness' });
+    fireEvent.click(retry);
+    expect(await screen.findByText('Dependency readiness is unknown while it loads.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Retry dependency readiness' })).not.toBeInTheDocument();
+    expect(get).toHaveBeenCalledTimes(2);
+
+    await act(async () => resolveRetry?.({ data: readiness({ dependencyCount: 2 }) }));
+    expect(await screen.findByText('Ready: no blocking dependencies among 2 dependency links.')).toBeInTheDocument();
+    expect(screen.queryByText('Dependency readiness is unavailable.')).not.toBeInTheDocument();
+    expect(get.mock.calls.map(([url]) => url)).toEqual([
+      `/tasks/${taskId}/readiness`,
+      `/tasks/${taskId}/readiness`,
+    ]);
+  });
+
+  it('does not show a prior task result when its readiness retry settles after a task switch', async () => {
+    let taskCalls = 0;
+    let resolveRetry: ((value: unknown) => void) | undefined;
+    const get = vi.spyOn(apiClient, 'get').mockImplementation((url) => {
+      if (url === `/tasks/${taskId}/readiness`) {
+        taskCalls += 1;
+        if (taskCalls === 1) return Promise.reject(new Error('synthetic transient failure')) as never;
+        return new Promise((resolve) => { resolveRetry = resolve; }) as never;
+      }
+      if (url === `/tasks/${otherTaskId}/readiness`) {
+        return Promise.resolve({ data: readiness({ taskId: otherTaskId, dependencyCount: 0 }) }) as never;
+      }
+      throw new Error(`unexpected request ${url}`);
+    });
+    const view = renderReadiness();
+
+    expect(await screen.findByText('Dependency readiness is unavailable.')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Retry dependency readiness' }));
+    expect(await screen.findByText('Dependency readiness is unknown while it loads.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Retry dependency readiness' })).not.toBeInTheDocument();
+
+    view.rerenderTask(otherTaskId);
+    expect(await screen.findByText('Ready: no dependency links.')).toBeInTheDocument();
+    await act(async () => resolveRetry?.({
+      data: readiness({ ready: false, dependencyCount: 1, blockedBy: [blocker()] }),
+    }));
+
+    expect(screen.getByText('Ready: no dependency links.')).toBeInTheDocument();
+    expect(screen.queryByText('Release prerequisite')).not.toBeInTheDocument();
+    expect(get.mock.calls.map(([url]) => url)).toEqual([
+      `/tasks/${taskId}/readiness`,
+      `/tasks/${taskId}/readiness`,
+      `/tasks/${otherTaskId}/readiness`,
+    ]);
   });
 
   it.each([
