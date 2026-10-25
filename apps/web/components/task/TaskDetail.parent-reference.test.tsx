@@ -81,6 +81,10 @@ function expectNoParentStatus() {
   expect(screen.queryByText(/^Parent status:/)).not.toBeInTheDocument();
 }
 
+function expectNoParentPriority() {
+  expect(screen.queryByText(/^Parent priority:/)).not.toBeInTheDocument();
+}
+
 describe('TaskDetail parent reference', () => {
   it('copies the full parent UUID only after a user action', () => {
     state.get.mockReturnValue(new Promise(() => undefined));
@@ -217,6 +221,46 @@ describe('TaskDetail parent reference', () => {
     expect(screen.queryByText('Parent status: To Do')).not.toBeInTheDocument();
   });
 
+  it('shows the canonical priority from the matching parent read', async () => {
+    state.get.mockResolvedValue({
+      data: { ...baseTask, id: parentId, title: 'Parent title from API', priority: 'high' },
+    });
+
+    renderTask({ ...baseTask, parentId });
+
+    const parentPriorityLabel = await screen.findByText('Parent priority:');
+    expect(parentPriorityLabel.parentElement).toHaveTextContent('Parent priority: High');
+  });
+
+  it('does not show priority from a response for a different parent ID', async () => {
+    const queryClient = makeQueryClient();
+    state.get.mockResolvedValue({
+      data: { ...baseTask, id: otherParentId, title: 'Other parent', priority: 'critical' },
+    });
+
+    renderTask({ ...baseTask, parentId }, queryClient);
+
+    await waitFor(() => {
+      expect(queryClient.getQueryState(['tasks', parentId])?.status).toBe('success');
+    });
+    expect(parentText(parentId)).toBeInTheDocument();
+    expectNoParentPriority();
+  });
+
+  it('does not show priority from an invalid parent response', async () => {
+    const queryClient = makeQueryClient();
+    state.get.mockResolvedValue({
+      data: { ...baseTask, id: parentId, title: 'Parent title', priority: 'urgent' },
+    });
+
+    renderTask({ ...baseTask, parentId }, queryClient);
+
+    await waitFor(() => {
+      expect(queryClient.getQueryState(['tasks', parentId])?.status).toBe('error');
+    });
+    expectNoParentPriority();
+  });
+
   it('does not show parent status from an unrecognized cached value', async () => {
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false, gcTime: Infinity, staleTime: Infinity } },
@@ -341,6 +385,7 @@ describe('TaskDetail parent reference', () => {
       ),
     ).toBeInTheDocument();
     expectNoParentStatus();
+    expectNoParentPriority();
   });
 
   it('does not show an old parent title after the child changes parent while reads are in flight', async () => {

@@ -172,6 +172,7 @@ function ParentTaskReference({ parentId }: { parentId: string }) {
     : undefined;
   const parentTask = parentStatus !== undefined ? parentTaskCandidate : undefined;
   const parentTitle = parentTask?.title ?? null;
+  const parentPriority = parentTask ? priorityConfig[parentTask.priority] : undefined;
 
   return (
     <div className="mt-1">
@@ -186,6 +187,12 @@ function ParentTaskReference({ parentId }: { parentId: string }) {
       </p>
       {parentStatus !== undefined && (
         <p className="mt-1 text-xs text-muted-foreground">Parent status: {parentStatus}</p>
+      )}
+      {parentPriority !== undefined && (
+        <div className="mt-1 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+          <span>Parent priority:{' '}</span>
+          <Badge variant={parentPriority.variant}>{parentPriority.label}</Badge>
+        </div>
       )}
     </div>
   );
