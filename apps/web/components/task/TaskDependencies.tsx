@@ -60,12 +60,36 @@ function CopyTaskIdButton({ taskId }: { taskId: string }) {
 }
 
 export function TaskDependencies({ taskId }: TaskDependenciesProps) {
-  const { data: deps = [], isLoading, isError } = useDependencyGraph(taskId);
+  const [retryingTaskId, setRetryingTaskId] = useState<string | null>(null);
+  const { data: deps = [], isLoading, isError, isFetching, refetch } = useDependencyGraph(taskId);
+  const isRetrying = retryingTaskId === taskId;
 
-  if (isError) {
+  const retryDependencies = () => {
+    if (isFetching || isRetrying) return;
+
+    setRetryingTaskId(taskId);
+    const finishRetry = () => setRetryingTaskId((currentTaskId) =>
+      currentTaskId === taskId ? null : currentTaskId,
+    );
+    void refetch().then(finishRetry, finishRetry);
+  };
+
+  if (isError || isRetrying) {
     return (
-      <div role="alert" className="rounded-lg border p-4 text-sm text-muted-foreground">
-        Dependencies are unavailable. Try again later.
+      <div role={isRetrying ? 'status' : 'alert'} className="rounded-lg border p-4 text-sm text-muted-foreground">
+        <p>
+          {isRetrying ? 'Retrying dependencies…' : 'Dependencies are unavailable.'}
+        </p>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="mt-3"
+          onClick={retryDependencies}
+          disabled={isFetching || isRetrying}
+        >
+          {isRetrying ? 'Retrying dependencies…' : 'Retry dependencies'}
+        </Button>
       </div>
     );
   }
