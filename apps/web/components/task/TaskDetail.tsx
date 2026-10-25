@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Bot, User, AlertCircle, Calendar } from 'lucide-react';
+import { Bot, User, AlertCircle, Calendar, Copy } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TaskChecklist } from './TaskChecklist';
 import { TaskDependencies } from './TaskDependencies';
@@ -90,6 +91,11 @@ export function TaskDetail({ task }: TaskDetailProps) {
           )}
         </div>
       </div>
+      <div className="flex min-w-0 flex-wrap items-center gap-2 text-sm">
+        <span className="text-muted-foreground">Task ID</span>
+        <code className="break-all font-mono text-xs">{task.id}</code>
+        <CopyCurrentTaskId key={task.id} taskId={task.id} />
+      </div>
 
       {/* Description */}
       {task.description && (
@@ -164,6 +170,61 @@ function ParentTaskReference({ parentId }: { parentId: string }) {
         <span className="font-mono">{parentId}</span>
       )}
     </p>
+  );
+}
+
+function CopyCurrentTaskId({ taskId }: { taskId: string }) {
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const [isCopying, setIsCopying] = useState(false);
+  const pendingRef = useRef(false);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
+
+  const copyTaskId = async () => {
+    if (pendingRef.current) return;
+    pendingRef.current = true;
+    setCopyState('idle');
+    setIsCopying(true);
+
+    try {
+      await navigator.clipboard.writeText(taskId);
+      if (mountedRef.current) setCopyState('copied');
+    } catch {
+      if (mountedRef.current) setCopyState('failed');
+    } finally {
+      if (mountedRef.current) {
+        pendingRef.current = false;
+        setIsCopying(false);
+      }
+    }
+  };
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="h-7 w-7 shrink-0"
+        onClick={copyTaskId}
+        disabled={isCopying}
+        aria-label={`Copy current task ID ${taskId}`}
+      >
+        <Copy className="h-3 w-3" />
+      </Button>
+      {copyState === 'copied' && (
+        <span role="status" className="text-xs text-green-700">Task ID copied.</span>
+      )}
+      {copyState === 'failed' && (
+        <span role="alert" className="text-xs text-destructive">
+          Could not copy task ID. Try copying it manually.
+        </span>
+      )}
+    </>
   );
 }
 
