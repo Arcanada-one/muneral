@@ -8,6 +8,7 @@ import { useTasks } from '@/lib/api/tasks';
 import { useProjectStore } from '@/store/project';
 import { useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { ProjectRepository } from '@/components/project/ProjectRepository';
 import { TASK_STATUS_LABELS } from '@/lib/task-status-labels';
 
@@ -24,7 +25,7 @@ function formatBacklogDueDate(value: string): string {
 
 export default function ProjectPage() {
   const { wsSlug, projSlug } = useParams<{ wsSlug: string; projSlug: string }>();
-  const { data: project, isError } = useProject(wsSlug, projSlug);
+  const { data: project, isError, refetch } = useProject(wsSlug, projSlug);
   const { setCurrentProject } = useProjectStore();
   const { data: tasksResult } = useTasks(project?.id ?? '', {});
   const allTasks = tasksResult?.data ?? [];
@@ -49,6 +50,14 @@ export default function ProjectPage() {
         <p role="alert" className="text-sm text-destructive">
           Project details are unavailable.
         </p>
+        <Button
+          type="button"
+          variant="ghost"
+          className="mt-4"
+          onClick={() => { void refetch(); }}
+        >
+          Retry loading project
+        </Button>
       </div>
     );
   }
