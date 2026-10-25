@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { Bot, User, Clock } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Bot, User, Clock, Copy } from 'lucide-react';
 import { TASK_STATUSES, type TaskPriority, type TaskStatus } from '@muneral/types';
 import { useActivity } from '@/lib/api/tasks';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface AuditLogProps {
@@ -231,6 +232,61 @@ function CommentBody({ body }: { body: string }) {
   return <div className="mt-1 min-w-0">{content}</div>;
 }
 
+function CopyActivityId({ eventId }: { eventId: string }) {
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const [isCopying, setIsCopying] = useState(false);
+  const pendingRef = useRef(false);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
+
+  const copyEventId = async () => {
+    if (pendingRef.current) return;
+    pendingRef.current = true;
+    setCopyState('idle');
+    setIsCopying(true);
+
+    try {
+      await navigator.clipboard.writeText(eventId);
+      if (mountedRef.current) setCopyState('copied');
+    } catch {
+      if (mountedRef.current) setCopyState('failed');
+    } finally {
+      if (mountedRef.current) {
+        pendingRef.current = false;
+        setIsCopying(false);
+      }
+    }
+  };
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="h-6 w-6 shrink-0"
+        onClick={copyEventId}
+        disabled={isCopying}
+        aria-label={`Copy activity event ID ${eventId}`}
+      >
+        <Copy className="h-3 w-3" />
+      </Button>
+      {copyState === 'copied' && (
+        <span role="status" className="text-xs text-green-700">Activity event ID copied.</span>
+      )}
+      {copyState === 'failed' && (
+        <span role="alert" className="text-xs text-destructive">
+          Could not copy activity event ID. Try copying it manually.
+        </span>
+      )}
+    </>
+  );
+}
+
 function formatRelativeTime(dateStr: string): string {
   const date = new Date(dateStr);
   const now = new Date();
@@ -401,6 +457,11 @@ export function AuditLog({ taskId }: AuditLogProps) {
                   {evidenceDetails !== undefined && (
                     <EvidenceActivityDetailsView details={evidenceDetails} />
                   )}
+                  <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1">
+                    <span className="text-xs text-muted-foreground">Event ID:</span>
+                    <code className="break-all text-xs">{entry.id}</code>
+                    <CopyActivityId key={`${taskId}:${entry.id}`} eventId={entry.id} />
+                  </div>
                 </div>
               </li>
             );
