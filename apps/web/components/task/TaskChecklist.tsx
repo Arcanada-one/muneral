@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useChecklist, useToggleChecklistItem } from '@/lib/api/tasks';
 import { cn } from '@/lib/utils';
 
@@ -11,15 +12,47 @@ interface TaskChecklistProps {
 
 export function TaskChecklist({ taskId }: TaskChecklistProps) {
   const [expanded, setExpanded] = useState(true);
-  const { data: items = [], isLoading, isError } = useChecklist(taskId);
+  const [retryingTaskId, setRetryingTaskId] = useState<string | null>(null);
+  const { data: items = [], isLoading, isError, isFetching, refetch } = useChecklist(taskId);
   const toggle = useToggleChecklistItem();
 
   const completed = items.filter((i) => i.checked).length;
   const total = items.length;
   const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
   const toggleFailedForTask = toggle.isError && toggle.variables?.taskId === taskId;
+  const isRetrying = retryingTaskId === taskId;
 
-  if (isError) return <div role="alert" className="rounded-lg border p-4 text-sm text-muted-foreground">Checklist is unavailable. Try again later.</div>;
+  const retryChecklist = () => {
+    if (isFetching || isRetrying) return;
+
+    setRetryingTaskId(taskId);
+    const finishRetry = () => setRetryingTaskId((currentTaskId) =>
+      currentTaskId === taskId ? null : currentTaskId,
+    );
+    void refetch().then(finishRetry, finishRetry);
+  };
+
+  if (isError || isRetrying) {
+    return (
+      <div className="rounded-lg border p-4 text-sm text-muted-foreground">
+        {isRetrying ? (
+          <p role="status">Retrying checklist…</p>
+        ) : (
+          <p role="alert">Checklist is unavailable. Try again later.</p>
+        )}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="mt-3"
+          onClick={retryChecklist}
+          disabled={isFetching || isRetrying}
+        >
+          {isRetrying ? 'Retrying checklist…' : 'Retry checklist'}
+        </Button>
+      </div>
+    );
+  }
 
   if (isLoading) return null;
   if (total === 0) return null;
