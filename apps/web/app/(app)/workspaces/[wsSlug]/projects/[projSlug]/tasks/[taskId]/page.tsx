@@ -96,7 +96,7 @@ export default function TaskPage() {
         </Button>
       </div>
 
-      <TaskDetail task={task} />
+      <TaskDetail task={task} onReloadCurrentTask={() => controller.refreshTask(selection)} />
     </div>
   );
 }

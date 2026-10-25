@@ -47,14 +47,14 @@ afterEach(() => {
   queryClients.splice(0).forEach((queryClient) => queryClient.clear());
 });
 
-function renderTaskDetail(value: Task) {
+function renderTaskDetail(value: Task, onReloadCurrentTask?: () => void) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
   queryClients.push(queryClient);
   const result = render(
     <QueryClientProvider client={queryClient}>
-      <TaskDetail task={value} />
+      <TaskDetail task={value} onReloadCurrentTask={onReloadCurrentTask} />
     </QueryClientProvider>,
   );
   return { ...result, queryClient };
@@ -131,6 +131,25 @@ describe('TaskDetail status action', () => {
     );
     expect(screen.queryByText('private server response detail')).not.toBeInTheDocument();
     expect(screen.getByRole('combobox', { name: 'Change task status' })).toHaveValue('todo');
+  });
+
+  it('offers a user-triggered read action after a rejected PATCH without resending it', async () => {
+    state.patch.mockRejectedValue(new Error('private server response detail'));
+    const reload = vi.fn();
+    renderTaskDetail(task, reload);
+
+    fireEvent.change(screen.getByRole('combobox', { name: 'Change task status' }), {
+      target: { value: 'in_progress' },
+    });
+    expect(await screen.findByRole('button', { name: 'Reload task' })).toBeInTheDocument();
+    expect(state.patch).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole('button', { name: 'Reload task' }));
+
+    expect(reload).toHaveBeenCalledTimes(1);
+    expect(state.patch).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Could not update status. Reload the task to confirm its current status before trying again.',
+    );
   });
 
   it('does not carry a late error from one task visit into another task', async () => {
