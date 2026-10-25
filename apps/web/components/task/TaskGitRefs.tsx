@@ -81,7 +81,9 @@ export function TaskGitRefs({ taskId }: { taskId: string }) {
             Retry
           </button>
         </>
-      ) : refs === undefined || refs.length === 0 ? (
+      ) : refs === undefined ? (
+        <p className="text-sm text-muted-foreground">Git references have not been loaded.</p>
+      ) : refs.length === 0 ? (
         <p className="text-sm text-muted-foreground">No Git references.</p>
       ) : (
         <ul className="space-y-2">
