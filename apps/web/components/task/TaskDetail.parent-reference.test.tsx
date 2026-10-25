@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { onlineManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { readTask } from '@/lib/api/read-contract';
@@ -21,6 +21,7 @@ const otherParentId = '44444444-4444-4444-8444-444444444444';
 const otherTaskId = '55555555-5555-4555-8555-555555555555';
 const queryClients = new Set<QueryClient>();
 const originalClipboardDescriptor = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
+let previousTimeZone: string | undefined;
 
 const baseTask = {
   id: taskId,
@@ -32,6 +33,11 @@ const baseTask = {
   createdAt: '2026-10-24T05:00:00.000Z',
   updatedAt: '2026-10-24T05:00:00.000Z',
 };
+
+beforeEach(() => {
+  previousTimeZone = process.env.TZ;
+  process.env.TZ = 'America/Los_Angeles';
+});
 
 afterEach(() => {
   cleanup();
@@ -45,6 +51,8 @@ afterEach(() => {
   } else {
     Reflect.deleteProperty(navigator, 'clipboard');
   }
+  if (previousTimeZone === undefined) delete process.env.TZ;
+  else process.env.TZ = previousTimeZone;
 });
 
 function installClipboard(writeText: ReturnType<typeof vi.fn>) {
@@ -83,6 +91,10 @@ function expectNoParentStatus() {
 
 function expectNoParentPriority() {
   expect(screen.queryByText(/^Parent priority:/)).not.toBeInTheDocument();
+}
+
+function expectNoParentDueDate() {
+  expect(screen.queryByText(/^Parent due date:/)).not.toBeInTheDocument();
 }
 
 describe('TaskDetail parent reference', () => {
@@ -232,10 +244,74 @@ describe('TaskDetail parent reference', () => {
     expect(parentPriorityLabel.parentElement).toHaveTextContent('Parent priority: High');
   });
 
+  it('shows a matching parent date-only due date without shifting its calendar day', async () => {
+    const dueDate = '2026-10-08';
+    state.get.mockResolvedValue({
+      data: { ...baseTask, id: parentId, title: 'Parent title', status: 'done', dueDate },
+    });
+
+    renderTask({ ...baseTask, parentId });
+
+    const expected = new Date(`${dueDate}T00:00:00.000Z`).toLocaleDateString(undefined, {
+      timeZone: 'UTC',
+    });
+    expect(await screen.findByText(`Parent due date: ${expected}`)).toBeInTheDocument();
+    await waitFor(() => expect(parentText('Parent title')).toBeInTheDocument());
+    expect(await screen.findByText('Parent status: Done')).toBeInTheDocument();
+    expect(screen.getByText('Parent priority:').parentElement).toHaveTextContent('Parent priority: Medium');
+    expect(screen.getByRole('button', { name: `Copy parent task ID ${parentId}` })).toBeInTheDocument();
+    expect(state.get).toHaveBeenCalledWith(`/tasks/${parentId}`);
+    expect(state.get.mock.calls.filter(([url]) => url === `/tasks/${parentId}`)).toHaveLength(1);
+  });
+
+  it('keeps parent timestamp due dates on the existing local calendar day', async () => {
+    const dueDate = '2026-10-08T00:30:00.000Z';
+    state.get.mockResolvedValue({
+      data: { ...baseTask, id: parentId, title: 'Parent title', dueDate },
+    });
+
+    renderTask({ ...baseTask, parentId });
+
+    expect(await screen.findByText(`Parent due date: ${new Date(dueDate).toLocaleDateString()}`))
+      .toBeInTheDocument();
+  });
+
+  it.each([
+    ['null', null],
+    ['missing', undefined],
+    ['empty', ''],
+  ])('does not show a parent due-date row when the value is %s', async (_label, dueDate) => {
+    state.get.mockResolvedValue({
+      data: { ...baseTask, id: parentId, title: 'Parent title', dueDate },
+    });
+
+    renderTask({ ...baseTask, parentId });
+
+    await waitFor(() => expect(parentText('Parent title')).toBeInTheDocument());
+    expectNoParentDueDate();
+  });
+
+  it.each(['2026-02-30', 'source due text'])('keeps invalid parent date text as the source fallback: %s', async (dueDate) => {
+    state.get.mockResolvedValue({
+      data: { ...baseTask, id: parentId, title: 'Parent title', dueDate },
+    });
+
+    renderTask({ ...baseTask, parentId });
+
+    expect(await screen.findByText(`Parent due date: ${dueDate}`)).toBeInTheDocument();
+    expect(screen.queryByText(/^Parent due date: \d{1,2}\/\d{1,2}\/\d{4}$/)).not.toBeInTheDocument();
+  });
+
   it('does not show priority from a response for a different parent ID', async () => {
     const queryClient = makeQueryClient();
     state.get.mockResolvedValue({
-      data: { ...baseTask, id: otherParentId, title: 'Other parent', priority: 'critical' },
+      data: {
+        ...baseTask,
+        id: otherParentId,
+        title: 'Other parent',
+        priority: 'critical',
+        dueDate: '2026-10-08',
+      },
     });
 
     renderTask({ ...baseTask, parentId }, queryClient);
@@ -245,12 +321,19 @@ describe('TaskDetail parent reference', () => {
     });
     expect(parentText(parentId)).toBeInTheDocument();
     expectNoParentPriority();
+    expectNoParentDueDate();
   });
 
   it('does not show priority from an invalid parent response', async () => {
     const queryClient = makeQueryClient();
     state.get.mockResolvedValue({
-      data: { ...baseTask, id: parentId, title: 'Parent title', priority: 'urgent' },
+      data: {
+        ...baseTask,
+        id: parentId,
+        title: 'Parent title',
+        priority: 'urgent',
+        dueDate: '2026-10-08',
+      },
     });
 
     renderTask({ ...baseTask, parentId }, queryClient);
@@ -259,6 +342,7 @@ describe('TaskDetail parent reference', () => {
       expect(queryClient.getQueryState(['tasks', parentId])?.status).toBe('error');
     });
     expectNoParentPriority();
+    expectNoParentDueDate();
   });
 
   it('does not show parent status from an unrecognized cached value', async () => {
@@ -289,6 +373,7 @@ describe('TaskDetail parent reference', () => {
     ).toBeInTheDocument();
     expectNoParentStatus();
     expect(screen.queryByText('Parent title from API')).not.toBeInTheDocument();
+    expectNoParentDueDate();
   });
 
   it('keeps the full parent UUID when the parent read is paused offline', () => {
@@ -301,6 +386,7 @@ describe('TaskDetail parent reference', () => {
     ).toBeInTheDocument();
     expectNoParentStatus();
     expect(state.get).not.toHaveBeenCalledWith(`/tasks/${parentId}`);
+    expectNoParentDueDate();
   });
 
   it.each([
@@ -323,11 +409,17 @@ describe('TaskDetail parent reference', () => {
     ).toBeInTheDocument();
     expectNoParentStatus();
     expect(screen.queryByText('private server detail')).not.toBeInTheDocument();
+    expectNoParentDueDate();
   });
 
   it('keeps the UUID when the successful response belongs to a different task', async () => {
     state.get.mockResolvedValue({
-      data: { ...baseTask, id: otherParentId, title: 'Unrelated task title' },
+      data: {
+        ...baseTask,
+        id: otherParentId,
+        title: 'Unrelated task title',
+        dueDate: '2026-10-08',
+      },
     });
 
     renderTask({ ...baseTask, parentId });
@@ -339,6 +431,7 @@ describe('TaskDetail parent reference', () => {
     ).toBeInTheDocument();
     expectNoParentStatus();
     expect(screen.queryByText('Unrelated task title')).not.toBeInTheDocument();
+    expectNoParentDueDate();
   });
 
   it('does not render a cached title whose task ID differs from the requested parent', () => {
@@ -350,6 +443,7 @@ describe('TaskDetail parent reference', () => {
       ...baseTask,
       id: otherParentId,
       title: 'Cached unrelated title',
+      dueDate: '2026-10-08',
     });
 
     renderTask({ ...baseTask, parentId }, queryClient);
@@ -357,6 +451,7 @@ describe('TaskDetail parent reference', () => {
     expect(parentText(parentId)).toBeInTheDocument();
     expectNoParentStatus();
     expect(screen.queryByText('Cached unrelated title')).not.toBeInTheDocument();
+    expectNoParentDueDate();
     expect(state.get).not.toHaveBeenCalledWith(`/tasks/${parentId}`);
   });
 
@@ -375,7 +470,7 @@ describe('TaskDetail parent reference', () => {
   });
 
   it('keeps the UUID when the parent response is malformed', async () => {
-    state.get.mockResolvedValue({ data: { id: parentId, title: 42 } });
+    state.get.mockResolvedValue({ data: { id: parentId, title: 42, dueDate: '2026-10-08' } });
 
     renderTask({ ...baseTask, parentId });
 
@@ -386,6 +481,7 @@ describe('TaskDetail parent reference', () => {
     ).toBeInTheDocument();
     expectNoParentStatus();
     expectNoParentPriority();
+    expectNoParentDueDate();
   });
 
   it('does not show an old parent title after the child changes parent while reads are in flight', async () => {
@@ -415,20 +511,41 @@ describe('TaskDetail parent reference', () => {
     );
     await waitFor(() => expect(state.get).toHaveBeenCalledWith(`/tasks/${otherParentId}`));
 
-    resolveFirst({ data: { ...baseTask, id: parentId, title: 'Old parent title', status: 'done' } });
+    resolveFirst({
+      data: {
+        ...baseTask,
+        id: parentId,
+        title: 'Old parent title',
+        status: 'done',
+        dueDate: '2026-10-08',
+      },
+    });
     await waitFor(() => expect(screen.queryByText('Old parent title')).not.toBeInTheDocument());
+    expectNoParentDueDate();
     expect(
       parentText(otherParentId),
     ).toBeInTheDocument();
     expectNoParentStatus();
 
-    resolveSecond({ data: { ...baseTask, id: otherParentId, title: 'Current parent title', status: 'blocked' } });
+    resolveSecond({
+      data: {
+        ...baseTask,
+        id: otherParentId,
+        title: 'Current parent title',
+        status: 'blocked',
+        dueDate: '2026-11-09',
+      },
+    });
     expect(
       await screen.findByText((_, node) =>
         node?.tagName === 'P' && node.textContent === 'Parent task: Current parent title',
       ),
     ).toBeInTheDocument();
     expect(await screen.findByText('Parent status: Blocked')).toBeInTheDocument();
+    const currentDueDate = new Date('2026-11-09T00:00:00.000Z').toLocaleDateString(undefined, {
+      timeZone: 'UTC',
+    });
+    expect(await screen.findByText(`Parent due date: ${currentDueDate}`)).toBeInTheDocument();
   });
 
   it.each([
@@ -439,6 +556,7 @@ describe('TaskDetail parent reference', () => {
 
     expect(screen.queryByText('Parent task')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Copy parent task ID/ })).not.toBeInTheDocument();
+    expectNoParentDueDate();
     expect(state.get).not.toHaveBeenCalledWith(`/tasks/${taskId}`);
   });
 });
