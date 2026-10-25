@@ -11,7 +11,7 @@ import { AuditLog } from './AuditLog';
 import { TaskGitRefs } from './TaskGitRefs';
 import { useTask, useUpdateTaskStatus, type Task } from '@/lib/api/tasks';
 import { TASK_STATUSES, TASK_TRANSITIONS, type TaskStatus } from '@muneral/types';
-import { TASK_STATUS_LABELS } from '@/lib/task-status-labels';
+import { getTaskStatusLabel, TASK_STATUS_LABELS } from '@/lib/task-status-labels';
 import { cn } from '@/lib/utils';
 
 interface TaskDetailProps {
@@ -161,23 +161,33 @@ export function TaskDetail({ task, onReloadCurrentTask }: TaskDetailProps) {
 
 function ParentTaskReference({ parentId }: { parentId: string }) {
   const parentTaskQuery = useTask(parentId);
-  const parentTitle =
+  const parentTaskCandidate =
     parentTaskQuery.isSuccess &&
     parentTaskQuery.fetchStatus === 'idle' &&
     parentTaskQuery.data.id === parentId
-      ? parentTaskQuery.data.title
-      : null;
+      ? parentTaskQuery.data
+      : undefined;
+  const parentStatus = parentTaskCandidate
+    ? getTaskStatusLabel(parentTaskCandidate.status)
+    : undefined;
+  const parentTask = parentStatus !== undefined ? parentTaskCandidate : undefined;
+  const parentTitle = parentTask?.title ?? null;
 
   return (
-    <p className="mt-1 flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
-      Parent task:{' '}
-      {parentTitle !== null ? (
-        <span>{parentTitle}</span>
-      ) : (
-        <span className="font-mono">{parentId}</span>
+    <div className="mt-1">
+      <p className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
+        Parent task:{' '}
+        {parentTitle !== null ? (
+          <span>{parentTitle}</span>
+        ) : (
+          <span className="font-mono">{parentId}</span>
+        )}
+        <CopyTaskId taskId={parentId} target="parent task" />
+      </p>
+      {parentStatus !== undefined && (
+        <p className="mt-1 text-xs text-muted-foreground">Parent status: {parentStatus}</p>
       )}
-      <CopyTaskId taskId={parentId} target="parent task" />
-    </p>
+    </div>
   );
 }
 
