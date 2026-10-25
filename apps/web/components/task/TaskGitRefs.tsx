@@ -61,7 +61,7 @@ function CopyGitReference({ value, label }: { value: string; label: string }) {
 }
 
 export function TaskGitRefs({ taskId }: { taskId: string }) {
-  const { data: refs, isLoading, isError } = useTaskGitRefs(taskId);
+  const { data: refs, isLoading, isError, isFetching, refetch } = useTaskGitRefs(taskId);
 
   return (
     <div className="rounded-lg border p-4">
@@ -69,7 +69,18 @@ export function TaskGitRefs({ taskId }: { taskId: string }) {
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading Git references…</p>
       ) : isError ? (
-        <p role="alert" className="text-sm text-muted-foreground">Git references are unavailable.</p>
+        <>
+          <p role="alert" className="text-sm text-muted-foreground">Git references are unavailable.</p>
+          <button
+            type="button"
+            aria-label="Retry Git references"
+            className="mt-2 rounded text-sm text-foreground underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={isFetching}
+            onClick={() => { void refetch(); }}
+          >
+            Retry
+          </button>
+        </>
       ) : refs === undefined || refs.length === 0 ? (
         <p className="text-sm text-muted-foreground">No Git references.</p>
       ) : (
