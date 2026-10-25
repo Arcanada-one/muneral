@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Bot, User, Clock } from 'lucide-react';
+import { Bot, User, Clock, Copy } from 'lucide-react';
 import { TASK_STATUSES, type TaskPriority, type TaskStatus } from '@muneral/types';
 import { useActivity } from '@/lib/api/tasks';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface AuditLogProps {
@@ -252,6 +253,48 @@ function formatRelativeTime(dateStr: string): string {
   return date.toLocaleDateString();
 }
 
+function CopyActivityActorId({ actorId }: { actorId: string }) {
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const [isCopying, setIsCopying] = useState(false);
+
+  const copyActorId = async () => {
+    setCopyState('idle');
+    setIsCopying(true);
+    try {
+      await navigator.clipboard.writeText(actorId);
+      setCopyState('copied');
+    } catch {
+      setCopyState('failed');
+    } finally {
+      setIsCopying(false);
+    }
+  };
+
+  return (
+    <div className="mt-1 flex flex-wrap items-center gap-1">
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="h-6 w-6 shrink-0"
+        aria-label="Copy recorded actor ID"
+        onClick={copyActorId}
+        disabled={isCopying}
+      >
+        <Copy className="h-3 w-3" />
+      </Button>
+      {copyState === 'copied' && (
+        <span role="status" className="text-xs text-green-700">Actor ID copied.</span>
+      )}
+      {copyState === 'failed' && (
+        <span role="alert" className="text-xs text-destructive">
+          Could not copy actor ID. Try copying it manually.
+        </span>
+      )}
+    </div>
+  );
+}
+
 export function AuditLog({ taskId }: AuditLogProps) {
   const [pageState, setPageState] = useState({ taskId, page: 1 });
   if (pageState.taskId !== taskId) setPageState({ taskId, page: 1 });
@@ -401,6 +444,10 @@ export function AuditLog({ taskId }: AuditLogProps) {
                   {evidenceDetails !== undefined && (
                     <EvidenceActivityDetailsView details={evidenceDetails} />
                   )}
+                  <CopyActivityActorId
+                    key={`${taskId}:${entry.id}:${entry.actorId}`}
+                    actorId={entry.actorId}
+                  />
                 </div>
               </li>
             );
