@@ -109,7 +109,11 @@ async function fetchTask(taskId: string): Promise<Task> {
 
 async function fetchChecklist(taskId: string): Promise<ChecklistItem[]> {
   const res = await apiClient.get<ChecklistItem[]>(`/tasks/${taskId}/checklist`);
-  return readChecklist(res.data);
+  const items = readChecklist(res.data);
+  if (items.some((item) => item.taskId !== taskId)) {
+    throw new Error('Checklist is unavailable');
+  }
+  return items;
 }
 
 async function fetchDependencies(taskId: string): Promise<TaskDependency[]> {

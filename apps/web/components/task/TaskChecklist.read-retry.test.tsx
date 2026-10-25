@@ -25,6 +25,14 @@ const otherItem = {
   checked: false,
   position: 0,
 };
+const foreignTaskId = '10000000-0000-4000-8000-000000000005';
+const foreignItem = {
+  id: '10000000-0000-4000-8000-000000000006',
+  taskId: foreignTaskId,
+  text: 'Foreign task item',
+  checked: false,
+  position: 0,
+};
 
 let client: QueryClient;
 function wrapper({ children }: PropsWithChildren) {
@@ -117,5 +125,49 @@ describe('TaskChecklist read recovery', () => {
       expect(screen.queryByText(firstItem.text)).not.toBeInTheDocument();
     });
     expect(api.get).toHaveBeenNthCalledWith(3, `/tasks/${otherTaskId}/checklist`);
+  });
+
+  it.each([
+    ['foreign-only', [foreignItem]],
+    ['mixed same-task and foreign', [firstItem, foreignItem]],
+  ])('rejects a %s response instead of publishing its rows', async (_label, data) => {
+    api.get.mockResolvedValueOnce({ data });
+
+    render(<TaskChecklist taskId={taskId} />, { wrapper });
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Checklist is unavailable');
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+    expect(screen.queryByText(foreignItem.text)).not.toBeInTheDocument();
+  });
+
+  it('continues to reject malformed item task IDs through the existing generic read error', async () => {
+    api.get.mockResolvedValueOnce({ data: [{ ...firstItem, taskId: 'not-a-uuid' }] });
+
+    render(<TaskChecklist taskId={taskId} />, { wrapper });
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Checklist is unavailable');
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+  });
+
+  it('keeps a late foreign-task response isolated after switching checklist queries', async () => {
+    let resolveFirstTask: ((value: { data: typeof foreignItem[] }) => void) | undefined;
+    api.get
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveFirstTask = resolve; }))
+      .mockResolvedValueOnce({ data: [otherItem] });
+
+    const view = render(<TaskChecklist taskId={taskId} />, { wrapper });
+    await waitFor(() => expect(resolveFirstTask).toBeDefined());
+    view.rerender(<TaskChecklist taskId={otherTaskId} />);
+
+    expect(await screen.findByRole('checkbox', { name: otherItem.text })).toBeInTheDocument();
+    await act(async () => resolveFirstTask?.({ data: [foreignItem] }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('checkbox', { name: otherItem.text })).toBeInTheDocument();
+      expect(screen.queryByText(foreignItem.text)).not.toBeInTheDocument();
+    });
+    expect(api.get).toHaveBeenCalledTimes(2);
+    expect(api.get).toHaveBeenNthCalledWith(1, `/tasks/${taskId}/checklist`);
+    expect(api.get).toHaveBeenNthCalledWith(2, `/tasks/${otherTaskId}/checklist`);
   });
 });
