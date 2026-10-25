@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createElement, type PropsWithChildren } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TaskGitRefs } from './TaskGitRefs';
@@ -34,6 +34,7 @@ function renderRefs(currentTaskId = taskId) {
   const view = render(<TaskGitRefs taskId={currentTaskId} />, { wrapper: Wrapper });
   return {
     ...view,
+    client,
     rerenderTask: (id: string) => view.rerender(<TaskGitRefs taskId={id} />),
   };
 }
@@ -74,6 +75,39 @@ describe('task Git reference read recovery', () => {
     expect(await screen.findByText('Loading Git references…')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Retry Git references' })).not.toBeInTheDocument();
     expect(api.get).toHaveBeenCalledTimes(2);
+
+    await act(async () => resolveRetry?.({ data: [taskRef] }));
+    expect(await screen.findByText('current-branch')).toBeInTheDocument();
+  });
+
+  it('shows pending recovery after cached data is hidden by a failed refetch', async () => {
+    let resolveRetry: ((response: { data: (typeof taskRef)[] }) => void) | undefined;
+    api.get.mockResolvedValueOnce({ data: [taskRef] });
+    api.get.mockRejectedValueOnce(new Error('Synthetic background read failure'));
+    api.get.mockImplementationOnce(() => new Promise((resolve) => { resolveRetry = resolve; }));
+    const view = renderRefs();
+
+    expect(await screen.findByText('current-branch')).toBeInTheDocument();
+    await act(async () => {
+      await view.client.refetchQueries({ queryKey: ['tasks', taskId, 'git-refs'], exact: true });
+    });
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Git references are unavailable.');
+    expect(screen.queryByText('current-branch')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Retry Git references' }));
+
+    await waitFor(() => {
+      expect(view.client.getQueryState(['tasks', taskId, 'git-refs'])).toMatchObject({
+        status: 'error',
+        fetchStatus: 'fetching',
+        data: [taskRef],
+      });
+    });
+    expect(await screen.findByText('Loading Git references…')).toBeInTheDocument();
+    expect(screen.queryByText('current-branch')).not.toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Retry Git references' })).not.toBeInTheDocument();
+    expect(api.get).toHaveBeenCalledTimes(3);
 
     await act(async () => resolveRetry?.({ data: [taskRef] }));
     expect(await screen.findByText('current-branch')).toBeInTheDocument();

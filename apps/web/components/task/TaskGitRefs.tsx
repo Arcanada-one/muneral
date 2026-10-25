@@ -66,7 +66,7 @@ export function TaskGitRefs({ taskId }: { taskId: string }) {
   return (
     <div className="rounded-lg border p-4">
       <h4 className="mb-3 text-sm font-medium">Git References</h4>
-      {isLoading ? (
+      {isLoading || (isError && isFetching) ? (
         <p className="text-sm text-muted-foreground">Loading Git references…</p>
       ) : isError ? (
         <>
