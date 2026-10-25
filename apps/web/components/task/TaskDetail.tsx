@@ -67,7 +67,9 @@ export function TaskDetail({ task, onReloadCurrentTask }: TaskDetailProps) {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight">{task.title}</h1>
-        {task.parentId && <ParentTaskReference parentId={task.parentId} />}
+        {task.parentId && (
+          <ParentTaskReference key={`${task.id}:${task.parentId}`} parentId={task.parentId} />
+        )}
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <TaskStatusAction
             key={`${task.id}:${task.status}:${task.updatedAt}`}
@@ -99,7 +101,7 @@ export function TaskDetail({ task, onReloadCurrentTask }: TaskDetailProps) {
       <div className="flex min-w-0 flex-wrap items-center gap-2 text-sm">
         <span className="text-muted-foreground">Task ID</span>
         <code className="break-all font-mono text-xs">{task.id}</code>
-        <CopyCurrentTaskId key={task.id} taskId={task.id} />
+        <CopyTaskId key={task.id} taskId={task.id} target="current task" />
       </div>
 
       {/* Description */}
@@ -167,18 +169,19 @@ function ParentTaskReference({ parentId }: { parentId: string }) {
       : null;
 
   return (
-    <p className="mt-1 text-sm text-muted-foreground">
+    <p className="mt-1 flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
       Parent task:{' '}
       {parentTitle !== null ? (
         <span>{parentTitle}</span>
       ) : (
         <span className="font-mono">{parentId}</span>
       )}
+      <CopyTaskId taskId={parentId} target="parent task" />
     </p>
   );
 }
 
-function CopyCurrentTaskId({ taskId }: { taskId: string }) {
+function CopyTaskId({ taskId, target }: { taskId: string; target: 'current task' | 'parent task' }) {
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const [isCopying, setIsCopying] = useState(false);
   const pendingRef = useRef(false);
@@ -217,16 +220,20 @@ function CopyCurrentTaskId({ taskId }: { taskId: string }) {
         className="h-7 w-7 shrink-0"
         onClick={copyTaskId}
         disabled={isCopying}
-        aria-label={`Copy current task ID ${taskId}`}
+        aria-label={`Copy ${target} ID ${taskId}`}
       >
         <Copy className="h-3 w-3" />
       </Button>
       {copyState === 'copied' && (
-        <span role="status" className="text-xs text-green-700">Task ID copied.</span>
+        <span role="status" className="text-xs text-green-700">
+          {target === 'parent task' ? 'Parent task ID copied.' : 'Task ID copied.'}
+        </span>
       )}
       {copyState === 'failed' && (
         <span role="alert" className="text-xs text-destructive">
-          Could not copy task ID. Try copying it manually.
+          {target === 'parent task'
+            ? 'Could not copy parent task ID. Try copying it manually.'
+            : 'Could not copy task ID. Try copying it manually.'}
         </span>
       )}
     </>
