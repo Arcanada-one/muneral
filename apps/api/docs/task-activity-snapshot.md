@@ -28,6 +28,12 @@ The pure codec enforces at most 10,000 rows, 16 MiB canonical document bytes, 64
 
 Page reconstruction checks the invariant metadata and digest across pages, sequential page numbers, page counts, exact row intervals and positions, unique activity IDs, and the recomputed canonical digest. These pure checks operate only on supplied values; they do not fetch, authorize, or persist anything.
 
+## Prospective KC-compatible response profile
+
+The codec's 1 MiB limit applies to the canonical encoded representation of each page. The v4 KC-compatible profile is stricter: each complete compact, uncompressed UTF-8 HTTP response body, including repeated metadata and rows, must be at most 900,000 bytes. That profile replaces the generic 1 MiB response ceiling and starts with `page_size=1`. Its proposed enumeration limits are 64 MiB across complete response bodies (including repeated metadata), 16 MiB canonical content, at most 10,000 pages, and an overall deadline of at most five minutes and strictly before snapshot expiry. These are prospective refusal limits, not throughput or fit evidence.
+
+This pure codec does not measure a serialized HTTP response body, enforce an enumeration deadline, or establish that a KC consumer can complete within these limits. No KC reader, transport, adoption, or KC fit is implemented or claimed here.
+
 ## Required future adapter boundary
 
 The current Prisma `ActivityLog.payload Json?` and `createdAt DateTime @db.Timestamptz()` types do not prove exact numeric-token or microsecond preservation. Existing Prisma `findMany` activity reads also do not provide a pre-transfer row/byte bound. A later adapter must supply exact decimal text and six-digit UTC timestamp text, and must establish source count, decompressed payload size, bounded transfer, and transaction consistency before materializing the values. The codec's in-memory byte checks do not prove those source-side bounds.

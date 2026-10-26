@@ -140,7 +140,7 @@ export function normalizeExactDecimalToken(token: string): string {
     unsupported('numeric token is not a bounded string');
   }
   const match = JSON_NUMBER_RE.exec(token);
-  if (!match) unsupported('numeric token is not valid finite JSON number syntax');
+  if (!match || match[0] !== token) unsupported('numeric token is not valid finite JSON number syntax');
 
   const [, sign, integer, fraction = '', exponentText = '0'] = match;
   const digits = `${integer}${fraction}`.replace(/^0+/, '');
@@ -197,7 +197,7 @@ export function buildTaskActivitySnapshot(input: TaskActivitySnapshotInput): Bui
   let rowArrayBytes = 2;
   for (let index = 0; index < activities.length; index++) {
     const activity = snapshotActivity(activities[index]);
-    if (activity.task_id !== taskId || activity.workspace_id !== workspaceId) {
+    if ((activity.task_id !== null && activity.task_id !== taskId) || activity.workspace_id !== workspaceId) {
       unsupported(`activity ${index + 1} does not match the snapshot task/workspace`);
     }
     if (ids.has(activity.id)) unsupported(`duplicate activity id at row ${index + 1}`);

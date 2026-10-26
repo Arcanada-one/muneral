@@ -89,6 +89,16 @@ describe('TaskActivitySnapshotCanonical/v1 pure codec', () => {
     },
   );
 
+  it.each([
+    ['LF', '\n'],
+    ['CR', '\r'],
+    ['CRLF', '\r\n'],
+    ['line separator', '\u2028'],
+    ['paragraph separator', '\u2029'],
+  ])('rejects a numeric token followed by a final %s', (_label, terminator) => {
+    expectCodecError(() => normalizeExactDecimalToken(`1${terminator}`), 'SNAPSHOT_CONTENT_UNSUPPORTED');
+  });
+
   it('tags all JSON shapes recursively and sorts object keys by UTF-16 code units', () => {
     const astralKey = '\u{10000}';
     const bmpKey = '\uE000';
@@ -147,6 +157,19 @@ describe('TaskActivitySnapshotCanonical/v1 pure codec', () => {
       }), 'SNAPSHOT_CONTENT_UNSUPPORTED');
     }
     expectCodecError(() => buildTaskActivitySnapshot({ ...input([]), captured_at: '9999-12-31T23:59:59.000000Z' }), 'SNAPSHOT_CONTENT_UNSUPPORTED');
+  });
+
+  it('preserves the sole nullable activity identity through build and page reconstruction', () => {
+    const nullableActivity = { ...activity('000000000001'), task_id: null };
+    const snapshot = buildTaskActivitySnapshot(input([nullableActivity], 1));
+    expect(snapshot.document.rows[0].activity.task_id).toBeNull();
+
+    const pages = createTaskActivitySnapshotPages(snapshot);
+    expect(validateAndReconstructTaskActivitySnapshot(pages)).toEqual(snapshot);
+    expect(pages[0].rows[0].activity.task_id).toBeNull();
+
+    const foreignActivity = { ...activity('000000000002'), task_id: PROJECT_ID };
+    expectCodecError(() => buildTaskActivitySnapshot(input([foreignActivity], 1)), 'SNAPSHOT_CONTENT_UNSUPPORTED');
   });
 
   it('matches a literal canonical byte and digest vector', () => {
