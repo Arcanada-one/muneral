@@ -319,6 +319,8 @@ export function AuditLog({ taskId }: AuditLogProps) {
 
   const setPage = (nextPage: number) => setPageState({ taskId, page: nextPage });
 
+  if (!taskId) return null;
+
   if (isError) {
     return (
       <div role="alert" className="rounded-lg border p-4 text-sm text-muted-foreground">
@@ -349,7 +351,7 @@ export function AuditLog({ taskId }: AuditLogProps) {
     );
   }
 
-  if (isLoading) {
+  if (isLoading || data === undefined) {
     return (
       <div className="rounded-lg border p-4">
         <h4 className="mb-3 text-sm font-medium">Activity</h4>

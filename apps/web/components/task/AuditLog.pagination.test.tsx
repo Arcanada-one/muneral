@@ -26,6 +26,8 @@ interface ActivityState {
   isLoading: boolean;
   isError: boolean;
   isFetching?: boolean;
+  isPending?: boolean;
+  fetchStatus?: 'idle' | 'fetching' | 'paused';
   refetch?: () => Promise<unknown>;
 }
 
@@ -168,6 +170,32 @@ describe('AuditLog activity pagination', () => {
     state.results.set(`${taskA}:1`, { data: undefined, isLoading: false, isError: true, isFetching: false });
     render(<AuditLog taskId={taskA} />);
     expect(screen.getByRole('alert')).toHaveTextContent('Activity is unavailable. Try again later.');
+  });
+
+  it('does not present a paused initial no-data query as an empty activity page', () => {
+    state.results.set(`${taskA}:1`, {
+      data: undefined,
+      isLoading: false,
+      isError: false,
+      isFetching: false,
+      isPending: true,
+      fetchStatus: 'paused',
+    });
+
+    render(<AuditLog taskId={taskA} />);
+
+    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(screen.queryByText('No activity on this page.')).not.toBeInTheDocument();
+    expect(screen.queryByText('Showing 0–0 of 0')).not.toBeInTheDocument();
+    expect(screen.queryByRole('navigation', { name: 'Activity pagination' })).not.toBeInTheDocument();
+  });
+
+  it('does not claim loading or empty activity when an empty task ID disables the query', () => {
+    render(<AuditLog taskId="" />);
+
+    expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+    expect(screen.queryByText('No activity on this page.')).not.toBeInTheDocument();
+    expect(screen.queryByRole('navigation', { name: 'Activity pagination' })).not.toBeInTheDocument();
   });
 
   it('offers page recovery after an older activity page fails', () => {
