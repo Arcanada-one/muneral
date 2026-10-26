@@ -57,7 +57,11 @@ export function TaskReadiness({ taskId }: TaskReadinessProps) {
   const { data, isLoading, isError, isFetching, refetch } = useTaskReadiness(taskId);
 
   let content;
-  if (!taskId || isError) {
+  if (!taskId) {
+    content = <p className="text-sm text-muted-foreground">Dependency readiness is unavailable.</p>;
+  } else if (isError && isFetching) {
+    content = <p className="text-sm text-muted-foreground">Dependency readiness is unknown while it loads.</p>;
+  } else if (isError) {
     content = <p className="text-sm text-muted-foreground">Dependency readiness is unavailable.</p>;
   } else if (isLoading || !data) {
     content = <p className="text-sm text-muted-foreground">Dependency readiness is unknown while it loads.</p>;

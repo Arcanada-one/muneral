@@ -246,6 +246,57 @@ describe('TaskDetail dependency readiness summary', () => {
     ]);
   });
 
+  it('keeps readiness unknown while retrying after a cached background-read error', async () => {
+    let resolveRetry: ((value: unknown) => void) | undefined;
+    const cachedReadiness = readiness({ ready: false, dependencyCount: 1, blockedBy: [blocker()] });
+    const get = vi.spyOn(apiClient, 'get')
+      .mockResolvedValueOnce({ data: cachedReadiness } as never)
+      .mockRejectedValueOnce(new Error('synthetic background read failure'))
+      .mockImplementationOnce(() => new Promise((resolve) => { resolveRetry = resolve; }) as never);
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    queryClients.push(queryClient);
+    render(
+      <QueryClientProvider client={queryClient}>
+        <TaskReadiness taskId={taskId} />
+      </QueryClientProvider>,
+    );
+
+    expect(await screen.findByText('Release prerequisite')).toBeInTheDocument();
+
+    await act(async () => {
+      await queryClient.invalidateQueries({ queryKey: ['tasks', taskId, 'readiness'] });
+    });
+    const failedBackgroundRead = queryClient.getQueryState(['tasks', taskId, 'readiness']);
+    expect(failedBackgroundRead?.status).toBe('error');
+    expect(failedBackgroundRead?.fetchStatus).toBe('idle');
+    expect(failedBackgroundRead?.data).toEqual(cachedReadiness);
+    expect(await screen.findByText('Dependency readiness is unavailable.')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Retry dependency readiness' }));
+    await waitFor(() => {
+      expect(queryClient.getQueryState(['tasks', taskId, 'readiness'])?.fetchStatus).toBe('fetching');
+    });
+    const pendingRetry = queryClient.getQueryState(['tasks', taskId, 'readiness']);
+    expect(pendingRetry?.status).toBe('error');
+    expect(pendingRetry?.data).toEqual(cachedReadiness);
+    expect(screen.getByText('Dependency readiness is unknown while it loads.')).toBeInTheDocument();
+    expect(screen.queryByText('Dependency readiness is unavailable.')).not.toBeInTheDocument();
+    expect(screen.queryByText('Release prerequisite')).not.toBeInTheDocument();
+    expect(screen.queryByText('Blocked')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Retry dependency readiness' })).toBeDisabled();
+
+    await act(async () => resolveRetry?.({ data: readiness({ dependencyCount: 2 }) }));
+
+    expect(await screen.findByText('Ready: no blocking dependencies among 2 dependency links.')).toBeInTheDocument();
+    expect(screen.queryByText('Dependency readiness is unavailable.')).not.toBeInTheDocument();
+    expect(get).toHaveBeenCalledTimes(3);
+    expect(get.mock.calls.map(([url]) => url)).toEqual([
+      `/tasks/${taskId}/readiness`,
+      `/tasks/${taskId}/readiness`,
+      `/tasks/${taskId}/readiness`,
+    ]);
+  });
+
   it('does not show a prior task result when its readiness retry settles after a task switch', async () => {
     let taskCalls = 0;
     let resolveRetry: ((value: unknown) => void) | undefined;
