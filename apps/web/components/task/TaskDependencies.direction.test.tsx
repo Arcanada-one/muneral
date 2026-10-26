@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { onlineManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import apiClient from '@/lib/api/client';
@@ -80,17 +80,20 @@ const graph = [
   },
 ];
 
-function renderDependencies(currentTaskId = taskId) {
+function renderDependencies(currentTaskId = taskId, initialGraph?: typeof graph) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
+  if (initialGraph) {
+    queryClient.setQueryData(['tasks', currentTaskId, 'dependency-graph'], initialGraph);
+  }
   const renderForTask = (id: string) => (
     <QueryClientProvider client={queryClient}>
       <TaskDependencies taskId={id} />
     </QueryClientProvider>
   );
   const view = render(renderForTask(currentTaskId));
-  return { ...view, rerenderTask: (id: string) => view.rerender(renderForTask(id)) };
+  return { ...view, queryClient, rerenderTask: (id: string) => view.rerender(renderForTask(id)) };
 }
 
 const originalClipboardDescriptor = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
@@ -118,6 +121,61 @@ afterEach(() => {
 });
 
 describe('task dependency directions', () => {
+  it('shows progress for an initial dependency graph query paused before data', () => {
+    const previousOnlineState = onlineManager.isOnline();
+    onlineManager.setOnline(false);
+    const view = renderDependencies();
+
+    try {
+      expect(view.queryClient.getQueryState(['tasks', taskId, 'dependency-graph'])).toMatchObject({
+        data: undefined,
+        status: 'pending',
+        fetchStatus: 'paused',
+      });
+      expect(apiClient.get).not.toHaveBeenCalled();
+      expect(screen.getByRole('status')).toHaveTextContent('Loading dependencies…');
+    } finally {
+      view.unmount();
+      view.queryClient.clear();
+      onlineManager.setOnline(previousOnlineState);
+    }
+  });
+
+  it('does not claim progress or issue a request for a disabled empty task ID', () => {
+    const view = renderDependencies('');
+
+    try {
+      expect(view.queryClient.getQueryState(['tasks', '', 'dependency-graph'])).toMatchObject({
+        data: undefined,
+        status: 'pending',
+        fetchStatus: 'idle',
+      });
+      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+      expect(apiClient.get).not.toHaveBeenCalled();
+    } finally {
+      view.unmount();
+      view.queryClient.clear();
+    }
+  });
+
+  it('keeps cached dependencies visible during a background refresh', async () => {
+    vi.mocked(apiClient.get).mockImplementationOnce(() => new Promise(() => {}));
+    const view = renderDependencies(taskId, graph);
+
+    try {
+      expect(await screen.findByText('Prerequisite task')).toBeInTheDocument();
+      expect(view.queryClient.getQueryState(['tasks', taskId, 'dependency-graph'])).toMatchObject({
+        data: graph,
+        status: 'success',
+        fetchStatus: 'fetching',
+      });
+      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    } finally {
+      view.unmount();
+      view.queryClient.clear();
+    }
+  });
+
   it('reads the complete graph and describes each directed relation from the current task', async () => {
     renderDependencies();
 

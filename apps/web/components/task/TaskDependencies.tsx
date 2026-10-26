@@ -61,7 +61,7 @@ function CopyTaskIdButton({ taskId }: { taskId: string }) {
 
 export function TaskDependencies({ taskId }: TaskDependenciesProps) {
   const [retryingTaskId, setRetryingTaskId] = useState<string | null>(null);
-  const { data: deps = [], isLoading, isError, isFetching, refetch } = useDependencyGraph(taskId);
+  const { data: deps, isPending, isError, isFetching, refetch } = useDependencyGraph(taskId);
   const isRetrying = retryingTaskId === taskId;
 
   const retryDependencies = () => {
@@ -93,8 +93,10 @@ export function TaskDependencies({ taskId }: TaskDependenciesProps) {
       </div>
     );
   }
-  if (isLoading) return null;
-  if (deps.length === 0) return null;
+  if (taskId && isPending && deps === undefined) {
+    return <p role="status" className="text-sm text-muted-foreground">Loading dependencies…</p>;
+  }
+  if (!deps || deps.length === 0) return null;
 
   return (
     <div className="rounded-lg border p-4">
