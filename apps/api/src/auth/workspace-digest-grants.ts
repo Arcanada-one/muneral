@@ -18,10 +18,9 @@
  * moment it merged — an agent gains a capability without anyone deciding it
  * should. The card that ordered this work says the grant must be explicit per
  * agent, so the marker is necessary and not sufficient: the guard also requires
- * an entry here for (this agent, its workspace). The list below ships EMPTY, so
- * merging this change grants nothing to anybody; the first entry is a separate,
- * reviewable pull request. `workspace-digest-grants.spec.ts` pins that emptiness
- * so a later merge cannot slip an entry in as a formatting change.
+ * an entry here for (this agent, its workspace). The list is empty after the
+ * DEC-AUP-0049 entry expired. `workspace-digest-grants.spec.ts` pins that
+ * emptiness so a later grant cannot slip in as a formatting change.
  *
  * ## Why it is wider than `project-read-grants.ts`, said plainly
  *
@@ -86,60 +85,17 @@ export const WORKSPACE_DIGEST_GRANTS = "a2284:workspaceDigestGrants";
 export const MAX_DIGEST_GRANT_WINDOW_DAYS = MAX_GRANT_WINDOW_DAYS;
 
 /**
- * ONE entry, added by A2-294 under DEC-AUP-0049.
+ * No live entries. The A2-294 / DEC-AUP-0049 entry expired at
+ * 2026-10-27T00:00:00Z and was removed under that decision's expiry/reversal
+ * rule. A future grant needs its own review and current decision evidence.
  *
- * A2-284 shipped this list EMPTY and said the first entry would be its own
- * reviewed pull request naming its decision. This is that pull request.
- *
- * What the decision blocked it on, and why the reader should care: granting a
- * workspace-wide PLAINTEXT title read to a key also hands it an id for every
- * task of the workspace, and `GET /tasks/:taskId/field-changes` answers by id.
- * As shipped, that route withheld `title`/`description` only from a key holding
- * a project-read grant (DEC-AUP-0033 R4), so a digest-only key would have read
- * every title AND description in the workspace — measured live, 926 of them.
- *
- * That door is closed by a SEPARATE, EARLIER pull request (muneral#172, A2-294b:
- * `agent-task-scope.guard.ts`, `assertTaskInWorkspace`), which this branch is
- * rebased onto. An earlier draft of this entry closed it in the same commit and
- * said so; blind review (A2-294 F3) pointed out that atomicity and ordering are
- * alternatives, not both, and that a decision whose whole control is an ORDER
- * must not also claim there is no window. The order is the control, and it is
- * enforced by the base of this branch rather than by prose: without #172 merged
- * and DEPLOYED, this entry is not a seven-column read — it is a workspace
- * free-text read. Its live verification is the probe
- * `runs/A2-294b/probe_withholding.py`, which must answer
- * `fields_not_withheld: 0` against the deployed API before this merges. Measured
- * before #172: 926 plaintext titles and 892 plaintext descriptions.
- *
- * Renewal under Program DEC-AUP-0049 A6 proposes a fixed `until` of 2026-10-27T00:00:00Z,
- * within 14 days of the amendment date; the source literal and Program
- * decision must remain identical. A6 was admitted on Program main in PR445
- * (merge d0a60fdc) and applies only to the exact seven-column projection. The
- * title slice scanned 6602/6602 tasks with zero hits and a passing red-proof.
- * The full workspace scan still FAILS
- * on 96 description rows; description is neither selected nor returned, and those
- * findings remain separate. Scope and expiry-only reversal are unchanged; no rolling
- * renewal is allowed.
+ * The removed entry belonged to arcanada-assistant under DEC-AUP-0049 A6.
+ * It authorized only the seven-column digest projection and expired by its
+ * own exclusive `until`; the underlying full-workspace description scan
+ * findings were separate and are not discharged by this removal. The decision
+ * and the old literal remain in Git history for audit.
  */
-export const WORKSPACE_DIGEST_GRANT_LIST: readonly WorkspaceDigestGrantEntry[] =
-  [
-    {
-      agentId: "565171f7-a3ca-45a4-b50e-4d8b07cf0b86",
-      agentName: "arcanada-assistant",
-      workspaceId: "05f8cddf-e91f-430b-81e3-d67965aa4de3",
-      until: "2026-10-27T00:00:00Z",
-      decision: "DEC-AUP-0049",
-      evidence:
-        "Admitted on Program main under DEC-AUP-0049 A6 (PR445 merge d0a60fdc). The " +
-        "digest row is pinned to id, projectId, title, status, priority, createdAt and updatedAt; " +
-        "the 2026-10-13 title slice scanned 6602/6602 tasks with zero hits and red-proof PASS. " +
-        "The authoritative full-workspace scan remains FAIL: 96 description rows and 136 " +
-        "generic-entropy spans; description is not selected or emitted and those findings remain " +
-        "separate. Proposed until 2026-10-27T00:00:00Z (14 days), replacement-only, no rolling " +
-        "renewal. Evidence: Program PR445 and Muneral task 7b3b4703, A6 scan comment " +
-        "f1b062b4-1e05-4d16-a9c8-f5cf5509dc5e.",
-    },
-  ];
+export const WORKSPACE_DIGEST_GRANT_LIST: readonly WorkspaceDigestGrantEntry[] = [];
 
 /** Case-insensitive: the ids are PostgreSQL `uuid`s, which are. */
 const sameId = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();

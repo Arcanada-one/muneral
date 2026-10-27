@@ -13,8 +13,6 @@
  * not a `toBeLessThan`: a pull request that adds the assistant's grant must
  * change this file too, which is where a reviewer is told what the entry buys.
  */
-import { createHash } from "node:crypto";
-
 import {
   WORKSPACE_DIGEST_GRANT_LIST,
   MAX_DIGEST_GRANT_WINDOW_DAYS,
@@ -26,17 +24,6 @@ import {
   GRANT_RENEWAL_LEAD_DAYS,
 } from "../src/auth/project-read-grants.js";
 import type { WorkspaceDigestGrantEntry } from "../src/auth/workspace-digest-grants.js";
-
-const evidenceSha256Of = (evidence: string) =>
-  createHash("sha256").update(evidence, "utf8").digest("hex").slice(0, 16);
-
-/**
- * A LITERAL, not `evidenceSha256Of(WORKSPACE_DIGEST_GRANT_LIST[0].evidence)` —
- * that first draft compared the shipped entry against itself and would have
- * passed whatever `evidence` said. This is the sha256 prefix of the evidence
- * proposed by A6; editing the recorded basis fails the equality below.
- */
-const EVIDENCE_SHA256_PREFIX = "c9dba15d1136978b";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -56,46 +43,14 @@ const entry = (
 
 describe("the shipped workspace-digest grant list", () => {
   /**
-   * A2-294 (DEC-AUP-0049) — this WAS `toEqual([])`. The first entry has arrived,
-   * so the assertion becomes what the emptiness test was standing in for: the
-   * list holds EXACTLY the entries the program's decisions name, compared field
-   * by field. An entry appended, removed, re-pointed at another agent or
-   * workspace, or given a longer window or a different decision still fails
-   * here, which is what the original equality bought and what a `length` or a
-   * `toContain` would have thrown away.
-   *
-   * What this CANNOT check, said plainly rather than left to be assumed: that
-   * `DEC-AUP-0049` exists, says what this entry claims, or is merged. The
-   * decisions live in a private repository Muneral's CI cannot read
-   * (DEC-AUP-0033 R5). That tie is made by the merge review and by the program
-   * repository's own gate — not here. A green test on this file is evidence
-   * about the literal, not about the authority behind it.
+   * DEC-AUP-0049's only shipped entry expired on 2026-10-27 and was removed.
+   * A new entry must fail this equality until its own decision and review
+   * update the expected list. The test does not itself verify that decision.
    */
-  const ENTRIES_THE_DECISIONS_NAME = [
-    {
-      agentId: "565171f7-a3ca-45a4-b50e-4d8b07cf0b86",
-      agentName: "arcanada-assistant",
-      workspaceId: "05f8cddf-e91f-430b-81e3-d67965aa4de3",
-      until: "2026-10-27T00:00:00Z",
-      decision: "DEC-AUP-0049",
-      // A prefix of sha256(evidence), so the projection covers `evidence` too:
-      // the string that tells a reviewer what the entry bought could otherwise
-      // be rewritten freely without failing this equality.
-      evidenceSha256: EVIDENCE_SHA256_PREFIX,
-    },
-  ];
+  const ENTRIES_THE_DECISIONS_NAME: WorkspaceDigestGrantEntry[] = [];
 
   it("holds EXACTLY the entries the program decisions name", () => {
-    expect(
-      WORKSPACE_DIGEST_GRANT_LIST.map((g) => ({
-        agentId: g.agentId,
-        agentName: g.agentName,
-        workspaceId: g.workspaceId,
-        until: g.until,
-        decision: g.decision,
-        evidenceSha256: evidenceSha256Of(g.evidence),
-      })),
-    ).toEqual(ENTRIES_THE_DECISIONS_NAME);
+    expect(WORKSPACE_DIGEST_GRANT_LIST).toEqual(ENTRIES_THE_DECISIONS_NAME);
   });
 
   it("requires every shipped grant to remain active", () => {
@@ -149,26 +104,39 @@ describe("workspaceDigestGrantState", () => {
   });
 
   it("answers `live` for the granted pair, and `expired` after its window", () => {
-    const granted = WORKSPACE_DIGEST_GRANT_LIST[0]!;
+    const granted = entry({ until: "2026-10-27T00:00:00Z" });
     const during = new Date(Date.parse(granted.until) - 86_400_000);
     const after = new Date(Date.parse(granted.until));
     expect(
-      workspaceDigestGrantState(granted.agentId, granted.workspaceId, during)
-        .kind,
+      workspaceDigestGrantState(
+        granted.agentId,
+        granted.workspaceId,
+        during,
+        [granted],
+      ).kind,
     ).toBe("live");
     // `until` is EXCLUSIVE: the grant is closed AT the instant, not after it.
     expect(
-      workspaceDigestGrantState(granted.agentId, granted.workspaceId, after)
-        .kind,
+      workspaceDigestGrantState(
+        granted.agentId,
+        granted.workspaceId,
+        after,
+        [granted],
+      ).kind,
     ).toBe("expired");
   });
 
   it("does not answer `live` for the granted agent in another workspace", () => {
-    const granted = WORKSPACE_DIGEST_GRANT_LIST[0]!;
+    const granted = entry({ until: "2026-10-27T00:00:00Z" });
     const during = new Date(Date.parse(granted.until) - 86_400_000);
-    expect(workspaceDigestGrantState(granted.agentId, WS, during).kind).toBe(
-      "none",
-    );
+    expect(
+      workspaceDigestGrantState(
+        granted.agentId,
+        "11111111-1111-1111-1111-111111111111",
+        during,
+        [granted],
+      ).kind,
+    ).toBe("none");
   });
 
   it("separates live, expired and never-granted", () => {
