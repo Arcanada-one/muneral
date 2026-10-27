@@ -26,7 +26,10 @@ import { ActivityModule } from '../src/activity/activity.module.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
 import { AuthService } from '../src/auth/auth.service.js';
 import { KanbanService } from '../src/ws/kanban.service.js';
-import { WORKSPACE_DIGEST_GRANTS } from '../src/auth/workspace-digest-grants.js';
+import {
+  STANDING_DIGEST_GRANT_UNTIL,
+  WORKSPACE_DIGEST_GRANTS,
+} from '../src/auth/workspace-digest-grants.js';
 import type { WorkspaceDigestGrantEntry } from '../src/auth/workspace-digest-grants.js';
 import { GRANT_RENEWAL_LEAD_DAYS } from '../src/auth/project-read-grants.js';
 import { WORKSPACE_DIGEST_COUNTED, WORKSPACE_DIGEST_READ_ACTION } from '../src/tasks/tasks.service.js';
@@ -261,6 +264,22 @@ describe('A2-284 — workspace task digest for granted agent keys (e2e)', () => 
       until: FUTURE,
       renewalDueAt: new Date(Date.parse(FUTURE) - GRANT_RENEWAL_LEAD_DAYS * 86_400_000).toISOString(),
     });
+  });
+
+  it('omits renewalDueAt for a standing grant (DEC-AUP-0049 A7)', async () => {
+    grants.push({
+      agentId: ids.reader,
+      agentName: 'reader',
+      workspaceId,
+      until: STANDING_DIGEST_GRANT_UNTIL,
+      standing: true,
+      decision: 'DEC-TEST',
+      evidence: 'e2e',
+    });
+    await othersTask();
+    const res = await digest(keys.reader).expect(200);
+    expect(res.body.grant).toEqual({ decision: 'DEC-TEST', until: STANDING_DIGEST_GRANT_UNTIL });
+    expect(Object.keys(res.body.grant)).not.toContain('renewalDueAt');
   });
 
   it('writes one activity row per read, and the answer carries its id', async () => {

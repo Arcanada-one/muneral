@@ -18,6 +18,8 @@ import { createHash } from "node:crypto";
 import {
   WORKSPACE_DIGEST_GRANT_LIST,
   MAX_DIGEST_GRANT_WINDOW_DAYS,
+  STANDING_DIGEST_GRANT_UNTIL,
+  digestGrantInvariantViolation,
   workspaceDigestGrantState,
   digestRenewalDueAt,
 } from "../src/auth/workspace-digest-grants.js";
@@ -34,9 +36,9 @@ const evidenceSha256Of = (evidence: string) =>
  * A LITERAL, not `evidenceSha256Of(WORKSPACE_DIGEST_GRANT_LIST[0].evidence)` —
  * that first draft compared the shipped entry against itself and would have
  * passed whatever `evidence` said. This is the sha256 prefix of the evidence
- * proposed by A6; editing the recorded basis fails the equality below.
+ * recorded under A7; editing the recorded basis fails the equality below.
  */
-const EVIDENCE_SHA256_PREFIX = "c9dba15d1136978b";
+const EVIDENCE_SHA256_PREFIX = "89cf99b0f5966aee";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -76,7 +78,10 @@ describe("the shipped workspace-digest grant list", () => {
       agentId: "565171f7-a3ca-45a4-b50e-4d8b07cf0b86",
       agentName: "arcanada-assistant",
       workspaceId: "05f8cddf-e91f-430b-81e3-d67965aa4de3",
-      until: "2026-10-27T00:00:00Z",
+      // DEC-AUP-0049 A7 (operator order 2026-10-27): standing, revoked only
+      // by removing this entry.
+      until: STANDING_DIGEST_GRANT_UNTIL,
+      standing: true,
       decision: "DEC-AUP-0049",
       // A prefix of sha256(evidence), so the projection covers `evidence` too:
       // the string that tells a reviewer what the entry bought could otherwise
@@ -92,6 +97,7 @@ describe("the shipped workspace-digest grant list", () => {
         agentName: g.agentName,
         workspaceId: g.workspaceId,
         until: g.until,
+        standing: g.standing,
         decision: g.decision,
         evidenceSha256: evidenceSha256Of(g.evidence),
       })),
@@ -100,19 +106,29 @@ describe("the shipped workspace-digest grant list", () => {
 
   it("requires every shipped grant to remain active", () => {
     for (const g of WORKSPACE_DIGEST_GRANT_LIST) {
+      expect(digestGrantInvariantViolation(g)).toBeNull();
       const until = Date.parse(g.until);
       expect(Number.isNaN(until)).toBe(false);
       // Keep this wall-clock check: it is the renewal signal when a shipped
-      // grant expires, including after a future date passes.
+      // DATED grant expires, including after a future date passes.
       expect(until).toBeGreaterThan(Date.now());
+      if (g.standing === true) continue;
       expect(until - Date.now()).toBeLessThanOrEqual(
         MAX_DIGEST_GRANT_WINDOW_DAYS * 86_400_000,
       );
     }
   });
 
-  it("caps a window at the ceiling DEC-AUP-0029 set for a NARROWER read", () => {
+  it("caps a non-standing window at the ceiling DEC-AUP-0029 set for a NARROWER read", () => {
     expect(MAX_DIGEST_GRANT_WINDOW_DAYS).toBe(MAX_GRANT_WINDOW_DAYS);
+    // The only way past the cap is the sentinel, and the sentinel only with
+    // `standing: true` — a dated far-future entry is malformed, not standing.
+    expect(
+      digestGrantInvariantViolation(entry({ until: "2999-01-01T00:00:00Z" })),
+    ).toBeNull();
+    expect(
+      Date.parse("2999-01-01T00:00:00Z") - Date.now(),
+    ).toBeGreaterThan(MAX_DIGEST_GRANT_WINDOW_DAYS * 86_400_000);
   });
 
   // Vacuous today, by construction — and that is why it is written now: the
@@ -125,9 +141,11 @@ describe("the shipped workspace-digest grant list", () => {
     for (const g of WORKSPACE_DIGEST_GRANT_LIST) {
       const until = Date.parse(g.until);
       expect(Number.isNaN(until)).toBe(false);
-      expect(until - Date.now()).toBeLessThanOrEqual(
-        MAX_DIGEST_GRANT_WINDOW_DAYS * 86_400_000,
-      );
+      if (g.standing !== true) {
+        expect(until - Date.now()).toBeLessThanOrEqual(
+          MAX_DIGEST_GRANT_WINDOW_DAYS * 86_400_000,
+        );
+      }
       expect(g.until).toMatch(/Z$/);
       expect(g.decision).toMatch(/^DEC-AUP-\d{4}$/);
       expect(g.agentId).toMatch(UUID);
@@ -148,19 +166,19 @@ describe("workspaceDigestGrantState", () => {
     expect(workspaceDigestGrantState(AGENT, WS, now).kind).toBe("none");
   });
 
-  it("answers `live` for the granted pair, and `expired` after its window", () => {
+  it("answers `live` for the granted (standing) pair, at any instant", () => {
     const granted = WORKSPACE_DIGEST_GRANT_LIST[0]!;
-    const during = new Date(Date.parse(granted.until) - 86_400_000);
-    const after = new Date(Date.parse(granted.until));
-    expect(
-      workspaceDigestGrantState(granted.agentId, granted.workspaceId, during)
-        .kind,
-    ).toBe("live");
-    // `until` is EXCLUSIVE: the grant is closed AT the instant, not after it.
-    expect(
-      workspaceDigestGrantState(granted.agentId, granted.workspaceId, after)
-        .kind,
-    ).toBe("expired");
+    expect(granted.standing).toBe(true);
+    for (const at of [
+      now,
+      new Date(Date.parse(STANDING_DIGEST_GRANT_UNTIL)),
+      new Date(8.64e15),
+    ]) {
+      expect(
+        workspaceDigestGrantState(granted.agentId, granted.workspaceId, at)
+          .kind,
+      ).toBe("live");
+    }
   });
 
   it("does not answer `live` for the granted agent in another workspace", () => {
@@ -231,6 +249,35 @@ describe("workspaceDigestGrantState", () => {
     );
   });
 
+  it("rejects a standing entry whose until is not the sentinel", () => {
+    const bad = entry({ standing: true, until: "2999-01-01T00:00:00Z" });
+    expect(digestGrantInvariantViolation(bad)).toMatch(/standing entry/);
+    // Fail closed: malformed is never live, even before its date.
+    expect(workspaceDigestGrantState(AGENT, WS, now, [bad]).kind).toBe(
+      "expired",
+    );
+  });
+
+  it("rejects a non-standing entry that carries the sentinel", () => {
+    const bad = entry({ until: STANDING_DIGEST_GRANT_UNTIL });
+    expect(digestGrantInvariantViolation(bad)).toMatch(/reserved/);
+    expect(workspaceDigestGrantState(AGENT, WS, now, [bad]).kind).toBe(
+      "expired",
+    );
+  });
+
+  it("answers `live` for a standing grant at a far-future instant", () => {
+    const standing = entry({
+      standing: true,
+      until: STANDING_DIGEST_GRANT_UNTIL,
+    });
+    expect(digestGrantInvariantViolation(standing)).toBeNull();
+    const farFuture = new Date("9999-12-31T23:59:59Z");
+    expect(workspaceDigestGrantState(AGENT, WS, farFuture, [standing])).toEqual(
+      { kind: "live", entry: standing },
+    );
+  });
+
   it("is exclusive at `until`: the instant itself is already closed", () => {
     const grants = [entry({ until: "2026-09-24T12:00:00Z" })];
     expect(workspaceDigestGrantState(AGENT, WS, now, grants).kind).toBe(
@@ -244,6 +291,14 @@ describe("workspaceDigestGrantState", () => {
 });
 
 describe("digestRenewalDueAt", () => {
+  it("has no renewal for a standing grant", () => {
+    expect(
+      digestRenewalDueAt(
+        entry({ standing: true, until: STANDING_DIGEST_GRANT_UNTIL }),
+      ),
+    ).toBeUndefined();
+  });
+
   it("lands GRANT_RENEWAL_LEAD_DAYS before `until`", () => {
     const e = entry({ until: "2026-10-14T00:00:00Z" });
     expect(digestRenewalDueAt(e)).toBe(
