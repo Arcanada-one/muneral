@@ -1,0 +1,196 @@
+// Candidate-local HTTP route sweep for muneral PR #321 (work item bcab5202).
+// Boots nothing itself: it probes an already-running candidate API on loopback,
+// built from the measured commit, against a disposable synthetic PostgreSQL.
+// For every route: one authenticated probe with an expected status, and one
+// unauthenticated control that must answer 401 or 403. Writes probes.json.
+import crypto from 'node:crypto';
+import fs from 'node:fs';
+
+const BASE = process.env.CANARY_BASE ?? 'http://127.0.0.1:35761/api/v1';
+const SECRET = fs.readFileSync(new URL('./jwt.secret', import.meta.url), 'utf8').trim();
+const OUT = process.argv[2] ?? new URL('./probes.json', import.meta.url).pathname;
+
+const WS = '05f8cddf-e91f-430b-81e3-d67965aa4de3';
+const PROJ = '08a50f9a-a735-4605-91ce-ce4a41193fbb';
+const OWNER = '11111111-0000-4000-8000-000000000001';
+const MEMBER = '11111111-0000-4000-8000-000000000002';
+const INVITEE = '11111111-0000-4000-8000-000000000003';
+const ASSISTANT = '565171f7-a3ca-45a4-b50e-4d8b07cf0b86';
+const ORCH = '9437639a-5f7c-4fe4-be04-18112ba0bada';
+
+const b64u = (b) => Buffer.from(b).toString('base64url');
+function jwt(sub) {
+  const now = Math.floor(Date.now() / 1000);
+  const h = b64u(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+  const p = b64u(JSON.stringify({ sub, type: 'access', iat: now, exp: now + 3600 }));
+  const s = crypto.createHmac('sha256', SECRET).update(`${h}.${p}`).digest('base64url');
+  return `${h}.${p}.${s}`;
+}
+const ownerJwt = jwt(OWNER);
+
+const probes = [];
+const routes = {}; // entity -> [probe ids]
+let seq = 0;
+
+async function call(method, path, token, body) {
+  const res = await fetch(BASE + path, {
+    method,
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+    },
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  });
+  const text = await res.text();
+  let json = null;
+  try { json = JSON.parse(text); } catch { /* not json */ }
+  return { status: res.status, text, json };
+}
+
+/** One route = an authenticated probe + an anonymous control. */
+async function probe(entity, method, path, { token = ownerJwt, body, expect, who = 'owner', anonPath } = {}) {
+  const r = await call(method, path, token, body);
+  const id = `${who}-${String(++seq).padStart(3, '0')}`;
+  const ok = (Array.isArray(expect) ? expect : [expect]).includes(r.status);
+  probes.push({
+    id, kind: 'http', executed: true, method, path, status: r.status,
+    outcome: ok ? 'verified' : 'failed',
+    reason: `real candidate-local request as ${who}; expected ${[].concat(expect).join('|')}, received ${r.status}`,
+    response_sha256: crypto.createHash('sha256').update(r.text).digest('hex'),
+    response_bytes: Buffer.byteLength(r.text),
+  });
+  if (!ok) console.error(`FAIL ${entity} ${r.status} ${r.text.slice(0, 300)}`);
+  const a = await call(method, anonPath ?? path, null, body);
+  const aid = `anonymous-${String(++seq).padStart(3, '0')}`;
+  const aok = a.status === 401 || a.status === 403;
+  probes.push({
+    id: aid, kind: 'http', executed: true, method, path: anonPath ?? path, status: a.status,
+    outcome: aok ? 'verified' : 'failed',
+    reason: `unauthenticated control expected 401 or 403; expected 401|403, received ${a.status}`,
+    response_sha256: crypto.createHash('sha256').update(a.text).digest('hex'),
+    response_bytes: Buffer.byteLength(a.text),
+  });
+  if (!aok) console.error(`FAIL-ANON ${entity} ${a.status} ${a.text.slice(0, 200)}`);
+  routes[entity] = [id, aid];
+  return r;
+}
+
+const R = (m, p) => `route:${m} ${p}`;
+
+// ---- agents and keys -------------------------------------------------------
+const worker = await probe(R('POST', '/agents'), 'POST', '/agents',
+  { body: { workspaceId: WS, name: 'canary-worker' }, expect: 201 });
+const WORKER = worker.json?.id;
+const k = await probe(R('POST', '/agents/:agentId/keys'), 'POST', `/agents/${WORKER}/keys`,
+  { body: { label: 'canary' }, expect: 201 });
+const workerKey = k.json?.key;
+const workerKeyId = k.json?.keyId;
+const ak = await call('POST', `/agents/${ASSISTANT}/keys`, ownerJwt, { label: 'assistant' });
+const assistantKey = ak.json?.key;
+const ok2 = await call('POST', `/agents/${ORCH}/keys`, ownerJwt, { label: 'orch' });
+const orchKey = ok2.json?.key;
+const rot = await probe(R('POST', '/agents/keys/:keyId/rotate'), 'POST', `/agents/keys/${workerKeyId}/rotate`,
+  { expect: [200, 201] });
+const workerKey2 = rot.json?.key ?? workerKey;
+await probe(R('GET', '/agents/workspace/:workspaceId'), 'GET', `/agents/workspace/${WS}`, { expect: 200 });
+
+// ---- workspaces ------------------------------------------------------------
+await probe(R('POST', '/workspaces'), 'POST', '/workspaces',
+  { body: { name: 'Canary Second', slug: `canary-second-${Date.now()}` }, expect: 201 });
+await probe(R('GET', '/workspaces'), 'GET', '/workspaces', { expect: 200 });
+await probe(R('GET', '/workspaces/:workspaceId'), 'GET', `/workspaces/${WS}`, { expect: 200 });
+await probe(R('GET', '/workspaces/:workspaceId/members'), 'GET', `/workspaces/${WS}/members`, { expect: 200 });
+await probe(R('POST', '/workspaces/:workspaceId/members/:userId'), 'POST', `/workspaces/${WS}/members/${INVITEE}`,
+  { body: { role: 'viewer' }, expect: [200, 201] });
+await probe(R('PATCH', '/workspaces/:workspaceId/members/:userId/role'), 'PATCH',
+  `/workspaces/${WS}/members/${INVITEE}/role`, { body: { role: 'developer' }, expect: 200 });
+await probe(R('DELETE', '/workspaces/:workspaceId/members/:userId'), 'DELETE',
+  `/workspaces/${WS}/members/${INVITEE}`, { expect: [200, 204] });
+
+// ---- projects --------------------------------------------------------------
+const p2 = await probe(R('POST', '/projects'), 'POST', '/projects',
+  { body: { workspaceId: WS, name: 'Canary Disposable', slug: `canary-disp-${Date.now()}` }, expect: 201 });
+await probe(R('GET', '/projects/workspace/:workspaceId'), 'GET', `/projects/workspace/${WS}`, { expect: 200 });
+await probe(R('GET', '/projects/:projectId'), 'GET', `/projects/${PROJ}`, { expect: 200 });
+
+// ---- tasks -----------------------------------------------------------------
+const t1 = await probe(R('POST', '/tasks'), 'POST', '/tasks',
+  { body: { projectId: PROJ, title: 'Canary task one', priority: 'high' }, expect: 201 });
+const T1 = t1.json?.id;
+const SPAN = 'PGPASSWORD=canary-synthetic-not-a-secret';
+const t2 = await call('POST', '/tasks', ownerJwt, { projectId: PROJ, title: 'Canary task two', priority: 'low', description: `fixture ${SPAN} end` });
+const T2 = t2.json?.id;
+const t3 = await call('POST', '/tasks', ownerJwt, { projectId: PROJ, title: 'Canary task three (deleted)' });
+const T3 = t3.json?.id;
+
+await probe(R('GET', '/tasks'), 'GET', '/tasks', { expect: 200 });
+await probe(R('GET', '/tasks/:taskId'), 'GET', `/tasks/${T1}`, { expect: 200 });
+await probe(R('GET', '/tasks/project/:projectId'), 'GET', `/tasks/project/${PROJ}`, { expect: 200 });
+await probe(R('GET', '/tasks/project/:projectId/staleness'), 'GET', `/tasks/project/${PROJ}/staleness`, { expect: 200 });
+await probe(R('GET', '/tasks/project/:projectId/index'), 'GET', `/tasks/project/${PROJ}/index`,
+  { token: orchKey, who: 'orchestrator-key', expect: 200 });
+// The change under review: the shipped STANDING digest grant for arcanada-assistant.
+const dg = await probe(R('GET', '/tasks/digest'), 'GET', '/tasks/digest',
+  { token: assistantKey, who: 'assistant-key', expect: 200 });
+fs.writeFileSync(new URL('./digest-grant.json', import.meta.url), JSON.stringify(dg.json?.grant ?? null));
+
+await probe(R('PATCH', '/tasks/:taskId/status'), 'PATCH', `/tasks/${T1}/status`,
+  { body: { status: 'in_progress' }, expect: 200 });
+await probe(R('POST', '/tasks/:taskId/comments'), 'POST', `/tasks/${T1}/comments`,
+  { body: { body: 'canary comment' }, expect: 201 });
+await probe(R('GET', '/tasks/:taskId/activity'), 'GET', `/tasks/${T1}/activity`, { expect: 200 });
+const ci = await probe(R('POST', '/tasks/:taskId/checklist'), 'POST', `/tasks/${T1}/checklist`,
+  { body: { text: 'canary item' }, expect: 201 });
+await probe(R('GET', '/tasks/:taskId/checklist'), 'GET', `/tasks/${T1}/checklist`, { expect: 200 });
+await probe(R('PATCH', '/tasks/:taskId/checklist/:itemId'), 'PATCH', `/tasks/${T1}/checklist/${ci.json?.id}`,
+  { body: { checked: true }, expect: 200 });
+await probe(R('DELETE', '/tasks/:taskId/checklist/:itemId'), 'DELETE', `/tasks/${T1}/checklist/${ci.json?.id}`,
+  { expect: [200, 204] });
+const dep = await probe(R('POST', '/tasks/:taskId/dependencies'), 'POST', `/tasks/${T1}/dependencies`,
+  { body: { toTaskId: T2, type: 'depends_on' }, expect: 201 });
+await probe(R('GET', '/tasks/:taskId/dependencies'), 'GET', `/tasks/${T1}/dependencies`, { expect: 200 });
+await probe(R('GET', '/tasks/:taskId/dependency-graph'), 'GET', `/tasks/${T1}/dependency-graph`, { expect: 200 });
+await probe(R('GET', '/tasks/:taskId/readiness'), 'GET', `/tasks/${T1}/readiness`, { expect: 200 });
+await probe(R('DELETE', '/tasks/:taskId/dependencies/:depId'), 'DELETE',
+  `/tasks/${T1}/dependencies/${dep.json?.id}`, { expect: [200, 204] });
+await probe(R('POST', '/tasks/:taskId/redactions'), 'POST', `/tasks/${T2}/redactions`,
+  { body: { field: 'description', span_sha256: crypto.createHash('sha256').update(SPAN).digest('hex'), rule: 'pgpassword', replacement: '[REDACTED]' }, expect: [200, 201] });
+
+// ---- agent-key routes ------------------------------------------------------
+await probe(R('POST', '/agents/tasks/:taskId/assign'), 'POST', `/agents/tasks/${T1}/assign`,
+  { body: { agentId: WORKER, role: 'executor' }, expect: [200, 201] });
+await probe(R('GET', '/agents/tasks'), 'GET', '/agents/tasks', { token: workerKey2, who: 'worker-key', expect: 200 });
+await probe(R('GET', '/tasks/:taskId/field-changes'), 'GET', `/tasks/${T1}/field-changes`,
+  { token: workerKey2, who: 'worker-key', expect: 200 });
+await probe(R('POST', '/tasks/:taskId/field-ack'), 'POST', `/tasks/${T1}/field-ack`,
+  { token: workerKey2, who: 'worker-key', body: { agentId: WORKER, fields: [] }, expect: 204 });
+await probe(R('PATCH', '/tasks/:taskId/contract'), 'PATCH', `/tasks/${T1}/contract`,
+  { token: workerKey2, who: 'worker-key', body: { contractDigest: 'sha256:' + 'a'.repeat(64), expectedContractDigest: null }, expect: 200 });
+await probe(R('POST', '/tasks/:taskId/evidence'), 'POST', `/tasks/${T1}/evidence`,
+  { token: workerKey2, who: 'worker-key', body: { uri: 'file://canary/evidence.txt', sha256: crypto.createHash('sha256').update('canary').digest('hex'), contentType: 'text/plain' }, expect: 201 });
+await probe(R('GET', '/tasks/:taskId/evidence'), 'GET', `/tasks/${T1}/evidence`, { expect: 200 });
+await probe(R('POST', '/sync/datarim/:projectId/import'), 'POST', `/sync/datarim/${PROJ}/import`,
+  { token: workerKey2, who: 'worker-key', body: { markdown: '### Canary task one\n- **Status:** in_progress\n- **Priority:** high\n' }, expect: [200, 201] });
+await probe(R('GET', '/sync/datarim/:projectId'), 'GET', `/sync/datarim/${PROJ}`, { expect: 200 });
+await probe(R('DELETE', '/agents/tasks/:taskId/assign/:agentId'), 'DELETE', `/agents/tasks/${T1}/assign/${WORKER}`,
+  { expect: [200, 204] });
+
+// ---- git refs --------------------------------------------------------------
+const gr = await probe(R('POST', '/projects/git-refs'), 'POST', '/projects/git-refs',
+  { body: { taskId: T1, type: 'repo', url: 'https://github.com/Arcanada-one/muneral' }, expect: 201 });
+await probe(R('GET', '/projects/tasks/:taskId/git-refs'), 'GET', `/projects/tasks/${T1}/git-refs`, { expect: 200 });
+await probe(R('DELETE', '/projects/git-refs/:refId'), 'DELETE', `/projects/git-refs/${gr.json?.id}`, { expect: [200, 204] });
+
+// ---- destructive, last -----------------------------------------------------
+await probe(R('DELETE', '/tasks/:taskId'), 'DELETE', `/tasks/${T3}`, { expect: [200, 204] });
+await probe(R('DELETE', '/projects/:projectId'), 'DELETE', `/projects/${p2.json?.id}`, { expect: [200, 204] });
+// A fresh key so the self-revoke does not spend the one used above.
+const k3 = await call('POST', `/agents/${WORKER}/keys`, ownerJwt, { label: 'canary-revoke' });
+await probe(R('POST', '/agents/keys/self/revoke'), 'POST', '/agents/keys/self/revoke',
+  { token: k3.json?.key, who: 'worker-key', expect: [200, 201, 204] });
+const k4 = await call('POST', `/agents/${WORKER}/keys`, ownerJwt, { label: 'canary-delete' });
+await probe(R('DELETE', '/agents/keys/:keyId'), 'DELETE', `/agents/keys/${k4.json?.keyId}`, { expect: [200, 204] });
+
+fs.writeFileSync(OUT, JSON.stringify({ probes, routes }, null, 1));
+const failed = probes.filter((p) => p.outcome !== 'verified').length;
+console.log(`routes=${Object.keys(routes).length} probes=${probes.length} failed=${failed}`);

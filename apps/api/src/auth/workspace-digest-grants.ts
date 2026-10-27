@@ -1,6 +1,6 @@
 /**
  * A2-284 — which agent keys may read their workspace's task digest, and until
- * when.
+ * when (or, for a STANDING entry, until the entry is removed).
  *
  * ## What this opens, and what it does not
  *
@@ -37,7 +37,12 @@
  *   1. per (agent, workspace), named here, merged through review;
  *   2. an expiry — `until` is required, and the ceiling is the same
  *      `MAX_GRANT_WINDOW_DAYS` DEC-AUP-0029 set for a read that is narrower
- *      than this one. A wider read does not get a longer window;
+ *      than this one. A wider read does not get a longer window. The one
+ *      exception is an entry marked `standing: true` (DEC-AUP-0049 A7,
+ *      operator order 2026-10-27): it carries the sentinel
+ *      `STANDING_DIGEST_GRANT_UNTIL` instead of a date and is revoked only by
+ *      removing it in a reviewed pull request. Bounds 1, 3 and 4 still hold for
+ *      it unchanged;
  *   3. read-only, own workspace, seven columns chosen by the consumer that was
  *      measured (`arcanada-assistant#76`), not by what the table happens to
  *      hold;
@@ -55,6 +60,13 @@
  * before the end. The consumer already renders the cause of a refusal into the
  * message it publishes, so a lapse prints itself in Telegram rather than
  * becoming a silent zero.
+ *
+ * Those answers did not stop the lapses; they only made them loud. The
+ * assistant's entry was renewed by hand every 14–30 days (decision amendment,
+ * scan, pull request, deploy) and the digest still went down on 2026-10-27 with
+ * `GRANT_EXPIRED`. DEC-AUP-0049 A7 therefore replaced that entry's expiry with
+ * a standing grant revoked by removal. A standing read has no end, so it
+ * carries no `renewalDueAt`; a dated entry still does.
  */
 import {
   GRANT_RENEWAL_LEAD_DAYS,
@@ -68,8 +80,13 @@ export interface WorkspaceDigestGrantEntry {
    *  names the wrong workspace is refused instead of quietly following the
    *  agent if it is ever moved. */
   workspaceId: string;
-  /** Exclusive: the grant is closed at and after this instant. */
+  /** Exclusive: the grant is closed at and after this instant. A standing
+   *  entry holds `STANDING_DIGEST_GRANT_UNTIL` here — a string, because the
+   *  consumer requires `grant.until` to be one. */
   until: string;
+  /** DEC-AUP-0049 A7: no time expiry; revoked only by removing the entry.
+   *  Set iff `until === STANDING_DIGEST_GRANT_UNTIL`. */
+  standing?: true;
   /** The program decision that admitted the grant. */
   decision: string;
   evidence: string;
@@ -84,6 +101,30 @@ export const WORKSPACE_DIGEST_GRANTS = "a2284:workspaceDigestGrants";
  * and a wider read taking a longer window would be the wrong way round.
  */
 export const MAX_DIGEST_GRANT_WINDOW_DAYS = MAX_GRANT_WINDOW_DAYS;
+
+/**
+ * The `until` of a standing entry. A sentinel rather than `null` so every
+ * reader that parses `until` keeps working and the instant still compares as
+ * "ahead"; the cap above applies to every entry that is NOT standing.
+ */
+export const STANDING_DIGEST_GRANT_UNTIL = "9999-12-31T00:00:00Z";
+
+/**
+ * `standing === true` iff `until === STANDING_DIGEST_GRANT_UNTIL`. The pairing
+ * is what stops a far-future date from passing as a dated grant, and a
+ * `standing` flag from riding on an ordinary date. Returns the violation, or
+ * null. An entry that fails it is never treated as live (fail closed).
+ */
+export function digestGrantInvariantViolation(
+  entry: WorkspaceDigestGrantEntry,
+): string | null {
+  const sentinel = entry.until === STANDING_DIGEST_GRANT_UNTIL;
+  if (entry.standing === true && !sentinel)
+    return `standing entry must have until ${STANDING_DIGEST_GRANT_UNTIL}`;
+  if (entry.standing !== true && sentinel)
+    return `until ${STANDING_DIGEST_GRANT_UNTIL} is reserved for standing entries`;
+  return null;
+}
 
 /**
  * ONE entry, added by A2-294 under DEC-AUP-0049.
@@ -111,15 +152,14 @@ export const MAX_DIGEST_GRANT_WINDOW_DAYS = MAX_GRANT_WINDOW_DAYS;
  * `fields_not_withheld: 0` against the deployed API before this merges. Measured
  * before #172: 926 plaintext titles and 892 plaintext descriptions.
  *
- * Renewal under Program DEC-AUP-0049 A6 proposes a fixed `until` of 2026-10-27T00:00:00Z,
- * within 14 days of the amendment date; the source literal and Program
- * decision must remain identical. A6 was admitted on Program main in PR445
- * (merge d0a60fdc) and applies only to the exact seven-column projection. The
- * title slice scanned 6602/6602 tasks with zero hits and a passing red-proof.
- * The full workspace scan still FAILS
- * on 96 description rows; description is neither selected nor returned, and those
- * findings remain separate. Scope and expiry-only reversal are unchanged; no rolling
- * renewal is allowed.
+ * Under DEC-AUP-0049 A6 this entry carried a fixed `until` of
+ * 2026-10-27T00:00:00Z and was to be replaced, never rolled. It lapsed at that
+ * instant. DEC-AUP-0049 A7 (operator order 2026-10-27) replaced the expiry with
+ * a STANDING grant: no `until` date, revocation = remove this entry by pull
+ * request. Nothing else moved: the same (agent, workspace) pair, read-only, own
+ * workspace, the same seven columns, one activity row per read. A6's title
+ * slice (6602/6602 tasks, zero hits) still covers the only free-text column
+ * returned; description is neither selected nor returned.
  */
 export const WORKSPACE_DIGEST_GRANT_LIST: readonly WorkspaceDigestGrantEntry[] =
   [
@@ -127,17 +167,16 @@ export const WORKSPACE_DIGEST_GRANT_LIST: readonly WorkspaceDigestGrantEntry[] =
       agentId: "565171f7-a3ca-45a4-b50e-4d8b07cf0b86",
       agentName: "arcanada-assistant",
       workspaceId: "05f8cddf-e91f-430b-81e3-d67965aa4de3",
-      until: "2026-10-27T00:00:00Z",
+      until: STANDING_DIGEST_GRANT_UNTIL,
+      standing: true,
       decision: "DEC-AUP-0049",
       evidence:
-        "Admitted on Program main under DEC-AUP-0049 A6 (PR445 merge d0a60fdc). The " +
-        "digest row is pinned to id, projectId, title, status, priority, createdAt and updatedAt; " +
-        "the 2026-10-13 title slice scanned 6602/6602 tasks with zero hits and red-proof PASS. " +
-        "The authoritative full-workspace scan remains FAIL: 96 description rows and 136 " +
-        "generic-entropy spans; description is not selected or emitted and those findings remain " +
-        "separate. Proposed until 2026-10-27T00:00:00Z (14 days), replacement-only, no rolling " +
-        "renewal. Evidence: Program PR445 and Muneral task 7b3b4703, A6 scan comment " +
-        "f1b062b4-1e05-4d16-a9c8-f5cf5509dc5e.",
+        "DEC-AUP-0049 A7 (operator order 2026-10-27): standing grant, no time expiry. " +
+        "Projection unchanged at seven columns: id, projectId, title, status, priority, " +
+        "createdAt, updatedAt; read-only, own workspace, one activity row per read. " +
+        "Revocation = remove this entry by pull request. reverse_if: a secret is found in a " +
+        "task title, this agent's key is compromised, or the consumer is retired. Prior basis: " +
+        "A6 (Program PR445, merge d0a60fdc) title slice 6602/6602 zero hits; Muneral task 7b3b4703.",
     },
   ];
 
@@ -180,14 +219,23 @@ export function workspaceDigestGrantState(
 ): WorkspaceDigestGrantState {
   const entries = entriesFor(agentId, workspaceId, grants);
   if (entries.length === 0) return { kind: "none" };
-  const live = entries.find((e) => now.getTime() < Date.parse(e.until));
+  // A malformed entry is never live: it can only be cited as expired.
+  const live = entries.find(
+    (e) =>
+      digestGrantInvariantViolation(e) === null &&
+      (e.standing === true || now.getTime() < Date.parse(e.until)),
+  );
   return live
     ? { kind: "live", entry: live }
     : { kind: "expired", entry: entries[0] };
 }
 
-/** When the holder should renew: `GRANT_RENEWAL_LEAD_DAYS` before `until`. */
-export function digestRenewalDueAt(entry: WorkspaceDigestGrantEntry): string {
+/** When the holder should renew: `GRANT_RENEWAL_LEAD_DAYS` before `until`.
+ *  A standing entry has no renewal, so it answers undefined. */
+export function digestRenewalDueAt(
+  entry: WorkspaceDigestGrantEntry,
+): string | undefined {
+  if (entry.standing === true) return undefined;
   return new Date(
     Date.parse(entry.until) - GRANT_RENEWAL_LEAD_DAYS * 86_400_000,
   ).toISOString();

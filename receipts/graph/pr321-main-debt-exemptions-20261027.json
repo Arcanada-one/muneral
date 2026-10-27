@@ -1,0 +1,68 @@
+{
+ "exemptions": [
+  {
+   "entity": "route:GET /workspaces/:workspaceId",
+   "code": "PREEXISTING_MAIN_FAILURE",
+   "owner": "Claude Root (arcana-devs)",
+   "expires_at_utc": "2026-11-10T00:00:00Z",
+   "reason": "Owner-authenticated request returned 403, anonymous control 401. Cause: WorkspaceMemberGuard (apps/api/src/common/guards/workspace-member.guard.ts:31) reads req.actor, which ActorInterceptor (apps/api/src/common/interceptors/actor.interceptor.ts:30) sets only after guards run, so every caller is refused 'Human authentication required'. Measured identically on main: muneral PR242 canary on 840e3be216844d57c163daf14ec0a5d51657f963 (exempted there, receipts/graph/pr242-main-debt-exemptions-20261014.json) and this PR's candidate-local canary on 1ae2f0e (receipts/canary/bcab5202/pr321-1ae2f0e/route-sweep.json); none of the files involved changed since 840e3be21684 and PR321 does not touch them. Fix work item: Muneral e4d18373-1eae-4835-8d85-b33982029eda. Reverse if the failure is not identical on main, if the fix does not remove the named cause, or at expiry.",
+   "ref": "e4d18373-1eae-4835-8d85-b33982029eda"
+  },
+  {
+   "entity": "route:GET /workspaces/:workspaceId/members",
+   "code": "PREEXISTING_MAIN_FAILURE",
+   "owner": "Claude Root (arcana-devs)",
+   "expires_at_utc": "2026-11-10T00:00:00Z",
+   "reason": "Owner-authenticated request returned 403, anonymous control 401. Cause: WorkspaceMemberGuard (apps/api/src/common/guards/workspace-member.guard.ts:31) reads req.actor, which ActorInterceptor (apps/api/src/common/interceptors/actor.interceptor.ts:30) sets only after guards run, so every caller is refused 'Human authentication required'. Measured identically on main: muneral PR242 canary on 840e3be216844d57c163daf14ec0a5d51657f963 (exempted there, receipts/graph/pr242-main-debt-exemptions-20261014.json) and this PR's candidate-local canary on 1ae2f0e (receipts/canary/bcab5202/pr321-1ae2f0e/route-sweep.json); none of the files involved changed since 840e3be21684 and PR321 does not touch them. Fix work item: Muneral e4d18373-1eae-4835-8d85-b33982029eda. Reverse if the failure is not identical on main, if the fix does not remove the named cause, or at expiry.",
+   "ref": "e4d18373-1eae-4835-8d85-b33982029eda"
+  },
+  {
+   "entity": "route:POST /workspaces/:workspaceId/members/:userId",
+   "code": "PREEXISTING_MAIN_FAILURE",
+   "owner": "Claude Root (arcana-devs)",
+   "expires_at_utc": "2026-11-10T00:00:00Z",
+   "reason": "Owner-authenticated request returned 403, anonymous control 401. Cause: WorkspaceMemberGuard (apps/api/src/common/guards/workspace-member.guard.ts:31) reads req.actor, which ActorInterceptor (apps/api/src/common/interceptors/actor.interceptor.ts:30) sets only after guards run, so every caller is refused 'Human authentication required'. Measured identically on main: muneral PR242 canary on 840e3be216844d57c163daf14ec0a5d51657f963 (exempted there, receipts/graph/pr242-main-debt-exemptions-20261014.json) and this PR's candidate-local canary on 1ae2f0e (receipts/canary/bcab5202/pr321-1ae2f0e/route-sweep.json); none of the files involved changed since 840e3be21684 and PR321 does not touch them. Fix work item: Muneral e4d18373-1eae-4835-8d85-b33982029eda. Reverse if the failure is not identical on main, if the fix does not remove the named cause, or at expiry.",
+   "ref": "e4d18373-1eae-4835-8d85-b33982029eda"
+  },
+  {
+   "entity": "route:PATCH /workspaces/:workspaceId/members/:userId/role",
+   "code": "PREEXISTING_MAIN_FAILURE",
+   "owner": "Claude Root (arcana-devs)",
+   "expires_at_utc": "2026-11-10T00:00:00Z",
+   "reason": "Owner-authenticated request returned 403, anonymous control 401. Cause: WorkspaceMemberGuard (apps/api/src/common/guards/workspace-member.guard.ts:31) reads req.actor, which ActorInterceptor (apps/api/src/common/interceptors/actor.interceptor.ts:30) sets only after guards run, so every caller is refused 'Human authentication required'. Measured identically on main: muneral PR242 canary on 840e3be216844d57c163daf14ec0a5d51657f963 (exempted there, receipts/graph/pr242-main-debt-exemptions-20261014.json) and this PR's candidate-local canary on 1ae2f0e (receipts/canary/bcab5202/pr321-1ae2f0e/route-sweep.json); none of the files involved changed since 840e3be21684 and PR321 does not touch them. Fix work item: Muneral e4d18373-1eae-4835-8d85-b33982029eda. Reverse if the failure is not identical on main, if the fix does not remove the named cause, or at expiry.",
+   "ref": "e4d18373-1eae-4835-8d85-b33982029eda"
+  },
+  {
+   "entity": "route:DELETE /workspaces/:workspaceId/members/:userId",
+   "code": "PREEXISTING_MAIN_FAILURE",
+   "owner": "Claude Root (arcana-devs)",
+   "expires_at_utc": "2026-11-10T00:00:00Z",
+   "reason": "Owner-authenticated request returned 403, anonymous control 401. Cause: WorkspaceMemberGuard (apps/api/src/common/guards/workspace-member.guard.ts:31) reads req.actor, which ActorInterceptor (apps/api/src/common/interceptors/actor.interceptor.ts:30) sets only after guards run, so every caller is refused 'Human authentication required'. Measured identically on main: muneral PR242 canary on 840e3be216844d57c163daf14ec0a5d51657f963 (exempted there, receipts/graph/pr242-main-debt-exemptions-20261014.json) and this PR's candidate-local canary on 1ae2f0e (receipts/canary/bcab5202/pr321-1ae2f0e/route-sweep.json); none of the files involved changed since 840e3be21684 and PR321 does not touch them. Fix work item: Muneral e4d18373-1eae-4835-8d85-b33982029eda. Reverse if the failure is not identical on main, if the fix does not remove the named cause, or at expiry.",
+   "ref": "e4d18373-1eae-4835-8d85-b33982029eda"
+  },
+  {
+   "entity": "route:DELETE /tasks/:taskId",
+   "code": "PREEXISTING_MAIN_FAILURE",
+   "owner": "Claude Root (arcana-devs)",
+   "expires_at_utc": "2026-11-10T00:00:00Z",
+   "reason": "Owner-authenticated request returned 500, anonymous control 401. Cause: TasksService.delete removes the task (apps/api/src/tasks/tasks.service.ts:597) and then writes an activity row for it (:608), violating activity_log_task_id_fkey (Prisma P2003). Measured identically on main: muneral PR242 canary on 840e3be216844d57c163daf14ec0a5d51657f963 (exempted there, receipts/graph/pr242-main-debt-exemptions-20261014.json) and this PR's candidate-local canary on 1ae2f0e (receipts/canary/bcab5202/pr321-1ae2f0e/route-sweep.json); none of the files involved changed since 840e3be21684 and PR321 does not touch them. Fix work item: Muneral c23de150-edd9-470e-a45c-7dc8f3241bae. Reverse if the failure is not identical on main, if the fix does not remove the named cause, or at expiry.",
+   "ref": "c23de150-edd9-470e-a45c-7dc8f3241bae"
+  },
+  {
+   "entity": "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
+   "code": "PREEXISTING_MAIN_FAILURE",
+   "owner": "Claude Root (arcana-devs)",
+   "expires_at_utc": "2026-11-10T00:00:00Z",
+   "reason": "Controller aggregate fails only through its five membership routes (owner 403, anonymous 401); its other two routes verified. Cause: WorkspaceMemberGuard (apps/api/src/common/guards/workspace-member.guard.ts:31) reads req.actor, which ActorInterceptor (apps/api/src/common/interceptors/actor.interceptor.ts:30) sets only after guards run, so every caller is refused 'Human authentication required'. Measured identically on main: muneral PR242 canary on 840e3be216844d57c163daf14ec0a5d51657f963 (exempted there, receipts/graph/pr242-main-debt-exemptions-20261014.json) and this PR's candidate-local canary on 1ae2f0e (receipts/canary/bcab5202/pr321-1ae2f0e/route-sweep.json); none of the files involved changed since 840e3be21684 and PR321 does not touch them. Fix work item: Muneral e4d18373-1eae-4835-8d85-b33982029eda. Reverse if the failure is not identical on main, if the fix does not remove the named cause, or at expiry.",
+   "ref": "e4d18373-1eae-4835-8d85-b33982029eda"
+  },
+  {
+   "entity": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+   "code": "PREEXISTING_MAIN_FAILURE",
+   "owner": "Claude Root (arcana-devs)",
+   "expires_at_utc": "2026-11-10T00:00:00Z",
+   "reason": "Controller aggregate fails only through DELETE /tasks/:taskId (owner 500, anonymous 401); its other 22 bound routes verified, including GET /tasks/digest with the standing grant. Cause: TasksService.delete removes the task (apps/api/src/tasks/tasks.service.ts:597) and then writes an activity row for it (:608), violating activity_log_task_id_fkey (Prisma P2003). Measured identically on main: muneral PR242 canary on 840e3be216844d57c163daf14ec0a5d51657f963 (exempted there, receipts/graph/pr242-main-debt-exemptions-20261014.json) and this PR's candidate-local canary on 1ae2f0e (receipts/canary/bcab5202/pr321-1ae2f0e/route-sweep.json); none of the files involved changed since 840e3be21684 and PR321 does not touch them. Fix work item: Muneral c23de150-edd9-470e-a45c-7dc8f3241bae. Reverse if the failure is not identical on main, if the fix does not remove the named cause, or at expiry.",
+   "ref": "c23de150-edd9-470e-a45c-7dc8f3241bae"
+  }
+ ]
+}

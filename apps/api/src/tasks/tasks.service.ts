@@ -380,12 +380,16 @@ export class TasksService {
       generatedAt: audit.createdAt.toISOString(),
       auditEventId: audit.id,
       // The lapse warning rides the read the consumer already does — see
-      // workspace-digest-grants.ts on the two days of silence that cost.
-      grant: {
-        decision: grant.decision,
-        until: grant.until,
-        renewalDueAt: digestRenewalDueAt(grant),
-      },
+      // workspace-digest-grants.ts on the two days of silence that cost. A
+      // standing grant (DEC-AUP-0049 A7) has nothing to renew, so the key is
+      // omitted rather than sent empty.
+      grant: grant.standing
+        ? { decision: grant.decision, until: grant.until }
+        : {
+            decision: grant.decision,
+            until: grant.until,
+            renewalDueAt: digestRenewalDueAt(grant),
+          },
     };
   }
 
