@@ -5,7 +5,7 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "paused_safe"
  },
- "captured_at_utc": "2026-10-27T12:21:55Z",
+ "captured_at_utc": "2026-10-27T12:46:05Z",
  "change_set": {
   "base": "ef09669895361d722f6713dcdac3e49dab9894e9",
   "files": [
@@ -29,6 +29,12 @@
    },
    {
     "kind": "test",
+    "path": "apps/api/test/assembly/mutation-results.json",
+    "status": "M",
+    "uncovered": true
+   },
+   {
+    "kind": "test",
     "node_id": "code_unit:apps/api/test/workspace-digest-grants.spec.ts",
     "node_ids": [
      "code_unit:apps/api/test/workspace-digest-grants.spec.ts"
@@ -46,7 +52,7 @@
     "status": "A"
    }
   ],
-  "head": "64a05497a7364fcc015bf7424213926dddb65667",
+  "head": "d456cb1d79570ae29427418a52e5e2b88e8941b6",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -55,17 +61,17 @@
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
   "graph_digest": "sha256:0d143380232d5e35cdc83ce9588dc2c780fd1ea99ddb844dfb5ad9ab8547f624",
-  "path": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-final-work/verifier-out/graph-ef0966989536.json",
+  "path": "/home/dev/arcanada-inbox/contract-place/kcp0029-current-mutation-verifier-out/graph-ef0966989536.json",
   "source_commit": "ef09669895361d722f6713dcdac3e49dab9894e9"
  },
  "head_graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:7eeda0db4a0b5e3e9477361d082d5a1cecd7486a72e243313cfeb96a0e91810c",
-  "path": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-final-work/verifier-out/graph-head-64a05497a736.json",
-  "source_commit": "64a05497a7364fcc015bf7424213926dddb65667",
+  "graph_digest": "sha256:e9de795353d9b2d2ad263f7a05b7358b78c78c774520754a7f7668e8d290381f",
+  "path": "/home/dev/arcanada-inbox/contract-place/kcp0029-current-mutation-verifier-out/graph-head-d456cb1d7957.json",
+  "source_commit": "d456cb1d79570ae29427418a52e5e2b88e8941b6",
   "staleness": {
-   "checked_at_utc": "2026-10-27T12:22:42Z",
+   "checked_at_utc": "2026-10-27T12:47:03Z",
    "checked_nodes": 551,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
@@ -4031,14 +4037,14 @@
  },
  "notes": [
   "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
-  "profile: .arcana/verify.json at verified head; baseline: contracts/graph-verified-change/fitness-baseline/Arcanada-one__muneral.v1.json (valid); selected: none; disabled: none"
+  "profile: .arcana/verify.json at verified head; baseline: contracts/graph-verified-change/fitness-baseline/Arcanada-one__muneral.v1.json (valid); selected: none; disabled: none",
+  "DEC-AUP-0035 not applied to receipt:receipts/graph/change-admission-kcp-0029-expired-grant.json: it declares this run's work item KCP-0029, but the receipt is being written to /home/dev/arcanada-inbox/contract-place/kcp0029-current-mutation-car.json, which is outside this repository, so no path in the tree is the one this run supersedes."
  ],
  "producer": {
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261027T122155Z-64a05497",
- "receipt_path": "receipts/graph/change-admission-kcp-0029-expired-grant.json",
+ "receipt_id": "car-verify-20261027T124605Z-d456cb1d",
  "repo": {
   "name": "Arcanada-one/muneral",
   "path": "/home/dev/orca/workspaces/arcanada/KCP-0029-muneral-grant"
@@ -4350,7 +4356,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-27T12:22:42Z",
+  "checked_at_utc": "2026-10-27T12:47:02Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -4589,21 +4595,6 @@
   },
   {
    "content_hash": {
-    "base": null,
-    "head": "sha256:cb2cf64f7f585f2200085efa709e5ecb48a5473e777d916177d9db818718c232"
-   },
-   "entity": "receipt:receipts/graph/change-admission-kcp-0029-expired-grant.json",
-   "node_type": "receipt",
-   "path": "receipts/graph/change-admission-kcp-0029-expired-grant.json",
-   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it; superseded by construction — this run re-issues the receipt at receipts/graph/change-admission-kcp-0029-expired-grant.json for work item KCP-0029",
-   "rule": "DEC-AUP-0035",
-   "superseded": {
-    "receipt_path": "receipts/graph/change-admission-kcp-0029-expired-grant.json",
-    "work_item": "KCP-0029"
-   }
-  },
-  {
-   "content_hash": {
     "base": "sha256:d75da3efcea75673c9b8a6f46f0fab9a970690ee25a5e27185a177556f7dec4a",
     "head": "sha256:d75da3efcea75673c9b8a6f46f0fab9a970690ee25a5e27185a177556f7dec4a"
    },
@@ -4835,7 +4826,7 @@
   }
  ],
  "tree": {
-  "commit": "64a05497a7364fcc015bf7424213926dddb65667",
+  "commit": "d456cb1d79570ae29427418a52e5e2b88e8941b6",
   "dirty": false
  },
  "verdicts": [
@@ -5345,6 +5336,11 @@
    "verifier_ids": [
     "v-doc-reference"
    ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-kcp-0029-expired-grant.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "verdict": "not_measured"
   },
   {
    "entity": "route:DELETE /agents/keys/:keyId",
@@ -5916,8 +5912,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/orca/workspaces/arcanada/KCP-0029-muneral-grant/apps/api/node_modules/.bin/tsc -p /home/dev/orca/workspaces/arcanada/KCP-0029-muneral-grant/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-final-work/verifier-out/type-check-cyclh0ri/check.tsbuildinfo --listFiles",
-   "duration_s": 3.8,
+   "command": "/home/dev/orca/workspaces/arcanada/KCP-0029-muneral-grant/apps/api/node_modules/.bin/tsc -p /home/dev/orca/workspaces/arcanada/KCP-0029-muneral-grant/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/arcanada-inbox/contract-place/kcp0029-current-mutation-verifier-out/type-check-wucu80fm/check.tsbuildinfo --listFiles",
+   "duration_s": 3.86,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -6081,13 +6077,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-final-work/verifier-out/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-10-27T12:22:45Z",
+   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-current-mutation-verifier-out/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-10-27T12:47:06Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1454 files listed"
   },
   {
-   "command": "/home/dev/orca/workspaces/arcanada/KCP-0029-muneral-grant/apps/api/node_modules/.bin/tsc -p /home/dev/orca/workspaces/arcanada/KCP-0029-muneral-grant/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-final-work/verifier-out/type-check-ecy4ethd/check.tsbuildinfo --listFiles",
-   "duration_s": 6.09,
+   "command": "/home/dev/orca/workspaces/arcanada/KCP-0029-muneral-grant/apps/api/node_modules/.bin/tsc -p /home/dev/orca/workspaces/arcanada/KCP-0029-muneral-grant/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/arcanada-inbox/contract-place/kcp0029-current-mutation-verifier-out/type-check-b8n6j0nw/check.tsbuildinfo --listFiles",
+   "duration_s": 6.62,
    "entities": [
     "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts",
     "code_unit:apps/api/test/agent-project-dependencies.e2e.spec.ts",
@@ -6145,13 +6141,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
-   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-final-work/verifier-out/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-10-27T12:22:49Z",
+   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-current-mutation-verifier-out/v-type-check-apps-api-tsconfig-test.txt",
+   "started_at_utc": "2026-10-27T12:47:10Z",
    "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1617 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=ef0966989536, head=64a05497a736, graph=head graph)",
-   "duration_s": 4.71,
+   "command": "tools/graph/contract_diff.py.run_diff(base=ef0966989536, head=d456cb1d7957, graph=head graph)",
+   "duration_s": 4.79,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.service.ts",
@@ -6281,8 +6277,8 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-final-work/verifier-out/v-contract-diff.json",
-   "started_at_utc": "2026-10-27T12:22:56Z",
+   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-current-mutation-verifier-out/v-contract-diff.json",
+   "started_at_utc": "2026-10-27T12:47:17Z",
    "summary": "61→61 contracts, breaking 0, edges {'verified': 174}"
   },
   {
@@ -6397,13 +6393,13 @@
    "exit_code": 0,
    "id": "v-route-config",
    "kind": "config_schema",
-   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-final-work/verifier-out/v-route-config.txt",
-   "started_at_utc": "2026-10-27T12:23:00Z",
+   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-current-mutation-verifier-out/v-route-config.txt",
+   "started_at_utc": "2026-10-27T12:47:22Z",
    "summary": "51 route(s), 0 failed"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.12,
+   "duration_s": 0.11,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -6513,8 +6509,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-final-work/verifier-out/v-fitness.json",
-   "started_at_utc": "2026-10-27T12:23:01Z",
+   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-current-mutation-verifier-out/v-fitness.json",
+   "started_at_utc": "2026-10-27T12:47:22Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -6533,8 +6529,8 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-final-work/verifier-out/v-doc-reference.txt",
-   "started_at_utc": "2026-10-27T12:23:01Z",
+   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-current-mutation-verifier-out/v-doc-reference.txt",
+   "started_at_utc": "2026-10-27T12:47:22Z",
    "summary": "3 document(s), 0 failed"
   },
   {
@@ -6663,23 +6659,22 @@
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-final-work/verifier-out/v-canary.json",
-   "started_at_utc": "2026-10-27T12:23:01Z",
+   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-current-mutation-verifier-out/v-canary.json",
+   "started_at_utc": "2026-10-27T12:47:22Z",
    "summary": "0 canary result(s), 0 committed at head; 0 verified / 0 failed / 58 not_measured of 58 entities"
   }
  ],
  "verify": {
   "events": [
    {
-    "code": "SUPERSEDED_SELF_EXCLUSION",
-    "entity": "receipt:receipts/graph/change-admission-kcp-0029-expired-grant.json",
+    "code": "SUPERSEDED_SELF_NOT_APPLICABLE",
     "rule": "DEC-AUP-0035",
-    "text": "the receipt at receipts/graph/change-admission-kcp-0029-expired-grant.json is the previous version of the one this run is writing, for the same work item KCP-0029 — superseded by construction, so it owes this change no verdict"
+    "text": "DEC-AUP-0035 not applied to receipt:receipts/graph/change-admission-kcp-0029-expired-grant.json: it declares this run's work item KCP-0029, but the receipt is being written to /home/dev/arcanada-inbox/contract-place/kcp0029-current-mutation-car.json, which is outside this repository, so no path in the tree is the one this run supersedes."
    },
    {
     "code": "STRUCTURAL_EXCLUSION",
     "rule": "DEC-AUP-0034",
-    "text": "43 affected entity(ies) owe no verdict (receipt: 43): unchanged at both revisions and given no verifier by the matrix"
+    "text": "42 affected entity(ies) owe no verdict (receipt: 42): unchanged at both revisions and given no verifier by the matrix"
    }
   ],
   "required_by_entity": {
@@ -7266,9 +7261,9 @@
    ]
   },
   "seconds": {
-   "prepare": 2.64,
-   "total": 65.76,
-   "verifiers": 14.8
+   "prepare": 3.15,
+   "total": 76.96,
+   "verifiers": 15.46
   }
  },
  "work_item": "KCP-0029"
