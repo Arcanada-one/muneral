@@ -96,6 +96,35 @@ describe("the shipped workspace-digest grant list", () => {
 describe("workspaceDigestGrantState", () => {
   const now = new Date("2026-09-24T12:00:00Z");
 
+  it("keeps the former holder's expiry reason without restoring access", () => {
+    const formerAgent = "565171f7-a3ca-45a4-b50e-4d8b07cf0b86";
+    const formerWorkspace = "05f8cddf-e91f-430b-81e3-d67965aa4de3";
+    const until = "2026-10-27T00:00:00Z";
+    expect(WORKSPACE_DIGEST_GRANT_LIST).toEqual([]);
+    expect(
+      workspaceDigestGrantState(
+        formerAgent,
+        formerWorkspace,
+        new Date(until),
+      ),
+    ).toEqual({
+      kind: "expired",
+      entry: {
+        until,
+        decision: "DEC-AUP-0049",
+        agentId: formerAgent,
+        workspaceId: formerWorkspace,
+      },
+    });
+    expect(
+      workspaceDigestGrantState(
+        formerAgent,
+        formerWorkspace,
+        new Date(Date.parse(until) - 1),
+      ).kind,
+    ).toBe("none");
+  });
+
   it("answers `none` against the shipped list for a key it does not name", () => {
     // A2-294: `AGENT`/`WS` here are aup-orchestrator and a fixture workspace —
     // deliberately NOT the granted pair, so this still asserts the default-deny

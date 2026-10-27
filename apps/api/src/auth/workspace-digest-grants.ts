@@ -97,6 +97,16 @@ export const MAX_DIGEST_GRANT_WINDOW_DAYS = MAX_GRANT_WINDOW_DAYS;
  */
 export const WORKSPACE_DIGEST_GRANT_LIST: readonly WorkspaceDigestGrantEntry[] = [];
 
+/** Diagnostic tombstone only. It is never searched for a live authorization. */
+const RETIRED_WORKSPACE_DIGEST_GRANTS = [
+  {
+    agentId: "565171f7-a3ca-45a4-b50e-4d8b07cf0b86",
+    workspaceId: "05f8cddf-e91f-430b-81e3-d67965aa4de3",
+    until: "2026-10-27T00:00:00Z",
+    decision: "DEC-AUP-0049",
+  },
+] as const;
+
 /** Case-insensitive: the ids are PostgreSQL `uuid`s, which are. */
 const sameId = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 
@@ -120,7 +130,7 @@ function entriesFor(
 
 export type WorkspaceDigestGrantState =
   | { kind: "live"; entry: WorkspaceDigestGrantEntry }
-  | { kind: "expired"; entry: WorkspaceDigestGrantEntry }
+  | { kind: "expired"; entry: Pick<WorkspaceDigestGrantEntry, "until" | "decision"> }
   | { kind: "none" };
 
 /**
@@ -135,7 +145,15 @@ export function workspaceDigestGrantState(
   grants: readonly WorkspaceDigestGrantEntry[] = WORKSPACE_DIGEST_GRANT_LIST,
 ): WorkspaceDigestGrantState {
   const entries = entriesFor(agentId, workspaceId, grants);
-  if (entries.length === 0) return { kind: "none" };
+  if (entries.length === 0) {
+    const retired = RETIRED_WORKSPACE_DIGEST_GRANTS.find(
+      (g) =>
+        sameId(g.agentId, agentId) &&
+        sameId(g.workspaceId, workspaceId) &&
+        now.getTime() >= Date.parse(g.until),
+    );
+    return retired ? { kind: "expired", entry: retired } : { kind: "none" };
+  }
   const live = entries.find((e) => now.getTime() < Date.parse(e.until));
   return live
     ? { kind: "live", entry: live }
