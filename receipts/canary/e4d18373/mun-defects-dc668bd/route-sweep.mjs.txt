@@ -1,8 +1,7 @@
 // Candidate-local HTTP route sweep, adapted from the PR #321 runner (work item
 // bcab5202) for the member-guard / task-delete fix (work items e4d18373 and
-// c23de150). Differences from the PR #321 copy: the default port, and
-// GET /tasks/digest, which on this base must refuse with GRANT_EXPIRED (see
-// the comment at that probe).
+// c23de150). Differences from the PR #321 copy: the default port, and an
+// optional expectCode on probe() (unused by any probe in this version).
 // Boots nothing itself: it probes an already-running candidate API on loopback,
 // built from the measured commit, against a disposable synthetic PostgreSQL.
 // For every route: one authenticated probe with an expected status, and one
@@ -134,13 +133,11 @@ await probe(R('GET', '/tasks/project/:projectId'), 'GET', `/tasks/project/${PROJ
 await probe(R('GET', '/tasks/project/:projectId/staleness'), 'GET', `/tasks/project/${PROJ}/staleness`, { expect: 200 });
 await probe(R('GET', '/tasks/project/:projectId/index'), 'GET', `/tasks/project/${PROJ}/index`,
   { token: orchKey, who: 'orchestrator-key', expect: 200 });
-// Not under change here. On this base (main ef09669) the only shipped digest
-// grant (arcanada-assistant, DEC-AUP-0049) has `until` 2026-10-27T00:00:00Z,
-// which has passed, so the route's specified answer to that key is 403 with
-// the machine-readable GRANT_EXPIRED. The probe pins that answer exactly (status
-// AND code), not a generic refusal. Renewal is PR #321's change, not this one.
+// Not under change here; exercised because the route is in the impact set.
+// Since PR #321 (main aae134b) the assistant's DEC-AUP-0049 grant is standing,
+// so the route's specified answer to that key is 200.
 const dg = await probe(R('GET', '/tasks/digest'), 'GET', '/tasks/digest',
-  { token: assistantKey, who: 'assistant-key', expect: 403, expectCode: 'GRANT_EXPIRED' });
+  { token: assistantKey, who: 'assistant-key', expect: 200 });
 fs.writeFileSync(new URL('./digest-grant.json', import.meta.url), JSON.stringify(dg.json?.grant ?? null));
 
 await probe(R('PATCH', '/tasks/:taskId/status'), 'PATCH', `/tasks/${T1}/status`,

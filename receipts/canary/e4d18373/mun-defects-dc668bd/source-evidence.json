@@ -1,11 +1,11 @@
 {
   "schema": "MeasuredGitSource/v1",
-  "commit": "a2fe29b1628b5b0782c48227413f5c721870d750",
-  "tree": "da60ffef2d24349d8c978887dcae2955d39944a6",
+  "commit": "dc668bd2709292db0e1cca8aaf4db358f0b345c6",
+  "tree": "bfd81d310eca7b277dd695d95d5a5ac1cd6cfb8a",
   "dirty": false,
   "producer": {
     "tool": "MUN member-guard/task-delete candidate-local HTTP route-sweep runner (route-sweep.mjs)",
     "version": "1"
   },
-  "captured_at_utc": "2026-10-27T21:07:34Z"
+  "captured_at_utc": "2026-10-27T21:23:35Z"
 }
