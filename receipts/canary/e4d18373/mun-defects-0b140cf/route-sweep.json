@@ -1,20 +1,20 @@
 {
  "schema": "CanaryResult/v1",
- "captured_at_utc": "2026-10-27T21:23:35Z",
+ "captured_at_utc": "2026-10-27T21:51:28Z",
  "card": "e4d18373-1eae-4835-8d85-b33982029eda",
  "phase": "pre",
  "plan": {
-  "id": "mun-member-guard-task-delete-dc668bd-51-route-sweep",
+  "id": "mun-member-guard-task-delete-0b140cf-51-route-sweep",
   "path": "plan.json",
-  "digest": "sha256:d2373e8f45b84916cac1d881bdda35ec2f8768e1641acf6c31d11c5fd9c13f12"
+  "digest": "sha256:4140832a15ab29f5d7e07f74f8340f058181b57edfb5557786ddc7daf1f5762f"
  },
  "subject": {
   "schema": "GitCanarySubject/v1",
-  "commit": "dc668bd2709292db0e1cca8aaf4db358f0b345c6",
-  "tree": "bfd81d310eca7b277dd695d95d5a5ac1cd6cfb8a",
+  "commit": "0b140cf8a585034bfe3a4f61e7be5bf7fd9c1b79",
+  "tree": "97b03ebda6ab4d38f6581bc13552477a26267147",
   "evidence": {
    "path": "source-evidence.json",
-   "sha256": "66479bdcddc6e40defb188ce622e3f29a154aa1fad7e360375fe519149cfe9ea",
+   "sha256": "fee0f982eb415ca06e82f2a4c66d6dec93fd5241c0796ef22fbd37a40eb0ffd7",
    "source_field": "commit"
   }
  },
@@ -446,7 +446,7 @@
    "status": 201,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 201, received 201",
-   "response_sha256": "bbdabbf2c9270d87ee368457e541b0fc8d2b81a08ac6ba905dec6746bf2d0e77",
+   "response_sha256": "db678c1c4e862107ed2731fc7418485c6e942fc224f167ef628018ce6e71b196",
    "response_bytes": 207
   },
   {
@@ -466,11 +466,11 @@
    "kind": "http",
    "executed": true,
    "method": "POST",
-   "path": "/agents/841c600a-b3e5-4bce-932a-ccedde3a20a9/keys",
+   "path": "/agents/5830ea89-c7b7-4a9f-a347-e4742fd84b11/keys",
    "status": 201,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 201, received 201",
-   "response_sha256": "30be8c5efece6953fe579aa887001e7784e559aa7aebcc9474caea8f27ab728c",
+   "response_sha256": "46902130a527c7ef50680808a28ad2140a400371586eea975baf5f258b3ae305",
    "response_bytes": 96
   },
   {
@@ -478,7 +478,7 @@
    "kind": "http",
    "executed": true,
    "method": "POST",
-   "path": "/agents/841c600a-b3e5-4bce-932a-ccedde3a20a9/keys",
+   "path": "/agents/5830ea89-c7b7-4a9f-a347-e4742fd84b11/keys",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -490,11 +490,11 @@
    "kind": "http",
    "executed": true,
    "method": "POST",
-   "path": "/agents/keys/45ddd799-a09f-4bb9-8d3a-513fbb0376f9/rotate",
+   "path": "/agents/keys/d35edbbe-f0a3-46d2-8117-65643003af79/rotate",
    "status": 201,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200|201, received 201",
-   "response_sha256": "f5287803bd15aeadebd8c3bac68082f92a21362bcf974b142d0f199fe9e9fb99",
+   "response_sha256": "12f02428967b39891f3ef6040740c809aa90718f2987db184e89c69fb6567a27",
    "response_bytes": 96
   },
   {
@@ -502,7 +502,7 @@
    "kind": "http",
    "executed": true,
    "method": "POST",
-   "path": "/agents/keys/45ddd799-a09f-4bb9-8d3a-513fbb0376f9/rotate",
+   "path": "/agents/keys/d35edbbe-f0a3-46d2-8117-65643003af79/rotate",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -518,7 +518,7 @@
    "status": 200,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200, received 200",
-   "response_sha256": "1910fe9997dd23742af599336860f41b7bca65e66997c3f51cbae5fb4ee95c07",
+   "response_sha256": "864184c5fecd0041af5ed861ebaf5bc3c221793ef5fe04eb26ea2ad9f5582ff4",
    "response_bytes": 633
   },
   {
@@ -542,7 +542,7 @@
    "status": 201,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 201, received 201",
-   "response_sha256": "f0357689b81c6033fd757778f3d84d7a120f7ad29258c55ec3c35316724cb18e",
+   "response_sha256": "90794433c4ef45e758af4da244eb0b6e42fe8e4e429abd972f39d33d4b7aa43e",
    "response_bytes": 219
   },
   {
@@ -566,7 +566,7 @@
    "status": 200,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200, received 200",
-   "response_sha256": "056a34664b74a9bd823f20aa36dd7bef3b6796ee15895b581794239ea6226cad",
+   "response_sha256": "8409a9c5e1c1fb3985328161cd38712cc8eb1a3bc30f8df28dc8a839006ed986",
    "response_bytes": 419
   },
   {
@@ -590,7 +590,7 @@
    "status": 200,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200, received 200",
-   "response_sha256": "984456e6cfb7a11503e0cc247f7475cfb641161dd74d16fb3f19a173ca01b74a",
+   "response_sha256": "8baeef0cb384403fda060b6f246bc26fc3102fec69e31896351e1427e13b4455",
    "response_bytes": 197
   },
   {
@@ -614,7 +614,7 @@
    "status": 200,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200, received 200",
-   "response_sha256": "f657848c26cc7a27e38cc9d806fcac0ebf95f5e0e572341dfe41f8e41178c270",
+   "response_sha256": "487e31c7b281ed2f062928cbb25e2986631f3c471bb3acee65766f2d0309f44e",
    "response_bytes": 650
   },
   {
@@ -710,7 +710,7 @@
    "status": 201,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 201, received 201",
-   "response_sha256": "18f0cf8e8b3aa65d485af3ce80357898544c9bc3c3f64386d29479dc19d6cb96",
+   "response_sha256": "e9519df2f58f127bfebdd43f162260765421ed9f9a6a8bcd6769492afe76f7cb",
    "response_bytes": 233
   },
   {
@@ -734,7 +734,7 @@
    "status": 200,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200, received 200",
-   "response_sha256": "25cbe28922138fc317b7f2d7cf095b4efddd0a2c5a7fe475ecfe829b66dfc8e3",
+   "response_sha256": "8efa51ef4dffbb15dbadc5563371205ff5c73d59c4cc8ab021b758d95f23e602",
    "response_bytes": 452
   },
   {
@@ -758,7 +758,7 @@
    "status": 200,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200, received 200",
-   "response_sha256": "2d48c4ff2edddc34fa4513a55ad99d8e561b6a00413a5ac6c10c6389383046e5",
+   "response_sha256": "5007134176b47c75f5a32104e37be4225f7693f2ee41b0c5acc89b64aa9e7173",
    "response_bytes": 216
   },
   {
@@ -782,7 +782,7 @@
    "status": 201,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 201, received 201",
-   "response_sha256": "56095150a93dd5000189a5be61bd7562ce0cba6290e92f8df60af49ce6187af6",
+   "response_sha256": "2ee1c309b698e648122e5be99b7c2e877cd1d540019ade1ef32252f8dd4e3f75",
    "response_bytes": 469
   },
   {
@@ -806,7 +806,7 @@
    "status": 200,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200, received 200",
-   "response_sha256": "139fa2cd44ebf67e7fd0ca88687519de0beeecb366141a56ed2adaa0301ddeb0",
+   "response_sha256": "000939fa6fc3626e9b5c53da5b7d9e1c74a41d96c30cf9a10a9a8eb38b696167",
    "response_bytes": 1516
   },
   {
@@ -826,11 +826,11 @@
    "kind": "http",
    "executed": true,
    "method": "GET",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52",
    "status": 200,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200, received 200",
-   "response_sha256": "56095150a93dd5000189a5be61bd7562ce0cba6290e92f8df60af49ce6187af6",
+   "response_sha256": "2ee1c309b698e648122e5be99b7c2e877cd1d540019ade1ef32252f8dd4e3f75",
    "response_bytes": 469
   },
   {
@@ -838,7 +838,7 @@
    "kind": "http",
    "executed": true,
    "method": "GET",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -854,7 +854,7 @@
    "status": 200,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200, received 200",
-   "response_sha256": "7310ae7cd9fc3cb89055786ffc687c046895ad51ede90de6c8a2b7f44567eb00",
+   "response_sha256": "613ec49328d7c70a507917bd8a916f4ad0df624cf4a65b59535b159357a07edc",
    "response_bytes": 1474
   },
   {
@@ -902,7 +902,7 @@
    "status": 200,
    "outcome": "verified",
    "reason": "real candidate-local request as orchestrator-key; expected 200, received 200",
-   "response_sha256": "4d64ec15f44b0f10cd87b3e187c4ba046908eb5faf34fca5182e9177ecfc1b84",
+   "response_sha256": "c360f54f33b569ac2049510eb66ca1163239dfed8144992642d9d51dad093386",
    "response_bytes": 1206
   },
   {
@@ -926,7 +926,7 @@
    "status": 200,
    "outcome": "verified",
    "reason": "real candidate-local request as assistant-key; expected 200, received 200",
-   "response_sha256": "7744563fec25cedc7fca0fd6da6f98af3a79fe8cd1f5bd675fa51496629ed58e",
+   "response_sha256": "850143070ba2ec73082a6a7ed4b64b56cd38c267eef56d572fbbf7fff1a9ca20",
    "response_bytes": 1009
   },
   {
@@ -946,11 +946,11 @@
    "kind": "http",
    "executed": true,
    "method": "PATCH",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/status",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/status",
    "status": 200,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200, received 200",
-   "response_sha256": "1071f10b61e5f1c1e06c53980a9e70e5e77d9bd241cc020b3b0c3575585c362b",
+   "response_sha256": "e186862ac7badab49575b9ebbf05b0c1a8899f0241b4ef8f25a16a828997353d",
    "response_bytes": 476
   },
   {
@@ -958,7 +958,7 @@
    "kind": "http",
    "executed": true,
    "method": "PATCH",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/status",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/status",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -970,7 +970,7 @@
    "kind": "http",
    "executed": true,
    "method": "POST",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/comments",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/comments",
    "status": 201,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 201, received 201",
@@ -982,7 +982,7 @@
    "kind": "http",
    "executed": true,
    "method": "POST",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/comments",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/comments",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -994,11 +994,11 @@
    "kind": "http",
    "executed": true,
    "method": "GET",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/activity",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/activity",
    "status": 200,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200, received 200",
-   "response_sha256": "dda55edc911b9b61e0973ed3242c97f9cb9cefe841f2c18c450d2dcdf515afba",
+   "response_sha256": "ea9d69b44166ec25804ae755ab1da05a0b17d060b7bf55dde9e2669f80b2f33d",
    "response_bytes": 1014
   },
   {
@@ -1006,7 +1006,7 @@
    "kind": "http",
    "executed": true,
    "method": "GET",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/activity",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/activity",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -1018,11 +1018,11 @@
    "kind": "http",
    "executed": true,
    "method": "POST",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/checklist",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/checklist",
    "status": 201,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 201, received 201",
-   "response_sha256": "fa9d5bc0728a3b1e233d092c6631c3dbb82714a05a69fa5bc44b7f4ef9f6ae1d",
+   "response_sha256": "db85be4b4ef3cd9f99707126a98397d9cee3796633d5ba39a1e020506ab71aa8",
    "response_bytes": 185
   },
   {
@@ -1030,7 +1030,7 @@
    "kind": "http",
    "executed": true,
    "method": "POST",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/checklist",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/checklist",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -1042,11 +1042,11 @@
    "kind": "http",
    "executed": true,
    "method": "GET",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/checklist",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/checklist",
    "status": 200,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200, received 200",
-   "response_sha256": "c7fd66a82f775116b6f44614d67a4e08f818efc00d2de426ad42b5fa447232a8",
+   "response_sha256": "01b0a64cc235dbe0ddd1487984f46f56804f95ccbb4d81ee47ea0c2dcdf3fd76",
    "response_bytes": 187
   },
   {
@@ -1054,7 +1054,7 @@
    "kind": "http",
    "executed": true,
    "method": "GET",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/checklist",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/checklist",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -1066,11 +1066,11 @@
    "kind": "http",
    "executed": true,
    "method": "PATCH",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/checklist/252b363a-145e-42e7-b45b-7ddb4fe91b64",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/checklist/4a907232-d581-4fef-a0e2-35f40664fb23",
    "status": 200,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200, received 200",
-   "response_sha256": "e0090bcd18b7c1b49c2cdf8cdc66af00a1156b3eeac4c9fda256c5de69fa4d12",
+   "response_sha256": "9fe5de417c55468011e19da667e4b9646726f7dee8a26ff960de56c43504fff6",
    "response_bytes": 184
   },
   {
@@ -1078,7 +1078,7 @@
    "kind": "http",
    "executed": true,
    "method": "PATCH",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/checklist/252b363a-145e-42e7-b45b-7ddb4fe91b64",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/checklist/4a907232-d581-4fef-a0e2-35f40664fb23",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -1090,7 +1090,7 @@
    "kind": "http",
    "executed": true,
    "method": "DELETE",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/checklist/252b363a-145e-42e7-b45b-7ddb4fe91b64",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/checklist/4a907232-d581-4fef-a0e2-35f40664fb23",
    "status": 204,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200|204, received 204",
@@ -1102,7 +1102,7 @@
    "kind": "http",
    "executed": true,
    "method": "DELETE",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/checklist/252b363a-145e-42e7-b45b-7ddb4fe91b64",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/checklist/4a907232-d581-4fef-a0e2-35f40664fb23",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -1114,11 +1114,11 @@
    "kind": "http",
    "executed": true,
    "method": "POST",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/dependencies",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/dependencies",
    "status": 201,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 201, received 201",
-   "response_sha256": "d0335a083ffbd718f8de873699b2d9beb707a22370ae94a7552f250f7706b154",
+   "response_sha256": "08e30daef4219143a0222bc9608adcd50637d08c80e97965c9e34516618c5b60",
    "response_bytes": 167
   },
   {
@@ -1126,7 +1126,7 @@
    "kind": "http",
    "executed": true,
    "method": "POST",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/dependencies",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/dependencies",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -1138,11 +1138,11 @@
    "kind": "http",
    "executed": true,
    "method": "GET",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/dependencies",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/dependencies",
    "status": 200,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200, received 200",
-   "response_sha256": "f519eea716922d33f018c9e35a566031c54dc9d9bf83dfb0fcf62daf01ce936e",
+   "response_sha256": "da4e0105189609ea08ddcf90443c26917c22381bff89d18267ad93b53f457c51",
    "response_bytes": 169
   },
   {
@@ -1150,7 +1150,7 @@
    "kind": "http",
    "executed": true,
    "method": "GET",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/dependencies",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/dependencies",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -1162,11 +1162,11 @@
    "kind": "http",
    "executed": true,
    "method": "GET",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/dependency-graph",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/dependency-graph",
    "status": 200,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200, received 200",
-   "response_sha256": "1b770a83bbe0e42d53c064e6535012db4f4e027d177f4cfe3c156e10c9627c0d",
+   "response_sha256": "d7468c9ae7edd8224d22927bbfa2f1e9b29b7f30ec4aab7bb9f55d46272177c7",
    "response_bytes": 305
   },
   {
@@ -1174,7 +1174,7 @@
    "kind": "http",
    "executed": true,
    "method": "GET",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/dependency-graph",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/dependency-graph",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -1186,11 +1186,11 @@
    "kind": "http",
    "executed": true,
    "method": "GET",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/readiness",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/readiness",
    "status": 200,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200, received 200",
-   "response_sha256": "f61686bf24eaa9f3117001a1674d79ce01e22248ba3a68c13ecf49d8f209374a",
+   "response_sha256": "f65fa0c2f518230666bf7e41312142cc395579813eeec20e176d34875a047b3c",
    "response_bytes": 401
   },
   {
@@ -1198,7 +1198,7 @@
    "kind": "http",
    "executed": true,
    "method": "GET",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/readiness",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/readiness",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -1210,7 +1210,7 @@
    "kind": "http",
    "executed": true,
    "method": "DELETE",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/dependencies/5db6b4f1-399e-49d3-8f4a-b1ad27a16df0",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/dependencies/30c2d2f4-8669-4144-b56c-8202aaba3d98",
    "status": 204,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200|204, received 204",
@@ -1222,7 +1222,7 @@
    "kind": "http",
    "executed": true,
    "method": "DELETE",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/dependencies/5db6b4f1-399e-49d3-8f4a-b1ad27a16df0",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/dependencies/30c2d2f4-8669-4144-b56c-8202aaba3d98",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -1234,11 +1234,11 @@
    "kind": "http",
    "executed": true,
    "method": "POST",
-   "path": "/tasks/a34aa98d-8084-4f03-84d3-0c0da353a8c5/redactions",
+   "path": "/tasks/397a6da8-d894-495a-ae15-77c436764eaa/redactions",
    "status": 201,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200|201, received 201",
-   "response_sha256": "ed038a61f582566f82229e9e46ba26b090bd951027fd389321a01d8097a4a818",
+   "response_sha256": "7078c5bbdfa4f33fb8e0a21c172afd3bc021236ddfb0f368cd4cb24e476cbdb9",
    "response_bytes": 567
   },
   {
@@ -1246,7 +1246,7 @@
    "kind": "http",
    "executed": true,
    "method": "POST",
-   "path": "/tasks/a34aa98d-8084-4f03-84d3-0c0da353a8c5/redactions",
+   "path": "/tasks/397a6da8-d894-495a-ae15-77c436764eaa/redactions",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -1258,11 +1258,11 @@
    "kind": "http",
    "executed": true,
    "method": "POST",
-   "path": "/agents/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/assign",
+   "path": "/agents/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/assign",
    "status": 201,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200|201, received 201",
-   "response_sha256": "b859a7ded29071c35895c2d475fb75c21d7fa0da39ff182f064c3feaff5930c3",
+   "response_sha256": "7c969b78a30fbeea2fc2ab500097e61cbd9c5cf7000a794feb2e1d9b3ebaeb6c",
    "response_bytes": 156
   },
   {
@@ -1270,7 +1270,7 @@
    "kind": "http",
    "executed": true,
    "method": "POST",
-   "path": "/agents/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/assign",
+   "path": "/agents/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/assign",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -1286,7 +1286,7 @@
    "status": 200,
    "outcome": "verified",
    "reason": "real candidate-local request as worker-key; expected 200, received 200",
-   "response_sha256": "adcdf0f9f57521699d2ad489119f64ec5d32f4248316b9b5375fa944ece2497c",
+   "response_sha256": "af877a24bbceb00e4158f4e5b6d55ee579a30b83739292bdd29acf58eed4ddb3",
    "response_bytes": 642
   },
   {
@@ -1306,11 +1306,11 @@
    "kind": "http",
    "executed": true,
    "method": "GET",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/field-changes",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/field-changes",
    "status": 200,
    "outcome": "verified",
    "reason": "real candidate-local request as worker-key; expected 200, received 200",
-   "response_sha256": "b733cd7cd542eafd8a1958d7cadb49f7b935d6917c313ffa4c2636d3c9549a80",
+   "response_sha256": "7dd9d988ba0a5df34406ce72da8451663be1487f04eb74f94839c3b7e12e5258",
    "response_bytes": 1240
   },
   {
@@ -1318,7 +1318,7 @@
    "kind": "http",
    "executed": true,
    "method": "GET",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/field-changes",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/field-changes",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -1330,7 +1330,7 @@
    "kind": "http",
    "executed": true,
    "method": "POST",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/field-ack",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/field-ack",
    "status": 204,
    "outcome": "verified",
    "reason": "real candidate-local request as worker-key; expected 204, received 204",
@@ -1342,7 +1342,7 @@
    "kind": "http",
    "executed": true,
    "method": "POST",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/field-ack",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/field-ack",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -1354,11 +1354,11 @@
    "kind": "http",
    "executed": true,
    "method": "PATCH",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/contract",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/contract",
    "status": 200,
    "outcome": "verified",
    "reason": "real candidate-local request as worker-key; expected 200, received 200",
-   "response_sha256": "4d78aeb8b53ca69c6f430bd2e1e33897bdbd981446d818a20b1f48aaa7865d28",
+   "response_sha256": "8f9314aea9cd803000de8df1e1a5bb0ab6c707f3e328d67586cf4f16395ed20a",
    "response_bytes": 545
   },
   {
@@ -1366,7 +1366,7 @@
    "kind": "http",
    "executed": true,
    "method": "PATCH",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/contract",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/contract",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -1378,11 +1378,11 @@
    "kind": "http",
    "executed": true,
    "method": "POST",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/evidence",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/evidence",
    "status": 201,
    "outcome": "verified",
    "reason": "real candidate-local request as worker-key; expected 201, received 201",
-   "response_sha256": "202d35a080b7609f2125f14ae030030c652572622cf75e45f9a007bf82159c5d",
+   "response_sha256": "e1d893478893de231bdf90f108f5d4b30930968b16764e1c7cf40c7106dac33b",
    "response_bytes": 403
   },
   {
@@ -1390,7 +1390,7 @@
    "kind": "http",
    "executed": true,
    "method": "POST",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/evidence",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/evidence",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -1402,11 +1402,11 @@
    "kind": "http",
    "executed": true,
    "method": "GET",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/evidence",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/evidence",
    "status": 200,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200, received 200",
-   "response_sha256": "a3802da74d8727cee302e6962cc51f219fae5ddf5edfae0c125396510357fd70",
+   "response_sha256": "2b56ee1318a75642bf88a43cbc9040a7eddd3181adb36fa2ffbac1770aed7995",
    "response_bytes": 458
   },
   {
@@ -1414,7 +1414,7 @@
    "kind": "http",
    "executed": true,
    "method": "GET",
-   "path": "/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/evidence",
+   "path": "/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/evidence",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -1454,7 +1454,7 @@
    "status": 200,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200, received 200",
-   "response_sha256": "81736a571f9c3cefee2ffef64158f7476735dd19a183e6f59fc640298d868f18",
+   "response_sha256": "14ec0adb04fe91c81eeac9ec50e244dc5c89ab079369ea7fc9def1234ee1031e",
    "response_bytes": 400
   },
   {
@@ -1474,7 +1474,7 @@
    "kind": "http",
    "executed": true,
    "method": "DELETE",
-   "path": "/agents/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/assign/841c600a-b3e5-4bce-932a-ccedde3a20a9",
+   "path": "/agents/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/assign/5830ea89-c7b7-4a9f-a347-e4742fd84b11",
    "status": 204,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200|204, received 204",
@@ -1486,7 +1486,7 @@
    "kind": "http",
    "executed": true,
    "method": "DELETE",
-   "path": "/agents/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/assign/841c600a-b3e5-4bce-932a-ccedde3a20a9",
+   "path": "/agents/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/assign/5830ea89-c7b7-4a9f-a347-e4742fd84b11",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -1502,7 +1502,7 @@
    "status": 201,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 201, received 201",
-   "response_sha256": "4a37d346d7ac890237034b9deb27636e43b3fa53842076cd7979fb5603100499",
+   "response_sha256": "a9a6603772f0d9ec7f1c53bc462304f405ed0daed83b6bb4b14fb617668beb86",
    "response_bytes": 205
   },
   {
@@ -1522,11 +1522,11 @@
    "kind": "http",
    "executed": true,
    "method": "GET",
-   "path": "/projects/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/git-refs",
+   "path": "/projects/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/git-refs",
    "status": 200,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200, received 200",
-   "response_sha256": "b463c2b3bac40d1a389a08738506708b2a0dca3d753f5ba18c7f737ccb7c8343",
+   "response_sha256": "aa2b0d90237513376279dc5370ff122f643e4faea4d127eb492a0b77d77c0a59",
    "response_bytes": 207
   },
   {
@@ -1534,7 +1534,7 @@
    "kind": "http",
    "executed": true,
    "method": "GET",
-   "path": "/projects/tasks/347cf1ac-3a13-4d3c-9f4f-f631ec7e741d/git-refs",
+   "path": "/projects/tasks/bfad1b3b-168a-4cc1-bbb7-07ace86f8a52/git-refs",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -1546,7 +1546,7 @@
    "kind": "http",
    "executed": true,
    "method": "DELETE",
-   "path": "/projects/git-refs/290b5073-3da7-4d04-82b9-3fac16983fbd",
+   "path": "/projects/git-refs/70070de1-7ff2-4874-a688-46b051110bc1",
    "status": 204,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200|204, received 204",
@@ -1558,7 +1558,7 @@
    "kind": "http",
    "executed": true,
    "method": "DELETE",
-   "path": "/projects/git-refs/290b5073-3da7-4d04-82b9-3fac16983fbd",
+   "path": "/projects/git-refs/70070de1-7ff2-4874-a688-46b051110bc1",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -1570,7 +1570,7 @@
    "kind": "http",
    "executed": true,
    "method": "DELETE",
-   "path": "/tasks/3802f1cf-1068-4012-b33e-d84e2489fe69",
+   "path": "/tasks/db599ed0-59e4-4465-bc54-242a1da66814",
    "status": 204,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200|204, received 204",
@@ -1582,7 +1582,7 @@
    "kind": "http",
    "executed": true,
    "method": "DELETE",
-   "path": "/tasks/3802f1cf-1068-4012-b33e-d84e2489fe69",
+   "path": "/tasks/db599ed0-59e4-4465-bc54-242a1da66814",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -1594,7 +1594,7 @@
    "kind": "http",
    "executed": true,
    "method": "DELETE",
-   "path": "/projects/6c364a56-ba4c-4e2f-985b-239e2a51313f",
+   "path": "/projects/f2e564dc-ebfa-4421-97f5-c56affbf536d",
    "status": 204,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200|204, received 204",
@@ -1606,7 +1606,7 @@
    "kind": "http",
    "executed": true,
    "method": "DELETE",
-   "path": "/projects/6c364a56-ba4c-4e2f-985b-239e2a51313f",
+   "path": "/projects/f2e564dc-ebfa-4421-97f5-c56affbf536d",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -1622,7 +1622,7 @@
    "status": 200,
    "outcome": "verified",
    "reason": "real candidate-local request as worker-key; expected 200|201|204, received 200",
-   "response_sha256": "ccc285f73b1c12dab080526bef02ff22da8df982f00099042a0b4986a20c74f9",
+   "response_sha256": "1752933fac6d34d02152908a4eb7f8ce7c4da7652125a67b4f124f032b9be125",
    "response_bytes": 136
   },
   {
@@ -1642,7 +1642,7 @@
    "kind": "http",
    "executed": true,
    "method": "DELETE",
-   "path": "/agents/keys/7e29d789-536c-4ca8-9a36-ef69d6d4c61f",
+   "path": "/agents/keys/9d7d695e-27d3-48e8-be09-23a7c8bb18ce",
    "status": 204,
    "outcome": "verified",
    "reason": "real candidate-local request as owner; expected 200|204, received 204",
@@ -1654,7 +1654,7 @@
    "kind": "http",
    "executed": true,
    "method": "DELETE",
-   "path": "/agents/keys/7e29d789-536c-4ca8-9a36-ef69d6d4c61f",
+   "path": "/agents/keys/9d7d695e-27d3-48e8-be09-23a7c8bb18ce",
    "status": 401,
    "outcome": "verified",
    "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
@@ -1663,7 +1663,7 @@
   }
  ],
  "rules": [
-  "Entity rows are exactly the 38 not_measured entities of the merged-head dry-run CAR (aae134b..dc668bd) (32 routes, 3 API controllers, 3 web API clients); every one of the 51 swept routes is in probes.",
+  "Entity rows are exactly the 38 not_measured entities of the merged-head dry-run CAR (aae134b..dc668bd; head 0b140cf adds only apps/api/package.json and mutation-results.json) (32 routes, 3 API controllers, 3 web API clients); every one of the 51 swept routes is in probes.",
   "Each route receives an authenticated loopback HTTP request expecting its success status and an unauthenticated control expecting 401|403. Code-unit rows aggregate their bound routes: the 3 controllers as bound in PR321's plan; web tasks.ts and task-detail-read.ts bound to route:GET /tasks; web workspaces.ts bound to route:GET /workspaces and route:POST /workspaces.",
   "GET /tasks/digest is called with a key of the real arcanada-assistant agent id in its real workspace id; since PR 321 (base aae134b) that grant is standing, so the probe expects 200."
  ]

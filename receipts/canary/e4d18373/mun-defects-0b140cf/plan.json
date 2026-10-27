@@ -1,16 +1,16 @@
 {
  "schema": "CanaryPlan/v1",
- "id": "mun-member-guard-task-delete-dc668bd-51-route-sweep",
+ "id": "mun-member-guard-task-delete-0b140cf-51-route-sweep",
  "environment": "candidate-local Nest API on loopback with disposable PostgreSQL 16 and private Redis; synthetic owner and agent principals",
  "base_url": "http://127.0.0.1:35781/api/v1",
- "head_sha": "dc668bd2709292db0e1cca8aaf4db358f0b345c6",
+ "head_sha": "0b140cf8a585034bfe3a4f61e7be5bf7fd9c1b79",
  "subject": {
   "schema": "GitCanarySubject/v1",
-  "commit": "dc668bd2709292db0e1cca8aaf4db358f0b345c6",
-  "tree": "bfd81d310eca7b277dd695d95d5a5ac1cd6cfb8a",
+  "commit": "0b140cf8a585034bfe3a4f61e7be5bf7fd9c1b79",
+  "tree": "97b03ebda6ab4d38f6581bc13552477a26267147",
   "evidence": {
    "path": "source-evidence.json",
-   "sha256": "66479bdcddc6e40defb188ce622e3f29a154aa1fad7e360375fe519149cfe9ea",
+   "sha256": "fee0f982eb415ca06e82f2a4c66d6dec93fd5241c0796ef22fbd37a40eb0ffd7",
    "source_field": "commit"
   }
  },
