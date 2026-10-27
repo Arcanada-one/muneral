@@ -5,7 +5,7 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "paused_safe"
  },
- "captured_at_utc": "2026-10-27T12:14:48Z",
+ "captured_at_utc": "2026-10-27T12:21:55Z",
  "change_set": {
   "base": "ef09669895361d722f6713dcdac3e49dab9894e9",
   "files": [
@@ -20,15 +20,33 @@
    },
    {
     "kind": "test",
+    "node_id": "code_unit:apps/api/test/agent-task-scope.guard.spec.ts",
+    "node_ids": [
+     "code_unit:apps/api/test/agent-task-scope.guard.spec.ts"
+    ],
+    "path": "apps/api/test/agent-task-scope.guard.spec.ts",
+    "status": "M"
+   },
+   {
+    "kind": "test",
     "node_id": "code_unit:apps/api/test/workspace-digest-grants.spec.ts",
     "node_ids": [
      "code_unit:apps/api/test/workspace-digest-grants.spec.ts"
     ],
     "path": "apps/api/test/workspace-digest-grants.spec.ts",
     "status": "M"
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/change-admission-kcp-0029-expired-grant.json",
+    "node_ids": [
+     "receipt:receipts/graph/change-admission-kcp-0029-expired-grant.json"
+    ],
+    "path": "receipts/graph/change-admission-kcp-0029-expired-grant.json",
+    "status": "A"
    }
   ],
-  "head": "70ff0f99558786175f00561b9e24902643b86d81",
+  "head": "64a05497a7364fcc015bf7424213926dddb65667",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -37,18 +55,18 @@
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
   "graph_digest": "sha256:0d143380232d5e35cdc83ce9588dc2c780fd1ea99ddb844dfb5ad9ab8547f624",
-  "path": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-work/verifier-out/graph-ef0966989536.json",
+  "path": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-final-work/verifier-out/graph-ef0966989536.json",
   "source_commit": "ef09669895361d722f6713dcdac3e49dab9894e9"
  },
  "head_graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:767243ff9103f68409e54993b37591102110227d524b029002c838baf731958f",
-  "path": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-work/verifier-out/graph-head-70ff0f995587.json",
-  "source_commit": "70ff0f99558786175f00561b9e24902643b86d81",
+  "graph_digest": "sha256:7eeda0db4a0b5e3e9477361d082d5a1cecd7486a72e243313cfeb96a0e91810c",
+  "path": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-final-work/verifier-out/graph-head-64a05497a736.json",
+  "source_commit": "64a05497a7364fcc015bf7424213926dddb65667",
   "staleness": {
-   "checked_at_utc": "2026-10-27T12:15:33Z",
-   "checked_nodes": 550,
+   "checked_at_utc": "2026-10-27T12:22:42Z",
+   "checked_nodes": 551,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -780,31 +798,6 @@
       "provenance": "deterministic",
       "to": "code_unit:apps/api/src/auth/auth.module.ts",
       "via": "relative"
-     }
-    ],
-    "revisions": [
-     "base",
-     "head"
-    ],
-    "verifier_hint": "type-check / compile of the importer"
-   },
-   {
-    "boundary": "intra_unit",
-    "depth": 2,
-    "entity": "code_unit:apps/api/test/agent-task-scope.guard.spec.ts",
-    "node_type": "code_unit",
-    "path": [
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts"
-     },
-     {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/test/agent-task-scope.guard.spec.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/guards/agent-task-scope.guard.ts"
      }
     ],
     "revisions": [
@@ -1729,22 +1722,15 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json",
     "node_type": "receipt",
     "path": [
      {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/test/agent-task-scope.guard.spec.ts",
       "via": "explicit-path"
      }
     ],
@@ -1756,22 +1742,15 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
     "node_type": "receipt",
     "path": [
      {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/test/agent-task-scope.guard.spec.ts",
       "via": "explicit-path"
      }
     ],
@@ -1783,22 +1762,15 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
     "node_type": "receipt",
     "path": [
      {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/test/agent-task-scope.guard.spec.ts",
       "via": "explicit-path"
      }
     ],
@@ -1810,22 +1782,15 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json",
     "node_type": "receipt",
     "path": [
      {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/test/agent-task-scope.guard.spec.ts",
       "via": "explicit-path"
      }
     ],
@@ -1837,22 +1802,15 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
     "node_type": "receipt",
     "path": [
      {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/test/agent-task-scope.guard.spec.ts",
       "via": "explicit-path"
      }
     ],
@@ -1884,22 +1842,15 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
     "node_type": "receipt",
     "path": [
      {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/test/agent-task-scope.guard.spec.ts",
       "via": "explicit-path"
      }
     ],
@@ -1937,22 +1888,15 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
     "node_type": "receipt",
     "path": [
      {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/test/agent-task-scope.guard.spec.ts",
       "via": "explicit-path"
      }
     ],
@@ -1964,22 +1908,15 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-integration-batch1.json",
     "node_type": "receipt",
     "path": [
      {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-integration-batch1.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/test/agent-task-scope.guard.spec.ts",
       "via": "explicit-path"
      }
     ],
@@ -2017,22 +1954,15 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-mun0049-20260913T182304Z.json",
     "node_type": "receipt",
     "path": [
      {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-mun0049-20260913T182304Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/test/agent-task-scope.guard.spec.ts",
       "via": "explicit-path"
      }
     ],
@@ -2044,22 +1974,15 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-mun0050-20260914T075259Z.json",
     "node_type": "receipt",
     "path": [
      {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-mun0050-20260914T075259Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/test/agent-task-scope.guard.spec.ts",
       "via": "explicit-path"
      }
     ],
@@ -2071,22 +1994,15 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-mun0051-20260914T092314Z.json",
     "node_type": "receipt",
     "path": [
      {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-mun0051-20260914T092314Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/test/agent-task-scope.guard.spec.ts",
       "via": "explicit-path"
      }
     ],
@@ -2098,22 +2014,15 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-mun0052-20260914T103558Z.json",
     "node_type": "receipt",
     "path": [
      {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-mun0052-20260914T103558Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/test/agent-task-scope.guard.spec.ts",
       "via": "explicit-path"
      }
     ],
@@ -2125,22 +2034,15 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-mun0053-20260914T125817Z.json",
     "node_type": "receipt",
     "path": [
      {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-mun0053-20260914T125817Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/test/agent-task-scope.guard.spec.ts",
       "via": "explicit-path"
      }
     ],
@@ -2178,22 +2080,15 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
     "node_type": "receipt",
     "path": [
      {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/test/agent-task-scope.guard.spec.ts",
       "via": "explicit-path"
      }
     ],
@@ -2205,22 +2100,15 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json",
     "node_type": "receipt",
     "path": [
      {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/test/agent-task-scope.guard.spec.ts",
       "via": "explicit-path"
      }
     ],
@@ -2265,22 +2153,15 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
     "node_type": "receipt",
     "path": [
      {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/test/agent-task-scope.guard.spec.ts",
       "via": "explicit-path"
      }
     ],
@@ -2292,22 +2173,15 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
     "node_type": "receipt",
     "path": [
      {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/test/agent-task-scope.guard.spec.ts",
       "via": "explicit-path"
      }
     ],
@@ -2379,22 +2253,15 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
     "node_type": "receipt",
     "path": [
      {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/test/agent-task-scope.guard.spec.ts",
       "via": "explicit-path"
      }
     ],
@@ -2406,22 +2273,15 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
     "node_type": "receipt",
     "path": [
      {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/test/agent-task-scope.guard.spec.ts",
       "via": "explicit-path"
      }
     ],
@@ -2433,22 +2293,15 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
     "node_type": "receipt",
     "path": [
      {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/test/agent-task-scope.guard.spec.ts",
       "via": "explicit-path"
      }
     ],
@@ -2514,22 +2367,15 @@
    },
    {
     "boundary": "intra_unit",
-    "depth": 2,
+    "depth": 1,
     "entity": "receipt:receipts/graph/security-api959a-caller788.json",
     "node_type": "receipt",
     "path": [
      {
-      "edge_type": "imports",
-      "from": "code_unit:apps/api/src/auth/auth.module.ts",
-      "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/workspace-digest-grants.ts",
-      "via": "relative"
-     },
-     {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/security-api959a-caller788.json",
       "provenance": "deterministic",
-      "to": "code_unit:apps/api/src/auth/auth.module.ts",
+      "to": "code_unit:apps/api/test/agent-task-scope.guard.spec.ts",
       "via": "explicit-path"
      }
     ],
@@ -4181,7 +4027,7 @@
   "inferred_tail": [],
   "max_depth": 3,
   "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
-  "total": 146
+  "total": 145
  },
  "notes": [
   "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
@@ -4191,7 +4037,7 @@
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261027T121448Z-70ff0f99",
+ "receipt_id": "car-verify-20261027T122155Z-64a05497",
  "receipt_path": "receipts/graph/change-admission-kcp-0029-expired-grant.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -4425,6 +4271,7 @@
    "receipt:receipts/graph/change-admission-a2p29-archived-20260915T131011Z.json",
    "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
    "receipt:receipts/graph/change-admission-integration-batch1.json",
+   "receipt:receipts/graph/change-admission-kcp-0029-expired-grant.json",
    "receipt:receipts/graph/change-admission-mun0048-rescue-20260915T070641Z.json",
    "receipt:receipts/graph/change-admission-mun0049-20260913T182304Z.json",
    "receipt:receipts/graph/change-admission-mun0050-20260914T075259Z.json",
@@ -4503,7 +4350,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-10-27T12:15:33Z",
+  "checked_at_utc": "2026-10-27T12:22:42Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -4742,6 +4589,21 @@
   },
   {
    "content_hash": {
+    "base": null,
+    "head": "sha256:cb2cf64f7f585f2200085efa709e5ecb48a5473e777d916177d9db818718c232"
+   },
+   "entity": "receipt:receipts/graph/change-admission-kcp-0029-expired-grant.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-kcp-0029-expired-grant.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it; superseded by construction — this run re-issues the receipt at receipts/graph/change-admission-kcp-0029-expired-grant.json for work item KCP-0029",
+   "rule": "DEC-AUP-0035",
+   "superseded": {
+    "receipt_path": "receipts/graph/change-admission-kcp-0029-expired-grant.json",
+    "work_item": "KCP-0029"
+   }
+  },
+  {
+   "content_hash": {
     "base": "sha256:d75da3efcea75673c9b8a6f46f0fab9a970690ee25a5e27185a177556f7dec4a",
     "head": "sha256:d75da3efcea75673c9b8a6f46f0fab9a970690ee25a5e27185a177556f7dec4a"
    },
@@ -4973,7 +4835,7 @@
   }
  ],
  "tree": {
-  "commit": "70ff0f99558786175f00561b9e24902643b86d81",
+  "commit": "64a05497a7364fcc015bf7424213926dddb65667",
   "dirty": false
  },
  "verdicts": [
@@ -6054,8 +5916,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/orca/workspaces/arcanada/KCP-0029-muneral-grant/apps/api/node_modules/.bin/tsc -p /home/dev/orca/workspaces/arcanada/KCP-0029-muneral-grant/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-work/verifier-out/type-check-1cjlomfb/check.tsbuildinfo --listFiles",
-   "duration_s": 3.5,
+   "command": "/home/dev/orca/workspaces/arcanada/KCP-0029-muneral-grant/apps/api/node_modules/.bin/tsc -p /home/dev/orca/workspaces/arcanada/KCP-0029-muneral-grant/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-final-work/verifier-out/type-check-cyclh0ri/check.tsbuildinfo --listFiles",
+   "duration_s": 3.8,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -6219,13 +6081,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-work/verifier-out/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-10-27T12:15:36Z",
+   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-final-work/verifier-out/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-10-27T12:22:45Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1454 files listed"
   },
   {
-   "command": "/home/dev/orca/workspaces/arcanada/KCP-0029-muneral-grant/apps/api/node_modules/.bin/tsc -p /home/dev/orca/workspaces/arcanada/KCP-0029-muneral-grant/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-work/verifier-out/type-check-iox9052r/check.tsbuildinfo --listFiles",
-   "duration_s": 5.62,
+   "command": "/home/dev/orca/workspaces/arcanada/KCP-0029-muneral-grant/apps/api/node_modules/.bin/tsc -p /home/dev/orca/workspaces/arcanada/KCP-0029-muneral-grant/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-final-work/verifier-out/type-check-ecy4ethd/check.tsbuildinfo --listFiles",
+   "duration_s": 6.09,
    "entities": [
     "code_unit:apps/api/test/agent-key-assign-scope.e2e.spec.ts",
     "code_unit:apps/api/test/agent-project-dependencies.e2e.spec.ts",
@@ -6283,13 +6145,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
-   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-work/verifier-out/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-10-27T12:15:40Z",
+   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-final-work/verifier-out/v-type-check-apps-api-tsconfig-test.txt",
+   "started_at_utc": "2026-10-27T12:22:49Z",
    "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1617 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=ef0966989536, head=70ff0f995587, graph=head graph)",
-   "duration_s": 4.37,
+   "command": "tools/graph/contract_diff.py.run_diff(base=ef0966989536, head=64a05497a736, graph=head graph)",
+   "duration_s": 4.71,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.service.ts",
@@ -6419,13 +6281,13 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-work/verifier-out/v-contract-diff.json",
-   "started_at_utc": "2026-10-27T12:15:46Z",
+   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-final-work/verifier-out/v-contract-diff.json",
+   "started_at_utc": "2026-10-27T12:22:56Z",
    "summary": "61→61 contracts, breaking 0, edges {'verified': 174}"
   },
   {
    "command": "verify.py route_config_consistency RC-01 prefix / RC-02 registration / RC-03 served",
-   "duration_s": 0.07,
+   "duration_s": 0.08,
    "entities": [
     "route:DELETE /agents/keys/:keyId",
     "route:DELETE /agents/tasks/:taskId/assign/:agentId",
@@ -6535,13 +6397,13 @@
    "exit_code": 0,
    "id": "v-route-config",
    "kind": "config_schema",
-   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-work/verifier-out/v-route-config.txt",
-   "started_at_utc": "2026-10-27T12:15:50Z",
+   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-final-work/verifier-out/v-route-config.txt",
+   "started_at_utc": "2026-10-27T12:23:00Z",
    "summary": "51 route(s), 0 failed"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.1,
+   "duration_s": 0.12,
    "entities": [
     "code_unit:apps/api/src/agents/agents.controller.ts",
     "code_unit:apps/api/src/agents/agents.module.ts",
@@ -6651,8 +6513,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-work/verifier-out/v-fitness.json",
-   "started_at_utc": "2026-10-27T12:15:50Z",
+   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-final-work/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-10-27T12:23:01Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -6671,8 +6533,8 @@
    "exit_code": 0,
    "id": "v-doc-reference",
    "kind": "doc_reference",
-   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-work/verifier-out/v-doc-reference.txt",
-   "started_at_utc": "2026-10-27T12:15:51Z",
+   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-final-work/verifier-out/v-doc-reference.txt",
+   "started_at_utc": "2026-10-27T12:23:01Z",
    "summary": "3 document(s), 0 failed"
   },
   {
@@ -6801,17 +6663,23 @@
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-work/verifier-out/v-canary.json",
-   "started_at_utc": "2026-10-27T12:15:51Z",
+   "output_ref": "/home/dev/arcanada-inbox/contract-place/kcp0029-muneral-verify-final-work/verifier-out/v-canary.json",
+   "started_at_utc": "2026-10-27T12:23:01Z",
    "summary": "0 canary result(s), 0 committed at head; 0 verified / 0 failed / 58 not_measured of 58 entities"
   }
  ],
  "verify": {
   "events": [
    {
+    "code": "SUPERSEDED_SELF_EXCLUSION",
+    "entity": "receipt:receipts/graph/change-admission-kcp-0029-expired-grant.json",
+    "rule": "DEC-AUP-0035",
+    "text": "the receipt at receipts/graph/change-admission-kcp-0029-expired-grant.json is the previous version of the one this run is writing, for the same work item KCP-0029 — superseded by construction, so it owes this change no verdict"
+   },
+   {
     "code": "STRUCTURAL_EXCLUSION",
     "rule": "DEC-AUP-0034",
-    "text": "42 affected entity(ies) owe no verdict (receipt: 42): unchanged at both revisions and given no verifier by the matrix"
+    "text": "43 affected entity(ies) owe no verdict (receipt: 43): unchanged at both revisions and given no verifier by the matrix"
    }
   ],
   "required_by_entity": {
@@ -7068,6 +6936,7 @@
    "receipt:receipts/graph/change-admission-a2p29-archived-20260915T131011Z.json": [],
    "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json": [],
    "receipt:receipts/graph/change-admission-integration-batch1.json": [],
+   "receipt:receipts/graph/change-admission-kcp-0029-expired-grant.json": [],
    "receipt:receipts/graph/change-admission-mun0048-rescue-20260915T070641Z.json": [],
    "receipt:receipts/graph/change-admission-mun0049-20260913T182304Z.json": [],
    "receipt:receipts/graph/change-admission-mun0050-20260914T075259Z.json": [],
@@ -7397,9 +7266,9 @@
    ]
   },
   "seconds": {
-   "prepare": 2.61,
-   "total": 62.6,
-   "verifiers": 13.66
+   "prepare": 2.64,
+   "total": 65.76,
+   "verifiers": 14.8
   }
  },
  "work_item": "KCP-0029"
