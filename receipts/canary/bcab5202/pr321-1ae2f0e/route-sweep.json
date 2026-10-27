@@ -1,0 +1,1895 @@
+{
+ "schema": "CanaryResult/v1",
+ "captured_at_utc": "2026-10-27T20:47:06Z",
+ "card": "bcab5202-09ff-4aa0-92ea-05c880d760b7",
+ "phase": "pre",
+ "plan": {
+  "id": "pr321-exact-head-51-route-9-code-unit-sweep",
+  "path": "plan.json",
+  "digest": "sha256:7d9733758645753091c7b7eaeac027799d0bdbcf8c4ed2b2bc7961583f703c8f"
+ },
+ "subject": {
+  "schema": "GitCanarySubject/v1",
+  "commit": "1ae2f0e933eec5850c24ec7024551d1abb8c9c26",
+  "tree": "2b4ca05b8153cee6959e7fed8c5d269131a0bb4d",
+  "evidence": {
+   "path": "source-evidence.json",
+   "sha256": "6f18b9ae07fe49335e69297418ff38dcd3ccfa577084524ccd6e66a3218e78d6",
+   "source_field": "commit"
+  }
+ },
+ "environment": "candidate-local Nest API on loopback with disposable PostgreSQL 16 and private Redis; synthetic owner and agent principals",
+ "producer": {
+  "tool": "PR321 candidate-local HTTP route-sweep runner (route-sweep.mjs)",
+  "version": "1"
+ },
+ "mutating_owner": "Claude Root (arcana-devs); disposable synthetic PostgreSQL only",
+ "read_only": false,
+ "resident_version": null,
+ "model": "deterministic synthetic HTTP runner",
+ "counters": {
+  "entities_verified": 52,
+  "failed": 8,
+  "not_measured": 0
+ },
+ "entity_verdicts": [
+  {
+   "entity": "route:DELETE /agents/keys/:keyId",
+   "probe_ids": [
+    "owner-101",
+    "anonymous-102"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 204; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:DELETE /agents/tasks/:taskId/assign/:agentId",
+   "probe_ids": [
+    "owner-087",
+    "anonymous-088"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 204; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:DELETE /projects/:projectId",
+   "probe_ids": [
+    "owner-097",
+    "anonymous-098"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 204; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:DELETE /projects/git-refs/:refId",
+   "probe_ids": [
+    "owner-093",
+    "anonymous-094"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 204; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:DELETE /tasks/:taskId",
+   "probe_ids": [
+    "owner-095",
+    "anonymous-096"
+   ],
+   "verdict": "failed",
+   "reason": "authenticated status 500; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:DELETE /tasks/:taskId/checklist/:itemId",
+   "probe_ids": [
+    "owner-055",
+    "anonymous-056"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 204; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:DELETE /tasks/:taskId/dependencies/:depId",
+   "probe_ids": [
+    "owner-065",
+    "anonymous-066"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 204; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:DELETE /workspaces/:workspaceId/members/:userId",
+   "probe_ids": [
+    "owner-021",
+    "anonymous-022"
+   ],
+   "verdict": "failed",
+   "reason": "authenticated status 403; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:GET /agents/tasks",
+   "probe_ids": [
+    "worker-key-071",
+    "anonymous-072"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:GET /agents/workspace/:workspaceId",
+   "probe_ids": [
+    "owner-007",
+    "anonymous-008"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:GET /projects/:projectId",
+   "probe_ids": [
+    "owner-027",
+    "anonymous-028"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:GET /projects/tasks/:taskId/git-refs",
+   "probe_ids": [
+    "owner-091",
+    "anonymous-092"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:GET /projects/workspace/:workspaceId",
+   "probe_ids": [
+    "owner-025",
+    "anonymous-026"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:GET /sync/datarim/:projectId",
+   "probe_ids": [
+    "owner-085",
+    "anonymous-086"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:GET /tasks",
+   "probe_ids": [
+    "owner-031",
+    "anonymous-032"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId",
+   "probe_ids": [
+    "owner-033",
+    "anonymous-034"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/activity",
+   "probe_ids": [
+    "owner-047",
+    "anonymous-048"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/checklist",
+   "probe_ids": [
+    "owner-051",
+    "anonymous-052"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/dependencies",
+   "probe_ids": [
+    "owner-059",
+    "anonymous-060"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/dependency-graph",
+   "probe_ids": [
+    "owner-061",
+    "anonymous-062"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/evidence",
+   "probe_ids": [
+    "owner-081",
+    "anonymous-082"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/field-changes",
+   "probe_ids": [
+    "worker-key-073",
+    "anonymous-074"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:GET /tasks/:taskId/readiness",
+   "probe_ids": [
+    "owner-063",
+    "anonymous-064"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:GET /tasks/digest",
+   "probe_ids": [
+    "assistant-key-041",
+    "anonymous-042"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:GET /tasks/project/:projectId",
+   "probe_ids": [
+    "owner-035",
+    "anonymous-036"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:GET /tasks/project/:projectId/index",
+   "probe_ids": [
+    "orchestrator-key-039",
+    "anonymous-040"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:GET /tasks/project/:projectId/staleness",
+   "probe_ids": [
+    "owner-037",
+    "anonymous-038"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:GET /workspaces",
+   "probe_ids": [
+    "owner-011",
+    "anonymous-012"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:GET /workspaces/:workspaceId",
+   "probe_ids": [
+    "owner-013",
+    "anonymous-014"
+   ],
+   "verdict": "failed",
+   "reason": "authenticated status 403; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:GET /workspaces/:workspaceId/members",
+   "probe_ids": [
+    "owner-015",
+    "anonymous-016"
+   ],
+   "verdict": "failed",
+   "reason": "authenticated status 403; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:PATCH /tasks/:taskId/checklist/:itemId",
+   "probe_ids": [
+    "owner-053",
+    "anonymous-054"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:PATCH /tasks/:taskId/contract",
+   "probe_ids": [
+    "worker-key-077",
+    "anonymous-078"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:PATCH /tasks/:taskId/status",
+   "probe_ids": [
+    "owner-043",
+    "anonymous-044"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:PATCH /workspaces/:workspaceId/members/:userId/role",
+   "probe_ids": [
+    "owner-019",
+    "anonymous-020"
+   ],
+   "verdict": "failed",
+   "reason": "authenticated status 403; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:POST /agents",
+   "probe_ids": [
+    "owner-001",
+    "anonymous-002"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 201; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:POST /agents/:agentId/keys",
+   "probe_ids": [
+    "owner-003",
+    "anonymous-004"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 201; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:POST /agents/keys/:keyId/rotate",
+   "probe_ids": [
+    "owner-005",
+    "anonymous-006"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 201; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:POST /agents/keys/self/revoke",
+   "probe_ids": [
+    "worker-key-099",
+    "anonymous-100"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 200; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:POST /agents/tasks/:taskId/assign",
+   "probe_ids": [
+    "owner-069",
+    "anonymous-070"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 201; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:POST /projects",
+   "probe_ids": [
+    "owner-023",
+    "anonymous-024"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 201; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:POST /projects/git-refs",
+   "probe_ids": [
+    "owner-089",
+    "anonymous-090"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 201; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:POST /sync/datarim/:projectId/import",
+   "probe_ids": [
+    "worker-key-083",
+    "anonymous-084"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 201; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:POST /tasks",
+   "probe_ids": [
+    "owner-029",
+    "anonymous-030"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 201; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:POST /tasks/:taskId/checklist",
+   "probe_ids": [
+    "owner-049",
+    "anonymous-050"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 201; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:POST /tasks/:taskId/comments",
+   "probe_ids": [
+    "owner-045",
+    "anonymous-046"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 201; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:POST /tasks/:taskId/dependencies",
+   "probe_ids": [
+    "owner-057",
+    "anonymous-058"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 201; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:POST /tasks/:taskId/evidence",
+   "probe_ids": [
+    "worker-key-079",
+    "anonymous-080"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 201; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:POST /tasks/:taskId/field-ack",
+   "probe_ids": [
+    "worker-key-075",
+    "anonymous-076"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 204; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:POST /tasks/:taskId/redactions",
+   "probe_ids": [
+    "owner-067",
+    "anonymous-068"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 201; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:POST /workspaces",
+   "probe_ids": [
+    "owner-009",
+    "anonymous-010"
+   ],
+   "verdict": "verified",
+   "reason": "authenticated status 201; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "route:POST /workspaces/:workspaceId/members/:userId",
+   "probe_ids": [
+    "owner-017",
+    "anonymous-018"
+   ],
+   "verdict": "failed",
+   "reason": "authenticated status 403; anonymous status 401; real candidate-local request with synthetic fixture"
+  },
+  {
+   "entity": "code_unit:apps/api/src/agents/agents.controller.ts",
+   "probe_ids": [
+    "owner-001",
+    "anonymous-002",
+    "owner-003",
+    "anonymous-004",
+    "owner-005",
+    "anonymous-006",
+    "owner-069",
+    "anonymous-070",
+    "worker-key-071",
+    "anonymous-072",
+    "owner-007",
+    "anonymous-008",
+    "owner-101",
+    "anonymous-102",
+    "owner-087",
+    "anonymous-088",
+    "worker-key-099",
+    "anonymous-100"
+   ],
+   "verdict": "verified",
+   "reason": "aggregate of 9 bound route(s); all verified"
+  },
+  {
+   "entity": "code_unit:apps/api/src/projects/projects.controller.ts",
+   "probe_ids": [
+    "owner-023",
+    "anonymous-024",
+    "owner-089",
+    "anonymous-090",
+    "owner-027",
+    "anonymous-028",
+    "owner-091",
+    "anonymous-092",
+    "owner-025",
+    "anonymous-026",
+    "owner-097",
+    "anonymous-098",
+    "owner-093",
+    "anonymous-094"
+   ],
+   "verdict": "verified",
+   "reason": "aggregate of 7 bound route(s); all verified"
+  },
+  {
+   "entity": "code_unit:apps/api/src/sync/sync.controller.ts",
+   "probe_ids": [
+    "worker-key-083",
+    "anonymous-084",
+    "owner-085",
+    "anonymous-086"
+   ],
+   "verdict": "verified",
+   "reason": "aggregate of 2 bound route(s); all verified"
+  },
+  {
+   "entity": "code_unit:apps/api/src/tasks/field-state/field-changes.controller.ts",
+   "probe_ids": [
+    "worker-key-075",
+    "anonymous-076",
+    "worker-key-073",
+    "anonymous-074"
+   ],
+   "verdict": "verified",
+   "reason": "aggregate of 2 bound route(s); all verified"
+  },
+  {
+   "entity": "code_unit:apps/api/src/tasks/task-contract-binding.controller.ts",
+   "probe_ids": [
+    "worker-key-077",
+    "anonymous-078"
+   ],
+   "verdict": "verified",
+   "reason": "aggregate of 1 bound route(s); all verified"
+  },
+  {
+   "entity": "code_unit:apps/api/src/tasks/tasks.controller.ts",
+   "probe_ids": [
+    "owner-029",
+    "anonymous-030",
+    "owner-049",
+    "anonymous-050",
+    "owner-045",
+    "anonymous-046",
+    "owner-057",
+    "anonymous-058",
+    "worker-key-079",
+    "anonymous-080",
+    "owner-067",
+    "anonymous-068",
+    "owner-053",
+    "anonymous-054",
+    "owner-043",
+    "anonymous-044",
+    "owner-031",
+    "anonymous-032",
+    "owner-033",
+    "anonymous-034",
+    "owner-047",
+    "anonymous-048",
+    "owner-051",
+    "anonymous-052",
+    "owner-059",
+    "anonymous-060",
+    "owner-061",
+    "anonymous-062",
+    "owner-081",
+    "anonymous-082",
+    "owner-063",
+    "anonymous-064",
+    "assistant-key-041",
+    "anonymous-042",
+    "owner-035",
+    "anonymous-036",
+    "orchestrator-key-039",
+    "anonymous-040",
+    "owner-037",
+    "anonymous-038",
+    "owner-095",
+    "anonymous-096",
+    "owner-055",
+    "anonymous-056",
+    "owner-065",
+    "anonymous-066"
+   ],
+   "verdict": "failed",
+   "reason": "aggregate of 23 bound route(s); failed routes: route:DELETE /tasks/:taskId"
+  },
+  {
+   "entity": "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
+   "probe_ids": [
+    "owner-009",
+    "anonymous-010",
+    "owner-017",
+    "anonymous-018",
+    "owner-019",
+    "anonymous-020",
+    "owner-011",
+    "anonymous-012",
+    "owner-013",
+    "anonymous-014",
+    "owner-015",
+    "anonymous-016",
+    "owner-021",
+    "anonymous-022"
+   ],
+   "verdict": "failed",
+   "reason": "aggregate of 7 bound route(s); failed routes: route:POST /workspaces/:workspaceId/members/:userId, route:PATCH /workspaces/:workspaceId/members/:userId/role, route:GET /workspaces/:workspaceId, route:GET /workspaces/:workspaceId/members, route:DELETE /workspaces/:workspaceId/members/:userId"
+  },
+  {
+   "entity": "code_unit:apps/web/lib/api/task-detail-read.ts",
+   "probe_ids": [
+    "owner-031",
+    "anonymous-032"
+   ],
+   "verdict": "verified",
+   "reason": "aggregate of 1 bound route(s); all verified"
+  },
+  {
+   "entity": "code_unit:apps/web/lib/api/tasks.ts",
+   "probe_ids": [
+    "owner-031",
+    "anonymous-032"
+   ],
+   "verdict": "verified",
+   "reason": "aggregate of 1 bound route(s); all verified"
+  }
+ ],
+ "probes": [
+  {
+   "id": "owner-001",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/agents",
+   "status": 201,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 201, received 201",
+   "response_sha256": "ac00d0abff8e7b5154b4e231cfb128dcaf761c592bd500cc10784a6cbfb7a0fa",
+   "response_bytes": 207
+  },
+  {
+   "id": "anonymous-002",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/agents",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-003",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/agents/7a281950-2d16-4b5d-90ea-c3b68c0d2288/keys",
+   "status": 201,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 201, received 201",
+   "response_sha256": "f7add8d9f1923e415c6f85a561fca3ea69e5c6414e4f0d24f74f664739b4cda5",
+   "response_bytes": 96
+  },
+  {
+   "id": "anonymous-004",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/agents/7a281950-2d16-4b5d-90ea-c3b68c0d2288/keys",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-005",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/agents/keys/9fc3bf77-31e6-4896-87e0-a8887b71aa46/rotate",
+   "status": 201,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200|201, received 201",
+   "response_sha256": "7381fefd27ffe4ebe7ba671eb2f8d8075f06f7afcf462ef83cd452d2c0d17270",
+   "response_bytes": 96
+  },
+  {
+   "id": "anonymous-006",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/agents/keys/9fc3bf77-31e6-4896-87e0-a8887b71aa46/rotate",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-007",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/agents/workspace/05f8cddf-e91f-430b-81e3-d67965aa4de3",
+   "status": 200,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200, received 200",
+   "response_sha256": "e5965c2022a50874ed3703504b3ce350cab5405637557e2cfcbbb3320b3d4d6c",
+   "response_bytes": 633
+  },
+  {
+   "id": "anonymous-008",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/agents/workspace/05f8cddf-e91f-430b-81e3-d67965aa4de3",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-009",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/workspaces",
+   "status": 201,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 201, received 201",
+   "response_sha256": "ea7b08a48ebb738e713253cebabc719aa33afd10f1c9c8f4630302fd2d383e2f",
+   "response_bytes": 219
+  },
+  {
+   "id": "anonymous-010",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/workspaces",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-011",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/workspaces",
+   "status": 200,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200, received 200",
+   "response_sha256": "b42368bacd9f41a04dc68c692f6523267a342616c09bbdf54022edd420a88fda",
+   "response_bytes": 419
+  },
+  {
+   "id": "anonymous-012",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/workspaces",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-013",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3",
+   "status": 403,
+   "outcome": "failed",
+   "reason": "real candidate-local request as owner; expected 200, received 403",
+   "response_sha256": "b04afb13dcec56498b87e976461724c5244db85b2b69f7d379513393a8ee0ac9",
+   "response_bytes": 80
+  },
+  {
+   "id": "anonymous-014",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-015",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members",
+   "status": 403,
+   "outcome": "failed",
+   "reason": "real candidate-local request as owner; expected 200, received 403",
+   "response_sha256": "b04afb13dcec56498b87e976461724c5244db85b2b69f7d379513393a8ee0ac9",
+   "response_bytes": 80
+  },
+  {
+   "id": "anonymous-016",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-017",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members/11111111-0000-4000-8000-000000000003",
+   "status": 403,
+   "outcome": "failed",
+   "reason": "real candidate-local request as owner; expected 200|201, received 403",
+   "response_sha256": "b04afb13dcec56498b87e976461724c5244db85b2b69f7d379513393a8ee0ac9",
+   "response_bytes": 80
+  },
+  {
+   "id": "anonymous-018",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members/11111111-0000-4000-8000-000000000003",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-019",
+   "kind": "http",
+   "executed": true,
+   "method": "PATCH",
+   "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members/11111111-0000-4000-8000-000000000003/role",
+   "status": 403,
+   "outcome": "failed",
+   "reason": "real candidate-local request as owner; expected 200, received 403",
+   "response_sha256": "b04afb13dcec56498b87e976461724c5244db85b2b69f7d379513393a8ee0ac9",
+   "response_bytes": 80
+  },
+  {
+   "id": "anonymous-020",
+   "kind": "http",
+   "executed": true,
+   "method": "PATCH",
+   "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members/11111111-0000-4000-8000-000000000003/role",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-021",
+   "kind": "http",
+   "executed": true,
+   "method": "DELETE",
+   "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members/11111111-0000-4000-8000-000000000003",
+   "status": 403,
+   "outcome": "failed",
+   "reason": "real candidate-local request as owner; expected 200|204, received 403",
+   "response_sha256": "b04afb13dcec56498b87e976461724c5244db85b2b69f7d379513393a8ee0ac9",
+   "response_bytes": 80
+  },
+  {
+   "id": "anonymous-022",
+   "kind": "http",
+   "executed": true,
+   "method": "DELETE",
+   "path": "/workspaces/05f8cddf-e91f-430b-81e3-d67965aa4de3/members/11111111-0000-4000-8000-000000000003",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-023",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/projects",
+   "status": 201,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 201, received 201",
+   "response_sha256": "8ff6626ba03c06c4f3a26bec4508ae48a28630e0e0566beb53ea2d7b74a64663",
+   "response_bytes": 233
+  },
+  {
+   "id": "anonymous-024",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/projects",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-025",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/projects/workspace/05f8cddf-e91f-430b-81e3-d67965aa4de3",
+   "status": 200,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200, received 200",
+   "response_sha256": "0a05ec35524c25cae0979d252cbfc6f8dd4a79e1fc5986f33bbb7787007ba8ed",
+   "response_bytes": 452
+  },
+  {
+   "id": "anonymous-026",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/projects/workspace/05f8cddf-e91f-430b-81e3-d67965aa4de3",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-027",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/projects/08a50f9a-a735-4605-91ce-ce4a41193fbb",
+   "status": 200,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200, received 200",
+   "response_sha256": "00c53ac29f1be6a0ac26c4dc48b62825be766905de2fc4c7bf27a0e39795c5d8",
+   "response_bytes": 216
+  },
+  {
+   "id": "anonymous-028",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/projects/08a50f9a-a735-4605-91ce-ce4a41193fbb",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-029",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/tasks",
+   "status": 201,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 201, received 201",
+   "response_sha256": "4482f6787db0d9624dd38d8f496a32aeed85bf8bfde03fdb7a8dc6bb64b58a46",
+   "response_bytes": 469
+  },
+  {
+   "id": "anonymous-030",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/tasks",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-031",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/tasks",
+   "status": 200,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200, received 200",
+   "response_sha256": "956283edad8bc7f446a7e47a50c1c0550b6d084220ce43a3b6e8ddb5fc72a871",
+   "response_bytes": 1516
+  },
+  {
+   "id": "anonymous-032",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/tasks",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-033",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1",
+   "status": 200,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200, received 200",
+   "response_sha256": "4482f6787db0d9624dd38d8f496a32aeed85bf8bfde03fdb7a8dc6bb64b58a46",
+   "response_bytes": 469
+  },
+  {
+   "id": "anonymous-034",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-035",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/tasks/project/08a50f9a-a735-4605-91ce-ce4a41193fbb",
+   "status": 200,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200, received 200",
+   "response_sha256": "c42b9e1189e30fef6a90ab9d88b12d97a338a3457a78cbf154da9a88fa216350",
+   "response_bytes": 1474
+  },
+  {
+   "id": "anonymous-036",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/tasks/project/08a50f9a-a735-4605-91ce-ce4a41193fbb",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-037",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/tasks/project/08a50f9a-a735-4605-91ce-ce4a41193fbb/staleness",
+   "status": 200,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200, received 200",
+   "response_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+   "response_bytes": 2
+  },
+  {
+   "id": "anonymous-038",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/tasks/project/08a50f9a-a735-4605-91ce-ce4a41193fbb/staleness",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "orchestrator-key-039",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/tasks/project/08a50f9a-a735-4605-91ce-ce4a41193fbb/index",
+   "status": 200,
+   "outcome": "verified",
+   "reason": "real candidate-local request as orchestrator-key; expected 200, received 200",
+   "response_sha256": "fe47dab9cda076f52014e0dba2517b720e8f8b6245aa380b1d7814da828977a8",
+   "response_bytes": 1206
+  },
+  {
+   "id": "anonymous-040",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/tasks/project/08a50f9a-a735-4605-91ce-ce4a41193fbb/index",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "assistant-key-041",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/tasks/digest",
+   "status": 200,
+   "outcome": "verified",
+   "reason": "real candidate-local request as assistant-key; expected 200, received 200",
+   "response_sha256": "b30091092d68fb0367d2ea6f1dbd185b31b994151b30a35ff9919e57f07852cf",
+   "response_bytes": 1009
+  },
+  {
+   "id": "anonymous-042",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/tasks/digest",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-043",
+   "kind": "http",
+   "executed": true,
+   "method": "PATCH",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/status",
+   "status": 200,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200, received 200",
+   "response_sha256": "61232c5525be803d8be8464eb42994a999e364251226feea83dec11fd1459fc9",
+   "response_bytes": 476
+  },
+  {
+   "id": "anonymous-044",
+   "kind": "http",
+   "executed": true,
+   "method": "PATCH",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/status",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-045",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/comments",
+   "status": 201,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 201, received 201",
+   "response_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "response_bytes": 0
+  },
+  {
+   "id": "anonymous-046",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/comments",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-047",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/activity",
+   "status": 200,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200, received 200",
+   "response_sha256": "3d977564209749163576cdecb1eef04d7abeec2f376a553db3971e5299d21f10",
+   "response_bytes": 1014
+  },
+  {
+   "id": "anonymous-048",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/activity",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-049",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/checklist",
+   "status": 201,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 201, received 201",
+   "response_sha256": "e618e8ff25b6e73578d3c8a3cf0f8e491a34d3374692626425bc246f4c3b900f",
+   "response_bytes": 185
+  },
+  {
+   "id": "anonymous-050",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/checklist",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-051",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/checklist",
+   "status": 200,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200, received 200",
+   "response_sha256": "45b90755fd009dc2777ee65f3608e2d79026d9c266e18576c87ef3c784434d4f",
+   "response_bytes": 187
+  },
+  {
+   "id": "anonymous-052",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/checklist",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-053",
+   "kind": "http",
+   "executed": true,
+   "method": "PATCH",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/checklist/a8f3774c-105d-4ab8-b807-1fa7661eefe9",
+   "status": 200,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200, received 200",
+   "response_sha256": "a9478cacc7f16fa7ec0eade268b00e5332cf8dd90a3b896e001811a4a8c95991",
+   "response_bytes": 184
+  },
+  {
+   "id": "anonymous-054",
+   "kind": "http",
+   "executed": true,
+   "method": "PATCH",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/checklist/a8f3774c-105d-4ab8-b807-1fa7661eefe9",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-055",
+   "kind": "http",
+   "executed": true,
+   "method": "DELETE",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/checklist/a8f3774c-105d-4ab8-b807-1fa7661eefe9",
+   "status": 204,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200|204, received 204",
+   "response_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "response_bytes": 0
+  },
+  {
+   "id": "anonymous-056",
+   "kind": "http",
+   "executed": true,
+   "method": "DELETE",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/checklist/a8f3774c-105d-4ab8-b807-1fa7661eefe9",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-057",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/dependencies",
+   "status": 201,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 201, received 201",
+   "response_sha256": "5576b648aa6d1d5f1f087806c845e365c9c69f30397eb38970a72c4222c887c1",
+   "response_bytes": 167
+  },
+  {
+   "id": "anonymous-058",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/dependencies",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-059",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/dependencies",
+   "status": 200,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200, received 200",
+   "response_sha256": "569bb33de557f24421e9228add78f6d556037318e7b2dcd984586f653638f821",
+   "response_bytes": 169
+  },
+  {
+   "id": "anonymous-060",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/dependencies",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-061",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/dependency-graph",
+   "status": 200,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200, received 200",
+   "response_sha256": "5623c2d19a98d162c17b0aba542bacfd991bba1f8e33c2f1d359412728c13e94",
+   "response_bytes": 305
+  },
+  {
+   "id": "anonymous-062",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/dependency-graph",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-063",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/readiness",
+   "status": 200,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200, received 200",
+   "response_sha256": "c745b6bf42d19eb98a05adc39e4d9104627b4952d31f9145e315dd611343a317",
+   "response_bytes": 401
+  },
+  {
+   "id": "anonymous-064",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/readiness",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-065",
+   "kind": "http",
+   "executed": true,
+   "method": "DELETE",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/dependencies/555e83c9-1922-4bf4-a6a8-65c0d536ab27",
+   "status": 204,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200|204, received 204",
+   "response_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "response_bytes": 0
+  },
+  {
+   "id": "anonymous-066",
+   "kind": "http",
+   "executed": true,
+   "method": "DELETE",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/dependencies/555e83c9-1922-4bf4-a6a8-65c0d536ab27",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-067",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/tasks/a996047e-5544-4768-98d6-c41838e024bf/redactions",
+   "status": 201,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200|201, received 201",
+   "response_sha256": "bed600c443d5deca97db5b47ef5dffa513fdd4920f7697ca3219dea5a90e52f5",
+   "response_bytes": 567
+  },
+  {
+   "id": "anonymous-068",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/tasks/a996047e-5544-4768-98d6-c41838e024bf/redactions",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-069",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/agents/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/assign",
+   "status": 201,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200|201, received 201",
+   "response_sha256": "4de3bfa2a51a49204c4da5954b9e284855f1b3a0a3742a2a917c760ac978a28a",
+   "response_bytes": 156
+  },
+  {
+   "id": "anonymous-070",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/agents/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/assign",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "worker-key-071",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/agents/tasks",
+   "status": 200,
+   "outcome": "verified",
+   "reason": "real candidate-local request as worker-key; expected 200, received 200",
+   "response_sha256": "36c3a712a1b4aa6bf4dd5f34e8d930ffff8bb1a48dcd9a27e5a0d839a4543113",
+   "response_bytes": 642
+  },
+  {
+   "id": "anonymous-072",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/agents/tasks",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "fee3d135d639945a7035a39d5a989494ef2425ff4ba8ee5050026530c057d075",
+   "response_bytes": 70
+  },
+  {
+   "id": "worker-key-073",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/field-changes",
+   "status": 200,
+   "outcome": "verified",
+   "reason": "real candidate-local request as worker-key; expected 200, received 200",
+   "response_sha256": "5ce681560f88e0c7f9cddde3046e87bda9bb94d1948c87323cb6bfac8527410b",
+   "response_bytes": 1240
+  },
+  {
+   "id": "anonymous-074",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/field-changes",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "fee3d135d639945a7035a39d5a989494ef2425ff4ba8ee5050026530c057d075",
+   "response_bytes": 70
+  },
+  {
+   "id": "worker-key-075",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/field-ack",
+   "status": 204,
+   "outcome": "verified",
+   "reason": "real candidate-local request as worker-key; expected 204, received 204",
+   "response_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "response_bytes": 0
+  },
+  {
+   "id": "anonymous-076",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/field-ack",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "fee3d135d639945a7035a39d5a989494ef2425ff4ba8ee5050026530c057d075",
+   "response_bytes": 70
+  },
+  {
+   "id": "worker-key-077",
+   "kind": "http",
+   "executed": true,
+   "method": "PATCH",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/contract",
+   "status": 200,
+   "outcome": "verified",
+   "reason": "real candidate-local request as worker-key; expected 200, received 200",
+   "response_sha256": "e8c0b53c1b21a9f1758cc630b3a3527826009c7b28bd783eaf2c2b5984a8ece2",
+   "response_bytes": 545
+  },
+  {
+   "id": "anonymous-078",
+   "kind": "http",
+   "executed": true,
+   "method": "PATCH",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/contract",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "worker-key-079",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/evidence",
+   "status": 201,
+   "outcome": "verified",
+   "reason": "real candidate-local request as worker-key; expected 201, received 201",
+   "response_sha256": "aa84db926a85b3c680b12c1fc6e0ea97f2d9fd5320a12d011ae4ec7e05d888a1",
+   "response_bytes": 403
+  },
+  {
+   "id": "anonymous-080",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/evidence",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-081",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/evidence",
+   "status": 200,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200, received 200",
+   "response_sha256": "d73e62fab977e578abaedf0541d5c8846c31152dcb1bf352251046e82772fc8f",
+   "response_bytes": 458
+  },
+  {
+   "id": "anonymous-082",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/evidence",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "worker-key-083",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/sync/datarim/08a50f9a-a735-4605-91ce-ce4a41193fbb/import",
+   "status": 201,
+   "outcome": "verified",
+   "reason": "real candidate-local request as worker-key; expected 200|201, received 201",
+   "response_sha256": "92ac6759c2ff848e8fbb5558c4d478a09eca78676f7fc9839bfb583f46d8ef33",
+   "response_bytes": 39
+  },
+  {
+   "id": "anonymous-084",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/sync/datarim/08a50f9a-a735-4605-91ce-ce4a41193fbb/import",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "fee3d135d639945a7035a39d5a989494ef2425ff4ba8ee5050026530c057d075",
+   "response_bytes": 70
+  },
+  {
+   "id": "owner-085",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/sync/datarim/08a50f9a-a735-4605-91ce-ce4a41193fbb",
+   "status": 200,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200, received 200",
+   "response_sha256": "a5eba45e84f4488f13d71ec916502edc9389cdc7fc0aeeea8bd68ba88de0cdbb",
+   "response_bytes": 400
+  },
+  {
+   "id": "anonymous-086",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/sync/datarim/08a50f9a-a735-4605-91ce-ce4a41193fbb",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-087",
+   "kind": "http",
+   "executed": true,
+   "method": "DELETE",
+   "path": "/agents/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/assign/7a281950-2d16-4b5d-90ea-c3b68c0d2288",
+   "status": 204,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200|204, received 204",
+   "response_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "response_bytes": 0
+  },
+  {
+   "id": "anonymous-088",
+   "kind": "http",
+   "executed": true,
+   "method": "DELETE",
+   "path": "/agents/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/assign/7a281950-2d16-4b5d-90ea-c3b68c0d2288",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-089",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/projects/git-refs",
+   "status": 201,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 201, received 201",
+   "response_sha256": "71aba14288c0a208a6ca6ebfab1cb620cec0ff2f5459c758a675aea57ac512b5",
+   "response_bytes": 205
+  },
+  {
+   "id": "anonymous-090",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/projects/git-refs",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-091",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/projects/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/git-refs",
+   "status": 200,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200, received 200",
+   "response_sha256": "7df97df82ef2158bb615b4c76f03f840c16356e4fc60aeff3b142d945f6c3179",
+   "response_bytes": 207
+  },
+  {
+   "id": "anonymous-092",
+   "kind": "http",
+   "executed": true,
+   "method": "GET",
+   "path": "/projects/tasks/b5ccc7e8-fe8f-4d52-98b3-c6413b675bc1/git-refs",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-093",
+   "kind": "http",
+   "executed": true,
+   "method": "DELETE",
+   "path": "/projects/git-refs/8892434c-6c50-4f49-8254-ff7585c4939b",
+   "status": 204,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200|204, received 204",
+   "response_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "response_bytes": 0
+  },
+  {
+   "id": "anonymous-094",
+   "kind": "http",
+   "executed": true,
+   "method": "DELETE",
+   "path": "/projects/git-refs/8892434c-6c50-4f49-8254-ff7585c4939b",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-095",
+   "kind": "http",
+   "executed": true,
+   "method": "DELETE",
+   "path": "/tasks/68427944-b097-43d8-a60a-404f86386e7b",
+   "status": 500,
+   "outcome": "failed",
+   "reason": "real candidate-local request as owner; expected 200|204, received 500",
+   "response_sha256": "fcbda2e2660dbbff82ba8df76212f3d4ab9ced3b9b9a8b8700621f45fb5ce006",
+   "response_bytes": 52
+  },
+  {
+   "id": "anonymous-096",
+   "kind": "http",
+   "executed": true,
+   "method": "DELETE",
+   "path": "/tasks/68427944-b097-43d8-a60a-404f86386e7b",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "owner-097",
+   "kind": "http",
+   "executed": true,
+   "method": "DELETE",
+   "path": "/projects/7c02922d-df12-474e-b157-42803b8294a3",
+   "status": 204,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200|204, received 204",
+   "response_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "response_bytes": 0
+  },
+  {
+   "id": "anonymous-098",
+   "kind": "http",
+   "executed": true,
+   "method": "DELETE",
+   "path": "/projects/7c02922d-df12-474e-b157-42803b8294a3",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  },
+  {
+   "id": "worker-key-099",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/agents/keys/self/revoke",
+   "status": 200,
+   "outcome": "verified",
+   "reason": "real candidate-local request as worker-key; expected 200|201|204, received 200",
+   "response_sha256": "ad3dbc9e75ac1e5da8fd98f210a43bfed433b34308702181b7b351bca074ce3a",
+   "response_bytes": 136
+  },
+  {
+   "id": "anonymous-100",
+   "kind": "http",
+   "executed": true,
+   "method": "POST",
+   "path": "/agents/keys/self/revoke",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "fee3d135d639945a7035a39d5a989494ef2425ff4ba8ee5050026530c057d075",
+   "response_bytes": 70
+  },
+  {
+   "id": "owner-101",
+   "kind": "http",
+   "executed": true,
+   "method": "DELETE",
+   "path": "/agents/keys/48b7cb7a-4587-49c4-91f1-63d79e3cb1f8",
+   "status": 204,
+   "outcome": "verified",
+   "reason": "real candidate-local request as owner; expected 200|204, received 204",
+   "response_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "response_bytes": 0
+  },
+  {
+   "id": "anonymous-102",
+   "kind": "http",
+   "executed": true,
+   "method": "DELETE",
+   "path": "/agents/keys/48b7cb7a-4587-49c4-91f1-63d79e3cb1f8",
+   "status": 401,
+   "outcome": "verified",
+   "reason": "unauthenticated control expected 401 or 403; expected 401|403, received 401",
+   "response_sha256": "e1654c7ad9ce4df238c7c18cafe8b85a27ac81155501831fcb1583963308e9a5",
+   "response_bytes": 43
+  }
+ ],
+ "rules": [
+  "Route rows are the exact-head CAR not_measured routes (51); code-unit rows aggregate their bound routes (7 controllers as bound in PR242's plan; 2 web API clients bound to route:GET /tasks, the route they consume).",
+  "Each route receives an authenticated loopback HTTP request expecting its success status and an unauthenticated control expecting 401|403; GET /tasks/digest is called with a key of the real arcanada-assistant agent id in its real workspace id, so it exercises the shipped standing grant."
+ ]
+}
