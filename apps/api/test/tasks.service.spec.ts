@@ -258,6 +258,23 @@ describe('TasksService', () => {
       await service.delete('task-1', humanActor);
 
       expect(prisma.task.delete).toHaveBeenCalled();
+      // c23de150: the audit row must be written through the transaction
+      // client and BEFORE the delete; written after, its task FK points at a
+      // row that no longer exists (P2003 activity_log_task_id_fkey -> 500).
+      expect(prisma.$transaction).toHaveBeenCalled();
+      expect(activityService.log).toHaveBeenCalledWith(
+        {
+          workspaceId: 'ws-1',
+          taskId: 'task-1',
+          actor: humanActor,
+          action: 'task:deleted',
+          payload: { title: MOCK_TASK.title },
+        },
+        prisma,
+      );
+      expect(activityService.log.mock.invocationCallOrder[0]).toBeLessThan(
+        prisma.task.delete.mock.invocationCallOrder[0],
+      );
       expect(kanbanService.notify).toHaveBeenCalledWith(
         'proj-1',
         'task:deleted',

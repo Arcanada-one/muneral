@@ -593,25 +593,39 @@ export class TasksService {
     // protecting the execution audit trail from disappearing under a task
     // delete, not something to route around. Surface it as a clear 409
     // instead of letting the raw Prisma P2003 through as an opaque 500.
-    try {
-      await this.prisma.task.delete({ where: { id: taskId } });
-    } catch (err) {
-      if (isForeignKeyRestrictViolation(err)) {
-        throw new ConflictException(
-          'Task has recorded execution history and cannot be deleted',
+    //
+    // The `task:deleted` activity row is written BEFORE the delete, in the
+    // same transaction. activity_log.task_id is `onDelete: SetNull`, so the
+    // row survives the delete detached from the task. Writing it after the
+    // delete (the old order) referenced a task that no longer existed and
+    // failed with P2003 activity_log_task_id_fkey -> 500. A refused (409)
+    // delete aborts the transaction, so no orphan audit row is left behind.
+    await this.prisma.$transaction(async (tx) => {
+      if (project) {
+        await this.activityService.log(
+          {
+            workspaceId: project.workspaceId,
+            taskId,
+            actor,
+            action: 'task:deleted',
+            payload: { title: task.title },
+          },
+          tx,
         );
       }
-      throw err;
-    }
+      try {
+        await tx.task.delete({ where: { id: taskId } });
+      } catch (err) {
+        if (isForeignKeyRestrictViolation(err)) {
+          throw new ConflictException(
+            'Task has recorded execution history and cannot be deleted',
+          );
+        }
+        throw err;
+      }
+    });
 
     if (project) {
-      await this.activityService.log({
-        workspaceId: project.workspaceId,
-        taskId,
-        actor,
-        action: 'task:deleted',
-        payload: { title: task.title },
-      });
       this.kanbanService.notify(project.id, 'task:deleted', { taskId });
     }
   }

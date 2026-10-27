@@ -1,0 +1,11 @@
+{
+  "schema": "MeasuredGitSource/v1",
+  "commit": "3402fde6744e6710d1b6993b9dfe42a23335896e",
+  "tree": "317ad41be541307ccccb8ca00fc9bd26f69dfec4",
+  "dirty": false,
+  "producer": {
+    "tool": "MUN member-guard/task-delete candidate-local HTTP route-sweep runner (route-sweep.mjs)",
+    "version": "1"
+  },
+  "captured_at_utc": "2026-10-27T22:04:12Z"
+}
