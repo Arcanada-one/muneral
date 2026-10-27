@@ -81,6 +81,25 @@ describe('AgentTaskScopeGuard', () => {
     expect(prisma.taskAgent.findFirst).not.toHaveBeenCalled();
   });
 
+  it('reports the former digest holder as expired without handing out a scope', async () => {
+    reflector.getAllAndOverride.mockReturnValue('workspace-digest');
+    const former = {
+      ...AGENT,
+      id: '565171f7-a3ca-45a4-b50e-4d8b07cf0b86',
+      workspaceId: '05f8cddf-e91f-430b-81e3-d67965aa4de3',
+    } as Agent;
+    const { ctx, req } = makeContext({ apiKeyAgent: former });
+
+    const error = await guard.canActivate(ctx).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ForbiddenException);
+    expect((error as ForbiddenException).getResponse()).toMatchObject({
+      code: 'GRANT_EXPIRED',
+      until: '2026-10-27T00:00:00Z',
+      decision: 'DEC-AUP-0049',
+    });
+    expect(req.agentScope).toBeUndefined();
+  });
+
   it('admits an assigned agent to its own task and records the scope', async () => {
     reflector.getAllAndOverride.mockReturnValue('task');
     prisma.task.findFirst.mockResolvedValue({ id: 't-1' });
