@@ -51,7 +51,7 @@ Completeness must be explicitly `complete` or `incomplete` and carry a UUID evid
 
 Only `id`, `taskId`, `action`, `createdAt`, and (for a status transition) `from`/`to` are read. Other input fields are ignored and never copied into output. Exact duplicate IDs with identical sanitized identity/value fields count once. If an ID repeats with a different `taskId`, `action`, `createdAt`, `from`, or `to`, the input is ambiguous and fails closed. Comments and all other valid actions are excluded from transition counts. The action/time/task/status values are still validated before filtering.
 
-Limits: 20 MiB input file, 100,000 event rows, 50,000 cohort task UUIDs, and a window no longer than 3,660 days. These keep the offline operation bounded. No external dependency, live service, or test database is needed.
+Limits: 20 MiB input file, 100,000 event rows, 50,000 cohort task UUIDs, and a window no longer than 3,660 days. File input is streamed in chunks of at most 64 KiB. The reader stops when the next chunk would cross 20 MiB and does not retain that over-limit chunk, so a file that grows while being read cannot bypass the cap. A file of exactly 20 MiB is permitted; a larger input returns `INPUT_TOO_LARGE`. This is enforced during reading, not by a file-size precheck. These limits keep the offline operation bounded. No external dependency, live service, or test database is needed.
 
 ## Output and interpretation
 

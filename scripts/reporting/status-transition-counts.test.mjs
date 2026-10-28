@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
+import { Readable } from 'node:stream';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { buildReport } from './status-transition-counts.mjs';
+import { buildReport, readBounded } from './status-transition-counts.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
@@ -172,6 +173,32 @@ test('requires explicit completeness evidence and a unique canonical cohort with
   }
 });
 
+test('bounded reader accepts valid input exactly at its byte limit', async () => {
+  const source = Buffer.from(JSON.stringify(base));
+  const readable = Readable.from([
+    source.subarray(0, 4),
+    source.subarray(4, 8),
+    source.subarray(8),
+  ]);
+  const result = await readBounded(readable, source.length);
+  assert.deepEqual(result, source);
+  const report = buildReport(JSON.parse(result.toString('utf8')));
+  assert.equal(report.transitions.verdict, 'MEASURED');
+  assert.equal(report.transitions.observedTotal, 0);
+});
+
+test('bounded reader rejects the first over-limit chunk and stops consuming input', async () => {
+  let advancedPastOverflow = false;
+  async function* chunks() {
+    yield Buffer.from('12345');
+    yield Buffer.from('678');
+    advancedPastOverflow = true;
+    yield Buffer.from('later input');
+  }
+
+  await assert.rejects(readBounded(chunks(), 6), (error) => error.code === 'INPUT_TOO_LARGE');
+  assert.equal(advancedPastOverflow, false);
+});
 
 test('CLI reads the checked-in synthetic sanitized fixture and emits valid JSON', () => {
   const cli = path.join(here, 'status-transition-counts.mjs');

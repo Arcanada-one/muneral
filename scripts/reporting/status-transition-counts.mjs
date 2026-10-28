@@ -1,9 +1,10 @@
 #!/usr/bin/env node
-import { readFile } from 'node:fs/promises';
+import { createReadStream } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const MAX_INPUT_BYTES = 20 * 1024 * 1024;
+const INPUT_READ_CHUNK_BYTES = 64 * 1024;
 const MAX_EVENTS = 100_000;
 const MAX_COHORT_TASKS = 50_000;
 const MAX_WINDOW_DAYS = 3_660;
@@ -172,14 +173,31 @@ function buildReport(input) {
   };
 }
 
+export async function readBounded(readable, maxBytes = MAX_INPUT_BYTES) {
+  const chunks = [];
+  let byteLength = 0;
+  try {
+    for await (const chunk of readable) {
+      if (!Buffer.isBuffer(chunk)) throw new InputError('INPUT_INVALID');
+      if (chunk.length > maxBytes - byteLength) throw new InputError('INPUT_TOO_LARGE');
+      chunks.push(chunk);
+      byteLength += chunk.length;
+    }
+  } catch (error) {
+    if (error instanceof InputError) throw error;
+    throw new InputError('INPUT_UNAVAILABLE');
+  }
+  return Buffer.concat(chunks, byteLength);
+}
+
 export async function reportFromFile(inputPath) {
   let bytes;
   try {
-    bytes = await readFile(inputPath);
-  } catch {
+    bytes = await readBounded(createReadStream(inputPath, { highWaterMark: INPUT_READ_CHUNK_BYTES }));
+  } catch (error) {
+    if (error instanceof InputError) throw error;
     throw new InputError('INPUT_UNAVAILABLE');
   }
-  if (bytes.length > MAX_INPUT_BYTES) throw new InputError('INPUT_TOO_LARGE');
   let parsed;
   try {
     parsed = JSON.parse(bytes.toString('utf8'));
