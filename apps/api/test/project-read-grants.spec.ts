@@ -20,6 +20,8 @@ import {
   agentHoldsAnyLiveProjectReadGrant,
   projectHasLiveGrantForAgent,
   renewalDueAt,
+  STANDING_PROJECT_READ_GRANT_UNTIL,
+  projectReadGrantInvariantViolation,
 } from '../src/auth/project-read-grants.js';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -32,8 +34,16 @@ describe('the shipped project-read grant list', () => {
     expect(pairs).toEqual([...new Set(pairs)]);
   });
 
-  it('carries a parseable, future-dated `until` no wider than the protocol allows', () => {
+  it('holds the standing invariant on every entry (DEC-AUP-0033 A3)', () => {
     for (const g of PROJECT_READ_GRANT_LIST) {
+      expect(projectReadGrantInvariantViolation(g)).toBeNull();
+    }
+  });
+
+  it('carries a parseable, future-dated `until` no wider than the protocol allows', () => {
+    // A standing entry (DEC-AUP-0033 A3) has no window; the cap applies to
+    // every entry that is NOT standing.
+    for (const g of PROJECT_READ_GRANT_LIST.filter((e) => e.standing !== true)) {
       const until = Date.parse(g.until);
       expect(Number.isNaN(until)).toBe(false);
       // An entry whose window already exceeds the cap measured from TODAY
@@ -60,7 +70,11 @@ describe('the shipped project-read grant list', () => {
 
   it('leaves a renewal window ahead of every expiry', () => {
     for (const g of PROJECT_READ_GRANT_LIST) {
-      expect(Date.parse(renewalDueAt(g))).toBe(
+      if (g.standing === true) {
+        expect(renewalDueAt(g)).toBeUndefined();
+        continue;
+      }
+      expect(Date.parse(renewalDueAt(g)!)).toBe(
         Date.parse(g.until) - GRANT_RENEWAL_LEAD_DAYS * 86_400_000,
       );
     }
@@ -116,6 +130,50 @@ describe('projectReadGrantState', () => {
     expect(
       projectReadGrantState(entry.agentId.toUpperCase(), entry.projectId.toUpperCase(), before, [entry]).kind,
     ).toBe('live');
+  });
+});
+
+describe('standing entries (DEC-AUP-0033 A3)', () => {
+  const standing = {
+    agentId: 'aaaaaaaa-0000-4000-8000-000000000001',
+    agentName: 'a',
+    projectId: 'bbbbbbbb-0000-4000-8000-000000000002',
+    until: STANDING_PROJECT_READ_GRANT_UNTIL,
+    standing: true as const,
+    decision: 'DEC-AUP-0033',
+    evidence: 'e',
+  };
+  const farFuture = new Date('9999-12-31T00:00:00Z');
+
+  it('is live at any instant, including at and after the sentinel itself', () => {
+    expect(projectReadGrantState(standing.agentId, standing.projectId, new Date('2026-10-28T00:00:00Z'), [standing]).kind).toBe('live');
+    expect(projectReadGrantState(standing.agentId, standing.projectId, farFuture, [standing]).kind).toBe('live');
+    expect(agentHoldsAnyLiveProjectReadGrant(standing.agentId, farFuture, [standing])).toBe(true);
+    expect(projectHasLiveGrantForAgent(standing.agentId, standing.projectId, farFuture, [standing])).toBe(true);
+  });
+
+  it('has no renewal date', () => {
+    expect(renewalDueAt(standing)).toBeUndefined();
+  });
+
+  it('rejects `standing` on an ordinary date — never live (fail closed)', () => {
+    const bad = { ...standing, until: '2026-11-01T00:00:00Z' };
+    expect(projectReadGrantInvariantViolation(bad)).toMatch(/standing entry must have until/);
+    expect(projectReadGrantState(bad.agentId, bad.projectId, new Date('2026-10-28T00:00:00Z'), [bad]).kind).toBe('expired');
+    expect(agentHoldsAnyLiveProjectReadGrant(bad.agentId, new Date('2026-10-28T00:00:00Z'), [bad])).toBe(false);
+  });
+
+  it('rejects the sentinel on a non-standing entry — never live (fail closed)', () => {
+    const { standing: _s, ...rest } = standing;
+    const bad = { ...rest };
+    expect(projectReadGrantInvariantViolation(bad)).toMatch(/reserved for standing entries/);
+    expect(projectReadGrantState(bad.agentId, bad.projectId, new Date('2026-10-28T00:00:00Z'), [bad]).kind).toBe('expired');
+    expect(agentHoldsAnyLiveProjectReadGrant(bad.agentId, new Date('2026-10-28T00:00:00Z'), [bad])).toBe(false);
+  });
+
+  it('opens no other pair: another agent or another project stays "none"', () => {
+    expect(projectReadGrantState('dddddddd-0000-4000-8000-000000000004', standing.projectId, farFuture, [standing]).kind).toBe('none');
+    expect(projectReadGrantState(standing.agentId, 'cccccccc-0000-4000-8000-000000000003', farFuture, [standing]).kind).toBe('none');
   });
 });
 

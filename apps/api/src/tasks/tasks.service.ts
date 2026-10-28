@@ -273,11 +273,16 @@ export class TasksService {
       // and nothing noticed for two days; every caller already writes this
       // envelope into a receipt, so the warning rides the read it already does
       // rather than needing a watcher nobody would run.
-      grant: {
-        decision: grant.decision,
-        until: grant.until,
-        renewalDueAt: renewalDueAt(grant),
-      },
+      // DEC-AUP-0033 A3: a standing grant has no renewal, so the field is
+      // omitted rather than carrying a date nobody is expected to reach.
+      grant:
+        grant.standing === true
+          ? { decision: grant.decision, until: grant.until }
+          : {
+              decision: grant.decision,
+              until: grant.until,
+              renewalDueAt: renewalDueAt(grant),
+            },
       tasks,
     };
   }
