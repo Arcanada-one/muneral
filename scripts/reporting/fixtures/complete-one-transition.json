@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "scope": {
+    "taskIds": ["11111111-1111-4111-8111-111111111111"],
+    "startInclusiveUtc": "2026-10-27T23:30:00Z",
+    "endExclusiveUtc": "2026-10-28T01:00:00Z"
+  },
+  "completeness": {
+    "state": "complete",
+    "evidenceId": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"
+  },
+  "events": [
+    {
+      "id": "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "taskId": "11111111-1111-4111-8111-111111111111",
+      "action": "task:status_changed",
+      "createdAt": "2026-10-28T00:10:00Z",
+      "from": "todo",
+      "to": "in_progress"
+    },
+    {
+      "id": "aaaaaaaa-aaaa-4aaa-8aaa-000000000002",
+      "taskId": "11111111-1111-4111-8111-111111111111",
+      "action": "task:comment_added",
+      "createdAt": "2026-10-28T00:20:00Z"
+    }
+  ]
+}
