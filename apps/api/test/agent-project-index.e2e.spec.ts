@@ -23,7 +23,11 @@ import { ActivityModule } from '../src/activity/activity.module.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
 import { AuthService } from '../src/auth/auth.service.js';
 import { KanbanService } from '../src/ws/kanban.service.js';
-import { PROJECT_READ_GRANTS, GRANT_RENEWAL_LEAD_DAYS } from '../src/auth/project-read-grants.js';
+import {
+  PROJECT_READ_GRANTS,
+  GRANT_RENEWAL_LEAD_DAYS,
+  STANDING_PROJECT_READ_GRANT_UNTIL,
+} from '../src/auth/project-read-grants.js';
 import type { ProjectReadGrantEntry } from '../src/auth/project-read-grants.js';
 import { PROJECT_INDEX_COUNTED, PROJECT_INDEX_READ_ACTION } from '../src/tasks/tasks.service.js';
 import { TaskFieldStateService } from '../src/tasks/field-state/task-field-state.service.js';
@@ -199,6 +203,28 @@ describe('MUN-0052 — project task index for granted agent keys (e2e)', () => {
     expect(raw).not.toContain('secret-bearing title');
     expect(raw).not.toContain('must never reach the index');
     expect(raw).not.toContain(ids.creator);
+  });
+
+  it('a STANDING grant (DEC-AUP-0033 A3) answers 200 and carries no renewalDueAt', async () => {
+    grants.push({
+      agentId: ids.reader,
+      agentName: 'reader',
+      projectId,
+      until: STANDING_PROJECT_READ_GRANT_UNTIL,
+      standing: true,
+      decision: 'DEC-TEST',
+      evidence: 'e2e',
+    });
+    const a = await othersTask(projectId, 'todo');
+
+    const res = await index(projectId, keys.reader).expect(200);
+
+    expect(res.body.grant).toEqual({ decision: 'DEC-TEST', until: STANDING_PROJECT_READ_GRANT_UNTIL });
+    expect(res.body.tasks.map((t: { id: string }) => t.id)).toEqual([a.id]);
+    for (const row of res.body.tasks) {
+      expect(Object.keys(row).sort()).toEqual(ROW_KEYS);
+    }
+    expect(JSON.stringify(res.body)).not.toContain('secret-bearing title');
   });
 
   it('the index is exactly the project: all seven statuses, nothing from a sibling project or another workspace', async () => {

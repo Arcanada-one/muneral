@@ -1,0 +1,11 @@
+{
+  "schema": "MeasuredGitSource/v1",
+  "commit": "3452dd965cd499f99eae0c76339002a4ff0acc50",
+  "tree": "dd31ef8bc416cf04de12037c1677868563c8aa1a",
+  "dirty": false,
+  "producer": {
+    "tool": "MUN standing project-read grants candidate-local HTTP route-sweep runner (route-sweep.mjs)",
+    "version": "1"
+  },
+  "captured_at_utc": "2026-10-28T11:05:59Z"
+}
