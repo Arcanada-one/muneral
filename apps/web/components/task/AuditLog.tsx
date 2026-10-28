@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { Bot, User, Clock, Copy } from 'lucide-react';
 import { TASK_STATUSES, type TaskPriority, type TaskStatus } from '@muneral/types';
 import { useActivity } from '@/lib/api/tasks';
@@ -11,6 +11,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 interface AuditLogProps {
   taskId: string;
 }
+
+type ActivityFilterMode = 'all' | 'status_changes';
 
 const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   todo: 'To Do',
@@ -296,9 +298,18 @@ function CopyActivityActorId({ actorId }: { actorId: string }) {
 }
 
 export function AuditLog({ taskId }: AuditLogProps) {
+  const activityFilterId = useId();
   const [pageState, setPageState] = useState({ taskId, page: 1 });
   if (pageState.taskId !== taskId) setPageState({ taskId, page: 1 });
   const page = pageState.taskId === taskId ? pageState.page : 1;
+  const [filterState, setFilterState] = useState({
+    taskId,
+    mode: 'all' as ActivityFilterMode,
+  });
+  if (filterState.taskId !== taskId) {
+    setFilterState({ taskId, mode: 'all' });
+  }
+  const filterMode = filterState.taskId === taskId ? filterState.mode : 'all';
   const { data, isLoading, isError, isFetching, refetch } = useActivity(taskId, page);
   const total = data !== undefined && Number.isSafeInteger(data.total) && data.total >= 0
     ? data.total
@@ -313,9 +324,12 @@ export function AuditLog({ taskId }: AuditLogProps) {
     : undefined;
   const pageOutOfRange = responsePageMatches && pageCount !== undefined && page > pageCount;
   if (pageOutOfRange) setPageState({ taskId, page: 1 });
-  const entries = responsePageIsUsable && !pageOutOfRange
+  const currentPageEntries = responsePageIsUsable && !pageOutOfRange
     ? (data?.data ?? []).filter((entry) => !entry.taskId || entry.taskId === taskId)
     : [];
+  const entries = filterMode === 'status_changes'
+    ? currentPageEntries.filter((entry) => entry.action === 'task:status_changed')
+    : currentPageEntries;
 
   const setPage = (nextPage: number) => setPageState({ taskId, page: nextPage });
 
@@ -384,6 +398,22 @@ export function AuditLog({ taskId }: AuditLogProps) {
         <Clock className="h-4 w-4" />
         Activity Log
       </h4>
+
+      <div className="mb-3 flex items-center gap-2 text-xs">
+        <label htmlFor={activityFilterId}>Activity filter</label>
+        <select
+          id={activityFilterId}
+          value={filterMode}
+          onChange={(event) => setFilterState({
+            taskId,
+            mode: event.target.value === 'status_changes' ? 'status_changes' : 'all',
+          })}
+          className="rounded border bg-background px-2 py-1"
+        >
+          <option value="all">All activity</option>
+          <option value="status_changes">Status changes on this page</option>
+        </select>
+      </div>
 
       <ScrollArea className="h-64">
         <ul className="space-y-3">
@@ -456,7 +486,11 @@ export function AuditLog({ taskId }: AuditLogProps) {
           })}
         </ul>
         {entries.length === 0 && (
-          <p className="py-3 text-xs text-muted-foreground">No activity on this page.</p>
+          <p className="py-3 text-xs text-muted-foreground">
+            {filterMode === 'status_changes'
+              ? 'No status changes on this page.'
+              : 'No activity on this page.'}
+          </p>
         )}
       </ScrollArea>
 
