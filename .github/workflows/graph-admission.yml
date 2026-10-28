@@ -79,6 +79,20 @@ on:
         required: false
         default: false
         type: boolean
+      candidate_dependency_setup:
+        description: >-
+          Optional CallerDependencySetup/v1 subject-and-digest manifest for the fixed MUN web typecheck
+          dependency profile. It binds repository/base/head, policy pnpm-frozen-web-typecheck/v1, scope apps/web,
+          cwd ., and blob_oid/sha256/bytes for the seven fixed source inputs. It accepts no command, script,
+          registry, or filesystem path from the caller.
+        required: false
+        default: ''
+        type: string
+      candidate_dependency_setup_required:
+        description: 'Refuse before candidate verification if the fixed caller dependency setup manifest is absent.'
+        required: false
+        default: false
+        type: boolean
       empty_impact_explanation:
         description: >-
           Optional exact EmptyImpactExplanation/v1 JSON claim for the current candidate range and its
@@ -710,7 +724,7 @@ jobs:
           cat > "$compiler_root/qualify-tsc.py" <<'AUP_QUALIFY_TSC_PY'
           #!/usr/bin/env python3
           import json, pathlib, subprocess, sys, tempfile
-          
+
           def qualify(root, executable):
               root = pathlib.Path(root).resolve()
               executable = pathlib.Path(executable)
@@ -735,7 +749,7 @@ jobs:
                       if (result.returncode == 0) != expected_success:
                           raise ValueError("TSC_SEMANTIC_CONTROL_FAILED:" + filename)
               return {"version": "5.9.3", "executable": str(executable.resolve()), "valid_input": "PASS", "invalid_input": "REFUSED"}
-          
+
           if __name__ == "__main__":
               print(json.dumps(qualify(sys.argv[1], sys.argv[2]), sort_keys=True))
           AUP_QUALIFY_TSC_PY
@@ -851,6 +865,142 @@ jobs:
           print("native_classifier=admit_change.structural_case")
           print("range=" + base + ".." + head)
           PY
+
+      - name: Prepare canonical Scrutator contract verifier dependencies
+        if: github.repository == 'Arcanada-one/scrutator' && steps.self_update_classifier.outputs.case == 'gate_self_update'
+        env:
+          RANGE_BASE: ${{ steps.range.outputs.base }}
+          RANGE_HEAD: ${{ steps.range.outputs.head }}
+        run: |
+          set -euo pipefail
+          test -f contracts/http/package.json && test ! -L contracts/http/package.json
+          test -f contracts/http/tsconfig.json && test ! -L contracts/http/tsconfig.json
+          git diff --quiet "$RANGE_BASE" "$RANGE_HEAD" -- contracts/http/package.json contracts/http/tsconfig.json
+          contract_root=$(mktemp -d "${RUNNER_TEMP}/scrutator-contract-ts.XXXXXX")
+          cat > "$contract_root/package.json" <<'SCRUTATOR_PACKAGE_JSON'
+          {"name":"scrutator-contract-graph-verifier","version":"1.0.0","private":true,"dependencies":{"typescript":"5.9.3","zod":"4.6.5"}}
+          SCRUTATOR_PACKAGE_JSON
+          cat > "$contract_root/package-lock.json" <<'SCRUTATOR_PACKAGE_LOCK_JSON'
+          {
+            "name":"scrutator-contract-graph-verifier","version":"1.0.0","lockfileVersion":3,"requires":true,
+            "packages":{
+              "":{"name":"scrutator-contract-graph-verifier","version":"1.0.0","dependencies":{"typescript":"5.9.3","zod":"4.6.5"}},
+              "node_modules/typescript":{"version":"5.9.3","resolved":"https://registry.npmjs.org/typescript/-/typescript-5.9.3.tgz","integrity":"sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==","bin":{"tsc":"bin/tsc","tsserver":"bin/tsserver"},"engines":{"node":">=14.17"}},
+              "node_modules/zod":{"version":"4.6.5","resolved":"https://registry.npmjs.org/zod/-/zod-4.6.5.tgz","integrity":"sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q=="}
+            }
+          }
+          SCRUTATOR_PACKAGE_LOCK_JSON
+          : > "$contract_root/user.npmrc"
+          : > "$contract_root/global.npmrc"
+          npm ci --prefix "$contract_root" --ignore-scripts --no-audit --no-fund --cache "$contract_root/npm-cache" --userconfig "$contract_root/user.npmrc" --globalconfig "$contract_root/global.npmrc" --registry https://registry.npmjs.org
+          export CONTRACT_ROOT="$contract_root"
+          python3 -I -B - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          package = json.loads(Path('contracts/http/package.json').read_text(encoding='utf-8'))
+          if package.get('name') != '@arcanada/scrutator-http-contract' or package.get('devDependencies') != {'typescript': '5.9.3', 'zod': '4.6.5'}:
+              raise SystemExit('SCRUTATOR_CONTRACT_DEPENDENCY_SUBJECT_REFUSED')
+          root = Path(os.environ['CONTRACT_ROOT']).resolve(strict=True)
+          for name, version in (('typescript', '5.9.3'), ('zod', '4.6.5')):
+              installed = json.loads((root / 'node_modules' / name / 'package.json').read_text(encoding='utf-8'))
+              if installed.get('version') != version:
+                  raise SystemExit('SCRUTATOR_CONTRACT_PINNED_PACKAGE_MISMATCH:' + name)
+          PY
+          contract_modules="$GITHUB_WORKSPACE/contracts/http/node_modules"
+          if [ -e "$contract_modules" ] || [ -L "$contract_modules" ]; then
+            echo "::error::contracts/http/node_modules already exists; refusing to replace it" >&2
+            exit 2
+          fi
+          printf '/contracts/http/node_modules\n' >> .git/info/exclude
+          ln -s "$contract_root/node_modules" "$contract_modules"
+
+      # A caller may opt into the one fixed MUN web-typecheck setup policy. The signed bundle validates
+      # exact repository/range/package/lock/blob pins before Node or pnpm executes; the caller input
+      # contains data only and cannot choose commands, paths, registries, or environment variables.
+      - name: Validate fixed caller dependency setup subject and source pins
+        id: candidate_dependency_setup
+        if: inputs.candidate_dependency_setup_required || inputs.candidate_dependency_setup != ''
+        env:
+          CANDIDATE_DEPENDENCY_SETUP: ${{ inputs.candidate_dependency_setup }}
+          TOOLS_PATH: ${{ inputs.tools_path }}
+          GITHUB_WORKSPACE: ${{ github.workspace }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          RANGE_BASE: ${{ steps.range.outputs.base }}
+          RANGE_HEAD: ${{ steps.range.outputs.head }}
+          RUNNER_TEMP: ${{ runner.temp }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CANDIDATE_DEPENDENCY_SETUP:-}" ]; then
+            echo "::error::required caller dependency setup manifest is absent" >&2
+            exit 2
+          fi
+          if [ "$GITHUB_REPOSITORY" = "Arcanada-one/arcanada-universal-program" ]; then
+            GRAPH_TOOLS_ROOT="$GITHUB_WORKSPACE"
+          else
+            GRAPH_TOOLS_ROOT="$GITHUB_WORKSPACE/$TOOLS_PATH"
+          fi
+          PLAN_ROOT="$RUNNER_TEMP/graph-admission/candidate-dependency-setup"
+          mkdir -p "$PLAN_ROOT"
+          PLAN_PATH="$PLAN_ROOT/plan.json"
+          set -C
+          python3 -I -B "$GRAPH_TOOLS_ROOT/tools/graph/ci_gate.py" candidate-dependency-setup-plan \
+            --repo "$GITHUB_WORKSPACE" --repository "$GITHUB_REPOSITORY" \
+            --base "$RANGE_BASE" --head "$RANGE_HEAD" > "$PLAN_PATH"
+          NODE_VERSION="$(python3 -I -B -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["node_version"])' "$PLAN_PATH")"
+          printf 'node_version=%s\nplan_path=%s\n' "$NODE_VERSION" "$PLAN_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Node for the fixed caller dependency setup
+        if: inputs.candidate_dependency_setup_required || inputs.candidate_dependency_setup != ''
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+        with:
+          node-version: ${{ steps.candidate_dependency_setup.outputs.node_version }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Corepack for the fixed caller dependency setup
+        if: inputs.candidate_dependency_setup_required || inputs.candidate_dependency_setup != ''
+        run: |
+          set -euo pipefail
+          mkdir -p "${RUNNER_TEMP}/corepack-bin"
+          corepack enable --install-directory "${RUNNER_TEMP}/corepack-bin"
+          echo "${RUNNER_TEMP}/corepack-bin" >> "$GITHUB_PATH"
+
+      - name: Prepare frozen caller dependencies before candidate verification
+        if: inputs.candidate_dependency_setup_required || inputs.candidate_dependency_setup != ''
+        env:
+          RUNNER_TEMP: ${{ runner.temp }}
+        run: |
+          set -euo pipefail
+          PLAN_PATH="$RUNNER_TEMP/graph-admission/candidate-dependency-setup/plan.json"
+          pnpm install --frozen-lockfile --ignore-scripts --ignore-pnpmfile
+          pnpm --filter @muneral/types build
+          cat "$PLAN_PATH" >> "$GITHUB_STEP_SUMMARY"
+
+      # The canonical Model Connector self-update is the only caller admitted by the narrow
+      # B1 pin/permission grammar. Its current-candidate TypeScript verifiers need the same
+      # frozen dependencies and generated Prisma client as its ordinary CI job. Keep this
+      # source-fixed setup separate from caller-controlled dependency-setup inputs.
+      - name: Prepare canonical Model Connector self-update verifier dependencies
+        if: github.repository == 'Arcanada-one/model-connector' && steps.self_update_classifier.outputs.case == 'gate_self_update'
+        env:
+          RANGE_BASE: ${{ steps.range.outputs.base }}
+          RANGE_HEAD: ${{ steps.range.outputs.head }}
+          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
+        run: |
+          set -euo pipefail
+          test -f package.json && test ! -L package.json
+          test -f pnpm-lock.yaml && test ! -L pnpm-lock.yaml
+          git diff --quiet "$RANGE_BASE" "$RANGE_HEAD" -- package.json pnpm-lock.yaml prisma
+          python3 -I -B - <<'PY'
+          import json
+          from pathlib import Path
+          package = json.loads(Path('package.json').read_text(encoding='utf-8'))
+          if package.get('name') != 'model-connector' or package.get('packageManager') != 'pnpm@10.30.3':
+              raise SystemExit('MODEL_SELF_UPDATE_DEPENDENCY_SUBJECT_REFUSED')
+          PY
+          corepack pnpm install --frozen-lockfile --ignore-scripts --ignore-pnpmfile
+          corepack pnpm exec prisma generate
 
       - name: jsonschema 4.23.0 for candidate and stage source-input controls
         if: inputs.stage_userpath_required || inputs.candidate_receipt_required || steps.self_update_classifier.outputs.case == 'gate_self_update'

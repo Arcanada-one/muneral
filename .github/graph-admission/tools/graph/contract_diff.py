@@ -1571,6 +1571,89 @@ def _shadow_ranges(code, name):
     return ranges
 
 
+def _union_guard_variants(code: str, executable: str, binding: str, pos: int, variants: list[dict]) -> list[int]:
+    """Narrow only a positive literal discriminator in an enclosing braced if.
+
+    No else/switch inference, disjunction, calls, or computed predicates. A
+    dependent union with repeated discriminator values stays ambiguous.
+    """
+    candidates = list(range(len(variants)))
+    for m in re.finditer(r'\bif\s*\(', executable):
+        op = m.end() - 1
+        cp = match_close(executable, op)
+        body = re.match(r'\s*\{', executable[cp + 1:])
+        if not body:
+            continue
+        ob = cp + body.end()
+        cb = match_close(executable, ob)
+        if not ob < pos < cb:
+            continue
+        if re.search(r'\bfunction\b|=>', executable[ob + 1:pos]):
+            # Creation inside a branch does not prove later callback execution.
+            return list(range(len(variants)))
+        condition = code[op + 1:cp].strip()
+        guard = re.fullmatch(re.escape(binding) + r'\s*\.\s*data\s*\.\s*(' + IDENT
+            + r')\s*===\s*(true|false|[\'\"][^\'\"\n]*[\'\"])'
+            + r'(?:\s*&&\s*' + IDENT + r'(?:\.' + IDENT + r')*)*', condition)
+        if not guard:
+            continue
+        field, value = guard.group(1), parse_literal(guard.group(2))
+        selected = []
+        for i in candidates:
+            prop = variants[i].get('properties', {}).get(field, {})
+            if (prop.get('kind') != 'enum' or field not in variants[i].get('required', [])
+                    or prop.get('nullable') or prop.get('optional')):
+                # One variant with a non-literal discriminator invalidates narrowing.
+                return candidates
+            if value in prop.get('values', []):
+                selected.append(i)
+        if selected:
+            candidates = selected
+    return candidates
+
+
+def _union_safeparse_projection(code: str, executable: str, schema: dict, wrappers: list[tuple[str, int, int]]) -> dict:
+    """Attribute each payload field read to its own branch, never a merged object.
+
+    Whole payloads, aliases, computed use and any writes remain unknown. Runtime
+    validation establishes the payload type, not downstream consumer behavior.
+    """
+    reads, reasons = [], []
+    variants = schema.get('variants', [])
+    if not wrappers or not variants or any(v.get('kind') != 'object' for v in variants):
+        return {'union_reads': [], 'incomplete_reasons': ['union requires bound safeParse and object variants'],
+                'safeparse_unresolved': True}
+    for binding, start, end in wrappers:
+        shadows = [(a, z) for a, z in _shadow_ranges(executable, binding) if start <= a and z <= end]
+        seg = ''.join(' ' if any(a <= start + i < z for a, z in shadows) else ch
+                      for i, ch in enumerate(executable[start:end]))
+        # Mutation of the wrapper or payload can invalidate a previously observed guard.
+        mutation = re.search(r'\b' + re.escape(binding)
+            + r'(?:\s*\.\s*' + IDENT + r'|\s*\[[^]\n]*\])*\s*'
+            + r'(?:=(?!=)|[+*/%&|^\-]=|\?\?=|&&=|\|\|=|<<=|>>=|\+\+|--)', seg)
+        mutation = mutation or re.search(r'(?:\bdelete\s+|\+\+\s*|--\s*)' + re.escape(binding) + r'\b', seg)
+        if mutation:
+            reasons.append('union safeParse result/payload reassigned')
+            continue
+        for use in re.finditer(r'\b' + re.escape(binding) + r'\b', seg):
+            tail = seg[use.end():]
+            member = re.match(r'\s*\??\.\s*(' + IDENT + r')', tail)
+            if member and member.group(1) in ('success', 'error'):
+                continue
+            payload = re.match(r'\s*\.\s*data\s*\.\s*(' + IDENT + r')', tail)
+            if not payload:
+                reasons.append('union result/payload usage unresolved')
+                continue
+            key = payload.group(1)
+            pos = start + use.start()
+            selected = _union_guard_variants(code, executable, binding, pos, variants)
+            reads.append({'key': key, 'variants': selected})
+            available = [key in variants[i].get('properties', {}) for i in selected]
+            if any(available) and not all(available):
+                reasons.append('dependent union field requires an unambiguous positive discriminator: ' + key)
+    return {'union_reads': reads, 'incomplete_reasons': sorted(set(reasons)), 'safeparse_unresolved': bool(reasons)}
+
+
 def projection(code: str, symbol: str, schema: dict, disabled: set[str] | None = None, *, known_zod=False, runtime_names=None,
                enum_literal_values=None) -> dict:
     """What the consumer file uses of the contract: keys read, keys sent (object literals), enum values used."""
@@ -1637,9 +1720,20 @@ def projection(code: str, symbol: str, schema: dict, disabled: set[str] | None =
             if m.end() - 1 not in proven_calls:
                 wrapper_unresolved = True
                 incomplete.append('safeParse result has no proven local binding')
-        if wrappers and schema.get('kind') != 'object':
+        if wrappers and schema.get('kind') not in ('object', 'union'):
             wrapper_unresolved = True
             incomplete.append('safeParse payload projection requires an object schema')
+    if schema.get("kind") == "union":
+        union = _union_safeparse_projection(code, executable, schema, wrappers)
+        incomplete.extend(union['incomplete_reasons'])
+        if scoped:
+            incomplete.append('non-safeParse union binding usage unresolved')
+        wrapper_unresolved = wrapper_unresolved or union['safeparse_unresolved'] or bool(scoped)
+        keys_read.update(read['key'] for read in union['union_reads'])
+        return {"bindings": sorted(bindings), "keys_read": sorted(keys_read), "keys_sent": [], "literals_sent": 0,
+                "values_used": [], "complete": not incomplete, "incomplete_reasons": sorted(set(incomplete)),
+                "safeparse_unresolved": wrapper_unresolved, "lexical_projection_unresolved": bool(lexical_issues),
+                "enum_runtime_unresolved": False, "union_reads": union['union_reads']}
     if schema.get("kind") == "object":
         def array_unresolved(reason):
             incomplete.append(reason)
@@ -2035,6 +2129,13 @@ def edge_verdict(proj: dict, head: dict | None, contract_diff: dict, provenance:
             if top and top in used:
                 failed = True
                 reasons.append(f"breaking change {c['code']} at `{c['path']}` sits on a key the consumer uses")
+    elif schema.get("kind") == "union":
+        variants = schema.get('variants', [])
+        for read in proj.get('union_reads', []):
+            selected = read['variants']
+            if selected and all(read['key'] not in variants[i].get('properties', {}) for i in selected):
+                failed = True
+                reasons.append(f"consumer reads key `{read['key']}` absent from every applicable union variant")
     elif schema.get("kind") == "enum":
         vals = {canonical(v) for v in schema.get("values", [])}
         members = set(schema.get("members", {}))
@@ -2054,6 +2155,8 @@ def edge_verdict(proj: dict, head: dict | None, contract_diff: dict, provenance:
         return "not_measured", ["safeParse result/payload usage not proven: " + "; ".join(proj["incomplete_reasons"])]
     if proj.get("enum_runtime_unresolved"):
         return "not_measured", ["enum runtime parsing usage not proven: " + "; ".join(proj["incomplete_reasons"])]
+    if schema.get('kind') == 'union' and breaking:
+        return 'not_measured', ['union provider changed; variant exhaustiveness and downstream handling unresolved']
     if not breaking:
         if provenance != "deterministic" and not proj["complete"]:
             return "not_measured", ["inferred edge and consumer usage not narrowable: " + "; ".join(proj["incomplete_reasons"])]

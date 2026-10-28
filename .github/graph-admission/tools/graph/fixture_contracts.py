@@ -197,6 +197,33 @@ def validate_inventory(snapshot: GitSnapshot, manifest: dict) -> dict[str, dict]
     return {"cases": cases, "members": members}
 
 
+def retained_witness_bindings(base: GitSnapshot, base_manifest: dict,
+                              head: GitSnapshot, head_manifest: dict) -> dict[str, list[dict]]:
+    """Retain BASE witnesses for later independent execution, never admission.
+
+    Both inventories are validated against immutable snapshots. HEAD may add
+    witnesses, but cannot delete a BASE case, rename an old witness, or change
+    its Git/byte identity and bless that edit in its own manifest. This helper
+    does not measure containment or execute the retained witness; native
+    consumers still need those independent obligations before classification.
+    """
+    old = validate_inventory(base, base_manifest)["cases"]
+    new = validate_inventory(head, head_manifest)["cases"]
+    retained = {}
+    for cid, case in old.items():
+        if cid not in new:
+            raise FixtureError("TRUSTED_CASE_REMOVED", cid)
+        bindings = {w["path"]: w for w in new[cid]["independent_witnesses"]}
+        for witness in case["independent_witnesses"]:
+            path = witness["path"]
+            if path not in bindings:
+                raise FixtureError("TRUSTED_WITNESS_REMOVED", f"{cid}: {path}")
+            if bindings[path] != witness:
+                raise FixtureError("TRUSTED_WITNESS_CHANGED", f"{cid}: {path}")
+        retained[cid] = copy.deepcopy(case["independent_witnesses"])
+    return retained
+
+
 # Only display/revision transport fields are removed; their Git context is bound
 # independently by the immutable inventory. Every diagnostic field is retained.
 RAW_FIELDS = {"schema", "tool", "tool_version", "repo", "base", "head", "graph", "edge_source",
@@ -266,6 +293,32 @@ def mandatory_dependencies(manifest_path: str, inventory: dict) -> dict[str, set
 
 def dependency_union(base: dict[str, set[str]], head: dict[str, set[str]]) -> dict[str, set[str]]:
     return {cid: base.get(cid, set()) | head.get(cid, set()) for cid in base.keys() | head.keys()}
+
+
+def paired_manifest_dependencies(base: GitSnapshot, head: GitSnapshot,
+                                 manifest_path: str) -> dict[str, set[str]]:
+    """Read both committed inventories and retain their complete dependencies.
+
+    The caller must select the canonical path from trusted BASE authority.
+    Missing/invalid manifests refuse, rather than erase old obligations. This
+    helper neither executes witnesses nor grants native classification.
+    """
+    path = safe_path(manifest_path)
+
+    def read(snapshot):
+        blob = snapshot.blobs.get(path)
+        if blob is None:
+            raise FixtureError("MANIFEST_MISSING", f"{snapshot.commit}: {path}")
+        if blob.mode != "100644":
+            raise FixtureError("NONREGULAR_INPUT", f"{path}: {blob.mode}")
+        return strict_json(blob.data)
+
+    old, new = read(base), read(head)
+    old_inventory = validate_inventory(base, old)
+    new_inventory = validate_inventory(head, new)
+    retained_witness_bindings(base, old, head, new)
+    return dependency_union(mandatory_dependencies(path, old_inventory),
+                            mandatory_dependencies(path, new_inventory))
 
 
 def affected_cases(base: dict[str, set[str]], head: dict[str, set[str]], changed_paths: set[str]) -> set[str]:

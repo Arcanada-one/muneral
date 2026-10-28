@@ -1,18 +1,18 @@
 {
- "bundle_digest": "sha256:e4470e21f5d1b90c7aea326992edf72d44c934be9600e674035bf9dc33da5718",
+ "bundle_digest": "sha256:dbc26274fd00bc374a7111a9e7c83b09e5a7106b661e290f27dd8c150f80e1d4",
  "files": [
   {
-   "blob_oid": "26744639847d12a9ad92e2426efb7e4340e3f20b",
+   "blob_oid": "30c8441c27426c1bf568fa2f5aa765df57266c20",
    "note": "the workflow file itself; it is already running by the time the job checks the bundle \u2014 so THIS run cannot vouch for it. The next run's verify_bundle hashes it against this entry (BUNDLE_WORKFLOW_DIGEST_MISMATCH) and the self-update battery's B8 refuses a change to it that this manifest does not attest (KB-039, DEC-AUP-0036)",
    "path": ".github/workflows/graph-admission.yml",
-   "sha256": "sha256:2302e5cc747210607b4a652ca75339aebb82c5e8c111da966325362fb00befd6",
+   "sha256": "sha256:24cc905fa0f313c622b60ee8de0a45d5116134873ea7f47c1bdc11a8be7a265e",
    "vendored_to": "graph-admission.yml",
    "verified_by_the_job": false
   },
   {
-   "blob_oid": "4e521cc02da05d99970333df64e280e6162c443d",
+   "blob_oid": "fc5c1a32ed90fc48facb3284e050b256c4e4d857",
    "path": "tools/ci/stage_userpath.py",
-   "sha256": "sha256:563eabd281b6e3295984de5d5521b938b04aced1cac18cbb4f122ea66319fcde"
+   "sha256": "sha256:e3a14d1dee8fe1719889b3896f4f4e298799df501250bb05d08d366d466da63a"
   },
   {
    "blob_oid": "705e67297d747c5e3f67ae12fc994ff716f1b4c1",
@@ -20,19 +20,24 @@
    "sha256": "sha256:50dab9d0c3d03ca52e3163f7c56edb61acab214adc548a5c533cdf248e9ae17e"
   },
   {
-   "blob_oid": "d3c554c38688ba9dfc720e938b35c343e48ec545",
+   "blob_oid": "dba314de5fd23a65edd045a78f1692b00db2ca7d",
    "path": "tools/graph/full_suite_ci.py",
-   "sha256": "sha256:1dc917363709ff0a6501b1c37ce02166c09f70a705466f1ca26508b70fd2de65"
+   "sha256": "sha256:9ae3c0cc0d51d86ac5fbd276b6e491e9bcb6ab636f74cafd7647520ab5cc507f"
   },
   {
-   "blob_oid": "07ae6ed8a750eef0df0213f6addbb6f760ef8af0",
+   "blob_oid": "aa9a890df8e76a608dbf60cf6434b869c0f46ded",
    "path": "tools/graph/shell_source.py",
-   "sha256": "sha256:2ba8221af3a8457a104d16dbd560f4a4c28c5d93587e1010d2ce940458b50b6e"
+   "sha256": "sha256:ac68f26b82df1b6d1151e0c11ba669dbb3f5249d8bc208d3e5405ef881712b3d"
   },
   {
-   "blob_oid": "79fed3170a7cb22c6d574400b0daf692cf312a4e",
+   "blob_oid": "d3577a9da7dee1d6aff5f916302dec2f9419e972",
+   "path": "tools/graph/shell_workflow.py",
+   "sha256": "sha256:b2aed5071ef38387a54a800a879f816453f1ebf862415d769ed155ba57beac4d"
+  },
+  {
+   "blob_oid": "c191b0d5e6158f1c1c8fee24d1dc6b90c0c773b0",
    "path": "tools/graph/admit_change.py",
-   "sha256": "sha256:433d45568a52a184f27b243b5f55e2460a8302db9f9ba4ab3717fb8883418522"
+   "sha256": "sha256:5c53e18c5d2e890b20eabdaf1df851dda26dee0061cbcd29ae5555fb4736534a"
   },
   {
    "blob_oid": "0ecd68b4d73437c73dab4b156f4bf57e42eb5277",
@@ -40,9 +45,9 @@
    "sha256": "sha256:339dcff4cd1e1915b9712387658f5ba9bee1667240f3f1d593423cd97d33d65e"
   },
   {
-   "blob_oid": "b07cee814cefe2c00de8e9dfa025af6d2ff0eabd",
+   "blob_oid": "1806648ac0225128011ad488af7b35a55ad495ee",
    "path": "tools/graph/schema_check.py",
-   "sha256": "sha256:8ec105df5924957f90a0e156ca06c46eccbca90bac42f12cc905a0634d241c11"
+   "sha256": "sha256:ed0320dda5550f2c1f185272e38789931c394e8ddd6f96c996ca5fcff0ce95a1"
   },
   {
    "blob_oid": "5c2c1cdfe807ad806a15eb5eb19d959b7fbe5ab5",
@@ -110,9 +115,9 @@
    "sha256": "sha256:3e4c786d14a4519bbce01d963e45581ce19eda48fb810655be56b6b196e9e083"
   },
   {
-   "blob_oid": "dd3c0bf44060e5fff507a02b3cb64e7511702f1d",
+   "blob_oid": "692f5350452bbedc1359a9d234c0f4bd58052e7b",
    "path": "tools/graph/fixture_contracts.py",
-   "sha256": "sha256:679796053a9f2ed5e028bc03ebfbff861689e5fa0a23a6347725af2daf2b45b0"
+   "sha256": "sha256:d0dc7ce4a2c43bc101ed2d369ec522c145d48fe8a696667dcd14c0e19d71951e"
   },
   {
    "blob_oid": "a306bda802fc5d2ee2e9367ba48d65c962fd04f4",
@@ -120,14 +125,14 @@
    "sha256": "sha256:21d5f04b11a3560fc2150e0d080a2e002a0230d6d74f30b82f19c8c13e4f538e"
   },
   {
-   "blob_oid": "994f145d2aaddfeb516a3973b28604b437f70725",
+   "blob_oid": "32304468a0a55d427dab920ad5bf0c9c5d8db79c",
    "path": "tools/graph/impact.py",
-   "sha256": "sha256:1f4b13d8fbb1534822d98e7dcc0ec1703048e39660e9edb521fe1b859256fcb8"
+   "sha256": "sha256:9608fddf96818ad57fae4661e8ede869e44306a79939581a1431932bd2a5360e"
   },
   {
-   "blob_oid": "d7d170754d0098b594deec0ca2033c9661521b78",
+   "blob_oid": "d57809a5930f18aa4f4cac02d7a86f44b6a00679",
    "path": "tools/graph/impact_pair.py",
-   "sha256": "sha256:623ebfb26b9f1f2302c687c80a2e4acef7a50735b6feca7fa3fef0f2c494cb95"
+   "sha256": "sha256:414078e6247408bd6df7af76b6f3c0fa07a953ef0c10b9b573a81bb8450997f5"
   },
   {
    "blob_oid": "81c53e25214deb7b4b543fb4a245a7db78142a06",
@@ -140,14 +145,14 @@
    "sha256": "sha256:78ea54f5ab290f09620b06411dea66e27652036312bea199c18215fc4b5f97d6"
   },
   {
-   "blob_oid": "59475dafa72e49623472dc2cae38ace0170478f8",
+   "blob_oid": "969fcac1f469a1d2ed5281a47a0bf14f02c05037",
    "path": "tools/graph/verify.py",
-   "sha256": "sha256:acc5f73d1d0a31badf421d46e06362df3f9c771aa63bb5f2826af0539e7e5e27"
+   "sha256": "sha256:2c331a637574ba897192ec9dd41607ee8015632e2cb2fa575994d5970d3f7aaf"
   },
   {
-   "blob_oid": "b224ca456d73d86294b7ae046a18a36b88fdeeff",
+   "blob_oid": "6d6e03c6a30cc21ab011a37549dd371a6752db73",
    "path": "tools/graph/contract_diff.py",
-   "sha256": "sha256:fbd36c9e4fe834011795a8776b48abdcc59610d46af43f449da02b5a81f0a403"
+   "sha256": "sha256:b6d173b41c9a56290e76c625691ca7137f3ff3972ebc8ca2ada069b46cd9d599"
   },
   {
    "blob_oid": "6e1288ad07c751fa6f2ba8fd773cbc34a4f8a4e0",
@@ -160,14 +165,14 @@
    "sha256": "sha256:8bba8db622af8abc9d06c15722153bb62a1fbea03dc117313c49640745ddc917"
   },
   {
-   "blob_oid": "faf8ca88bb795b2de0a6faeb7746e0073f5adcab",
+   "blob_oid": "680ab075c19aee414ad3318b078d4a97064bf7bd",
    "path": "tools/graph/canary_evidence.py",
-   "sha256": "sha256:83a696550da963bf508e8970516facd29ddfd47dd001fd45e64e91f653f350b1"
+   "sha256": "sha256:3d0bc25118bab348846e4c067d4570535996a95df2479af715e6d1df2b689cea"
   },
   {
-   "blob_oid": "cc5b0cc1a6c8bd2637bfb2a0de595f670e87dabb",
+   "blob_oid": "72c73a52800b0363d43502036010fdafeeb8c7b5",
    "path": "tools/graph/process_observation.py",
-   "sha256": "sha256:aef3315fc6bc36ed895d8eff6d0a275f2d054dee2bf226bdebcb82718236a464"
+   "sha256": "sha256:2027f3ef66425a68e54d81d1cdc5d075457205ee94f934b822b8c12a0934422b"
   },
   {
    "blob_oid": "e9defbc9f662f6dd0f75e2bf1f0567b31f37119d",
@@ -180,9 +185,9 @@
    "sha256": "sha256:bcc2b9c986588c689a9ef015e04dcaf2e69971cf64c69e761138de70c19258a7"
   },
   {
-   "blob_oid": "fe72765967f39ea20673e1a951d825426e2b6f8e",
+   "blob_oid": "4de9a0aa447527142ac41548153a35648b4b7b8b",
    "path": "tools/graph/ci_gate.py",
-   "sha256": "sha256:ab04f9e46b10bf9eb8c6c91f1ad5259b3be183a305ed0145eaf37291020d4cc7"
+   "sha256": "sha256:a54e9f3d56a6313c52de399491924ebdb3535e228c410b8ce685051d13668d43"
   },
   {
    "blob_oid": "f97c4273c635f3e3215c13a0e063930951d7b48d",
@@ -221,9 +226,12 @@
   "tool": "tools/graph/ci_gate.py",
   "version": "1.0.0"
  },
- "program_ref": "6af491c01ed545d1c62108b1d451982a74ddf6a4",
+ "program_ref": "6f9c98d0089d9f786514f609d0450e1c3783dcfd",
  "program_repo": "Arcanada-one/arcanada-universal-program",
  "provisional_until_fable_review": true,
  "rule": "The workflow refuses unless every file's sha256 matches this manifest AND the caller's `program_ref` input matches `program_ref` here. The bundle is a VENDORED copy of one pinned program-repo SHA (the program repository is private and no shared credential exists to check it out from a caller's CI). A pull request that changes anything under the bundle directory is refused by the gate job \u2014 a bundle refresh is its own pull request. Each entry's `blob_oid` is the git object id the bytes were read at: `git hash-object <file>` must equal it, which is how a caller with no credential for the program repository can CONTRADICT this manifest offline (DEC-AUP-0036 R2). Every byte here was read from the object store at program_ref, never from a working tree (R1).",
- "schema": "GraphAdmissionBundle/v1"
+ "schema": "GraphAdmissionBundle/v1",
+ "signing_keys": [
+  "SHA256:9QFqysn44UjA8rXyfHjItP3b2Oadhnbf1bDNqXrsCig"
+ ]
 }

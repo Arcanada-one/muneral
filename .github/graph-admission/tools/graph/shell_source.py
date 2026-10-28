@@ -13,6 +13,8 @@ import subprocess
 import tempfile
 from pathlib import Path, PurePosixPath
 
+import shell_workflow
+
 KINDS = {"bash_source", "bats_test"}
 
 
@@ -266,6 +268,11 @@ def workflow(path, raw, paths):
             if not isinstance(d, dict) or not isinstance(d.get("run", {}), dict):
                 raise ValueError("opaque workflow run defaults")
             return d.get("run", {})
+        def environment(scope):
+            env = scope.get("env", {})
+            if not isinstance(env, dict):
+                return False
+            return not any(key in shell_workflow.SOURCE_ENVIRONMENT for key in env)
         root = defaults(data)
         for name, job in data["jobs"].items():
             if not isinstance(job, dict) or "uses" in job or not isinstance(job.get("steps"), list):
@@ -273,6 +280,14 @@ def workflow(path, raw, paths):
                 unbound_callers.append(f"job {name}: reusable/opaque caller has no target script reference")
                 continue
             inherited = {**root, **defaults(job)}
+            checkout_unknown = any(
+                isinstance(step, dict) and str(step.get("uses", "")).startswith("actions/checkout@")
+                and (not isinstance(step.get("with", {}), dict)
+                     or (step.get("with") or {}).get("path")
+                     or (step.get("with") or {}).get("repository"))
+                for step in job["steps"])
+            inherited_env_safe = environment(data) and environment(job)
+            prior_env_write = False
             for index, step in enumerate(job["steps"]):
                 if not isinstance(step, dict):
                     unknown.append(f"job {name} step {index}: opaque step")
@@ -301,22 +316,58 @@ def workflow(path, raw, paths):
                     cwd = None
                 else:
                     cwd = os.path.normpath(wd)
+                if checkout_unknown or not inherited_env_safe or not environment(step) or prior_env_write:
+                    unknown.append(context + ": checkout root or source-affecting workflow environment unresolved")
+                    cwd = None
                 run = step["run"]
                 if not isinstance(run, str):
                     unknown.append(context + ": opaque run body")
                     unbound_callers.append(context + ": opaque run body has no target script reference")
                     continue
-                analysis = analyse(path, run.encode("utf-8"), paths, cwd=cwd)
+                # These files can change a later step's PATH/environment. A
+                # source-only projection cannot establish their resulting value.
+                if "GITHUB_ENV" in run or "GITHUB_PATH" in run:
+                    prior_env_write = True
+                analysis = shell_workflow.analyse(path, run.encode("utf-8"), paths, cwd=cwd)
                 if cwd is None or analysis["unknown"]:
                     for ref in analysis["references"]:
                         ref["provenance"] = "inferred"
-                refs.extend(analysis["references"])
+                step_references = list(analysis["references"])
+                reference_keys = {
+                    (ref["path"], ref["type"], ref["line"])
+                    for ref in step_references
+                }
+                # The workflow parser remains primary. Its opaque/unknown result
+                # is preserved, while the existing shell source parser may add
+                # only inventory-bound, target-local inferred call candidates.
+                # This secondary pass has no cwd and never supplies YAML context.
+                if cwd is None or analysis["unknown"]:
+                    secondary = analyse(path, run.encode("utf-8"), paths,
+                                        cwd=None, root_cwd=False)
+                    for ref in secondary["references"]:
+                        if (ref["type"] != "calls"
+                                or ref["provenance"] != "inferred"
+                                or ref["cwd"] is not None
+                                or ref["path"] not in paths):
+                            continue
+                        # A known workflow cwd with a primary line-specific
+                        # refusal (for example a missing helper under sub/)
+                        # cannot be replaced by a root-relative fallback.
+                        if (cwd is not None and any(
+                                reason.startswith(f"line {ref['line']}:")
+                                for reason in analysis["unknown"])):
+                            continue
+                        key = (ref["path"], ref["type"], ref["line"])
+                        if key not in reference_keys:
+                            step_references.append(ref)
+                            reference_keys.add(key)
+                refs.extend(step_references)
                 unknown.extend(context + ": " + s for s in analysis["unknown"])
                 # An unknown on a source line with a parsed target reference is
                 # scoped to that target (whose provenance was downgraded above).
                 # Unknowns on other lines, or without a line binding, may be an
                 # additional caller that emits no target reference at all.
-                referenced_lines = {ref["line"] for ref in analysis["references"]}
+                referenced_lines = {ref["line"] for ref in step_references}
                 run_lines = run.splitlines()
                 def has_multiple_statements(line_number):
                     if line_number < 1 or line_number > len(run_lines):

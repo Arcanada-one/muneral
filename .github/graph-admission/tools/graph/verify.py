@@ -79,8 +79,15 @@ import impact_pair  # noqa: E402
 import contract_diff  # noqa: E402
 import native_projection  # noqa: E402
 import full_suite_ci
+import process_observation
 import shell_source
 import source_input_contract
+
+
+def _new_private_scratch(prefix: str) -> Path:
+    """Create retained, private scratch unique to this invocation under the temp parent."""
+    return Path(tempfile.mkdtemp(prefix=prefix))
+
 
 VERSION = "1.4.1"   # workflow shell unknown cannot discharge mandatory caller closure
 TOOL = "tools/graph/verify.py"
@@ -1425,7 +1432,7 @@ class Verify:
         self.top = self.repo.top
         self.scope_root = self.repo.path
         self.scope_prefix = self.repo.prefix
-        self.workdir = Path(a.workdir) if a.workdir else Path(os.environ.get("TMPDIR", "/tmp")) / "arcana-verify"
+        self.workdir = Path(a.workdir) if a.workdir else _new_private_scratch("arcana-verify-")
         self.workdir.mkdir(parents=True, exist_ok=True)
         # Captured verifier output and the two graph dumps go to the WORKDIR, never beside the receipt.
         # The old default was `<out>.d/` — so `--out receipts/graph/car.json` dropped `car.d/` into the
@@ -1438,6 +1445,7 @@ class Verify:
         self.events: list[dict] = []
         self.notes: list[str] = []
         self.verifiers: list[dict] = []
+        self.test_suite: dict | None = None  # typed absent-suite record; set only by v_global_fallback_test
         self.ev: dict[str, dict[str, tuple[str, str]]] = {}   # verifier id → entity → (verdict, reason)
         self.canary_paths = list(getattr(a, "canary", None) or [])   # CanaryResult/v1 documents (AUP-GRAPH-008)
         self.canary_verified: set[str] = set()
@@ -1886,7 +1894,7 @@ class Verify:
     def v_systemd_unit_semantics(self):
         entities = self.needing("systemd_unit_semantics")
         verdicts, rows = {}, []
-        parity_errors = systemd_graph_parity(self.idx.doc, self.tree_head)
+        parity_errors = systemd_graph_parity(self.graph_head, self.tree_head)
         for eid in entities:
             ent = self.entities[eid]; path = ent["node"].get("path")
             origin = (ent["node"].get("attrs") or {}).get("source_origin") or {}
@@ -2685,13 +2693,22 @@ class Verify:
                 verdict = ("not_measured", "workflow source hash differs from selected graph node")
             else:
                 verdict = workflow_config.validate(raw)
-                unknown = self.entities[eid]["node"].get("attrs", {}).get("shell_unknown", [])
-                if unknown and verdict[0] == "verified":
-                    verdict = ("not_measured", "workflow shell caller closure not measured: " + "; ".join(unknown))
+            shell_unknown = self.entities[eid]["node"].get("attrs", {}).get("shell_unknown", [])
+            if shell_unknown and verdict[0] == "verified":
+                verdict = ("not_measured", "workflow shell caller closure not measured: " + "; ".join(shell_unknown))
+            detail = verdict[1]
+            if shell_unknown:
+                detail += (f"; {len(shell_unknown)} workflow shell-caller uncertainty item(s) remain separate "
+                           "from YAML schema validation and are retained in graph closure evidence")
+            proof = {"config_schema_verdict": verdict[0], "detail": detail,
+                     "shell_closure": {"verdict": "not_measured" if shell_unknown else "verified",
+                                       "unknown": shell_unknown,
+                                       "disposition": "retained separately; no shell execution or closure claim"}}
             vid = "v-workflow-config-" + hashlib.sha256(path.encode()).hexdigest()[:16]
+            row_verdict = (verdict[0], detail)
             self.record(vid, "config_schema", "workflow_config.validate exact head bytes", [eid],
-                        0 if verdict[0] == "verified" else 1, verdict[1], now_iso(), 0.0,
-                        verdict[1], {eid: verdict})
+                        0 if verdict[0] == "verified" else 1, proof, now_iso(), 0.0,
+                        detail, {eid: row_verdict})
 
     def v_config_schema(self):
         self.v_workflow_config()
@@ -3322,6 +3339,24 @@ class Verify:
         budget = prof.get("full_test_timeout_seconds", 900)
         return budget if type(budget) is int and 1 <= budget <= 7200 else None
 
+    def absent_suite_declaration(self, dep: str) -> dict | None:
+        """The typed absent-suite class applies only when ALL hold; otherwise None and today's NM stays.
+
+        Profile declares `full_test: null` + non-empty `full_test_absent_reason` + `static_validation`
+        (non-empty list of argv lists); the HEAD tree has no tracked test file and no scripts.test
+        (the same detector C18 re-derives with: schema_check.absent_suite_tree)."""
+        prof = (self.profile.get("deployables") or {}).get(dep, {})
+        reason, static = prof.get("full_test_absent_reason"), prof.get("static_validation")
+        if "full_test" not in prof or prof["full_test"] is not None or not isinstance(reason, str) or not reason.strip():
+            return None
+        if not (isinstance(static, list) and static and all(
+                isinstance(a, list) and a and all(isinstance(x, str) for x in a) for a in static)):
+            return None
+        tree = schema_check.absent_suite_tree(self.tree_head.files)
+        if tree["test_files"] or tree["scripts_test"] is not None or tree["unknown"]:
+            return None
+        return {"reason": reason.strip(), "static": static, "tree": tree}
+
     def v_global_fallback_test(self):
         """Run the repository's complete suite, independently of targeted spec selection."""
         groups = {}
@@ -3333,12 +3368,25 @@ class Verify:
             cmd = self.full_fallback_test_runner(dep)
             timeout = self.full_fallback_test_timeout(dep)
             started = now_iso()
+            absent = None
             if timeout is None:
                 rc, out, secs = 125, "FULL_FALLBACK_TEST_NOT_MEASURED: full_test_timeout_seconds must be an integer in 1..7200", 0.0
                 verdict = "not_measured"
             elif "full_fallback_test" in self.disabled or not cmd:
                 rc, out, secs = 127, "FULL_FALLBACK_TEST_NOT_MEASURED: explicit full_test declaration/runner absent or disabled", 0.0
                 verdict = "not_measured"
+                absent = None if "full_fallback_test" in self.disabled else self.absent_suite_declaration(dep)
+                if absent:
+                    # Typed absent-suite class: run ONLY the declared static validation. The row stays
+                    # not_measured (never verified); a failed command stays failed.
+                    static_text = schema_check.absent_suite_static_text(absent["static"])
+                    rc, out, secs = 0, "", 0.0
+                    for argv in absent["static"]:
+                        r, o, t = run_cmd(argv, self.exec_root / dep, env={"CI": "1", "PYTHONDONTWRITEBYTECODE": "1", "FORCE_COLOR": "0", "NO_COLOR": "1"}, timeout=timeout)
+                        rc, out, secs = r, out + o, secs + t
+                        if r:
+                            break
+                    verdict = "failed" if rc not in (0, 124, 127) else "not_measured"
             else:
                 supplied = list(getattr(self.a, "full_test_ci", None) or [])
                 candidates = []
@@ -3383,11 +3431,19 @@ class Verify:
                 verdict = "not_measured" if rc in (124, 127) else ("failed" if rc else ("verified" if passed else "not_measured"))
             vid = "v-global-fallback-test-" + (re.sub(r"[^a-z0-9]+", "-", dep.lower()).strip("-") or "root")
             logical_cmd = [Path(cmd[0]).name if Path(cmd[0]).is_absolute() else cmd[0], *cmd[1:]] if cmd else []
-            self.record(vid, "targeted_test", shlex.join(logical_cmd), entities, rc, out, started, secs,
+            self.record(vid, "targeted_test", static_text if absent else shlex.join(logical_cmd), entities, rc, out, started, secs,
                         "complete fallback suite: " + verdict,
                         {eid: (verdict, "complete fallback suite: " + verdict) for eid in entities})
             self.verifiers[-1]["scope"] = "global_fallback_full_suite"
             self.verifiers[-1]["timeout_seconds"] = timeout
+            if absent and rc == 0 and dep == "." and not self.test_suite:
+                v = self.verifiers[-1]
+                self.test_suite = {
+                    "status": "absent_declared", "behavior": "not_measured", "entities": sorted(entities),
+                    "declaration": {"deployable": dep, "full_test": None, "full_test_absent_reason": absent["reason"]},
+                    "tree": absent["tree"],
+                    "static_validation": [{"verifier_id": vid, "command": v["command"], "exit_code": v["exit_code"],
+                                           "output_ref": v["output_ref"]}]}
 
     def v_shell_syntax(self):
         for eid in self.needing("shell_syntax"):
@@ -3456,7 +3512,11 @@ class Verify:
                     try:
                         tap = full_suite_ci._blob(self.top, self.head, tap_path) if isinstance(tap_path, str) else b""
                         streams = [p.get("streams", {}).get("stdout", {}) for p in probes]
-                        tap_verified = (len(streams) == 1 and streams[0].get("sha256") == full_suite_ci._digest(tap)
+                        stream_digest = (process_observation.canonical_digest_hex(streams[0].get("sha256"))
+                                         if len(streams) == 1 else None)
+                        tap_digest = full_suite_ci.canonical_digest_hex(full_suite_ci._digest(tap))
+                        tap_verified = (len(streams) == 1 and stream_digest is not None
+                                        and tap_digest is not None and stream_digest == tap_digest
                                         and streams[0].get("captured_bytes") == len(tap)
                                         and not streams[0].get("truncated") and shell_source.tap_membership(tap, inventory))
                     except (ValueError, OSError, TypeError, subprocess.SubprocessError):
@@ -3956,6 +4016,8 @@ class Verify:
                          *exemption_notes, *self.notes],
                "verify": {"events": self.events, "required_by_entity": {e: ent["required"] for e, ent in sorted(self.entities.items())},
                           "seconds": {"prepare": self.prep_seconds, "verifiers": round(sum(v.get("duration_s", 0) for v in self.verifiers), 2)}}}
+        if self.test_suite:
+            rec["test_suite"] = self.test_suite
         rec["verifier_selection"] = self.verifier_selection()
         # A2-418. A selected verifier that applied to nothing leaves the REQUEST unanswered, and the
         # change holds for that reason — workflow-configuration.md: «missing selected checks retain
@@ -4313,10 +4375,13 @@ def run_scenario(scratch: Path, work: Path, fault: dict, tsc: str | None, prisma
 def selftest(a) -> int:
     t0 = time.monotonic()
     checks: list[dict] = []
-    work = Path(a.workdir) if a.workdir else Path(os.environ.get("TMPDIR", "/tmp")) / "arcana-verify-selftest"
-    if work.exists():
-        shutil.rmtree(work)
-    work.mkdir(parents=True)
+    if a.workdir:
+        work = Path(a.workdir)
+        if work.exists():
+            shutil.rmtree(work)
+        work.mkdir(parents=True)
+    else:
+        work = _new_private_scratch("arcana-verify-selftest-")
     matrix = load_matrix()
     gs, rs = schema_check.load_schema(schema_check.GRAPH_SCHEMA_PATH), schema_check.load_schema(schema_check.RECEIPT_SCHEMA_PATH)
 

@@ -639,8 +639,10 @@ def pin_only_edit(repo: Path, base: str, head: str, path: str, expect_ref: str |
                                 capture_output=True, text=True)
         if origin.returncode == 0 and _canonical_auth_origin(origin.stdout.strip()):
             scoped_ok, scoped_why = _canonical_caller_pin_and_read_scope_edit(old, new, expect_ref)
+        elif origin.returncode == 0 and _canonical_model_connector_origin(origin.stdout.strip()):
+            scoped_ok, scoped_why = _canonical_model_connector_pin_and_read_scope_edit(old, new, expect_ref)
         else:
-            scoped_ok, scoped_why = False, "read-scope amendment is limited to the canonical Auth GitHub origin"
+            scoped_ok, scoped_why = False, "read-scope amendment requires a canonical enrolled GitHub origin"
         if scoped_ok:
             return True, scoped_why
         # Preserve the existing strictly line-bound pin-only case. A permission-bearing change
@@ -721,6 +723,86 @@ def _canonical_auth_origin(origin: str) -> bool:
         r"ssh://git@github\.com/Arcanada-one/auth-arcana(?:\.git)?|"
         r"git@github\.com:Arcanada-one/auth-arcana(?:\.git)?)",
         origin))
+
+
+def _canonical_model_connector_origin(origin: str) -> bool:
+    """Accept only the canonical Model Connector repository on github.com."""
+    return bool(re.fullmatch(
+        r"(?:https://github\.com/Arcanada-one/model-connector(?:\.git)?|"
+        r"ssh://git@github\.com/Arcanada-one/model-connector(?:\.git)?|"
+        r"git@github\.com:Arcanada-one/model-connector(?:\.git)?)",
+        origin))
+
+
+def _canonical_model_connector_pin_and_read_scope_edit(old: str, new: str,
+                                                         expect_ref: str | None) -> tuple[bool, str]:
+    """Permit only the paired bundle pin and caller-level read-only Actions scope.
+
+    The existing local reusable-workflow reference, trigger, trust pin, and job
+    configuration must remain unchanged. Parsing is inert and rejects ambiguous YAML.
+    """
+    if not isinstance(expect_ref, str) or not re.fullmatch(r"[0-9a-f]{40}", expect_ref):
+        return False, "no full40 head bundle program_ref"
+    try:
+        import yaml
+
+        def parse(raw: str):
+            try:
+                for token in yaml.scan(raw):
+                    if isinstance(token, (yaml.tokens.AliasToken, yaml.tokens.AnchorToken,
+                                          yaml.tokens.TagToken, yaml.tokens.DirectiveToken)):
+                        raise ValueError("workflow aliases/tags/directives unsupported")
+
+                class UniqueLoader(yaml.BaseLoader):
+                    pass
+
+                def unique_mapping(loader, node):
+                    result = {}
+                    for key_node, value_node in node.value:
+                        key = loader.construct_object(key_node)
+                        if key in result:
+                            raise ValueError("duplicate workflow mapping key")
+                        result[key] = loader.construct_object(value_node)
+                    return result
+
+                UniqueLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, unique_mapping)
+                value = yaml.load(raw, Loader=UniqueLoader)
+            except yaml.YAMLError as exc:
+                raise ValueError("malformed workflow YAML") from exc
+            if not isinstance(value, dict):
+                raise ValueError("caller workflow is not a YAML mapping")
+            return value
+
+        before, after = parse(old), parse(new)
+        before_jobs, after_jobs = before.get("jobs"), after.get("jobs")
+        before_job = before_jobs.get("graph-admission") if isinstance(before_jobs, dict) else None
+        after_job = after_jobs.get("graph-admission") if isinstance(after_jobs, dict) else None
+        if not isinstance(before_job, dict) or not isinstance(after_job, dict):
+            return False, "canonical graph-admission job is absent"
+        local_uses = "./.github/workflows/graph-admission.yml"
+        if before_job.get("uses") != local_uses or after_job.get("uses") != local_uses:
+            return False, "local reusable-workflow reference changed"
+        before_inputs, after_inputs = before_job.get("with"), after_job.get("with")
+        if not isinstance(before_inputs, dict) or not isinstance(after_inputs, dict):
+            return False, "caller input map is absent"
+        old_ref, new_ref = before_inputs.get("program_ref"), after_inputs.get("program_ref")
+        if not isinstance(old_ref, str) or not re.fullmatch(r"[0-9a-f]{40}", old_ref):
+            return False, "base caller program_ref is not a full40 pin"
+        if old_ref == new_ref or new_ref != expect_ref:
+            return False, "caller program_ref did not move to the head bundle pin"
+        if before.get("permissions") != {"contents": "read"}:
+            return False, "base caller permissions are not exactly contents: read"
+        if after.get("permissions") != {"contents": "read", "actions": "read"}:
+            return False, "head caller permissions are not exactly read-only contents and actions"
+        before_cmp, after_cmp = copy.deepcopy(before), copy.deepcopy(after)
+        before_cmp["jobs"]["graph-admission"]["with"]["program_ref"] = "<paired-program-pin>"
+        after_cmp["jobs"]["graph-admission"]["with"]["program_ref"] = "<paired-program-pin>"
+        after_cmp["permissions"] = {"contents": "read"}
+        if before_cmp != after_cmp:
+            return False, "caller change includes fields beyond the paired pin and exact read-only scope"
+    except (ImportError, ValueError, TypeError, KeyError) as exc:
+        return False, "Model Connector caller cannot be safely classified: " + str(exc)
+    return True, "canonical Model Connector pin and caller-level contents/actions read scope are paired"
 
 
 def _canonical_muneral_origin(origin: str) -> bool:
@@ -1033,8 +1115,62 @@ def split_self_update_receipt(repo: Path, base: str, head: str, outside: list[st
     if not ok:
         return [], list(outside), ev
     ev["admitted"] = path
-    ev["work_item"] = work_item_id((json.loads(git(repo, "show", f"{head}:{path}")) or {}).get("work_item"))
-    return [path], [p for p in outside if p != path], ev
+    receipt = json.loads(git(repo, "show", f"{head}:{path}"))
+    ev["work_item"] = work_item_id(receipt.get("work_item"))
+    # This only classifies exact inert records, never grants a verifier verdict or an exemption.
+    # CAN consumption is re-derived from Git; unchanged/unused claims license no sibling paths.
+    verdicts, verifiers = receipt.get("verdicts"), receipt.get("verifiers")
+    if not isinstance(verdicts, list) or not isinstance(verifiers, list):
+        ev["canary_record_refusals"] = ["unsupported receipt verdict/verifier structure"]
+        return [path], [p for p in outside if p != path], ev
+    cashed = {vid for row in verdicts if isinstance(row, dict)
+              and row.get("verdict") == "verified" and isinstance(row.get("verifier_ids"), list)
+              for vid in row["verifier_ids"] if isinstance(vid, str)}
+    records: set[str] = set()
+    failures: list[str] = []
+    for verifier in verifiers:
+        if (not isinstance(verifier, dict) or verifier.get("kind") != "canary"
+                or not isinstance(verifier.get("id"), str) or verifier.get("id") not in cashed):
+            continue
+        ref = verifier.get("output_ref")
+        # No directory licence. Only a nested JSON record named by this receipt is considered.
+        if (not isinstance(ref, str) or not re.fullmatch(r"receipts/graph/[^/]+/[^/]+\.json", ref)
+                or ref.startswith(LEDGER_REL + "/") or ref not in outside):
+            continue
+        try:
+            rows, errors, doc = canary_evidence.consume(repo / ref, repo, head, at_head=ref)
+            if errors:
+                raise ValueError("; ".join(errors[:3]))
+            entities = verifier.get("entities")
+            if (not isinstance(entities, list) or not entities or any(
+                    entity not in rows or rows[entity].get("verdict") != "verified" for entity in entities)):
+                raise ValueError("claimed entities are not verified by the committed result")
+            if doc.get("schema") != "CanaryResult/v2" or doc.get("read_only") is not True:
+                raise ValueError("only read-only original-plan-bound process results are supported")
+            if any(probe.get("kind") != "process" for probe in doc.get("probes", [])):
+                raise ValueError("unsupported dynamic canary evidence")
+            siblings = [doc["plan"]["path"], doc["subject"]["evidence"]["path"]]
+            if any(not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9_-][A-Za-z0-9_.-]*\.json", name)
+                   for name in siblings):
+                raise ValueError("plan/source must be exact sibling JSON documents")
+            closure = {ref, *(ref.rsplit("/", 1)[0] + "/" + name for name in siblings)}
+            if len(closure) != 3:
+                raise ValueError("result, plan and source must be three distinct records")
+            if records and records != closure:
+                raise ValueError("one own CAR may classify only one distinct canary record triple")
+            for record in sorted(closure):
+                if (changed.get(record) != "A" or record not in outside
+                        or git_ok(repo, "cat-file", "-e", f"{base}:{record}")):
+                    raise ValueError(f"{record} is not an exact newly added record of this range")
+                mode = git(repo, "ls-tree", head, "--", record).split()[0]
+                if mode != "100644":
+                    raise ValueError(f"{record} is not a regular non-executable record (mode {mode})")
+            records.update(closure)
+        except (KeyError, IndexError, TypeError, ValueError, OSError, subprocess.SubprocessError) as exc:
+            failures.append(f"{ref}: {exc}")
+    ev["canary_records"] = sorted(records)
+    ev["canary_record_refusals"] = failures
+    return [path], [p for p in outside if p != path and p not in records], ev
 
 
 # ============================================================================================
@@ -2194,7 +2330,8 @@ def _selftest_output(raw: bytes) -> dict:
     return out
 
 
-def _bundle_selftest(bundle_root: Path, *, evidence: dict | None = None) -> tuple[int | None, int | None, str]:
+def _bundle_selftest(bundle_root: Path, *, evidence: dict | None = None,
+                     legacy_base: bool = False) -> tuple[int | None, int | None, str]:
     """→ (exit code, measured arm count, tail); retain full stdout/stderr in `evidence`.
 
     A FAIL summary measures a count, not a success. Missing, ambiguous, malformed or unfinished
@@ -2226,15 +2363,18 @@ def _bundle_selftest(bundle_root: Path, *, evidence: dict | None = None) -> tupl
     text = report["stdout"]["text"]
     # Only the single final aggregate is comparable. Per-battery totals, a duplicate aggregate,
     # zero measured arms, truncated output and contradictory totals cannot prove monotonicity.
-    summaries = re.findall(r"^TOTAL (PASS|FAIL): (\d+)/(\d+) checks across eight batteries "
-                           r"\((\d+) not_measured\)$", text, re.M)
+    # The signed pre-upgrade caller bundle reports three batteries. It can serve as
+    # B4's BASE measurement only; the candidate HEAD still owes the current eight.
+    batteries = r"(?:three|eight)" if legacy_base else "eight"
+    aggregate = (rf"TOTAL (PASS|FAIL): (\d+)/(\d+) checks across {batteries} batteries "
+                 r"\((\d+) not_measured\)")
+    summaries = re.findall(rf"^{aggregate}$", text, re.M)
     if report["complete"] and len(summaries) == 1:
         status, passed, total, nm = summaries[0]
         passed, total, nm = int(passed), int(total), int(nm)
         if (total > 0 and 0 <= passed <= total
                 and ((status == "PASS" and passed == total) or (status == "FAIL" and passed < total))
-                and re.fullmatch(r"TOTAL (PASS|FAIL): (\d+)/(\d+) checks across eight batteries "
-                                 r"\((\d+) not_measured\)", text.rstrip().splitlines()[-1])):
+                and re.fullmatch(aggregate, text.rstrip().splitlines()[-1])):
             report["summary"] = {"status": status, "passed": passed, "measured": total,
                                  "not_measured": nm}
             report["arms"] = total
@@ -2741,7 +2881,7 @@ def evaluate_self_update(repo: Path, base: str, head: str, files: list[dict], wo
         ids_b = _bundle_policy_check_ids(base_bundle) if base_bundle else None
         base_test: dict = {}
         if base_bundle:
-            rc_b, arms_b, _ = _bundle_selftest(base_bundle, evidence=base_test)
+            rc_b, arms_b, _ = _bundle_selftest(base_bundle, evidence=base_test, legacy_base=True)
         else:
             rc_b, arms_b = None, None
             base_test = {"exit_code": None, "arms": None, "complete": False, "summary": None,
@@ -3918,15 +4058,69 @@ def gate(repo: Path, base: str, head: str, receipt_paths: list[Path], policy: di
         # ownership says whether a file at that path can be anything but the artefact of that check.
         # A caller repository owns no ledger, so there the path stays ordinary content.
         ledger_rel = LEDGER_REL if is_program_repo(repo, repo_name) else None
-        record = trailing_record_commits(repo, base, head, bound, changed, wd_rc, ledger_rel)
-        uncovered = sorted(changed - covered - set(record["admitted_paths"]["receipts"])
-                           - set(record["admitted_paths"]["derived"])
-                           - set(record["admitted_paths"]["work_item_evidence"]))
+        gate_repo = impact_pair.impact.Repo(repo)
+        record = trailing_record_commits(gate_repo.top, base, head, bound, changed, wd_rc, ledger_rel)
+        record_paths = (set(record["admitted_paths"]["receipts"])
+                        | set(record["admitted_paths"]["derived"])
+                        | set(record["admitted_paths"]["work_item_evidence"]))
+        scope_prefix = gate_repo.prefix
+        scope_path_problems = []
+        if scope_prefix:
+            # Git's full-range diff and a scoped verifier receipt use different coordinates.
+            # Derive the prefix from the actual --repo path; receipt labels cannot choose it.
+            # Keep outside paths separate so a root-level `x.py` cannot collide with scoped `x.py`.
+            scoped_changed = {path[len(scope_prefix):] for path in changed
+                              if path.startswith(scope_prefix)}
+            outside_scope = {path for path in changed if not path.startswith(scope_prefix)}
+
+            scoped_covered = set()
+            ambiguous_scoped_paths = set()
+            for rec in bound:
+                seen_in_receipt = set()
+                doc = rec["_doc"]
+                for row in (doc.get("change_set") or {}).get("files") or []:
+                    path = row.get("path") if isinstance(row, dict) else None
+                    if not isinstance(path, str) or not path or path.startswith("/") or "\\" in path \
+                            or "\x00" in path or any(part in ("", ".", "..") for part in path.split("/")):
+                        scope_path_problems.append("malformed or traversal receipt change_set path")
+                        if isinstance(path, str) and path and not path.startswith("/") \
+                                and "\\" not in path and "\x00" not in path:
+                            parts = []
+                            escaped = False
+                            for part in path.split("/"):
+                                if part in ("", "."):
+                                    continue
+                                if part == "..":
+                                    if not parts:
+                                        escaped = True
+                                        break
+                                    parts.pop()
+                                else:
+                                    parts.append(part)
+                            alias = "/".join(parts)
+                            if not escaped and alias in scoped_changed:
+                                ambiguous_scoped_paths.add(alias)
+                        continue
+                    if path in seen_in_receipt:
+                        scope_path_problems.append("duplicate receipt change_set path is ambiguous")
+                        ambiguous_scoped_paths.add(path)
+                        continue
+                    seen_in_receipt.add(path)
+                    scoped_covered.add(path)
+
+            uncovered_scoped = {scope_prefix + path for path in scoped_changed
+                                if path not in scoped_covered or path in ambiguous_scoped_paths}
+            uncovered = sorted((uncovered_scoped | outside_scope) - record_paths)
+        else:
+            # Preserve canonical root-repository comparison exactly.
+            uncovered = sorted(changed - covered - record_paths)
         after = record["edited_after_receipt_head"]
-        if uncovered or after:
+        if uncovered or after or scope_path_problems:
             parts = []
             if uncovered:
                 parts.append(f"{len(uncovered)}/{len(changed)} changed file(s) are absent from the receipt change_set")
+            if scope_path_problems:
+                parts.append("scoped receipt paths refused: " + "; ".join(sorted(set(scope_path_problems))))
             if after:
                 parts.append(f"{len(after)} path(s) changed AFTER the receipt head by a commit no receipt has seen "
                              f"({', '.join(after[:4])}) — only the receipt file itself, a declared derived "
@@ -5427,7 +5621,8 @@ def cmd_gate(a) -> int:
     actual_repo_name = getattr(a, "repo_name", None) or repo_remote_name(Path(a.repo).resolve())
     if (any(value is not None for value in current_values)
             and actual_repo_name != "Arcanada-one/arcanada-universal-program"
-            and not all(isinstance(value, str) and value for value in current_program_values)):
+            and not (isinstance(current_program_values[0], Path)
+                     and all(isinstance(value, str) and value for value in current_program_values[1:]))):
         raise UsageError("external current-source stage requires the pinned Program bundle, program_ref, and signer fingerprint")
     if (actual_repo_name == "Arcanada-one/arcanada-universal-program"
             and any(value is not None for value in current_program_values)):
@@ -5613,7 +5808,7 @@ def current_source_stage_outcome_for_receipt(receipt_path: Path, receipt: dict, 
             authority_row = authority_rows[0]
             if (authority_path.is_symlink() or not authority_path.is_file()
                     or _stage_sha256(authority_path.read_bytes()) != STAGE_AUTHORITY_SHA256
-                    or authority_row.get("sha256") != hashlib.sha256(authority_path.read_bytes()).hexdigest()
+                    or authority_row.get("sha256") != _stage_sha256(authority_path.read_bytes())
                     or not isinstance(authority_row.get("blob_oid"), str)
                     or not re.fullmatch(r"[0-9a-f]{40,64}", authority_row["blob_oid"])):
                 return {}, ["signed Program bundle DEC-AUP-0167 source does not match the pinned authority bytes"]
@@ -5939,7 +6134,41 @@ def _stage_authenticated_github_problems(repo_name: str, base: str, head: str,
                 or comment.get("html_url") != expected_comment_url or not isinstance(body, str)
                 or head not in body):
             return ["selected authenticated review comment does not bind the exact PR and full head"]
-        verdict_lines = {re.sub(r"[*_`#]", "", line).strip().upper() for line in body.splitlines()}
+        verdict_lines = set()
+        for line in body.splitlines():
+            normalized = line.strip().upper()
+            normalized = re.sub(r"^#{1,6}\s+", "", normalized)
+
+            def strip_paired_markup(value):
+                markers = "*_`"
+                while value and (value[0] in markers or value[-1] in markers):
+                    opener = value[0]
+                    if opener not in markers:
+                        return None
+                    opening_width = len(value) - len(value.lstrip(opener))
+                    closing_width = len(value) - len(value.rstrip(opener))
+                    if opening_width != closing_width:
+                        return None
+                    value = value[opening_width:-closing_width].strip()
+                return value
+
+            # Markdown formatting is optional only when its boundary markers are paired
+            # with the same delimiter and width. Do not normalize malformed wrappers into
+            # an approval token.
+            if normalized.startswith(tuple("*_`")):
+                normalized = strip_paired_markup(normalized)
+                if normalized is None:
+                    continue
+            if normalized.startswith("VERDICT:"):
+                token = strip_paired_markup(normalized[len("VERDICT:"):].strip())
+                if token is None:
+                    continue
+                normalized = "VERDICT: " + token
+            else:
+                normalized = strip_paired_markup(normalized)
+                if normalized is None:
+                    continue
+            verdict_lines.add(normalized)
         if not verdict_lines.intersection({"APPROVE", "VERDICT: APPROVE", "APPROVE_SOURCE",
                                            "VERDICT: APPROVE_SOURCE"}):
             return ["selected authenticated review comment does not contain an explicit approval verdict"]
@@ -6238,9 +6467,9 @@ def _stage_process_problems(evidence: dict, repo: Path, candidate_head: str,
             if (any(not isinstance(item, dict) for item in expected_inputs + actual_inputs)
                     or len({item.get("path") for item in expected_inputs if isinstance(item, dict)}) != len(expected_inputs)
                     or len({item.get("path") for item in actual_inputs if isinstance(item, dict)}) != len(actual_inputs)
-                    or [(item.get("path"), item.get("sha256")) for item in expected_inputs]
-                    != [(item.get("path"), item.get("sha256")) for item in actual_inputs]):
-                problems.append(f"{rid}: observed source inputs differ from the original process plan")
+                    or [(item.get("path"), item.get("sha256"), item.get("attribution")) for item in expected_inputs]
+                    != [(item.get("path"), item.get("sha256"), item.get("attribution")) for item in actual_inputs]):
+                problems.append(f"{rid}: observed execution inputs or attribution differ from the original process plan")
                 continue
             input_paths = set()
             source_tree = canary_evidence.tree_entries(repo, source_head)
@@ -6254,28 +6483,61 @@ def _stage_process_problems(evidence: dict, repo: Path, candidate_head: str,
                         or ".." in Path(absolute).parts):
                     input_error = "process input path is not a normalized absolute path"
                     break
+                attribution = expected.get("attribution")
+                if attribution is None:
+                    # A legacy row remains product source only under its one source-bound root.
+                    kind = "product_source"
+                elif isinstance(attribution, dict):
+                    kind = attribution.get("kind")
+                else:
+                    input_error = "process input attribution is malformed"
+                    break
+                if not re.fullmatch(r"[0-9a-f]{64}", str(expected.get("sha256", ""))):
+                    input_error = "process input content pin is invalid"
+                    break
+                if (actual.get("matched") is not True or actual.get("sha256") != expected.get("sha256")
+                        or actual.get("bytes") is None):
+                    input_error = "process input does not match its exact measured content pin"
+                    break
+                if kind in ("program_producer", "system_executable"):
+                    # Keep external producer/tool identity and its measured bytes bound to the
+                    # result, but never count it as a product-repository source path.
+                    if (not isinstance(attribution, dict)
+                            or set(attribution) != {"kind", "source_id", "version"}
+                            or not isinstance(attribution.get("source_id"), str)
+                            or not attribution["source_id"].strip()
+                            or attribution.get("version") != "sha256:" + expected["sha256"]
+                            or (kind == "system_executable" and attribution["source_id"] != absolute)):
+                        input_error = "external process input lacks its exact source/content-version identity"
+                        break
+                    continue
+                if kind != "product_source" or (attribution is not None and set(attribution) != {"kind"}):
+                    input_error = "process input attribution kind is unsupported"
+                    break
                 try:
                     relative = Path(absolute).relative_to(Path(producer_root)).as_posix()
                 except (TypeError, ValueError):
-                    input_error = "process input is outside the source-bound producer repository"
+                    input_error = "product process input is outside the source-bound producer repository"
                     break
                 if (not relative or relative == "." or relative.startswith("../")
-                        or "\\" in relative or not re.fullmatch(r"[0-9a-f]{64}", str(expected.get("sha256", "")))):
-                    input_error = "process input path or source pin is invalid"
+                        or "\\" in relative):
+                    input_error = "product process input path is invalid"
                     break
                 tree_entry = source_tree.get(relative)
                 if not tree_entry or tree_entry[0] not in {"100644", "100755"}:
-                    input_error = f"process input is not a regular source file at the raw CAR head: {relative}"
+                    input_error = f"product process input is not a regular source file at the raw CAR head: {relative}"
                     break
                 source_bytes = canary_evidence.read_at_commit(repo, source_head, relative)
                 expected_sha = expected["sha256"]
-                if (hashlib.sha256(source_bytes).hexdigest() != expected_sha or actual.get("matched") is not True
-                        or actual.get("sha256") != expected_sha):
-                    input_error = f"process input does not match the exact source blob: {relative}"
+                if hashlib.sha256(source_bytes).hexdigest() != expected_sha:
+                    input_error = f"product process input does not match the exact source blob: {relative}"
                     break
                 input_paths.add(relative)
             if input_error:
                 problems.append(f"{rid}: {input_error}")
+                continue
+            if not input_paths:
+                problems.append(f"{rid}: external process inputs cannot substitute for product source inputs")
                 continue
             verified_entities = {
                 entity for entity, row in rows.items()

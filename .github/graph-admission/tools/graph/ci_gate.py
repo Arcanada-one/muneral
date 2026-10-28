@@ -56,6 +56,7 @@ BUNDLE_FILES = [
     "governance/decisions/DEC-AUP-0167.md",
     "tools/graph/full_suite_ci.py",
     "tools/graph/shell_source.py",
+    "tools/graph/shell_workflow.py",
     "tools/graph/admit_change.py",
     # The StageEvidence validator reads this committed contract relative to the bundle root.
     # Without it, a vendored admission tool cannot validate the explicit finished-stage input.
@@ -750,10 +751,11 @@ def select_stage_receipt(receipts: list[Path], evidence_path: str | None,
                          expected_repo: str, expected_base: str, expected_head: str) -> tuple[list[Path], dict]:
     """Select only the raw CAR whose bytes are named by an explicit StageEvidence input.
 
-    The stage document is not authority and does not alter a CAR. Native admit_change validates
-    its full repository/range, provenance, coverage, E2E, review, CI and policy bindings. This
-    adapter only prevents the reusable workflow from silently pairing a finished-stage request
-    with an unrelated receipt found by broad tree discovery (for example, an older PR receipt).
+    The stage document is not authority and does not alter a CAR. Its source tuple binds the
+    digest-selected raw CAR; the candidate PR range is a separate identity checked downstream.
+    Native admit_change validates its full repository/range, provenance, coverage, E2E, review,
+    CI and policy bindings. This adapter prevents the reusable workflow from silently pairing a
+    finished-stage request with an unrelated receipt found by broad tree discovery.
     """
     if not evidence_path:
         if required or evidence_root:
@@ -779,20 +781,49 @@ def select_stage_receipt(receipts: list[Path], evidence_path: str | None,
         if not isinstance(digest, str) or not re.fullmatch(r"sha256:[0-9a-f]{64}", digest):
             raise ValueError("stage evidence raw_car_sha256 is malformed")
         subject = doc.get("repository")
-        if (not isinstance(subject, dict) or subject.get("name") != expected_repo
-                or subject.get("base") != expected_base or subject.get("head") != expected_head):
-            return [], {"verdict": "refuse", "reason": "STAGE_EVIDENCE_SUBJECT_MISMATCH",
-                        "expected": {"repository": expected_repo, "base": expected_base, "head": expected_head}}
+        if not isinstance(subject, dict) or subject.get("name") != expected_repo:
+            return [], {"verdict": "refuse", "reason": "STAGE_EVIDENCE_REPOSITORY_MISMATCH",
+                        "expected_repository": expected_repo}
     except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
         return [], {"verdict": "refuse", "reason": "STAGE_EVIDENCE_INPUT_INVALID",
                     "detail": str(exc)}
-    matching = [p for p in receipts if p.is_file() and not p.is_symlink()
-                and "sha256:" + hashlib.sha256(p.read_bytes()).hexdigest() == digest]
+    try:
+        matching = [p for p in receipts if p.is_file() and not p.is_symlink()
+                    and "sha256:" + hashlib.sha256(p.read_bytes()).hexdigest() == digest]
+    except OSError as exc:
+        return [], {"verdict": "refuse", "reason": "STAGE_EVIDENCE_CAR_INVALID",
+                    "detail": type(exc).__name__}
     if len(matching) != 1:
         return [], {"verdict": "refuse", "reason": "STAGE_EVIDENCE_CAR_BINDING_MISMATCH",
                     "matching_receipts": len(matching), "raw_car_sha256": digest}
+    try:
+        raw_car = json.loads(matching[0].read_text(encoding="utf-8"))
+        car_repo = raw_car.get("repo") if isinstance(raw_car, dict) else None
+        change = raw_car.get("change_set") if isinstance(raw_car, dict) else None
+        source = {
+            "name": car_repo.get("name") if isinstance(car_repo, dict) else None,
+            "base": change.get("base") if isinstance(change, dict) else None,
+            "head": change.get("head") if isinstance(change, dict) else None,
+        }
+        if (not isinstance(raw_car, dict)
+                or raw_car.get("schema") != "ChangeAdmissionReceipt/v1"
+                or source["name"] != expected_repo
+                or not isinstance(source["base"], str)
+                or not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", source["base"])
+                or not isinstance(source["head"], str)
+                or not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", source["head"])):
+            raise ValueError("digest-matched raw CAR has no supported repository/base/head")
+        if (subject.get("name") != source["name"] or subject.get("base") != source["base"]
+                or subject.get("head") != source["head"]):
+            return [], {"verdict": "refuse", "reason": "STAGE_EVIDENCE_SOURCE_MISMATCH",
+                        "raw_car_source": source}
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
+        return [], {"verdict": "refuse", "reason": "STAGE_EVIDENCE_CAR_INVALID",
+                    "detail": str(exc)}
     return matching, {"verdict": "selected", "receipt": str(matching[0]),
-                      "raw_car_sha256": digest}
+                      "raw_car_sha256": digest, "raw_car_source": source,
+                      "candidate": {"repository": expected_repo,
+                                    "base": expected_base, "head": expected_head}}
 
 
 def _stage_userpath_ref(root: Path, descriptor: object) -> tuple[Path | None, str | None]:
@@ -902,6 +933,8 @@ def validate_current_source_cli_outcome(outcome: object, root: Path, repo: Path,
                            or explanation_digest_path.exists() or explanation_digest_path.is_symlink())
     if explanation_present:
         expected_argv["verify"].extend(["--empty-impact-explanation", str(explanation_path)])
+    if repo_name == "Arcanada-one/auth-arcana":
+        expected_argv["verify"].extend(["--root-typecheck-ci-root", str(candidate_root / "ci-typecheck")])
     resolved_outputs = {}
     for name, row in command_by_id.items():
         if (set(row) != {"id", "argv", "cwd", "pid", "start_utc", "end_utc", "exit_code",
@@ -1451,6 +1484,213 @@ def validate_stage_userpath_result(result_path: str | None, result_root: str | N
         "result_sha256": hashlib.sha256(raw_result).hexdigest(),
     }
     return proof, sorted(set(problems))
+
+CALLER_DEPENDENCY_SETUP_SCHEMA = "CallerDependencySetup/v1"
+CALLER_DEPENDENCY_SETUP_POLICY = "pnpm-frozen-web-typecheck/v1"
+CALLER_DEPENDENCY_SETUP_REPOSITORY = "Arcanada-one/muneral"
+CALLER_DEPENDENCY_SETUP_FILES = (
+    ".github/workflows/ci.yml",
+    "package.json",
+    "pnpm-lock.yaml",
+    "pnpm-workspace.yaml",
+    "apps/web/package.json",
+    "packages/types/package.json",
+    ".arcana/derived-artefacts.v1.json",
+)
+
+
+def _strict_json_object(text: str, label: str) -> dict:
+    """Parse one JSON object without accepting duplicate keys or non-object roots."""
+    def unique_pairs(pairs):
+        value = {}
+        for key, item in pairs:
+            if key in value:
+                raise ValueError(f"{label} contains a duplicate key")
+            value[key] = item
+        return value
+
+    try:
+        value = json.loads(text, object_pairs_hook=unique_pairs)
+    except (json.JSONDecodeError, UnicodeError) as exc:
+        raise ValueError(f"{label} is not valid JSON") from exc
+    if not isinstance(value, dict):
+        raise ValueError(f"{label} must be a JSON object")
+    return value
+
+
+def _candidate_setup_git(repo: Path, *args: str) -> bytes:
+    env = dict(os.environ)
+    env["GIT_TERMINAL_PROMPT"] = "0"
+    env["GIT_NO_LAZY_FETCH"] = "1"
+    try:
+        result = subprocess.run(["git", "-C", str(repo), *args], capture_output=True,
+                                timeout=15, env=env, check=False)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise ValueError("candidate Git binding is unavailable") from exc
+    if result.returncode != 0:
+        raise ValueError("candidate Git binding is unavailable")
+    return result.stdout
+
+
+def validate_candidate_dependency_setup(manifest: dict, repo_path: str | Path,
+                                        repository: str, base: str, head: str) -> dict:
+    """Validate the fixed MUN web-typecheck setup contract without executing setup commands.
+
+    The manifest is caller-supplied data, never a command source. This function checks its exact
+    policy, subject, range, package scope and seven Git/blob/content pins, then returns only the
+    fixed pnpm operations supported by this profile. Its JSON shape is exactly
+    {schema, policy, repository, base, head, working_directory, scope, files}; each files value is
+    {blob_oid, sha256, bytes}. The workflow is responsible for executing those literal operations
+    after this function succeeds.
+    """
+    if not isinstance(manifest, dict):
+        raise ValueError("dependency setup manifest must be an object")
+    if set(manifest) != {"schema", "policy", "repository", "base", "head",
+                        "working_directory", "scope", "files"}:
+        raise ValueError("dependency setup fields are missing or unsupported")
+    if manifest.get("schema") != CALLER_DEPENDENCY_SETUP_SCHEMA:
+        raise ValueError("dependency setup schema is unsupported")
+    if manifest.get("policy") != CALLER_DEPENDENCY_SETUP_POLICY:
+        raise ValueError("dependency setup policy is unsupported")
+    if repository != CALLER_DEPENDENCY_SETUP_REPOSITORY or manifest.get("repository") != repository:
+        raise ValueError("dependency setup repository does not match the supported caller")
+    if manifest.get("working_directory") != "." or manifest.get("scope") != "apps/web":
+        raise ValueError("dependency setup working directory or package scope is unsupported")
+    if (not isinstance(base, str) or not re.fullmatch(r"[0-9a-f]{40}", base)
+            or not isinstance(head, str) or not re.fullmatch(r"[0-9a-f]{40}", head)
+            or base == head or manifest.get("base") != base or manifest.get("head") != head):
+        raise ValueError("dependency setup range does not match the current candidate")
+
+    repo = Path(repo_path).resolve(strict=True)
+    if not repo.is_dir():
+        raise ValueError("candidate workspace is unavailable")
+    actual_head = _candidate_setup_git(repo, "rev-parse", "--verify", "HEAD^{commit}").decode().strip()
+    _candidate_setup_git(repo, "cat-file", "-e", f"{base}^{{commit}}")
+    _candidate_setup_git(repo, "merge-base", "--is-ancestor", base, head)
+    if actual_head != head:
+        raise ValueError("candidate workspace HEAD differs from the dependency setup subject")
+
+    file_pins = manifest.get("files")
+    if not isinstance(file_pins, dict) or set(file_pins) != set(CALLER_DEPENDENCY_SETUP_FILES):
+        raise ValueError("dependency setup file set is incomplete or unsupported")
+    checked_files = {}
+    bytes_by_path = {}
+    for relative in CALLER_DEPENDENCY_SETUP_FILES:
+        pin = file_pins.get(relative)
+        if not isinstance(pin, dict) or set(pin) != {"blob_oid", "sha256", "bytes"}:
+            raise ValueError(f"dependency setup pin is malformed: {relative}")
+        if (not isinstance(pin.get("blob_oid"), str)
+                or not re.fullmatch(r"[0-9a-f]{40}", pin["blob_oid"])
+                or not isinstance(pin.get("sha256"), str)
+                or not re.fullmatch(r"[0-9a-f]{64}", pin["sha256"])
+                or not isinstance(pin.get("bytes"), int) or isinstance(pin.get("bytes"), bool)
+                or pin["bytes"] < 0):
+            raise ValueError(f"dependency setup pin is malformed: {relative}")
+        path = repo / relative
+        cursor = repo
+        for component in Path(relative).parts:
+            cursor = cursor / component
+            try:
+                mode = cursor.lstat().st_mode
+            except OSError as exc:
+                raise ValueError(f"dependency setup source is missing: {relative}") from exc
+            if cursor == path:
+                if not stat.S_ISREG(mode):
+                    raise ValueError(f"dependency setup source is not a regular file: {relative}")
+            elif not stat.S_ISDIR(mode):
+                raise ValueError(f"dependency setup source path is unsafe: {relative}")
+        raw = path.read_bytes()
+        tree_row = _candidate_setup_git(repo, "ls-tree", "-z", "--full-tree", head, "--", relative)
+        rows = [row for row in tree_row.split(b"\0") if row]
+        if len(rows) != 1 or b"\t" not in rows[0]:
+            raise ValueError(f"dependency setup Git tree row is missing or ambiguous: {relative}")
+        metadata, recorded_path = rows[0].split(b"\t", 1)
+        try:
+            mode_text, kind, oid = metadata.decode("ascii").split(" ")
+            path_text = recorded_path.decode("utf-8")
+        except (UnicodeError, ValueError) as exc:
+            raise ValueError(f"dependency setup Git tree row is malformed: {relative}") from exc
+        if (path_text != relative or mode_text != "100644" or kind != "blob"
+                or oid != pin["blob_oid"] or git_blob_oid_of_bytes(raw) != pin["blob_oid"]
+                or len(raw) != pin["bytes"] or hashlib.sha256(raw).hexdigest() != pin["sha256"]):
+            raise ValueError(f"dependency setup source pin mismatch: {relative}")
+        checked_files[relative] = dict(pin)
+        bytes_by_path[relative] = raw
+
+    try:
+        root_package = _strict_json_object(bytes_by_path["package.json"].decode("utf-8"), "package.json")
+        web_package = _strict_json_object(bytes_by_path["apps/web/package.json"].decode("utf-8"),
+                                          "apps/web/package.json")
+        types_package = _strict_json_object(bytes_by_path["packages/types/package.json"].decode("utf-8"),
+                                            "packages/types/package.json")
+        derived = _strict_json_object(bytes_by_path[".arcana/derived-artefacts.v1.json"].decode("utf-8"),
+                                      ".arcana/derived-artefacts.v1.json")
+    except (UnicodeError, json.JSONDecodeError, ValueError) as exc:
+        raise ValueError("dependency setup package inputs are malformed") from exc
+    if (root_package.get("packageManager") != "pnpm@11.5.2"
+            or (root_package.get("engines") or {}).get("node") != "24.22.1"):
+        raise ValueError("root package manager or Node pin differs from the supported setup policy")
+    if (web_package.get("name") != "@muneral/web"
+            or (web_package.get("dependencies") or {}).get("@muneral/types") != "workspace:*"):
+        raise ValueError("web package scope differs from the supported setup policy")
+    if (types_package.get("name") != "@muneral/types"
+            or types_package.get("main") != "./dist/index.js"
+            or types_package.get("types") != "./dist/index.d.ts"
+            or (types_package.get("scripts") or {}).get("build") != "tsc"):
+        raise ValueError("workspace type package build contract differs from the supported setup policy")
+    derived_rows = derived.get("artefacts")
+    mutation_rows = [row for row in derived_rows if isinstance(row, dict)
+                     and row.get("path") == "apps/api/test/assembly/mutation-results.json"] \
+        if isinstance(derived_rows, list) else []
+    mutation_setup = mutation_rows[0].get("setup") if len(mutation_rows) == 1 else None
+    if (derived.get("schema") != "GraphAdmissionDerivedArtefacts/v1" or len(mutation_rows) != 1
+            or mutation_rows[0].get("verified_by_job") != "lint-and-test"
+            or not isinstance(mutation_setup, dict)
+            or set(mutation_setup) != {"argv", "cwd", "why"}
+            or mutation_setup.get("argv") != ["pnpm", "install", "--frozen-lockfile", "--ignore-scripts"]
+            or mutation_setup.get("cwd") != "."
+            or not isinstance(mutation_setup.get("why"), str)):
+        raise ValueError("existing derived-artifact setup declaration conflicts with the pinned source profile")
+    workspace = bytes_by_path["pnpm-workspace.yaml"].decode("utf-8")
+    lockfile = bytes_by_path["pnpm-lock.yaml"].decode("utf-8")
+    if (not re.search(r"(?m)^\s*-\s*['\"]apps/\*['\"]\s*$", workspace)
+            or not re.search(r"(?m)^\s*-\s*['\"]packages/\*['\"]\s*$", workspace)
+            or not re.search(r"(?m)^  apps/web:\s*$", lockfile)
+            or not re.search(r"(?m)^  packages/types:\s*$", lockfile)):
+        raise ValueError("workspace and lockfile do not bind the supported package importers")
+
+    return {
+        "schema": "CallerDependencySetupPlan/v1",
+        "policy": CALLER_DEPENDENCY_SETUP_POLICY,
+        "repository": repository,
+        "base": base,
+        "head": head,
+        "working_directory": ".",
+        "scope": "apps/web",
+        "package_manager": root_package["packageManager"],
+        "node_version": root_package["engines"]["node"],
+        "files": checked_files,
+        "argv": [["pnpm", "install", "--frozen-lockfile", "--ignore-scripts",
+                  "--ignore-pnpmfile"],
+                 ["pnpm", "--filter", "@muneral/types", "build"]],
+    }
+
+
+def cmd_candidate_dependency_setup_plan(a) -> int:
+    """Validate the caller's fixed dependency manifest; never install or build dependencies."""
+    try:
+        raw = os.environ.get("CANDIDATE_DEPENDENCY_SETUP", "")
+        if not raw:
+            raise ValueError("dependency setup manifest is absent")
+        manifest = _strict_json_object(raw, "dependency setup manifest")
+        plan = validate_candidate_dependency_setup(
+            manifest, a.repo, a.repository, a.base, a.head)
+    except (OSError, ValueError) as exc:
+        print(f"CANDIDATE_DEPENDENCY_SETUP_REFUSED: {exc}", file=sys.stderr)
+        return 2
+    print(json.dumps(plan, sort_keys=True, separators=(",", ":")))
+    return 0
+
 
 def cmd_run(a) -> int:
     repo = Path(a.repo).resolve()
@@ -4381,7 +4621,7 @@ def selftest_gate2b() -> tuple[list[dict], int]:
         ok_stale, _, _ = sshsig.verify_detached(msg2.read_bytes(), (d / "m.sig").read_text(),
                                                 (d / "k.pub").read_text(), SIGNING_NAMESPACE)
         check("RE-SIGN TRAP: `ssh-keygen -Y sign` over an existing .sig exits 0 and keeps the STALE signature, "
-              "which then does NOT verify over the new bytes — the defect gate3a fixes", 
+              "which then does NOT verify over the new bytes — the defect gate3a fixes",
               r_noclean.returncode == 0 and kept_stale and not ok_stale,
               exit_code=r_noclean.returncode, kept_stale=kept_stale, stale_verifies=ok_stale)
         # (b) the fix: remove the target first, exactly as cmd_bundle now does
@@ -4407,6 +4647,15 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--selftest", action="store_true")
     sub = ap.add_subparsers(dest="cmd", required=False)
+
+    dependency_setup = sub.add_parser(
+        "candidate-dependency-setup-plan",
+        help="validate the fixed caller dependency setup subject and return its non-executing plan")
+    dependency_setup.add_argument("--repo", required=True)
+    dependency_setup.add_argument("--repository", required=True)
+    dependency_setup.add_argument("--base", required=True)
+    dependency_setup.add_argument("--head", required=True)
+    dependency_setup.set_defaults(fn=cmd_candidate_dependency_setup_plan)
 
     b = sub.add_parser("bundle", help="vendor the gate tools of a pinned program SHA into a caller repository")
     b.add_argument("--out", required=True)
