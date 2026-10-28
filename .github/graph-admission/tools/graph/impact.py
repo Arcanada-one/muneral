@@ -624,6 +624,16 @@ def query(idx: GraphIndex, files: list[dict], *, mode: str, base: str | None = N
             ids = sorted(set(ids) | {dep_id})
             open_containment.add(dep_id)
             entry["scoped_fallback"] = f"{f['path']} changed ⇒ every unit shipped inside {dep_id} is affected"
+        elif d and not dep_id and "scoped_fallback" in rules and (
+                base_name == "package.json" or re.fullmatch(r"tsconfig(?:\.[\w.-]+)?\.json", base_name)):
+            compiler_units = sorted(nid for nid, node in idx.nodes.items()
+                                    if node["type"] == "code_unit"
+                                    and node.get("path", "").startswith(d + "/")
+                                    and os.path.splitext(node["path"])[1].lower() in CODE_EXTS)
+            ids = sorted(set(ids) | set(compiler_units))
+            if compiler_units:
+                entry["scoped_fallback"] = (f"{f['path']} changed ⇒ existing TS/JS units beneath {d} "
+                                            "are rechecked; no runtime deployable inferred")
         if f["kind"] in FALLBACK_KINDS:
             fallback_files.append(f["path"])
         if ids:

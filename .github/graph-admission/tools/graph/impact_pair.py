@@ -525,6 +525,48 @@ def blocking_query_events(q):
     return [e for e in q.get("events", []) if not (bound and e.get("code") == "EMPTY_IMPACT_REQUIRES_EXPLANATION")]
 
 
+def absent_suite_repo_problems(repo, head: str, doc: dict, units: set[str]) -> list[str]:
+    """Re-derive from Git at HEAD that a claimed absent suite is really absent and really declared.
+
+    Nothing is taken from the receipt: the class is root-only, so the fallback unit must be exactly
+    `deployable_unit:.` as derived from the impact graph (`units`), the declaration is read from the
+    COMMITTED profile, and the static row must carry that profile's own argv."""
+    ts = doc["test_suite"]
+    out = []
+    if units != {"deployable_unit:."} or set(ts.get("entities") or []) != units:
+        out.append("absent_declared class refused: supported only when the derived fallback unit is exactly deployable_unit:.")
+    if (ts.get("declaration") or {}).get("deployable") != ".":
+        out.append("absent_declared class refused: receipt declaration.deployable is not the root")
+    try:
+        names = impact.git(["ls-tree", "-r", "--name-only", head], repo.path).splitlines()
+        prefix = repo.prefix
+        names = [n[len(prefix):] for n in names if n.startswith(prefix)]
+        files = dict.fromkeys(names)
+        files.update(repo.read_at(head, schema_check.absent_suite_sources(names)))
+        profile = json.loads(repo.read_at(head, [".arcana/verify.json"])[".arcana/verify.json"] or b"{}")
+    except (impact.Refusal, ValueError, OSError, subprocess.SubprocessError):
+        return ["absent_declared class refused: head tree/profile unreadable"]
+    facts = schema_check.absent_suite_tree(files)
+    if facts["test_files"]:
+        out.append("absent_declared class refused: tracked tests at head: " + ", ".join(facts["test_files"][:5]))
+    if facts["scripts_test"] is not None:
+        out.append("absent_declared class refused: declared test scripts at head: " + facts["scripts_test"])
+    if facts["unknown"]:
+        out.append("absent_declared class refused: unclassifiable sources (unknown is not absent): " + ", ".join(facts["unknown"][:5]))
+    deps = (profile.get("deployables") or {}) if isinstance(profile, dict) else {}
+    row = deps.get(".") if isinstance(deps.get("."), dict) else {}
+    static = row.get("static_validation")
+    if "full_test" not in row or row["full_test"] is not None or not str(row.get("full_test_absent_reason") or "").strip():
+        out.append("absent_declared class refused: .arcana/verify.json at head does not declare full_test null with full_test_absent_reason")
+    elif (ts.get("declaration") or {}).get("full_test_absent_reason") != row["full_test_absent_reason"].strip():
+        out.append("absent_declared class refused: receipt reason differs from the committed profile")
+    expected = schema_check.absent_suite_static_text(static) if isinstance(static, list) and static else None
+    rows = ts.get("static_validation")
+    if expected is None or not isinstance(rows, list) or [r.get("command") for r in rows if isinstance(r, dict)] != [expected] or len(rows) != 1:
+        out.append("absent_declared class refused: static_validation row differs from the committed profile commands")
+    return out
+
+
 def receipt_problems(repo_path: Path, doc: dict, *, origin_binding: dict | None = None) -> list[str]:
     """Rebuild from Git, never from receipt node_ids or declared revision selections.
 
@@ -589,6 +631,8 @@ A paired receipt must match both graph digests and the complete dual selection.
     if not enforce_mandatory and not new_required and not selection["unmeasured_head_files"]:
         return []
     problems = schema_check.fallback_evidence_problems(doc, fallback_units(q)) if q["impact_set"].get("global_fallback", {}).get("triggered") else []
+    if schema_check.ABSENT_SUITE_CLASS_ENABLED and isinstance(doc.get("test_suite"), dict) and q["impact_set"].get("global_fallback", {}).get("triggered"):
+        problems.extend(absent_suite_repo_problems(repo, head, doc, fallback_units(q)))
     explanation = doc.get("empty_impact_explanation") or {}
     if "binding" in explanation:
         try:
