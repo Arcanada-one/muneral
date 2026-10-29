@@ -1,0 +1,66 @@
+name: Repository destination browser user path
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  repository-destination-browser:
+    # ci-general spans more than one host. The fixture fails with a bounded,
+    # sanitized reason unless the root-managed CfT binary is present.
+    runs-on: [self-hosted, linux, ci-general]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.22.1
+
+      - name: Enable the repository-pinned pnpm
+        run: |
+          set -euo pipefail
+          corepack_home="${RUNNER_TEMP}/repository-destination-corepack"
+          mkdir -m 700 "${corepack_home}"
+          corepack enable --install-directory "${corepack_home}"
+          printf '%s\n' "${corepack_home}" >> "${GITHUB_PATH}"
+
+      - name: Install locked workspace dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install the isolated browser helper
+        run: >-
+          pnpm --dir apps/web/e2e/repository-destination --ignore-workspace
+          install --frozen-lockfile
+          --config.store-dir="${RUNNER_TEMP}/repository-destination-helper-store"
+
+      - name: Run the repository destination browser fixture
+        env:
+          CHROME_PATH: /opt/arcanada-browsers/cft-156.0.8078.4/chrome-linux64/chrome
+          REPOSITORY_DESTINATION_OUTPUT_ROOT: ${{ runner.temp }}/repository-destination-capture
+        run: |
+          set -euo pipefail
+          umask 077
+          set -o noclobber
+          test ! -e "${REPOSITORY_DESTINATION_OUTPUT_ROOT}"
+          mkdir -m 700 "${REPOSITORY_DESTINATION_OUTPUT_ROOT}"
+          set +e
+          timeout --signal=TERM --kill-after=15s 600s \
+            node apps/web/e2e/repository-destination/run.mjs
+          rc=$?
+          set -e
+          printf '{"schema":"RepositoryDestinationBrowserProcess/v1","exitCode":%d}\n' "${rc}" \
+            > "${REPOSITORY_DESTINATION_OUTPUT_ROOT}/runner-exit.json"
+          exit "${rc}"
+
+      - name: Retain the sanitized browser result
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: repository-destination-browser-${{ github.sha }}
+          path: ${{ runner.temp }}/repository-destination-capture/
+          if-no-files-found: warn
