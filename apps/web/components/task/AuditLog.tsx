@@ -13,6 +13,7 @@ interface AuditLogProps {
 }
 
 type ActivityFilterMode = 'all' | 'status_changes';
+type ActorFilterMode = 'all' | 'humans' | 'agents';
 
 const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   todo: 'To Do',
@@ -305,11 +306,13 @@ export function AuditLog({ taskId }: AuditLogProps) {
   const [filterState, setFilterState] = useState({
     taskId,
     mode: 'all' as ActivityFilterMode,
+    actorMode: 'all' as ActorFilterMode,
   });
   if (filterState.taskId !== taskId) {
-    setFilterState({ taskId, mode: 'all' });
+    setFilterState({ taskId, mode: 'all', actorMode: 'all' });
   }
   const filterMode = filterState.taskId === taskId ? filterState.mode : 'all';
+  const actorFilterMode = filterState.taskId === taskId ? filterState.actorMode : 'all';
   const { data, isLoading, isError, isFetching, refetch } = useActivity(taskId, page);
   const total = data !== undefined && Number.isSafeInteger(data.total) && data.total >= 0
     ? data.total
@@ -327,9 +330,14 @@ export function AuditLog({ taskId }: AuditLogProps) {
   const currentPageEntries = responsePageIsUsable && !pageOutOfRange
     ? (data?.data ?? []).filter((entry) => !entry.taskId || entry.taskId === taskId)
     : [];
-  const entries = filterMode === 'status_changes'
+  const actionFilteredEntries = filterMode === 'status_changes'
     ? currentPageEntries.filter((entry) => entry.action === 'task:status_changed')
     : currentPageEntries;
+  const entries = actorFilterMode === 'humans'
+    ? actionFilteredEntries.filter((entry) => entry.actorType === 'human')
+    : actorFilterMode === 'agents'
+      ? actionFilteredEntries.filter((entry) => entry.actorType === 'agent')
+      : actionFilteredEntries;
 
   const setPage = (nextPage: number) => setPageState({ taskId, page: nextPage });
 
@@ -407,11 +415,32 @@ export function AuditLog({ taskId }: AuditLogProps) {
           onChange={(event) => setFilterState({
             taskId,
             mode: event.target.value === 'status_changes' ? 'status_changes' : 'all',
+            actorMode: filterState.taskId === taskId ? filterState.actorMode : 'all',
           })}
           className="rounded border bg-background px-2 py-1"
         >
           <option value="all">All activity</option>
           <option value="status_changes">Status changes on this page</option>
+        </select>
+      </div>
+
+      <div className="mb-3 flex items-center gap-2 text-xs">
+        <label htmlFor={`${activityFilterId}-actor`}>Actor filter</label>
+        <select
+          id={`${activityFilterId}-actor`}
+          value={actorFilterMode}
+          onChange={(event) => setFilterState({
+            taskId,
+            mode: filterState.taskId === taskId ? filterState.mode : 'all',
+            actorMode: event.target.value === 'humans' || event.target.value === 'agents'
+              ? event.target.value
+              : 'all',
+          })}
+          className="rounded border bg-background px-2 py-1"
+        >
+          <option value="all">All actors</option>
+          <option value="humans">Humans on this page</option>
+          <option value="agents">Agents on this page</option>
         </select>
       </div>
 
@@ -487,7 +516,9 @@ export function AuditLog({ taskId }: AuditLogProps) {
         </ul>
         {entries.length === 0 && (
           <p className="py-3 text-xs text-muted-foreground">
-            {filterMode === 'status_changes'
+            {actorFilterMode !== 'all'
+              ? 'No matching activity on this page.'
+              : filterMode === 'status_changes'
               ? 'No status changes on this page.'
               : 'No activity on this page.'}
           </p>
