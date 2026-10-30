@@ -161,7 +161,7 @@ jobs:
     # and no retrievable annotation. Recorded as a hole, not as a solved problem.
     uses: ./.github/workflows/graph-admission.yml
     with:
-      program_ref: '6f9c98d0089d9f786514f609d0450e1c3783dcfd'
+      program_ref: '5e352e78262271892170c750229d3baee18a4556'
       stage_evidence_path: ''
       stage_evidence_root: ''
       stage_evidence_required: false
