@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import apiClient from '@/lib/api/client';
 import type { Task } from '@/lib/api/tasks';
@@ -119,9 +119,8 @@ describe('TaskDetail dependency readiness summary', () => {
 
     expect(await screen.findByText('1 of 2 dependency links are blocking this task.')).toBeInTheDocument();
     expect(screen.getByText('Release prerequisite')).toBeInTheDocument();
-    const blockers = within(screen.getByRole('list', { name: 'Loaded blocking dependencies' }));
-    expect(blockers.getByText('In Progress', { exact: true })).toBeInTheDocument();
-    expect(blockers.getByText('In Progress', { exact: true })).toBeInTheDocument();
+    expect(screen.getByText('In Progress')).toBeInTheDocument();
+    expect(screen.getByText('Blocked')).toBeInTheDocument();
   });
 
   it.each([

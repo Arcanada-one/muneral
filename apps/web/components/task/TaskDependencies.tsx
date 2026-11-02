@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { ArrowRight, Copy, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -60,13 +60,7 @@ function CopyTaskIdButton({ taskId }: { taskId: string }) {
 }
 
 export function TaskDependencies({ taskId }: TaskDependenciesProps) {
-  return <TaskDependenciesForTask key={taskId} taskId={taskId} />;
-}
-
-function TaskDependenciesForTask({ taskId }: TaskDependenciesProps) {
   const [retryingTaskId, setRetryingTaskId] = useState<string | null>(null);
-  const [searchState, setSearchState] = useState({ taskId, query: '' });
-  const searchQuery = searchState.taskId === taskId ? searchState.query : '';
   const { data: deps, isPending, isError, isFetching, refetch } = useDependencyGraph(taskId);
   const isRetrying = retryingTaskId === taskId;
 
@@ -111,340 +105,31 @@ function TaskDependenciesForTask({ taskId }: TaskDependenciesProps) {
         Dependencies
       </h4>
 
-      <DependencyList
-        key={taskId}
-        taskId={taskId}
-        deps={deps}
-        searchQuery={searchQuery}
-        onSearchQueryChange={(query) => setSearchState({ taskId, query })}
-      />
+      <ul className="space-y-2">
+        {deps.map((dep) => {
+          const config = typeLabels[dep.type];
+          const label = config?.[dep.direction] ?? dep.type;
+          const statusLabel = getTaskStatusLabel(dep.otherTaskStatus);
+          const counterpartTitle = dep.otherTaskTitleWithheld === true ? null : dep.otherTaskTitle;
+
+          return (
+            <li key={dep.id} className="flex flex-wrap items-center gap-2 text-sm">
+              <span className={(config?.className ?? 'text-gray-600') + ' text-xs font-medium min-w-[80px]'}>
+                {label}
+              </span>
+              <ArrowRight className="h-3 w-3 text-muted-foreground" />
+              {counterpartTitle !== null && (
+                <span className="min-w-0 break-words font-medium">{counterpartTitle}</span>
+              )}
+              <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono">
+                {dep.otherTaskId.slice(0, 8)}
+              </code>
+              {statusLabel && <Badge variant="secondary">{statusLabel}</Badge>}
+              <CopyTaskIdButton key={`${taskId}:${dep.id}:${dep.otherTaskId}`} taskId={dep.otherTaskId} />
+            </li>
+          );
+        })}
+      </ul>
     </div>
-  );
-}
-
-type DependencyRow = NonNullable<ReturnType<typeof useDependencyGraph>['data']>[number];
-
-function DependencyList({
-  taskId,
-  deps,
-  searchQuery,
-  onSearchQueryChange,
-}: {
-  taskId: string;
-  deps: DependencyRow[];
-  searchQuery: string;
-  onSearchQueryChange: (query: string) => void;
-}) {
-  const [direction, setDirection] = useState<'all' | 'incoming' | 'outgoing'>('all');
-  const [hideCompleted, setHideCompleted] = useState(false);
-  const hideCompletedId = useId();
-  const searchId = useId();
-  const normalizedQuery = searchQuery.trim().toLowerCase();
-  const visibleDeps = deps.filter((dep) => {
-    const matchesQuery = normalizedQuery.length === 0
-      || dep.otherTaskId.toLowerCase().includes(normalizedQuery)
-      || (dep.otherTaskTitleWithheld !== true
-        && typeof dep.otherTaskTitle === 'string'
-        && dep.otherTaskTitle.toLowerCase().includes(normalizedQuery));
-
-    return matchesQuery
-      && (direction === 'all' || dep.direction === direction)
-      && (!hideCompleted || dep.otherTaskStatus !== 'done');
-  });
-  const eligibleTitles = visibleDeps.flatMap((dep) => {
-    if (dep.otherTaskTitleWithheld === true) return [];
-    const title = dep.otherTaskTitle;
-    return typeof title === 'string' && title.trim().length > 0 ? [title] : [];
-  });
-  const titleBatchKey = JSON.stringify([
-    taskId,
-    direction,
-    hideCompleted,
-    searchQuery,
-    visibleDeps.map((dep) => {
-      if (dep.otherTaskTitleWithheld === true) {
-        return [dep.id, dep.type, dep.direction, dep.fromTaskId, dep.toTaskId,
-          dep.otherTaskId, 'withheld', dep.otherTaskStatus];
-      }
-      return [dep.id, dep.type, dep.direction, dep.fromTaskId, dep.toTaskId,
-        dep.otherTaskId, dep.otherTaskTitle, dep.otherTaskStatus];
-    }),
-  ]);
-
-  return (
-    <>
-      <div className="mb-3 flex flex-wrap items-center gap-2 text-sm">
-        <label htmlFor={`dependency-direction-${taskId}`} className="font-medium">
-          Dependency direction
-        </label>
-        <select
-          id={`dependency-direction-${taskId}`}
-          value={direction}
-          onChange={(event) => {
-            setDirection(event.target.value as typeof direction);
-          }}
-          className="rounded-md border bg-background px-2 py-1"
-        >
-          <option value="all">All dependencies</option>
-          <option value="incoming">Incoming</option>
-          <option value="outgoing">Outgoing</option>
-        </select>
-        <label htmlFor={hideCompletedId} className="inline-flex items-center gap-2">
-          <input
-            id={hideCompletedId}
-            type="checkbox"
-            checked={hideCompleted}
-            onChange={(event) => {
-              setHideCompleted(event.target.checked);
-            }}
-          />
-          Hide completed dependencies
-        </label>
-      </div>
-
-      <div className="mb-3 flex flex-wrap items-center gap-2 text-sm">
-        <label htmlFor={searchId} className="font-medium">Search loaded dependencies</label>
-        <input
-          id={searchId}
-          type="text"
-          value={searchQuery}
-          onChange={(event) => {
-            onSearchQueryChange(event.target.value);
-          }}
-          onKeyDown={(event) => {
-            if (event.key !== 'Escape' || event.nativeEvent.isComposing
-                || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey
-                || searchQuery.length === 0) return;
-
-            event.preventDefault();
-            event.stopPropagation();
-            onSearchQueryChange('');
-          }}
-          aria-keyshortcuts="Escape"
-          aria-describedby={`${searchId}-escape-help`}
-          className="min-w-0 rounded-md border bg-background px-2 py-1"
-        />
-        <span id={`${searchId}-escape-help`} className="text-xs text-muted-foreground">
-          Press Escape to clear search.
-        </span>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            onSearchQueryChange('');
-          }}
-          disabled={searchQuery.length === 0}
-        >
-          Clear search
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            setDirection('all');
-            setHideCompleted(false);
-            onSearchQueryChange('');
-          }}
-          disabled={direction === 'all' && !hideCompleted && searchQuery.length === 0}
-        >
-          Show all loaded dependencies
-        </Button>
-        <span aria-live="polite" className="text-muted-foreground">
-          Showing {visibleDeps.length}{normalizedQuery ? ' matching' : ''} of {deps.length} loaded dependencies.
-        </span>
-      </div>
-
-      <DependencyCopyControls
-        scopeKey={titleBatchKey}
-        visibleDeps={visibleDeps}
-        eligibleTitles={eligibleTitles}
-      />
-
-      {visibleDeps.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          No matching dependencies in the loaded list.{' '}
-          {normalizedQuery
-            ? 'Clear search or adjust the dependency filters to show more.'
-            : hideCompleted
-            ? 'Clear Hide completed dependencies or choose All dependencies to show more.'
-            : 'Choose All dependencies to show the full list.'}
-        </p>
-      ) : (
-        <ul className="space-y-2">
-          {visibleDeps.map((dep) => (
-            <DependencyRowItem
-              key={JSON.stringify([taskId, dep.id, dep.otherTaskId])}
-              taskId={taskId}
-              dep={dep}
-            />
-          ))}
-        </ul>
-      )}
-    </>
-  );
-}
-
-function DependencyCopyControls({
-  scopeKey,
-  visibleDeps,
-  eligibleTitles,
-}: {
-  scopeKey: string;
-  visibleDeps: DependencyRow[];
-  eligibleTitles: string[];
-}) {
-  type CopyResult = 'copied' | 'failed';
-  type ScopedPending = { scope: string; id: number };
-  type ScopedResult = { scope: string; result: CopyResult };
-
-  const scopeGeneration = useRef({ key: scopeKey, generation: 0 });
-  const [generation, setGeneration] = useState(0);
-  useLayoutEffect(() => {
-    if (scopeGeneration.current.key === scopeKey) return;
-    scopeGeneration.current = {
-      key: scopeKey,
-      generation: scopeGeneration.current.generation + 1,
-    };
-    setGeneration(scopeGeneration.current.generation);
-  }, [scopeKey]);
-  const activeScope = `${generation}:${scopeKey}`;
-  const activeScopeRef = useRef(activeScope);
-  useLayoutEffect(() => {
-    activeScopeRef.current = activeScope;
-  }, [activeScope]);
-
-  const [pendingBatch, setPendingBatch] = useState<ScopedPending | null>(null);
-  const [pendingTitles, setPendingTitles] = useState<ScopedPending | null>(null);
-  const [batchResult, setBatchResult] = useState<ScopedResult | null>(null);
-  const [titleResult, setTitleResult] = useState<ScopedResult | null>(null);
-  const copyAttempt = useRef(0);
-  const pendingCopyRef = useRef<ScopedPending | null>(null);
-  const pendingTitleCopyRef = useRef<ScopedPending | null>(null);
-  const isBatchCopyPending = pendingBatch?.scope === activeScope;
-  const isTitleBatchCopyPending = pendingTitles?.scope === activeScope;
-  const batchCopyFeedback = batchResult?.scope === activeScope ? batchResult.result : null;
-  const titleBatchCopyFeedback = titleResult?.scope === activeScope ? titleResult.result : null;
-
-  const copyVisibleTaskIds = async () => {
-    if (visibleDeps.length === 0 || pendingCopyRef.current?.scope === activeScope) return;
-    const attempt = { scope: activeScope, id: ++copyAttempt.current };
-    pendingCopyRef.current = attempt;
-    setPendingBatch(attempt);
-    setBatchResult(null);
-    try {
-      const clipboard = navigator.clipboard;
-      if (typeof clipboard?.writeText !== 'function') throw new Error('Clipboard unavailable');
-      await clipboard.writeText(visibleDeps.map((dep) => dep.otherTaskId).join('\n'));
-      if (activeScopeRef.current === attempt.scope) setBatchResult({ scope: attempt.scope, result: 'copied' });
-    } catch {
-      if (activeScopeRef.current === attempt.scope) setBatchResult({ scope: attempt.scope, result: 'failed' });
-    } finally {
-      if (pendingCopyRef.current?.id === attempt.id) {
-        pendingCopyRef.current = null;
-        setPendingBatch((current) => current?.id === attempt.id ? null : current);
-      }
-    }
-  };
-
-  const copyVisibleDependencyTitles = async () => {
-    if (eligibleTitles.length === 0 || pendingTitleCopyRef.current?.scope === activeScope) return;
-    const attempt = { scope: activeScope, id: ++copyAttempt.current };
-    pendingTitleCopyRef.current = attempt;
-    setPendingTitles(attempt);
-    setTitleResult(null);
-    try {
-      const clipboard = navigator.clipboard;
-      if (typeof clipboard?.writeText !== 'function') throw new Error('Clipboard unavailable');
-      await clipboard.writeText(eligibleTitles.join('\n'));
-      if (activeScopeRef.current === attempt.scope) setTitleResult({ scope: attempt.scope, result: 'copied' });
-    } catch {
-      if (activeScopeRef.current === attempt.scope) setTitleResult({ scope: attempt.scope, result: 'failed' });
-    } finally {
-      if (pendingTitleCopyRef.current?.id === attempt.id) {
-        pendingTitleCopyRef.current = null;
-        setPendingTitles((current) => current?.id === attempt.id ? null : current);
-      }
-    }
-  };
-
-  useEffect(() => () => {
-    pendingCopyRef.current = null;
-    pendingTitleCopyRef.current = null;
-  }, []);
-
-  return (
-    <div className="mb-3 flex flex-wrap items-center gap-2 text-sm">
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={() => void copyVisibleTaskIds()}
-        disabled={visibleDeps.length === 0 || isBatchCopyPending}
-      >
-        Copy visible dependency task IDs ({visibleDeps.length})
-      </Button>
-      {batchCopyFeedback === 'copied' && (
-        <span role="status" className="text-xs text-green-700">Dependency task IDs copied.</span>
-      )}
-      {batchCopyFeedback === 'failed' && (
-        <span role="alert" className="text-xs text-destructive">
-          Could not copy dependency task IDs. Try again or copy them manually.
-        </span>
-      )}
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={() => void copyVisibleDependencyTitles()}
-        disabled={eligibleTitles.length === 0 || isTitleBatchCopyPending}
-      >
-        Copy available dependency titles ({eligibleTitles.length})
-      </Button>
-      {titleBatchCopyFeedback === 'copied' && (
-        <span role="status" className="text-xs text-green-700">Dependency titles copied.</span>
-      )}
-      {titleBatchCopyFeedback === 'failed' && (
-        <span role="alert" className="text-xs text-destructive">
-          Could not copy dependency titles. Try again or copy them manually.
-        </span>
-      )}
-    </div>
-  );
-}
-
-function DependencyRowItem({ taskId, dep }: { taskId: string; dep: DependencyRow }) {
-  const [showFullTaskId, setShowFullTaskId] = useState(false);
-  const config = typeLabels[dep.type];
-  const label = config?.[dep.direction] ?? dep.type;
-  const statusLabel = getTaskStatusLabel(dep.otherTaskStatus);
-  const counterpartTitle = dep.otherTaskTitleWithheld === true ? null : dep.otherTaskTitle;
-
-  return (
-    <li className="flex flex-wrap items-center gap-2 text-sm">
-      <span className={(config?.className ?? 'text-gray-600') + ' text-xs font-medium min-w-[80px]'}>
-        {label}
-      </span>
-      <ArrowRight className="h-3 w-3 text-muted-foreground" />
-      {counterpartTitle !== null && (
-        <span className="min-w-0 break-words font-medium">{counterpartTitle}</span>
-      )}
-      <code className="max-w-full min-w-0 break-words rounded bg-muted px-1.5 py-0.5 text-xs font-mono" style={{ overflowWrap: 'anywhere' }}>
-        {showFullTaskId ? dep.otherTaskId : dep.otherTaskId.slice(0, 8)}
-      </code>
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        className="h-7 px-2 text-xs"
-        aria-expanded={showFullTaskId}
-        onClick={() => setShowFullTaskId((current) => !current)}
-      >
-        {showFullTaskId ? 'Hide full task ID' : 'Show full task ID'}
-      </Button>
-      {statusLabel && <Badge variant="secondary">{statusLabel}</Badge>}
-      <CopyTaskIdButton key={`${taskId}:${dep.id}:${dep.otherTaskId}`} taskId={dep.otherTaskId} />
-    </li>
   );
 }
