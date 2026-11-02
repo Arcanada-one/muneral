@@ -11,6 +11,10 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const EXPECTED_BROWSER_PATH = '/opt/arcanada-browsers/cft-156.0.8078.4/chrome-linux64/chrome';
 const EXPECTED_BROWSER_VERSION = 'Google Chrome for Testing 156.0.8078.4';
+// Derived from Chrome for Testing 156.0.8078.4 linux64 official archive:
+// https://storage.googleapis.com/chrome-for-testing-public/156.0.8078.4/linux64/chrome-linux64.zip
+// Archive SHA-256: 43fd31766c7533a02dda2ded5ad50c2f861cd5400be7509c0abad71129f79d79.
+const EXPECTED_BROWSER_SHA256 = '377a9fc07b495c3b8d0ab8ec1fdfd153641759f9756fea34d8dfce4de82f5025';
 const EXPECTED_COMPONENT_SHA256 = 'a382181a1af1aed3236272bf6cf5021a3982b072d567cd63a1b5a9bfffbb57c8';
 const RESULT_SCHEMA = 'ActivityVisibleCountBrowser/v1';
 const PRIVATE_PROCESS_SCHEMA = 'ActivityVisibleCountProcess/v1';
@@ -32,7 +36,7 @@ const FAILURE_REASONS = new Set([
   'RUN_BINDING_INVALID', 'OUTPUT_PREPARATION_FAILED', 'WORKSPACE_UNAVAILABLE',
   'CANDIDATE_HEAD_UNAVAILABLE', 'CANDIDATE_HEAD_MISMATCH', 'COMPONENT_SOURCE_UNAVAILABLE',
   'COMPONENT_HASH_MISMATCH', 'NODE_WEBSOCKET_UNSUPPORTED', 'BROWSER_PATH_UNSUPPORTED',
-  'BROWSER_BINARY_UNAVAILABLE', 'BROWSER_VERSION_FAILED', 'BROWSER_VERSION_TIMEOUT',
+  'BROWSER_BINARY_UNAVAILABLE', 'BROWSER_BINARY_HASH_MISMATCH', 'BROWSER_VERSION_FAILED', 'BROWSER_VERSION_TIMEOUT',
   'BROWSER_VERSION_SPAWN_FAILED', 'BROWSER_VERSION_MISMATCH', 'TOOL_MODULE_LOAD_FAILED',
   'SERVER_CREATE_FAILED', 'SERVER_LISTEN_FAILED', 'SERVER_ADDRESS_UNAVAILABLE',
   'CDP_ENDPOINT_UNAVAILABLE', 'CDP_CONNECT_FAILED', 'CDP_COMMAND_FAILED',
@@ -84,8 +88,8 @@ export function validateResultRecord(value, binding = {}) {
   if (value.componentSha256 !== EXPECTED_COMPONENT_SHA256) return false;
   if (!BROWSER_VERSION_OUTCOMES.has(value.browserVersionOutcome)) return false;
   if (value.browserVersionOutcome === 'VERSION_OK') {
-    if (value.browserVersion !== EXPECTED_BROWSER_VERSION || !/^[a-f0-9]{64}$/.test(value.browserSha256 ?? '')) return false;
-  } else if (value.browserVersion !== null || (value.browserSha256 !== null && !/^[a-f0-9]{64}$/.test(value.browserSha256))) {
+    if (value.browserVersion !== EXPECTED_BROWSER_VERSION || value.browserSha256 !== EXPECTED_BROWSER_SHA256) return false;
+  } else if (value.browserVersion !== null || (value.browserSha256 !== null && value.browserSha256 !== EXPECTED_BROWSER_SHA256)) {
     return false;
   }
   if (!exactKeys(value.scenarioVerdicts, SCENARIOS)) return false;
@@ -531,7 +535,7 @@ async function checkEmptyState(cdp, sessionId, message) {
 function browserBinaryIsAccepted(browserStat, browserPath, canonicalPath) {
   return browserPath === EXPECTED_BROWSER_PATH && canonicalPath === EXPECTED_BROWSER_PATH &&
     browserStat.isFile() && !browserStat.isSymbolicLink() && browserStat.uid === 0 &&
-    (browserStat.mode & 0o111) !== 0;
+    (browserStat.mode & 0o111) !== 0 && (browserStat.mode & 0o022) === 0;
 }
 
 function expectedRoots(runnerTemp, runId, runAttempt, candidateSha) {
@@ -594,15 +598,24 @@ async function verifyCandidateSource(state) {
   if (createHash('sha256').update(componentBytes).digest('hex') !== EXPECTED_COMPONENT_SHA256) throw fail('COMPONENT_HASH_MISMATCH');
 }
 
-async function verifyBrowser(state) {
+async function verifyBrowser(state, dependencies = {}) {
   if (typeof WebSocket !== 'function') throw fail('NODE_WEBSOCKET_UNSUPPORTED');
-  const browserPath = process.env.CHROME_PATH;
+  const browserPath = dependencies.browserPath ?? process.env.CHROME_PATH;
   if (browserPath !== EXPECTED_BROWSER_PATH) throw fail('BROWSER_PATH_UNSUPPORTED');
-  const browserInfo = await lstat(browserPath).catch(() => { throw fail('BROWSER_BINARY_UNAVAILABLE'); });
-  const canonicalPath = await realpath(browserPath).catch(() => { throw fail('BROWSER_BINARY_UNAVAILABLE'); });
+  const inspectPath = dependencies.lstatPath ?? lstat;
+  const resolvePath = dependencies.realpathPath ?? realpath;
+  const readDigest = dependencies.readDigest ?? sha256File;
+  const launchVersion = dependencies.launchVersion ?? spawnCaptured;
+  const readVersionOutput = dependencies.readVersionOutput ?? (async (privateRoot) =>
+    readFile(path.join(privateRoot, 'browser-version.stdout.raw'), 'utf8').catch(() => '')
+  );
+  const browserInfo = await inspectPath(browserPath).catch(() => { throw fail('BROWSER_BINARY_UNAVAILABLE'); });
+  const canonicalPath = await resolvePath(browserPath).catch(() => { throw fail('BROWSER_BINARY_UNAVAILABLE'); });
   if (!browserBinaryIsAccepted(browserInfo, browserPath, canonicalPath)) throw fail('BROWSER_BINARY_UNAVAILABLE');
-  state.browserSha256 = await sha256File(browserPath);
-  const versionCapture = spawnCaptured(browserPath, ['--version'], {
+  const measuredDigest = await readDigest(browserPath);
+  if (measuredDigest !== EXPECTED_BROWSER_SHA256) throw fail('BROWSER_BINARY_HASH_MISMATCH');
+  state.browserSha256 = measuredDigest;
+  const versionCapture = launchVersion(browserPath, ['--version'], {
     cwd: state.privateRoot, env: privateEnvironment(state.privateRoot),
     label: 'browser-version', privateRoot: state.privateRoot, timeoutMs: 5_000,
   });
@@ -616,8 +629,7 @@ async function verifyBrowser(state) {
     state.browserVersionOutcome = 'VERSION_TIMEOUT';
     throw fail('BROWSER_VERSION_TIMEOUT');
   }
-  const stdoutPath = path.join(state.privateRoot, 'browser-version.stdout.raw');
-  const versionOutput = await readFile(stdoutPath, 'utf8').catch(() => '');
+  const versionOutput = await readVersionOutput(state.privateRoot);
   if (state.versionCapture.exitCode !== 0) {
     state.browserVersionOutcome = 'VERSION_FAILED';
     throw fail('BROWSER_VERSION_FAILED');
@@ -628,6 +640,13 @@ async function verifyBrowser(state) {
   }
   state.browserVersionOutcome = 'VERSION_OK';
   state.browserVersion = EXPECTED_BROWSER_VERSION;
+  state.browserVerified = true;
+}
+
+async function launchBrowserAfterVerification(state, launchBrowser, verify = verifyBrowser) {
+  if (state.browserVerified !== true) await verify(state);
+  if (state.browserVerified !== true) throw fail('BROWSER_BINARY_UNAVAILABLE');
+  return launchBrowser();
 }
 
 async function createViteServer(state) {
@@ -892,12 +911,14 @@ async function runFixture() {
       throw fail('SERVER_ADDRESS_UNAVAILABLE');
     }
     state.phase = 'BROWSER_SPAWN_FAILED';
-    state.browser = spawnCaptured(EXPECTED_BROWSER_PATH, browserArguments(path.join(state.privateRoot, 'browser-profile')), {
-      cwd: state.privateRoot,
-      env: privateEnvironment(state.privateRoot),
-      label: 'browser',
-      privateRoot: state.privateRoot,
-      timeoutMs: FIXTURE_TIMEOUT_MS,
+    state.browser = await launchBrowserAfterVerification(state, () => {
+      return spawnCaptured(EXPECTED_BROWSER_PATH, browserArguments(path.join(state.privateRoot, 'browser-profile')), {
+        cwd: state.privateRoot,
+        env: privateEnvironment(state.privateRoot),
+        label: 'browser',
+        privateRoot: state.privateRoot,
+        timeoutMs: FIXTURE_TIMEOUT_MS,
+      });
     });
     if (state.browser.record.pid === null) throw fail('BROWSER_SPAWN_FAILED');
     state.phase = 'CDP_ENDPOINT_UNAVAILABLE';
@@ -982,6 +1003,7 @@ if (process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === imp
 export const __test = Object.freeze({
   EXPECTED_BROWSER_PATH,
   EXPECTED_BROWSER_VERSION,
+  EXPECTED_BROWSER_SHA256,
   EXPECTED_COMPONENT_SHA256,
   RESULT_SCHEMA,
   SCENARIOS,
@@ -989,6 +1011,9 @@ export const __test = Object.freeze({
   atomicPublishJson,
   browserArguments,
   isAllowedFixtureRequest,
+  browserBinaryIsAccepted,
+  verifyBrowser,
+  launchBrowserAfterVerification,
   spawnCaptured,
   validateResultRecord,
 });

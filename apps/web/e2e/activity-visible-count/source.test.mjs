@@ -61,7 +61,7 @@ test('PASS result records require exact browser, network, and adapter evidence',
     componentSha256: driver.EXPECTED_COMPONENT_SHA256,
     browserVersionOutcome: 'VERSION_OK',
     browserVersion: driver.EXPECTED_BROWSER_VERSION,
-    browserSha256: 'b'.repeat(64),
+    browserSha256: driver.EXPECTED_BROWSER_SHA256,
     scenarioVerdicts: Object.fromEntries(driver.SCENARIOS.map((scenario) => [scenario, 'PASS'])),
     counts: {
       localAssetRequests: 4,
@@ -77,9 +77,92 @@ test('PASS result records require exact browser, network, and adapter evidence',
   assert.equal(driver.validateResultRecord(valid, { candidateSha, runId: '12345', runAttempt: 1 }), true);
   assert.equal(driver.validateResultRecord({ ...valid, unexpected: true }), false);
   assert.equal(driver.validateResultRecord({ ...valid, browserVersionOutcome: 'NOT_STARTED' }), false);
+  assert.equal(driver.validateResultRecord({ ...valid, browserSha256: 'b'.repeat(64) }), false);
   assert.equal(driver.validateResultRecord({ ...valid, scenarioVerdicts: { ...valid.scenarioVerdicts, emptyPage: 'NOT_MEASURED' } }), false);
   assert.equal(driver.validateResultRecord({ ...valid, counts: { ...valid.counts, syntheticGetAttempts: 4 } }), false);
   assert.equal(driver.validateResultRecord({ ...valid, counts: { ...valid.counts, blockedNetworkRequests: 1 } }), false);
+});
+
+test('the pinned Chrome digest is accepted only for a trusted root-owned non-writable executable', async () => {
+  const acceptedPath = driver.EXPECTED_BROWSER_PATH;
+  const acceptedStat = {
+    isFile: () => true,
+    isSymbolicLink: () => false,
+    uid: 0,
+    mode: 0o100755,
+  };
+  assert.equal(driver.browserBinaryIsAccepted(acceptedStat, acceptedPath, acceptedPath), true);
+  assert.equal(driver.browserBinaryIsAccepted({ ...acceptedStat, mode: 0o100775 }, acceptedPath, acceptedPath), false);
+  assert.equal(driver.browserBinaryIsAccepted({ ...acceptedStat, mode: 0o100757 }, acceptedPath, acceptedPath), false);
+  assert.equal(driver.browserBinaryIsAccepted({ ...acceptedStat, uid: 1000 }, acceptedPath, acceptedPath), false);
+
+  let versionChildren = 0;
+  const state = { privateRoot: '/private' };
+  await driver.verifyBrowser(state, {
+    browserPath: acceptedPath,
+    lstatPath: async () => acceptedStat,
+    realpathPath: async () => acceptedPath,
+    readDigest: async () => driver.EXPECTED_BROWSER_SHA256,
+    launchVersion: (executable, argv) => {
+      versionChildren += 1;
+      assert.equal(executable, acceptedPath);
+      assert.deepEqual(argv, ['--version']);
+      return { completion: Promise.resolve({ captureFailed: false, spawnFailed: false, timedOut: false, exitCode: 0 }) };
+    },
+    readVersionOutput: async () => driver.EXPECTED_BROWSER_VERSION,
+  });
+  assert.equal(versionChildren, 1);
+  assert.equal(state.browserSha256, driver.EXPECTED_BROWSER_SHA256);
+  assert.equal(state.browserVersionOutcome, 'VERSION_OK');
+  assert.equal(state.browserVersion, driver.EXPECTED_BROWSER_VERSION);
+});
+
+test('wrong bytes and writable modes fail before a version child can start', async () => {
+  const acceptedPath = driver.EXPECTED_BROWSER_PATH;
+  const acceptedStat = {
+    isFile: () => true,
+    isSymbolicLink: () => false,
+    uid: 0,
+    mode: 0o100755,
+  };
+  let digestReads = 0;
+  let versionChildren = 0;
+  let browserChildren = 0;
+  const injected = {
+    browserPath: acceptedPath,
+    lstatPath: async () => acceptedStat,
+    realpathPath: async () => acceptedPath,
+    readDigest: async () => {
+      digestReads += 1;
+      return 'b'.repeat(64);
+    },
+    launchVersion: () => {
+      versionChildren += 1;
+      return { completion: Promise.resolve({ exitCode: 0 }) };
+    },
+    readVersionOutput: async () => driver.EXPECTED_BROWSER_VERSION,
+  };
+  await assert.rejects(
+    driver.launchBrowserAfterVerification({ privateRoot: '/private' }, () => {
+      browserChildren += 1;
+      return { spawned: true };
+    }, (state) => driver.verifyBrowser(state, injected)),
+    (error) => error.failureReason === 'BROWSER_BINARY_HASH_MISMATCH',
+  );
+  assert.equal(digestReads, 1);
+  assert.equal(versionChildren, 0);
+  assert.equal(browserChildren, 0);
+
+  digestReads = 0;
+  await assert.rejects(
+    driver.verifyBrowser({ privateRoot: '/private' }, {
+      ...injected,
+      lstatPath: async () => ({ ...acceptedStat, mode: 0o100775 }),
+    }),
+    (error) => error.failureReason === 'BROWSER_BINARY_UNAVAILABLE',
+  );
+  assert.equal(digestReads, 0);
+  assert.equal(versionChildren, 0);
 });
 
 test('result publication is atomic and refuses to replace an existing result', async () => {
