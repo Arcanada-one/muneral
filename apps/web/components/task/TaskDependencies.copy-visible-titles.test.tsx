@@ -291,6 +291,7 @@ describe('copy available visible dependency titles', () => {
       ['tasks', taskId, 'dependency-graph'],
       [dependency('dep-new', 'new-id', 'New title')],
     ));
+    expect(await screen.findByText('New title')).toBeInTheDocument();
     await act(async () => oldWrite.reject(new Error('stale private failure')));
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     expect(titleCopyButton(1)).toBeEnabled();
