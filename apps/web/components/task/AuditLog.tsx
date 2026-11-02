@@ -294,7 +294,8 @@ function formatExactUtcTime(value: string): string | undefined {
   const offsetMs = (offsetHour * 60 + offsetMinute) * 60_000 * offsetSign;
   const utc = new Date(calendarDate.getTime() - offsetMs);
   const normalizedFraction = fraction.replace(/0+$/, '').padEnd(3, '0');
-  return `${utc.toISOString().slice(0, 19)}.${normalizedFraction || '000'}Z`;
+  const utcDateTime = utc.toISOString().replace(/\.\d{3}Z$/, '');
+  return `${utcDateTime}.${normalizedFraction || '000'}Z`;
 }
 
 function CopyActivityActorId({ actorId }: { actorId: string }) {

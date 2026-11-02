@@ -142,6 +142,19 @@ describe('AuditLog exact UTC activity time', () => {
     expect(screen.queryByText(malformed)).not.toBeInTheDocument();
   });
 
+  it('preserves expanded UTC years and fractional precision when offsets cross year boundaries', () => {
+    ready(taskA, 1, [
+      entry('lower-year-rollover', taskA, '0000-01-01T00:30:00.1234500+01:00'),
+      entry('upper-year-rollover', taskA, '9999-12-31T23:30:00.1234500-01:00'),
+    ], 2);
+
+    render(<AuditLog taskId={taskA} />);
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Show exact UTC timestamps' }));
+
+    expect(screen.getByText('-000001-12-31T23:30:00.12345Z')).toBeInTheDocument();
+    expect(screen.getByText('+010000-01-01T00:30:00.12345Z')).toBeInTheDocument();
+  });
+
   it('retains exact mode through same-task refresh and page navigation, preserves filters, then resets on task switch', () => {
     ready(taskA, 1, [
       entry('page-one-status', taskA, '2026-10-29T11:00:00Z', 'task:status_changed'),
