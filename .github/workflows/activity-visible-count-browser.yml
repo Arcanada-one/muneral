@@ -61,14 +61,16 @@ jobs:
           [[ "${ACTIVITY_COUNT_CANDIDATE_SHA}" =~ ^[a-f0-9]{40}$ ]]
           artifact_parent="${RUNNER_TEMP}/activity-visible-count-artifacts/${ACTIVITY_COUNT_RUN_ID}/${ACTIVITY_COUNT_RUN_ATTEMPT}"
           private_parent="${RUNNER_TEMP}/activity-visible-count-private/${ACTIVITY_COUNT_RUN_ID}/${ACTIVITY_COUNT_RUN_ATTEMPT}"
-          mkdir -p -m 700 "${artifact_parent}" "${private_parent}"
+          mkdir -p "${artifact_parent}" "${private_parent}"
           artifact_root="${artifact_parent}/${ACTIVITY_COUNT_CANDIDATE_SHA}"
           private_root="${private_parent}/${ACTIVITY_COUNT_CANDIDATE_SHA}"
           mkdir -m 700 "${artifact_root}"
           mkdir -m 700 "${private_root}"
-          printf 'artifact_root=%s\n' "${artifact_root}" >> "${GITHUB_OUTPUT}"
-          printf 'private_root=%s\n' "${private_root}" >> "${GITHUB_OUTPUT}"
-          printf 'ready=true\n' >> "${GITHUB_OUTPUT}"
+          {
+            printf 'artifact_root=%s\n' "${artifact_root}"
+            printf 'private_root=%s\n' "${private_root}"
+            printf 'ready=true\n'
+          } >> "${GITHUB_OUTPUT}"
 
       - name: Run the current-page activity count browser path
         if: steps.allocate-output.outputs.ready == 'true'

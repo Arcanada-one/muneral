@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { __test as driver } from './run.mjs';
 import apiClient, { __test as adapter, TASK_IDS } from './synthetic-api-client.mjs';
@@ -9,6 +10,9 @@ import apiClient, { __test as adapter, TASK_IDS } from './synthetic-api-client.m
 const appRoot = '/repo/apps/web';
 const repoRoot = '/repo';
 const origin = 'http://127.0.0.1:43127';
+const fixtureDirectory = path.dirname(fileURLToPath(import.meta.url));
+const webDirectory = path.resolve(fixtureDirectory, '../..');
+const repositoryDirectory = path.resolve(webDirectory, '../..');
 
 test('the pinned Node runtime exposes its built-in WebSocket client', () => {
   assert.equal(typeof WebSocket, 'function');
@@ -22,7 +26,46 @@ test('only same-origin GETs for Vite and the bounded fixture source tree are all
   assert.equal(driver.isAllowedFixtureRequest('https://example.invalid/', 'GET', origin, appRoot, repoRoot), false);
   assert.equal(driver.isAllowedFixtureRequest(`${origin}/tasks/${TASK_IDS.populated}/activity?page=1&limit=20`, 'GET', origin, appRoot, repoRoot), false);
   assert.equal(driver.isAllowedFixtureRequest(`${origin}/@fs/repo/apps/web/%2e%2e/secrets`, 'GET', origin, appRoot, repoRoot), false);
-  assert.equal(driver.isAllowedFixtureRequest(`${origin}/main.jsx`, 'POST', origin, appRoot, repoRoot), false);
+  assert.equal(driver.isAllowedFixtureRequest(`${origin}/main.tsx`, 'POST', origin, appRoot, repoRoot), false);
+});
+
+test('the typed fixture entry is the only admitted root module path', () => {
+  assert.equal(driver.isAllowedFixtureRequest(`${origin}/main.tsx`, 'GET', origin, appRoot, repoRoot), true);
+  assert.equal(driver.isAllowedFixtureRequest(`${origin}/main.jsx`, 'GET', origin, appRoot, repoRoot), false);
+  assert.equal(driver.isAllowedFixtureRequest(`${origin}/main.tsx/extra`, 'GET', origin, appRoot, repoRoot), false);
+  assert.equal(driver.isAllowedFixtureRequest(`https://example.invalid/main.tsx`, 'GET', origin, appRoot, repoRoot), false);
+  assert.equal(driver.isAllowedFixtureRequest(`${origin}/main.tsx`, 'POST', origin, appRoot, repoRoot), false);
+});
+
+test('workflow output allocation and CI-only inputs keep their bounded contract', async () => {
+  const workflow = await readFile(path.join(repositoryDirectory, '.github/workflows/activity-visible-count-browser.yml'), 'utf8');
+  const envExample = await readFile(path.join(webDirectory, '.env.example'), 'utf8');
+  const allocationStep = workflow.split('id: allocate-output')[1]?.split('\n      - name:')[0];
+  assert.ok(allocationStep);
+  assert.match(allocationStep, /umask 077[\s\S]*mkdir -p "\$\{artifact_parent\}" "\$\{private_parent\}"/);
+  assert.doesNotMatch(allocationStep, /mkdir -p -m 700/);
+  assert.match(allocationStep, /mkdir -m 700 "\$\{artifact_root\}"/);
+  assert.match(allocationStep, /mkdir -m 700 "\$\{private_root\}"/);
+  assert.match(allocationStep, /printf 'artifact_root=%s\\n'[\s\S]*printf 'private_root=%s\\n'[\s\S]*printf 'ready=true\\n'[\s\S]*\} >> "\$\{GITHUB_OUTPUT\}"/);
+  assert.equal((allocationStep.match(/>> "\$\{GITHUB_OUTPUT\}"/g) ?? []).length, 1);
+
+  assert.match(envExample, /CI-injected metadata and paths/);
+  assert.match(envExample, /not production defaults or credentials/);
+  const declared = new Map(envExample.split(/\r?\n/).map((line) => line.match(/^([A-Z][A-Z0-9_]*)=(.*)$/)).filter(Boolean).map((match) => [match[1], match[2]]));
+  for (const key of [
+    'ACTIVITY_COUNT_CANDIDATE_SHA', 'ACTIVITY_COUNT_OUTPUT_ROOT', 'ACTIVITY_COUNT_PRIVATE_ROOT',
+    'CHROME_PATH', 'GITHUB_RUN_ATTEMPT', 'GITHUB_RUN_ID', 'GITHUB_WORKSPACE', 'RUNNER_TEMP',
+  ]) assert.equal(declared.get(key), '', `${key} must be declared with an empty placeholder`);
+});
+
+test('the HTML entry and fixture implementation are genuinely TypeScript-covered', async () => {
+  const html = await readFile(path.join(fixtureDirectory, 'index.html'), 'utf8');
+  const fixtureSource = await readFile(path.join(fixtureDirectory, 'main.tsx'), 'utf8');
+  assert.match(html, /src="\/main\.tsx"/);
+  await assert.rejects(readFile(path.join(fixtureDirectory, 'main.jsx')));
+  assert.match(fixtureSource, /declare global[\s\S]*interface Window/);
+  assert.match(fixtureSource, /if \(!rootElement\)/);
+  assert.doesNotMatch(fixtureSource, /@ts-ignore|@ts-nocheck/);
 });
 
 test('browser arguments retain Chromium sandbox defaults', () => {

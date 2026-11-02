@@ -4,6 +4,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuditLog } from '../../components/task/AuditLog';
 import { getFixtureStats, TASK_IDS } from './synthetic-api-client.mjs';
 
+declare global {
+  interface Window {
+    __activityCountFixtureStats: typeof getFixtureStats;
+  }
+}
+
 window.__activityCountFixtureStats = getFixtureStats;
 
 const queryClient = new QueryClient({
@@ -17,7 +23,7 @@ const queryClient = new QueryClient({
 });
 
 function FixtureApp() {
-  const [taskId, setTaskId] = useState(TASK_IDS.populated);
+  const [taskId, setTaskId] = useState<string>(TASK_IDS.populated);
   const nextTaskId = taskId === TASK_IDS.populated ? TASK_IDS.empty : TASK_IDS.populated;
   const nextTaskLabel = taskId === TASK_IDS.populated ? 'empty' : 'populated';
 
@@ -35,7 +41,10 @@ function FixtureApp() {
   );
 }
 
-createRoot(document.getElementById('root')).render(
+const rootElement = document.getElementById('root');
+if (!rootElement) throw new Error('Activity count fixture root is missing');
+
+createRoot(rootElement).render(
   <QueryClientProvider client={queryClient}>
     <FixtureApp />
   </QueryClientProvider>,

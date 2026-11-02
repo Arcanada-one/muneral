@@ -114,7 +114,7 @@ export function isAllowedFixtureRequest(requestUrl, method, expectedOrigin, appR
   let pathname;
   try { pathname = decodeURIComponent(parsed.pathname); } catch { return false; }
   if (pathname.split('/').some((segment) => segment === '.' || segment === '..')) return false;
-  if (pathname === '/' || pathname === '/index.html' || pathname === '/main.jsx') return true;
+  if (pathname === '/' || pathname === '/index.html' || pathname === '/main.tsx') return true;
   if (
     pathname.startsWith('/@vite/') || pathname.startsWith('/@id/') ||
     pathname.startsWith('/@react-refresh') || pathname.startsWith('/node_modules/.vite/')
