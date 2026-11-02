@@ -388,8 +388,30 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
               type="search"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
+              onKeyDown={(event) => {
+                if (
+                  event.key !== 'Escape' ||
+                  searchQuery === '' ||
+                  event.nativeEvent.isComposing ||
+                  event.altKey ||
+                  event.ctrlKey ||
+                  event.metaKey ||
+                  event.shiftKey
+                ) {
+                  return;
+                }
+
+                event.preventDefault();
+                event.stopPropagation();
+                setSearchQuery('');
+              }}
+              aria-describedby={`${searchInputId}-help`}
+              aria-keyshortcuts="Escape"
               className="min-w-0 rounded border bg-background px-2 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             />
+            <span id={`${searchInputId}-help`} className="text-xs text-muted-foreground">
+              Press Escape to clear search.
+            </span>
             <label htmlFor={`${kindSelectId}-available-only`} className="inline-flex items-center gap-2 text-sm">
               <input
                 id={`${kindSelectId}-available-only`}
