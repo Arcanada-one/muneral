@@ -8,6 +8,10 @@ import {
 import { createReadStream } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import {
+  buildFailureSummary, noBrowserCapture, publishFailureSummary,
+  readCompletedBrowserCapture, validateFailureSummaryFiles,
+} from './failure-summary.mjs';
 
 const EXPECTED_BROWSER_PATH = '/opt/arcanada-browsers/cft-156.0.8078.4/chrome-linux64/chrome';
 const EXPECTED_BROWSER_VERSION = 'Google Chrome for Testing 156.0.8078.4';
@@ -881,9 +885,8 @@ function createResult(state) {
   };
 }
 
-async function writeResult(state) {
+async function writeResult(state, result = createResult(state)) {
   if (!state.outputReady) return false;
-  const result = createResult(state);
   if (!validateResultRecord(result, {
     candidateSha: state.candidateSha, runId: state.runId, runAttempt: state.runAttempt,
   })) throw fail('RESULT_CAPTURE_FAILED');
@@ -891,6 +894,33 @@ async function writeResult(state) {
   if (outputEntries.length !== 0) throw fail('RESULT_CAPTURE_FAILED');
   await atomicPublishJson(state.artifactRoot, result);
   return result.status === 'PASS';
+}
+
+async function writeFailureSummary(state, result) {
+  if (!state.outputReady || result.status !== 'FAIL') throw fail('RESULT_CAPTURE_FAILED');
+  const binding = { runId: state.runId, runAttempt: state.runAttempt, candidateSha: state.candidateSha };
+  const capture = state.browser
+    ? await readCompletedBrowserCapture(
+      state.privateRoot,
+      await state.browser.completion,
+      {
+        expectedArgv: [EXPECTED_BROWSER_PATH, ...browserArguments(path.join(state.privateRoot, 'browser-profile'))],
+        expectedCwd: state.privateRoot,
+      },
+    )
+    : noBrowserCapture();
+  capture.process.cleanupRequested = state.browserShutdownRequested;
+  const summary = buildFailureSummary({
+    binding,
+    phase: state.phase,
+    reason: result.reason,
+    process: capture.process,
+    diagnostics: capture.diagnostics,
+    allowedReasons: FAILURE_REASONS,
+  });
+  return publishFailureSummary(state.artifactRoot, summary, {
+    binding, allowedReasons: FAILURE_REASONS, expectedResult: result,
+  });
 }
 
 async function runFixture() {
@@ -942,11 +972,21 @@ async function runFixture() {
     }
   }
   try {
-    const passed = await writeResult(state);
+    const result = createResult(state);
+    const passed = await writeResult(state, result);
+    if (!passed && state.outputReady) {
+      try {
+        await writeFailureSummary(state, result);
+      } catch {
+        process.stderr.write('activity visible count browser fixture: FAILURE_SUMMARY_CAPTURE_FAILED\n');
+        process.exitCode = 1;
+      }
+    }
     process.stdout.write(passed
       ? 'activity visible count browser fixture: PASS\n'
       : `activity visible count browser fixture: ${state.failureReason ?? 'FAIL'}\n`);
-    process.exitCode = passed ? 0 : 1;
+    if (passed) process.exitCode = 0;
+    else process.exitCode = 1;
   } catch {
     process.stderr.write('activity visible count browser fixture: RESULT_CAPTURE_FAILED\n');
     process.exitCode = 1;
@@ -969,8 +1009,9 @@ async function validateOutput() {
   if (canonical !== expected || !dirStat.isDirectory() || dirStat.isSymbolicLink() || (dirStat.mode & 0o077) !== 0) {
     throw fail('OUTPUT_PREPARATION_FAILED');
   }
-  const entries = await readdir(canonical);
-  if (entries.length !== 1 || entries[0] !== 'result.json') throw fail('RESULT_CAPTURE_FAILED');
+  const entries = (await readdir(canonical)).sort();
+  if (!entries.includes('result.json') || entries.some((entry) => !['result.json', 'failure-summary.json'].includes(entry)) ||
+      entries.length > 2) throw fail('RESULT_CAPTURE_FAILED');
   const resultPath = path.join(canonical, 'result.json');
   const fileStat = await lstat(resultPath);
   if (!fileStat.isFile() || fileStat.isSymbolicLink() || fileStat.size > RESULT_LIMIT_BYTES || (fileStat.mode & 0o077) !== 0) {
@@ -979,13 +1020,65 @@ async function validateOutput() {
   let value;
   try { value = JSON.parse(await readFile(resultPath, 'utf8')); } catch { throw fail('RESULT_CAPTURE_FAILED'); }
   if (!validateResultRecord(value, { candidateSha, runId, runAttempt })) throw fail('RESULT_CAPTURE_FAILED');
+  if ((value.status === 'PASS' && entries.length !== 1) ||
+      (entries.includes('failure-summary.json') && value.status !== 'FAIL')) throw fail('RESULT_CAPTURE_FAILED');
+  if (process.env.GITHUB_OUTPUT) {
+    await writeFile(process.env.GITHUB_OUTPUT, `failure_summary_required=${value.status === 'FAIL'}\n`, { flag: 'a', mode: 0o600 });
+  }
   process.stdout.write('activity visible count result: VALID\n');
+}
+
+async function validateFailureSummaryOutput() {
+  const runId = process.env.GITHUB_RUN_ID;
+  const runAttempt = Number(process.env.GITHUB_RUN_ATTEMPT);
+  const candidateSha = process.env.ACTIVITY_COUNT_CANDIDATE_SHA;
+  const runnerTemp = process.env.RUNNER_TEMP;
+  const workspace = process.env.GITHUB_WORKSPACE;
+  if (!/^[0-9]+$/.test(runId ?? '') || !/^[1-9][0-9]*$/.test(String(process.env.GITHUB_RUN_ATTEMPT ?? '')) ||
+      !/^[a-f0-9]{40}$/.test(candidateSha ?? '') || !path.isAbsolute(runnerTemp ?? '') || !path.isAbsolute(workspace ?? '')) {
+    throw fail('RUN_BINDING_INVALID');
+  }
+  const expectedRoot = expectedRoots(path.resolve(runnerTemp), runId, runAttempt, candidateSha).artifact;
+  if (process.env.ACTIVITY_COUNT_OUTPUT_ROOT !== expectedRoot) throw fail('RUN_BINDING_INVALID');
+  const workspaceReal = await realpath(workspace).catch(() => { throw fail('WORKSPACE_UNAVAILABLE'); });
+  if (workspaceReal !== path.resolve(workspace)) throw fail('WORKSPACE_UNAVAILABLE');
+  const currentHead = execFileSync('git', ['rev-parse', 'HEAD'], {
+    cwd: workspaceReal, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'],
+  }).trim();
+  if (currentHead !== candidateSha) throw fail('CANDIDATE_HEAD_MISMATCH');
+  const componentBytes = await readFile(path.join(workspaceReal, 'apps/web/components/task/AuditLog.tsx'))
+    .catch(() => { throw fail('COMPONENT_SOURCE_UNAVAILABLE'); });
+  if (createHash('sha256').update(componentBytes).digest('hex') !== EXPECTED_COMPONENT_SHA256) {
+    throw fail('COMPONENT_HASH_MISMATCH');
+  }
+  const resultPath = path.join(expectedRoot, 'result.json');
+  const resultInfo = await lstat(resultPath);
+  if (!resultInfo.isFile() || resultInfo.isSymbolicLink() || resultInfo.size > RESULT_LIMIT_BYTES ||
+      (resultInfo.mode & 0o077) !== 0) throw fail('RESULT_CAPTURE_FAILED');
+  let result;
+  try { result = JSON.parse(await readFile(resultPath, 'utf8')); } catch { throw fail('RESULT_CAPTURE_FAILED'); }
+  const binding = { candidateSha, runId, runAttempt };
+  if (!validateResultRecord(result, binding) || result.status !== 'FAIL') throw fail('RESULT_CAPTURE_FAILED');
+  await validateFailureSummaryFiles({
+    artifactRoot: expectedRoot,
+    binding,
+    allowedReasons: FAILURE_REASONS,
+    expectedResult: result,
+  });
+  process.stdout.write('activity visible count failure summary: VALID\n');
 }
 
 async function main() {
   if (process.argv[2] === '--validate-output') {
     await validateOutput().catch(() => {
       process.stderr.write('activity visible count result: INVALID\n');
+      process.exitCode = 1;
+    });
+    return;
+  }
+  if (process.argv[2] === '--validate-failure-summary') {
+    await validateFailureSummaryOutput().catch(() => {
+      process.stderr.write('activity visible count failure summary: INVALID\n');
       process.exitCode = 1;
     });
     return;
@@ -1006,8 +1099,8 @@ export const __test = Object.freeze({
   EXPECTED_BROWSER_SHA256,
   EXPECTED_COMPONENT_SHA256,
   RESULT_SCHEMA,
-  SCENARIOS,
   FAILURE_REASONS: Object.freeze([...FAILURE_REASONS]),
+  SCENARIOS,
   atomicPublishJson,
   browserArguments,
   isAllowedFixtureRequest,
@@ -1016,4 +1109,5 @@ export const __test = Object.freeze({
   launchBrowserAfterVerification,
   spawnCaptured,
   validateResultRecord,
+  validateFailureSummaryOutput,
 });
