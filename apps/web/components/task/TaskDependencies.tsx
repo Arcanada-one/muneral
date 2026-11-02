@@ -62,9 +62,6 @@ function CopyTaskIdButton({ taskId }: { taskId: string }) {
 export function TaskDependencies({ taskId }: TaskDependenciesProps) {
   const [retryingTaskId, setRetryingTaskId] = useState<string | null>(null);
   const [searchState, setSearchState] = useState({ taskId, query: '' });
-  useEffect(() => {
-    setSearchState((current) => current.taskId === taskId ? current : { taskId, query: '' });
-  }, [taskId]);
   const searchQuery = searchState.taskId === taskId ? searchState.query : '';
   const { data: deps, isPending, isError, isFetching, refetch } = useDependencyGraph(taskId);
   const isRetrying = retryingTaskId === taskId;
@@ -189,113 +186,6 @@ function DependencyList({
         dep.otherTaskId, dep.otherTaskTitle, dep.otherTaskStatus];
     }),
   ]);
-  const copyGeneration = useRef({
-    generation: 0,
-    taskId,
-    deps,
-    direction,
-    hideCompleted,
-    searchQuery,
-    titleBatchKey,
-  });
-
-  const previousBatch = copyGeneration.current;
-  if (previousBatch.taskId !== taskId || previousBatch.deps !== deps
-      || previousBatch.direction !== direction || previousBatch.hideCompleted !== hideCompleted
-      || previousBatch.searchQuery !== searchQuery
-      || previousBatch.titleBatchKey !== titleBatchKey) {
-    copyGeneration.current = {
-      generation: previousBatch.generation + 1,
-      taskId,
-      deps,
-      direction,
-      hideCompleted,
-      searchQuery,
-      titleBatchKey,
-    };
-  }
-
-  const invalidateCopyBatch = () => {
-    copyGeneration.current = {
-      ...copyGeneration.current,
-      generation: copyGeneration.current.generation + 1,
-    };
-    setBatchCopyFeedback(null);
-    setPendingBatchCopy(null);
-    setTitleBatchCopyFeedback(null);
-    setPendingTitleBatchCopy(null);
-  };
-
-  useEffect(() => () => {
-    copyGeneration.current = {
-      ...copyGeneration.current,
-      generation: copyGeneration.current.generation + 1,
-    };
-    pendingCopyRef.current = null;
-    pendingTitleCopyRef.current = null;
-  }, []);
-
-  const currentGeneration = copyGeneration.current.generation;
-  const isBatchCopyPending = pendingBatchCopy?.generation === currentGeneration;
-  const currentBatchCopyFeedback = batchCopyFeedback?.generation === currentGeneration
-    ? batchCopyFeedback.result : null;
-  const isTitleBatchCopyPending = pendingTitleBatchCopy?.generation === currentGeneration;
-  const currentTitleBatchCopyFeedback = titleBatchCopyFeedback?.generation === currentGeneration
-    ? titleBatchCopyFeedback.result : null;
-
-  const copyVisibleTaskIds = async () => {
-    const generation = copyGeneration.current.generation;
-    if (visibleDeps.length === 0 || pendingCopyRef.current?.generation === generation) return;
-
-    const attempt = { id: ++copyAttempt.current, generation };
-    pendingCopyRef.current = attempt;
-    setPendingBatchCopy(attempt);
-    setBatchCopyFeedback(null);
-    try {
-      const clipboard = navigator.clipboard;
-      if (typeof clipboard?.writeText !== 'function') throw new Error('Clipboard unavailable');
-      await clipboard.writeText(visibleDeps.map((dep) => dep.otherTaskId).join('\n'));
-      if (copyGeneration.current.generation === generation) {
-        setBatchCopyFeedback({ generation, result: 'copied' });
-      }
-    } catch {
-      if (copyGeneration.current.generation === generation) {
-        setBatchCopyFeedback({ generation, result: 'failed' });
-      }
-    } finally {
-      if (pendingCopyRef.current?.id === attempt.id) {
-        pendingCopyRef.current = null;
-        setPendingBatchCopy((current) => current?.id === attempt.id ? null : current);
-      }
-    }
-  };
-
-  const copyVisibleDependencyTitles = async () => {
-    const generation = copyGeneration.current.generation;
-    if (eligibleTitles.length === 0 || pendingTitleCopyRef.current?.generation === generation) return;
-
-    const attempt = { id: ++copyAttempt.current, generation };
-    pendingTitleCopyRef.current = attempt;
-    setPendingTitleBatchCopy(attempt);
-    setTitleBatchCopyFeedback(null);
-    try {
-      const clipboard = navigator.clipboard;
-      if (typeof clipboard?.writeText !== 'function') throw new Error('Clipboard unavailable');
-      await clipboard.writeText(eligibleTitles.join('\n'));
-      if (copyGeneration.current.generation === generation) {
-        setTitleBatchCopyFeedback({ generation, result: 'copied' });
-      }
-    } catch {
-      if (copyGeneration.current.generation === generation) {
-        setTitleBatchCopyFeedback({ generation, result: 'failed' });
-      }
-    } finally {
-      if (pendingTitleCopyRef.current?.id === attempt.id) {
-        pendingTitleCopyRef.current = null;
-        setPendingTitleBatchCopy((current) => current?.id === attempt.id ? null : current);
-      }
-    }
-  };
 
   return (
     <>
@@ -307,7 +197,6 @@ function DependencyList({
           id={`dependency-direction-${taskId}`}
           value={direction}
           onChange={(event) => {
-            invalidateCopyBatch();
             setDirection(event.target.value as typeof direction);
           }}
           className="rounded-md border bg-background px-2 py-1"
@@ -322,7 +211,6 @@ function DependencyList({
             type="checkbox"
             checked={hideCompleted}
             onChange={(event) => {
-              invalidateCopyBatch();
               setHideCompleted(event.target.checked);
             }}
           />
@@ -337,7 +225,6 @@ function DependencyList({
           type="text"
           value={searchQuery}
           onChange={(event) => {
-            invalidateCopyBatch();
             onSearchQueryChange(event.target.value);
           }}
           onKeyDown={(event) => {
@@ -347,7 +234,6 @@ function DependencyList({
 
             event.preventDefault();
             event.stopPropagation();
-            invalidateCopyBatch();
             onSearchQueryChange('');
           }}
           aria-keyshortcuts="Escape"
@@ -362,7 +248,6 @@ function DependencyList({
           variant="outline"
           size="sm"
           onClick={() => {
-            invalidateCopyBatch();
             onSearchQueryChange('');
           }}
           disabled={searchQuery.length === 0}
@@ -374,7 +259,6 @@ function DependencyList({
           variant="outline"
           size="sm"
           onClick={() => {
-            invalidateCopyBatch();
             setDirection('all');
             setHideCompleted(false);
             onSearchQueryChange('');
@@ -388,42 +272,11 @@ function DependencyList({
         </span>
       </div>
 
-      <div className="mb-3 flex flex-wrap items-center gap-2 text-sm">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => void copyVisibleTaskIds()}
-          disabled={visibleDeps.length === 0 || isBatchCopyPending}
-        >
-          Copy visible dependency task IDs ({visibleDeps.length})
-        </Button>
-        {currentBatchCopyFeedback === 'copied' && (
-          <span role="status" className="text-xs text-green-700">Dependency task IDs copied.</span>
-        )}
-        {currentBatchCopyFeedback === 'failed' && (
-          <span role="alert" className="text-xs text-destructive">
-            Could not copy dependency task IDs. Try again or copy them manually.
-          </span>
-        )}
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => void copyVisibleDependencyTitles()}
-          disabled={eligibleTitles.length === 0 || isTitleBatchCopyPending}
-        >
-          Copy available dependency titles ({eligibleTitles.length})
-        </Button>
-        {currentTitleBatchCopyFeedback === 'copied' && (
-          <span role="status" className="text-xs text-green-700">Dependency titles copied.</span>
-        )}
-        {currentTitleBatchCopyFeedback === 'failed' && (
-          <span role="alert" className="text-xs text-destructive">
-            Could not copy dependency titles. Try again or copy them manually.
-          </span>
-        )}
-      </div>
+      <DependencyCopyControls
+        key={titleBatchKey}
+        visibleDeps={visibleDeps}
+        eligibleTitles={eligibleTitles}
+      />
 
       {visibleDeps.length === 0 ? (
         <p className="text-sm text-muted-foreground">
@@ -446,6 +299,108 @@ function DependencyList({
         </ul>
       )}
     </>
+  );
+}
+
+function DependencyCopyControls({
+  visibleDeps,
+  eligibleTitles,
+}: {
+  visibleDeps: DependencyRow[];
+  eligibleTitles: string[];
+}) {
+  const [batchCopyFeedback, setBatchCopyFeedback] = useState<'copied' | 'failed' | null>(null);
+  const [isBatchCopyPending, setIsBatchCopyPending] = useState(false);
+  const [titleBatchCopyFeedback, setTitleBatchCopyFeedback] = useState<'copied' | 'failed' | null>(null);
+  const [isTitleBatchCopyPending, setIsTitleBatchCopyPending] = useState(false);
+  const copyAttempt = useRef(0);
+  const pendingCopyRef = useRef<number | null>(null);
+  const pendingTitleCopyRef = useRef<number | null>(null);
+
+  const copyVisibleTaskIds = async () => {
+    if (visibleDeps.length === 0 || pendingCopyRef.current !== null) return;
+    const attempt = ++copyAttempt.current;
+    pendingCopyRef.current = attempt;
+    setIsBatchCopyPending(true);
+    setBatchCopyFeedback(null);
+    try {
+      const clipboard = navigator.clipboard;
+      if (typeof clipboard?.writeText !== 'function') throw new Error('Clipboard unavailable');
+      await clipboard.writeText(visibleDeps.map((dep) => dep.otherTaskId).join('\n'));
+      setBatchCopyFeedback('copied');
+    } catch {
+      setBatchCopyFeedback('failed');
+    } finally {
+      if (pendingCopyRef.current === attempt) {
+        pendingCopyRef.current = null;
+        setIsBatchCopyPending(false);
+      }
+    }
+  };
+
+  const copyVisibleDependencyTitles = async () => {
+    if (eligibleTitles.length === 0 || pendingTitleCopyRef.current !== null) return;
+    const attempt = ++copyAttempt.current;
+    pendingTitleCopyRef.current = attempt;
+    setIsTitleBatchCopyPending(true);
+    setTitleBatchCopyFeedback(null);
+    try {
+      const clipboard = navigator.clipboard;
+      if (typeof clipboard?.writeText !== 'function') throw new Error('Clipboard unavailable');
+      await clipboard.writeText(eligibleTitles.join('\n'));
+      setTitleBatchCopyFeedback('copied');
+    } catch {
+      setTitleBatchCopyFeedback('failed');
+    } finally {
+      if (pendingTitleCopyRef.current === attempt) {
+        pendingTitleCopyRef.current = null;
+        setIsTitleBatchCopyPending(false);
+      }
+    }
+  };
+
+  useEffect(() => () => {
+    pendingCopyRef.current = null;
+    pendingTitleCopyRef.current = null;
+  }, []);
+
+  return (
+    <div className="mb-3 flex flex-wrap items-center gap-2 text-sm">
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => void copyVisibleTaskIds()}
+        disabled={visibleDeps.length === 0 || isBatchCopyPending}
+      >
+        Copy visible dependency task IDs ({visibleDeps.length})
+      </Button>
+      {batchCopyFeedback === 'copied' && (
+        <span role="status" className="text-xs text-green-700">Dependency task IDs copied.</span>
+      )}
+      {batchCopyFeedback === 'failed' && (
+        <span role="alert" className="text-xs text-destructive">
+          Could not copy dependency task IDs. Try again or copy them manually.
+        </span>
+      )}
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => void copyVisibleDependencyTitles()}
+        disabled={eligibleTitles.length === 0 || isTitleBatchCopyPending}
+      >
+        Copy available dependency titles ({eligibleTitles.length})
+      </Button>
+      {titleBatchCopyFeedback === 'copied' && (
+        <span role="status" className="text-xs text-green-700">Dependency titles copied.</span>
+      )}
+      {titleBatchCopyFeedback === 'failed' && (
+        <span role="alert" className="text-xs text-destructive">
+          Could not copy dependency titles. Try again or copy them manually.
+        </span>
+      )}
+    </div>
   );
 }
 

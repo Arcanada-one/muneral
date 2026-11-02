@@ -183,13 +183,14 @@ describe('reset all loaded dependency filters', () => {
     const storageWrites = vi.spyOn(Storage.prototype, 'setItem');
     const storageRemovals = vi.spyOn(Storage.prototype, 'removeItem');
     const navigation = vi.spyOn(history, 'pushState');
+    const getRequest = vi.spyOn(apiClient, 'get');
 
     expect(resetButton()).toBeDisabled();
     fireEvent.click(resetButton());
     fireEvent.change(screen.getByRole('combobox', { name: 'Dependency direction' }), {
       target: { value: 'incoming' },
     });
-    apiClient.get.mockClear();
+    getRequest.mockClear();
     mutations.forEach((mutation) => mutation.mockClear());
     fetchSpy.mockClear();
     storageWrites.mockClear();

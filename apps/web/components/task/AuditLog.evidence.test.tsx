@@ -84,7 +84,7 @@ describe('AuditLog evidence attachment details', () => {
         activeElement === actorFilter ||
         activeElement === summary
       ) {
-        reachedKeyboardTargets.push(activeElement);
+        reachedKeyboardTargets.push(activeElement as HTMLElement);
       }
     }
     expect(reachedKeyboardTargets).toEqual(keyboardTargets);
