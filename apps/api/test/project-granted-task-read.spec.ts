@@ -80,7 +80,7 @@ describe('project-granted GET /tasks/:taskId metadata read', () => {
     for (const grants of [[], [{ ...GRANT, agentId: 'agent-2' }], [{ ...GRANT, projectId: 'project-2' }]]) {
       const { guard, prisma, req, context } = guardFor(grants);
       prisma.task.findFirst.mockResolvedValueOnce(null).mockResolvedValueOnce({ id: 'task-1', projectId: 'project-1' });
-      await expect(guard.canActivate(context)).rejects.toThrow(NotFoundException);
+      await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
       expect(req.agentScope).toBeUndefined();
     }
   });

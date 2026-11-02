@@ -244,7 +244,11 @@ export class AgentTaskScopeGuard implements CanActivate {
             decision: state.entry.decision,
           });
         }
-        if (state.kind === 'none') throw new NotFoundException('Task not found.');
+        // Preserve the pre-grant task-read contract: a task this key cannot
+        // read answers 403, whether its id exists or not. Project-index uses
+        // 404 for an absent grant because that route deliberately hides
+        // project existence; this single-task route historically did not.
+        if (state.kind === 'none') throw new ForbiddenException('Task is not in scope for this key.');
         req.agentScope = {
           agentId: agent.id,
           kind,
