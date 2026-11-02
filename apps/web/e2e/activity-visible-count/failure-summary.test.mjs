@@ -275,6 +275,53 @@ test('first relevant stderr diagnostic scans the full bounded capture and expose
   assert.ok(unicode.stderrFirstRelevantLine.length <= 300);
 });
 
+test('known namespace permission diagnostics use fixed labels while spoofed or unknown text stays withheld', () => {
+  const label = 'BROWSER_NAMESPACE_PERMISSION_DENIED';
+  const synthetic = sanitizeStderr(Buffer.from(
+    'FATAL: sandbox initialization failed: user namespace creation returned EPERM',
+  ));
+  assert.deepEqual(synthetic.stderrCategories, [label]);
+  assert.deepEqual(synthetic.stderrLines, [label]);
+  assert.equal(synthetic.stderrFirstRelevantLine, label);
+  assert.equal(synthetic.stderrStatus, 'CLASSIFIED');
+  assert.equal(synthetic.stderrRedacted, false);
+  assert.equal(validateFailureSummary(summaryFor(startedProcess(), synthetic), binding, reasons), true);
+
+  // This fixed diagnostic is present in Chromium's sandbox/linux/suid/sandbox.c.
+  const chromium = sanitizeStderr(Buffer.from(
+    'Failed to move to new namespace: PID namespaces supported, Network namespace supported, but failed: errno = Operation not permitted',
+  ));
+  assert.deepEqual(chromium.stderrCategories, [label]);
+  assert.deepEqual(chromium.stderrLines, [label]);
+  assert.equal(chromium.stderrFirstRelevantLine, label);
+
+  const unusableSandbox = sanitizeStderr(Buffer.from('No usable sandbox!'));
+  assert.deepEqual(unusableSandbox.stderrCategories, ['BROWSER_SANDBOX_UNAVAILABLE']);
+  assert.deepEqual(unusableSandbox.stderrLines, ['No usable sandbox!']);
+
+  const spoofed = sanitizeStderr(Buffer.from([
+    'message="FATAL: sandbox initialization failed: user namespace creation returned EPERM"',
+    'FATAL: sandbox initialization failed: user namespace creation returned EPERM /private/profile',
+    'FATAL: sandbox initialization failed: user namespace creation returned EPERM https://private.invalid/path?token=secret',
+    'FATAL: sandbox initialization failed: user namespace creation returned \u001b[31mEPERM\u001b[0m',
+    'FATAL: unrelated sandbox failure: namespace setup rejected with EPERM',
+  ].join('\n')));
+  const serialized = JSON.stringify(spoofed);
+  assert.equal(spoofed.stderrCategories.includes(label), false);
+  assert.equal(serialized.includes('private.invalid'), false);
+  assert.equal(serialized.includes('/private/profile'), false);
+  assert.equal(serialized.includes('token=secret'), false);
+  assert.equal(serialized.includes('EPERM'), false);
+  assert.equal(spoofed.stderrCategories.includes('STDERR_WITHHELD'), true);
+
+  const tamperedLabel = summaryFor(startedProcess(), structuredClone(synthetic));
+  tamperedLabel.diagnostics.stderrLines = ['BROWSER_NAMESPACE_PERMISSION_DENIED secret=leak'];
+  assert.equal(validateFailureSummary(tamperedLabel, binding, reasons), false);
+  const tamperedCategory = summaryFor(startedProcess(), structuredClone(synthetic));
+  tamperedCategory.diagnostics.stderrCategories = ['BROWSER_NAMESPACE_PERMISSION_DENIED secret'];
+  assert.equal(validateFailureSummary(tamperedCategory, binding, reasons), false);
+});
+
 test('failure summary preserves not-started, exit, signal, timeout, and requested-cleanup states', () => {
   const notStarted = noBrowserCapture();
   const noProcess = summaryFor(notStarted.process, notStarted.diagnostics);

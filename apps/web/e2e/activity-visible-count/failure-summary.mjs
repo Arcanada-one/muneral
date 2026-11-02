@@ -26,7 +26,8 @@ const SIGNALS = new Set([
   'SIGXCPU', 'SIGXFSZ', 'SIGVTALRM', 'SIGPROF', 'SIGWINCH', 'SIGIO', 'SIGSYS', 'SIGPWR', 'SIGSTKFLT',
 ]);
 const DIAGNOSTIC_CODES = new Set([
-  'BROWSER_SANDBOX_UNAVAILABLE', 'BROWSER_STARTUP_FAILURE', 'BROWSER_DISPLAY_UNAVAILABLE',
+  'BROWSER_SANDBOX_UNAVAILABLE', 'BROWSER_NAMESPACE_PERMISSION_DENIED',
+  'BROWSER_STARTUP_FAILURE', 'BROWSER_DISPLAY_UNAVAILABLE',
   'STDERR_WITHHELD', 'UNKNOWN',
 ]);
 const STDERR_PHRASES = new Map([
@@ -38,10 +39,12 @@ const RELEVANT_DIAGNOSTIC_TOKEN = /\b(?:FATAL|sandbox|namespace)\b/i;
 const STDERR_STATUSES = new Set(['NOT_STARTED', 'EMPTY', 'CLASSIFIED', 'WITHHELD', 'TRUNCATED']);
 const STDERR_REDACTION_MARKER = '[REDACTED]';
 const STDERR_SAFE_SEGMENTS = [STDERR_REDACTION_MARKER, 'FATAL', 'sandbox', 'namespace', ...STDERR_PHRASES.keys()];
+const SAFE_DIAGNOSTIC_LABELS = ['BROWSER_NAMESPACE_PERMISSION_DENIED'];
+const STDERR_SAFE_DIAGNOSTIC_LABEL_PATTERN = SAFE_DIAGNOSTIC_LABELS.join('|');
 const escapeRegex = (value) => value.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
 const STDERR_SAFE_SEGMENT_PATTERN = STDERR_SAFE_SEGMENTS.map(escapeRegex).join('|');
 const STDERR_SAFE_LINE_PATTERN = new RegExp(
-  '^(?:' + STDERR_SAFE_SEGMENT_PATTERN + ')(?: (?:' + STDERR_SAFE_SEGMENT_PATTERN + '))*$',
+  '^(?:(?:' + STDERR_SAFE_DIAGNOSTIC_LABEL_PATTERN + ')|(?:' + STDERR_SAFE_SEGMENT_PATTERN + ')(?: (?:' + STDERR_SAFE_SEGMENT_PATTERN + '))*)$',
 );
 const ANSI_ESCAPE = /\u001b(?:\[[0-?]*[ -/]*[@-~]|\][^\u0007]*(?:\u0007|\u001b\\)|.)/g;
 const UNSAFE_CODEPOINT = /[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u202a-\u202e\u2060-\u206f\ufeff]/g;
@@ -126,6 +129,19 @@ function maskMatches(value, pattern) {
   return { value: masked, redacted };
 }
 
+function classifyKnownDiagnostic(value) {
+  const normalized = value.trim();
+  // This exact synthetic shape is a task fixture, not evidence that a live run emitted it.
+  if (/^FATAL: sandbox initialization failed: user namespace creation returned EPERM$/i.test(normalized)) {
+    return 'BROWSER_NAMESPACE_PERMISSION_DENIED';
+  }
+  // Chromium's sandbox/linux/suid/sandbox.c emits this fixed phrase and errno text.
+  if (/^Failed to move to new namespace:(?: PID namespaces supported,)?(?: Network namespace supported,)? but failed: errno = Operation not permitted$/i.test(normalized)) {
+    return 'BROWSER_NAMESPACE_PERMISSION_DENIED';
+  }
+  return null;
+}
+
 function projectDiagnosticLine(sourceLine) {
   let value = sourceLine.endsWith('\r') ? sourceLine.slice(0, -1) : sourceLine;
   let redacted = false;
@@ -143,6 +159,9 @@ function projectDiagnosticLine(sourceLine) {
     value = masked.value;
     redacted ||= masked.redacted;
   }
+
+  const knownDiagnostic = classifyKnownDiagnostic(value);
+  if (knownDiagnostic) return { line: knownDiagnostic, redacted, truncated: false, category: knownDiagnostic };
 
   const matches = [];
   for (const phrase of STDERR_PHRASES.keys()) {
@@ -206,7 +225,7 @@ function projectDiagnosticLine(sourceLine) {
     writtenParts.push(STDERR_REDACTION_MARKER);
     output = writtenParts.join(' ');
   }
-  return { line: output, redacted, truncated };
+  return { line: output, redacted, truncated, category: null };
 }
 
 export function sanitizeStderr(bytes, { truncated = false } = {}) {
@@ -251,7 +270,7 @@ export function sanitizeStderr(bytes, { truncated = false } = {}) {
       stderrFirstRelevantLine = projected.line;
       stderrRedacted ||= projected.redacted;
     }
-    const category = STDERR_PHRASES.get(line);
+    const category = projected.category ?? STDERR_PHRASES.get(line);
     if (category) categories.push(category);
     else withheld = true;
     if (keepLine) stderrRedacted ||= projected.redacted;
