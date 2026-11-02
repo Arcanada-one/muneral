@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { AuditLog } from './AuditLog';
 
 const activityState = vi.hoisted(() => ({ data: [] as Array<Record<string, unknown>> }));
