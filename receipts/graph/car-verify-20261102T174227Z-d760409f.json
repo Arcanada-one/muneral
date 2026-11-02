@@ -5,7 +5,7 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "paused_safe"
  },
- "captured_at_utc": "2026-11-02T17:42:27Z",
+ "captured_at_utc": "2026-11-02T18:10:44Z",
  "change_set": {
   "base": "e480bc5555035b04ee75d53fa7abf6bd5200ac02",
   "files": [
@@ -17,6 +17,21 @@
     ],
     "path": ".github/workflows/ci.yml",
     "status": "M"
+   },
+   {
+    "kind": "test",
+    "path": "apps/api/test/assembly/mutation-results.json",
+    "status": "M",
+    "uncovered": true
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/car-verify-20261102T174227Z-d760409f.json",
+    "node_ids": [
+     "receipt:receipts/graph/car-verify-20261102T174227Z-d760409f.json"
+    ],
+    "path": "receipts/graph/car-verify-20261102T174227Z-d760409f.json",
+    "status": "A"
    },
    {
     "kind": "code",
@@ -37,7 +52,7 @@
     "status": "A"
    }
   ],
-  "head": "d760409fa17424d27ff60369db98d8a31b75bb6a",
+  "head": "f572753b37643bdaafb04f1131104ba283af7665",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -52,12 +67,12 @@
  "head_graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:ce90d01c15eb6ac4c353a3ad84bec7203a89f257774e0e49969b752f596c0767",
-  "path": "/out/verifier-out/graph-head-d760409fa174.json",
-  "source_commit": "d760409fa17424d27ff60369db98d8a31b75bb6a",
+  "graph_digest": "sha256:7a65d19631b0b0bc9f7cdfce2d74eaa04c1900649c754570e4ae995580ccb2b5",
+  "path": "/out/verifier-out/graph-head-f572753b3764.json",
+  "source_commit": "f572753b37643bdaafb04f1131104ba283af7665",
   "staleness": {
-   "checked_at_utc": "2026-11-02T17:43:28Z",
-   "checked_nodes": 560,
+   "checked_at_utc": "2026-11-02T18:11:43Z",
+   "checked_nodes": 561,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -1001,13 +1016,14 @@
  },
  "notes": [
   "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
-  "profile: .arcana/verify.json at verified head; baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none"
+  "profile: .arcana/verify.json at verified head; baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none",
+  "DEC-AUP-0035 not applied to receipt:receipts/graph/car-verify-20261102T174227Z-d760409f.json: it declares this run's work item d74ee092-dc6c-4c68-8b6a-17bd556052f8, but the receipt is being written to /out/receipt.json, which is outside this repository, so no path in the tree is the one this run supersedes."
  ],
  "producer": {
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261102T174227Z-d760409f",
+ "receipt_id": "car-verify-20261102T181044Z-f572753b",
  "repo": {
   "name": "Arcanada-one/muneral",
   "path": "/repo"
@@ -1072,6 +1088,7 @@
    "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json",
    "receipt:receipts/graph/a2-320-web-eslint10.json",
    "receipt:receipts/graph/bundle-refresh-8681292.json",
+   "receipt:receipts/graph/car-verify-20261102T174227Z-d760409f.json",
    "receipt:receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json",
    "receipt:receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json",
    "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
@@ -1112,7 +1129,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-11-02T17:43:27Z",
+  "checked_at_utc": "2026-11-02T18:11:43Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -1571,7 +1588,7 @@
   }
  ],
  "tree": {
-  "commit": "d760409fa17424d27ff60369db98d8a31b75bb6a",
+  "commit": "f572753b37643bdaafb04f1131104ba283af7665",
   "dirty": false
  },
  "verdicts": [
@@ -1617,6 +1634,11 @@
    "verifier_ids": [
     "v-doc-reference"
    ]
+  },
+  {
+   "entity": "receipt:receipts/graph/car-verify-20261102T174227Z-d760409f.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "verdict": "not_measured"
   }
  ],
  "verifier_selection": {
@@ -1641,7 +1663,7 @@
    "id": "v-type-check-uncovered",
    "kind": "type_check",
    "output_ref": "/out/verifier-out/v-type-check-uncovered.txt",
-   "started_at_utc": "2026-11-02T17:43:35Z",
+   "started_at_utc": "2026-11-02T18:11:51Z",
    "summary": "not_measured: 2 entity(ies) no tsconfig covers"
   },
   {
@@ -1657,12 +1679,12 @@
    "id": "v-workflow-config-b803fcb7f17ed923",
    "kind": "config_schema",
    "output_ref": "/out/verifier-out/v-workflow-config-b803fcb7f17ed923.txt",
-   "started_at_utc": "2026-11-02T17:43:35Z",
+   "started_at_utc": "2026-11-02T18:11:51Z",
    "summary": "workflow configuration not measured: reusable workflow input expression value/type unresolved; 26 workflow shell-caller uncertainty item(s) remain separate from YAML schema validation and are retained in graph closure evidence"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.23,
+   "duration_s": 0.24,
    "entities": [
     "code_unit:.github/workflows/ci.yml",
     "code_unit:scripts/diagnostics/sanitize-browser-stderr.mjs",
@@ -1677,7 +1699,7 @@
    "id": "v-fitness",
    "kind": "fitness_rules",
    "output_ref": "/out/verifier-out/v-fitness.json",
-   "started_at_utc": "2026-11-02T17:43:35Z",
+   "started_at_utc": "2026-11-02T18:11:51Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -1695,12 +1717,17 @@
    "id": "v-doc-reference",
    "kind": "doc_reference",
    "output_ref": "/out/verifier-out/v-doc-reference.txt",
-   "started_at_utc": "2026-11-02T17:43:35Z",
+   "started_at_utc": "2026-11-02T18:11:51Z",
    "summary": "2 document(s), 0 failed"
   }
  ],
  "verify": {
   "events": [
+   {
+    "code": "SUPERSEDED_SELF_NOT_APPLICABLE",
+    "rule": "DEC-AUP-0035",
+    "text": "DEC-AUP-0035 not applied to receipt:receipts/graph/car-verify-20261102T174227Z-d760409f.json: it declares this run's work item d74ee092-dc6c-4c68-8b6a-17bd556052f8, but the receipt is being written to /out/receipt.json, which is outside this repository, so no path in the tree is the one this run supersedes."
+   },
    {
     "code": "STRUCTURAL_EXCLUSION",
     "rule": "DEC-AUP-0034",
@@ -1733,6 +1760,7 @@
    "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json": [],
    "receipt:receipts/graph/a2-320-web-eslint10.json": [],
    "receipt:receipts/graph/bundle-refresh-8681292.json": [],
+   "receipt:receipts/graph/car-verify-20261102T174227Z-d760409f.json": [],
    "receipt:receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json": [],
    "receipt:receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json": [],
    "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json": [],
@@ -1769,9 +1797,9 @@
    "receipt:receipts/graph/pin-repair-muneral213r2-20261007.json": []
   },
   "seconds": {
-   "prepare": 3.42,
-   "total": 68.52,
-   "verifiers": 0.23
+   "prepare": 3.37,
+   "total": 67.13,
+   "verifiers": 0.24
   }
  },
  "work_item": "d74ee092-dc6c-4c68-8b6a-17bd556052f8"
