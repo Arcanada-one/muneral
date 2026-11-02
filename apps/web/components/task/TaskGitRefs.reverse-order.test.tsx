@@ -221,11 +221,13 @@ describe('reverse loaded Git reference order', () => {
     fireEvent.change(screen.getByRole('searchbox', { name: 'Search loaded Git references' }), {
       target: { value: 'release/two' },
     });
+    fireEvent.click(screen.getByRole('button', { name: 'Clear search' }));
+    expect(reverse).toBeChecked();
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Search loaded Git references' }), {
+      target: { value: 'release/two' },
+    });
     const search = screen.getByRole('searchbox', { name: 'Search loaded Git references' });
     fireEvent.keyDown(search, { key: 'Escape' });
-    expect(reverse).toBeChecked();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Clear search' }));
     expect(reverse).toBeChecked();
     fireEvent.change(screen.getByRole('combobox', { name: 'Git reference kind' }), {
       target: { value: 'branch' },

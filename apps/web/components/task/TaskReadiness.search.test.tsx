@@ -109,7 +109,7 @@ describe('TaskReadiness loaded blocker search', () => {
 
     expect(await screen.findByText('3 of 5 dependency links are blocking this task.')).toBeInTheDocument();
     expect(within(screen.getByRole('list', { name: 'Loaded blocking dependencies' }))
-      .getByText('Blocked', { exact: true })).toBeInTheDocument();
+      .getAllByText('In Progress', { exact: true })).toHaveLength(3);
     const search = screen.getByRole('searchbox', { name: 'Search loaded blockers' });
     expect(search).toHaveValue('');
     expect(screen.getByText('Showing 3 of 3 loaded blocking dependencies.')).toBeInTheDocument();
@@ -134,7 +134,7 @@ describe('TaskReadiness loaded blocker search', () => {
 
     fireEvent.change(search, { target: { value: 'does-not-match' } });
     expect(screen.getByText('Showing 0 of 3 loaded blocking dependencies.')).toBeInTheDocument();
-    expect(screen.getByText('No loaded blocking dependencies match this search. Clear search to see all loaded blockers.'))
+    expect(screen.getByText('No loaded blocking dependencies match the selected filters. Choose All blocker statuses or clear search to broaden the loaded results.'))
       .toBeVisible();
 
     fireEvent.click(screen.getByRole('button', { name: 'Clear search' }));

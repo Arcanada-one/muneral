@@ -377,6 +377,7 @@ function TaskReadinessPanel({
               blockerTaskIds={loadedBlockerIds}
             />
             <CopyVisibleBlockerIdsButton
+              key={visibleCopySelectionKey}
               blockerTaskIds={visibleBlockerIds}
               selectionKey={visibleCopySelectionKey}
             />

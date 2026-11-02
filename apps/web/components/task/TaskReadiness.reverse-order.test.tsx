@@ -156,8 +156,8 @@ describe('TaskReadiness reverse loaded blocker order', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Copy loaded blocker IDs' }));
     expect(writeText).toHaveBeenNthCalledWith(1, `${firstId}\n${reviewId}\n${secondId}\n${thirdId}\n${todoId}`);
     expect(await screen.findByText('Blocker IDs copied.')).toBeVisible();
-    fireEvent.click(screen.getByRole('button', { name: 'Copy visible blocker IDs (4)' }));
-    expect(writeText).toHaveBeenNthCalledWith(2, `${firstId}\n${thirdId}\n${secondId}\n${firstId}`);
+    fireEvent.click(screen.getByRole('button', { name: 'Copy visible blocker IDs (3)' }));
+    expect(writeText).toHaveBeenNthCalledWith(2, `${firstId}\n${thirdId}\n${secondId}`);
     expect(await screen.findByText('Visible blocker IDs copied.')).toBeVisible();
 
     expect(screen.getByText('6 of 9 dependency links are blocking this task.')).toBeInTheDocument();
@@ -278,17 +278,18 @@ describe('TaskReadiness reverse loaded blocker order', () => {
 
     fireEvent.click(reverse);
     const pendingButtonForNewOrder = screen.getByRole('button', { name: 'Copy visible blocker IDs (3)' });
-    expect(pendingButtonForNewOrder).toBeDisabled();
+    expect(pendingButtonForNewOrder).toBeEnabled();
     fireEvent.click(pendingButtonForNewOrder);
-    expect(writeText).toHaveBeenCalledTimes(1);
-    expect(screen.queryByText('Visible blocker IDs copied.')).not.toBeInTheDocument();
+    expect(writeText).toHaveBeenCalledTimes(2);
+    expect(writeText).toHaveBeenNthCalledWith(2, `${thirdId}\n${secondId}\n${firstId}`);
+    expect(await screen.findByText('Visible blocker IDs copied.')).toBeVisible();
 
     await act(async () => resolvePendingCopy?.());
-    expect(screen.queryByText('Visible blocker IDs copied.')).not.toBeInTheDocument();
+    expect(screen.getByText('Visible blocker IDs copied.')).toBeVisible();
     expect(screen.getByRole('button', { name: 'Copy visible blocker IDs (3)' })).toBeEnabled();
 
     fireEvent.click(screen.getByRole('button', { name: 'Copy visible blocker IDs (3)' }));
-    expect(writeText).toHaveBeenNthCalledWith(2, `${thirdId}\n${secondId}\n${firstId}`);
+    expect(writeText).toHaveBeenNthCalledWith(3, `${thirdId}\n${secondId}\n${firstId}`);
     expect(await screen.findByText('Visible blocker IDs copied.')).toBeVisible();
     expect(get).toHaveBeenCalledTimes(1);
     expect(get).toHaveBeenCalledWith(`/tasks/${taskId}/readiness`);

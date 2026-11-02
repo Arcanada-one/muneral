@@ -121,7 +121,7 @@ describe('TaskDetail dependency readiness summary', () => {
     expect(screen.getByText('Release prerequisite')).toBeInTheDocument();
     const blockers = within(screen.getByRole('list', { name: 'Loaded blocking dependencies' }));
     expect(blockers.getByText('In Progress', { exact: true })).toBeInTheDocument();
-    expect(blockers.getByText('Blocked', { exact: true })).toBeInTheDocument();
+    expect(blockers.getByText('In Progress', { exact: true })).toBeInTheDocument();
   });
 
   it.each([

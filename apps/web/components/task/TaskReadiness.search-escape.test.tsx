@@ -103,7 +103,9 @@ describe('TaskReadiness search Escape recovery', () => {
     expect(screen.getByText('3 of 5 dependency links are blocking this task.')).toBeInTheDocument();
     expect(screen.getByText('Showing 3 of 3 loaded blocking dependencies.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Show blocking tasks' })).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.getByRole('list', { name: 'Loaded blocking dependencies', hidden: true })).not.toBeVisible();
+    const blockerListId = screen.getByRole('button', { name: 'Show blocking tasks' }).getAttribute('aria-controls');
+    expect(blockerListId).toBeTruthy();
+    expect(document.getElementById(blockerListId as string)).not.toBeVisible();
 
     fireEvent.click(screen.getByRole('button', { name: 'Show blocking tasks' }));
     const list = screen.getByRole('list', { name: 'Loaded blocking dependencies' });
