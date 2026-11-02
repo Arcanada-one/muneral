@@ -136,8 +136,9 @@ export function validateRunnerExitRecord(value, binding) {
 }
 
 export function classifyVersionOutcome(result) {
-  if (!result || result.started !== true) return 'NOT_STARTED';
+  if (!result) return 'NOT_STARTED';
   if (result.spawnFailed) return 'VERSION_SPAWN_FAILED';
+  if (result.started !== true) return 'NOT_STARTED';
   if (result.timedOut) return 'VERSION_TIMEOUT';
   if (result.signal !== null) return 'VERSION_SIGNALED';
   if (result.exitCode !== 0) return 'VERSION_EXIT_NONZERO';
