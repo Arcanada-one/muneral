@@ -118,6 +118,7 @@ test('PASS result records require exact browser, network, and adapter evidence',
     },
   };
   assert.equal(driver.validateResultRecord(valid, { candidateSha, runId: '12345', runAttempt: 1 }), true);
+  assert.equal(driver.validateResultRecord({ ...valid, componentSha256: '0'.repeat(64) }, { candidateSha, runId: '12345', runAttempt: 1 }), false);
   assert.equal(driver.validateResultRecord({ ...valid, unexpected: true }), false);
   assert.equal(driver.validateResultRecord({ ...valid, browserVersionOutcome: 'NOT_STARTED' }), false);
   assert.equal(driver.validateResultRecord({ ...valid, browserSha256: 'b'.repeat(64) }), false);
