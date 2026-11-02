@@ -99,6 +99,8 @@ jobs:
         with:
           node-version: 24.22.1
           cache: pnpm
+      - name: Test standalone browser stderr sanitizer
+        run: node --test scripts/diagnostics/sanitize-browser-stderr.test.mjs
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Lint
