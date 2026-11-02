@@ -382,6 +382,8 @@ export function AuditLog({ taskId }: AuditLogProps) {
     : actorFilterMode === 'agents'
       ? actionFilteredEntries.filter((entry) => entry.actorType === 'agent')
       : actionFilteredEntries;
+  const canShowVisibleCount = data !== undefined && responsePageMatches &&
+    responsePageIsUsable && !pageOutOfRange && !isLoading && !isError && !isFetching;
 
   const setPage = (nextPage: number) => setPageState({ taskId, page: nextPage });
   const updateFilterState = (updates: Partial<Omit<ActivityFilterState, 'taskId'>>) => {
@@ -492,6 +494,13 @@ export function AuditLog({ taskId }: AuditLogProps) {
           <option value="agents">Agents on this page</option>
         </select>
       </div>
+
+      {canShowVisibleCount && (
+        <p role="status" className="mb-3 text-xs text-muted-foreground">
+          Showing {entries.length} of {currentPageEntries.length} loaded activity{' '}
+          {currentPageEntries.length === 1 ? 'entry' : 'entries'} on this page.
+        </p>
+      )}
 
       <div className="mb-3 flex items-center gap-2 text-xs">
         <input
