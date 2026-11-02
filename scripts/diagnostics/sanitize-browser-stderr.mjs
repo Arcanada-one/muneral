@@ -228,18 +228,46 @@ function readBoundedStdin() {
     const chunks = [];
     let retained = 0;
     let truncated = false;
-    process.stdin.on('data', (chunk) => {
+    let settled = false;
+
+    const cleanupReadListeners = () => {
+      process.stdin.removeListener('data', onData);
+      process.stdin.removeListener('end', onEnd);
+    };
+    const onClose = () => process.stdin.removeListener('error', onError);
+    const finish = (result, error, closeInput = false) => {
+      if (settled) return;
+      settled = true;
+      process.stdin.pause();
+      cleanupReadListeners();
+      if (error) {
+        process.stdin.destroy();
+        reject(error);
+      } else {
+        if (closeInput) process.stdin.destroy();
+        resolve(result);
+      }
+    };
+    const onEnd = () => finish({ bytes: Buffer.concat(chunks, retained), truncated });
+    const onError = () => finish(null, new Error('INPUT_UNAVAILABLE'), true);
+    const onData = (chunk) => {
       const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
       const remaining = MAX_STDERR_BYTES - retained;
-      if (bytes.length > remaining) truncated = true;
       if (remaining > 0) {
         const kept = Buffer.from(bytes.subarray(0, remaining));
         chunks.push(kept);
         retained += kept.length;
       }
-    });
-    process.stdin.once('end', () => resolve({ bytes: Buffer.concat(chunks, retained), truncated }));
-    process.stdin.once('error', () => reject(new Error('INPUT_UNAVAILABLE')));
+      if (bytes.length > remaining) {
+        truncated = true;
+        finish({ bytes: Buffer.concat(chunks, retained), truncated }, null, true);
+      }
+    };
+
+    process.stdin.once('close', onClose);
+    process.stdin.on('data', onData);
+    process.stdin.once('end', onEnd);
+    process.stdin.on('error', onError);
     process.stdin.resume();
   });
 }

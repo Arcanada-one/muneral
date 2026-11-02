@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import {
@@ -114,6 +114,76 @@ test('CLI reads stdin and emits exactly one bounded JSON diagnostics line', () =
   assert.equal(overflowDiagnostics.stderrTruncated, true);
   assert.equal(overflowDiagnostics.stderrStatus, 'TRUNCATED');
   assert.equal(overflow.stdout.includes(Buffer.from('private-overflow-marker')), false);
+});
+
+test('CLI stdin boundary leaves exactly capped input untruncated when EOF follows', () => {
+  const prefix = Buffer.from('No usable sandbox!\n');
+  const exactLimit = Buffer.concat([
+    prefix,
+    Buffer.alloc(MAX_STDERR_BYTES - prefix.length, 0x78),
+  ]);
+  assert.equal(exactLimit.length, MAX_STDERR_BYTES);
+
+  const result = runCli(exactLimit);
+  assert.equal(result.status, 0);
+  const diagnostics = parseOneJsonLine(result);
+  assert.equal(diagnostics.stderrTruncated, false);
+  assert.equal(diagnostics.stderrStatus, 'WITHHELD');
+  assert.equal(diagnostics.stderrLines.length, 2);
+});
+
+test('CLI closes stdin and exits after the first overflow byte without waiting for EOF', async (t) => {
+  const child = spawn(process.execPath, [command], {
+    stdio: ['pipe', 'pipe', 'pipe'],
+  });
+  const stdout = [];
+  const stderr = [];
+  child.stdout.on('data', (chunk) => stdout.push(chunk));
+  child.stderr.on('data', (chunk) => stderr.push(chunk));
+  child.stdin.on('error', () => {});
+
+  let closed = false;
+  const closeResult = new Promise((resolve) => {
+    child.once('close', (code, signal) => {
+      closed = true;
+      resolve({ code, signal });
+    });
+  });
+  t.after(() => {
+    if (!closed) child.kill('SIGKILL');
+  });
+
+  child.stdin.write(Buffer.concat([
+    Buffer.from('No usable sandbox!\n'),
+    Buffer.alloc(MAX_STDERR_BYTES + 1, 0x78),
+    Buffer.from(' private-after-overflow-marker'),
+  ]));
+
+  let timeout;
+  const outcome = await Promise.race([
+    closeResult.then((result) => ({ kind: 'closed', ...result })),
+    new Promise((resolve) => {
+      timeout = setTimeout(() => resolve({ kind: 'timeout' }), 2000);
+    }),
+  ]);
+  clearTimeout(timeout);
+  if (outcome.kind === 'timeout') {
+    child.kill('SIGKILL');
+    await closeResult;
+    assert.fail('CLI did not exit while stdin remained open after overflow');
+  }
+
+  assert.equal(outcome.code, 0);
+  assert.equal(outcome.signal, null);
+  assert.equal(child.stdin.writableEnded, false, 'the test must not send EOF');
+  assert.equal(Buffer.concat(stderr).length, 0);
+  const output = Buffer.concat(stdout);
+  assert.ok(output.length <= MAX_DIAGNOSTIC_TOTAL_BYTES + 1024);
+  assert.equal(output.includes(Buffer.from('private-after-overflow-marker')), false);
+  assert.match(output.toString('utf8'), /^\{[^\n]*\}\n$/);
+  const diagnostics = JSON.parse(output.toString('utf8'));
+  assert.equal(diagnostics.stderrTruncated, true);
+  assert.equal(diagnostics.stderrStatus, 'TRUNCATED');
 });
 
 test('CLI rejects arguments with a fixed safe JSON error and supports static help', () => {
