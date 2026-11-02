@@ -354,15 +354,15 @@ describe('MUN-0052 — project task index for granted agent keys (e2e)', () => {
   // what the grant does NOT open — one test per route, granted key, other's task
   // -------------------------------------------------------------------------
 
-  describe('the grant changes no route except the explicitly granted reads', () => {
+  describe('the grant changes nothing else — each route answers the same with the grant present and removed', () => {
     let taskId: string;
     beforeEach(async () => {
       taskId = (await othersTask()).id;
     });
     const k = () => bearer(keys.reader);
 
-    /** Compare routes which must retain identical behavior with or without
-     *  the project grant. */
+    /** Run `call` with the reader granted on this project, then with no grant
+     *  at all; both answers must carry `status`, and `check` holds after each. */
     async function differential(
       call: () => supertest.Test,
       status: number,
@@ -380,27 +380,8 @@ describe('MUN-0052 — project task index for granted agent keys (e2e)', () => {
       return [withGrant, withoutGrant];
     }
 
-    it('GET /tasks/:taskId returns only audited metadata with a grant; without it, the old 403 remains', async () => {
-      grants.length = 0;
-      grant('reader', projectId);
-      const auditCount = await prisma.activityLog.count({ where: { action: 'project:index_read', actorId: ids.reader } });
-      const withGrant = await http().get(`/tasks/${taskId}`).set(k()).expect(200);
-      expect(Object.keys(withGrant.body).sort()).toEqual([
-        'auditEventId', 'description', 'id', 'projectId', 'status', 'title',
-      ]);
-      expect(withGrant.body).toMatchObject({
-        id: taskId,
-        projectId,
-        title: expect.stringContaining('secret-bearing title'),
-        description: 'must never reach the index',
-      });
-      expect(withGrant.body.auditEventId).toEqual(expect.any(String));
-      expect(await prisma.activityLog.count({ where: { action: 'project:index_read', actorId: ids.reader } })).toBe(auditCount + 1);
-
-      grants.length = 0;
-      const withoutGrant = await http().get(`/tasks/${taskId}`).set(k()).expect(403);
-      expect(JSON.stringify(withoutGrant.body)).not.toContain(taskId);
-      expect(await prisma.activityLog.count({ where: { action: 'project:index_read', actorId: ids.reader } })).toBe(auditCount + 1);
+    it('GET /tasks/:taskId → 403', async () => {
+      await differential(() => http().get(`/tasks/${taskId}`).set(k()), 403);
     });
 
     it('GET /tasks/project/:projectId stays the own slice (empty)', async () => {

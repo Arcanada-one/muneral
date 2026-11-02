@@ -38,10 +38,6 @@ export interface AgentScopeContext {
   assignBasis?: AssignBasis;
   /** MUN-0052, 'project-index' only: the grant that admitted the read. */
   projectReadGrant?: ProjectReadGrantEntry;
-  /** 'task-read' only: true when this response must use the metadata DTO. */
-  projectTaskReadOnly?: true;
-  /** 'task-read' only: exact project checked with the grant. */
-  projectId?: string;
   /** A2-284, 'workspace-digest' only: the grant that admitted the read. */
   workspaceDigestGrant?: WorkspaceDigestGrantEntry;
   /** A2-284, 'workspace-digest' only: the workspace the answer must be
@@ -206,58 +202,6 @@ export class AgentTaskScopeGuard implements CanActivate {
         if (!taskId) throw new ForbiddenException('No task in scope for this key.');
         await this.assertOwnTask(agent, taskId);
         break;
-      }
-      // GET /tasks/:taskId preserves the normal full response for an assigned
-      // or creator key. Otherwise, a live project grant admits only the
-      // metadata projection; the controller branches on this explicit marker.
-      // No other route uses this scope, so comments/history/writes do not gain
-      // access from a project grant.
-      case 'task-read': {
-        const taskId = this.paramOf(req, 'taskId');
-        if (!taskId) throw new ForbiddenException('No task in scope for this key.');
-        const owned = await this.prisma.task.findFirst({
-          where: {
-            id: taskId,
-            project: { workspaceId: agent.workspaceId },
-            ...agentOwnTaskWhere(agent.id),
-          },
-          select: { id: true },
-        }).catch(() => null);
-        if (owned) {
-          req.agentScope = { agentId: agent.id, kind, workspaceId: agent.workspaceId };
-          return true;
-        }
-        const task = await this.prisma.task.findFirst({
-          where: { id: taskId, project: { workspaceId: agent.workspaceId } },
-          select: { id: true, projectId: true },
-        }).catch(() => null);
-        if (!task) throw new ForbiddenException('Task is not in scope for this key.');
-        const state = projectReadGrantState(agent.id, task.projectId, new Date(), this.projectReadGrants);
-        if (state.kind === 'expired') {
-          throw new ForbiddenException({
-            code: 'GRANT_EXPIRED',
-            message:
-              `The project read grant for this key expired at ${state.entry.until}. ` +
-              'It is renewed by a pull request citing a program decision, not by an environment edit (MUN-0052).',
-            projectId: task.projectId,
-            until: state.entry.until,
-            decision: state.entry.decision,
-          });
-        }
-        // Preserve the pre-grant task-read contract: a task this key cannot
-        // read answers 403, whether its id exists or not. Project-index uses
-        // 404 for an absent grant because that route deliberately hides
-        // project existence; this single-task route historically did not.
-        if (state.kind === 'none') throw new ForbiddenException('Task is not in scope for this key.');
-        req.agentScope = {
-          agentId: agent.id,
-          kind,
-          projectTaskReadOnly: true,
-          projectId: task.projectId,
-          workspaceId: agent.workspaceId,
-          projectReadGrant: state.entry,
-        };
-        return true;
       }
       // MUN-0049: 'task-redaction' is bound to the assignment — the agent
       // must be assigned to the task — and is listed separately so the write

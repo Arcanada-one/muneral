@@ -181,37 +181,6 @@ export class TasksService {
     return task;
   }
 
-  /** A project grant admits only this metadata projection for an unassigned
-   *  task. Recheck the exact project and credential workspace in the query,
-   *  then record the same project:index_read audit event as the index route. */
-  async findOneForProjectReadGrant(
-    taskId: string,
-    projectId: string,
-    workspaceId: string,
-    agentId: string,
-    grant: ProjectReadGrantEntry,
-  ) {
-    const task = await this.prisma.task.findFirst({
-      where: { id: taskId, projectId, project: { workspaceId } },
-      select: { id: true, projectId: true, title: true, description: true, status: true },
-    });
-    if (!task) throw new NotFoundException('Task not found');
-
-    const audit = await this.prisma.activityLog.create({
-      data: {
-        workspaceId,
-        taskId: null,
-        actorType: 'agent',
-        actorId: agentId,
-        action: PROJECT_INDEX_READ_ACTION,
-        payload: { projectId, decision: grant.decision, rowCount: 1 } as Prisma.InputJsonValue,
-      },
-      select: { id: true },
-    });
-
-    return { ...task, auditEventId: audit.id };
-  }
-
   /**
    * Tasks in a project.
    *
