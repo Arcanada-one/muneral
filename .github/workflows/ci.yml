@@ -11,6 +11,9 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 # A newer push to a pull-request branch supersedes that branch's older run, which
 # otherwise keeps queueing on the shared self-hosted runners. Only pull_request
 # runs are ever cancelled: push (main), tag, schedule and workflow_dispatch runs get
