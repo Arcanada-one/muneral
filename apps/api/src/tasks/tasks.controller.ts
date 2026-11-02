@@ -193,13 +193,23 @@ export class TasksController {
    * field version covers.
    */
   @Get(':taskId')
-  @AgentScope('task')
+  @AgentScope('task-read')
   async findOne(
     @Param('taskId') taskId: string,
     @Req() req: AuthRequest,
     @Headers('if-none-match') ifNoneMatch: string | undefined,
     @Res({ passthrough: true }) res: Response,
   ) {
+    const scope = req.agentScope;
+    if (scope?.projectTaskReadOnly === true && scope.projectReadGrant && scope.projectId && scope.workspaceId) {
+      return this.tasksService.findOneForProjectReadGrant(
+        taskId,
+        scope.projectId,
+        scope.workspaceId,
+        scope.agentId,
+        scope.projectReadGrant,
+      );
+    }
     const task = await this.tasksService.findOne(taskId, req.actor.type === 'human' ? req.actor.id : undefined);
 
     // MUN-0054: set before the 304 branch, so a conditional request that gets

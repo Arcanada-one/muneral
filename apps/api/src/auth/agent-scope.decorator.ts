@@ -15,6 +15,10 @@ import { SetMetadata } from '@nestjs/common';
  *                      agent, `actor_type` = 'agent'). Before MUN-0051 a creator
  *                      without an assignment row could not read or comment on
  *                      the task it had just created.
+ *   'task-read'      — GET /tasks/:taskId. An assigned/creator key keeps the
+ *                      full task response; otherwise a live project-read grant
+ *                      admits only id, projectId, title, description and status.
+ *                      No history or write route uses this scope.
  *   'project'        — the route names a project (`:projectId`) and returns a
  *                      collection. The key's agent sees only the tasks it is
  *                      assigned to inside that project; an agent with no
@@ -130,6 +134,7 @@ export type AgentScopeKind =
   | 'project-create'
   | 'task-dependency'
   | 'task'
+  | 'task-read'
   | 'project'
   | 'task-workspace'
   | 'project-write'
