@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AuditLog } from './AuditLog';
 
@@ -53,7 +53,7 @@ beforeEach(() => {
 afterEach(() => cleanup());
 
 describe('AuditLog evidence attachment details', () => {
-  it('shows the writer fields as inert text in an accessible disclosure', async () => {
+  it('reaches the evidence disclosure by keyboard and opens it on click', async () => {
     const uri = 'artifact:fixture/<svg/onload=alert(1)>';
     setActivity(evidenceEntry({
       evidence_id: '55555555-5555-4555-8555-555555555555',
@@ -89,7 +89,11 @@ describe('AuditLog evidence attachment details', () => {
     }
     expect(reachedKeyboardTargets).toEqual(keyboardTargets);
     expect(summary).toHaveFocus();
-    await user.keyboard('{Enter}');
+    const disclosure = summary.closest('details');
+    expect(disclosure).not.toBeNull();
+    expect(disclosure).not.toHaveAttribute('open');
+    fireEvent.click(summary);
+    expect(disclosure).toHaveAttribute('open');
 
     expect(screen.getByText('URI')).toBeInTheDocument();
     expect(screen.getByText(uri)).toHaveClass('break-all');
