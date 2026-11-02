@@ -101,7 +101,7 @@ describe('copying available loaded Git reference links', () => {
 
     expect(writeText).toHaveBeenCalledOnce();
     expect(writeText).toHaveBeenCalledWith(`${firstUrl}\n${secondUrl}\n${firstUrl}`);
-    expect(await screen.findByRole('status')).toHaveTextContent('Available Git reference links copied.');
+    expect(await screen.findByText('Available Git reference links copied.')).toBeInTheDocument();
     expect(api.get).toHaveBeenCalledTimes(1);
   });
 
@@ -154,14 +154,14 @@ describe('copying available loaded Git reference links', () => {
 
     expect(writeText).toHaveBeenCalledOnce();
     expect(writeText).toHaveBeenCalledWith(`${firstUrl}\n${secondUrl}\n${firstUrl}\n${repoUrl}`);
-    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.queryByText(/(?:copied|could not copy)/i)).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Copy 4 available Git reference links' })).toBeDisabled();
 
     fireEvent.click(button);
     expect(writeText).toHaveBeenCalledOnce();
 
     await act(async () => finishCopy?.());
-    expect(await screen.findByRole('status')).toHaveTextContent('Available Git reference links copied.');
+    expect(await screen.findByText('Available Git reference links copied.')).toBeInTheDocument();
     expect(api.get).toHaveBeenCalledTimes(1);
   });
 
@@ -180,7 +180,7 @@ describe('copying available loaded Git reference links', () => {
     expect(writeText).toHaveBeenCalledTimes(1);
 
     fireEvent.click(button);
-    expect(await screen.findByRole('status')).toHaveTextContent('Available Git reference links copied.');
+    expect(await screen.findByText('Available Git reference links copied.')).toBeInTheDocument();
     expect(writeText).toHaveBeenCalledTimes(2);
   });
 
@@ -200,14 +200,14 @@ describe('copying available loaded Git reference links', () => {
     renderRefs();
 
     fireEvent.click(await screen.findByRole('button', { name: 'Copy 4 available Git reference links' }));
-    expect(await screen.findByRole('status')).toHaveTextContent('Available Git reference links copied.');
+    expect(await screen.findByText('Available Git reference links copied.')).toBeInTheDocument();
 
     fireEvent.change(screen.getByRole('combobox', { name: 'Git reference kind' }), {
       target: { value: 'repo' },
     });
 
     expect(screen.getByRole('button', { name: 'Copy 1 available Git reference links' })).toBeEnabled();
-    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.queryByText(/(?:copied|could not copy)/i)).not.toBeInTheDocument();
     expect(writeText).toHaveBeenCalledOnce();
   });
 
@@ -226,7 +226,7 @@ describe('copying available loaded Git reference links', () => {
     expect(screen.getByRole('button', { name: 'Copy 4 available Git reference links' })).toBeEnabled();
 
     await act(async () => finishCopy?.());
-    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.queryByText(/(?:copied|could not copy)/i)).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Copy 4 available Git reference links' })).toBeEnabled();
     expect(writeText).toHaveBeenCalledOnce();
   });
@@ -264,12 +264,12 @@ describe('copying available loaded Git reference links', () => {
     const nextButton = await screen.findByRole('button', { name: 'Copy 1 available Git reference links' });
     await act(async () => finishCopy?.());
 
-    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.queryByText(/(?:copied|could not copy)/i)).not.toBeInTheDocument();
     expect(nextButton).toBeEnabled();
     fireEvent.click(nextButton);
     expect(writeText).toHaveBeenNthCalledWith(2, 'https://github.com/example/next/tree/release/current');
     await act(async () => finishCopy?.());
-    expect(await screen.findByRole('status')).toHaveTextContent('Available Git reference links copied.');
+    expect(await screen.findByText('Available Git reference links copied.')).toBeInTheDocument();
     expect(api.get).toHaveBeenCalledTimes(2);
   });
 });

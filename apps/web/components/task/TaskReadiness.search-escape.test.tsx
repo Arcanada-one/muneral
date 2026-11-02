@@ -103,10 +103,10 @@ describe('TaskReadiness search Escape recovery', () => {
     expect(screen.getByText('3 of 5 dependency links are blocking this task.')).toBeInTheDocument();
     expect(screen.getByText('Showing 3 of 3 loaded blocking dependencies.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Show blocking tasks' })).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.getByRole('list', { hidden: true })).not.toBeVisible();
+    expect(screen.getByRole('list', { name: 'Loaded blocking dependencies', hidden: true })).not.toBeVisible();
 
     fireEvent.click(screen.getByRole('button', { name: 'Show blocking tasks' }));
-    const list = screen.getByRole('list');
+    const list = screen.getByRole('list', { name: 'Loaded blocking dependencies' });
     expect(within(list).getAllByRole('listitem').map((row) => row.textContent?.replace(/\s+/g, ' ').trim()))
       .toEqual(['Alpha blockerIn Progress', 'Needle blockerIn Progress', 'Needle later blockerIn Progress']);
     expect(get).toHaveBeenCalledTimes(1);

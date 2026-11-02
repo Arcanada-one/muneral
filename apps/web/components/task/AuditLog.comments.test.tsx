@@ -97,7 +97,7 @@ describe('AuditLog comment bodies', () => {
     expect(container.textContent).toContain(body);
   });
 
-  it('reaches the comment disclosure by keyboard and opens it with Enter', async () => {
+  it('keeps the comment disclosure keyboard reachable and opens it through native activation', async () => {
     const body = `Start\n${'evidence '.repeat(180)}<script>alert(1)</script> End`;
     ready(taskA, [commentEntry(taskA, { body })]);
 
@@ -131,6 +131,9 @@ describe('AuditLog comment bodies', () => {
     expect(reachedKeyboardTargets).toEqual(keyboardTargets);
     expect(summary).toHaveFocus();
     await user.keyboard('{Enter}');
+    // jsdom does not implement the browser's native Enter activation for <summary>.
+    expect(disclosure).not.toHaveAttribute('open');
+    summary.click();
     expect(disclosure).toHaveAttribute('open');
     const renderedBody = within(disclosure as HTMLDetailsElement).getByText((text) =>
       text.startsWith('Start evidence evidence'),

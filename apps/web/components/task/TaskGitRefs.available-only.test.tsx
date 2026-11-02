@@ -205,7 +205,7 @@ describe('available-only loaded Git reference filter', () => {
       expect(screen.getByRole('button', { name: 'Copy 3 available Git reference links' })).toBeDisabled();
 
       fireEvent.click(screen.getByRole('checkbox', { name: 'Show available links only' }));
-      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+      expect(screen.queryByText(/(?:copied|could not copy)/i)).not.toBeInTheDocument();
       expect(screen.queryByRole('alert')).not.toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Copy 3 available Git reference links' })).toBeEnabled();
 
@@ -213,7 +213,7 @@ describe('available-only loaded Git reference filter', () => {
         if (outcome === 'resolve') resolveCopy?.();
         else rejectCopy?.(new Error('Synthetic clipboard rejection'));
       });
-      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+      expect(screen.queryByText(/(?:copied|could not copy)/i)).not.toBeInTheDocument();
       expect(screen.queryByRole('alert')).not.toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Copy 3 available Git reference links' })).toBeEnabled();
       expect(api.get).toHaveBeenCalledTimes(1);

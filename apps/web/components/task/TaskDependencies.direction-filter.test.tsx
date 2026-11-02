@@ -109,7 +109,7 @@ describe('task dependency direction filter', () => {
     const filtered = renderDependencies();
     const select = await screen.findByRole('combobox', { name: 'Dependency direction' });
     fireEvent.change(select, { target: { value: 'outgoing' } });
-    expect(screen.getByText(/No matching dependencies or references in the loaded list/)).toBeInTheDocument();
+    expect(screen.getByText(/No matching dependencies in the loaded list\./)).toBeInTheDocument();
     expect(screen.getByText(/Choose All dependencies/)).toBeInTheDocument();
     expect(loadedCount()).toHaveTextContent('Showing 0 of 1 loaded dependencies.');
     filtered.unmount();

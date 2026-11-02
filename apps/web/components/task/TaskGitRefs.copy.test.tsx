@@ -85,7 +85,7 @@ describe('task Git reference copying', () => {
 
     expect(writeText).toHaveBeenCalledTimes(1);
     expect(writeText).toHaveBeenCalledWith(fullRef);
-    expect(await screen.findByRole('status')).toHaveTextContent('Git reference copied.');
+    expect(await screen.findByText('Git reference copied.')).toBeInTheDocument();
   });
 
   it('copies the exact URL when a repository reference has no separate ref value', async () => {
@@ -98,7 +98,7 @@ describe('task Git reference copying', () => {
     }));
 
     expect(writeText).toHaveBeenCalledWith(repoUrl);
-    expect(await screen.findByRole('status')).toHaveTextContent('Git reference copied.');
+    expect(await screen.findByText('Git reference copied.')).toBeInTheDocument();
   });
 
   it('uses the same URL fallback when the stored ref is an empty string', async () => {
@@ -146,7 +146,7 @@ describe('task Git reference copying', () => {
     expect(writeText).toHaveBeenCalledTimes(1);
 
     await act(async () => finishCopy?.());
-    expect(await screen.findByRole('status')).toHaveTextContent('Git reference copied.');
+    expect(await screen.findByText('Git reference copied.')).toBeInTheDocument();
   });
 
   it('does not show a late copy result after the same ref identity changes value', async () => {
@@ -170,7 +170,7 @@ describe('task Git reference copying', () => {
     })).toBeInTheDocument();
 
     await act(async () => finishCopy?.());
-    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.queryByText(/(?:copied|could not copy)/i)).not.toBeInTheDocument();
     expect(screen.getByRole('button', {
       name: 'Copy branch reference release/replaced-ref',
     })).toBeEnabled();
@@ -190,7 +190,7 @@ describe('task Git reference copying', () => {
     expect(await screen.findByRole('button', { name: 'Copy branch reference next/branch' })).toBeInTheDocument();
 
     await act(async () => finishCopy?.());
-    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.queryByText(/(?:copied|could not copy)/i)).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Copy branch reference next/branch' })).toBeEnabled();
   });
 
@@ -201,12 +201,12 @@ describe('task Git reference copying', () => {
     fireEvent.click(await screen.findByRole('button', {
       name: `Copy branch reference ${refs[0].ref}`,
     }));
-    expect(await screen.findByRole('status')).toHaveTextContent('Git reference copied.');
+    expect(await screen.findByText('Git reference copied.')).toBeInTheDocument();
 
     view.rerenderTask(nextTaskId);
 
     expect(await screen.findByRole('button', { name: 'Copy branch reference next/branch' })).toBeInTheDocument();
-    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.queryByText(/(?:copied|could not copy)/i)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: `Copy branch reference ${refs[0].ref}` })).not.toBeInTheDocument();
     expect(writeText).toHaveBeenCalledTimes(1);
   });

@@ -248,7 +248,7 @@ function TaskReadinessPanel({
       { todo: 0, inProgress: 0, review: 0, blocked: 0, other: 0 },
     );
     const visibleBlockers = reverseBlockerOrder ? [...filteredBlockers].reverse() : filteredBlockers;
-    const visibleBlockerIds = visibleBlockers.map((edge) => edge.otherTaskId);
+    const visibleBlockerIds = Array.from(new Set(visibleBlockers.map((edge) => edge.otherTaskId)));
     const blockerSearchId = `task-readiness-${taskId}-blocker-search`;
     const blockerStatusFilterId = `task-readiness-${taskId}-blocker-status`;
     const blockerOrderId = `task-readiness-${taskId}-reverse-blocker-order`;
@@ -384,6 +384,7 @@ function TaskReadinessPanel({
         )}
         <ul
           id={`task-readiness-${taskId}-blockers`}
+          aria-label="Loaded blocking dependencies"
           hidden={!blockersExpanded}
           className="mt-2 list-disc space-y-1 pl-5 text-sm"
         >

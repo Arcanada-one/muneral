@@ -70,7 +70,7 @@ function setClipboard(writeText?: (text: string) => Promise<void>) {
 }
 
 function blockerList() {
-  return within(screen.getByRole('list'));
+  return within(screen.getByRole('list', { name: 'Loaded blocking dependencies' }));
 }
 
 function rowLabels() {

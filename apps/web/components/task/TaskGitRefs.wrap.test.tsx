@@ -194,7 +194,7 @@ describe('task Git reference text wrapping', () => {
     expect(checkbox).toBeInTheDocument();
     expect(screen.getByText('Showing 0 of 1 loaded Git references.')).toBeInTheDocument();
     expect(screen.getByText(
-      'No matching Git references in the loaded list. Choose All references to show all.',
+      'No matching Git references in the loaded list. Choose All references to show more.',
     )).toBeInTheDocument();
     expect(api.get).toHaveBeenCalledTimes(1);
   });

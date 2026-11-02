@@ -4,17 +4,16 @@ import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createElement, type PropsWithChildren } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { ChecklistItem } from '@/lib/api/tasks';
 import { TaskChecklist } from './TaskChecklist';
 
 const api = vi.hoisted(() => ({ get: vi.fn(), patch: vi.fn() }));
 vi.mock('@/lib/api/client', () => ({ default: api }));
 
 const taskId = '10000000-0000-4000-8000-000000000001';
-const items: ChecklistItem[] = [
-  { id: '10000000-0000-4000-8000-000000000002', taskId, label: 'Draft agenda', checked: false, order: 0 },
-  { id: '10000000-0000-4000-8000-000000000003', taskId, label: 'Approve agenda', checked: true, order: 1 },
-  { id: '10000000-0000-4000-8000-000000000004', taskId, label: 'Deliver notes', checked: false, order: 2 },
+const items = [
+  { id: '10000000-0000-4000-8000-000000000002', taskId, text: 'Draft agenda', checked: false, position: 0 },
+  { id: '10000000-0000-4000-8000-000000000003', taskId, text: 'Approve agenda', checked: true, position: 1 },
+  { id: '10000000-0000-4000-8000-000000000004', taskId, text: 'Deliver notes', checked: false, position: 2 },
 ];
 
 function deferred<T>() {

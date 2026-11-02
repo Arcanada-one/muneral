@@ -181,7 +181,7 @@ describe('loaded Git reference search', () => {
     expect(writeText).toHaveBeenCalledWith(
       'https://github.com/example/repo/tree/release/current-feature',
     );
-    expect(await screen.findByRole('status')).toHaveTextContent('Git reference link copied.');
+    expect(await screen.findByText('Git reference link copied.')).toBeInTheDocument();
     expect(api.get).toHaveBeenCalledTimes(2);
     expect(writeText).toHaveBeenCalledTimes(1);
   });

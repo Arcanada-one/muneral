@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { ArrowRight, Copy, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -60,6 +60,10 @@ function CopyTaskIdButton({ taskId }: { taskId: string }) {
 }
 
 export function TaskDependencies({ taskId }: TaskDependenciesProps) {
+  return <TaskDependenciesForTask key={taskId} taskId={taskId} />;
+}
+
+function TaskDependenciesForTask({ taskId }: TaskDependenciesProps) {
   const [retryingTaskId, setRetryingTaskId] = useState<string | null>(null);
   const [searchState, setSearchState] = useState({ taskId, query: '' });
   const searchQuery = searchState.taskId === taskId ? searchState.query : '';
@@ -133,26 +137,6 @@ function DependencyList({
 }) {
   const [direction, setDirection] = useState<'all' | 'incoming' | 'outgoing'>('all');
   const [hideCompleted, setHideCompleted] = useState(false);
-  const [batchCopyFeedback, setBatchCopyFeedback] = useState<{
-    generation: number;
-    result: 'copied' | 'failed';
-  } | null>(null);
-  const [pendingBatchCopy, setPendingBatchCopy] = useState<{
-    id: number;
-    generation: number;
-  } | null>(null);
-  const [titleBatchCopyFeedback, setTitleBatchCopyFeedback] = useState<{
-    generation: number;
-    result: 'copied' | 'failed';
-  } | null>(null);
-  const [pendingTitleBatchCopy, setPendingTitleBatchCopy] = useState<{
-    id: number;
-    generation: number;
-  } | null>(null);
-  const copyAttempt = useRef(0);
-  const pendingCopyRef = useRef<{ id: number; generation: number } | null>(null);
-  const pendingTitleCopyRef = useRef<{ id: number; generation: number } | null>(null);
-
   const hideCompletedId = useId();
   const searchId = useId();
   const normalizedQuery = searchQuery.trim().toLowerCase();
@@ -273,7 +257,7 @@ function DependencyList({
       </div>
 
       <DependencyCopyControls
-        key={titleBatchKey}
+        scopeKey={titleBatchKey}
         visibleDeps={visibleDeps}
         eligibleTitles={eligibleTitles}
       />
@@ -303,58 +287,84 @@ function DependencyList({
 }
 
 function DependencyCopyControls({
+  scopeKey,
   visibleDeps,
   eligibleTitles,
 }: {
+  scopeKey: string;
   visibleDeps: DependencyRow[];
   eligibleTitles: string[];
 }) {
-  const [batchCopyFeedback, setBatchCopyFeedback] = useState<'copied' | 'failed' | null>(null);
-  const [isBatchCopyPending, setIsBatchCopyPending] = useState(false);
-  const [titleBatchCopyFeedback, setTitleBatchCopyFeedback] = useState<'copied' | 'failed' | null>(null);
-  const [isTitleBatchCopyPending, setIsTitleBatchCopyPending] = useState(false);
+  type CopyResult = 'copied' | 'failed';
+  type ScopedPending = { scope: string; id: number };
+  type ScopedResult = { scope: string; result: CopyResult };
+
+  const scopeGeneration = useRef({ key: scopeKey, generation: 0 });
+  const [generation, setGeneration] = useState(0);
+  useLayoutEffect(() => {
+    if (scopeGeneration.current.key === scopeKey) return;
+    scopeGeneration.current = {
+      key: scopeKey,
+      generation: scopeGeneration.current.generation + 1,
+    };
+    setGeneration(scopeGeneration.current.generation);
+  }, [scopeKey]);
+  const activeScope = `${generation}:${scopeKey}`;
+  const activeScopeRef = useRef(activeScope);
+  useLayoutEffect(() => {
+    activeScopeRef.current = activeScope;
+  }, [activeScope]);
+
+  const [pendingBatch, setPendingBatch] = useState<ScopedPending | null>(null);
+  const [pendingTitles, setPendingTitles] = useState<ScopedPending | null>(null);
+  const [batchResult, setBatchResult] = useState<ScopedResult | null>(null);
+  const [titleResult, setTitleResult] = useState<ScopedResult | null>(null);
   const copyAttempt = useRef(0);
-  const pendingCopyRef = useRef<number | null>(null);
-  const pendingTitleCopyRef = useRef<number | null>(null);
+  const pendingCopyRef = useRef<ScopedPending | null>(null);
+  const pendingTitleCopyRef = useRef<ScopedPending | null>(null);
+  const isBatchCopyPending = pendingBatch?.scope === activeScope;
+  const isTitleBatchCopyPending = pendingTitles?.scope === activeScope;
+  const batchCopyFeedback = batchResult?.scope === activeScope ? batchResult.result : null;
+  const titleBatchCopyFeedback = titleResult?.scope === activeScope ? titleResult.result : null;
 
   const copyVisibleTaskIds = async () => {
-    if (visibleDeps.length === 0 || pendingCopyRef.current !== null) return;
-    const attempt = ++copyAttempt.current;
+    if (visibleDeps.length === 0 || pendingCopyRef.current?.scope === activeScope) return;
+    const attempt = { scope: activeScope, id: ++copyAttempt.current };
     pendingCopyRef.current = attempt;
-    setIsBatchCopyPending(true);
-    setBatchCopyFeedback(null);
+    setPendingBatch(attempt);
+    setBatchResult(null);
     try {
       const clipboard = navigator.clipboard;
       if (typeof clipboard?.writeText !== 'function') throw new Error('Clipboard unavailable');
       await clipboard.writeText(visibleDeps.map((dep) => dep.otherTaskId).join('\n'));
-      setBatchCopyFeedback('copied');
+      if (activeScopeRef.current === attempt.scope) setBatchResult({ scope: attempt.scope, result: 'copied' });
     } catch {
-      setBatchCopyFeedback('failed');
+      if (activeScopeRef.current === attempt.scope) setBatchResult({ scope: attempt.scope, result: 'failed' });
     } finally {
-      if (pendingCopyRef.current === attempt) {
+      if (pendingCopyRef.current?.id === attempt.id) {
         pendingCopyRef.current = null;
-        setIsBatchCopyPending(false);
+        setPendingBatch((current) => current?.id === attempt.id ? null : current);
       }
     }
   };
 
   const copyVisibleDependencyTitles = async () => {
-    if (eligibleTitles.length === 0 || pendingTitleCopyRef.current !== null) return;
-    const attempt = ++copyAttempt.current;
+    if (eligibleTitles.length === 0 || pendingTitleCopyRef.current?.scope === activeScope) return;
+    const attempt = { scope: activeScope, id: ++copyAttempt.current };
     pendingTitleCopyRef.current = attempt;
-    setIsTitleBatchCopyPending(true);
-    setTitleBatchCopyFeedback(null);
+    setPendingTitles(attempt);
+    setTitleResult(null);
     try {
       const clipboard = navigator.clipboard;
       if (typeof clipboard?.writeText !== 'function') throw new Error('Clipboard unavailable');
       await clipboard.writeText(eligibleTitles.join('\n'));
-      setTitleBatchCopyFeedback('copied');
+      if (activeScopeRef.current === attempt.scope) setTitleResult({ scope: attempt.scope, result: 'copied' });
     } catch {
-      setTitleBatchCopyFeedback('failed');
+      if (activeScopeRef.current === attempt.scope) setTitleResult({ scope: attempt.scope, result: 'failed' });
     } finally {
-      if (pendingTitleCopyRef.current === attempt) {
+      if (pendingTitleCopyRef.current?.id === attempt.id) {
         pendingTitleCopyRef.current = null;
-        setIsTitleBatchCopyPending(false);
+        setPendingTitles((current) => current?.id === attempt.id ? null : current);
       }
     }
   };

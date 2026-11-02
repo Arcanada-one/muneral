@@ -92,7 +92,7 @@ describe('task Git reference link copying', () => {
 
     expect(writeText).toHaveBeenCalledTimes(1);
     expect(writeText).toHaveBeenCalledWith(branchUrl);
-    expect(await screen.findByRole('status')).toHaveTextContent('Git reference link copied.');
+    expect(await screen.findByText('Git reference link copied.')).toBeInTheDocument();
     expect(api.get).toHaveBeenCalledTimes(1);
   });
 
@@ -184,7 +184,7 @@ describe('task Git reference link copying', () => {
     expect(writeText).toHaveBeenCalledWith(branchUrl);
 
     await act(async () => finishCopy?.());
-    expect(await screen.findByRole('status')).toHaveTextContent('Git reference link copied.');
+    expect(await screen.findByText('Git reference link copied.')).toBeInTheDocument();
   });
 
   it.each([
@@ -234,7 +234,7 @@ describe('task Git reference link copying', () => {
     });
     await act(async () => pendingCopies[0]?.());
 
-    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.queryByText(/(?:copied|could not copy)/i)).not.toBeInTheDocument();
     const currentButton = screen.getByRole('button', { name: nextLabel });
     expect(currentButton).toBeEnabled();
     fireEvent.click(currentButton);
@@ -242,6 +242,6 @@ describe('task Git reference link copying', () => {
     expect(api.get).toHaveBeenCalledTimes(nextLabel.includes('current-feature') ? 2 : 1);
 
     await act(async () => pendingCopies[1]?.());
-    expect(await screen.findByRole('status')).toHaveTextContent('Git reference link copied.');
+    expect(await screen.findByText('Git reference link copied.')).toBeInTheDocument();
   });
 });

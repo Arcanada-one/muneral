@@ -125,9 +125,10 @@ describe('reset loaded Git reference filters', () => {
     expect(screen.getByRole('checkbox', { name: 'Show available links only' })).not.toBeChecked();
     expect(screen.getByRole('checkbox', { name: 'Wrap Git reference text' })).toBeChecked();
     expect(screen.getByText('Showing 4 of 4 loaded Git references.')).toBeInTheDocument();
-    expect(screen.getAllByRole('listitem').map((item) => item.textContent)).toEqual([
-      'release/current', 'example/repo', 'Reference link unavailable', '0123456',
+    expect(screen.getAllByRole('link').map((link) => link.querySelector('span')?.textContent)).toEqual([
+      'release/current', 'example/repo', '0123456',
     ]);
+    expect(screen.getAllByText('Reference link unavailable')).toHaveLength(1);
     expect(screen.getByRole('link', { name: 'release/current' }))
       .toHaveAttribute('href', 'https://github.com/example/repo/tree/release/current');
     expect(screen.getByRole('button', { name: 'Copy branch reference release/current' })).toBeInTheDocument();

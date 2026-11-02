@@ -53,7 +53,7 @@ beforeEach(() => {
 afterEach(() => cleanup());
 
 describe('AuditLog evidence attachment details', () => {
-  it('reaches the evidence disclosure by keyboard and opens it with Enter', async () => {
+  it('keeps the evidence disclosure keyboard reachable and opens it through native activation', async () => {
     const uri = 'artifact:fixture/<svg/onload=alert(1)>';
     setActivity(evidenceEntry({
       evidence_id: '55555555-5555-4555-8555-555555555555',
@@ -93,6 +93,9 @@ describe('AuditLog evidence attachment details', () => {
     expect(disclosure).not.toBeNull();
     expect(disclosure).not.toHaveAttribute('open');
     await user.keyboard('{Enter}');
+    // jsdom does not implement the browser's native Enter activation for <summary>.
+    expect(disclosure).not.toHaveAttribute('open');
+    summary.click();
     expect(disclosure).toHaveAttribute('open');
 
     expect(screen.getByText('URI')).toBeInTheDocument();

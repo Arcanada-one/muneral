@@ -92,7 +92,6 @@ describe('TaskReadiness blocker disclosure', () => {
     renderReadiness();
 
     expect(await findParagraph('2 of 3 dependency links are blocking this task.')).toBeInTheDocument();
-    expect(screen.getByText('Blocked')).toBeInTheDocument();
     const hideButton = screen.getByRole('button', { name: 'Hide blocking tasks' });
     expect(hideButton).toHaveAttribute('aria-expanded', 'true');
     const listId = hideButton.getAttribute('aria-controls');
@@ -100,6 +99,7 @@ describe('TaskReadiness blocker disclosure', () => {
     const blockerList = document.getElementById(listId as string);
     expect(blockerList).toBeInTheDocument();
     expect(blockerList).toBeVisible();
+    expect(within(blockerList as HTMLElement).getByText('Blocked', { exact: true })).toBeInTheDocument();
     expect(within(blockerList as HTMLElement).getAllByRole('listitem')).toHaveLength(2);
     expect(within(blockerList as HTMLElement).getByText(firstBlockerTaskId)).toBeVisible();
     expect(within(blockerList as HTMLElement).queryByText('First blocker')).not.toBeInTheDocument();
@@ -117,7 +117,7 @@ describe('TaskReadiness blocker disclosure', () => {
     expect(showButton).toHaveAttribute('aria-controls', listId);
     expect(blockerList).not.toBeVisible();
     expect(screen.getByText((_, element) => element?.tagName === 'P' && element.textContent === '2 of 3 dependency links are blocking this task.')).toBeInTheDocument();
-    expect(screen.getByText('Blocked')).toBeInTheDocument();
+    expect(within(blockerList as HTMLElement).getByText('Blocked', { exact: true })).toBeInTheDocument();
 
     fireEvent.click(showButton);
     expect(screen.getByRole('button', { name: 'Hide blocking tasks' })).toHaveAttribute('aria-expanded', 'true');

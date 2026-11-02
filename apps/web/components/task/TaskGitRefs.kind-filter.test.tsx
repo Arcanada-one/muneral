@@ -133,7 +133,7 @@ describe('task Git reference kind filter', () => {
     const selector = await screen.findByRole('combobox', { name: 'Git reference kind' });
     fireEvent.change(selector, { target: { value: 'branch' } });
     expect(screen.getByText(
-      'No matching Git references in the loaded list. Choose All references to show all.',
+      'No matching Git references in the loaded list. Choose All references to show more.',
     )).toBeInTheDocument();
     expect(selector).toHaveValue('branch');
 

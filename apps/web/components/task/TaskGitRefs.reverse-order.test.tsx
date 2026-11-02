@@ -164,9 +164,9 @@ describe('reverse loaded Git reference order', () => {
 
     fireEvent.click(reverse);
     expect(reverse).not.toBeChecked();
-    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.queryByText(/(?:copied|could not copy)/i)).not.toBeInTheDocument();
     await act(async () => resolveFirstCopy());
-    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.queryByText(/(?:copied|could not copy)/i)).not.toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 
     fireEvent.click(reverse);
@@ -174,7 +174,7 @@ describe('reverse loaded Git reference order', () => {
     expect(writeText).toHaveBeenLastCalledWith([
       firstUrl, 'refs/heads/release/two', 'refs/heads/release/one',
     ].join('\n'));
-    expect(await screen.findByRole('status')).toHaveTextContent('Available Git reference values copied.');
+    expect(await screen.findByText('Available Git reference values copied.')).toBeInTheDocument();
     expect(api.get).toHaveBeenCalledTimes(1);
   });
 

@@ -108,7 +108,8 @@ describe('TaskReadiness loaded blocker search', () => {
     const view = renderReadiness();
 
     expect(await screen.findByText('3 of 5 dependency links are blocking this task.')).toBeInTheDocument();
-    expect(screen.getByText('Blocked')).toBeInTheDocument();
+    expect(within(screen.getByRole('list', { name: 'Loaded blocking dependencies' }))
+      .getByText('Blocked', { exact: true })).toBeInTheDocument();
     const search = screen.getByRole('searchbox', { name: 'Search loaded blockers' });
     expect(search).toHaveValue('');
     expect(screen.getByText('Showing 3 of 3 loaded blocking dependencies.')).toBeInTheDocument();
@@ -117,13 +118,13 @@ describe('TaskReadiness loaded blocker search', () => {
     expect(search).toHaveValue('  NEEDLE  ');
     expect(screen.getByText('Showing 1 of 3 loaded blocking dependencies.')).toBeInTheDocument();
     expect(screen.queryByText('Needle hidden title')).not.toBeInTheDocument();
-    let blockerList = screen.getByRole('list');
+    let blockerList = screen.getByRole('list', { name: 'Loaded blocking dependencies' });
     expect(within(blockerList).getAllByRole('listitem')).toHaveLength(1);
     expect(within(blockerList).getByText('Needle visible title')).toBeVisible();
 
     fireEvent.change(search, { target: { value: ' AAA ' } });
     expect(screen.getByText('Showing 2 of 3 loaded blocking dependencies.')).toBeInTheDocument();
-    blockerList = screen.getByRole('list');
+    blockerList = screen.getByRole('list', { name: 'Loaded blocking dependencies' });
     expect(within(blockerList).getAllByRole('listitem')).toHaveLength(2);
     expect(within(blockerList).getByText('Ordinary blocker')).toBeVisible();
     expect(within(blockerList).getByText('Needle visible title')).toBeVisible();
@@ -164,7 +165,7 @@ describe('TaskReadiness loaded blocker search', () => {
     const search = await screen.findByRole('searchbox', { name: 'Search loaded blockers' });
     fireEvent.change(search, { target: { value: 'needle' } });
     expect(screen.getByText('Showing 2 of 3 loaded blocking dependencies.')).toBeInTheDocument();
-    let blockerList = screen.getByRole('list');
+    let blockerList = screen.getByRole('list', { name: 'Loaded blocking dependencies' });
     expect(within(blockerList).getAllByRole('listitem')).toHaveLength(2);
     expect(within(blockerList).getByText('Needle blocker')).toBeVisible();
     expect(within(blockerList).getByText('Needle duplicate')).toBeVisible();
@@ -179,7 +180,7 @@ describe('TaskReadiness loaded blocker search', () => {
     expect(await screen.findByText('Blocker IDs copied.')).toBeVisible();
 
     fireEvent.click(screen.getByRole('button', { name: 'Show blocking tasks' }));
-    blockerList = screen.getByRole('list');
+    blockerList = screen.getByRole('list', { name: 'Loaded blocking dependencies' });
     const rowCopyButtons = within(blockerList).getAllByRole('button', { name: /^Copy blocker task ID / });
     expect(rowCopyButtons).toHaveLength(2);
     fireEvent.click(rowCopyButtons[0]);
