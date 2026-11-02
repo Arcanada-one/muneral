@@ -12,6 +12,7 @@ import {
 } from './sanitize-browser-stderr.mjs';
 
 const command = fileURLToPath(new URL('./sanitize-browser-stderr.mjs', import.meta.url));
+const commandUrl = new URL('./sanitize-browser-stderr.mjs', import.meta.url).href;
 
 function runCli(input, args = []) {
   return spawnSync(process.execPath, [command, ...args], {
@@ -29,6 +30,25 @@ function parseOneJsonLine(result) {
   assert.ok(Buffer.byteLength(stdout, 'utf8') <= MAX_DIAGNOSTIC_TOTAL_BYTES + 1024);
   assert.match(stdout, /^\{[^\n]*\}\n$/);
   return JSON.parse(stdout);
+}
+
+function runSyntheticChild(body) {
+  const source = [
+    "import { PassThrough } from 'node:stream';",
+    'const { runCommand } = await import(' + JSON.stringify(commandUrl) + ');',
+    'const input = new PassThrough();',
+    'let ended = false;',
+    'let errored = false;',
+    "input.once('end', () => { ended = true; });",
+    "input.once('error', () => { errored = true; });",
+    body,
+  ].join('\n');
+  return spawnSync(process.execPath, ['--input-type=module', '-e', source], {
+    encoding: null,
+    stdio: ['ignore', 'pipe', 'pipe'],
+    timeout: 3000,
+    maxBuffer: 8 * 1024,
+  });
 }
 
 test('keeps only the three safe phrases and redacts surrounding/private data', () => {
@@ -184,6 +204,46 @@ test('CLI closes stdin and exits after the first overflow byte without waiting f
   const diagnostics = JSON.parse(output.toString('utf8'));
   assert.equal(diagnostics.stderrTruncated, true);
   assert.equal(diagnostics.stderrStatus, 'TRUNCATED');
+});
+
+test('synthetic close-before-end emits one fixed safe input error without raw input', () => {
+  const result = runSyntheticChild([
+    "const running = runCommand({ input, args: [], output: process.stdout });",
+    "input.write(Buffer.from('PRIVATE_CLOSE_MARKER'));",
+    'input.destroy();',
+    'const code = await running;',
+    'process.exitCode = ended || errored ? 91 : code;',
+  ].join('\n'));
+
+  assert.equal(result.error, undefined);
+  assert.equal(result.status, 1);
+  assert.equal(result.signal, null);
+  assert.equal(result.stderr.length, 0);
+  const diagnostic = parseOneJsonLine(result);
+  assert.equal(diagnostic.error, 'INPUT_UNAVAILABLE');
+  assert.deepEqual(diagnostic.stderrCategories, ['UNKNOWN']);
+  assert.deepEqual(diagnostic.stderrLines, [STDERR_REDACTION_MARKER]);
+  assert.equal(result.stdout.includes(Buffer.from('PRIVATE_CLOSE_MARKER')), false);
+});
+
+test('synthetic post-overflow close remains one-shot after truncation settles', () => {
+  const result = runSyntheticChild([
+    'const closed = new Promise((resolve) => input.once("close", resolve));',
+    'const running = runCommand({ input, args: [], output: process.stdout });',
+    'input.write(Buffer.concat([Buffer.from("No usable sandbox!\\n"), Buffer.alloc(MAX_BYTES, 0x78), Buffer.from("PRIVATE_AFTER_OVERFLOW_MARKER")]));',
+    'const code = await running;',
+    'await closed;',
+    'process.exitCode = ended ? 91 : code;',
+  ].join('\n').replace('MAX_BYTES', String(MAX_STDERR_BYTES + 1)));
+
+  assert.equal(result.error, undefined);
+  assert.equal(result.status, 0);
+  assert.equal(result.signal, null);
+  assert.equal(result.stderr.length, 0);
+  const diagnostic = parseOneJsonLine(result);
+  assert.equal(diagnostic.stderrTruncated, true);
+  assert.equal(diagnostic.stderrStatus, 'TRUNCATED');
+  assert.equal(result.stdout.includes(Buffer.from('PRIVATE_AFTER_OVERFLOW_MARKER')), false);
 });
 
 test('CLI rejects arguments with a fixed safe JSON error and supports static help', () => {

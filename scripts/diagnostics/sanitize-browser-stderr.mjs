@@ -218,12 +218,7 @@ function errorDiagnostics(error) {
   };
 }
 
-function emit(value, exitCode = 0) {
-  process.stdout.write(JSON.stringify(value) + '\n');
-  process.exitCode = exitCode;
-}
-
-function readBoundedStdin() {
+function readBoundedStdin(input = process.stdin) {
   return new Promise((resolve, reject) => {
     const chunks = [];
     let retained = 0;
@@ -231,20 +226,23 @@ function readBoundedStdin() {
     let settled = false;
 
     const cleanupReadListeners = () => {
-      process.stdin.removeListener('data', onData);
-      process.stdin.removeListener('end', onEnd);
+      input.removeListener('data', onData);
+      input.removeListener('end', onEnd);
     };
-    const onClose = () => process.stdin.removeListener('error', onError);
+    const onClose = () => {
+      if (!settled) finish(null, new Error('INPUT_UNAVAILABLE'));
+      input.removeListener('error', onError);
+    };
     const finish = (result, error, closeInput = false) => {
       if (settled) return;
       settled = true;
-      process.stdin.pause();
+      input.pause();
       cleanupReadListeners();
       if (error) {
-        process.stdin.destroy();
+        if (closeInput) input.destroy();
         reject(error);
       } else {
-        if (closeInput) process.stdin.destroy();
+        if (closeInput) input.destroy();
         resolve(result);
       }
     };
@@ -264,32 +262,39 @@ function readBoundedStdin() {
       }
     };
 
-    process.stdin.once('close', onClose);
-    process.stdin.on('data', onData);
-    process.stdin.once('end', onEnd);
-    process.stdin.on('error', onError);
-    process.stdin.resume();
+    input.once('close', onClose);
+    input.on('data', onData);
+    input.once('end', onEnd);
+    input.on('error', onError);
+    input.resume();
   });
 }
 
-async function main() {
-  const args = process.argv.slice(2);
+export async function runCommand({
+  input = process.stdin,
+  args = process.argv.slice(2),
+  output = process.stdout,
+} = {}) {
   if (args.length === 1 && args[0] === '--help') {
-    process.stdout.write('Usage: node sanitize-browser-stderr.mjs [--help] < stderr-bytes\n');
-    return;
+    output.write('Usage: node sanitize-browser-stderr.mjs [--help] < stderr-bytes\n');
+    return 0;
   }
   if (args.length !== 0) {
-    emit(errorDiagnostics('INVALID_ARGUMENTS'), 2);
-    return;
+    output.write(JSON.stringify(errorDiagnostics('INVALID_ARGUMENTS')) + '\n');
+    return 2;
   }
   try {
-    const input = await readBoundedStdin();
-    emit(sanitizeStderr(input.bytes, { truncated: input.truncated }));
+    const captured = await readBoundedStdin(input);
+    output.write(JSON.stringify(sanitizeStderr(captured.bytes, { truncated: captured.truncated })) + '\n');
+    return 0;
   } catch {
-    emit(errorDiagnostics('INPUT_UNAVAILABLE'), 1);
+    output.write(JSON.stringify(errorDiagnostics('INPUT_UNAVAILABLE')) + '\n');
+    return 1;
   }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  main();
+  runCommand().then((exitCode) => {
+    process.exitCode = exitCode;
+  });
 }
