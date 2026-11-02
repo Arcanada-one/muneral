@@ -13,6 +13,7 @@ export const MAX_DIAGNOSTIC_CODES = 8;
 export const MAX_DIAGNOSTIC_CODE_LENGTH = 256;
 export const MAX_DIAGNOSTIC_LINES = 8;
 export const MAX_DIAGNOSTIC_LINE_BYTES = 256;
+export const MAX_FIRST_RELEVANT_DIAGNOSTIC_BYTES = 300;
 export const MAX_DIAGNOSTIC_TOTAL_BYTES = 2048;
 export const FAILURE_SUMMARY_FILENAME = 'failure-summary.json';
 
@@ -33,9 +34,10 @@ const STDERR_PHRASES = new Map([
   ["DevToolsActivePort file doesn't exist", 'BROWSER_STARTUP_FAILURE'],
   ['Missing X server or $DISPLAY', 'BROWSER_DISPLAY_UNAVAILABLE'],
 ]);
+const RELEVANT_DIAGNOSTIC_TOKEN = /\b(?:FATAL|sandbox|namespace)\b/i;
 const STDERR_STATUSES = new Set(['NOT_STARTED', 'EMPTY', 'CLASSIFIED', 'WITHHELD', 'TRUNCATED']);
 const STDERR_REDACTION_MARKER = '[REDACTED]';
-const STDERR_SAFE_SEGMENTS = [STDERR_REDACTION_MARKER, ...STDERR_PHRASES.keys()];
+const STDERR_SAFE_SEGMENTS = [STDERR_REDACTION_MARKER, 'FATAL', 'sandbox', 'namespace', ...STDERR_PHRASES.keys()];
 const escapeRegex = (value) => value.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
 const STDERR_SAFE_SEGMENT_PATTERN = STDERR_SAFE_SEGMENTS.map(escapeRegex).join('|');
 const STDERR_SAFE_LINE_PATTERN = new RegExp(
@@ -157,6 +159,10 @@ function projectDiagnosticLine(sourceLine) {
       offset = end;
     }
   }
+  for (const match of value.matchAll(/\b(?:FATAL|sandbox|namespace)\b/gi)) {
+    const token = match[0].toLowerCase() === 'fatal' ? 'FATAL' : match[0].toLowerCase();
+    matches.push({ start: match.index, end: match.index + match[0].length, phrase: token });
+  }
   matches.sort((left, right) => left.start - right.start || right.end - left.end);
 
   const parts = [];
@@ -210,7 +216,7 @@ export function sanitizeStderr(bytes, { truncated = false } = {}) {
   if (bytes.length === 0) {
     return {
       stderrCategories: ['UNKNOWN'], stderrLines: [], stderrTruncated: truncated,
-      stderrRedacted: false, stderrStatus: truncated ? 'TRUNCATED' : 'EMPTY',
+      stderrFirstRelevantLine: null, stderrRedacted: false, stderrStatus: truncated ? 'TRUNCATED' : 'EMPTY',
     };
   }
 
@@ -220,7 +226,7 @@ export function sanitizeStderr(bytes, { truncated = false } = {}) {
   } catch {
     return {
       stderrCategories: ['UNKNOWN'], stderrLines: [STDERR_REDACTION_MARKER],
-      stderrTruncated: truncated, stderrRedacted: true,
+      stderrTruncated: truncated, stderrFirstRelevantLine: null, stderrRedacted: true,
       stderrStatus: truncated ? 'TRUNCATED' : 'WITHHELD',
     };
   }
@@ -232,21 +238,23 @@ export function sanitizeStderr(bytes, { truncated = false } = {}) {
   let considered = 0;
   let outputTruncated = truncated;
   let stderrRedacted = false;
+  let stderrFirstRelevantLine = null;
   for (const sourceLine of lines) {
     const line = sourceLine.endsWith('\r') ? sourceLine.slice(0, -1) : sourceLine;
     if (line.length === 0) continue;
     considered += 1;
-    if (considered > MAX_DIAGNOSTIC_LINES) {
-      withheld = true;
-      outputTruncated = true;
-      break;
+    const projected = projectDiagnosticLine(sourceLine);
+    const keepLine = stderrLines.length < MAX_DIAGNOSTIC_LINES;
+    if (keepLine) stderrLines.push(projected.line);
+    else outputTruncated = true;
+    if (stderrFirstRelevantLine === null && RELEVANT_DIAGNOSTIC_TOKEN.test(line)) {
+      stderrFirstRelevantLine = projected.line;
+      stderrRedacted ||= projected.redacted;
     }
     const category = STDERR_PHRASES.get(line);
     if (category) categories.push(category);
     else withheld = true;
-    const projected = projectDiagnosticLine(sourceLine);
-    stderrLines.push(projected.line);
-    stderrRedacted ||= projected.redacted;
+    if (keepLine) stderrRedacted ||= projected.redacted;
     outputTruncated ||= projected.truncated;
     withheld ||= projected.redacted;
   }
@@ -265,6 +273,7 @@ export function sanitizeStderr(bytes, { truncated = false } = {}) {
     stderrCategories: categories.slice(0, MAX_DIAGNOSTIC_CODES),
     stderrLines,
     stderrTruncated: outputTruncated,
+    stderrFirstRelevantLine,
     stderrRedacted,
     stderrStatus: outputTruncated ? 'TRUNCATED' : (withheld ? 'WITHHELD' : 'CLASSIFIED'),
   };
@@ -364,7 +373,7 @@ export function noBrowserCapture() {
     },
     diagnostics: {
       stderrCategories: ['UNKNOWN'], stderrLines: [], stderrTruncated: false,
-      stderrRedacted: false, stderrStatus: 'NOT_STARTED',
+      stderrFirstRelevantLine: null, stderrRedacted: false, stderrStatus: 'NOT_STARTED',
     },
   };
 }
@@ -394,7 +403,13 @@ export function validateFailureSummary(value, binding, allowedReasons) {
   }
 
   const diagnostics = value.diagnostics;
-  if (!exactKeys(diagnostics, ['stderrCategories', 'stderrLines', 'stderrTruncated', 'stderrRedacted', 'stderrStatus']) ||
+  const diagnosticsWithFirstLine = exactKeys(diagnostics, [
+    'stderrCategories', 'stderrLines', 'stderrTruncated', 'stderrFirstRelevantLine', 'stderrRedacted', 'stderrStatus',
+  ]);
+  const legacyDiagnostics = exactKeys(diagnostics, [
+    'stderrCategories', 'stderrLines', 'stderrTruncated', 'stderrRedacted', 'stderrStatus',
+  ]);
+  if ((!diagnosticsWithFirstLine && !legacyDiagnostics) ||
       !Array.isArray(diagnostics.stderrCategories) || diagnostics.stderrCategories.length < 1 ||
       diagnostics.stderrCategories.length > MAX_DIAGNOSTIC_CODES ||
       !diagnostics.stderrCategories.every((code) => typeof code === 'string' && code.length <= MAX_DIAGNOSTIC_CODE_LENGTH && DIAGNOSTIC_CODES.has(code)) ||
@@ -403,10 +418,13 @@ export function validateFailureSummary(value, binding, allowedReasons) {
         !line.includes('\n') && !line.includes('\r') &&
         Buffer.byteLength(line, 'utf8') <= MAX_DIAGNOSTIC_LINE_BYTES && STDERR_SAFE_LINE_PATTERN.test(line)) ||
       diagnostics.stderrLines.reduce((sum, line) => sum + Buffer.byteLength(line, 'utf8'), 0) > MAX_DIAGNOSTIC_TOTAL_BYTES ||
+      !(diagnostics.stderrFirstRelevantLine === undefined || diagnostics.stderrFirstRelevantLine === null || (typeof diagnostics.stderrFirstRelevantLine === 'string' &&
+        Buffer.byteLength(diagnostics.stderrFirstRelevantLine, 'utf8') <= MAX_FIRST_RELEVANT_DIAGNOSTIC_BYTES &&
+        STDERR_SAFE_LINE_PATTERN.test(diagnostics.stderrFirstRelevantLine))) ||
       typeof diagnostics.stderrTruncated !== 'boolean' || typeof diagnostics.stderrRedacted !== 'boolean' ||
       !STDERR_STATUSES.has(diagnostics.stderrStatus)) return false;
   const hasRedactionMarker = diagnostics.stderrLines.some((line) => line.includes(STDERR_REDACTION_MARKER));
-  if (diagnostics.stderrRedacted !== hasRedactionMarker) return false;
+  if (diagnostics.stderrRedacted !== (hasRedactionMarker || diagnostics.stderrFirstRelevantLine?.includes(STDERR_REDACTION_MARKER) === true)) return false;
   if (process.started && diagnostics.stderrStatus === 'NOT_STARTED') return false;
   if ((diagnostics.stderrStatus === 'TRUNCATED') !== diagnostics.stderrTruncated) return false;
   if (diagnostics.stderrStatus === 'NOT_STARTED' &&

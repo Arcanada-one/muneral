@@ -13,6 +13,7 @@ import {
   MAX_DIAGNOSTIC_LINES,
   MAX_DIAGNOSTIC_LINE_BYTES,
   MAX_DIAGNOSTIC_TOTAL_BYTES,
+  MAX_FIRST_RELEVANT_DIAGNOSTIC_BYTES,
   MAX_STDERR_BYTES,
   buildFailureSummary,
   noBrowserCapture,
@@ -206,6 +207,9 @@ test('NEW stderr projection fails closed on invalid UTF-8 and bounds line count,
   assert.equal(valid.schema, 'ActivityVisibleCountFailureSummary/v2');
   assert.equal(valid.diagnostics.stderrLines[0], '[REDACTED] No usable sandbox! [REDACTED]');
   assert.equal(validateFailureSummary(valid, binding, reasons), true);
+  const legacyDiagnostics = { ...valid.diagnostics };
+  delete legacyDiagnostics.stderrFirstRelevantLine;
+  assert.equal(validateFailureSummary({ ...valid, diagnostics: legacyDiagnostics }, binding, reasons), true);
   assert.equal(validateFailureSummary({
     ...valid,
     diagnostics: { ...valid.diagnostics, stderrLines: ['No usable sandbox! password=raw'] },
@@ -239,6 +243,36 @@ test('NEW stderr projection fails closed on invalid UTF-8 and bounds line count,
     ...valid,
     diagnostics: { ...valid.diagnostics, stderrLines: [42] },
   }, binding, reasons), false);
+  assert.equal(validateFailureSummary({
+    ...valid,
+    diagnostics: { ...valid.diagnostics, stderrFirstRelevantLine: 'FATAL token=private' },
+  }, binding, reasons), false);
+});
+
+test('first relevant stderr diagnostic scans the full bounded capture and exposes only safe tokens', () => {
+  const input = [
+    ...Array.from({ length: MAX_DIAGNOSTIC_LINES + 2 }, (_, index) => `irrelevant prefix ${index}`),
+    'FATAL: sandbox initialization failed at /private/profile https://example.invalid/path?token=secret',
+    'namespace sandbox later diagnostic',
+  ].join('\n');
+  const diagnostics = sanitizeStderr(Buffer.from(input));
+  assert.equal(diagnostics.stderrLines.length, MAX_DIAGNOSTIC_LINES);
+  assert.equal(diagnostics.stderrFirstRelevantLine, 'FATAL [REDACTED] sandbox [REDACTED]');
+  assert.ok(Buffer.byteLength(diagnostics.stderrFirstRelevantLine, 'utf8') <= MAX_FIRST_RELEVANT_DIAGNOSTIC_BYTES);
+  assert.equal(diagnostics.stderrTruncated, true);
+  for (const privateValue of ['/private/profile', 'example.invalid', 'token=secret', 'initialization failed']) {
+    assert.equal(JSON.stringify(diagnostics).includes(privateValue), false);
+  }
+
+  const order = sanitizeStderr(Buffer.from('namespace failure\nsandbox failure\nFATAL failure'));
+  assert.equal(order.stderrFirstRelevantLine, 'namespace [REDACTED]');
+  assert.equal(sanitizeStderr(Buffer.from('Fatal sandbox error')).stderrFirstRelevantLine, 'FATAL sandbox [REDACTED]');
+  const noMatch = sanitizeStderr(Buffer.from('ordinary startup text\nno relevant marker'));
+  assert.equal(noMatch.stderrFirstRelevantLine, null);
+
+  const unicode = sanitizeStderr(Buffer.from(`FATAL ${'界'.repeat(400)}`));
+  assert.ok(Buffer.byteLength(unicode.stderrFirstRelevantLine, 'utf8') <= MAX_FIRST_RELEVANT_DIAGNOSTIC_BYTES);
+  assert.ok(unicode.stderrFirstRelevantLine.length <= 300);
 });
 
 test('failure summary preserves not-started, exit, signal, timeout, and requested-cleanup states', () => {
