@@ -149,6 +149,19 @@ test('failure summary preserves not-started, exit, signal, timeout, and requeste
   assert.equal(validateFailureSummary({ ...timeout, process: { ...timeout.process, exitCode: 1 } }, binding, reasons), false);
 });
 
+test('completed summary requires exactly one exit code or signal', () => {
+  const valid = summaryFor(startedProcess());
+  const zeroExit = summaryFor(startedProcess({ exitCode: 0 }));
+  assert.equal(zeroExit.process.exitCode, 0);
+  assert.equal(validateFailureSummary(zeroExit, binding, reasons), true);
+  for (const process of [
+    { ...valid.process, exitCode: null, signal: null },
+    { ...valid.process, exitCode: 23, signal: 'SIGTERM' },
+  ]) {
+    assert.equal(validateFailureSummary({ ...valid, process }, binding, reasons), false);
+  }
+});
+
 test('summary schema, run/head/attempt binding, phase, reason, UTC and enums fail closed', () => {
   const value = summaryFor(startedProcess());
   assert.equal(value.schema, FAILURE_SUMMARY_SCHEMA);
@@ -209,6 +222,55 @@ test('completed direct-child capture is bound to process metadata and only stder
     await assert.rejects(lstat(path.join(privateRoot, 'browser.stdout.raw')));
   } finally {
     await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('completed capture reader rejects missing or conflicting process outcomes', async () => {
+  for (const outcome of [
+    { exitCode: null, signal: null },
+    { exitCode: 23, signal: 'SIGTERM' },
+  ]) {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'activity-browser-invalid-capture-'));
+    const privateRoot = path.join(root, 'private');
+    await mkdir(privateRoot, { mode: 0o700 });
+    const stderr = Buffer.alloc(0);
+    const record = {
+      argv: [driver.EXPECTED_BROWSER_PATH, ...driver.browserArguments(path.join(privateRoot, 'browser-profile'))],
+      cwd: privateRoot,
+      pid: 1234,
+      processGroup: 1234,
+      startedAtUtc: '2026-11-02T15:50:00.000Z',
+      endedAtUtc: '2026-11-02T15:50:01.000Z',
+      timedOut: false,
+      spawnFailed: false,
+      ...outcome,
+    };
+    const capture = {
+      schema: 'ActivityVisibleCountProcess/v1',
+      label: 'browser',
+      argv: record.argv,
+      cwd: record.cwd,
+      pid: record.pid,
+      processGroup: record.processGroup,
+      startedAtUtc: record.startedAtUtc,
+      endedAtUtc: record.endedAtUtc,
+      exitCode: record.exitCode,
+      signal: record.signal,
+      timedOut: record.timedOut,
+      spawnFailed: record.spawnFailed,
+      stdout: { file: 'browser.stdout.raw', capturedBytes: 0, observedBytes: 0, truncated: false, sha256: '0'.repeat(64) },
+      stderr: { file: 'browser.stderr.raw', capturedBytes: 0, observedBytes: 0, truncated: false, sha256: createHash('sha256').update(stderr).digest('hex') },
+    };
+    try {
+      await writeFile(path.join(privateRoot, 'browser.process.json'), JSON.stringify(capture), { mode: 0o600, flag: 'wx' });
+      await writeFile(path.join(privateRoot, 'browser.stderr.raw'), stderr, { mode: 0o600, flag: 'wx' });
+      await assert.rejects(
+        readCompletedBrowserCapture(privateRoot, record, { expectedArgv: record.argv, expectedCwd: privateRoot }),
+        { code: 'CAPTURE_RECORD_INVALID' },
+      );
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
   }
 });
 

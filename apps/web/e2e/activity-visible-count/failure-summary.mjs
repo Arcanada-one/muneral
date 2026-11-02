@@ -156,11 +156,15 @@ function validCaptureShape(capture, liveRecord, expectedArgv, expectedCwd) {
         stream.truncated !== (stream.observedBytes > stream.capturedBytes) ||
         typeof stream.sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(stream.sha256)) return false;
   }
+  const started = capture.pid !== null;
+  const hasExitCode = capture.exitCode !== null;
+  const hasSignal = capture.signal !== null;
   return capture.stderr.capturedBytes <= MAX_STDERR_BYTES &&
     (capture.pid === null || (Number.isSafeInteger(capture.pid) && capture.pid > 0)) &&
     (capture.processGroup === null || capture.processGroup === capture.pid) &&
     (capture.exitCode === null || (Number.isInteger(capture.exitCode) && capture.exitCode >= 0 && capture.exitCode <= 255)) &&
     (capture.signal === null || SIGNALS.has(capture.signal)) &&
+    (started ? hasExitCode !== hasSignal : !hasExitCode && !hasSignal) &&
     typeof capture.timedOut === 'boolean' && typeof capture.spawnFailed === 'boolean' &&
     (capture.startedAtUtc === null || validUtc(capture.startedAtUtc)) &&
     (capture.endedAtUtc === null || validUtc(capture.endedAtUtc));
@@ -224,7 +228,7 @@ export function validateFailureSummary(value, binding, allowedReasons) {
   } else {
     if (!validUtc(process.startedAtUtc) || !validUtc(process.endedAtUtc) ||
         Date.parse(process.endedAtUtc) < Date.parse(process.startedAtUtc) ||
-        (process.exitCode !== null && process.signal !== null) ||
+        ((process.exitCode !== null) === (process.signal !== null)) ||
         ((process.timedOut || process.cleanupRequested) && !process.started)) return false;
   }
 
