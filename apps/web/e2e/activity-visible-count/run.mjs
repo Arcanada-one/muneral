@@ -19,7 +19,7 @@ const EXPECTED_BROWSER_VERSION = 'Google Chrome for Testing 156.0.8078.4';
 // https://storage.googleapis.com/chrome-for-testing-public/156.0.8078.4/linux64/chrome-linux64.zip
 // Archive SHA-256: 43fd31766c7533a02dda2ded5ad50c2f861cd5400be7509c0abad71129f79d79.
 const EXPECTED_BROWSER_SHA256 = '377a9fc07b495c3b8d0ab8ec1fdfd153641759f9756fea34d8dfce4de82f5025';
-const EXPECTED_COMPONENT_SHA256 = 'a382181a1af1aed3236272bf6cf5021a3982b072d567cd63a1b5a9bfffbb57c8';
+const EXPECTED_COMPONENT_SHA256 = '36da1780353fe7c2fc33ef8d813853201848dbeb79f2d06765417939e751bb23';
 const RESULT_SCHEMA = 'ActivityVisibleCountBrowser/v1';
 const PRIVATE_PROCESS_SCHEMA = 'ActivityVisibleCountProcess/v1';
 const FIXTURE_TIMEOUT_MS = 180_000;
