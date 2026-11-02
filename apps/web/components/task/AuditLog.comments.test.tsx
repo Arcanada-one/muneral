@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AuditLog } from './AuditLog';
 
@@ -97,22 +97,40 @@ describe('AuditLog comment bodies', () => {
     expect(container.textContent).toContain(body);
   });
 
-  it('opens the complete long comment from its keyboard-accessible disclosure', async () => {
+  it('reaches the comment disclosure by keyboard and opens it with Enter', async () => {
     const body = `Start\n${'evidence '.repeat(180)}<script>alert(1)</script> End`;
     ready(taskA, [commentEntry(taskA, { body })]);
 
-    render(<AuditLog taskId={taskA} />);
+    const { container } = render(<AuditLog taskId={taskA} />);
 
     const user = userEvent.setup();
+    const activityFilter = screen.getByRole('combobox', { name: 'Activity filter' });
+    const actorFilter = screen.getByRole('combobox', { name: 'Actor filter' });
     const summary = screen.getByText('Read full comment');
     expect(summary.tagName).toBe('SUMMARY');
     expect(summary).toHaveTextContent('Read full comment');
     const disclosure = summary.closest('details');
     expect(disclosure).not.toBeNull();
     expect(disclosure).not.toHaveAttribute('open');
-    await user.tab();
+
+    const keyboardTargets = [activityFilter, actorFilter, summary];
+    const reachedKeyboardTargets: HTMLElement[] = [];
+    const tabStopLimit = [...container.querySelectorAll<HTMLElement>('*')]
+      .filter((element) => element.tabIndex >= 0 && !element.hasAttribute('disabled')).length;
+    for (let tab = 0; tab < tabStopLimit && document.activeElement !== summary; tab += 1) {
+      await user.tab();
+      const activeElement = document.activeElement;
+      if (
+        activeElement === activityFilter ||
+        activeElement === actorFilter ||
+        activeElement === summary
+      ) {
+        reachedKeyboardTargets.push(activeElement);
+      }
+    }
+    expect(reachedKeyboardTargets).toEqual(keyboardTargets);
     expect(summary).toHaveFocus();
-    fireEvent.click(summary);
+    await user.keyboard('{Enter}');
     expect(disclosure).toHaveAttribute('open');
     const renderedBody = within(disclosure as HTMLDetailsElement).getByText((text) =>
       text.startsWith('Start evidence evidence'),

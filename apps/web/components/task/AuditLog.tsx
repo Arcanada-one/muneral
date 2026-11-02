@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Bot, User, Clock, Copy } from 'lucide-react';
 import { TASK_STATUSES, type TaskPriority, type TaskStatus } from '@muneral/types';
 import { useActivity } from '@/lib/api/tasks';
@@ -10,6 +10,39 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface AuditLogProps {
   taskId: string;
+}
+
+type ActivityFilterMode = 'all' | 'status_changes';
+type ActorFilterMode = 'all' | 'humans' | 'agents';
+
+interface ActivityFilterState {
+  taskId: string;
+  mode: ActivityFilterMode;
+  actorMode: ActorFilterMode;
+  showExactUtcTime: boolean;
+  reverseLoadedOrder: boolean;
+}
+
+interface VisibleEventIdCopyScope {
+  taskId: string;
+  page: number;
+  actionFilter: ActivityFilterMode;
+  actorFilter: ActorFilterMode;
+  data: unknown;
+  pageEntries: unknown;
+  isLoading: boolean;
+  isError: boolean;
+  isFetching: boolean;
+  responsePageMatches: boolean;
+  responsePageIsUsable: boolean;
+  pageOutOfRange: boolean;
+  reverseLoadedOrder: boolean;
+  orderedIds: string;
+}
+
+interface VisibleEventIdCopyFeedback {
+  scope: VisibleEventIdCopyScope;
+  status: 'pending' | 'copied' | 'failed';
 }
 
 const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
@@ -253,6 +286,41 @@ function formatRelativeTime(dateStr: string): string {
   return date.toLocaleDateString();
 }
 
+function formatExactUtcTime(value: string): string | undefined {
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?(Z|([+-])(\d{2}):(\d{2}))$/.exec(value);
+  if (!match) return undefined;
+
+  const [, yearText, monthText, dayText, hourText, minuteText, secondText, fraction = '', zone, sign, offsetHourText, offsetMinuteText] = match;
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const hour = Number(hourText);
+  const minute = Number(minuteText);
+  const second = Number(secondText);
+  const offsetHour = Number(offsetHourText ?? '0');
+  const offsetMinute = Number(offsetMinuteText ?? '0');
+
+  if (
+    month < 1 || month > 12 || day < 1 || day > 31 || hour > 23 || minute > 59 || second > 59
+    || offsetHour > 23 || offsetMinute > 59 || (zone !== 'Z' && sign === '-' && offsetHour === 0 && offsetMinute === 0)
+  ) return undefined;
+
+  const calendarDate = new Date(0);
+  calendarDate.setUTCFullYear(year, month - 1, day);
+  calendarDate.setUTCHours(hour, minute, second, 0);
+  if (
+    calendarDate.getUTCFullYear() !== year || calendarDate.getUTCMonth() !== month - 1
+    || calendarDate.getUTCDate() !== day || calendarDate.getUTCHours() !== hour
+  ) return undefined;
+
+  const offsetSign = sign === '-' ? -1 : 1;
+  const offsetMs = (offsetHour * 60 + offsetMinute) * 60_000 * offsetSign;
+  const utc = new Date(calendarDate.getTime() - offsetMs);
+  const normalizedFraction = fraction.replace(/0+$/, '').padEnd(3, '0');
+  const utcDateTime = utc.toISOString().replace(/\.\d{3}Z$/, '');
+  return `${utcDateTime}.${normalizedFraction || '000'}Z`;
+}
+
 function CopyActivityActorId({ actorId }: { actorId: string }) {
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const [isCopying, setIsCopying] = useState(false);
@@ -295,10 +363,92 @@ function CopyActivityActorId({ actorId }: { actorId: string }) {
   );
 }
 
+function CopyActivityEventId({ eventId }: { eventId: string }) {
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const [isCopying, setIsCopying] = useState(false);
+  const isMountedRef = useRef(false);
+  const isPendingRef = useRef(false);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  const copyEventId = async () => {
+    if (isPendingRef.current) return;
+    isPendingRef.current = true;
+    setCopyState('idle');
+    setIsCopying(true);
+
+    try {
+      const clipboard = typeof navigator === 'undefined' ? undefined : navigator.clipboard;
+      if (!clipboard || typeof clipboard.writeText !== 'function') {
+        throw new Error('Clipboard unavailable');
+      }
+      await clipboard.writeText(eventId);
+      if (isMountedRef.current) setCopyState('copied');
+    } catch {
+      if (isMountedRef.current) setCopyState('failed');
+    } finally {
+      if (isMountedRef.current) {
+        isPendingRef.current = false;
+        setIsCopying(false);
+      }
+    }
+  };
+
+  return (
+    <div className="mt-1 flex flex-wrap items-center gap-1">
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="h-6 w-6 shrink-0"
+        aria-label="Copy activity event ID"
+        onClick={copyEventId}
+        disabled={isCopying}
+      >
+        <Copy className="h-3 w-3" />
+      </Button>
+      {copyState === 'copied' && (
+        <span role="status" className="text-xs text-green-700">Activity event ID copied.</span>
+      )}
+      {copyState === 'failed' && (
+        <span role="alert" className="text-xs text-destructive">
+          Could not copy activity event ID. Try again or copy it manually.
+        </span>
+      )}
+    </div>
+  );
+}
+
 export function AuditLog({ taskId }: AuditLogProps) {
+  const activityFilterId = useId();
   const [pageState, setPageState] = useState({ taskId, page: 1 });
   if (pageState.taskId !== taskId) setPageState({ taskId, page: 1 });
   const page = pageState.taskId === taskId ? pageState.page : 1;
+  const [filterState, setFilterState] = useState<ActivityFilterState>({
+    taskId,
+    mode: 'all' as ActivityFilterMode,
+    actorMode: 'all' as ActorFilterMode,
+    showExactUtcTime: false,
+    reverseLoadedOrder: false,
+  });
+  if (filterState.taskId !== taskId) {
+    setFilterState({
+      taskId,
+      mode: 'all',
+      actorMode: 'all',
+      showExactUtcTime: false,
+      reverseLoadedOrder: false,
+    });
+  }
+  const filterMode = filterState.taskId === taskId ? filterState.mode : 'all';
+  const actorFilterMode = filterState.taskId === taskId ? filterState.actorMode : 'all';
+  const showExactUtcTime = filterState.taskId === taskId && filterState.showExactUtcTime;
+  const reverseLoadedOrder = filterState.taskId === taskId && filterState.reverseLoadedOrder;
   const { data, isLoading, isError, isFetching, refetch } = useActivity(taskId, page);
   const total = data !== undefined && Number.isSafeInteger(data.total) && data.total >= 0
     ? data.total
@@ -313,11 +463,117 @@ export function AuditLog({ taskId }: AuditLogProps) {
     : undefined;
   const pageOutOfRange = responsePageMatches && pageCount !== undefined && page > pageCount;
   if (pageOutOfRange) setPageState({ taskId, page: 1 });
-  const entries = responsePageIsUsable && !pageOutOfRange
+  const currentPageEntries = responsePageIsUsable && !pageOutOfRange
     ? (data?.data ?? []).filter((entry) => !entry.taskId || entry.taskId === taskId)
     : [];
+  const actionFilteredEntries = filterMode === 'status_changes'
+    ? currentPageEntries.filter((entry) => entry.action === 'task:status_changed')
+    : currentPageEntries;
+  const filteredEntries = actorFilterMode === 'humans'
+    ? actionFilteredEntries.filter((entry) => entry.actorType === 'human')
+    : actorFilterMode === 'agents'
+      ? actionFilteredEntries.filter((entry) => entry.actorType === 'agent')
+      : actionFilteredEntries;
+  const entries = reverseLoadedOrder ? [...filteredEntries].reverse() : filteredEntries;
+  const canShowVisibleCount = data !== undefined && responsePageMatches &&
+    responsePageIsUsable && !pageOutOfRange && !isLoading && !isError && !isFetching;
+  const visibleEventIds = entries.map((entry) => entry.id);
+  const visibleEventIdsText = visibleEventIds.join('\n');
+  const visibleEventIdsKey = JSON.stringify(visibleEventIds);
+  const visibleEventIdCopyScope = useMemo<VisibleEventIdCopyScope>(() => ({
+    taskId,
+    page,
+    actionFilter: filterMode,
+    actorFilter: actorFilterMode,
+    data,
+    pageEntries: data?.data,
+    isLoading,
+    isError,
+    isFetching,
+    responsePageMatches,
+    responsePageIsUsable,
+    pageOutOfRange,
+    reverseLoadedOrder,
+    orderedIds: visibleEventIdsKey,
+  }), [
+    taskId,
+    page,
+    filterMode,
+    actorFilterMode,
+    data,
+    data?.data,
+    isLoading,
+    isError,
+    isFetching,
+    responsePageMatches,
+    responsePageIsUsable,
+    pageOutOfRange,
+    reverseLoadedOrder,
+    visibleEventIdsKey,
+  ]);
+  const [visibleEventIdCopyFeedback, setVisibleEventIdCopyFeedback] =
+    useState<VisibleEventIdCopyFeedback | undefined>();
+  const visibleEventIdCopyScopeRef = useRef(visibleEventIdCopyScope);
+  const visibleEventIdCopyGenerationRef = useRef(0);
+  const visibleEventIdCopyRequestRef = useRef<number | null>(null);
+  const visibleEventIdCopyRequestIdRef = useRef(0);
+  useLayoutEffect(() => {
+    visibleEventIdCopyScopeRef.current = visibleEventIdCopyScope;
+    visibleEventIdCopyGenerationRef.current += 1;
+    visibleEventIdCopyRequestRef.current = null;
+    return () => {
+      visibleEventIdCopyGenerationRef.current += 1;
+      visibleEventIdCopyRequestRef.current = null;
+    };
+  }, [visibleEventIdCopyScope]);
+  const visibleEventIdCopyStatus =
+    visibleEventIdCopyFeedback?.scope === visibleEventIdCopyScope
+      ? visibleEventIdCopyFeedback.status
+      : 'idle';
+  const canCopyVisibleEventIds = canShowVisibleCount && entries.length > 0;
+
+  const copyVisibleEventIds = async () => {
+    if (!canCopyVisibleEventIds || visibleEventIdCopyRequestRef.current !== null) return;
+
+    const requestId = ++visibleEventIdCopyRequestIdRef.current;
+    const generation = visibleEventIdCopyGenerationRef.current;
+    const scope = visibleEventIdCopyScope;
+    visibleEventIdCopyRequestRef.current = requestId;
+    setVisibleEventIdCopyFeedback({ scope, status: 'pending' });
+
+    const isCurrentRequest = () =>
+      visibleEventIdCopyScopeRef.current === scope &&
+      visibleEventIdCopyGenerationRef.current === generation &&
+      visibleEventIdCopyRequestRef.current === requestId;
+
+    try {
+      const clipboard = typeof navigator === 'undefined' ? undefined : navigator.clipboard;
+      if (!clipboard || typeof clipboard.writeText !== 'function') {
+        throw new Error('Clipboard unavailable');
+      }
+      await clipboard.writeText(visibleEventIdsText);
+      if (isCurrentRequest()) setVisibleEventIdCopyFeedback({ scope, status: 'copied' });
+    } catch {
+      if (isCurrentRequest()) setVisibleEventIdCopyFeedback({ scope, status: 'failed' });
+    } finally {
+      if (visibleEventIdCopyRequestRef.current === requestId) {
+        visibleEventIdCopyRequestRef.current = null;
+      }
+    }
+  };
 
   const setPage = (nextPage: number) => setPageState({ taskId, page: nextPage });
+  const updateFilterState = (updates: Partial<Omit<ActivityFilterState, 'taskId'>>) => {
+    setFilterState((current) => ({
+      taskId,
+      mode: current.taskId === taskId ? current.mode : 'all',
+      actorMode: current.taskId === taskId ? current.actorMode : 'all',
+      showExactUtcTime: current.taskId === taskId ? current.showExactUtcTime : false,
+      reverseLoadedOrder: current.taskId === taskId ? current.reverseLoadedOrder : false,
+      ...updates,
+    }));
+  };
+  const canResetActivityFilters = filterMode !== 'all' || actorFilterMode !== 'all';
 
   if (!taskId) return null;
 
@@ -385,6 +641,106 @@ export function AuditLog({ taskId }: AuditLogProps) {
         Activity Log
       </h4>
 
+      <div className="mb-3 flex items-center gap-2 text-xs">
+        <label htmlFor={activityFilterId}>Activity filter</label>
+        <select
+          id={activityFilterId}
+          value={filterMode}
+          onChange={(event) => updateFilterState({
+            mode: event.target.value === 'status_changes' ? 'status_changes' : 'all',
+          })}
+          className="rounded border bg-background px-2 py-1"
+        >
+          <option value="all">All activity</option>
+          <option value="status_changes">Status changes on this page</option>
+        </select>
+      </div>
+
+      <div className="mb-3 flex items-center gap-2 text-xs">
+        <label htmlFor={`${activityFilterId}-actor`}>Actor filter</label>
+        <select
+          id={`${activityFilterId}-actor`}
+          value={actorFilterMode}
+          onChange={(event) => updateFilterState({
+            actorMode: event.target.value === 'humans' || event.target.value === 'agents'
+              ? event.target.value
+              : 'all',
+          })}
+          className="rounded border bg-background px-2 py-1"
+        >
+          <option value="all">All actors</option>
+          <option value="humans">Humans on this page</option>
+          <option value="agents">Agents on this page</option>
+        </select>
+      </div>
+
+      {canShowVisibleCount && currentPageEntries.length > 0 && (
+        <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            aria-pressed={reverseLoadedOrder}
+            aria-describedby={`${activityFilterId}-reverse-order-help`}
+            onClick={() => updateFilterState({ reverseLoadedOrder: !reverseLoadedOrder })}
+          >
+            Reverse loaded activity order
+          </Button>
+          <span id={`${activityFilterId}-reverse-order-help`} className="text-muted-foreground">
+            Reverses only matching activity already loaded on this page.
+          </span>
+        </div>
+      )}
+
+      <div className="mb-3">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => updateFilterState({ mode: 'all', actorMode: 'all' })}
+          disabled={!canResetActivityFilters}
+        >
+          Reset activity filters
+        </Button>
+      </div>
+
+      {canShowVisibleCount && (
+        <p role="status" className="mb-3 text-xs text-muted-foreground">
+          Showing {entries.length} of {currentPageEntries.length} loaded activity{' '}
+          {currentPageEntries.length === 1 ? 'entry' : 'entries'} on this page.
+        </p>
+      )}
+
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={copyVisibleEventIds}
+          disabled={!canCopyVisibleEventIds || visibleEventIdCopyStatus === 'pending'}
+        >
+          Copy visible activity event IDs ({entries.length})
+        </Button>
+        {visibleEventIdCopyStatus === 'copied' && (
+          <span role="status" className="text-xs text-green-700">Activity event IDs copied.</span>
+        )}
+        {visibleEventIdCopyStatus === 'failed' && (
+          <span role="alert" className="text-xs text-destructive">
+            Could not copy activity event IDs. Try copying them manually.
+          </span>
+        )}
+      </div>
+
+      <div className="mb-3 flex items-center gap-2 text-xs">
+        <input
+          id={`${activityFilterId}-exact-utc`}
+          type="checkbox"
+          checked={showExactUtcTime}
+          onChange={(event) => updateFilterState({ showExactUtcTime: event.target.checked })}
+        />
+        <label htmlFor={`${activityFilterId}-exact-utc`}>Show exact UTC timestamps</label>
+      </div>
+
       <ScrollArea className="h-64">
         <ul className="space-y-3">
           {entries.map((entry) => {
@@ -400,9 +756,10 @@ export function AuditLog({ taskId }: AuditLogProps) {
             const evidenceDetails = entry.action === 'task:evidence_attached'
               ? getEvidenceActivityDetails(entry.payload)
               : undefined;
+            const exactUtcTime = showExactUtcTime ? formatExactUtcTime(entry.createdAt) : undefined;
 
             return (
-              <li key={entry.id} className="flex gap-3">
+              <li key={JSON.stringify([taskId, entry.id])} className="flex gap-3">
                 <Avatar className="h-6 w-6 flex-shrink-0 mt-0.5">
                   <AvatarFallback className="text-xs">
                     {entry.actorType === 'agent' ? (
@@ -430,7 +787,9 @@ export function AuditLog({ taskId }: AuditLogProps) {
                     </span>
                   </div>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    {formatRelativeTime(entry.createdAt)}
+                    {showExactUtcTime
+                      ? (exactUtcTime ?? 'Exact time unavailable')
+                      : formatRelativeTime(entry.createdAt)}
                   </p>
                   {taskCreatedDetails !== undefined && (
                     <p className="mt-1 text-xs text-muted-foreground">
@@ -447,8 +806,29 @@ export function AuditLog({ taskId }: AuditLogProps) {
                     <EvidenceActivityDetailsView details={evidenceDetails} />
                   )}
                   <CopyActivityActorId
-                    key={`${taskId}:${entry.id}:${entry.actorId}`}
+                    key={JSON.stringify([
+                      taskId,
+                      page,
+                      filterMode,
+                      actorFilterMode,
+                      reverseLoadedOrder,
+                      visibleEventIdsKey,
+                      entry.id,
+                      entry.actorId,
+                    ])}
                     actorId={entry.actorId}
+                  />
+                  <CopyActivityEventId
+                    key={JSON.stringify([
+                      taskId,
+                      page,
+                      filterMode,
+                      actorFilterMode,
+                      reverseLoadedOrder,
+                      visibleEventIdsKey,
+                      entry.id,
+                    ])}
+                    eventId={entry.id}
                   />
                 </div>
               </li>
@@ -456,7 +836,13 @@ export function AuditLog({ taskId }: AuditLogProps) {
           })}
         </ul>
         {entries.length === 0 && (
-          <p className="py-3 text-xs text-muted-foreground">No activity on this page.</p>
+          <p className="py-3 text-xs text-muted-foreground">
+            {actorFilterMode !== 'all'
+              ? 'No matching activity on this page.'
+              : filterMode === 'status_changes'
+              ? 'No status changes on this page.'
+              : 'No activity on this page.'}
+          </p>
         )}
       </ScrollArea>
 
