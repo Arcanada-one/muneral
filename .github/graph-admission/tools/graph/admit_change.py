@@ -3447,6 +3447,21 @@ def cashed_canary_ids(doc: dict, boundary_inferred: set[str]) -> set[str]:
     return out
 
 
+def _git_valid_structural_exclusions(repo_path: Path, doc: dict, base: str, head: str) -> set[str]:
+    """Return only DEC-AUP-0034 exclusions independently re-derived from the bound Git trees.
+
+    C12 may discharge an inferred boundary obligation only for an exclusion that survives the same
+    matrix, changed-path, blob identity, and receipt-hash checks used by impact_pair coverage.
+    Invalid claims remain in the gate's coverage diagnostics; they never reduce this set.
+    """
+    repo = impact_pair.impact.Repo(repo_path)
+    before = impact_pair.index_at(repo, base)
+    after = impact_pair.index_at(repo, head)
+    accepted, _problems = impact_pair.structural_exclusions_rederived(
+        repo, doc, base, head, before, after)
+    return accepted
+
+
 def canary_coverage(repo: Path, rows: list[dict], cashed: set[str] | None = None, *,
                     head: str | None = None) -> tuple[set[str], list[str]]:
     """Which entities a receipt's canary rows ACTUALLY cover (DEC-AUP-0037 R1/R2).
@@ -4032,6 +4047,12 @@ def gate(repo: Path, base: str, head: str, receipt_paths: list[Path], policy: di
         # verdicts and discharges nothing — while `schema_check`, which does apply it, called the
         # same bytes conformant.
         imp = doc.get("impact_set") or {}
+        try:
+            structural_exclusions = _git_valid_structural_exclusions(repo, doc, base, head)
+        except (impact.Refusal, ValueError, KeyError, TypeError, OSError, subprocess.SubprocessError):
+            # Coverage already reports its own refusal (C18). Fail closed here: an exclusion that
+            # cannot be re-derived still owes the ordinary canary obligation.
+            structural_exclusions = set()
         boundary_inferred = []
         for section in ("deterministic_core", "inferred_tail"):
             for e in imp.get(section) or []:
@@ -4046,7 +4067,8 @@ def gate(repo: Path, base: str, head: str, receipt_paths: list[Path], policy: di
         # caller receipt into a C12 refusal.
         canary_entities, canary_problems = canary_coverage(
             repo, doc.get("verifiers") or [],
-            cashed=cashed_canary_ids(doc, set(boundary_inferred) - set(valid_exempt)), head=head)
+            cashed=cashed_canary_ids(
+                doc, set(boundary_inferred) - set(valid_exempt) - structural_exclusions), head=head)
         for problem in canary_problems:
             add("C12", f"{Path(rec['path']).name}: {problem}")
         # An exact eligible DEC-AUP-0167 record may carry a C1 canary measurement that remains
@@ -4056,7 +4078,8 @@ def gate(repo: Path, base: str, head: str, receipt_paths: list[Path], policy: di
         stage_nm_c1 = {entity for entity in stage_nm_entities
                        if verdict_of.get(entity) == "not_measured"}
         boundary = [e for e in boundary_inferred
-                    if e not in canary_entities and e not in valid_exempt and e not in stage_nm_c1]
+                    if e not in canary_entities and e not in valid_exempt
+                    and e not in structural_exclusions and e not in stage_nm_c1]
         if boundary:
             add("C12", f"{Path(rec['path']).name}: {len(boundary)} boundary entity(ies) reached over an "
                        f"inferred/observed edge with no canary", sorted(set(boundary)))
@@ -5713,7 +5736,7 @@ def cmd_gate(a) -> int:
 # DEC-AUP-0167 is an externally adopted delivery authority.  It deliberately does not live in
 # the candidate Program policy bundle: a candidate policy or stage document cannot adopt itself.
 STAGE_AUTHORITY_PATH = Path("/home/dev/aup/root-orch/STAGE-DELIVERY-DEC-AUP-0167.md")
-STAGE_AUTHORITY_SHA256 = "sha256:50dab9d0c3d03ca52e3163f7c56edb61acab214adc548a5c533cdf248e9ae17e"
+STAGE_AUTHORITY_SHA256 = "sha256:2a901098cf76366eae4159f7c254830ec10619be79205bb283fc6568b50355e6"
 STAGE_AUTHORITY_SOURCE_PATH = "governance/decisions/DEC-AUP-0167.md"
 STAGE_EVIDENCE_SCHEMA_PATH = PROGRAM_ROOT / "contracts/graph-verified-change/stage-evidence.v1.json"
 CURRENT_SOURCE_OUTCOME_FILES = (

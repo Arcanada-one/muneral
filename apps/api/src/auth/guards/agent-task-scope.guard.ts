@@ -12,7 +12,6 @@ import type { Request } from 'express';
 import { Agent } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { AGENT_SCOPE_KEY } from '../agent-scope.decorator.js';
-import { PROJECT_READ_TASK_METADATA_KEY } from '../project-read-task-metadata.decorator.js';
 import type { AgentScopeKind } from '../agent-scope.decorator.js';
 import { agentOwnTaskWhere, agentStatusAuthorityWhere } from '../agent-task-visibility.js';
 import { assignCompatWindowAdmits } from '../assign-compat-window.js';
@@ -67,10 +66,6 @@ const ROLE_RANK: Readonly<Record<string, number>> = {
 export type AgentScopedRequest = Request & {
   apiKeyAgent?: Agent;
   agentScope?: AgentScopeContext;
-  projectTaskMetadataRead?: {
-    projectId: string;
-    grant: ProjectReadGrantEntry;
-  };
 };
 
 /**
@@ -117,10 +112,8 @@ export type AgentScopedRequest = Request & {
  * 'project-index': a key named in `project-read-grants.ts` for a project reads
  * that project's task index (ids, status, title hashes; no free text). Without a
  * live grant the route answers the same 404 as a project outside the workspace,
- * so it does not confirm that a project exists. The separate
- * `@ProjectReadTaskMetadata()` marker on `GET /tasks/:taskId` may use the same
- * list for only its minimal metadata projection; ordinary task history and
- * writes remain assignment-scoped and never consult it.
+ * so it does not confirm that a project exists. No other scope kind consults
+ * the grant list — in particular no write does.
  */
 @Injectable()
 export class AgentTaskScopeGuard implements CanActivate {
@@ -207,66 +200,6 @@ export class AgentTaskScopeGuard implements CanActivate {
       case 'task': {
         const taskId = this.paramOf(req, 'taskId');
         if (!taskId) throw new ForbiddenException('No task in scope for this key.');
-
-        // This marker is attached only to GET /tasks/:taskId. Keep the
-        // established AgentScopeKind contract and task scope; the grant is a
-        // route-specific fallback after the normal creator/assignment check.
-        if (Reflect.getMetadata(PROJECT_READ_TASK_METADATA_KEY, context.getHandler()) === true) {
-          if (req.method !== 'GET') {
-            throw new ForbiddenException('Project task metadata grants are read-only.');
-          }
-
-          const owned = await this.prisma.task
-            .findFirst({
-              where: {
-                id: taskId,
-                project: { workspaceId: agent.workspaceId },
-                ...agentOwnTaskWhere(agent.id),
-              },
-              select: { id: true },
-            })
-            .catch(() => null);
-
-          // Existing callers keep the full assigned/creator response.
-          if (owned) {
-            req.agentScope = { agentId: agent.id, kind, workspaceId: agent.workspaceId };
-            return true;
-          }
-
-          const task = await this.prisma.task
-            .findFirst({
-              where: { id: taskId, project: { workspaceId: agent.workspaceId } },
-              select: { id: true, projectId: true },
-            })
-            .catch(() => null);
-          if (!task) {
-            throw new ForbiddenException('Task is not in scope for this key.');
-          }
-
-          const state = projectReadGrantState(
-            agent.id,
-            task.projectId,
-            new Date(),
-            this.projectReadGrants,
-          );
-          if (state.kind === 'expired') {
-            throw new ForbiddenException({
-              code: 'GRANT_EXPIRED',
-              message: `The project read grant for this key expired at ${state.entry.until}.`,
-              projectId: task.projectId,
-              until: state.entry.until,
-              decision: state.entry.decision,
-            });
-          }
-          if (state.kind === 'none') {
-            throw new ForbiddenException('Task is not in scope for this key.');
-          }
-
-          req.agentScope = { agentId: agent.id, kind, workspaceId: agent.workspaceId };
-          req.projectTaskMetadataRead = { projectId: task.projectId, grant: state.entry };
-          return true;
-        }
-
         await this.assertOwnTask(agent, taskId);
         break;
       }

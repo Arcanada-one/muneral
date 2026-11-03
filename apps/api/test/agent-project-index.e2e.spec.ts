@@ -5,8 +5,9 @@
  * `GET /tasks/project/:projectId/index` answers every task of the project as
  * ids, status and title hashes to a key named for that project in the grant
  * list, and a 404 — the answer an unknown project gets — to every other key.
- * A grant also opens only the metadata projection of one task GET; history and
- * write routes retain their own-slice checks. Each admitted read writes one
+ * The grant opens that one route and nothing else: every write route, and every
+ * read route that keeps the own slice, answers a granted key exactly as before
+ * on a task it neither created nor is assigned to. Each read writes one
  * activity row whose id is in the answer.
  */
 import supertest from 'supertest';
@@ -379,91 +380,8 @@ describe('MUN-0052 — project task index for granted agent keys (e2e)', () => {
       return [withGrant, withoutGrant];
     }
 
-    it('GET /tasks/:taskId returns audited metadata under a grant and preserves the legacy 403 without one', async () => {
-      grants.length = 0;
-      grant('reader', projectId);
-      const task = await prisma.task.findUniqueOrThrow({ where: { id: taskId } });
-      const auditCount = await prisma.activityLog.count({
-        where: { action: 'project:index_read', actorId: ids.reader },
-      });
-
-      const withGrant = await http().get(`/tasks/${taskId}`).set(k()).expect(200);
-      expect(Object.keys(withGrant.body).sort()).toEqual([
-        'auditEventId', 'description', 'id', 'projectId', 'status', 'title',
-      ]);
-      expect(withGrant.body).toMatchObject({
-        id: task.id,
-        projectId: task.projectId,
-        title: task.title,
-        description: task.description,
-        status: task.status,
-      });
-      const audit = await prisma.activityLog.findUniqueOrThrow({
-        where: { id: withGrant.body.auditEventId },
-      });
-      expect(audit).toMatchObject({
-        workspaceId,
-        taskId: null,
-        actorType: 'agent',
-        actorId: ids.reader,
-        action: 'project:index_read',
-      });
-      expect(await prisma.activityLog.count({
-        where: { action: 'project:index_read', actorId: ids.reader },
-      })).toBe(auditCount + 1);
-
-      grants.length = 0;
-      const withoutGrant = await http().get(`/tasks/${taskId}`).set(k()).expect(403);
-      expect(JSON.stringify(withoutGrant.body)).not.toContain(taskId);
-      expect(await prisma.activityLog.count({
-        where: { action: 'project:index_read', actorId: ids.reader },
-      })).toBe(auditCount + 1);
-    });
-
-    it('keeps assigned, creator, and human task reads on the existing full response', async () => {
-      grants.length = 0;
-      const assigned = await othersTask();
-      await prisma.taskAgent.create({ data: { taskId: assigned.id, agentId: ids.reader, role: 'executor' } });
-      const created = await prisma.task.create({
-        data: {
-          projectId,
-          title: 'reader-created full task',
-          description: 'creator compatibility',
-          status: 'todo',
-          priority: 'high',
-          createdById: ids.reader,
-          actorType: 'agent',
-          bootstrapStamp: { receipt: 'full response remains for creator' },
-        },
-      });
-
-      for (const task of [assigned, created]) {
-        const response = await http().get(`/tasks/${task.id}`).set(k()).expect(200);
-        expect(response.body).toMatchObject({
-          id: task.id,
-          projectId,
-          title: task.title,
-          description: task.description,
-          status: task.status,
-          priority: task.priority,
-        });
-        expect(response.body).toHaveProperty('bootstrapStamp');
-        expect(response.body).not.toHaveProperty('auditEventId');
-      }
-
-      const humanResponse = await http()
-        .get(`/tasks/${assigned.id}`)
-        .set(bearer(authSvc.signAccess(userId)))
-        .expect(200);
-      expect(humanResponse.body).toMatchObject({
-        id: assigned.id,
-        projectId,
-        title: assigned.title,
-        description: assigned.description,
-        status: assigned.status,
-        priority: assigned.priority,
-      });
-      expect(humanResponse.body).not.toHaveProperty('auditEventId');
+    it('GET /tasks/:taskId → 403', async () => {
+      await differential(() => http().get(`/tasks/${taskId}`).set(k()), 403);
     });
 
     it('GET /tasks/project/:projectId stays the own slice (empty)', async () => {

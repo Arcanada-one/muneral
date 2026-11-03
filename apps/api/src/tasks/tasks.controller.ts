@@ -30,7 +30,6 @@ import { AgentTaskScopeGuard } from '../auth/guards/agent-task-scope.guard.js';
 import { HumanTaskReadGuard } from '../auth/guards/human-task-read.guard.js';
 import type { AgentScopeContext } from '../auth/guards/agent-task-scope.guard.js';
 import { AgentScope } from '../auth/agent-scope.decorator.js';
-import { ProjectReadTaskMetadata } from '../auth/project-read-task-metadata.decorator.js';
 import { ActorInterceptor } from '../common/interceptors/actor.interceptor.js';
 import type { Actor } from '@muneral/types';
 import { FieldChangesService } from './field-state/field-changes.service.js';
@@ -40,14 +39,7 @@ import { RedactFieldDto } from './redactions/redact-field.dto.js';
 import { TaskEvidenceService } from './evidence/task-evidence.service.js';
 import { AttachEvidenceDto } from './evidence/attach-evidence.dto.js';
 
-type AuthRequest = Request & {
-  actor: Actor;
-  agentScope?: AgentScopeContext;
-  projectTaskMetadataRead?: {
-    projectId: string;
-    grant: import('../auth/project-read-grants.js').ProjectReadGrantEntry;
-  };
-};
+type AuthRequest = Request & { actor: Actor; agentScope?: AgentScopeContext };
 
 /**
  * Tasks CRUD with status state machine, checklists, dependencies, comments.
@@ -61,10 +53,9 @@ type AuthRequest = Request & {
  *
  * The guard pair below is an ALLOWLIST, not a widening: `JwtOrApiKeyGuard`
  * accepts either credential, and `AgentTaskScopeGuard` then refuses an API key
- * on every route that is not explicitly marked `@AgentScope(...)`. The one
- * additional project-grant path is the explicit metadata marker on `findOne`;
- * it returns only a narrow task projection. Routes with no scope marker —
- * delete, checklists — stay exactly as JWT-only as they
+ * on every route that is not explicitly marked `@AgentScope(...)`, and on every
+ * marked route whose task the key's agent is not assigned to. Routes with no
+ * marker — delete, checklists — stay exactly as JWT-only as they
  * were; the only visible difference is that a valid key is now told 403
  * instead of 401.
  *
@@ -203,33 +194,12 @@ export class TasksController {
    */
   @Get(':taskId')
   @AgentScope('task')
-  @ProjectReadTaskMetadata()
   async findOne(
     @Param('taskId') taskId: string,
     @Req() req: AuthRequest,
     @Headers('if-none-match') ifNoneMatch: string | undefined,
     @Res({ passthrough: true }) res: Response,
   ) {
-    if (req.projectTaskMetadataRead) {
-      const scope = req.agentScope;
-      if (
-        req.actor.type !== 'agent' ||
-        !scope ||
-        scope.kind !== 'task' ||
-        scope.agentId !== req.actor.id ||
-        !scope.workspaceId
-      ) {
-        throw new ForbiddenException('Project task metadata grant context is required.');
-      }
-      return this.tasksService.findOneForProjectReadGrant(
-        taskId,
-        req.projectTaskMetadataRead.projectId,
-        scope.workspaceId,
-        scope.agentId,
-        req.projectTaskMetadataRead.grant,
-      );
-    }
-
     const task = await this.tasksService.findOne(taskId, req.actor.type === 'human' ? req.actor.id : undefined);
 
     // MUN-0054: set before the 304 branch, so a conditional request that gets

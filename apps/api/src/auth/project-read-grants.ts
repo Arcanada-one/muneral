@@ -12,13 +12,10 @@
  * key cannot do today is list the ids — a workspace-wide list would hand every
  * key of the workspace the whole board, including titles known to carry secrets.
  *
- * So the read is granted per key and per project, here. It opens the index
- * route, `GET /tasks/project/:projectId/index` (`@AgentScope('project-index')`),
- * and the minimal metadata branch of `GET /tasks/:taskId` only when that
- * handler also carries `@ProjectReadTaskMetadata()`. The index answers ids,
- * status and a sha256 of the title; the single-task branch answers only id,
- * projectId, title, description and status, with its audit event id. Every
- * other route keeps the own-slice rule, and no write consults this list.
+ * So the read is granted per key and per project, here, and it opens exactly one
+ * route: `GET /tasks/project/:projectId/index` (`@AgentScope('project-index')`),
+ * which answers ids, status and a sha256 of the title — no free text. Every other
+ * route keeps the own-slice rule, and nothing here is consulted by any write.
  *
  * The list lives in code, not in a table or the environment, on purpose — the
  * same choice as `assign-compat-window.ts`: a grant is a reviewed change that
