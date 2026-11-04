@@ -2187,24 +2187,65 @@ def cmd_run(a) -> int:
             files_status = [{"path": f, "status": status.get(f, "M")} for f in files]
             su_case, su_ev = admit_mod.structural_case(
                 repo, base, head, files_status, bundle_rel, getattr(a, "base_branch", None))
-            if su_case != "gate_self_update":
+            if su_case == "gate_self_update":
+                managed_base, base_manifest = admit_mod.bundle_paths_at(repo, base, bundle_rel)
+                managed_head, head_manifest = admit_mod.bundle_paths_at(repo, head, bundle_rel)
+                executable_suffixes = {".py", ".js", ".mjs", ".cjs", ".sh", ".bash", ".zsh"}
+                def executable_payload_paths(paths, manifest):
+                    return {path for entry in (manifest or {}).get("files", [])
+                            if isinstance(entry, dict) and entry.get("verified_by_the_job") is not False
+                            and isinstance(entry.get("path"), str)
+                            and Path(entry["path"]).suffix.lower() in executable_suffixes
+                            for path in [f"{prefix}{entry['path']}"] if path in paths}
+                executable_edits = set(edited) & (
+                    executable_payload_paths(managed_base, base_manifest)
+                    | executable_payload_paths(managed_head, head_manifest))
+                base_ref = (base_manifest or {}).get("program_ref")
+                head_ref = (head_manifest or {}).get("program_ref")
+                # Refuse stale-ref executable edits before their native B3 selftest recurses.
+                if (executable_edits and isinstance(base_ref, str) and base_ref
+                        and base_ref == head_ref and not su_ev.get("program_ref_pin_updates")):
+                    return fail("BUNDLE_MODIFIED_BY_PR",
+                                "managed executable source changed while the signed program_ref stayed stale and no paired canonical caller-pin update was validated")
+                result["self_update"] = su_ev
+                result["checks"].append({"code": "SELF_UPDATE_CANDIDATE", "verdict": "not_measured",
+                                         "detail": (f"this pull request refreshes the vendored gate bundle itself "
+                                                    f"(program_ref {str((su_ev.get('program_ref') or {}).get('base'))[:12]} → "
+                                                    f"{str((su_ev.get('program_ref') or {}).get('head'))[:12]}) and changes "
+                                                    f"NOTHING else. The gate below must find a receipt carrying a "
+                                                    f"GATE_SELF_UPDATE exemption and re-measure its full battery. "
+                                                    f"`not_measured` is not a pass (DEC-AUP-0008 I4).")})
+            elif su_case is None:
+                # The remote canonical workflow has already completed its native pre-payload
+                # signature, active-workflow, BASE-key-continuity and exact-inventory checks.
+                # Recheck the BASE-key continuity and bundle batteries in the authenticated tools,
+                # then keep this exact final range on the ordinary CAR path below.
+                composition = admit_mod.evaluate_self_update(
+                    repo, base, head, files_status,
+                    work / "mixed-bundle-composition", bundle_rel,
+                    verifier_job=getattr(a, "verifier_job", None),
+                    verifier_conclusion=getattr(a, "verifier_conclusion", None),
+                    base_branch=getattr(a, "base_branch", None), composition=True)
+                if not composition.get("eligible"):
+                    failed = [c for c in composition.get("checks", [])
+                              if c.get("verdict") != "verified"]
+                    return fail("BUNDLE_COMPOSITION_REFUSED",
+                                "; ".join(f"{c.get('code')}: {c.get('detail')}" for c in failed[:5])
+                                or "the BASE-key managed-segment proof is incomplete")
+                result["bundle_composition"] = composition
+                result["checks"].append({"code": "BUNDLE_COMPOSITION_AUTHENTICATED", "verdict": "verified",
+                                         "detail": ("the changed managed segment passed BASE-key continuity, "
+                                                    "head selftest, monotonicity and workflow integrity; every "
+                                                    "outside path remains in the exact final base..head range and "
+                                                    "is still subject to the ordinary CAR, impact, verifier and "
+                                                    "canary checks below")})
+            else:
                 return fail("BUNDLE_MODIFIED_BY_PR",
                             f"this pull request edits or removes {len(edited)} file(s) under the vendored gate bundle "
-                            f"({', '.join(sorted(edited)[:3])}) — a bundle refresh is its own pull request, gated on its own"
-                            + (f"; and it is not one: {su_ev.get('reason') or 'the changed set is not exactly the '
-                               'bundle-managed paths'}" if su_ev.get("outside_the_bundle") or su_ev.get("reason") else ""))
-            result["self_update"] = su_ev
-            result["checks"].append({"code": "SELF_UPDATE_CANDIDATE", "verdict": "not_measured",
-                                     "detail": (f"this pull request refreshes the vendored gate bundle itself "
-                                                f"(program_ref {str((su_ev.get('program_ref') or {}).get('base'))[:12]} → "
-                                                f"{str((su_ev.get('program_ref') or {}).get('head'))[:12]}) and changes "
-                                                f"NOTHING else. BUNDLE_MODIFIED_BY_PR is therefore not the answer, and "
-                                                f"neither is a pass: the gate below must find a receipt carrying a "
-                                                f"GATE_SELF_UPDATE exemption, and it re-measures that exemption's whole "
-                                                f"battery — signature continuity against the key of the BASE tree, the "
-                                                f"head bundle's own selftest, and check-id/arm monotonicity. "
-                                                f"`not_measured` is not a pass (DEC-AUP-0008 I4).")})
-        if touched and not result.get("self_update"):
+                            f"({', '.join(sorted(edited)[:3])}) — neither a managed-only refresh nor a valid mixed-range "
+                            "composition is established"
+                            + (f"; classifier: {su_ev.get('reason')}" if su_ev.get("reason") else ""))
+        if touched and not result.get("self_update") and not result.get("bundle_composition"):
             # …and NOT on the self-update path: there the bundle is REFRESHED, not installed, and
             # saying «ADDS the vendored gate bundle» about a diff of six modified files is a check text
             # that misdescribes what it measured. Caught by replaying the real muneral refresh locally.
@@ -2704,7 +2745,7 @@ def selftest() -> int:
         if f["path"].endswith("admit_change.py"):
             f["sha256"] = sha256_file(tp2)
     mp2.write_text(json.dumps(man2, indent=1, sort_keys=True) + "\n")
-    subprocess.run(["git", "-C", str(repo2), "add", "-A"], check=True)
+    subprocess.run(["git", "-C", str(repo2), "add", "--", ".github/graph-admission"], check=True)
     subprocess.run(["git", "-C", str(repo2), "-c", "user.email=f@x", "-c", "user.name=f",
                     "commit", "-q", "-m", "edit a vendored tool"], check=True)
     edited_head = admit_change.git(repo2, "rev-parse", "HEAD").strip()
@@ -2722,7 +2763,7 @@ def selftest() -> int:
     # stop: someone who HOLDS the signing key. Re-sign the tampered bundle correctly and the signature
     # is valid; BUNDLE_MODIFIED_BY_PR is then the only thing standing, and it must still stand.
     sign_bundle(repo2 / ".github/graph-admission")
-    subprocess.run(["git", "-C", str(repo2), "add", "-A"], check=True)
+    subprocess.run(["git", "-C", str(repo2), "add", "--", ".github/graph-admission"], check=True)
     subprocess.run(["git", "-C", str(repo2), "-c", "user.email=f@x", "-c", "user.name=f",
                     "commit", "-q", "-m", "re-sign the tampered bundle with the trusted key"], check=True)
     resigned_head = admit_change.git(repo2, "rev-parse", "HEAD").strip()
