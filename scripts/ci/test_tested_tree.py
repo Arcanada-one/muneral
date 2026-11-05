@@ -249,7 +249,10 @@ class TestedTreeQualificationTests(unittest.TestCase):
 
     def test_deploy_readiness_requires_reuse_or_cold_success_and_every_gate(self):
         def readiness(reuse, lint, gates, tested_tree_result="success"):
-            test_path = (reuse == "true" and lint == "skipped") or (reuse != "true" and lint == "success")
+            if reuse == "true":
+                test_path = lint == "success"
+            else:
+                test_path = lint == "success"
             return (
                 tested_tree_result == "success"
                 and gates == {"secrets": "success", "network": "success", "preflight": "success"}
@@ -257,18 +260,19 @@ class TestedTreeQualificationTests(unittest.TestCase):
             )
 
         all_green = {"secrets": "success", "network": "success", "preflight": "success"}
-        self.assertTrue(readiness("true", "skipped", all_green))
+        self.assertTrue(readiness("true", "success", all_green))
+        self.assertFalse(readiness("true", "failure", all_green))
         self.assertTrue(readiness("false", "success", all_green))
         self.assertTrue(readiness("unknown", "success", all_green))
         self.assertFalse(readiness("unknown", "failure", all_green))
         self.assertFalse(readiness("false", "skipped", all_green))
-        self.assertFalse(readiness("true", "skipped", all_green, tested_tree_result="failure"))
+        self.assertFalse(readiness("true", "success", all_green, tested_tree_result="failure"))
         self.assertFalse(readiness("false", "success", all_green, tested_tree_result="cancelled"))
         for gate in all_green:
             for result in ("failure", "cancelled", "skipped"):
-                self.assertFalse(readiness("true", "skipped", dict(all_green, **{gate: result})))
+                self.assertFalse(readiness("true", "success", dict(all_green, **{gate: result})))
                 self.assertFalse(readiness("false", "success", dict(all_green, **{gate: result})))
-        self.assertFalse(readiness("true", "skipped", {"secrets": "success", "network": "success"}))
+        self.assertFalse(readiness("true", "success", {"secrets": "success", "network": "success"}))
 
 
 if __name__ == "__main__":
