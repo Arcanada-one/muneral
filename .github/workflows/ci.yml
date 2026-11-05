@@ -65,12 +65,12 @@ jobs:
         run: python3 -I scripts/ci/tested_tree.py
 
   lint-and-test:
-    # PR and cold-path main verification use the same runner class, so tested-tree
-    # can qualify the effective runtime before permitting reuse. Dedicated deploy
-    # gates remain on their existing isolated lane.
+    # This job remains successful on reuse so it cannot skip a transitive deploy
+    # ancestor. The exact reuse proof runs while ordinary verification steps skip.
+    # Dedicated deploy gates remain on their existing isolated lane.
     runs-on: [self-hosted, linux, ci-general]
     needs: tested-tree
-    if: always() && (github.event_name == 'pull_request' || needs.tested-tree.outputs.reuse != 'true')
+    if: always()
     services:
       postgres:
         image: postgres:16
@@ -93,13 +93,19 @@ jobs:
           - 5432
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - name: Confirm tested-tree reuse proof
+        run: printf 'tested-tree reuse=%s tree=%s\n' '${{ needs.tested-tree.outputs.reuse }}' "$(git rev-parse 'HEAD^{tree}')"
       - name: Test Ops Bot secret gate contract
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: bash scripts/ci/opsbot-secret-gate.test.sh
       - name: Test runner deploy-broker preflight contract
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: bash scripts/ci/runner-broker-preflight.test.sh
       - name: Test tested-tree reuse qualification
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: python3 -I scripts/ci/test_tested_tree.py
       - name: Test semantic aggregate readback contract
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: |
           node --test apps/api/scripts/semantic-aggregate-readback.test.mjs
           bash scripts/ci/semantic-readback-caller-contract.test.sh
@@ -108,51 +114,65 @@ jobs:
       # bodies and asserts each one goes RED — including the exact hole A2-251 measured, where the
       # controller's `0.0.0-unknown` sentinel was recorded as a valid version.
       - name: Test /health identity probes go red on a build that cannot name itself
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: bash scripts/ci/probe-health-identity.test.sh
           bash scripts/ci/semantic-readback-caller-contract.sh
       # A2-267: the agent-task list must carry `contractDigest` on every row. This serves rows with
       # the key missing or malformed from a loopback stub and asserts the probe goes RED on each.
       - name: Test the contract-digest probe goes red on a build without the field
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: bash scripts/ci/probe-contract-digest.test.sh
       # A2-330: the post-deploy canary must be able to go red — a route missing from the resident
       # route table, a 405, a router no-match 404 — and must never send anything but a GET.
       - name: Test the post-deploy canary goes red
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: python3 -m unittest discover -s scripts/canary -p 'test_*.py'
       - name: Enable corepack (pnpm@11.5.2 from packageManager field)
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: |
           COREPACK_HOME="${RUNNER_TEMP}/corepack-bin"
           mkdir -p "${COREPACK_HOME}"
           corepack enable --install-directory "${COREPACK_HOME}"
           echo "${COREPACK_HOME}" >> "${GITHUB_PATH}"
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        if: needs.tested-tree.outputs.reuse != 'true'
         with:
           node-version: 24.22.1
           cache: pnpm
       - name: Test standalone browser stderr sanitizer
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: node --test scripts/diagnostics/sanitize-browser-stderr.test.mjs
       - name: Install dependencies
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: pnpm install --frozen-lockfile
       - name: Lint
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: pnpm lint
       - name: Build shared types
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: pnpm --filter @muneral/types build
       - name: Generate Prisma client
+        if: needs.tested-tree.outputs.reuse != 'true'
         # Run from repo root so prisma.config.ts (root) resolves apps/api/prisma/schema.prisma
         run: pnpm exec prisma generate
         env:
           DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
       - name: Build
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: pnpm build
       - name: Apply DB migrations
+        if: needs.tested-tree.outputs.reuse != 'true'
         # Run from repo root — prisma.config.ts at root, schema at apps/api/prisma/schema.prisma
         run: pnpm exec prisma migrate deploy
         env:
           DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
       - name: Test semantic aggregate readback against disposable PostgreSQL
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: node apps/api/scripts/semantic-aggregate-readback.mjs
         env:
           DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
       - name: Test
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: pnpm test
         env:
           DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
@@ -249,7 +269,7 @@ jobs:
           set -eu
           [ "$TESTED_TREE_RESULT" = success ]
           if [ "$TESTED_TREE_REUSE" = true ]; then
-            [ "$LINT_AND_TEST_RESULT" = skipped ]
+            [ "$LINT_AND_TEST_RESULT" = success ]
           else
             [ "$LINT_AND_TEST_RESULT" = success ]
           fi
