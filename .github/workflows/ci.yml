@@ -234,7 +234,7 @@ jobs:
     # successful cold suite, plus every security gate, can reach the deploy job.
     needs: [tested-tree, lint-and-test, secrets-gate, network-exposure, preflight-caller-contract]
     if: always() && github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, ci-general]
     permissions: {}
     steps:
       - name: Require successful test proof and security gates
