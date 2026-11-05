@@ -218,7 +218,7 @@ def main() -> int:
     output_path = os.environ.get("GITHUB_OUTPUT")
     if not output_path:
         print("tested-tree: missing GITHUB_OUTPUT; cold path selected", file=sys.stderr)
-        return 1
+        return 0
     repository = os.environ.get("GITHUB_REPOSITORY", "")
     push_sha = os.environ.get("GITHUB_SHA", "")
     token = os.environ.get("GITHUB_TOKEN", "")

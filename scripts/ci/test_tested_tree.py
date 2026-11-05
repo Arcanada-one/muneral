@@ -1,5 +1,7 @@
 import hashlib
+import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -68,6 +70,24 @@ def fixture():
 
 
 class TestedTreeQualificationTests(unittest.TestCase):
+    def test_missing_github_output_exits_successfully_without_granting_reuse(self):
+        with tempfile.TemporaryDirectory() as workdir:
+            result = subprocess.run(
+                [sys.executable, "-I", "-B", str(Path(tested_tree_module.__file__).resolve())],
+                cwd=workdir,
+                env={},
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout, "")
+            self.assertEqual(
+                result.stderr, "tested-tree: missing GITHUB_OUTPUT; cold path selected\n"
+            )
+            self.assertNotIn("reuse=true", result.stdout + result.stderr)
+            self.assertEqual(list(Path(workdir).iterdir()), [])
+
     def test_exact_merged_pr_and_successful_pinned_workflow_job_qualify(self):
         pr, merge, runs, jobs, check_run, suite, workflow = fixture()
         self.assertTrue(
