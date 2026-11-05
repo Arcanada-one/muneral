@@ -66,7 +66,7 @@ def associated_merged_pr_is_exact(
     ):
         return None
     parents = merge_commit.get("parents") or []
-    if len(parents) != 2 or not parents[0].get("sha") or not parents[1].get("sha"):
+    if len(parents) != 2 or not parents[0].get("sha") or not parents[1].get("sha") or parents[1]["sha"] != head["sha"]:
         return None
     return pr
 

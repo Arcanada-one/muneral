@@ -199,6 +199,16 @@ class TestedTreeQualificationTests(unittest.TestCase):
                 )
             )
 
+    def test_pr_head_absent_from_two_nonempty_merge_parents_refuses(self):
+        pr, merge, runs, jobs, check_run, suite, workflow = fixture()
+        bad_merge = dict(merge, parents=[{"sha": "main-parent"}, {"sha": "other-parent"}])
+        self.assertFalse(
+            reuse_qualified(
+                REPOSITORY, PUSH_SHA, bad_merge, [pr], "same-tree", "same-tree",
+                WORKFLOW_ID, runs, jobs, check_run, suite, workflow
+            )
+        )
+
     def test_wrong_workflow_run_attempt_job_or_check_identity_refuses(self):
         pr, _, runs, jobs, check_run, suite, _ = fixture()
         cases = []
