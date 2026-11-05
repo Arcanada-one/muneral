@@ -41,12 +41,36 @@ jobs:
           OPSBOT_API_KEY: ${{ secrets.OPSBOT_API_KEY }}
         run: bash scripts/ci/opsbot-secret-gate.sh
 
+  tested-tree:
+    # Reuse is an optimization only. Any missing, ambiguous or unqualified proof
+    # emits `reuse=false`, so the ordinary lint-and-test job remains the fallback.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      actions: read
+      checks: read
+      contents: read
+      pull-requests: read
+    runs-on: [self-hosted, linux, ci-general]
+    outputs:
+      reuse: ${{ steps.proof.outputs.reuse }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+      - name: Qualify tested PR tree
+        id: proof
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 -I scripts/ci/tested_tree.py
+
   lint-and-test:
-    # A2-315: pre-deploy gates run on the dedicated `deploy-gate` lane, not on `ci-general`, where
-    # KC2 batteries held all five slots for hours (argana 95 min, muneral 150 min in the queue on
-    # 2026-09-24/25). The lane's runners carry ONLY that label (--no-default-labels): nothing else lands there.
-    # Pull requests keep the shared pool; only the push that deploys takes the lane.
-    runs-on: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && fromJSON('["deploy-gate"]') || fromJSON('["self-hosted","linux","ci-general"]') }}
+    # PR and cold-path main verification use the same runner class, so tested-tree
+    # can qualify the effective runtime before permitting reuse. Dedicated deploy
+    # gates remain on their existing isolated lane.
+    runs-on: [self-hosted, linux, ci-general]
+    needs: tested-tree
+    if: always() && (github.event_name == 'pull_request' || needs.tested-tree.outputs.reuse != 'true')
     services:
       postgres:
         image: postgres:16
@@ -73,6 +97,8 @@ jobs:
         run: bash scripts/ci/opsbot-secret-gate.test.sh
       - name: Test runner deploy-broker preflight contract
         run: bash scripts/ci/runner-broker-preflight.test.sh
+      - name: Test tested-tree reuse qualification
+        run: python3 -I scripts/ci/test_tested_tree.py
       - name: Test semantic aggregate readback contract
         run: |
           node --test apps/api/scripts/semantic-aggregate-readback.test.mjs
@@ -202,8 +228,37 @@ jobs:
         with:
           vault-addr: ${{ vars.VAULT_ADDR }}
 
+  deploy-readiness:
+    # Keep the registered deploy.if byte-for-byte exact. This capability-free
+    # aggregator is the conditional DAG edge: only an exact reuse proof or a
+    # successful cold suite, plus every security gate, can reach the deploy job.
+    needs: [tested-tree, lint-and-test, secrets-gate, network-exposure, preflight-caller-contract]
+    if: always() && github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: [self-hosted, linux, ci-general]
+    permissions: {}
+    steps:
+      - name: Require successful test proof and security gates
+        env:
+          TESTED_TREE_RESULT: ${{ needs.tested-tree.result }}
+          TESTED_TREE_REUSE: ${{ needs.tested-tree.outputs.reuse }}
+          LINT_AND_TEST_RESULT: ${{ needs.lint-and-test.result }}
+          SECRETS_GATE_RESULT: ${{ needs.secrets-gate.result }}
+          NETWORK_EXPOSURE_RESULT: ${{ needs.network-exposure.result }}
+          PREFLIGHT_CONTRACT_RESULT: ${{ needs.preflight-caller-contract.result }}
+        run: |
+          set -eu
+          [ "$TESTED_TREE_RESULT" = success ]
+          if [ "$TESTED_TREE_REUSE" = true ]; then
+            [ "$LINT_AND_TEST_RESULT" = skipped ]
+          else
+            [ "$LINT_AND_TEST_RESULT" = success ]
+          fi
+          [ "$SECRETS_GATE_RESULT" = success ]
+          [ "$NETWORK_EXPOSURE_RESULT" = success ]
+          [ "$PREFLIGHT_CONTRACT_RESULT" = success ]
+
   deploy:
-    needs: [lint-and-test, secrets-gate, network-exposure, preflight-caller-contract]
+    needs: [deploy-readiness, preflight-caller-contract]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     # SEC-0063: a HOST-UNIQUE label, not the shared `arcana-prod`. The shared
     # label sits on several runners, including ones on a DIFFERENT machine
