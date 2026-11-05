@@ -97,6 +97,8 @@ jobs:
         run: bash scripts/ci/opsbot-secret-gate.test.sh
       - name: Test runner deploy-broker preflight contract
         run: bash scripts/ci/runner-broker-preflight.test.sh
+      - name: Test tested-tree reuse qualification
+        run: python3 -I scripts/ci/test_tested_tree.py
       - name: Test semantic aggregate readback contract
         run: |
           node --test apps/api/scripts/semantic-aggregate-readback.test.mjs
@@ -226,17 +228,38 @@ jobs:
         with:
           vault-addr: ${{ vars.VAULT_ADDR }}
 
-  deploy:
+  deploy-readiness:
+    # Keep the registered deploy.if byte-for-byte exact. This capability-free
+    # aggregator is the conditional DAG edge: only an exact reuse proof or a
+    # successful cold suite, plus every security gate, can reach the deploy job.
     needs: [tested-tree, lint-and-test, secrets-gate, network-exposure, preflight-caller-contract]
-    if: >-
-      always() &&
-      github.ref == 'refs/heads/main' &&
-      github.event_name == 'push' &&
-      ((needs.tested-tree.result == 'success' && needs.tested-tree.outputs.reuse == 'true') ||
-       (needs.tested-tree.outputs.reuse != 'true' && needs.lint-and-test.result == 'success')) &&
-      needs.secrets-gate.result == 'success' &&
-      needs.network-exposure.result == 'success' &&
-      needs.preflight-caller-contract.result == 'success'
+    if: always() && github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Require successful test proof and security gates
+        env:
+          TESTED_TREE_RESULT: ${{ needs.tested-tree.result }}
+          TESTED_TREE_REUSE: ${{ needs.tested-tree.outputs.reuse }}
+          LINT_AND_TEST_RESULT: ${{ needs.lint-and-test.result }}
+          SECRETS_GATE_RESULT: ${{ needs.secrets-gate.result }}
+          NETWORK_EXPOSURE_RESULT: ${{ needs.network-exposure.result }}
+          PREFLIGHT_CONTRACT_RESULT: ${{ needs.preflight-caller-contract.result }}
+        run: |
+          set -eu
+          [ "$TESTED_TREE_RESULT" = success ]
+          if [ "$TESTED_TREE_REUSE" = true ]; then
+            [ "$LINT_AND_TEST_RESULT" = skipped ]
+          else
+            [ "$LINT_AND_TEST_RESULT" = success ]
+          fi
+          [ "$SECRETS_GATE_RESULT" = success ]
+          [ "$NETWORK_EXPOSURE_RESULT" = success ]
+          [ "$PREFLIGHT_CONTRACT_RESULT" = success ]
+
+  deploy:
+    needs: [deploy-readiness, preflight-caller-contract]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     # SEC-0063: a HOST-UNIQUE label, not the shared `arcana-prod`. The shared
     # label sits on several runners, including ones on a DIFFERENT machine
     # where this service has no containers and the root deploy broker has no

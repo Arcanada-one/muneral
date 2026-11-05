@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import sys
@@ -15,11 +16,9 @@ from typing import Any
 API = "https://api.github.com"
 EXPECTED_RUNNER_LABELS = {"self-hosted", "linux", "ci-general"}
 GITHUB_ACTIONS_APP_ID = 15368
-EXPECTED_SETUP_NODE = "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020"
-EXPECTED_CHECKOUT = "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1"
-EXPECTED_NODE = "24.22.1"
-EXPECTED_POSTGRES = "postgres:16"
-EXPECTED_PACKAGE_MANAGER = "pnpm@11.5.2"
+# Candidate identity for the complete, independently reviewable CI workflow.
+# Reuse remains false until a reviewer recomputes this from the whole workflow.
+QUALIFIED_WORKFLOW_SHA256 = "05cb0174d4ac7d160542bab1bd23b79b919c0cd2d6d4924c8e83b11327849a91"
 
 
 class GitHubAPI:
@@ -41,18 +40,11 @@ class GitHubAPI:
             return json.load(response)
 
 
-def runtime_inputs_qualified(workflow: str, package: dict[str, Any]) -> bool:
-    """Require the source-controlled verifier and runtime pins used by both paths."""
-    return all(
-        (
-            workflow.count("runs-on: [self-hosted, linux, ci-general]") >= 2,
-            EXPECTED_SETUP_NODE in workflow,
-            EXPECTED_CHECKOUT in workflow,
-            f"node-version: {EXPECTED_NODE}" in workflow,
-            f"image: {EXPECTED_POSTGRES}" in workflow,
-            package.get("packageManager") == EXPECTED_PACKAGE_MANAGER,
-        )
-    )
+def runtime_inputs_qualified(workflow_bytes: bytes) -> bool:
+    """Qualify only the complete workflow whose fixed digest received review."""
+    if not isinstance(workflow_bytes, bytes) or len(QUALIFIED_WORKFLOW_SHA256) != 64:
+        return False
+    return hashlib.sha256(workflow_bytes).hexdigest() == QUALIFIED_WORKFLOW_SHA256
 
 
 def associated_merged_pr_is_exact(
@@ -145,15 +137,14 @@ def reuse_qualified(
     jobs: list[dict[str, Any]],
     check_run: dict[str, Any],
     check_suite: dict[str, Any],
-    workflow_text: str,
-    package: dict[str, Any],
+    workflow_bytes: bytes,
 ) -> bool:
     pr = associated_merged_pr_is_exact(repository, push_sha, merge_commit, prs)
     return bool(
         pr
         and merge_tree
         and merge_tree == pr_tree
-        and runtime_inputs_qualified(workflow_text, package)
+        and runtime_inputs_qualified(workflow_bytes)
         and exact_successful_run(repository, pr, workflow_id, runs, jobs, check_run, check_suite)
     )
 
@@ -206,8 +197,7 @@ def qualify(api: GitHubAPI, repository: str, push_sha: str) -> bool:
         return False
     check_suite = api.get(f"check-suites/{suite_id}")
 
-    workflow_text = Path(".github/workflows/ci.yml").read_text(encoding="utf-8")
-    package = json.loads(Path("package.json").read_text(encoding="utf-8"))
+    workflow_bytes = Path(".github/workflows/ci.yml").read_bytes()
     return reuse_qualified(
         repository,
         push_sha,
@@ -220,8 +210,7 @@ def qualify(api: GitHubAPI, repository: str, push_sha: str) -> bool:
         jobs,
         check_run,
         check_suite,
-        workflow_text,
-        package,
+        workflow_bytes,
     )
 
 
