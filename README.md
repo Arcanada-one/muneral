@@ -50,14 +50,19 @@ curl -X POST https://api.muneral.com/api/v1/workspaces/my-ws/agents \
   -H "Authorization: Bearer $HUMAN_JWT" \
   -d '{"name": "my-agent", "model": "claude-sonnet-4-6", "provider": "anthropic"}'
 
-# Get assigned tasks
+# Get assigned tasks (agent self-list). Do NOT call GET /api/v1/tasks with an
+# agent key — that filtered list stays JWT-only and answers 403 (MUN-0043).
 curl https://api.muneral.com/api/v1/agents/tasks \
   -H "Authorization: Bearer $API_KEY"
 
+# Project-scoped own slice (same credential):
+# curl https://api.muneral.com/api/v1/tasks/project/$PROJECT_ID \
+#   -H "Authorization: Bearer $API_KEY"
+
 # Read a task the agent is assigned to, and move it along.
 # MUN-0043: an agent key reaches GET /tasks/:id, GET /tasks/project/:id and
-# PATCH /tasks/:id/status, scoped to the tasks that agent is assigned to —
-# 403 for anything else, and the rest of /tasks stays JWT-only.
+# PATCH /tasks/:id/status under their scopes — 403 for anything else.
+# Full matrix + 401/403/404 diagnosis: apps/api/docs/agent-task-contract.md
 curl https://api.muneral.com/api/v1/tasks/$TASK_ID \
   -H "Authorization: Bearer $API_KEY"
 

@@ -154,24 +154,38 @@ secondary data source.
 
 | Route | Agent key | Scope |
 |---|---|---|
+| `GET /agents/tasks` | yes — own assignments across the key's workspace | ApiKeyGuard (agent self-list) |
 | `GET /tasks/:id` | yes | `task` (assigned) |
 | `GET /tasks/:id/readiness` | yes | `task` |
 | `GET /tasks/:id/dependency-graph` | yes | `task` |
 | `GET /tasks/:id/dependencies` | yes | `task` |
 | `GET /tasks/:id/activity` | yes | `task` |
 | `POST /tasks/:id/comments` | yes | `task` |
-| `PATCH /tasks/:id/status` | yes | `task` |
+| `PATCH /tasks/:id/status` | yes | `task-status` (creator or executor) |
 | `GET /tasks/project/:projectId` | yes, narrowed to own assignments | `project` |
 | `POST /tasks` | yes | `project-write` |
 | `GET /tasks/:id/field-changes`, `POST /tasks/:id/field-ack` | yes | `task-workspace` |
-| `GET /tasks` (filtered query) | **no — 403** | unscoped |
+| `GET /tasks` (filtered query) | **no — 403** | unscoped — **never use with an agent key** |
 | `DELETE /tasks/:id` | **no — 403** | unscoped |
 | `POST /tasks/:id/dependencies`, `DELETE /tasks/:id/dependencies/:depId` | yes, creator or executor of both endpoints in own workspace | `task-dependency` |
 | checklist routes | **no — 403** | unscoped |
 
+### Refusal diagnosis (machine-readable for consumers)
+
+| HTTP | Typical body cue | Means | Must not mean |
+|---|---|---|---|
+| `401` | `Unauthorized` | Missing or invalid credential | Task missing; empty list; closed |
+| `403` + MUN-0043 allowlist text | `This route is not available to an agent API key…` | Route unscoped for agent keys | Task missing; retry as empty success |
+| `403` + scope text | e.g. `Task is not in scope for this key.` | Valid key, wrong assignment/workspace/authority | Enumerate existence; treat as empty deps |
+| `404` | Nest `Cannot GET…` or project/workspace unknown shape | Path does not exist **or** foreign workspace/project id collapsed to unknown | Proof the task id is free |
+| Non-`200` after a write | any | Update **failed** — unknown state until GET read-back | Claim the task closed / status moved |
+
 `403` does not distinguish "not assigned" from "does not exist" — deliberate, so
 a key cannot enumerate real task ids. **Do not read a `403` as "no such task"
-and do not read it as "empty".**
+and do not read it as "empty".** Discover work via `GET /agents/tasks` or
+`GET /tasks/project/:projectId`, never via generic `GET /tasks`. After every
+status or comment write, confirm with `GET /tasks/:id` (and `/activity` when
+needed); a failed update is not completion.
 
 ## Discovering and creating projects with an agent key
 
@@ -231,9 +245,14 @@ Always pair the status with `/readiness`.
 
 ## Checklist for a consumer
 
+- [ ] Discover work via `GET /agents/tasks` or `GET /tasks/project/:projectId` —
+      never generic `GET /tasks` with an agent key.
 - [ ] Never `.get("dependencies")` on a `/tasks/:id` body. The key does not exist.
 - [ ] Call `/tasks/:id/readiness` and branch on `ready`.
 - [ ] Treat a non-`200` as **unknown**, never as ready. A `403` is not an empty list.
+- [ ] Distinguish `401` (bad/missing key) from unscoped `403` (MUN-0043) from
+      out-of-scope `403` — none of them mean "task closed" or "empty deps".
+- [ ] After a status/comment write, GET read-back; a failed update is not completion.
 - [ ] If a field you expect is absent, check `X-Muneral-Dependencies` and this
       document before assuming the value is empty.
 - [ ] Prefer a server-computed verdict over a client-side inference from a
@@ -249,3 +268,7 @@ Always pair the status with `/readiness`.
   served". Added `/readiness` and `/dependency-graph`, scoped the existing
   dependency read, added the `X-Muneral-Dependencies` header, and published this
   contract.
+- **MUNERAL-AGENT-CONTRACT-20260929** — consumer docs still omitted
+  `GET /agents/tasks`, still forbade generic `GET /tasks` only in passing, and
+  sibling docs still called dependency writes "JWT-only" after
+  `'task-dependency'` shipped. Refusal diagnosis table and checklist updated.
