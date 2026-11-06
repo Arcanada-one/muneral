@@ -711,24 +711,15 @@ async function createViteServer(state) {
       return null;
     },
   };
-  // @vite/client still constructs a WebSocket even when server.hmr is false; the
-  // fixture forbids any websocketAttempts, so replace the client with a no-op.
-  const stubViteClient = {
-    name: 'activity-count-stub-vite-client',
-    enforce: 'pre',
-    resolveId(source) {
-      if (source === '/@vite/client' || source === '@vite/client') return '\0activity-count-stub-vite-client';
-      return null;
-    },
-    load(id) {
-      if (id !== '\0activity-count-stub-vite-client') return null;
-      return [
-        'export function createHotContext() {',
-        '  return { accept() {}, dispose() {}, decline() {}, invalidate() {}, on() {}, off() {}, send() {} };',
-        '}',
-        'export function updateStyle() {}',
-        'export function removeStyle() {}',
-      ].join('\n');
+  // Vite 8 still injects /@vite/client (and may open server.ws) unless both HMR and
+  // the websocket server are disabled and the client script is stripped post-inject.
+  const stripViteClient = {
+    name: 'activity-count-strip-vite-client',
+    transformIndexHtml: {
+      order: 'post',
+      handler(html) {
+        return html.replace(/<script\b[^>]*\bsrc=["']\/@vite\/client["'][^>]*><\/script>/g, '');
+      },
     },
   };
   const typesSource = path.join(state.repoRoot, 'packages/types/src/index.ts');
@@ -741,7 +732,7 @@ async function createViteServer(state) {
     logLevel: 'silent',
     cacheDir: path.join(state.privateRoot, 'vite-cache'),
     appType: 'spa',
-    plugins: [stubViteClient, reactModule.default({ fastRefresh: false }), exactHttpBoundary],
+    plugins: [stripViteClient, reactModule.default({ fastRefresh: false }), exactHttpBoundary],
     resolve: {
       alias: [
         { find: '@muneral/types', replacement: typesSource },
@@ -750,7 +741,7 @@ async function createViteServer(state) {
       dedupe: ['react', 'react-dom'],
     },
     server: {
-      host: '127.0.0.1', port: 0, strictPort: false, hmr: false, watch: null, open: false,
+      host: '127.0.0.1', port: 0, strictPort: false, hmr: false, ws: false, watch: null, open: false,
       fs: { strict: true, allow: [state.repoRoot, state.privateRoot] },
     },
   });
