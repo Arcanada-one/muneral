@@ -143,8 +143,12 @@ The comment is attributed to the calling agent regardless of what the request
 body claims: `AddCommentDto` carries only `body`, and the actor comes from the
 credential (`req.actor`, via `ActorInterceptor`), never from the request.
 
-Remaining unmarked routes on `/tasks` — delete, checklists, dependencies —
-stay JWT-only, refused with `403` for a valid key rather than granted. This is
+Remaining unmarked routes on `/tasks` — delete and checklists — stay JWT-only,
+refused with `403` for a valid key rather than granted. Dependency **reads**
+(`/dependencies`, `/dependency-graph`, `/readiness`) are scoped `'task'`
+(MUN-0054). Dependency **writes** (`POST`/`DELETE …/dependencies`) are scoped
+`'task-dependency'` (creator or executor of both endpoints in the key's
+workspace) — see [`agent-task-contract.md`](agent-task-contract.md). This is
 not a claim that every write an agent needs is now open; see
 `universal-program/cards/MUN-0046-*.md` for the full route sweep this card
 produced and which of those routes are `not_measured` for agent intent.
