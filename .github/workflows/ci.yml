@@ -11,6 +11,9 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 # A newer push to a pull-request branch supersedes that branch's older run, which
 # otherwise keeps queueing on the shared self-hosted runners. Only pull_request
 # runs are ever cancelled: push (main), tag, schedule and workflow_dispatch runs get
@@ -38,12 +41,36 @@ jobs:
           OPSBOT_API_KEY: ${{ secrets.OPSBOT_API_KEY }}
         run: bash scripts/ci/opsbot-secret-gate.sh
 
+  tested-tree:
+    # Reuse is an optimization only. Any missing, ambiguous or unqualified proof
+    # emits `reuse=false`, so the ordinary lint-and-test job remains the fallback.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      actions: read
+      checks: read
+      contents: read
+      pull-requests: read
+    runs-on: [self-hosted, linux, ci-general]
+    outputs:
+      reuse: ${{ steps.proof.outputs.reuse }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+      - name: Qualify tested PR tree
+        id: proof
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 -I scripts/ci/tested_tree.py
+
   lint-and-test:
-    # A2-315: pre-deploy gates run on the dedicated `deploy-gate` lane, not on `ci-general`, where
-    # KC2 batteries held all five slots for hours (argana 95 min, muneral 150 min in the queue on
-    # 2026-09-24/25). The lane's runners carry ONLY that label (--no-default-labels): nothing else lands there.
-    # Pull requests keep the shared pool; only the push that deploys takes the lane.
-    runs-on: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && fromJSON('["deploy-gate"]') || fromJSON('["self-hosted","linux","ci-general"]') }}
+    # This job remains successful on reuse so it cannot skip a transitive deploy
+    # ancestor. The exact reuse proof runs while ordinary verification steps skip.
+    # Dedicated deploy gates remain on their existing isolated lane.
+    runs-on: [self-hosted, linux, ci-general]
+    needs: tested-tree
+    if: always()
     services:
       postgres:
         image: postgres:16
@@ -66,11 +93,19 @@ jobs:
           - 5432
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - name: Confirm tested-tree reuse proof
+        run: printf 'tested-tree reuse=%s tree=%s\n' '${{ needs.tested-tree.outputs.reuse }}' "$(git rev-parse 'HEAD^{tree}')"
       - name: Test Ops Bot secret gate contract
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: bash scripts/ci/opsbot-secret-gate.test.sh
       - name: Test runner deploy-broker preflight contract
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: bash scripts/ci/runner-broker-preflight.test.sh
+      - name: Test tested-tree reuse qualification
+        if: needs.tested-tree.outputs.reuse != 'true'
+        run: python3 -I scripts/ci/test_tested_tree.py
       - name: Test semantic aggregate readback contract
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: |
           node --test apps/api/scripts/semantic-aggregate-readback.test.mjs
           bash scripts/ci/semantic-readback-caller-contract.test.sh
@@ -79,49 +114,65 @@ jobs:
       # bodies and asserts each one goes RED — including the exact hole A2-251 measured, where the
       # controller's `0.0.0-unknown` sentinel was recorded as a valid version.
       - name: Test /health identity probes go red on a build that cannot name itself
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: bash scripts/ci/probe-health-identity.test.sh
           bash scripts/ci/semantic-readback-caller-contract.sh
       # A2-267: the agent-task list must carry `contractDigest` on every row. This serves rows with
       # the key missing or malformed from a loopback stub and asserts the probe goes RED on each.
       - name: Test the contract-digest probe goes red on a build without the field
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: bash scripts/ci/probe-contract-digest.test.sh
       # A2-330: the post-deploy canary must be able to go red — a route missing from the resident
       # route table, a 405, a router no-match 404 — and must never send anything but a GET.
       - name: Test the post-deploy canary goes red
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: python3 -m unittest discover -s scripts/canary -p 'test_*.py'
       - name: Enable corepack (pnpm@11.5.2 from packageManager field)
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: |
           COREPACK_HOME="${RUNNER_TEMP}/corepack-bin"
           mkdir -p "${COREPACK_HOME}"
           corepack enable --install-directory "${COREPACK_HOME}"
           echo "${COREPACK_HOME}" >> "${GITHUB_PATH}"
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        if: needs.tested-tree.outputs.reuse != 'true'
         with:
           node-version: 24.22.1
           cache: pnpm
+      - name: Test standalone browser stderr sanitizer
+        if: needs.tested-tree.outputs.reuse != 'true'
+        run: node --test scripts/diagnostics/sanitize-browser-stderr.test.mjs
       - name: Install dependencies
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: pnpm install --frozen-lockfile
       - name: Lint
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: pnpm lint
       - name: Build shared types
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: pnpm --filter @muneral/types build
       - name: Generate Prisma client
+        if: needs.tested-tree.outputs.reuse != 'true'
         # Run from repo root so prisma.config.ts (root) resolves apps/api/prisma/schema.prisma
         run: pnpm exec prisma generate
         env:
           DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
       - name: Build
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: pnpm build
       - name: Apply DB migrations
+        if: needs.tested-tree.outputs.reuse != 'true'
         # Run from repo root — prisma.config.ts at root, schema at apps/api/prisma/schema.prisma
         run: pnpm exec prisma migrate deploy
         env:
           DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
       - name: Test semantic aggregate readback against disposable PostgreSQL
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: node apps/api/scripts/semantic-aggregate-readback.mjs
         env:
           DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
       - name: Test
+        if: needs.tested-tree.outputs.reuse != 'true'
         run: pnpm test
         env:
           DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
@@ -161,7 +212,7 @@ jobs:
     # and no retrievable annotation. Recorded as a hole, not as a solved problem.
     uses: ./.github/workflows/graph-admission.yml
     with:
-      program_ref: '5e352e78262271892170c750229d3baee18a4556'
+      program_ref: 'cc3307df92348433ab6fbc2f34a12597d9fefeb7'
       stage_evidence_path: ''
       stage_evidence_root: ''
       stage_evidence_required: false
@@ -197,8 +248,37 @@ jobs:
         with:
           vault-addr: ${{ vars.VAULT_ADDR }}
 
+  deploy-readiness:
+    # Keep the registered deploy.if byte-for-byte exact. This capability-free
+    # aggregator is the conditional DAG edge: only an exact reuse proof or a
+    # successful cold suite, plus every security gate, can reach the deploy job.
+    needs: [tested-tree, lint-and-test, secrets-gate, network-exposure, preflight-caller-contract]
+    if: always() && github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: [self-hosted, linux, ci-general]
+    permissions: {}
+    steps:
+      - name: Require successful test proof and security gates
+        env:
+          TESTED_TREE_RESULT: ${{ needs.tested-tree.result }}
+          TESTED_TREE_REUSE: ${{ needs.tested-tree.outputs.reuse }}
+          LINT_AND_TEST_RESULT: ${{ needs.lint-and-test.result }}
+          SECRETS_GATE_RESULT: ${{ needs.secrets-gate.result }}
+          NETWORK_EXPOSURE_RESULT: ${{ needs.network-exposure.result }}
+          PREFLIGHT_CONTRACT_RESULT: ${{ needs.preflight-caller-contract.result }}
+        run: |
+          set -eu
+          [ "$TESTED_TREE_RESULT" = success ]
+          if [ "$TESTED_TREE_REUSE" = true ]; then
+            [ "$LINT_AND_TEST_RESULT" = success ]
+          else
+            [ "$LINT_AND_TEST_RESULT" = success ]
+          fi
+          [ "$SECRETS_GATE_RESULT" = success ]
+          [ "$NETWORK_EXPOSURE_RESULT" = success ]
+          [ "$PREFLIGHT_CONTRACT_RESULT" = success ]
+
   deploy:
-    needs: [lint-and-test, secrets-gate, network-exposure, preflight-caller-contract]
+    needs: [deploy-readiness, preflight-caller-contract]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     # SEC-0063: a HOST-UNIQUE label, not the shared `arcana-prod`. The shared
     # label sits on several runners, including ones on a DIFFERENT machine
