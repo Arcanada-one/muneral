@@ -524,9 +524,20 @@ describe('MUN-0052 — project task index for granted agent keys (e2e)', () => {
       );
     });
 
-    it('POST /tasks/:taskId/dependencies → 403 (unmarked route)', async () => {
+    it('POST /tasks/:taskId/dependencies → 403 (index grant does not open dependency writes)', async () => {
       const other = await othersTask();
-      await differential(() => http().post(`/tasks/${taskId}/dependencies`).set(k()).send({ dependsOnId: other.id }), 403);
+      // Project-index grant is read-only for the index route. Dependency writes
+      // need `@AgentScope('task-dependency')` (creator/executor of both ends);
+      // a granted reader without that authority still gets 403 — not because
+      // the route is unmarked.
+      await differential(
+        () =>
+          http()
+            .post(`/tasks/${taskId}/dependencies`)
+            .set(k())
+            .send({ toTaskId: other.id, type: 'depends_on' }),
+        403,
+      );
     });
 
     it('DELETE /tasks/:taskId → 403 (unmarked route), task still there', async () => {
