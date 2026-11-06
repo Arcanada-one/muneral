@@ -273,6 +273,10 @@ def workflow(path, raw, paths):
             if not isinstance(env, dict):
                 return False
             return not any(key in shell_workflow.SOURCE_ENVIRONMENT for key in env)
+        def python_free(scope):
+            # Python search-path/startup controls (PYTHONPATH, PYTHONHOME, ...) can redirect `python -m`.
+            env = scope.get("env", {})
+            return isinstance(env, dict) and not any(str(key).upper().startswith("PYTHON") for key in env)
         root = defaults(data)
         for name, job in data["jobs"].items():
             if not isinstance(job, dict) or "uses" in job or not isinstance(job.get("steps"), list):
@@ -280,12 +284,24 @@ def workflow(path, raw, paths):
                 unbound_callers.append(f"job {name}: reusable/opaque caller has no target script reference")
                 continue
             inherited = {**root, **defaults(job)}
-            checkout_unknown = any(
-                isinstance(step, dict) and str(step.get("uses", "")).startswith("actions/checkout@")
-                and (not isinstance(step.get("with", {}), dict)
-                     or (step.get("with") or {}).get("path")
-                     or (step.get("with") or {}).get("repository"))
-                for step in job["steps"])
+            def action_path_scope_unknown(step):
+                if not isinstance(step, dict) or "run" in step:
+                    return False
+                options = step.get("with", {})
+                if not isinstance(options, dict):
+                    return True
+                uses = step.get("uses")
+                if isinstance(uses, str) and uses.startswith("actions/checkout@"):
+                    return bool(options.get("path") or options.get("repository"))
+                if options.get("path"):
+                    # An expression or malformed selector could resolve to
+                    # checkout. Preserve uncertainty instead of treating its
+                    # path as a known non-checkout action input.
+                    return (not isinstance(uses, str) or not uses
+                            or "${{" in uses or "$" in uses or "`" in uses)
+                return False
+
+            checkout_unknown = any(action_path_scope_unknown(step) for step in job["steps"])
             inherited_env_safe = environment(data) and environment(job)
             prior_env_write = False
             for index, step in enumerate(job["steps"]):
@@ -294,9 +310,14 @@ def workflow(path, raw, paths):
                     unbound_callers.append(f"job {name} step {index}: opaque caller has no target script reference")
                     continue
                 if "run" not in step:
-                    local_action = str(step.get("uses", "")).startswith("./")
-                    checkout_path = (step.get("with") or {}).get("path")
-                    if local_action or checkout_path:
+                    action_uses = str(step.get("uses", ""))
+                    local_action = action_uses.startswith("./")
+                    options = step.get("with", {})
+                    options = options if isinstance(options, dict) else {}
+                    checkout_path = (options.get("path")
+                                     if action_uses.startswith("actions/checkout@") else None)
+                    unresolved_path = action_path_scope_unknown(step) and not local_action
+                    if local_action or checkout_path or unresolved_path:
                         unknown.append(f"job {name} step {index}: local action/checkout path scope unresolved")
                     if local_action:
                         unbound_callers.append(
@@ -304,6 +325,9 @@ def workflow(path, raw, paths):
                     elif checkout_path:
                         unbound_callers.append(
                             f"job {name} step {index}: checkout path leaves later script callers unbound")
+                    elif unresolved_path:
+                        unbound_callers.append(
+                            f"job {name} step {index}: unresolved action selector leaves later script callers unbound")
                     continue
                 shell = step.get("shell", inherited.get("shell", "bash"))
                 wd = step.get("working-directory", inherited.get("working-directory", "."))
@@ -328,7 +352,11 @@ def workflow(path, raw, paths):
                 # source-only projection cannot establish their resulting value.
                 if "GITHUB_ENV" in run or "GITHUB_PATH" in run:
                     prior_env_write = True
-                analysis = shell_workflow.analyse(path, run.encode("utf-8"), paths, cwd=cwd)
+                python_env_safe = (inherited_env_safe and environment(step) and not prior_env_write
+                                   and not checkout_unknown
+                                   and all(python_free(scope) for scope in (data, job, step)))
+                analysis = shell_workflow.analyse(path, run.encode("utf-8"), paths, cwd=cwd,
+                                                  python_env_safe=python_env_safe)
                 if cwd is None or analysis["unknown"]:
                     for ref in analysis["references"]:
                         ref["provenance"] = "inferred"
@@ -361,6 +389,9 @@ def workflow(path, raw, paths):
                         if key not in reference_keys:
                             step_references.append(ref)
                             reference_keys.add(key)
+                if prior_env_write and any(ref["type"] == "calls" for ref in step_references):
+                    unbound_callers.append(
+                        context + ": source-affecting workflow environment leaves later script callers unbound")
                 refs.extend(step_references)
                 unknown.extend(context + ": " + s for s in analysis["unknown"])
                 # An unknown on a source line with a parsed target reference is
