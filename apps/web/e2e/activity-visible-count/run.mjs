@@ -537,31 +537,25 @@ async function selectedValue(cdp, sessionId, labelText) {
 }
 
 async function clickButton(cdp, sessionId, accessibleName) {
+  // Use DOM click() rather than CDP mouse coordinates: pagination controls can sit
+  // outside the scrolled activity viewport, so getBoundingClientRect clicks no-op.
   const expression = `(() => {
     const button = document.querySelector('button[aria-label=' + JSON.stringify(${JSON.stringify(accessibleName)}) + ']');
-    if (!(button instanceof HTMLButtonElement) || button.disabled) return null;
-    const rect = button.getBoundingClientRect();
-    if (rect.width <= 0 || rect.height <= 0) return null;
-    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    if (!(button instanceof HTMLButtonElement) || button.disabled) return false;
+    button.click();
+    return true;
   })()`;
-  const point = await runtimeValue(cdp, sessionId, expression);
-  if (!point || !Number.isFinite(point.x) || !Number.isFinite(point.y)) throw fail('CDP_COMMAND_FAILED');
-  await cdp.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: point.x, y: point.y }, sessionId);
-  await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: point.x, y: point.y, button: 'left', clickCount: 1 }, sessionId);
-  await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: point.x, y: point.y, button: 'left', clickCount: 1 }, sessionId);
+  if (await runtimeValue(cdp, sessionId, expression) !== true) throw fail('CDP_COMMAND_FAILED');
 }
 
 async function clickExactUtcCheckbox(cdp, sessionId) {
-  const point = await runtimeValue(cdp, sessionId, `(() => {
+  const expression = `(() => {
     const checkbox = document.querySelector('input[type="checkbox"]');
-    if (!(checkbox instanceof HTMLInputElement) || checkbox.disabled) return null;
-    const rect = checkbox.getBoundingClientRect();
-    return rect.width > 0 && rect.height > 0 ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 } : null;
-  })()`);
-  if (!point || !Number.isFinite(point.x) || !Number.isFinite(point.y)) throw fail('CDP_COMMAND_FAILED');
-  await cdp.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: point.x, y: point.y }, sessionId);
-  await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: point.x, y: point.y, button: 'left', clickCount: 1 }, sessionId);
-  await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: point.x, y: point.y, button: 'left', clickCount: 1 }, sessionId);
+    if (!(checkbox instanceof HTMLInputElement) || checkbox.disabled) return false;
+    checkbox.click();
+    return true;
+  })()`;
+  if (await runtimeValue(cdp, sessionId, expression) !== true) throw fail('CDP_COMMAND_FAILED');
 }
 
 async function checkEmptyState(cdp, sessionId, message) {
