@@ -118,7 +118,10 @@ export function isAllowedFixtureRequest(requestUrl, method, expectedOrigin, appR
   let pathname;
   try { pathname = decodeURIComponent(parsed.pathname); } catch { return false; }
   if (pathname.split('/').some((segment) => segment === '.' || segment === '..')) return false;
-  if (pathname === '/' || pathname === '/index.html' || pathname === '/main.tsx') return true;
+  if (
+    pathname === '/' || pathname === '/index.html' || pathname === '/main.tsx' ||
+    pathname === '/synthetic-api-client.mjs'
+  ) return true;
   if (
     pathname.startsWith('/@vite/') || pathname.startsWith('/@id/') ||
     pathname.startsWith('/@react-refresh') || pathname.startsWith('/node_modules/')
@@ -708,6 +711,26 @@ async function createViteServer(state) {
       return null;
     },
   };
+  // @vite/client still constructs a WebSocket even when server.hmr is false; the
+  // fixture forbids any websocketAttempts, so replace the client with a no-op.
+  const stubViteClient = {
+    name: 'activity-count-stub-vite-client',
+    enforce: 'pre',
+    resolveId(source) {
+      if (source === '/@vite/client' || source === '@vite/client') return '\0activity-count-stub-vite-client';
+      return null;
+    },
+    load(id) {
+      if (id !== '\0activity-count-stub-vite-client') return null;
+      return [
+        'export function createHotContext() {',
+        '  return { accept() {}, dispose() {}, decline() {}, invalidate() {}, on() {}, off() {}, send() {} };',
+        '}',
+        'export function updateStyle() {}',
+        'export function removeStyle() {}',
+      ].join('\n');
+    },
+  };
   const typesSource = path.join(state.repoRoot, 'packages/types/src/index.ts');
   state.phase = 'SERVER_CREATE_FAILED';
   state.server = await viteModule.createServer({
@@ -718,7 +741,7 @@ async function createViteServer(state) {
     logLevel: 'silent',
     cacheDir: path.join(state.privateRoot, 'vite-cache'),
     appType: 'spa',
-    plugins: [reactModule.default(), exactHttpBoundary],
+    plugins: [stubViteClient, reactModule.default({ fastRefresh: false }), exactHttpBoundary],
     resolve: {
       alias: [
         { find: '@muneral/types', replacement: typesSource },
@@ -727,8 +750,8 @@ async function createViteServer(state) {
       dedupe: ['react', 'react-dom'],
     },
     server: {
-      host: '127.0.0.1', port: 0, strictPort: false, hmr: false, open: false,
-      fs: { strict: true, allow: [state.repoRoot] },
+      host: '127.0.0.1', port: 0, strictPort: false, hmr: false, watch: null, open: false,
+      fs: { strict: true, allow: [state.repoRoot, state.privateRoot] },
     },
   });
 }

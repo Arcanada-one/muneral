@@ -24,6 +24,7 @@ test('only same-origin GETs for Vite and the bounded fixture source tree are all
   assert.equal(driver.isAllowedFixtureRequest(`${origin}/@fs/repo/apps/web/components/task/AuditLog.tsx`, 'GET', origin, appRoot, repoRoot), true);
   assert.equal(driver.isAllowedFixtureRequest(`${origin}/@fs/repo/packages/types/src/index.ts`, 'GET', origin, appRoot, repoRoot), true);
   assert.equal(driver.isAllowedFixtureRequest(`${origin}/node_modules/react/index.js`, 'GET', origin, appRoot, repoRoot), true);
+  assert.equal(driver.isAllowedFixtureRequest(`${origin}/synthetic-api-client.mjs`, 'GET', origin, appRoot, repoRoot), true);
   assert.equal(driver.isAllowedFixtureRequest(`${origin}/@fs/private/vite-cache/deps/react.js`, 'GET', origin, appRoot, repoRoot, ['/private/vite-cache']), true);
   assert.equal(driver.isAllowedFixtureRequest(`${origin}/@fs/private/secret.env`, 'GET', origin, appRoot, repoRoot, ['/private/vite-cache']), false);
   assert.equal(driver.isAllowedFixtureRequest('https://example.invalid/', 'GET', origin, appRoot, repoRoot), false);
