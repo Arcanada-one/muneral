@@ -53,16 +53,23 @@ The idempotent answer exists for the unattended caller that retries after a
 lost response: before MUN-0050 a repeat answered `400 Invalid status
 transition: in_progress → in_progress`, indistinguishable from a real refusal.
 
-## What stays as it was
+## What stayed as it was (MUN-0050 snapshot)
 
-- Every other route on the tasks controller keeps its scope or stays JWT-only:
-  delete, checklists, dependencies, the migration CAS transition path
-  (`tasks.revision` is moved by that path alone; this route leaves it at 0).
+At MUN-0050 merge time the bullets below were true. Later cards superseded two
+of them — do not treat this section as the live allowlist. Live matrix:
+[`agent-task-contract.md`](agent-task-contract.md).
+
+- Delete, checklists, and the migration CAS transition path remain JWT-only /
+  unscoped for agent keys (`tasks.revision` still moves only on the migration
+  path; this status route leaves it at 0).
+- Dependency **reads** were later opened by MUN-0054 (`'task'`). Dependency
+  **writes** are scoped `'task-dependency'` (creator or executor of both
+  endpoints) — not JWT-only.
 - The creator is **not** thereby admitted to `GET /tasks/:taskId`,
   `GET /tasks/:taskId/activity` or `POST /tasks/:taskId/comments` — those keep
   `'task'` (assignment). Recorded as a finding for a separate card.
-- `POST /agents/tasks/:taskId/assign` is unchanged (and unscoped — a finding
-  recorded by MUN-0050, not touched here).
+- `POST /agents/tasks/:taskId/assign` was later scoped `'task-assign'` by
+  MUN-0051 (no longer the unscoped finding MUN-0050 recorded).
 
 ## Proof
 
