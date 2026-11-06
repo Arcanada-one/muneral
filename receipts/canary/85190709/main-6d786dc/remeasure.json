@@ -1,0 +1,30 @@
+{
+  "schema": "MainDebtRemeasure/v1",
+  "card": "85190709-51ce-437d-9740-0096389dbb2c",
+  "subject": {
+    "commit": "6d786dca224c4dfcf13ca14693a032c9ab53343f",
+    "tree": "9099b9c6bbd77fb36acaae7cdeaad3abc21d0fb7"
+  },
+  "method": "e2e:human-task-read-isolation.e2e.spec.ts#Workspace member routes and task delete",
+  "counters": {
+    "tests_passed": 20,
+    "tests_failed": 0,
+    "suites_passed": 1
+  },
+  "entities_verified": [
+    "route:GET /workspaces/:workspaceId",
+    "route:GET /workspaces/:workspaceId/members",
+    "route:POST /workspaces/:workspaceId/members/:userId",
+    "route:PATCH /workspaces/:workspaceId/members/:userId/role",
+    "route:DELETE /workspaces/:workspaceId/members/:userId",
+    "route:DELETE /tasks/:taskId",
+    "code_unit:apps/api/src/workspaces/workspaces.controller.ts",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts"
+  ],
+  "excerpt_sha256": "add52687eb30dad9b66f5c97648d07b12bdbbf5ee3c7d491fcf57a1defbda55c",
+  "full_log_sha256": "36a5da2316db62da7656807daab9974b7ddf0fe4d1ccfb2b65d04040a94a9864",
+  "fix_pr": 322,
+  "exemptions_removed": [
+    "receipts/graph/pr321-main-debt-exemptions-20261027.json"
+  ]
+}
