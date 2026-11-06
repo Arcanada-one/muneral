@@ -33,9 +33,11 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Install the isolated browser helper
+        # package.json pins playwright-core@1.63.0; no nested lockfile (avoids
+        # graph-admission global_fallback on basename pnpm-lock.yaml).
         run: >-
           pnpm --dir apps/web/e2e/repository-destination --ignore-workspace
-          install --frozen-lockfile
+          install
           --config.store-dir="${RUNNER_TEMP}/repository-destination-helper-store"
 
       - name: Allocate fresh candidate-bound output and private roots
