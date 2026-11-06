@@ -98,6 +98,7 @@ model Project {
   sprints    Sprint[]
   tasks      Task[]
   migrationBatches MigrationBatch[]
+  commandAssociations TaskCommandAssociation[]
 
   @@map("projects")
 }
@@ -196,6 +197,9 @@ model Task {
   attempts       TaskExecutionAttempt[]
   transitions    TaskExecutionTransition[]
   outboxEvents   TaskOutboxEvent[]
+  commandAssociations TaskCommandAssociation[]
+  planRevisions  TaskPlanRevision[]
+  planHead       TaskPlanHead?
   resultBindings TaskResultBinding[]
   resultNodes    TaskResultNode[]
   resultRefs     TaskCommittedResultRef[]
@@ -982,4 +986,63 @@ model MigrationIdempotencyRecord {
 
   @@id([scope, idempotencyKey])
   @@map("migration_idempotency_records")
+}
+
+// ---------------------------------------------------------------------------
+// KCLIVE-10 — command association + owner-managed plan graph
+// ---------------------------------------------------------------------------
+
+/// Durable idempotent association of a create/run command to a root task/run.
+model TaskCommandAssociation {
+  id             String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  actorType      String   @map("actor_type") @db.VarChar(16)
+  actorId        String   @map("actor_id") @db.Uuid
+  projectId      String   @map("project_id") @db.Uuid
+  operation      String   @db.VarChar(64)
+  idempotencyKey String   @map("idempotency_key") @db.VarChar(256)
+  commandDigest  String   @map("command_digest") @db.VarChar(64)
+  rootTaskId     String?  @map("root_task_id") @db.Uuid
+  runId          String?  @map("run_id") @db.Uuid
+  response       Json
+  recordedAt     DateTime @default(now()) @map("recorded_at") @db.Timestamptz()
+
+  project  Project @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  rootTask Task?   @relation(fields: [rootTaskId], references: [id], onDelete: Restrict)
+
+  @@unique([actorType, actorId, projectId, operation, idempotencyKey], map: "task_command_associations_scope_key_unique")
+  @@index([rootTaskId], map: "idx_task_command_associations_root_task")
+  @@index([projectId], map: "idx_task_command_associations_project")
+  @@map("task_command_associations")
+}
+
+/// Append-only owner-managed plan revision (not migration Task.revision).
+model TaskPlanRevision {
+  id            String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  rootTaskId    String   @map("root_task_id") @db.Uuid
+  revision      BigInt
+  planDigest    String   @map("plan_digest") @db.VarChar(64)
+  snapshot      Json
+  createdByType String   @map("created_by_type") @db.VarChar(16)
+  createdById   String   @map("created_by_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  rootTask Task @relation(fields: [rootTaskId], references: [id], onDelete: Restrict)
+
+  @@unique([rootTaskId, revision], map: "task_plan_revisions_root_revision_unique")
+  @@index([rootTaskId], map: "idx_task_plan_revisions_root")
+  @@map("task_plan_revisions")
+}
+
+/// Current authoritative plan head + optional lease for a root task.
+model TaskPlanHead {
+  rootTaskId     String    @id @map("root_task_id") @db.Uuid
+  revision       BigInt
+  planDigest     String    @map("plan_digest") @db.VarChar(64)
+  leaseHolder    String?   @map("lease_holder") @db.VarChar(128)
+  leaseExpiresAt DateTime? @map("lease_expires_at") @db.Timestamptz()
+  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  rootTask Task @relation(fields: [rootTaskId], references: [id], onDelete: Restrict)
+
+  @@map("task_plan_heads")
 }
