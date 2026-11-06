@@ -5,9 +5,9 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "admitted_with_exemptions"
  },
- "captured_at_utc": "2026-11-06T22:02:26Z",
+ "captured_at_utc": "2026-11-06T23:32:27Z",
  "change_set": {
-  "base": "6d786dca224c4dfcf13ca14693a032c9ab53343f",
+  "base": "253fc1afeffd2cc7359353cc98b1e4db0f7ef7ba",
   "files": [
    {
     "kind": "config",
@@ -75,9 +75,18 @@
     ],
     "path": "apps/web/e2e/repository-destination/run.mjs",
     "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/car-verify-mun-hyg-327-repository-destination.json",
+    "node_ids": [
+     "receipt:receipts/graph/car-verify-mun-hyg-327-repository-destination.json"
+    ],
+    "path": "receipts/graph/car-verify-mun-hyg-327-repository-destination.json",
+    "status": "A"
    }
   ],
-  "head": "630f0e97020f9d9e0920dc63cddb616246fad51a",
+  "head": "646af21628cc102b6280c7e09121880021fbe423",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -85,44 +94,44 @@
   {
    "code": "BOUNDED_CHECKER_OUT_OF_SCOPE",
    "entity": "code_unit:.github/workflows/repository-destination-browser.yml",
-   "expires_at_utc": "2026-12-06T21:58:10Z",
+   "expires_at_utc": "2026-12-06T23:22:07Z",
    "owner": "ARC2 worker b8a8e6e5 (Muneral work item b8a8e6e5-f8f6-4bce-841a-7de49bef5a57; PR #327 MUN-HYG repository destination; host arcana-devs; admitting agent per DEC-AUP-0008)",
-   "reason": "v-workflow-config returns not_measured on shell-caller closure for this workflow (checkout root / source-affecting environment unresolved; unsupported interpreter dispatch; heredoc/group expansion) — a limitation of the bounded checker, not a property of this change. Coverage at content head 630f0e97020f9d9e0920dc63cddb616246fad51a: hosted GitHub Actions check-run repository-destination-browser (job 128169554846, workflow run 42298411582) concluded success on that exact SHA, and lint-and-test (job 128169557753, workflow run 42298411891) also concluded success on that exact SHA; v-fitness recorded no new fitness violation. Residue: static shell-caller closure and actionlint remain not_measured locally. reverse_if: repository-destination-browser or lint-and-test concludes failure on a later record-only head that still claims this receipt. Verifier reason retained: v-workflow-config-293d11fa6785da2c: workflow shell caller closure not measured.",
-   "ref": "notes[b8a8e6e5-repo-dest-workflow-hosted]"
+   "reason": "v-workflow-config returns not_measured on shell-caller closure for this workflow — bounded checker limit. Coverage at content head 646af21628cc102b6280c7e09121880021fbe423: hosted check-run repository-destination-browser job 128206910559 (run 42309432770) SUCCESS and lint-and-test job 128206912764 (run 42309433086) SUCCESS on that exact SHA. Residue: static shell-caller closure not_measured locally. reverse_if: those checks fail on a later record-only head claiming this receipt.",
+   "ref": "notes[b8a8e6e5-repo-dest-workflow-646af21]"
   },
   {
    "code": "BOUNDED_CHECKER_OUT_OF_SCOPE",
    "entity": "code_unit:apps/web/e2e/repository-destination/main.jsx",
-   "expires_at_utc": "2026-12-06T21:58:10Z",
+   "expires_at_utc": "2026-12-06T23:22:07Z",
    "owner": "ARC2 worker b8a8e6e5 (Muneral work item b8a8e6e5-f8f6-4bce-841a-7de49bef5a57; PR #327 MUN-HYG repository destination; host arcana-devs; admitting agent per DEC-AUP-0008)",
-   "reason": "Fixture JSX entry for the isolated Vite browser harness; apps/web/tsconfig.json does not include apps/web/e2e/ paths, so type_check cannot attribute a verdict. EXECUTED end-to-end by hosted repository-destination-browser job 128169554846 on content head 630f0e97020f9d9e0920dc63cddb616246fad51a (run 42298411582) SUCCESS, which loads this main.jsx through the fixture Vite server; lint-and-test job 128169557753 also SUCCESS on that exact SHA. Residue: no apps/web tsconfig attribution for e2e fixture sources. reverse_if: repository-destination-browser concludes failure while this exemption is claimed. Verifier reason: v-type-check-apps-web-tsconfig: apps/web/tsconfig.json does not include apps/web/e2e/repository-destination/main.jsx",
-   "ref": "notes[b8a8e6e5-repo-dest-main-jsx-hosted]"
+   "reason": "Fixture JSX outside apps/web/tsconfig include. EXECUTED by hosted repository-destination-browser job 128206910559 SUCCESS on 646af21628cc102b6280c7e09121880021fbe423 (run 42309432770). reverse_if: that browser check fails while claimed.",
+   "ref": "notes[b8a8e6e5-repo-dest-main-jsx-646af21]"
   },
   {
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/web/e2e/repository-destination/run.mjs",
-   "expires_at_utc": "2026-12-06T21:58:10Z",
+   "expires_at_utc": "2026-12-06T23:22:07Z",
    "owner": "ARC2 worker b8a8e6e5 (Muneral work item b8a8e6e5-f8f6-4bce-841a-7de49bef5a57; PR #327 MUN-HYG repository destination; host arcana-devs; admitting agent per DEC-AUP-0008)",
-   "reason": "E2E harness script under apps/web/e2e/; a canary lists live-contour entities and cannot name a test/harness file (A2-353 sibling discharge). Other selected verifiers for this entity (v-config-schema, v-fitness) ran in this receipt. Coverage of the script itself: hosted check-run repository-destination-browser job 128169554846 on head 630f0e97020f concluded success (run 42298411582), which executes this run.mjs path; lint-and-test job 128169557753 also SUCCESS on the same SHA. Residue: no production canary can precede deploy for a fixture harness; keep NOT_MEASURED for v-canary. reverse_if: that browser check concludes failure while this exemption is still claimed. Verifier reason: v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY.",
-   "ref": "notes[b8a8e6e5-repo-dest-run-mjs-hosted]"
+   "reason": "E2E harness under apps/web/e2e/; canary cannot name fixture harness. Other verifiers ran. Coverage: repository-destination-browser job 128206910559 SUCCESS on 646af21628cc (run 42309432770) executes this run.mjs; lint-and-test job 128206912764 SUCCESS. reverse_if: browser check fails while claimed.",
+   "ref": "notes[b8a8e6e5-repo-dest-run-mjs-646af21]"
   }
  ],
  "graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:1605ee7b740099ae07ae2a37529532939b41b60889a742fec2133e4adffb6b77",
-  "path": "/tmp/verify-b8a8e6e5/verifier-out/graph-6d786dca224c.json",
-  "source_commit": "6d786dca224c4dfcf13ca14693a032c9ab53343f"
+  "graph_digest": "sha256:5d3f605b08c9a37f885e2a18ecda33269361b6d0c4935947129d4ae6ac15e411",
+  "path": "/tmp/verify-b8a8e6e5-646af21b/verifier-out/graph-253fc1afeffd.json",
+  "source_commit": "253fc1afeffd2cc7359353cc98b1e4db0f7ef7ba"
  },
  "head_graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:81fb2058bed654a77edf33a5fde632fd6141725814302a78c817a5dd667d0d9c",
-  "path": "/tmp/verify-b8a8e6e5-exempt/verifier-out/graph-head-630f0e97020f.json",
-  "source_commit": "630f0e97020f9d9e0920dc63cddb616246fad51a",
+  "graph_digest": "sha256:488a1a879550b5099bc2bb873cfae8d24981cacd57ec7264d70ef5c57a8849d1",
+  "path": "/tmp/verify-b8a8e6e5-646af21b/verifier-out/graph-head-646af21628cc.json",
+  "source_commit": "646af21628cc102b6280c7e09121880021fbe423",
   "staleness": {
-   "checked_at_utc": "2026-11-06T22:04:52Z",
-   "checked_nodes": 573,
+   "checked_at_utc": "2026-11-06T23:37:54Z",
+   "checked_nodes": 577,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -2849,13 +2858,14 @@
  "notes": [
   "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
   "profile: .arcana/verify.json at verified head; baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none",
-  "exemptions: 3 attached from /tmp/car-327-exemptions.json"
+  "exemptions: 3 attached from /tmp/car-327-exemptions-646af21.json"
  ],
  "producer": {
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261106T220226Z-630f0e97",
+ "receipt_id": "car-verify-20261106T233227Z-646af216",
+ "receipt_path": "receipts/graph/car-verify-mun-hyg-327-repository-destination.json",
  "repo": {
   "name": "Arcanada-one/muneral",
   "path": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-327-cifix/muneral"
@@ -2980,6 +2990,7 @@
    "receipt:receipts/graph/a2-304-dependabot-group.json",
    "receipt:receipts/graph/a2-320-web-eslint10.json",
    "receipt:receipts/graph/backend-workspace-isolation-20261008.json",
+   "receipt:receipts/graph/car-verify-mun-hyg-327-repository-destination.json",
    "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json",
    "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
    "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
@@ -3050,7 +3061,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-11-06T22:04:51Z",
+  "checked_at_utc": "2026-11-06T23:37:50Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -3110,6 +3121,21 @@
    "path": "receipts/graph/backend-workspace-isolation-20261008.json",
    "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
    "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": null,
+    "head": "sha256:5c04660cf3fa9d4da6900790e4084a2b4ed4cf34fd1ddb818ffd2e46e1799fb7"
+   },
+   "entity": "receipt:receipts/graph/car-verify-mun-hyg-327-repository-destination.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/car-verify-mun-hyg-327-repository-destination.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it; superseded by construction — this run re-issues the receipt at receipts/graph/car-verify-mun-hyg-327-repository-destination.json for work item b8a8e6e5-f8f6-4bce-841a-7de49bef5a57",
+   "rule": "DEC-AUP-0035",
+   "superseded": {
+    "receipt_path": "receipts/graph/car-verify-mun-hyg-327-repository-destination.json",
+    "work_item": "b8a8e6e5-f8f6-4bce-841a-7de49bef5a57"
+   }
   },
   {
    "content_hash": {
@@ -3817,7 +3843,7 @@
   }
  ],
  "tree": {
-  "commit": "630f0e97020f9d9e0920dc63cddb616246fad51a",
+  "commit": "646af21628cc102b6280c7e09121880021fbe423",
   "dirty": false
  },
  "verdicts": [
@@ -4039,8 +4065,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-327-cifix/muneral/apps/web/node_modules/.bin/tsc -p /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-327-cifix/muneral/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/verify-b8a8e6e5-exempt/verifier-out/type-check-4n7160wn/check.tsbuildinfo --listFiles",
-   "duration_s": 44.12,
+   "command": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-327-cifix/muneral/apps/web/node_modules/.bin/tsc -p /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-327-cifix/muneral/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/verify-b8a8e6e5-646af21b/verifier-out/type-check-bj8zdtca/check.tsbuildinfo --listFiles",
+   "duration_s": 122.82,
    "entities": [
     "code_unit:apps/web/__tests__/project-repository.test.tsx",
     "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
@@ -4092,8 +4118,8 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/tmp/verify-b8a8e6e5-exempt/verifier-out/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-11-06T22:05:23Z",
+   "output_ref": "/tmp/verify-b8a8e6e5-646af21b/verifier-out/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-11-06T23:38:40Z",
    "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1417 files listed"
   },
   {
@@ -4108,13 +4134,13 @@
    "exit_code": 1,
    "id": "v-workflow-config-293d11fa6785da2c",
    "kind": "config_schema",
-   "output_ref": "/tmp/verify-b8a8e6e5-exempt/verifier-out/v-workflow-config-293d11fa6785da2c.txt",
-   "started_at_utc": "2026-11-06T22:06:10Z",
+   "output_ref": "/tmp/verify-b8a8e6e5-646af21b/verifier-out/v-workflow-config-293d11fa6785da2c.txt",
+   "started_at_utc": "2026-11-06T23:40:45Z",
    "summary": "workflow shell caller closure not measured: job repository-destination-browser step 3: checkout root or source-affecting workflow environment unresolved; job repository-destination-browser step 4: checkout root or source-affecting workflow environment unresolved; job repository-destination-browser step 5: checkout root or source-affecting workflow environment unresolved; job repository-destination-browser step 5: heredoc/group/function/brace expansion closure is unresolved; job repository-destination-browser step 6: checkout root or source-affecting workflow environment unresolved; job repository-destination-browser step 6: line 4: wrapper execution scope/options unresolved; job repository-destination-browser step 6: line 8: unsupported interpreter script/module/stdin dispatch closure; job repository-destination-browser step 7: checkout root or source-affecting workflow environment unresolved; job repository-destination-browser step 7: line 2: unsupported interpreter script/module/stdin dispatch closure; 9 workflow shell-caller uncertainty item(s) remain separate from YAML schema validation and are retained in graph closure evidence"
   },
   {
    "command": "verify.py config_schema: keys read at head ⊆ declared keys",
-   "duration_s": 1.69,
+   "duration_s": 6.66,
    "entities": [
     "code_unit:apps/web/e2e/repository-destination/run.mjs"
    ],
@@ -4124,13 +4150,13 @@
    "exit_code": 0,
    "id": "v-config-schema",
    "kind": "config_schema",
-   "output_ref": "/tmp/verify-b8a8e6e5-exempt/verifier-out/v-config-schema.json",
-   "started_at_utc": "2026-11-06T22:06:10Z",
+   "output_ref": "/tmp/verify-b8a8e6e5-646af21b/verifier-out/v-config-schema.json",
+   "started_at_utc": "2026-11-06T23:40:45Z",
    "summary": "3 source(s), 0 new / 3 frozen undeclared reads, 0 failed; 5 vendored file(s) not attributed to this repository (Arcanada-one/arcanada-universal-program)"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.49,
+   "duration_s": 2.02,
    "entities": [
     "code_unit:.github/workflows/repository-destination-browser.yml",
     "code_unit:apps/web/__tests__/project-repository.test.tsx",
@@ -4184,8 +4210,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/tmp/verify-b8a8e6e5-exempt/verifier-out/v-fitness.json",
-   "started_at_utc": "2026-11-06T22:06:11Z",
+   "output_ref": "/tmp/verify-b8a8e6e5-646af21b/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-11-06T23:40:52Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -4200,17 +4226,23 @@
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/tmp/verify-b8a8e6e5-exempt/verifier-out/v-canary.json",
-   "started_at_utc": "2026-11-06T22:06:12Z",
+   "output_ref": "/tmp/verify-b8a8e6e5-646af21b/verifier-out/v-canary.json",
+   "started_at_utc": "2026-11-06T23:40:54Z",
    "summary": "0 canary result(s), 0 committed at head; 0 verified / 0 failed / 1 not_measured of 1 entities"
   }
  ],
  "verify": {
   "events": [
    {
+    "code": "SUPERSEDED_SELF_EXCLUSION",
+    "entity": "receipt:receipts/graph/car-verify-mun-hyg-327-repository-destination.json",
+    "rule": "DEC-AUP-0035",
+    "text": "the receipt at receipts/graph/car-verify-mun-hyg-327-repository-destination.json is the previous version of the one this run is writing, for the same work item b8a8e6e5-f8f6-4bce-841a-7de49bef5a57 — superseded by construction, so it owes this change no verdict"
+   },
+   {
     "code": "STRUCTURAL_EXCLUSION",
     "rule": "DEC-AUP-0034",
-    "text": "69 affected entity(ies) owe no verdict (receipt: 69): unchanged at both revisions and given no verifier by the matrix"
+    "text": "70 affected entity(ies) owe no verdict (receipt: 70): unchanged at both revisions and given no verifier by the matrix"
    }
   ],
   "required_by_entity": {
@@ -4313,6 +4345,7 @@
    "receipt:receipts/graph/a2-304-dependabot-group.json": [],
    "receipt:receipts/graph/a2-320-web-eslint10.json": [],
    "receipt:receipts/graph/backend-workspace-isolation-20261008.json": [],
+   "receipt:receipts/graph/car-verify-mun-hyg-327-repository-destination.json": [],
    "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json": [],
    "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json": [],
    "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json": [],
@@ -4379,9 +4412,9 @@
    "receipt:receipts/graph/security-api959a-caller788.json": []
   },
   "seconds": {
-   "prepare": 15.99,
-   "total": 226.81,
-   "verifiers": 46.3
+   "prepare": 21.19,
+   "total": 507.86,
+   "verifiers": 131.5
   }
  },
  "work_item": "b8a8e6e5-f8f6-4bce-841a-7de49bef5a57"
