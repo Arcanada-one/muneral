@@ -110,7 +110,7 @@ export function validateResultRecord(value, binding = {}) {
   return true;
 }
 
-export function isAllowedFixtureRequest(requestUrl, method, expectedOrigin, appRoot, repoRoot) {
+export function isAllowedFixtureRequest(requestUrl, method, expectedOrigin, appRoot, repoRoot, extraFsRoots = []) {
   if (method !== 'GET' || typeof requestUrl !== 'string') return false;
   let parsed;
   try { parsed = new URL(requestUrl); } catch { return false; }
@@ -121,11 +121,16 @@ export function isAllowedFixtureRequest(requestUrl, method, expectedOrigin, appR
   if (pathname === '/' || pathname === '/index.html' || pathname === '/main.tsx') return true;
   if (
     pathname.startsWith('/@vite/') || pathname.startsWith('/@id/') ||
-    pathname.startsWith('/@react-refresh') || pathname.startsWith('/node_modules/.vite/')
+    pathname.startsWith('/@react-refresh') || pathname.startsWith('/node_modules/')
   ) return true;
-  const appPrefix = `/@fs${path.resolve(appRoot)}/`;
-  const typesPrefix = `/@fs${path.resolve(repoRoot, 'packages/types/src')}/`;
-  return pathname.startsWith(appPrefix) || pathname.startsWith(typesPrefix);
+  const allowedFsRoots = [
+    appRoot,
+    path.join(repoRoot, 'packages/types/src'),
+    path.join(repoRoot, 'node_modules'),
+    path.join(appRoot, 'node_modules'),
+    ...extraFsRoots,
+  ];
+  return allowedFsRoots.some((root) => pathname.startsWith(`/@fs${path.resolve(root)}/`));
 }
 
 export function browserArguments(profilePath) {
@@ -740,7 +745,14 @@ async function attachPage(state, browser) {
   const baseUrl = `http://127.0.0.1:${state.server.httpServer.address().port}`;
   state.baseOrigin = new URL(baseUrl).origin;
   state.cdp.on('Fetch.requestPaused', async ({ params, sessionId }) => {
-    const allowed = isAllowedFixtureRequest(params.request?.url, params.request?.method, state.baseOrigin, state.appRoot, state.repoRoot);
+    const allowed = isAllowedFixtureRequest(
+      params.request?.url,
+      params.request?.method,
+      state.baseOrigin,
+      state.appRoot,
+      state.repoRoot,
+      [path.join(state.privateRoot, 'vite-cache')],
+    );
     if (!allowed) {
       state.counts.blockedNetworkRequests += 1;
       state.counts.networkViolations += 1;
