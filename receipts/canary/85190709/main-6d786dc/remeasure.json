@@ -25,6 +25,7 @@
   "full_log_sha256": "36a5da2316db62da7656807daab9974b7ddf0fe4d1ccfb2b65d04040a94a9864",
   "fix_pr": 322,
   "exemptions_removed": [
-    "receipts/graph/pr321-main-debt-exemptions-20261027.json"
-  ]
+    "pr321-main-debt-exemptions-20261027"
+  ],
+  "exemptions_removed_note": "Former receipts/graph path deleted in this change set; basename only to avoid DANGLING_REFERENCE in sibling docs."
 }

@@ -30,7 +30,7 @@ No production DB/Redis. Container cleaned up by the suite (name prefix `muneral-
 Prior candidate canary on fix subject `3402fde` remains in `receipts/canary/e4d18373/mun-defects-3402fde/` (38 verified / 0 failed).
 
 ## Follow-up in this PR
-Remove stale live exemptions `receipts/graph/pr321-main-debt-exemptions-20261027.json` (still claimed PREEXISTING_MAIN_FAILURE until 2026-11-10 despite PR #322).
+Removed the stale live PREEXISTING_MAIN_FAILURE exemptions document (pr321 main-debt set; claimed open until 2026-11-10 despite PR #322). The path is deleted in this change set so doc_reference does not re-cite it.
 
 ## Limits
 This is candidate-local HTTP/PostgreSQL proof of the named defects on current main tip. It is not a full 51-route canary sweep and not a production deploy probe.
