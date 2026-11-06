@@ -75,6 +75,14 @@ test('browser arguments retain Chromium sandbox defaults', () => {
   assert.ok(!args.some((arg) => /no-sandbox|disable-setuid-sandbox|disable-namespace-sandbox/i.test(arg)));
 });
 
+test('short chrome runtime paths stay under the AF_UNIX socket limit', () => {
+  const runtimeRoot = driver.chromeRuntimeRoot('41484912349', 1);
+  const tmpProbe = path.join(runtimeRoot, 't', 'org.chromium.Chromium.XXXXXX', 'SingletonSocket');
+  const profileProbe = path.join(runtimeRoot, 'p', 'SingletonSocket');
+  assert.ok(Buffer.byteLength(tmpProbe, 'utf8') <= driver.CHROME_SOCKET_PATH_LIMIT);
+  assert.ok(Buffer.byteLength(profileProbe, 'utf8') <= driver.CHROME_SOCKET_PATH_LIMIT);
+});
+
 test('synthetic adapter serves only exact paginated activity GET inputs', async () => {
   const response = await apiClient.get(`/tasks/${TASK_IDS.populated}/activity?page=1&limit=20`);
   assert.equal(response.data.data.length, 20);

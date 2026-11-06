@@ -3,7 +3,7 @@ import { createRequire } from 'node:module';
 import { createHash, randomUUID } from 'node:crypto';
 import { execFileSync, spawn } from 'node:child_process';
 import {
-  link, lstat, mkdir, open, readFile, readdir, realpath, unlink, writeFile,
+  link, lstat, mkdir, open, readFile, readdir, realpath, rm, unlink, writeFile,
 } from 'node:fs/promises';
 import { createReadStream } from 'node:fs';
 import path from 'node:path';
@@ -177,8 +177,8 @@ function fail(reason) {
   return error;
 }
 
-function privateEnvironment(privateRoot) {
-  const temporary = path.join(privateRoot, 'tmp');
+function privateEnvironment(privateRoot, chromeTmp = null) {
+  const temporary = chromeTmp ?? path.join(privateRoot, 'tmp');
   return {
     PATH: '/usr/bin:/bin',
     HOME: path.join(privateRoot, 'home'),
@@ -188,6 +188,31 @@ function privateEnvironment(privateRoot) {
     LANG: 'C.UTF-8',
     TZ: 'UTC',
   };
+}
+
+// Chromium writes SingletonSocket under TMPDIR/user-data-dir. AF_UNIX sun_path is
+// typically 108 bytes; nested RUNNER_TEMP private roots exceed that on CI hosts.
+const CHROME_SOCKET_PATH_LIMIT = 107;
+
+function chromeRuntimeRoot(runId, runAttempt) {
+  return path.join('/tmp', 'avc', runId, String(runAttempt));
+}
+
+async function allocateShortChromeRuntime(state) {
+  const runtimeRoot = chromeRuntimeRoot(state.runId, state.runAttempt);
+  await rm(runtimeRoot, { recursive: true, force: true });
+  await mkdir(runtimeRoot, { recursive: true, mode: 0o700 });
+  const chromeTmp = path.join(runtimeRoot, 't');
+  const chromeProfile = path.join(runtimeRoot, 'p');
+  await mkdir(chromeTmp, { mode: 0o700 });
+  await mkdir(chromeProfile, { mode: 0o700 });
+  const probe = path.join(chromeTmp, 'org.chromium.Chromium.XXXXXX', 'SingletonSocket');
+  if (Buffer.byteLength(probe, 'utf8') > CHROME_SOCKET_PATH_LIMIT) throw fail('OUTPUT_PREPARATION_FAILED');
+  const profileProbe = path.join(chromeProfile, 'SingletonSocket');
+  if (Buffer.byteLength(profileProbe, 'utf8') > CHROME_SOCKET_PATH_LIMIT) throw fail('OUTPUT_PREPARATION_FAILED');
+  state.chromeRuntimeRoot = runtimeRoot;
+  state.chromeTmp = chromeTmp;
+  state.chromeProfile = chromeProfile;
 }
 
 function createCollector(maxBytes = CAPTURE_LIMIT_BYTES) {
@@ -591,6 +616,7 @@ async function prepareOutput(state) {
   await mkdir(path.join(privateReal, 'tmp'), { mode: 0o700 });
   await mkdir(path.join(privateReal, 'browser-profile'), { mode: 0o700 });
   await mkdir(path.join(privateReal, 'vite-cache'), { mode: 0o700 });
+  await allocateShortChromeRuntime(state);
 }
 
 async function verifyCandidateSource(state) {
@@ -620,7 +646,8 @@ async function verifyBrowser(state, dependencies = {}) {
   if (measuredDigest !== EXPECTED_BROWSER_SHA256) throw fail('BROWSER_BINARY_HASH_MISMATCH');
   state.browserSha256 = measuredDigest;
   const versionCapture = launchVersion(browserPath, ['--version'], {
-    cwd: state.privateRoot, env: privateEnvironment(state.privateRoot),
+    cwd: state.privateRoot,
+    env: privateEnvironment(state.privateRoot, state.chromeTmp),
     label: 'browser-version', privateRoot: state.privateRoot, timeoutMs: 5_000,
   });
   state.versionCapture = await versionCapture.completion;
@@ -702,7 +729,7 @@ async function createViteServer(state) {
 }
 
 async function attachPage(state, browser) {
-  const endpoint = await waitForDevToolsEndpoint(path.join(state.privateRoot, 'browser-profile'), browser);
+  const endpoint = await waitForDevToolsEndpoint(state.chromeProfile, browser);
   state.cdp = new CdpClient(endpoint);
   await state.cdp.ready.catch(() => { throw fail('CDP_CONNECT_FAILED'); });
   const target = await state.cdp.send('Target.createTarget', { url: 'about:blank' });
@@ -845,11 +872,15 @@ async function cleanup(state) {
       delay(5_000),
     ]);
   }
+  if (state.chromeRuntimeRoot) {
+    await rm(state.chromeRuntimeRoot, { recursive: true, force: true }).catch(() => {});
+  }
 }
 
 function createInitialState() {
   return {
     phase: 'UNEXPECTED_FAILURE', outputReady: false, artifactRoot: null, privateRoot: null,
+    chromeRuntimeRoot: null, chromeTmp: null, chromeProfile: null,
     repoRoot: null, appRoot: null, fixtureRoot: null, server: null, cdp: null,
     browser: null, pageSessionId: null, browserSha256: null, browserVersion: null,
     browserVersionOutcome: 'NOT_STARTED', versionCapture: null, candidateSha: null,
@@ -904,7 +935,7 @@ async function writeFailureSummary(state, result) {
       state.privateRoot,
       await state.browser.completion,
       {
-        expectedArgv: [EXPECTED_BROWSER_PATH, ...browserArguments(path.join(state.privateRoot, 'browser-profile'))],
+        expectedArgv: [EXPECTED_BROWSER_PATH, ...browserArguments(state.chromeProfile)],
         expectedCwd: state.privateRoot,
       },
     )
@@ -942,9 +973,9 @@ async function runFixture() {
     }
     state.phase = 'BROWSER_SPAWN_FAILED';
     state.browser = await launchBrowserAfterVerification(state, () => {
-      return spawnCaptured(EXPECTED_BROWSER_PATH, browserArguments(path.join(state.privateRoot, 'browser-profile')), {
+      return spawnCaptured(EXPECTED_BROWSER_PATH, browserArguments(state.chromeProfile), {
         cwd: state.privateRoot,
-        env: privateEnvironment(state.privateRoot),
+        env: privateEnvironment(state.privateRoot, state.chromeTmp),
         label: 'browser',
         privateRoot: state.privateRoot,
         timeoutMs: FIXTURE_TIMEOUT_MS,
@@ -1101,8 +1132,10 @@ export const __test = Object.freeze({
   RESULT_SCHEMA,
   FAILURE_REASONS: Object.freeze([...FAILURE_REASONS]),
   SCENARIOS,
+  CHROME_SOCKET_PATH_LIMIT,
   atomicPublishJson,
   browserArguments,
+  chromeRuntimeRoot,
   isAllowedFixtureRequest,
   browserBinaryIsAccepted,
   verifyBrowser,
