@@ -35,6 +35,9 @@ datarim/
 coverage/
 .nyc_output/
 
+# BATCH-004 CI machine reports (eslint/tsc/jest/vitest/ErrorLedger); produced on the runner
+reports/
+
 # Runtime data
 pids/
 *.pid
