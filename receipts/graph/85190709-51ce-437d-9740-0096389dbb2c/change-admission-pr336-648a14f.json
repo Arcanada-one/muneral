@@ -1,0 +1,161 @@
+{
+ "admission": {
+  "rule": "admitted requires every verdict = verified; failed without exemption ⇒ refused; not_measured without exemption ⇒ paused_safe; exemptions (owner + expiry) are attached by the admitting agent, never by the verifier (DEC-AUP-0008, matrix P1/P4)",
+  "structural_exclusion_rule": "DEC-AUP-0034: an affected entity is NOT verdict-owing when all three hold — the verifier matrix declares neither a mandatory nor a selectable verifier for its node type (so the only verdict it could ever carry states a property of the MATRIX, not of this change), the change set does not contain it, and its bytes are identical at base and head. Each one is listed in structural_exclusions with the content hash at both revisions that proves the byte-identity, and impact_pair.receipt_problems re-derives that proof from Git rather than believing the receipt.",
+  "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
+  "verdict": "admitted"
+ },
+ "captured_at_utc": "2026-11-06T21:34:32Z",
+ "change_set": {
+  "base": "6d786dca224c4dfcf13ca14693a032c9ab53343f",
+  "files": [
+   {
+    "kind": "doc",
+    "node_id": "document:receipts/canary/85190709/main-6d786dc/RESULT.md",
+    "node_ids": [
+     "document:receipts/canary/85190709/main-6d786dc/RESULT.md"
+    ],
+    "path": "receipts/canary/85190709/main-6d786dc/RESULT.md",
+    "status": "A"
+   },
+   {
+    "kind": "doc",
+    "new": true,
+    "path": "receipts/canary/85190709/main-6d786dc/e2e-debt-describe.excerpt.txt",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "new": true,
+    "path": "receipts/canary/85190709/main-6d786dc/remeasure.json",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "path": "receipts/graph/pr321-main-debt-exemptions-20261027.json",
+    "status": "D",
+    "uncovered": true
+   }
+  ],
+  "head": "648a14fade7f4220b2e515fd5269bc19999fba40",
+  "mode": "diff"
+ },
+ "decision_ref": "DEC-AUP-0008",
+ "exemptions": [],
+ "graph": {
+  "builder_version": "1.0.6",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:1605ee7b740099ae07ae2a37529532939b41b60889a742fec2133e4adffb6b77",
+  "path": "/home/dev/aup/claude-work/mun-hyg-20261022/kb-ingest-scope-20261105/true-positive-followthrough-20261106/next-20261106T1113Z/mun-main-debt-pr336-remediate/verifier-out-2/graph-6d786dca224c.json",
+  "source_commit": "6d786dca224c4dfcf13ca14693a032c9ab53343f"
+ },
+ "head_graph": {
+  "builder_version": "1.0.6",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:7ce5f79c6fdd2c8a8d9ca520cb7b8db8826a7715b667998b416a7a733001c3bf",
+  "path": "/home/dev/aup/claude-work/mun-hyg-20261022/kb-ingest-scope-20261105/true-positive-followthrough-20261106/next-20261106T1113Z/mun-main-debt-pr336-remediate/verifier-out-2/graph-head-648a14fade7f.json",
+  "source_commit": "648a14fade7f4220b2e515fd5269bc19999fba40",
+  "staleness": {
+   "checked_at_utc": "2026-11-06T21:38:27Z",
+   "checked_nodes": 570,
+   "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+   "mismatched_nodes": [],
+   "verdict": "fresh"
+  }
+ },
+ "host": "mun-pr336-remediate",
+ "host_redacted": true,
+ "host_sha256": "0c671b03a96a1b4f9451dc5ba48dd9b8e33f118ad4a56216413dfcc9a55b9025",
+ "impact_set": {
+  "deterministic_core": [],
+  "edge_types": "all",
+  "global_fallback": {
+   "triggered": false
+  },
+  "inferred_tail": [],
+  "max_depth": 3,
+  "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
+  "total": 0
+ },
+ "notes": [
+  "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
+  "profile: .arcana/verify.json at verified head; baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none"
+ ],
+ "producer": {
+  "tool": "tools/graph/verify.py",
+  "version": "1.4.1"
+ },
+ "receipt_id": "car-verify-20261106T213432Z-648a14fa",
+ "repo": {
+  "name": "Arcanada-one/muneral",
+  "path": "/home/dev/aup/claude-work/mun-hyg-20261022/kb-ingest-scope-20261105/true-positive-followthrough-20261106/next-20261106T1113Z/mun-main-debt-pr336-remediate/worktree"
+ },
+ "revision_selection": {
+  "base": [],
+  "head": [
+   "document:receipts/canary/85190709/main-6d786dc/RESULT.md"
+  ],
+  "schema": "RevisionImpactSelection/v1",
+  "unmeasured_head_files": []
+ },
+ "schema": "ChangeAdmissionReceipt/v1",
+ "staleness": {
+  "checked_at_utc": "2026-11-06T21:38:27Z",
+  "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+  "mismatched_nodes": [],
+  "verdict": "fresh"
+ },
+ "structural_exclusions": [],
+ "tree": {
+  "commit": "648a14fade7f4220b2e515fd5269bc19999fba40",
+  "dirty": false
+ },
+ "verdicts": [
+  {
+   "entity": "document:receipts/canary/85190709/main-6d786dc/RESULT.md",
+   "reason": "v-doc-reference: 5 reference(s) resolve at head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-doc-reference"
+   ]
+  }
+ ],
+ "verifier_selection": {
+  "applied": {},
+  "not_applied": [],
+  "requested": [],
+  "schema": "VerifierSelection/v1"
+ },
+ "verifiers": [
+  {
+   "command": "verify.py doc_reference: path / route / model references of affected documents resolve at head",
+   "duration_s": 0.0,
+   "entities": [
+    "document:receipts/canary/85190709/main-6d786dc/RESULT.md"
+   ],
+   "entity_verdicts": {
+    "document:receipts/canary/85190709/main-6d786dc/RESULT.md": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-doc-reference",
+   "kind": "doc_reference",
+   "output_ref": "/home/dev/aup/claude-work/mun-hyg-20261022/kb-ingest-scope-20261105/true-positive-followthrough-20261106/next-20261106T1113Z/mun-main-debt-pr336-remediate/verifier-out-2/v-doc-reference.txt",
+   "started_at_utc": "2026-11-06T21:38:39Z",
+   "summary": "1 document(s), 0 failed"
+  }
+ ],
+ "verify": {
+  "events": [],
+  "required_by_entity": {
+   "document:receipts/canary/85190709/main-6d786dc/RESULT.md": [
+    "doc_reference"
+   ]
+  },
+  "seconds": {
+   "prepare": 5.14,
+   "total": 247.23,
+   "verifiers": 0.0
+  }
+ },
+ "work_item": "85190709-51ce-437d-9740-0096389dbb2c"
+}
