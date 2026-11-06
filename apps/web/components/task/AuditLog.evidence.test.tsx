@@ -80,9 +80,10 @@ describe('AuditLog evidence attachment details', () => {
       await user.tab();
       const activeElement = document.activeElement;
       if (
-        activeElement === activityFilter ||
-        activeElement === actorFilter ||
-        activeElement === summary
+        activeElement instanceof HTMLElement &&
+        (activeElement === activityFilter ||
+          activeElement === actorFilter ||
+          activeElement === summary)
       ) {
         reachedKeyboardTargets.push(activeElement);
       }
