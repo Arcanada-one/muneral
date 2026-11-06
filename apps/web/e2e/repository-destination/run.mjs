@@ -3,9 +3,10 @@ import { createRequire } from 'node:module';
 import { randomUUID, createHash } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { createReadStream } from 'node:fs';
-import { link, lstat, mkdir, open, readFile, readdir, realpath, stat, unlink, writeFile } from 'node:fs/promises';
+import { link, lstat, mkdir, mkdtemp, open, readFile, readdir, realpath, rm, stat, unlink, writeFile } from 'node:fs/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
+import os from 'node:os';
 
 const expectedBrowserPath = '/opt/arcanada-browsers/cft-156.0.8078.4/chrome-linux64/chrome';
 const expectedBrowserVersion = 'Google Chrome for Testing 156.0.8078.4';
@@ -48,6 +49,10 @@ const state = {
   resultPath: null,
   privateDir: null,
   versionDir: null,
+  // Chromium AF_UNIX sockets are capped (~107 bytes). Keep runtime dirs short.
+  browserRuntimeDir: null,
+  browserTempDir: null,
+  browserProfileDir: null,
   outputReady: false,
   outputWritten: false,
   server: null,
@@ -277,11 +282,21 @@ async function prepareOutput() {
   await mkdir(path.join(state.privateDir, 'home'), { mode: 0o700 });
   await mkdir(path.join(state.privateDir, 'tmp'), { mode: 0o700 });
   await mkdir(state.versionDir, { mode: 0o700 });
+  // Short path under the OS temp root; the bound private root alone is too long for Chromium sockets.
+  const runtimeToken = sha256(`${state.runId}:${state.runAttempt}:${state.candidateSha}`).slice(0, 10);
+  state.browserRuntimeDir = await mkdtemp(path.join(os.tmpdir(), `rd${runtimeToken}-`));
+  const runtimeStat = await lstat(state.browserRuntimeDir);
+  requireCondition(runtimeStat.isDirectory() && !runtimeStat.isSymbolicLink()
+    && (runtimeStat.mode & 0o077) === 0, 'PRIVATE_ROOT_NOT_PRIVATE');
+  state.browserTempDir = path.join(state.browserRuntimeDir, 't');
+  state.browserProfileDir = path.join(state.browserRuntimeDir, 'p');
+  await mkdir(state.browserTempDir, { mode: 0o700 });
+  await mkdir(state.browserProfileDir, { mode: 0o700 });
   state.outputReady = true;
 }
 
 function browserEnvironment() {
-  const temp = path.join(state.privateDir, 'tmp');
+  const temp = state.browserTempDir;
   return {
     PATH: process.env.PATH || '/usr/bin:/bin',
     HOME: path.join(state.privateDir, 'home'),
@@ -486,12 +501,17 @@ async function runFixture() {
   const toolRequire = createRequire(toolAnchor);
   const viteModule = await import(pathToFileURL(toolRequire.resolve('vite')).href);
   const reactModule = await import(pathToFileURL(toolRequire.resolve('@vitejs/plugin-react')).href);
-  const playwrightModule = await import(pathToFileURL(toolRequire.resolve('playwright-core')).href);
+  // createRequire resolves the CJS entry (index.js). Dynamic import of that file does not
+  // surface named ESM exports such as chromium; use the package's import entry instead.
+  const playwrightRoot = path.dirname(toolRequire.resolve('playwright-core/package.json'));
+  const playwrightEntry = path.join(playwrightRoot, 'index.mjs');
+  requireCondition(await realpath(playwrightEntry) === playwrightEntry, 'TOOL_API_UNSUPPORTED');
+  const playwrightModule = await import(pathToFileURL(playwrightEntry).href);
   const reactPlugin = reactModule.default;
-  const { chromium } = playwrightModule;
+  const chromium = playwrightModule.chromium;
   requireCondition(typeof viteModule.createServer === 'function'
     && typeof reactPlugin === 'function'
-    && typeof chromium.launchPersistentContext === 'function', 'TOOL_API_UNSUPPORTED');
+    && typeof chromium?.launchPersistentContext === 'function', 'TOOL_API_UNSUPPORTED');
 
   state.server = await viteModule.createServer({
     configFile: false,
@@ -500,7 +520,18 @@ async function runFixture() {
     envPrefix: [],
     cacheDir: path.join(state.privateDir, 'vite-cache'),
     appType: 'spa',
-    plugins: [reactPlugin()],
+    plugins: [
+      reactPlugin(),
+      {
+        name: 'repository-destination-strip-vite-client',
+        transformIndexHtml: {
+          order: 'post',
+          handler(html) {
+            return html.replace(/<script\b[^>]*\bsrc=["']\/@vite\/client["'][^>]*><\/script>\s*/g, '');
+          },
+        },
+      },
+    ],
     resolve: {
       alias: [
         { find: 'react-dom/client', replacement: `${appRoot}/node_modules/react-dom/client` },
@@ -511,14 +542,19 @@ async function runFixture() {
       ],
       dedupe: ['react', 'react-dom'],
     },
-    server: { host: '127.0.0.1', port: 0, strictPort: false, hmr: false, open: false,
+    server: { host: '127.0.0.1', port: 0, strictPort: false, hmr: false, ws: false, open: false,
       fs: { strict: true, allow: [repoRoot, fixtureRoot] } },
   });
   await state.server.listen();
+  // Vite may still attach a WS endpoint even with server.ws=false / hmr=false; close it
+  // before the browser session so the isolation check stays at websocketCount === 0.
+  if (state.server.ws && typeof state.server.ws.close === 'function') {
+    await state.server.ws.close();
+  }
   const address = state.server.httpServer.address();
   assert.ok(address && typeof address === 'object');
   const baseUrl = `http://127.0.0.1:${address.port}`;
-  const profileDir = path.join(state.privateDir, 'browser-profile');
+  const profileDir = state.browserProfileDir;
   state.context = await chromium.launchPersistentContext(profileDir, {
     executablePath: browserPath,
     env: browserEnvironment(),
@@ -528,7 +564,8 @@ async function runFixture() {
     viewport: { width: 240, height: 640 },
   });
   const page = state.context.pages()[0];
-  page.on('websocket', socket => { state.websocketCount += 1; socket.close(); });
+  // playwright-core 1.63 WebSocket is observational (no close()); count only.
+  page.on('websocket', () => { state.websocketCount += 1; });
   await page.route('**/*', async route => {
     const request = route.request();
     const url = new URL(request.url());
@@ -593,6 +630,12 @@ async function runFixture() {
 async function closeBrowserResources() {
   if (state.context) await state.context.close().catch(() => {});
   if (state.server) await state.server.close().catch(() => {});
+  if (state.browserRuntimeDir) {
+    await rm(state.browserRuntimeDir, { recursive: true, force: true }).catch(() => {});
+    state.browserRuntimeDir = null;
+    state.browserTempDir = null;
+    state.browserProfileDir = null;
+  }
 }
 
 async function main() {
