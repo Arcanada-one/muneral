@@ -68,6 +68,7 @@ export function TaskGitRefs({ taskId }: { taskId: string }) {
 
 function TaskGitRefsForTask({ taskId }: { taskId: string }) {
   const [selectedKind, setSelectedKind] = useState<GitReferenceKind>('all');
+  const [wrapReferenceText, setWrapReferenceText] = useState(false);
   const kindSelectId = useId();
   const { data: refs, isLoading, isError, isFetching, refetch } = useTaskGitRefs(taskId);
   const visibleRefs = selectedKind === 'all'
@@ -114,6 +115,15 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
               <option value="branch">Branches</option>
               <option value="commit">Commits</option>
             </select>
+            <label htmlFor={`${kindSelectId}-wrap`} className="inline-flex items-center gap-2 text-sm">
+              <input
+                id={`${kindSelectId}-wrap`}
+                type="checkbox"
+                checked={wrapReferenceText}
+                onChange={(event) => setWrapReferenceText(event.target.checked)}
+              />
+              Wrap Git reference text
+            </label>
           </div>
           <p className="mb-3 text-xs text-muted-foreground">
             Showing {visibleRefs.length} of {refs.length} loaded Git references.
@@ -145,7 +155,9 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
                       className="flex min-w-0 flex-1 items-center gap-2 text-sm text-primary hover:underline"
                     >
                       <Icon className="h-4 w-4 flex-shrink-0" />
-                      <span className="truncate font-mono text-xs">{ref.ref || ref.url}</span>
+                      <span className={wrapReferenceText
+                        ? 'min-w-0 flex-1 whitespace-normal break-all font-mono text-xs'
+                        : 'truncate font-mono text-xs'}>{ref.ref || ref.url}</span>
                       <ExternalLink className="h-3 w-3 flex-shrink-0 opacity-50" />
                     </a>
                     <CopyGitReference
