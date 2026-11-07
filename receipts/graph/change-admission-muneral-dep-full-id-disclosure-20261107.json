@@ -5,9 +5,9 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "admitted"
  },
- "captured_at_utc": "2026-11-07T01:58:53Z",
+ "captured_at_utc": "2026-11-07T03:09:13Z",
  "change_set": {
-  "base": "7cf7390da4c455879a669b9bb6f969a8a1a38883",
+  "base": "a8d449215da5f43ab177aa7f7455d4d1d8bdce49",
   "files": [
    {
     "kind": "test",
@@ -26,9 +26,18 @@
     ],
     "path": "apps/web/components/task/TaskDependencies.tsx",
     "status": "M"
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/change-admission-muneral-dep-full-id-disclosure-20261107.json",
+    "node_ids": [
+     "receipt:receipts/graph/change-admission-muneral-dep-full-id-disclosure-20261107.json"
+    ],
+    "path": "receipts/graph/change-admission-muneral-dep-full-id-disclosure-20261107.json",
+    "status": "A"
    }
   ],
-  "head": "8bf603ef0187844364ff69b7d0d5395fa18e763d",
+  "head": "4bdf56064732dccecaa5a9c21dcddbe67e96ac26",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -36,25 +45,27 @@
  "graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:2bbe807ff9576700b199ebeed8935584a2c37e40a9605efa35c3b9332b2f7595",
-  "path": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-dep-full-id-c4c8e318/verify-work/verifier-out/graph-7cf7390da4c4.json",
-  "source_commit": "7cf7390da4c455879a669b9bb6f969a8a1a38883"
+  "graph_digest": "sha256:8616dd5bd6a72b5db0da0bfda1b2ad4954054a6cb82e07dde00781f3103f5683",
+  "path": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-dep-full-id-c4c8e318-absorb-a8d4492/verify-work/verifier-out/graph-a8d449215da5.json",
+  "source_commit": "a8d449215da5f43ab177aa7f7455d4d1d8bdce49"
  },
  "head_graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:9108d2950fc97d1d0198282026cb76650675ff094edc42e07d1e8a4daf9fe2a7",
-  "path": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-dep-full-id-c4c8e318/verify-work/verifier-out/graph-head-8bf603ef0187.json",
-  "source_commit": "8bf603ef0187844364ff69b7d0d5395fa18e763d",
+  "graph_digest": "sha256:52daa8ac760a3c06163a7ea11299ffa9914dd020c4f23bb014a74a2885a8acb5",
+  "path": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-dep-full-id-c4c8e318-absorb-a8d4492/verify-work/verifier-out/graph-head-4bdf56064732.json",
+  "source_commit": "4bdf56064732dccecaa5a9c21dcddbe67e96ac26",
   "staleness": {
-   "checked_at_utc": "2026-11-07T02:03:01Z",
-   "checked_nodes": 582,
+   "checked_at_utc": "2026-11-07T03:15:28Z",
+   "checked_nodes": 585,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
   }
  },
- "host": "arcana-devs",
+ "host": "muneral-c4c8e318-absorb",
+ "host_redacted": true,
+ "host_sha256": "915369caae2858aaad3a1b0e2e1935a7d213b60c390969e057121629019411f2",
  "impact_set": {
   "deterministic_core": [
    {
@@ -1834,6 +1845,33 @@
    },
    {
     "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-muneral-task-readiness-search-blockers-20261107.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskDependencies.tsx",
+      "via": "tsconfig-paths"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-muneral-task-readiness-search-blockers-20261107.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/__tests__/task-read-error-presentation.test.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
     "depth": 1,
     "entity": "receipt:receipts/graph/change-admission-muneral-task-readiness-summary-20261024.json",
     "node_type": "receipt",
@@ -2074,7 +2112,7 @@
   "inferred_tail": [],
   "max_depth": 3,
   "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
-  "total": 83
+  "total": 84
  },
  "notes": [
   "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
@@ -2084,11 +2122,11 @@
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261107T015853Z-8bf603ef",
+ "receipt_id": "car-verify-20261107T030913Z-4bdf5606",
  "receipt_path": "receipts/graph/change-admission-muneral-dep-full-id-disclosure-20261107.json",
  "repo": {
   "name": "Arcanada-one/muneral",
-  "path": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-dep-full-id-c4c8e318/muneral"
+  "path": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-dep-full-id-c4c8e318-absorb-a8d4492/muneral"
  },
  "revision_selection": {
   "base": [
@@ -2165,6 +2203,7 @@
    "receipt:receipts/graph/change-admission-muneral-task-readiness-blocker-uuid-copy-20261025.json",
    "receipt:receipts/graph/change-admission-muneral-task-readiness-cached-error-retry-20261026.json",
    "receipt:receipts/graph/change-admission-muneral-task-readiness-retry-20261025.json",
+   "receipt:receipts/graph/change-admission-muneral-task-readiness-search-blockers-20261107.json",
    "receipt:receipts/graph/change-admission-muneral-task-readiness-summary-20261024.json",
    "receipt:receipts/graph/change-admission-muneral-task-status-transition-confirmation-20261025.json",
    "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
@@ -2226,6 +2265,7 @@
    "receipt:receipts/graph/change-admission-muneral-auditlog-pagination-20261024.json",
    "receipt:receipts/graph/change-admission-muneral-auditlog-recovery-20261024.json",
    "receipt:receipts/graph/change-admission-muneral-auditlog-status-20261023.json",
+   "receipt:receipts/graph/change-admission-muneral-dep-full-id-disclosure-20261107.json",
    "receipt:receipts/graph/change-admission-muneral-dependency-context-ui-20261024.json",
    "receipt:receipts/graph/change-admission-muneral-task-checklist-disclosure-20261024.json",
    "receipt:receipts/graph/change-admission-muneral-task-checklist-feedback-20261024.json",
@@ -2252,6 +2292,7 @@
    "receipt:receipts/graph/change-admission-muneral-task-readiness-blocker-uuid-copy-20261025.json",
    "receipt:receipts/graph/change-admission-muneral-task-readiness-cached-error-retry-20261026.json",
    "receipt:receipts/graph/change-admission-muneral-task-readiness-retry-20261025.json",
+   "receipt:receipts/graph/change-admission-muneral-task-readiness-search-blockers-20261107.json",
    "receipt:receipts/graph/change-admission-muneral-task-readiness-summary-20261024.json",
    "receipt:receipts/graph/change-admission-muneral-task-status-transition-confirmation-20261025.json",
    "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
@@ -2269,7 +2310,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-11-07T02:02:59Z",
+  "checked_at_utc": "2026-11-07T03:15:26Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -2640,6 +2681,21 @@
   },
   {
    "content_hash": {
+    "base": null,
+    "head": "sha256:93dcc8193613a585f22ecc6047e76b7f1910ec34e5c0df25c219e35cb4b017c5"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-dep-full-id-disclosure-20261107.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-dep-full-id-disclosure-20261107.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it; superseded by construction — this run re-issues the receipt at receipts/graph/change-admission-muneral-dep-full-id-disclosure-20261107.json for work item c4c8e318-4b39-48c9-ae2c-e3c8f98750e5",
+   "rule": "DEC-AUP-0035",
+   "superseded": {
+    "receipt_path": "receipts/graph/change-admission-muneral-dep-full-id-disclosure-20261107.json",
+    "work_item": "c4c8e318-4b39-48c9-ae2c-e3c8f98750e5"
+   }
+  },
+  {
+   "content_hash": {
     "base": "sha256:28c7de6b28555d61a6794aaa725b931783d2fc43a9679f98908732f10a7c1699",
     "head": "sha256:28c7de6b28555d61a6794aaa725b931783d2fc43a9679f98908732f10a7c1699"
    },
@@ -2926,6 +2982,17 @@
   },
   {
    "content_hash": {
+    "base": "sha256:4fe43bcca99d62ce56a76f3571a07c175080f565bdfdeede43360b2c95a0f0b3",
+    "head": "sha256:4fe43bcca99d62ce56a76f3571a07c175080f565bdfdeede43360b2c95a0f0b3"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-task-readiness-search-blockers-20261107.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-task-readiness-search-blockers-20261107.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
     "base": "sha256:5d85104064eab99820ca19ac477c2974cf64adb0c489d422a724c0931bf00e9d",
     "head": "sha256:5d85104064eab99820ca19ac477c2974cf64adb0c489d422a724c0931bf00e9d"
    },
@@ -3047,7 +3114,7 @@
   }
  ],
  "tree": {
-  "commit": "8bf603ef0187844364ff69b7d0d5395fa18e763d",
+  "commit": "4bdf56064732dccecaa5a9c21dcddbe67e96ac26",
   "dirty": false
  },
  "verdicts": [
@@ -3195,8 +3262,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-dep-full-id-c4c8e318/muneral/apps/web/node_modules/.bin/tsc -p /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-dep-full-id-c4c8e318/muneral/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-dep-full-id-c4c8e318/verify-work/verifier-out/type-check-ok6bb0d8/check.tsbuildinfo --listFiles",
-   "duration_s": 78.22,
+   "command": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-dep-full-id-c4c8e318-absorb-a8d4492/muneral/apps/web/node_modules/.bin/tsc -p /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-dep-full-id-c4c8e318-absorb-a8d4492/muneral/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-dep-full-id-c4c8e318-absorb-a8d4492/verify-work/verifier-out/type-check-1rts28oz/check.tsbuildinfo --listFiles",
+   "duration_s": 96.44,
    "entities": [
     "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
     "code_unit:apps/web/__tests__/task-detail-retry.test.tsx",
@@ -3234,13 +3301,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-dep-full-id-c4c8e318/verify-work/verifier-out/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-11-07T02:04:02Z",
-   "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1418 files listed"
+   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-dep-full-id-c4c8e318-absorb-a8d4492/verify-work/verifier-out/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-11-07T03:16:05Z",
+   "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1419 files listed"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.61,
+   "duration_s": 1.06,
    "entities": [
     "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
     "code_unit:apps/web/__tests__/task-detail-retry.test.tsx",
@@ -3278,17 +3345,23 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-dep-full-id-c4c8e318/verify-work/verifier-out/v-fitness.json",
-   "started_at_utc": "2026-11-07T02:05:21Z",
+   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-dep-full-id-c4c8e318-absorb-a8d4492/verify-work/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-11-07T03:17:45Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   }
  ],
  "verify": {
   "events": [
    {
+    "code": "SUPERSEDED_SELF_EXCLUSION",
+    "entity": "receipt:receipts/graph/change-admission-muneral-dep-full-id-disclosure-20261107.json",
+    "rule": "DEC-AUP-0035",
+    "text": "the receipt at receipts/graph/change-admission-muneral-dep-full-id-disclosure-20261107.json is the previous version of the one this run is writing, for the same work item c4c8e318-4b39-48c9-ae2c-e3c8f98750e5 — superseded by construction, so it owes this change no verdict"
+   },
+   {
     "code": "STRUCTURAL_EXCLUSION",
     "rule": "DEC-AUP-0034",
-    "text": "70 affected entity(ies) owe no verdict (receipt: 70): unchanged at both revisions and given no verifier by the matrix"
+    "text": "72 affected entity(ies) owe no verdict (receipt: 72): unchanged at both revisions and given no verifier by the matrix"
    }
   ],
   "required_by_entity": {
@@ -3385,6 +3458,7 @@
    "receipt:receipts/graph/change-admission-muneral-auditlog-pagination-20261024.json": [],
    "receipt:receipts/graph/change-admission-muneral-auditlog-recovery-20261024.json": [],
    "receipt:receipts/graph/change-admission-muneral-auditlog-status-20261023.json": [],
+   "receipt:receipts/graph/change-admission-muneral-dep-full-id-disclosure-20261107.json": [],
    "receipt:receipts/graph/change-admission-muneral-dependency-context-ui-20261024.json": [],
    "receipt:receipts/graph/change-admission-muneral-task-checklist-disclosure-20261024.json": [],
    "receipt:receipts/graph/change-admission-muneral-task-checklist-feedback-20261024.json": [],
@@ -3411,6 +3485,7 @@
    "receipt:receipts/graph/change-admission-muneral-task-readiness-blocker-uuid-copy-20261025.json": [],
    "receipt:receipts/graph/change-admission-muneral-task-readiness-cached-error-retry-20261026.json": [],
    "receipt:receipts/graph/change-admission-muneral-task-readiness-retry-20261025.json": [],
+   "receipt:receipts/graph/change-admission-muneral-task-readiness-search-blockers-20261107.json": [],
    "receipt:receipts/graph/change-admission-muneral-task-readiness-summary-20261024.json": [],
    "receipt:receipts/graph/change-admission-muneral-task-status-transition-confirmation-20261025.json": [],
    "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json": [],
@@ -3424,9 +3499,9 @@
    "receipt:receipts/graph/security-api959a-caller788.json": []
   },
   "seconds": {
-   "prepare": 27.87,
-   "total": 389.22,
-   "verifiers": 78.83
+   "prepare": 17.61,
+   "total": 513.96,
+   "verifiers": 97.5
   }
  },
  "work_item": "c4c8e318-4b39-48c9-ae2c-e3c8f98750e5"
