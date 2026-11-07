@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { AuditLog } from './AuditLog';
 
 const activityState = vi.hoisted(() => ({ data: [] as Array<Record<string, unknown>> }));
@@ -93,7 +93,12 @@ describe('AuditLog actor identity', () => {
 
     expect(writeText).toHaveBeenCalledOnce();
     expect(writeText).toHaveBeenCalledWith(actorId);
-    expect(await screen.findByRole('status')).toHaveTextContent('Actor ID copied.');
+    const actorRow = within(screen.getByRole('listitem'));
+    expect(await actorRow.findByRole('status')).toHaveTextContent('Actor ID copied.');
+    expect(screen.getAllByRole('status').map((status) => status.textContent)).toEqual([
+      'Showing 1 of 1 loaded activity entry on this page.',
+      'Actor ID copied.',
+    ]);
   });
 
   it('reports clipboard failure without exposing browser details', async () => {
@@ -124,7 +129,8 @@ describe('AuditLog actor identity', () => {
     expect(writeText).toHaveBeenCalledOnce();
 
     await act(async () => resolveClipboard());
-    expect(await screen.findByRole('status')).toHaveTextContent('Actor ID copied.');
+    expect(await within(screen.getByRole('listitem')).findByRole('status'))
+      .toHaveTextContent('Actor ID copied.');
   });
 
   it('does not show an old event copy result after that event is replaced', async () => {
@@ -141,7 +147,7 @@ describe('AuditLog actor identity', () => {
     expect(screen.getByRole('button', { name: 'Copy recorded actor ID' })).toBeInTheDocument();
 
     await act(async () => resolveClipboard());
-    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(within(screen.getByRole('listitem')).queryByRole('status')).not.toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
@@ -158,7 +164,7 @@ describe('AuditLog actor identity', () => {
     view.rerender(<AuditLog taskId={otherTaskId} />);
 
     await act(async () => resolveClipboard());
-    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(within(screen.getByRole('listitem')).queryByRole('status')).not.toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 });
