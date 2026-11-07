@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useId, useLayoutEffect, useRef, useState } from 'react';
 import { Bot, User, Clock, Copy } from 'lucide-react';
 import { TASK_STATUSES, type TaskPriority, type TaskStatus } from '@muneral/types';
 import { useActivity } from '@/lib/api/tasks';
@@ -20,6 +20,12 @@ interface ActivityFilterState {
   mode: ActivityFilterMode;
   actorMode: ActorFilterMode;
   showExactUtcTime: boolean;
+}
+
+interface VisibleEventIdCopyFeedback {
+  scopeKey: string;
+  generation: number;
+  status: 'pending' | 'copied' | 'failed';
 }
 
 const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
@@ -384,6 +390,87 @@ export function AuditLog({ taskId }: AuditLogProps) {
       : actionFilteredEntries;
   const canShowVisibleCount = data !== undefined && responsePageMatches &&
     responsePageIsUsable && !pageOutOfRange && !isLoading && !isError && !isFetching;
+  const visibleEventIds = entries.map((entry) => entry.id);
+  const visibleEventIdsText = visibleEventIds.join('\n');
+  const visibleEventIdCopyScopeKey = [
+    taskId,
+    String(page),
+    filterMode,
+    actorFilterMode,
+    JSON.stringify(visibleEventIds),
+    data === undefined ? 'data:none' : `data:${String(data.page)}:${String(data.total)}:${String(data.limit)}`,
+    String(isLoading),
+    String(isError),
+    String(isFetching),
+    String(responsePageMatches),
+    String(responsePageIsUsable),
+    String(pageOutOfRange),
+  ].join('\u0001');
+  const [visibleEventIdCopyFeedback, setVisibleEventIdCopyFeedback] =
+    useState<VisibleEventIdCopyFeedback | undefined>();
+  const [visibleEventIdCopyEpoch, setVisibleEventIdCopyEpoch] = useState({
+    key: visibleEventIdCopyScopeKey,
+    generation: 0,
+  });
+  if (visibleEventIdCopyEpoch.key !== visibleEventIdCopyScopeKey) {
+    setVisibleEventIdCopyEpoch({
+      key: visibleEventIdCopyScopeKey,
+      generation: visibleEventIdCopyEpoch.generation + 1,
+    });
+  }
+  const visibleEventIdCopyGeneration =
+    visibleEventIdCopyEpoch.key === visibleEventIdCopyScopeKey
+      ? visibleEventIdCopyEpoch.generation
+      : visibleEventIdCopyEpoch.generation + 1;
+  const visibleEventIdCopyScopeKeyRef = useRef(visibleEventIdCopyScopeKey);
+  const visibleEventIdCopyGenerationRef = useRef(visibleEventIdCopyGeneration);
+  const visibleEventIdCopyRequestRef = useRef<number | null>(null);
+  const visibleEventIdCopyRequestIdRef = useRef(0);
+  useLayoutEffect(() => {
+    visibleEventIdCopyScopeKeyRef.current = visibleEventIdCopyScopeKey;
+    visibleEventIdCopyGenerationRef.current = visibleEventIdCopyGeneration;
+    visibleEventIdCopyRequestRef.current = null;
+  }, [visibleEventIdCopyScopeKey, visibleEventIdCopyGeneration]);
+  const visibleEventIdCopyStatus =
+    visibleEventIdCopyFeedback?.scopeKey === visibleEventIdCopyScopeKey &&
+    visibleEventIdCopyFeedback.generation === visibleEventIdCopyGeneration
+      ? visibleEventIdCopyFeedback.status
+      : 'idle';
+  const canCopyVisibleEventIds = canShowVisibleCount && entries.length > 0;
+
+  const copyVisibleEventIds = async () => {
+    if (!canCopyVisibleEventIds || visibleEventIdCopyRequestRef.current !== null) return;
+
+    const requestId = ++visibleEventIdCopyRequestIdRef.current;
+    const generation = visibleEventIdCopyGeneration;
+    const scopeKey = visibleEventIdCopyScopeKey;
+    visibleEventIdCopyRequestRef.current = requestId;
+    setVisibleEventIdCopyFeedback({ scopeKey, generation, status: 'pending' });
+
+    const isCurrentRequest = () =>
+      visibleEventIdCopyScopeKeyRef.current === scopeKey &&
+      visibleEventIdCopyGenerationRef.current === generation &&
+      visibleEventIdCopyRequestRef.current === requestId;
+
+    try {
+      const clipboard = typeof navigator === 'undefined' ? undefined : navigator.clipboard;
+      if (!clipboard || typeof clipboard.writeText !== 'function') {
+        throw new Error('Clipboard unavailable');
+      }
+      await clipboard.writeText(visibleEventIdsText);
+      if (isCurrentRequest()) {
+        setVisibleEventIdCopyFeedback({ scopeKey, generation, status: 'copied' });
+      }
+    } catch {
+      if (isCurrentRequest()) {
+        setVisibleEventIdCopyFeedback({ scopeKey, generation, status: 'failed' });
+      }
+    } finally {
+      if (visibleEventIdCopyRequestRef.current === requestId) {
+        visibleEventIdCopyRequestRef.current = null;
+      }
+    }
+  };
 
   const setPage = (nextPage: number) => setPageState({ taskId, page: nextPage });
   const updateFilterState = (updates: Partial<Omit<ActivityFilterState, 'taskId'>>) => {
@@ -501,6 +588,26 @@ export function AuditLog({ taskId }: AuditLogProps) {
           {currentPageEntries.length === 1 ? 'entry' : 'entries'} on this page.
         </p>
       )}
+
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={copyVisibleEventIds}
+          disabled={!canCopyVisibleEventIds || visibleEventIdCopyStatus === 'pending'}
+        >
+          Copy visible activity event IDs ({entries.length})
+        </Button>
+        {visibleEventIdCopyStatus === 'copied' && (
+          <span role="status" className="text-xs text-green-700">Activity event IDs copied.</span>
+        )}
+        {visibleEventIdCopyStatus === 'failed' && (
+          <span role="alert" className="text-xs text-destructive">
+            Could not copy activity event IDs. Try copying them manually.
+          </span>
+        )}
+      </div>
 
       <div className="mb-3 flex items-center gap-2 text-xs">
         <input

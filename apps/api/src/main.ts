@@ -1,3 +1,4 @@
+// mun-hyg e8fd: keep lint-and-test path hot for ruleset required checks
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
