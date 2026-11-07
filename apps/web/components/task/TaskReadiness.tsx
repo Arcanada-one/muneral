@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import { Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -53,15 +53,68 @@ function CopyBlockerTaskIdButton({ blockerTaskId }: { blockerTaskId: string }) {
   );
 }
 
+function CopyLoadedBlockerIdsButton({
+  blockerTaskIds,
+}: {
+  blockerTaskIds: string[];
+}) {
+  const isCopyPending = useRef(false);
+  const [isCopying, setIsCopying] = useState(false);
+  const [copyResult, setCopyResult] = useState<'idle' | 'copied' | 'failed'>('idle');
+
+  const copyLoadedBlockerIds = async () => {
+    if (isCopyPending.current) return;
+
+    isCopyPending.current = true;
+    setIsCopying(true);
+    setCopyResult('idle');
+
+    const clipboard = typeof navigator === 'undefined' ? undefined : navigator.clipboard;
+    if (!clipboard || typeof clipboard.writeText !== 'function') {
+      isCopyPending.current = false;
+      setIsCopying(false);
+      setCopyResult('failed');
+      return;
+    }
+
+    try {
+      await clipboard.writeText(blockerTaskIds.join('\n'));
+      setCopyResult('copied');
+    } catch {
+      setCopyResult('failed');
+    } finally {
+      isCopyPending.current = false;
+      setIsCopying(false);
+    }
+  };
+
+  return (
+    <div className="mt-2">
+      <Button type="button" variant="outline" size="sm" onClick={copyLoadedBlockerIds} disabled={isCopying}>
+        Copy loaded blocker IDs
+      </Button>
+      {copyResult === 'copied' && (
+        <span role="status" className="ml-2 text-xs text-green-700">Blocker IDs copied.</span>
+      )}
+      {copyResult === 'failed' && (
+        <span role="alert" className="ml-2 text-xs text-destructive">
+          Could not copy blocker IDs. Try copying them manually.
+        </span>
+      )}
+    </div>
+  );
+}
+
 function blockerSearchText(edge: {
   otherTaskId: string;
   otherTaskTitle?: string | null;
   otherTaskTitleWithheld?: true;
-  otherTaskStatus?: string | null;
 }): string {
-  const title = edge.otherTaskTitleWithheld === true ? null : edge.otherTaskTitle;
-  const status = getTaskStatusLabel(edge.otherTaskStatus ?? '') ?? edge.otherTaskStatus ?? '';
-  return [title || '', edge.otherTaskId, status].join('\n').toLowerCase();
+  const parts = [edge.otherTaskId];
+  if (edge.otherTaskTitleWithheld !== true && edge.otherTaskTitle) {
+    parts.push(edge.otherTaskTitle);
+  }
+  return parts.join('\n').toLowerCase();
 }
 
 export function TaskReadiness({ taskId }: TaskReadinessProps) {
@@ -78,6 +131,7 @@ function TaskReadinessPanel({
 }) {
   const { data, isLoading, isError, isFetching, refetch } = readiness;
   const [searchQuery, setSearchQuery] = useState('');
+  const [blockersExpanded, setBlockersExpanded] = useState(true);
   const searchInputId = useId();
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
 
@@ -98,6 +152,7 @@ function TaskReadinessPanel({
     </p>;
   } else {
     const loadedBlockers = data.blockedBy;
+    const loadedBlockerIds = Array.from(new Set(loadedBlockers.map((edge) => edge.otherTaskId)));
     const visibleBlockers = normalizedSearchQuery
       ? loadedBlockers.filter((edge) => blockerSearchText(edge).includes(normalizedSearchQuery))
       : loadedBlockers;
@@ -108,77 +163,95 @@ function TaskReadinessPanel({
           {data.blockedBy.length} of {data.dependencyCount} dependency links are blocking this task.
         </p>
         {loadedBlockers.length > 0 && (
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <label htmlFor={searchInputId} className="text-sm">
-              Search loaded blockers
-            </label>
-            <input
-              id={searchInputId}
-              type="search"
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              onKeyDown={(event) => {
-                if (
-                  event.key !== 'Escape' ||
-                  searchQuery === '' ||
-                  event.nativeEvent.isComposing ||
-                  event.altKey ||
-                  event.ctrlKey ||
-                  event.metaKey ||
-                  event.shiftKey
-                ) {
-                  return;
-                }
-
-                event.preventDefault();
-                event.stopPropagation();
-                setSearchQuery('');
-              }}
-              aria-describedby={`${searchInputId}-help`}
-              aria-keyshortcuts="Escape"
-              placeholder="Title, task ID, or status"
-              className="min-w-0 flex-1 rounded border bg-background px-2 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          <>
+            <button
+              type="button"
+              aria-controls={`task-readiness-${taskId}-blockers`}
+              aria-expanded={blockersExpanded}
+              className="mt-2 rounded text-sm text-foreground underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              onClick={() => setBlockersExpanded((expanded) => !expanded)}
+            >
+              {blockersExpanded ? 'Hide blocking tasks' : 'Show blocking tasks'}
+            </button>
+            <CopyLoadedBlockerIdsButton
+              key={JSON.stringify([taskId, loadedBlockerIds])}
+              blockerTaskIds={loadedBlockerIds}
             />
-            <span id={`${searchInputId}-help`} className="basis-full text-xs text-muted-foreground">
-              Filters the already-loaded readiness blockers locally. Press Escape to clear search.
-            </span>
-            {searchQuery !== '' && (
-              <button
-                type="button"
-                className="rounded text-sm text-foreground underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                onClick={() => setSearchQuery('')}
-              >
-                Clear search
-              </button>
-            )}
-            <p className="basis-full text-xs text-muted-foreground">
-              Showing {visibleBlockers.length} of {loadedBlockers.length} loaded readiness blockers.
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <label htmlFor={searchInputId} className="text-sm">
+                Search loaded blockers
+              </label>
+              <input
+                id={searchInputId}
+                type="search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (
+                    event.key !== 'Escape' ||
+                    searchQuery === '' ||
+                    event.nativeEvent.isComposing ||
+                    event.altKey ||
+                    event.ctrlKey ||
+                    event.metaKey ||
+                    event.shiftKey
+                  ) {
+                    return;
+                  }
+
+                  event.preventDefault();
+                  event.stopPropagation();
+                  setSearchQuery('');
+                }}
+                aria-describedby={`${searchInputId}-help`}
+                aria-keyshortcuts="Escape"
+                placeholder="Title or task ID"
+                className="min-w-0 flex-1 rounded border bg-background px-2 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              />
+              <span id={`${searchInputId}-help`} className="basis-full text-xs text-muted-foreground">
+                Filters the already-loaded readiness blockers locally. Press Escape to clear search.
+              </span>
+              {searchQuery !== '' && (
+                <button
+                  type="button"
+                  aria-label="Clear search"
+                  className="rounded text-sm text-foreground underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  onClick={() => setSearchQuery('')}
+                >
+                  Clear search
+                </button>
+              )}
+              <p className="basis-full text-xs text-muted-foreground">
+                Showing {visibleBlockers.length} of {loadedBlockers.length} loaded blocking dependencies.
+              </p>
+            </div>
+          </>
+        )}
+        <div id={`task-readiness-${taskId}-blockers`} hidden={!blockersExpanded}>
+          {visibleBlockers.length === 0 ? (
+            <p className="mt-2 text-sm text-muted-foreground">
+              {loadedBlockers.length === 0
+                ? 'No loaded readiness blockers.'
+                : 'No matching readiness blockers in the loaded list. Clear search to show more.'}
             </p>
-          </div>
-        )}
-        {visibleBlockers.length === 0 ? (
-          <p className="mt-2 text-sm text-muted-foreground">
-            {loadedBlockers.length === 0
-              ? 'No loaded readiness blockers.'
-              : 'No matching readiness blockers in the loaded list. Clear search to show more.'}
-          </p>
-        ) : (
-          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
-            {visibleBlockers.map((edge) => {
-              const title = edge.otherTaskTitleWithheld === true ? null : edge.otherTaskTitle;
-              const status = getTaskStatusLabel(edge.otherTaskStatus);
-              return (
-                <li key={`${taskId}:${edge.id}:${edge.otherTaskId}`} className="break-words">
-                  {title || edge.otherTaskId}
-                  {status ? <Badge className="ml-2" variant="secondary">{status}</Badge> : null}
-                  <CopyBlockerTaskIdButton
-                    blockerTaskId={edge.otherTaskId}
-                  />
-                </li>
-              );
-            })}
-          </ul>
-        )}
+          ) : (
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
+              {visibleBlockers.map((edge) => {
+                const title = edge.otherTaskTitleWithheld === true ? null : edge.otherTaskTitle;
+                const status = getTaskStatusLabel(edge.otherTaskStatus);
+                return (
+                  <li key={`${taskId}:${edge.id}:${edge.otherTaskId}`} className="break-words">
+                    {title || edge.otherTaskId}
+                    {status ? <Badge className="ml-2" variant="secondary">{status}</Badge> : null}
+                    <CopyBlockerTaskIdButton
+                      blockerTaskId={edge.otherTaskId}
+                    />
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
       </>
     );
   }
