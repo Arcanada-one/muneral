@@ -71,18 +71,21 @@ def main() -> int:
         )
 
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    # Run metadata is injected by the workflow as RUN_META_JSON so this script
+    # does not read undeclared GITHUB_* config keys (graph v-config-schema).
+    run_meta: dict = {}
+    raw_meta = os.environ.get("RUN_META_JSON", "").strip()
+    if raw_meta:
+        try:
+            parsed = json.loads(raw_meta)
+            if isinstance(parsed, dict):
+                run_meta = parsed
+        except json.JSONDecodeError:
+            run_meta = {"parse_error": "RUN_META_JSON is not valid JSON"}
     ledger = {
         "schema": "ErrorLedger/v1",
         "captured_at_utc": now,
-        "run": {
-            "repository": os.environ.get("GITHUB_REPOSITORY", ""),
-            "run_id": os.environ.get("GITHUB_RUN_ID", ""),
-            "run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT", ""),
-            "sha": os.environ.get("GITHUB_SHA", ""),
-            "ref": os.environ.get("GITHUB_REF", ""),
-            "event_name": os.environ.get("GITHUB_EVENT_NAME", ""),
-            "head_ref": os.environ.get("GITHUB_HEAD_REF", ""),
-        },
+        "run": run_meta,
         "steps": steps,
         "reports": reports,
         "clusters": [],

@@ -3,6 +3,8 @@
 # stdout (caller redirects to reports/verify-structure.txt). Exit 0 only when
 # every required path exists. BATCH-005 may replace this with a richer collector.
 set -eu
+ROOT="$(CDPATH= cd -- "$(dirname "$0")/../.." && pwd)"
+cd -- "$ROOT"
 required=(
   apps/api/package.json
   apps/web/package.json
@@ -13,7 +15,7 @@ required=(
   pnpm-workspace.yaml
 )
 missing=0
-printf 'verify-structure: start\n'
+printf 'verify-structure: start root=%s\n' "$ROOT"
 for path in "${required[@]}"; do
   if [[ -e "${path}" ]]; then
     printf 'OK %s\n' "${path}"

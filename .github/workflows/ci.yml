@@ -280,6 +280,8 @@ jobs:
         id: collect
         if: always() && needs.tested-tree.outputs.reuse != 'true'
         env:
+          RUN_META_JSON: >-
+            {"repository":"${{ github.repository }}","run_id":"${{ github.run_id }}","run_attempt":"${{ github.run_attempt }}","sha":"${{ github.sha }}","ref":"${{ github.ref }}","event_name":"${{ github.event_name }}","head_ref":"${{ github.head_ref }}"}
           STEP_OUTCOMES: |
             opsbot_secret_gate_test=${{ steps.opsbot_secret_gate_test.outcome }}
             runner_broker_preflight_test=${{ steps.runner_broker_preflight_test.outcome }}
