@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Copy, GitBranch, GitCommit, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTaskGitRefs } from '@/lib/api/tasks';
@@ -54,6 +54,61 @@ function CopyGitReference({ value, label }: { value: string; label: string }) {
       {copyState === 'failed' && (
         <span role="alert" className="basis-full text-xs text-destructive">
           Could not copy Git reference. Try copying it manually.
+        </span>
+      )}
+    </>
+  );
+}
+
+function CopyGitReferenceLink({
+  reference,
+  url,
+  label,
+}: {
+  reference: string;
+  url: string;
+  label: string;
+}) {
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const [isCopying, setIsCopying] = useState(false);
+  const isCopyingRef = useRef(false);
+
+  const copyLink = async () => {
+    if (isCopyingRef.current) return;
+
+    isCopyingRef.current = true;
+    setCopyState('idle');
+    setIsCopying(true);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopyState('copied');
+    } catch {
+      setCopyState('failed');
+    } finally {
+      isCopyingRef.current = false;
+      setIsCopying(false);
+    }
+  };
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="h-7 w-7 shrink-0"
+        onClick={copyLink}
+        disabled={isCopying}
+        aria-label={`Copy Git reference link for ${label} ${reference}`}
+      >
+        <Copy className="h-3 w-3" />
+      </Button>
+      {copyState === 'copied' && (
+        <span role="status" className="basis-full text-xs text-green-700">Git reference link copied.</span>
+      )}
+      {copyState === 'failed' && (
+        <span role="alert" className="basis-full text-xs text-destructive">
+          Could not copy Git reference link. Try copying the link manually.
         </span>
       )}
     </>
@@ -116,6 +171,14 @@ export function TaskGitRefs({ taskId }: { taskId: string }) {
                   value={ref.ref || ref.url}
                   label={referenceLabels[ref.type]}
                 />
+                {typeof ref.ref === 'string' && ref.ref.trim() !== '' && ref.ref !== ref.url && (
+                  <CopyGitReferenceLink
+                    key={JSON.stringify([taskId, ref.id, ref.ref, ref.url])}
+                    reference={ref.ref}
+                    url={ref.url}
+                    label={referenceLabels[ref.type]}
+                  />
+                )}
               </li>
             );
           })}
