@@ -388,20 +388,22 @@ jobs:
       github.event_name != 'pull_request' ||
       startsWith(github.head_ref, 'integration/') ||
       contains(github.event.pull_request.labels.*.name, 'ci:run')
-    uses: Arcanada-one/datarim/.github/workflows/network-exposure-lint.yml@50351e0468f57a39b280d75cf41827329d6393d2
+    uses: Arcanada-one/datarim/.github/workflows/network-exposure-lint.yml@66a98187ca9e7045dbbefdd1cec5aaeba1c1b981
     with:
       compose_paths: docker-compose.prod.yml
-      datarim_ref: '50351e0468f57a39b280d75cf41827329d6393d2'
+      datarim_ref: '66a98187ca9e7045dbbefdd1cec5aaeba1c1b981'
       # A2-315: on the deploying push this gate takes the `deploy-gate` lane too (default is ci-general).
       runner_labels: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && '["deploy-gate"]' || '["self-hosted","linux","ci-general"]' }}
 
   preflight-caller-contract:
-    # BATCH-004 intended the same PR skip guard as lint-and-test/network-exposure.
-    # Measured on PR #342 run 42317650803: a job-level `if:` here makes the datarim
-    # preflight-caller-contract action fail with
-    # `.jobs.preflight-caller-contract.capabilities: contract violation`.
-    # Keep this job unconditional (ubuntu-latest, not ci-general) until that
-    # contract admits a guarded form. Gap recorded on Muneral b2e6f1a9 AC3.
+    # BATCH-004 guard: same PR skip rule as lint-and-test / network-exposure.
+    # Job stays on ubuntu-latest (not ci-general). Required `if:` restored for AC3;
+    # capabilities allowlist in pinned datarim preflight-caller-contract is unchanged
+    # (no deploy/vault/contract-step weakening).
+    if: >-
+      github.event_name != 'pull_request' ||
+      startsWith(github.head_ref, 'integration/') ||
+      contains(github.event.pull_request.labels.*.name, 'ci:run')
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -411,7 +413,7 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ github.workflow_sha }}
-      - uses: Arcanada-one/datarim/.github/actions/preflight-caller-contract@50351e0468f57a39b280d75cf41827329d6393d2
+      - uses: Arcanada-one/datarim/.github/actions/preflight-caller-contract@66a98187ca9e7045dbbefdd1cec5aaeba1c1b981
         with:
           vault-addr: ${{ vars.VAULT_ADDR }}
 
@@ -469,7 +471,7 @@ jobs:
     steps:
       - name: Pre-deploy host readiness
         id: preflight
-        uses: Arcanada-one/datarim/.github/actions/preflight-check@50351e0468f57a39b280d75cf41827329d6393d2
+        uses: Arcanada-one/datarim/.github/actions/preflight-check@66a98187ca9e7045dbbefdd1cec5aaeba1c1b981
         with:
           target-host: arcana-prd
           service-name: muneral
