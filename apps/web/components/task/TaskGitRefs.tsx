@@ -119,6 +119,64 @@ function CopyAvailableGitReferenceLinks({ urls }: { urls: string[] }) {
   );
 }
 
+function CopyAvailableGitReferenceValues({ refs }: { refs: TaskGitRef[] }) {
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const [isCopying, setIsCopying] = useState(false);
+  const isCopyingRef = useRef(false);
+  const values = refs.map((ref) => ref.ref || ref.url);
+
+  const copyValues = async () => {
+    if (isCopyingRef.current || values.length === 0) return;
+
+    isCopyingRef.current = true;
+    setCopyState('idle');
+    setIsCopying(true);
+
+    const clipboard = typeof navigator === 'undefined' ? undefined : navigator.clipboard;
+    if (!clipboard || typeof clipboard.writeText !== 'function') {
+      isCopyingRef.current = false;
+      setIsCopying(false);
+      setCopyState('failed');
+      return;
+    }
+
+    try {
+      await clipboard.writeText(values.join('\n'));
+      setCopyState('copied');
+    } catch {
+      setCopyState('failed');
+    } finally {
+      isCopyingRef.current = false;
+      setIsCopying(false);
+    }
+  };
+
+  return (
+    <span className="inline-flex flex-wrap items-center gap-2">
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => { void copyValues(); }}
+        disabled={values.length === 0 || isCopying}
+        aria-label={`Copy ${values.length} available Git reference values`}
+        aria-busy={isCopying}
+      >
+        <Copy className="h-3 w-3" />
+        {isCopying ? 'Copying available references…' : `Copy available reference values (${values.length})`}
+      </Button>
+      {copyState === 'copied' && (
+        <span role="status" className="text-xs text-green-700">Available Git reference values copied.</span>
+      )}
+      {copyState === 'failed' && (
+        <span role="alert" className="text-xs text-destructive">
+          Could not copy available Git reference values. Try again.
+        </span>
+      )}
+    </span>
+  );
+}
+
 export function TaskGitRefs({ taskId }: { taskId: string }) {
   return <TaskGitRefsForTask key={taskId} taskId={taskId} />;
 }
@@ -128,7 +186,7 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
   const [searchQuery, setSearchQuery] = useState('');
   const kindSelectId = useId();
   const searchInputId = useId();
-  const { data: refs, isLoading, isError, isFetching, refetch } = useTaskGitRefs(taskId);
+  const { data: refs, dataUpdatedAt, isLoading, isError, isFetching, refetch } = useTaskGitRefs(taskId);
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
   const filteredRefs = (refs ?? []).filter((ref) => {
     if (selectedKind !== 'all' && ref.type !== selectedKind) return false;
@@ -144,11 +202,19 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
   const availableLinkUrls = filteredRefs
     .filter((ref) => safeRepositoryUrl(ref.url))
     .map((ref) => ref.url);
+  const availableReferences = filteredRefs.filter((ref) => safeRepositoryUrl(ref.url));
   const visibleBatchKey = JSON.stringify([
     taskId,
     selectedKind,
     searchQuery,
     (refs ?? []).map((ref) => [ref.id, ref.type, ref.ref, ref.url]),
+  ]);
+  const availableReferencesKey = JSON.stringify([
+    taskId,
+    selectedKind,
+    searchQuery,
+    dataUpdatedAt,
+    availableReferences.map((ref) => [ref.id, ref.type, ref.ref, ref.url]),
   ]);
 
   let body;
@@ -175,8 +241,9 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
     body = (
       <>
         <p className="text-sm text-muted-foreground">No Git references.</p>
-        <div className="mt-3">
+        <div className="mt-3 flex flex-wrap items-center gap-2">
           <CopyAvailableGitReferenceLinks key={visibleBatchKey} urls={availableLinkUrls} />
+          <CopyAvailableGitReferenceValues key={availableReferencesKey} refs={availableReferences} />
         </div>
       </>
     );
@@ -234,6 +301,7 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
             </Button>
           )}
           <CopyAvailableGitReferenceLinks key={visibleBatchKey} urls={availableLinkUrls} />
+          <CopyAvailableGitReferenceValues key={availableReferencesKey} refs={availableReferences} />
         </div>
         <p className="mb-3 text-xs text-muted-foreground">
           Showing {filteredRefs.length} of {refs.length} loaded Git references.
