@@ -276,8 +276,8 @@
       "apps/web/",
       "receipts/"
     ],
-    "trackedTreeWithoutEvidence": "c5a78405898bf03e492a9a842ff5e6f529e47f03",
-    "trackedSnapshotDiffSha256": "835f212925f909e730087dc18859684b3f78523ae05b5b87d035711c9057bfa6"
+    "trackedTreeWithoutEvidence": "2a69e32fb7bb4f2a39d902a0982e86e6d3e1d3f9",
+    "trackedSnapshotDiffSha256": "113664cf94cc41d1dd4087e918c0d0211610a47537f882c4b2cebc2327858e1a"
   },
   "baseline": {
     "outcome": "SURVIVED",
