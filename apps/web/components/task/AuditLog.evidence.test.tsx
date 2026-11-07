@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AuditLog } from './AuditLog';
 
@@ -53,7 +53,7 @@ beforeEach(() => {
 afterEach(() => cleanup());
 
 describe('AuditLog evidence attachment details', () => {
-  it('shows the writer fields as inert text in an accessible disclosure', async () => {
+  it('reaches the evidence disclosure by keyboard and opens it on click', async () => {
     const uri = 'artifact:fixture/<svg/onload=alert(1)>';
     setActivity(evidenceEntry({
       evidence_id: '55555555-5555-4555-8555-555555555555',
@@ -67,11 +67,34 @@ describe('AuditLog evidence attachment details', () => {
     expect(screen.getByText('task:evidence_attached')).toBeInTheDocument();
 
     const user = userEvent.setup();
+    const activityFilter = screen.getByRole('combobox', { name: 'Activity filter' });
+    const actorFilter = screen.getByRole('combobox', { name: 'Actor filter' });
     const summary = screen.getByText('Evidence details');
     expect(summary.tagName).toBe('SUMMARY');
-    await user.tab();
+
+    const keyboardTargets = [activityFilter, actorFilter, summary];
+    const reachedKeyboardTargets: HTMLElement[] = [];
+    const tabStopLimit = [...container.querySelectorAll<HTMLElement>('*')]
+      .filter((element) => element.tabIndex >= 0 && !element.hasAttribute('disabled')).length;
+    for (let tab = 0; tab < tabStopLimit && document.activeElement !== summary; tab += 1) {
+      await user.tab();
+      const activeElement = document.activeElement;
+      if (
+        activeElement instanceof HTMLElement &&
+        (activeElement === activityFilter ||
+          activeElement === actorFilter ||
+          activeElement === summary)
+      ) {
+        reachedKeyboardTargets.push(activeElement);
+      }
+    }
+    expect(reachedKeyboardTargets).toEqual(keyboardTargets);
     expect(summary).toHaveFocus();
-    await user.keyboard('{Enter}');
+    const disclosure = summary.closest('details');
+    expect(disclosure).not.toBeNull();
+    expect(disclosure).not.toHaveAttribute('open');
+    fireEvent.click(summary);
+    expect(disclosure).toHaveAttribute('open');
 
     expect(screen.getByText('URI')).toBeInTheDocument();
     expect(screen.getByText(uri)).toHaveClass('break-all');
