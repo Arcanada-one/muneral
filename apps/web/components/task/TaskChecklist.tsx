@@ -73,8 +73,30 @@ function ChecklistItems({
               type="search"
               value={searchQuery}
               onChange={(event) => onSearchQueryChange(event.target.value)}
+              onKeyDown={(event) => {
+                if (
+                  event.key !== 'Escape' ||
+                  event.nativeEvent.isComposing ||
+                  event.altKey ||
+                  event.ctrlKey ||
+                  event.metaKey ||
+                  event.shiftKey ||
+                  searchQuery.length === 0
+                ) {
+                  return;
+                }
+
+                event.preventDefault();
+                event.stopPropagation();
+                onSearchQueryChange('');
+              }}
+              aria-keyshortcuts="Escape"
+              aria-describedby={`${searchId}-hint`}
               className="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             />
+            <p id={`${searchId}-hint`} className="text-xs text-muted-foreground">
+              Press Escape to clear the search.
+            </p>
           </div>
           <Button
             type="button"
