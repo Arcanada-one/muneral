@@ -5,7 +5,7 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "admitted"
  },
- "captured_at_utc": "2026-11-07T22:39:42Z",
+ "captured_at_utc": "2026-11-07T22:54:06Z",
  "change_set": {
   "base": "97cc45022239bd9bb748b634d332ed3ff4227b7e",
   "files": [
@@ -37,7 +37,7 @@
     "status": "A"
    }
   ],
-  "head": "8fbfc549e88373dfe1e9eb340a6c97a7a8c63f48",
+  "head": "2639f954616c9a379c5b301c1f28780176a7b7a4",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -46,17 +46,17 @@
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
   "graph_digest": "sha256:46b50096738fd7d55954680a5b7c3d2f6f6e94a44b64969c6d838ce2c4cecdbc",
-  "path": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-61c598d4-clear-gitref-search-escape/verify-work/verifier-out-absorb2/graph-97cc45022239.json",
+  "path": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-61c598d4-clear-gitref-search-escape/verify-work/verifier-out-sync/graph-97cc45022239.json",
   "source_commit": "97cc45022239bd9bb748b634d332ed3ff4227b7e"
  },
  "head_graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:1b4f6e9c5d85c63a28f052241a7822b901c96ba1c82dbe297b6d58af484d4ceb",
-  "path": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-61c598d4-clear-gitref-search-escape/verify-work/verifier-out-absorb2/graph-head-8fbfc549e883.json",
-  "source_commit": "8fbfc549e88373dfe1e9eb340a6c97a7a8c63f48",
+  "graph_digest": "sha256:ad52d2be350948d60eff861752fccb88abde5631d287c15bc7e5be1432347bc1",
+  "path": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-61c598d4-clear-gitref-search-escape/verify-work/verifier-out-sync/graph-head-2639f954616c.json",
+  "source_commit": "2639f954616c9a379c5b301c1f28780176a7b7a4",
   "staleness": {
-   "checked_at_utc": "2026-11-07T22:44:07Z",
+   "checked_at_utc": "2026-11-07T22:56:17Z",
    "checked_nodes": 625,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
@@ -65,7 +65,7 @@
  },
  "host": "muneral-lane-worker",
  "host_redacted": true,
- "host_sha256": "b2ab4dc0a962a8f357d11cd49ded451ba5249823afd6835f8579eaaea6a221ff",
+ "host_sha256": "a6c1a8a64835011cc842ac40c21747cb016cfa7d5cdfbf3bb38e4f5a5f3b6137",
  "impact_set": {
   "deterministic_core": [
    {
@@ -2481,7 +2481,7 @@
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261107T223942Z-8fbfc549",
+ "receipt_id": "car-verify-20261107T225406Z-2639f954",
  "receipt_path": "receipts/graph/change-admission-61c598d4-gitref-search-escape.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -2693,7 +2693,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-11-07T22:44:06Z",
+  "checked_at_utc": "2026-11-07T22:56:16Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -2779,7 +2779,7 @@
   {
    "content_hash": {
     "base": null,
-    "head": "sha256:1bd449f38b4092d33943b0802f8e3138cb2894168f915d46ba571609af3d8e8f"
+    "head": "sha256:33d7181e927ef0ffcb40bc4cb0839c90df133f8e4fa4720c41511ef1cea2cab8"
    },
    "entity": "receipt:receipts/graph/change-admission-61c598d4-gitref-search-escape.json",
    "node_type": "receipt",
@@ -3574,7 +3574,7 @@
   }
  ],
  "tree": {
-  "commit": "8fbfc549e88373dfe1e9eb340a6c97a7a8c63f48",
+  "commit": "2639f954616c9a379c5b301c1f28780176a7b7a4",
   "dirty": false
  },
  "verdicts": [
@@ -3767,8 +3767,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-61c598d4-clear-gitref-search-escape/repo/apps/web/node_modules/.bin/tsc -p /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-61c598d4-clear-gitref-search-escape/repo/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-61c598d4-clear-gitref-search-escape/verify-work/verifier-out-absorb2/type-check-ebaxa6nl/check.tsbuildinfo --listFiles",
-   "duration_s": 53.15,
+   "command": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-61c598d4-clear-gitref-search-escape/repo/apps/web/node_modules/.bin/tsc -p /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-61c598d4-clear-gitref-search-escape/repo/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-61c598d4-clear-gitref-search-escape/verify-work/verifier-out-sync/type-check-70alepfm/check.tsbuildinfo --listFiles",
+   "duration_s": 19.14,
    "entities": [
     "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
     "code_unit:apps/web/__tests__/task-detail-retry.test.tsx",
@@ -3816,13 +3816,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-61c598d4-clear-gitref-search-escape/verify-work/verifier-out-absorb2/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-11-07T22:44:33Z",
+   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-61c598d4-clear-gitref-search-escape/verify-work/verifier-out-sync/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-11-07T22:56:35Z",
    "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1442 files listed"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 1.25,
+   "duration_s": 0.31,
    "entities": [
     "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
     "code_unit:apps/web/__tests__/task-detail-retry.test.tsx",
@@ -3870,8 +3870,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-61c598d4-clear-gitref-search-escape/verify-work/verifier-out-absorb2/v-fitness.json",
-   "started_at_utc": "2026-11-07T22:45:27Z",
+   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-61c598d4-clear-gitref-search-escape/verify-work/verifier-out-sync/v-fitness.json",
+   "started_at_utc": "2026-11-07T22:56:55Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   }
  ],
@@ -4051,9 +4051,9 @@
    "receipt:receipts/graph/security-api959a-caller788.json": []
   },
   "seconds": {
-   "prepare": 12.0,
-   "total": 346.74,
-   "verifiers": 54.4
+   "prepare": 8.55,
+   "total": 169.0,
+   "verifiers": 19.45
   }
  },
  "work_item": "61c598d4-a669-4d41-8601-35f7cd15d14b"
