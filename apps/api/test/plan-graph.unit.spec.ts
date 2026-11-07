@@ -207,6 +207,30 @@ describe('KCLIVE-10 plan-graph unit surface', () => {
       expect(delivered.map((e) => e.eventId)).toEqual(['e1']);
       expect(withheld.map((e) => e.eventId)).toEqual(['e2']);
     });
+
+    it('production deliverScopedOutboxEvents path withholds non-member projects', async () => {
+      const emitted: Array<{ projectId: string; eventId: string }> = [];
+      const gateway = {
+        emit: (projectId: string, _event: string, payload: { eventId: string }) => {
+          emitted.push({ projectId, eventId: payload.eventId });
+        },
+      };
+      const projectMembership = {
+        listMemberProjectIds: async () => new Set(['p1']),
+      };
+      const { KanbanService } = await import('../src/ws/kanban.service.js');
+      const service = new KanbanService(
+        gateway as never,
+        projectMembership as never,
+      );
+      const result = await service.deliverScopedOutboxEvents('user-1', [
+        { eventId: 'e1', projectId: 'p1' },
+        { eventId: 'e2', projectId: 'p2' },
+      ]);
+      expect(result.delivered.map((e) => e.eventId)).toEqual(['e1']);
+      expect(result.withheld.map((e) => e.eventId)).toEqual(['e2']);
+      expect(emitted).toEqual([{ projectId: 'p1', eventId: 'e1' }]);
+    });
   });
 
   describe('AC5 projection recovery rematch', () => {

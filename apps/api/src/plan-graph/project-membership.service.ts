@@ -39,4 +39,28 @@ export class ProjectMembershipService {
       isMember: project.workspace.members.length > 0,
     };
   }
+
+  /**
+   * Current project ids the user may observe via outbox/WS subscription.
+   * Membership is workspace membership of each project's workspace.
+   */
+  async listMemberProjectIds(userId: string): Promise<ReadonlySet<string>> {
+    const memberships = await this.prisma.workspaceMember.findMany({
+      where: { userId },
+      select: {
+        workspace: {
+          select: {
+            projects: { select: { id: true } },
+          },
+        },
+      },
+    });
+    const ids = new Set<string>();
+    for (const row of memberships) {
+      for (const project of row.workspace.projects) {
+        ids.add(project.id);
+      }
+    }
+    return ids;
+  }
 }
