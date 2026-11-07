@@ -217,6 +217,7 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
     taskId,
     selectedKind,
     searchQuery,
+    availableLinksOnly,
     dataUpdatedAt,
     availableReferences.map((ref) => [ref.id, ref.type, ref.ref, ref.url]),
   ]);
@@ -313,6 +314,19 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
               Clear search
             </Button>
           )}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={selectedKind === 'all' && searchQuery === '' && !availableLinksOnly}
+            onClick={() => {
+              setSelectedKind('all');
+              setSearchQuery('');
+              setAvailableLinksOnly(false);
+            }}
+          >
+            Reset Git reference filters
+          </Button>
           <CopyAvailableGitReferenceLinks key={visibleBatchKey} urls={availableLinkUrls} />
           <CopyAvailableGitReferenceValues key={availableReferencesKey} refs={availableReferences} />
         </div>
