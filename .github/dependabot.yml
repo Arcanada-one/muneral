@@ -1,11 +1,35 @@
+# BATCH-003 (Muneral 579b765c): group npm updates, weekly Monday, open-PR
+# limit 2, toolchain ignores, rebase-strategy disabled; remove github-actions
+# from Dependabot (SEC-0039 / governance-diff-guard — human/agent pin refresh
+# pattern is muneral #106). Source path ADDENDUM-RESULT.md §1.5 was unavailable
+# on this host; YAML follows the Muneral task body.
 version: 2
 updates:
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: weekly
-    open-pull-requests-limit: 10
+      day: monday
+    open-pull-requests-limit: 2
+    rebase-strategy: disabled
+    groups:
+      npm-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
+      npm-major:
+        update-types:
+          - "major"
     ignore:
+      # @nestjs/jwt major is ESM-only (BATCH-001); do not auto-propose majors.
+      - dependency-name: "@nestjs/jwt"
+        update-types: ["version-update:semver-major"]
+      # eslint major for apps/web historically blocked by eslint-plugin-react ≤ 9.7
+      # (BATCH-003); keep majors out of the bot path.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
       # TypeScript 7 is DEFERRED, not forgotten. Decision A2-304c (2026-09-25), recorded
       # here by A2-320 so the December review finds it instead of re-deriving it.
       #
@@ -30,17 +54,25 @@ updates:
       # TS2564 in one PR, and run `pnpm lint` -- the check that failed, not the peer range.
       - dependency-name: typescript
         update-types: ["version-update:semver-major"]
-  - package-ecosystem: github-actions
-    directory: /
-    schedule:
-      interval: weekly
+
+  # github-actions ecosystem intentionally omitted (BATCH-003 / SEC-0039):
+  # bot PRs trip governance-diff-guard by design. Refresh action pins via a
+  # human-/agent-authored PR with SHA verified against upstream tags (sample #106).
+
   - package-ecosystem: "docker"
     directory: "/apps/api"
     schedule:
       interval: weekly
-    open-pull-requests-limit: 10
+      day: monday
+    open-pull-requests-limit: 2
+    rebase-strategy: disabled
     # Base images are where OS-level CVEs accumulate, and a digest-pinned FROM
     # cannot rot visibly -- nobody reads a sha256 and notices it is a year old.
     groups:
       minor-and-patch:
         update-types: ["minor", "patch"]
+    ignore:
+      # Runtime major is bound to .node-version-for-derived (BATCH-006); do not
+      # let Dependabot propose node major image bumps.
+      - dependency-name: "node"
+        update-types: ["version-update:semver-major"]
