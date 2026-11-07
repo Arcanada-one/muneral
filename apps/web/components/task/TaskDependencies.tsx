@@ -18,6 +18,14 @@ const typeLabels: Record<string, { incoming: string; outgoing: string; className
   duplicates: { incoming: 'Duplicates', outgoing: 'Duplicates', className: 'text-amber-600' },
 };
 
+function dependencyRowIdentity(
+  taskId: string,
+  dependencyId: string,
+  otherTaskId: string,
+): string {
+  return `${taskId}:${dependencyId}:${otherTaskId}`;
+}
+
 function CopyTaskIdButton({ taskId }: { taskId: string }) {
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const [isCopying, setIsCopying] = useState(false);
@@ -61,6 +69,7 @@ function CopyTaskIdButton({ taskId }: { taskId: string }) {
 
 export function TaskDependencies({ taskId }: TaskDependenciesProps) {
   const [retryingTaskId, setRetryingTaskId] = useState<string | null>(null);
+  const [expandedRowIds, setExpandedRowIds] = useState<ReadonlySet<string>>(() => new Set());
   const { data: deps, isPending, isError, isFetching, refetch } = useDependencyGraph(taskId);
   const isRetrying = retryingTaskId === taskId;
 
@@ -72,6 +81,18 @@ export function TaskDependencies({ taskId }: TaskDependenciesProps) {
       currentTaskId === taskId ? null : currentTaskId,
     );
     void refetch().then(finishRetry, finishRetry);
+  };
+
+  const toggleFullTaskId = (rowIdentity: string) => {
+    setExpandedRowIds((current) => {
+      const next = new Set(current);
+      if (next.has(rowIdentity)) {
+        next.delete(rowIdentity);
+      } else {
+        next.add(rowIdentity);
+      }
+      return next;
+    });
   };
 
   if (isError || isRetrying) {
@@ -111,6 +132,9 @@ export function TaskDependencies({ taskId }: TaskDependenciesProps) {
           const label = config?.[dep.direction] ?? dep.type;
           const statusLabel = getTaskStatusLabel(dep.otherTaskStatus);
           const counterpartTitle = dep.otherTaskTitleWithheld === true ? null : dep.otherTaskTitle;
+          const rowIdentity = dependencyRowIdentity(taskId, dep.id, dep.otherTaskId);
+          const showFullTaskId = expandedRowIds.has(rowIdentity);
+          const taskIdTextId = `dependency-task-id-${dep.id}`;
 
           return (
             <li key={dep.id} className="flex flex-wrap items-center gap-2 text-sm">
@@ -121,11 +145,29 @@ export function TaskDependencies({ taskId }: TaskDependenciesProps) {
               {counterpartTitle !== null && (
                 <span className="min-w-0 break-words font-medium">{counterpartTitle}</span>
               )}
-              <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono">
-                {dep.otherTaskId.slice(0, 8)}
+              <code
+                id={taskIdTextId}
+                className={
+                  showFullTaskId
+                    ? 'min-w-0 max-w-full break-all rounded bg-muted px-1.5 py-0.5 text-xs font-mono'
+                    : 'rounded bg-muted px-1.5 py-0.5 text-xs font-mono'
+                }
+              >
+                {showFullTaskId ? dep.otherTaskId : dep.otherTaskId.slice(0, 8)}
               </code>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 shrink-0 px-2 text-xs"
+                aria-expanded={showFullTaskId}
+                aria-controls={taskIdTextId}
+                onClick={() => toggleFullTaskId(rowIdentity)}
+              >
+                {showFullTaskId ? 'Hide full task ID' : 'Show full task ID'}
+              </Button>
               {statusLabel && <Badge variant="secondary">{statusLabel}</Badge>}
-              <CopyTaskIdButton key={`${taskId}:${dep.id}:${dep.otherTaskId}`} taskId={dep.otherTaskId} />
+              <CopyTaskIdButton key={rowIdentity} taskId={dep.otherTaskId} />
             </li>
           );
         })}
