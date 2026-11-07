@@ -41,6 +41,13 @@ Owner-managed Muneral surfaces for Live Lab Agent Runs. Spec pin:
 ## Feature flag / deploy notes
 
 - Schema migration: `20261106210000_add_command_association_plan_graph`
-- Deployed outbox relay enablement on a live host: measure with
-  `apps/api/scripts/outbox-relay-probe.mjs` — record `NOT_MEASURED` when DATABASE_URL
-  for that environment is unavailable to the author lane.
+- Actual outbox relay enablement/delivery: measure with disposable Postgres
+  (`test/outbox-relay-probe.postgres.spec.ts` → `scripts/outbox-relay-probe.mjs`).
+  That is an empirical relay proof on a task-owned database, not a mock.
+- Deployed-host outbox relay enablement: measure with
+  `apps/api/scripts/outbox-relay-probe.mjs` against that environment's
+  `DATABASE_URL` — record `NOT_MEASURED` when that URL is unavailable to the
+  author lane.
+- Client outbox delivery call-site: `KanbanService.deliverScopedOutboxEvents`
+  filters via `scopeOutboxEventsByMembership` using
+  `ProjectMembershipService.listMemberProjectIds`.
