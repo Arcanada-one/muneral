@@ -5,9 +5,9 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "admitted_with_exemptions"
  },
- "captured_at_utc": "2026-11-07T03:33:14Z",
+ "captured_at_utc": "2026-11-07T04:56:28Z",
  "change_set": {
-  "base": "a8d449215da5f43ab177aa7f7455d4d1d8bdce49",
+  "base": "64072ca24fb59d15ceed67ea6b93ef611cdde9f6",
   "files": [
    {
     "kind": "other",
@@ -31,6 +31,15 @@
     "kind": "other",
     "new": true,
     "path": "data/pr108_lint_and_test.log",
+    "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/change-admission-batch005-errorledger-a36cabee4479.json",
+    "node_ids": [
+     "receipt:receipts/graph/change-admission-batch005-errorledger-a36cabee4479.json"
+    ],
+    "path": "receipts/graph/change-admission-batch005-errorledger-a36cabee4479.json",
     "status": "A"
    },
    {
@@ -61,22 +70,22 @@
     "status": "A"
    }
   ],
-  "head": "a36cabee44790d648597a62f1719f4740ac3d25a",
+  "head": "6cade75121eed0f7210edcb8a750e547dd3801dd",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
  "empty_impact_explanation": {
   "binding": {
    "input": {
-    "base": "a8d449215da5f43ab177aa7f7455d4d1d8bdce49",
-    "base_graph_digest": "sha256:8616dd5bd6a72b5db0da0bfda1b2ad4954054a6cb82e07dde00781f3103f5683",
-    "head": "a36cabee44790d648597a62f1719f4740ac3d25a",
-    "head_graph_digest": "sha256:f2545f7c7463189ae17da6275e546e391ebe847c57eec492bbedb45a20a64c40",
-    "reason": "BATCH-005 adds ErrorLedger/v1 collector scripts under scripts/ci/ plus retained #108 log fixtures under data/ and a .gitignore negation for those fixtures; mutation-results.json only rebinds supplementalGit. None of these paths are TypeScript deployable graph seeds with dependents: the collector is invoked by CI collect / node --test and does not import into apps/api or apps/web. Empty dependent prediction is therefore expected, not an approval.",
+    "base": "64072ca24fb59d15ceed67ea6b93ef611cdde9f6",
+    "base_graph_digest": "sha256:37663c2d70ecfbf0a48674aaff93fc36c4bc0783d356f3e34c52c21ca8998bcd",
+    "head": "6cade75121eed0f7210edcb8a750e547dd3801dd",
+    "head_graph_digest": "sha256:bb0bd19ee76a197a495d703235fb18781863271651f983c6a091847532c6e556",
+    "reason": "BATCH-005 adds ErrorLedger/v1 collector scripts under scripts/ci/ plus retained #108 log fixtures under data/ and a .gitignore negation for those fixtures; mutation-results.json only rebinds supplementalGit after absorbing origin/main. None of these paths are TypeScript deployable graph seeds with dependents: the collector is invoked by CI collect / node --test and does not import into apps/api or apps/web. Empty dependent prediction is therefore expected, not an approval.",
     "schema": "EmptyImpactExplanation/v1",
     "scope": "graph_non_seed_dependents"
    },
-   "input_sha256": "sha256:d733fae2840112166fe06933e9e940ffee27942f85a44779563e02ac9845ee99",
+   "input_sha256": "sha256:54a917f3d564e31100349cf89bcae9eaca139cfbcff9c604af47f96340f710ef",
    "schema": "BoundEmptyImpactExplanation/v1"
   },
   "graph_metadata": {
@@ -130,6 +139,12 @@
        "status": "A"
       },
       {
+       "kind": "receipt",
+       "new": true,
+       "path": "receipts/graph/change-admission-batch005-errorledger-a36cabee4479.json",
+       "status": "A"
+      },
+      {
        "kind": "other",
        "new": true,
        "path": "scripts/ci/collect-error-ledger.py",
@@ -148,7 +163,7 @@
        "status": "A"
       }
      ],
-     "graph_digest": "sha256:8616dd5bd6a72b5db0da0bfda1b2ad4954054a6cb82e07dde00781f3103f5683",
+     "graph_digest": "sha256:37663c2d70ecfbf0a48674aaff93fc36c4bc0783d356f3e34c52c21ca8998bcd",
      "internal_reverse_edges": 0,
      "language_coverage": [
       "typescript",
@@ -163,7 +178,7 @@
      ],
      "max_depth": 3,
      "seeds": [],
-     "source_commit": "a8d449215da5f43ab177aa7f7455d4d1d8bdce49"
+     "source_commit": "64072ca24fb59d15ceed67ea6b93ef611cdde9f6"
     },
     "head": {
      "changed_node_known_to_graph": true,
@@ -214,6 +229,15 @@
        "status": "A"
       },
       {
+       "kind": "receipt",
+       "node_id": "receipt:receipts/graph/change-admission-batch005-errorledger-a36cabee4479.json",
+       "node_ids": [
+        "receipt:receipts/graph/change-admission-batch005-errorledger-a36cabee4479.json"
+       ],
+       "path": "receipts/graph/change-admission-batch005-errorledger-a36cabee4479.json",
+       "status": "A"
+      },
+      {
        "kind": "other",
        "node_id": "code_unit:scripts/ci/collect-error-ledger.py",
        "node_ids": [
@@ -241,8 +265,8 @@
        "status": "A"
       }
      ],
-     "graph_digest": "sha256:f2545f7c7463189ae17da6275e546e391ebe847c57eec492bbedb45a20a64c40",
-     "internal_reverse_edges": 2,
+     "graph_digest": "sha256:bb0bd19ee76a197a495d703235fb18781863271651f983c6a091847532c6e556",
+     "internal_reverse_edges": 5,
      "language_coverage": [
       "typescript",
       "javascript",
@@ -258,14 +282,15 @@
      "seeds": [
       "code_unit:scripts/ci/collect-error-ledger.py",
       "code_unit:scripts/ci/error-ledger.mjs",
-      "code_unit:scripts/ci/error-ledger.test.mjs"
+      "code_unit:scripts/ci/error-ledger.test.mjs",
+      "receipt:receipts/graph/change-admission-batch005-errorledger-a36cabee4479.json"
      ],
-     "source_commit": "a36cabee44790d648597a62f1719f4740ac3d25a"
+     "source_commit": "6cade75121eed0f7210edcb8a750e547dd3801dd"
     }
    },
    "scope": "graph_non_seed_dependents"
   },
-  "reason": "BATCH-005 adds ErrorLedger/v1 collector scripts under scripts/ci/ plus retained #108 log fixtures under data/ and a .gitignore negation for those fixtures; mutation-results.json only rebinds supplementalGit. None of these paths are TypeScript deployable graph seeds with dependents: the collector is invoked by CI collect / node --test and does not import into apps/api or apps/web. Empty dependent prediction is therefore expected, not an approval.",
+  "reason": "BATCH-005 adds ErrorLedger/v1 collector scripts under scripts/ci/ plus retained #108 log fixtures under data/ and a .gitignore negation for those fixtures; mutation-results.json only rebinds supplementalGit after absorbing origin/main. None of these paths are TypeScript deployable graph seeds with dependents: the collector is invoked by CI collect / node --test and does not import into apps/api or apps/web. Empty dependent prediction is therefore expected, not an approval.",
   "schema": "BoundEmptyImpactExplanation/v1"
  },
  "exemptions": [
@@ -287,19 +312,19 @@
  "graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:8616dd5bd6a72b5db0da0bfda1b2ad4954054a6cb82e07dde00781f3103f5683",
-  "path": "/home/dev/aup/claude-work/janitor-resume-20261106/ws-batch005/repo/receipts/graph/verifier-out/batch005-c/graph-a8d449215da5.json",
-  "source_commit": "a8d449215da5f43ab177aa7f7455d4d1d8bdce49"
+  "graph_digest": "sha256:37663c2d70ecfbf0a48674aaff93fc36c4bc0783d356f3e34c52c21ca8998bcd",
+  "path": "/tmp/arcana-verify-zx65ectl/verifier-out/graph-64072ca24fb5.json",
+  "source_commit": "64072ca24fb59d15ceed67ea6b93ef611cdde9f6"
  },
  "head_graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:f2545f7c7463189ae17da6275e546e391ebe847c57eec492bbedb45a20a64c40",
-  "path": "/home/dev/aup/claude-work/janitor-resume-20261106/ws-batch005/repo/receipts/graph/verifier-out/batch005-c/graph-head-a36cabee4479.json",
-  "source_commit": "a36cabee44790d648597a62f1719f4740ac3d25a",
+  "graph_digest": "sha256:bb0bd19ee76a197a495d703235fb18781863271651f983c6a091847532c6e556",
+  "path": "/tmp/arcana-verify-zx65ectl/verifier-out/graph-head-6cade75121ee.json",
+  "source_commit": "6cade75121eed0f7210edcb8a750e547dd3801dd",
   "staleness": {
-   "checked_at_utc": "2026-11-07T03:37:58Z",
-   "checked_nodes": 586,
+   "checked_at_utc": "2026-11-07T04:59:29Z",
+   "checked_nodes": 599,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -320,13 +345,13 @@
  "notes": [
   "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
   "profile: .arcana/verify.json at verified head; baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none",
-  "exemptions: 2 attached from /home/dev/aup/claude-work/janitor-resume-20261106/ws-batch005/refs/car/exemptions.json"
+  "exemptions: 2 attached from /home/dev/aup/claude-work/janitor-resume-20261106/ws-batch005/refs/car-rebase/exemptions.json"
  ],
  "producer": {
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261107T033314Z-a36cabee",
+ "receipt_id": "car-verify-20261107T045628Z-6cade751",
  "receipt_path": "receipts/graph/change-admission-batch005-errorledger-a36cabee4479.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -337,21 +362,38 @@
   "head": [
    "code_unit:scripts/ci/collect-error-ledger.py",
    "code_unit:scripts/ci/error-ledger.mjs",
-   "code_unit:scripts/ci/error-ledger.test.mjs"
+   "code_unit:scripts/ci/error-ledger.test.mjs",
+   "receipt:receipts/graph/change-admission-batch005-errorledger-a36cabee4479.json"
   ],
   "schema": "RevisionImpactSelection/v1",
   "unmeasured_head_files": []
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-11-07T03:37:57Z",
+  "checked_at_utc": "2026-11-07T04:59:29Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
  },
- "structural_exclusions": [],
+ "structural_exclusions": [
+  {
+   "content_hash": {
+    "base": null,
+    "head": "sha256:5cf1eefd079023dfd2db06d397cb258ee1767af7732d2d6972a9a9903ddbf8f2"
+   },
+   "entity": "receipt:receipts/graph/change-admission-batch005-errorledger-a36cabee4479.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-batch005-errorledger-a36cabee4479.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it; superseded by construction — this run re-issues the receipt at receipts/graph/change-admission-batch005-errorledger-a36cabee4479.json for work item 76507918-300d-49bd-a244-df7f22e3f6e3",
+   "rule": "DEC-AUP-0035",
+   "superseded": {
+    "receipt_path": "receipts/graph/change-admission-batch005-errorledger-a36cabee4479.json",
+    "work_item": "76507918-300d-49bd-a244-df7f22e3f6e3"
+   }
+  }
+ ],
  "tree": {
-  "commit": "a36cabee44790d648597a62f1719f4740ac3d25a",
+  "commit": "6cade75121eed0f7210edcb8a750e547dd3801dd",
   "dirty": false
  },
  "verdicts": [
@@ -403,13 +445,13 @@
    "exit_code": 127,
    "id": "v-type-check-uncovered",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/claude-work/janitor-resume-20261106/ws-batch005/repo/receipts/graph/verifier-out/batch005-c/v-type-check-uncovered.txt",
-   "started_at_utc": "2026-11-07T03:38:51Z",
+   "output_ref": "/tmp/arcana-verify-zx65ectl/verifier-out/v-type-check-uncovered.txt",
+   "started_at_utc": "2026-11-07T04:59:58Z",
    "summary": "not_measured: 2 entity(ies) no tsconfig covers"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.98,
+   "duration_s": 0.99,
    "entities": [
     "code_unit:scripts/ci/collect-error-ledger.py",
     "code_unit:scripts/ci/error-ledger.mjs",
@@ -423,13 +465,24 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/home/dev/aup/claude-work/janitor-resume-20261106/ws-batch005/repo/receipts/graph/verifier-out/batch005-c/v-fitness.json",
-   "started_at_utc": "2026-11-07T03:38:51Z",
+   "output_ref": "/tmp/arcana-verify-zx65ectl/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-11-07T04:59:58Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   }
  ],
  "verify": {
   "events": [
+   {
+    "code": "SUPERSEDED_SELF_EXCLUSION",
+    "entity": "receipt:receipts/graph/change-admission-batch005-errorledger-a36cabee4479.json",
+    "rule": "DEC-AUP-0035",
+    "text": "the receipt at receipts/graph/change-admission-batch005-errorledger-a36cabee4479.json is the previous version of the one this run is writing, for the same work item 76507918-300d-49bd-a244-df7f22e3f6e3 — superseded by construction, so it owes this change no verdict"
+   },
+   {
+    "code": "STRUCTURAL_EXCLUSION",
+    "rule": "DEC-AUP-0034",
+    "text": "1 affected entity(ies) owe no verdict (receipt: 1): unchanged at both revisions and given no verifier by the matrix"
+   },
    {
     "code": {
      "code": "EMPTY_IMPACT_REQUIRES_EXPLANATION",
@@ -456,12 +509,13 @@
    "code_unit:scripts/ci/error-ledger.test.mjs": [
     "fitness_rules",
     "type_check"
-   ]
+   ],
+   "receipt:receipts/graph/change-admission-batch005-errorledger-a36cabee4479.json": []
   },
   "seconds": {
-   "prepare": 32.0,
-   "total": 337.81,
-   "verifiers": 0.98
+   "prepare": 12.23,
+   "total": 210.41,
+   "verifiers": 0.99
   }
  },
  "work_item": "76507918-300d-49bd-a244-df7f22e3f6e3"
