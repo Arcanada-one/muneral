@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { Readable } from 'node:stream';
 import test from 'node:test';
@@ -7,6 +8,15 @@ import { fileURLToPath } from 'node:url';
 import { buildReport, readBounded } from './status-transition-counts.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+const cli = path.join(here, 'status-transition-counts.mjs');
+
+function runCli(args, input) {
+  return spawnSync(process.execPath, [cli, ...args], {
+    input,
+    encoding: 'utf8',
+    maxBuffer: 1024 * 1024,
+  });
+}
 
 const taskA = '11111111-1111-4111-8111-111111111111';
 const taskB = '22222222-2222-4222-8222-222222222222';
@@ -173,37 +183,133 @@ test('requires explicit completeness evidence and a unique canonical cohort with
   }
 });
 
-test('bounded reader accepts valid input exactly at its byte limit', async () => {
-  const source = Buffer.from(JSON.stringify(base));
-  const readable = Readable.from([
-    source.subarray(0, 4),
-    source.subarray(4, 8),
-    source.subarray(8),
-  ]);
-  const result = await readBounded(readable, source.length);
-  assert.deepEqual(result, source);
-  const report = buildReport(JSON.parse(result.toString('utf8')));
-  assert.equal(report.transitions.verdict, 'MEASURED');
-  assert.equal(report.transitions.observedTotal, 0);
-});
+test('bounded reader accepts exactly 20 MiB using one accumulator and one 64 KiB chunk backing', async () => {
+  const maxBytes = 20 * 1024 * 1024;
+  const chunkBytes = 64 * 1024;
+  const chunk = Buffer.alloc(chunkBytes, 0x20);
+  let prefix = Buffer.from(JSON.stringify(base));
+  assert.ok(prefix.length < chunkBytes);
+  let yieldedBytes = 0;
+  let yieldedChunks = 0;
 
-test('bounded reader rejects the first over-limit chunk and stops consuming input', async () => {
-  let advancedPastOverflow = false;
-  async function* chunks() {
-    yield Buffer.from('12345');
-    yield Buffer.from('678');
-    advancedPastOverflow = true;
-    yield Buffer.from('later input');
+  async function* exactLimitChunks() {
+    while (yieldedBytes < maxBytes) {
+      chunk.fill(0x20);
+      if (yieldedBytes === 0) {
+        prefix.copy(chunk);
+        prefix = null;
+      }
+      const length = Math.min(chunkBytes, maxBytes - yieldedBytes);
+      yieldedBytes += length;
+      yieldedChunks += 1;
+      yield chunk.subarray(0, length);
+    }
   }
 
-  await assert.rejects(readBounded(chunks(), 6), (error) => error.code === 'INPUT_TOO_LARGE');
+  const result = await readBounded(exactLimitChunks(), maxBytes);
+  assert.equal(yieldedBytes, maxBytes);
+  assert.equal(yieldedChunks, maxBytes / chunkBytes);
+  assert.equal(result.byteLength, maxBytes);
+  assert.equal(result.buffer.byteLength, maxBytes);
+  assert.equal(chunk.buffer.byteLength, chunkBytes);
+  assert.equal(result.buffer.byteLength + chunk.buffer.byteLength, maxBytes + chunkBytes);
+  assert.equal(JSON.parse(result.toString('utf8')).schemaVersion, base.schemaVersion);
+});
+
+test('bounded reader rejects one byte over 20 MiB and stops consuming after the lookahead chunk', async () => {
+  const maxBytes = 20 * 1024 * 1024;
+  const chunkBytes = 64 * 1024;
+  const chunk = Buffer.alloc(chunkBytes, 0x61);
+  let yieldedBytes = 0;
+  let yieldedChunks = 0;
+  let advancedPastOverflow = false;
+  async function* chunks() {
+    while (yieldedBytes < maxBytes) {
+      const length = Math.min(chunkBytes, maxBytes - yieldedBytes);
+      yieldedBytes += length;
+      yieldedChunks += 1;
+      yield chunk.subarray(0, length);
+    }
+    chunk[0] = 0x21;
+    yieldedBytes += 1;
+    yieldedChunks += 1;
+    yield chunk.subarray(0, 1);
+    advancedPastOverflow = true;
+    yield chunk.subarray(1, 2);
+  }
+
+  await assert.rejects(readBounded(chunks(), maxBytes), (error) => error.code === 'INPUT_TOO_LARGE');
+  assert.equal(yieldedBytes, maxBytes + 1);
+  assert.equal(yieldedChunks, (maxBytes / chunkBytes) + 1);
   assert.equal(advancedPastOverflow, false);
 });
 
-test('CLI reads the checked-in synthetic sanitized fixture and emits valid JSON', () => {
-  const cli = path.join(here, 'status-transition-counts.mjs');
+test('bounded reader rejects oversized chunk backing and limits above the input contract', async () => {
+  const largeBacking = Buffer.alloc((64 * 1024) + 1, 0x61);
+  await assert.rejects(
+    readBounded(Readable.from([largeBacking.subarray(0, 1)])),
+    (error) => error.code === 'INPUT_TOO_LARGE',
+  );
+  await assert.rejects(
+    readBounded(Readable.from([]), (20 * 1024 * 1024) + 1),
+    (error) => error.code === 'INPUT_INVALID',
+  );
+});
+
+test('bounded reader maps a stream read failure to a generic unavailable error', async () => {
+  async function* brokenChunks() {
+    yield Buffer.from('{');
+    throw new Error('PRIVATE STREAM DETAIL');
+  }
+
+  await assert.rejects(
+    readBounded(Readable.from(brokenChunks())),
+    (error) => error.code === 'INPUT_UNAVAILABLE' && error.message === 'INPUT_UNAVAILABLE',
+  );
+});
+
+test('CLI stdin produces the same report as the existing file carrier', () => {
   const fixture = path.join(here, 'fixtures', 'complete-one-transition.json');
-  const result = spawnSync(process.execPath, [cli, fixture], { encoding: 'utf8', maxBuffer: 1024 * 1024 });
+  const input = readFileSync(fixture);
+  const fileResult = runCli([fixture]);
+  const stdinResult = runCli(['-'], input);
+
+  assert.equal(fileResult.status, 0, fileResult.stderr);
+  assert.equal(stdinResult.status, 0, stdinResult.stderr);
+  assert.equal(stdinResult.stderr, '');
+  assert.deepEqual(JSON.parse(stdinResult.stdout), JSON.parse(fileResult.stdout));
+});
+
+test('CLI stdin rejects empty and malformed input with generic diagnostics', () => {
+  for (const input of [Buffer.alloc(0), Buffer.from('PRIVATE MALFORMED BODY')]) {
+    const result = runCli(['-'], input);
+    assert.equal(result.status, 1);
+    assert.equal(result.stdout, '');
+    assert.equal(result.stderr, 'status-transition-counts: INPUT_INVALID\n');
+    assert.equal(result.stderr.includes('PRIVATE'), false);
+  }
+});
+
+test('CLI stdin rejects an oversized stream with the bounded generic error', () => {
+  const input = Buffer.alloc(20 * 1024 * 1024 + 1, 0x20);
+  const result = runCli(['-'], input);
+  assert.equal(result.status, 1);
+  assert.equal(result.stdout, '');
+  assert.equal(result.stderr, 'status-transition-counts: INPUT_TOO_LARGE\n');
+});
+
+test('CLI requires exactly one explicit file or stdin argument', () => {
+  for (const args of [[], ['-', 'extra']]) {
+    const result = runCli(args);
+    assert.equal(result.status, 2);
+    assert.equal(result.stdout, '');
+    assert.equal(result.stderr, 'Usage: node scripts/reporting/status-transition-counts.mjs <sanitized-envelope.json|->\n');
+  }
+});
+
+test('CLI reads the checked-in synthetic sanitized fixture and emits valid JSON', () => {
+  const fixture = path.join(here, 'fixtures', 'complete-one-transition.json');
+  const result = runCli([fixture]);
   assert.equal(result.status, 0, result.stderr);
   const report = JSON.parse(result.stdout);
   assert.equal(report.transitions.verdict, 'MEASURED');
