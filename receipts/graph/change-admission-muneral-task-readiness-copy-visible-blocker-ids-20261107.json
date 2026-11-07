@@ -5,9 +5,9 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "admitted"
  },
- "captured_at_utc": "2026-11-07T22:47:43Z",
+ "captured_at_utc": "2026-11-07T23:01:54Z",
  "change_set": {
-  "base": "97cc45022239bd9bb748b634d332ed3ff4227b7e",
+  "base": "c68e1b858e0ae40f30ff68f230d3819e393f7d36",
   "files": [
    {
     "kind": "test",
@@ -26,9 +26,18 @@
     ],
     "path": "apps/web/components/task/TaskReadiness.tsx",
     "status": "M"
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/change-admission-muneral-task-readiness-copy-visible-blocker-ids-20261107.json",
+    "node_ids": [
+     "receipt:receipts/graph/change-admission-muneral-task-readiness-copy-visible-blocker-ids-20261107.json"
+    ],
+    "path": "receipts/graph/change-admission-muneral-task-readiness-copy-visible-blocker-ids-20261107.json",
+    "status": "A"
    }
   ],
-  "head": "fdefe588830ada6732ef7f6c962c38b9b207ed85",
+  "head": "c76a0fc77d4db6ffaffe22a5bcac82ab85e373e4",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -36,19 +45,19 @@
  "graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:46b50096738fd7d55954680a5b7c3d2f6f6e94a44b64969c6d838ce2c4cecdbc",
-  "path": "/tmp/arcana-verify-wpf71dgl/verifier-out/graph-97cc45022239.json",
-  "source_commit": "97cc45022239bd9bb748b634d332ed3ff4227b7e"
+  "graph_digest": "sha256:3c77c6bc3c046020e15333b31e03c77b52a6d493790ecfa030792d2bd508421a",
+  "path": "/tmp/arcana-verify-rjnzoqmo/verifier-out/graph-c68e1b858e0a.json",
+  "source_commit": "c68e1b858e0ae40f30ff68f230d3819e393f7d36"
  },
  "head_graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:2f714e5a9133a99e1b9215f9f84ad9a0eedd55e41092fd8beb0574174369515e",
-  "path": "/tmp/arcana-verify-wpf71dgl/verifier-out/graph-head-fdefe588830a.json",
-  "source_commit": "fdefe588830ada6732ef7f6c962c38b9b207ed85",
+  "graph_digest": "sha256:b3719db96075adfcad8f0ee96f00978019883024a26940db8b304025f71d59d0",
+  "path": "/tmp/arcana-verify-rjnzoqmo/verifier-out/graph-head-c76a0fc77d4d.json",
+  "source_commit": "c76a0fc77d4db6ffaffe22a5bcac82ab85e373e4",
   "staleness": {
-   "checked_at_utc": "2026-11-07T22:51:30Z",
-   "checked_nodes": 624,
+   "checked_at_utc": "2026-11-07T23:05:17Z",
+   "checked_nodes": 625,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -56,7 +65,7 @@
  },
  "host": "lane-worker-a21a34e1",
  "host_redacted": true,
- "host_sha256": "8925b9ea76488e5ff8cbd99c1068a230984d6bb7f6c623f3d1111dd60c803af7",
+ "host_sha256": "deb846759f4b10ef0d4f5aa5d235f889e33718e2b0ec9ac63711f99d16e459d9",
  "impact_set": {
   "deterministic_core": [
    {
@@ -2565,7 +2574,7 @@
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261107T224743Z-fdefe588",
+ "receipt_id": "car-verify-20261107T230154Z-c76a0fc7",
  "receipt_path": "receipts/graph/change-admission-muneral-task-readiness-copy-visible-blocker-ids-20261107.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -2753,6 +2762,7 @@
    "receipt:receipts/graph/change-admission-muneral-task-parent-reference-uuid-copy-20261025.json",
    "receipt:receipts/graph/change-admission-muneral-task-readiness-blocker-uuid-copy-20261025.json",
    "receipt:receipts/graph/change-admission-muneral-task-readiness-cached-error-retry-20261026.json",
+   "receipt:receipts/graph/change-admission-muneral-task-readiness-copy-visible-blocker-ids-20261107.json",
    "receipt:receipts/graph/change-admission-muneral-task-readiness-retry-20261025.json",
    "receipt:receipts/graph/change-admission-muneral-task-readiness-search-blockers-20261107.json",
    "receipt:receipts/graph/change-admission-muneral-task-readiness-summary-20261024.json",
@@ -2772,7 +2782,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-11-07T22:51:29Z",
+  "checked_at_utc": "2026-11-07T23:05:17Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -3506,6 +3516,21 @@
   },
   {
    "content_hash": {
+    "base": null,
+    "head": "sha256:bec44661a0bcb714576b058c026cd8eb9293c87ab261b5473da5970a99b11fc5"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-task-readiness-copy-visible-blocker-ids-20261107.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-task-readiness-copy-visible-blocker-ids-20261107.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it; superseded by construction — this run re-issues the receipt at receipts/graph/change-admission-muneral-task-readiness-copy-visible-blocker-ids-20261107.json for work item a21a34e1-0d88-4dea-b083-24b48782064d",
+   "rule": "DEC-AUP-0035",
+   "superseded": {
+    "receipt_path": "receipts/graph/change-admission-muneral-task-readiness-copy-visible-blocker-ids-20261107.json",
+    "work_item": "a21a34e1-0d88-4dea-b083-24b48782064d"
+   }
+  },
+  {
+   "content_hash": {
     "base": "sha256:18216073eeb9d567d014e5f58dbc213ea491f9aa1bdb864f951e75da5d8a735b",
     "head": "sha256:18216073eeb9d567d014e5f58dbc213ea491f9aa1bdb864f951e75da5d8a735b"
    },
@@ -3649,7 +3674,7 @@
   }
  ],
  "tree": {
-  "commit": "fdefe588830ada6732ef7f6c962c38b9b207ed85",
+  "commit": "c76a0fc77d4db6ffaffe22a5bcac82ab85e373e4",
   "dirty": false
  },
  "verdicts": [
@@ -3815,8 +3840,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-a21a34e1-copy-visible-blocker-ids/repo/apps/web/node_modules/.bin/tsc -p /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-a21a34e1-copy-visible-blocker-ids/repo/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/arcana-verify-wpf71dgl/verifier-out/type-check-4hw1kmto/check.tsbuildinfo --listFiles",
-   "duration_s": 28.19,
+   "command": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-a21a34e1-copy-visible-blocker-ids/repo/apps/web/node_modules/.bin/tsc -p /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-a21a34e1-copy-visible-blocker-ids/repo/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/arcana-verify-rjnzoqmo/verifier-out/type-check-dcjbftv8/check.tsbuildinfo --listFiles",
+   "duration_s": 103.45,
    "entities": [
     "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
     "code_unit:apps/web/__tests__/task-detail-retry.test.tsx",
@@ -3858,13 +3883,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/tmp/arcana-verify-wpf71dgl/verifier-out/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-11-07T22:51:57Z",
+   "output_ref": "/tmp/arcana-verify-rjnzoqmo/verifier-out/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-11-07T23:05:43Z",
    "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1442 files listed"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.23,
+   "duration_s": 3.08,
    "entities": [
     "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
     "code_unit:apps/web/__tests__/task-detail-retry.test.tsx",
@@ -3906,17 +3931,23 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/tmp/arcana-verify-wpf71dgl/verifier-out/v-fitness.json",
-   "started_at_utc": "2026-11-07T22:52:25Z",
+   "output_ref": "/tmp/arcana-verify-rjnzoqmo/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-11-07T23:07:31Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   }
  ],
  "verify": {
   "events": [
    {
+    "code": "SUPERSEDED_SELF_EXCLUSION",
+    "entity": "receipt:receipts/graph/change-admission-muneral-task-readiness-copy-visible-blocker-ids-20261107.json",
+    "rule": "DEC-AUP-0035",
+    "text": "the receipt at receipts/graph/change-admission-muneral-task-readiness-copy-visible-blocker-ids-20261107.json is the previous version of the one this run is writing, for the same work item a21a34e1-0d88-4dea-b083-24b48782064d — superseded by construction, so it owes this change no verdict"
+   },
+   {
     "code": "STRUCTURAL_EXCLUSION",
     "rule": "DEC-AUP-0034",
-    "text": "79 affected entity(ies) owe no verdict (receipt: 79): unchanged at both revisions and given no verifier by the matrix"
+    "text": "80 affected entity(ies) owe no verdict (receipt: 80): unchanged at both revisions and given no verifier by the matrix"
    }
   ],
   "required_by_entity": {
@@ -4054,6 +4085,7 @@
    "receipt:receipts/graph/change-admission-muneral-task-parent-reference-uuid-copy-20261025.json": [],
    "receipt:receipts/graph/change-admission-muneral-task-readiness-blocker-uuid-copy-20261025.json": [],
    "receipt:receipts/graph/change-admission-muneral-task-readiness-cached-error-retry-20261026.json": [],
+   "receipt:receipts/graph/change-admission-muneral-task-readiness-copy-visible-blocker-ids-20261107.json": [],
    "receipt:receipts/graph/change-admission-muneral-task-readiness-retry-20261025.json": [],
    "receipt:receipts/graph/change-admission-muneral-task-readiness-search-blockers-20261107.json": [],
    "receipt:receipts/graph/change-admission-muneral-task-readiness-summary-20261024.json": [],
@@ -4069,9 +4101,9 @@
    "receipt:receipts/graph/security-api959a-caller788.json": []
   },
   "seconds": {
-   "prepare": 13.89,
-   "total": 283.03,
-   "verifiers": 28.42
+   "prepare": 11.5,
+   "total": 341.49,
+   "verifiers": 106.53
   }
  },
  "work_item": "a21a34e1-0d88-4dea-b083-24b48782064d"
