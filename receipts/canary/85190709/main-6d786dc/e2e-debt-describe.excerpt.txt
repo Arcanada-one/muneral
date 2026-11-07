@@ -1,0 +1,25 @@
+  Workspace member routes and task delete (real HTTP/PostgreSQL)
+    e4d18373: workspace member routes
+      ✓ lets the owner read the workspace and its members (1134 ms)
+      ✓ lets the owner add, re-role and remove a member (695 ms)
+      ✓ GET /workspaces/:id still refuses an authenticated non-member (403) (45 ms)
+      ✓ GET /workspaces/:id/members still refuses an authenticated non-member (403) (52 ms)
+      ✓ POST /workspaces/:id/members/:userId still refuses an authenticated non-member (403) (62 ms)
+      ✓ PATCH /workspaces/:id/members/:userId/role still refuses an authenticated non-member (403) (45 ms)
+      ✓ DELETE /workspaces/:id/members/:userId still refuses an authenticated non-member (403) (11 ms)
+      ✓ GET /workspaces/:id still refuses an agent API key of this workspace (403) (3195 ms)
+      ✓ GET /workspaces/:id/members still refuses an agent API key of this workspace (403) (1229 ms)
+      ✓ POST /workspaces/:id/members/:userId still refuses an agent API key of this workspace (403) (4572 ms)
+      ✓ PATCH /workspaces/:id/members/:userId/role still refuses an agent API key of this workspace (403) (2187 ms)
+      ✓ DELETE /workspaces/:id/members/:userId still refuses an agent API key of this workspace (403) (1627 ms)
+      ✓ GET /workspaces/:id still refuses an anonymous caller (401) (62 ms)
+      ✓ GET /workspaces/:id/members still refuses an anonymous caller (401) (127 ms)
+      ✓ POST /workspaces/:id/members/:userId still refuses an anonymous caller (401) (43 ms)
+      ✓ PATCH /workspaces/:id/members/:userId/role still refuses an anonymous caller (401) (20 ms)
+      ✓ DELETE /workspaces/:id/members/:userId still refuses an anonymous caller (401) (5 ms)
+      ✓ left membership unchanged after every refused call (7 ms)
+    c23de150: DELETE /tasks/:taskId
+      ✓ deletes the task and keeps a detached task:deleted audit row (400 ms)
+      ✓ refuses a task with execution history with 409 and leaves no orphan audit row (659 ms)
+
+Test Suites: 1 passed, 1 total

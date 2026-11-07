@@ -323,10 +323,10 @@ describe('Agent-key scope on /tasks (e2e)', () => {
     // POST /tasks is no longer in this set — see MUN-0045 below. Neither is
     // POST /tasks/:taskId/comments — see MUN-0046 below. Neither is
     // GET /tasks/:taskId/activity — see MUN-0047 below. Neither is
-    // GET /tasks/:taskId/dependencies — see MUN-0054 below. The dependency
-    // WRITE routes (POST/DELETE) do stay JWT-only: MUN-0054 opened the read
-    // that an executor needs to know it is blocked, not the ability to
-    // rewrite the graph it is judged against.
+    // GET /tasks/:taskId/dependencies — see MUN-0054 below. Neither are
+    // dependency WRITE routes — those are `@AgentScope('task-dependency')`
+    // (creator/executor of both ends); see the MUN-0054 block below.
+    // Delete remains unscoped for agent keys.
     await supertest(app.getHttpServer())
       .delete(`/tasks/${task.id}`)
       .set('Authorization', `Bearer ${assignedKey}`)
@@ -646,7 +646,7 @@ describe('Agent-key scope on /tasks (e2e)', () => {
   // "dependencies not served here"
   // -------------------------------------------------------------------------
 
-  /** Record a dependency edge directly — the write routes stay JWT-only. */
+  /** Record a dependency edge directly in fixtures (bypasses HTTP scope). */
   async function dependency(fromTaskId: string, toTaskId: string, type: string) {
     return prisma.taskDependency.create({ data: { fromTaskId, toTaskId, type } });
   }
@@ -808,11 +808,14 @@ describe('Agent-key scope on /tasks (e2e)', () => {
     }
   });
 
-  it('leaves the dependency WRITE routes JWT-only', async () => {
+  it('refuses dependency WRITE when the key lacks creator/executor on both ends', async () => {
     const a = await createTask();
     const b = await createTask();
     await assign(a.id);
 
+    // Assigned executor of `a` only — not creator/executor of `b` — so
+    // `@AgentScope('task-dependency')` refuses. This is scope denial, not an
+    // unscoped/JWT-only route (see agent-project-dependencies.e2e for 201).
     await supertest(app.getHttpServer())
       .post(`/tasks/${a.id}/dependencies`)
       .set('Authorization', `Bearer ${assignedKey}`)
@@ -820,5 +823,26 @@ describe('Agent-key scope on /tasks (e2e)', () => {
       .expect(403);
 
     expect(await prisma.taskDependency.count({ where: { fromTaskId: a.id } })).toBe(0);
+  });
+
+  it('lets an agent key write a dependency when it created both endpoints', async () => {
+    const a = await supertest(app.getHttpServer())
+      .post('/tasks')
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .send({ projectId, title: 'dep-write-a' })
+      .expect(201);
+    const b = await supertest(app.getHttpServer())
+      .post('/tasks')
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .send({ projectId, title: 'dep-write-b' })
+      .expect(201);
+
+    await supertest(app.getHttpServer())
+      .post(`/tasks/${a.body.id}/dependencies`)
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .send({ toTaskId: b.body.id, type: 'depends_on' })
+      .expect(201);
+
+    expect(await prisma.taskDependency.count({ where: { fromTaskId: a.body.id, toTaskId: b.body.id } })).toBe(1);
   });
 });

@@ -5,6 +5,8 @@ import {
   ForbiddenException,
   BadRequestException,
   ConflictException,
+  Inject,
+  Optional,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -22,7 +24,12 @@ import { TaskFieldStateService } from './field-state/task-field-state.service.js
 import { TaskExecutionRecorderService } from '../execution-authority/task-execution-recorder.service.js';
 import { agentOwnTaskWhere } from '../auth/agent-task-visibility.js';
 import type { ProjectReadGrantEntry } from '../auth/project-read-grants.js';
-import { renewalDueAt } from '../auth/project-read-grants.js';
+import {
+  PROJECT_READ_GRANTS,
+  PROJECT_READ_GRANT_LIST,
+  projectReadGrantState,
+  renewalDueAt,
+} from '../auth/project-read-grants.js';
 import type { WorkspaceDigestGrantEntry } from '../auth/workspace-digest-grants.js';
 import { digestRenewalDueAt } from '../auth/workspace-digest-grants.js';
 import { QueryWorkspaceDigestDto } from './dto/query-workspace-digest.dto.js';
@@ -90,13 +97,20 @@ const PROJECT_INDEX_SELECT = {
 
 @Injectable()
 export class TasksService {
+  private readonly projectReadGrants: readonly ProjectReadGrantEntry[];
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly activityService: ActivityService,
     private readonly kanbanService: KanbanService,
     private readonly fieldStateService: TaskFieldStateService,
     private readonly executionRecorder: TaskExecutionRecorderService,
-  ) {}
+    @Optional()
+    @Inject(PROJECT_READ_GRANTS)
+    projectReadGrants?: readonly ProjectReadGrantEntry[],
+  ) {
+    this.projectReadGrants = projectReadGrants ?? PROJECT_READ_GRANT_LIST;
+  }
 
   async create(actor: Actor, dto: CreateTaskDto) {
     const project = await this.prisma.project.findUnique({
@@ -179,6 +193,45 @@ export class TasksService {
       throw new NotFoundException('Task not found');
     }
     return task;
+  }
+
+  /**
+   * A live project grant admits only the task metadata projection for an
+   * unassigned task. Recheck the exact grant and bind the database query to its
+   * project and the credential workspace. The audit write must succeed before
+   * this method returns any task fields.
+   */
+  async findOneForProjectReadGrant(
+    taskId: string,
+    projectId: string,
+    workspaceId: string,
+    agentId: string,
+    grant: ProjectReadGrantEntry,
+  ) {
+    const state = projectReadGrantState(agentId, projectId, new Date(), this.projectReadGrants);
+    if (state.kind !== 'live' || state.entry !== grant) {
+      throw new ForbiddenException('Task is not in scope for this key.');
+    }
+
+    const task = await this.prisma.task.findFirst({
+      where: { id: taskId, projectId, project: { workspaceId } },
+      select: { id: true, projectId: true, title: true, description: true, status: true },
+    });
+    if (!task) throw new ForbiddenException('Task is not in scope for this key.');
+
+    const audit = await this.prisma.activityLog.create({
+      data: {
+        workspaceId,
+        taskId: null,
+        actorType: 'agent',
+        actorId: agentId,
+        action: PROJECT_INDEX_READ_ACTION,
+        payload: { projectId, decision: grant.decision, rowCount: 1 } as Prisma.InputJsonValue,
+      },
+      select: { id: true },
+    });
+
+    return { ...task, auditEventId: audit.id };
   }
 
   /**
