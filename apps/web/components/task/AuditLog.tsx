@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Bot, User, Clock, Copy } from 'lucide-react';
 import { TASK_STATUSES, type TaskPriority, type TaskStatus } from '@muneral/types';
 import { useActivity } from '@/lib/api/tasks';
@@ -340,6 +340,67 @@ function CopyActivityActorId({ actorId }: { actorId: string }) {
   );
 }
 
+function CopyActivityEventId({ eventId }: { eventId: string }) {
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const [isCopying, setIsCopying] = useState(false);
+  const isMountedRef = useRef(false);
+  const isPendingRef = useRef(false);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  const copyEventId = async () => {
+    if (isPendingRef.current) return;
+    isPendingRef.current = true;
+    setCopyState('idle');
+    setIsCopying(true);
+
+    try {
+      const clipboard = typeof navigator === 'undefined' ? undefined : navigator.clipboard;
+      if (!clipboard || typeof clipboard.writeText !== 'function') {
+        throw new Error('Clipboard unavailable');
+      }
+      await clipboard.writeText(eventId);
+      if (isMountedRef.current) setCopyState('copied');
+    } catch {
+      if (isMountedRef.current) setCopyState('failed');
+    } finally {
+      if (isMountedRef.current) {
+        isPendingRef.current = false;
+        setIsCopying(false);
+      }
+    }
+  };
+
+  return (
+    <div className="mt-1 flex flex-wrap items-center gap-1">
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="h-6 w-6 shrink-0"
+        aria-label="Copy activity event ID"
+        onClick={copyEventId}
+        disabled={isCopying}
+      >
+        <Copy className="h-3 w-3" />
+      </Button>
+      {copyState === 'copied' && (
+        <span role="status" className="text-xs text-green-700">Activity event ID copied.</span>
+      )}
+      {copyState === 'failed' && (
+        <span role="alert" className="text-xs text-destructive">
+          Could not copy activity event ID. Try again or copy it manually.
+        </span>
+      )}
+    </div>
+  );
+}
+
 export function AuditLog({ taskId }: AuditLogProps) {
   const activityFilterId = useId();
   const [pageState, setPageState] = useState({ taskId, page: 1 });
@@ -579,6 +640,10 @@ export function AuditLog({ taskId }: AuditLogProps) {
                   <CopyActivityActorId
                     key={`${taskId}:${entry.id}:${entry.actorId}`}
                     actorId={entry.actorId}
+                  />
+                  <CopyActivityEventId
+                    key={JSON.stringify([taskId, page, filterMode, actorFilterMode, entry.id])}
+                    eventId={entry.id}
                   />
                 </div>
               </li>
