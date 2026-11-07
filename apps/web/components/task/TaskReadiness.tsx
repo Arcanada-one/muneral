@@ -105,6 +105,64 @@ function CopyLoadedBlockerIdsButton({
   );
 }
 
+function CopyVisibleLoadedBlockerIdsButton({
+  blockerTaskIds,
+}: {
+  blockerTaskIds: string[];
+}) {
+  const isCopyPending = useRef(false);
+  const [isCopying, setIsCopying] = useState(false);
+  const [copyResult, setCopyResult] = useState<'idle' | 'copied' | 'failed'>('idle');
+
+  const copyVisibleLoadedBlockerIds = async () => {
+    if (isCopyPending.current || blockerTaskIds.length === 0) return;
+
+    isCopyPending.current = true;
+    setIsCopying(true);
+    setCopyResult('idle');
+
+    const clipboard = typeof navigator === 'undefined' ? undefined : navigator.clipboard;
+    if (!clipboard || typeof clipboard.writeText !== 'function') {
+      isCopyPending.current = false;
+      setIsCopying(false);
+      setCopyResult('failed');
+      return;
+    }
+
+    try {
+      await clipboard.writeText(blockerTaskIds.join('\n'));
+      setCopyResult('copied');
+    } catch {
+      setCopyResult('failed');
+    } finally {
+      isCopyPending.current = false;
+      setIsCopying(false);
+    }
+  };
+
+  return (
+    <div className="mt-2">
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={copyVisibleLoadedBlockerIds}
+        disabled={blockerTaskIds.length === 0 || isCopying}
+      >
+        Copy visible loaded blocker IDs ({blockerTaskIds.length})
+      </Button>
+      {copyResult === 'copied' && (
+        <span role="status" className="ml-2 text-xs text-green-700">Visible blocker IDs copied.</span>
+      )}
+      {copyResult === 'failed' && (
+        <span role="alert" className="ml-2 text-xs text-destructive">
+          Could not copy visible blocker IDs. Try copying them manually.
+        </span>
+      )}
+    </div>
+  );
+}
+
 function blockerSearchText(edge: {
   otherTaskId: string;
   otherTaskTitle?: string | null;
@@ -156,6 +214,7 @@ function TaskReadinessPanel({
     const visibleBlockers = normalizedSearchQuery
       ? loadedBlockers.filter((edge) => blockerSearchText(edge).includes(normalizedSearchQuery))
       : loadedBlockers;
+    const visibleBlockerIds = Array.from(new Set(visibleBlockers.map((edge) => edge.otherTaskId)));
 
     content = (
       <>
@@ -176,6 +235,10 @@ function TaskReadinessPanel({
             <CopyLoadedBlockerIdsButton
               key={JSON.stringify([taskId, loadedBlockerIds])}
               blockerTaskIds={loadedBlockerIds}
+            />
+            <CopyVisibleLoadedBlockerIdsButton
+              key={JSON.stringify(['visible', taskId, visibleBlockerIds])}
+              blockerTaskIds={visibleBlockerIds}
             />
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <label htmlFor={searchInputId} className="text-sm">
