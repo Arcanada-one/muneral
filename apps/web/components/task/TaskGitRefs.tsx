@@ -297,9 +297,13 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
               event.stopPropagation();
               setSearchQuery('');
             }}
+            aria-describedby={`${searchInputId}-hint`}
             aria-keyshortcuts="Escape"
             className="min-w-0 rounded border bg-background px-2 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
+          <span id={`${searchInputId}-hint`} className="basis-full text-xs text-muted-foreground">
+            Press Escape to clear the search.
+          </span>
           <label htmlFor={availableOnlyId} className="inline-flex items-center gap-2 text-sm">
             <input
               id={availableOnlyId}
