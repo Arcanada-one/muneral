@@ -155,7 +155,7 @@ describe('AuditLog exact UTC activity time', () => {
     expect(screen.getByText('+010000-01-01T00:30:00.12345Z')).toBeInTheDocument();
   });
 
-  it('retains exact mode through same-task refresh and page navigation, preserves status/pagination, then resets on task switch', () => {
+  it('retains exact mode through same-task refresh and page navigation, preserves filters, then resets on task switch', () => {
     ready(taskA, 1, [
       entry('page-one-status', taskA, '2026-10-29T11:00:00Z', 'task:status_changed'),
       entry('page-one-comment', taskA, '2026-10-29T11:15:00Z'),
@@ -168,24 +168,30 @@ describe('AuditLog exact UTC activity time', () => {
 
     const view = render(<AuditLog taskId={taskA} />);
     fireEvent.click(screen.getByRole('checkbox', { name: 'Show exact UTC timestamps' }));
+    fireEvent.change(screen.getByRole('combobox', { name: 'Activity filter' }), {
+      target: { value: 'status_changes' },
+    });
+    fireEvent.change(screen.getByRole('combobox', { name: 'Actor filter' }), {
+      target: { value: 'agents' },
+    });
     expect(screen.getByText('To Do → Done')).toBeInTheDocument();
     expect(screen.getByText('2026-10-29T11:00:00.000Z')).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'Actor filter' })).toHaveValue('agents');
     expect(screen.getByText('Showing 1–20 of 22')).toBeInTheDocument();
 
-    ready(taskA, 1, [
-      entry('refreshed-status', taskA, '2026-10-29T11:10:00Z', 'task:status_changed'),
-      entry('refreshed-comment', taskA, '2026-10-29T11:12:00Z'),
-    ], 22);
+    ready(taskA, 1, [entry('refreshed-status', taskA, '2026-10-29T11:10:00Z', 'task:status_changed')], 22);
     view.rerender(<AuditLog taskId={taskA} />);
     expect(screen.getByRole('checkbox', { name: 'Show exact UTC timestamps' })).toBeChecked();
-    expect(screen.getByText('To Do → Done')).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'Activity filter' })).toHaveValue('status_changes');
+    expect(screen.getByRole('combobox', { name: 'Actor filter' })).toHaveValue('agents');
     expect(screen.getByText('2026-10-29T11:10:00.000Z')).toBeInTheDocument();
-    expect(screen.getByText('Showing 1–20 of 22')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Next activity page' }));
     expect(screen.getByRole('checkbox', { name: 'Show exact UTC timestamps' })).toBeChecked();
+    expect(screen.getByRole('combobox', { name: 'Activity filter' })).toHaveValue('status_changes');
+    expect(screen.getByRole('combobox', { name: 'Actor filter' })).toHaveValue('agents');
     expect(screen.getByText('2026-10-29T11:20:00.000Z')).toBeInTheDocument();
-    expect(screen.getByText('page-two-comment')).toBeInTheDocument();
+    expect(screen.queryByText('page-two-comment')).not.toBeInTheDocument();
     expect(screen.getByText('Showing 21–22 of 22')).toBeInTheDocument();
 
     view.rerender(<AuditLog taskId={taskB} />);

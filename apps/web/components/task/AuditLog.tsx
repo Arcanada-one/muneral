@@ -12,8 +12,13 @@ interface AuditLogProps {
   taskId: string;
 }
 
-interface ExactTimeViewState {
+type ActivityFilterMode = 'all' | 'status_changes';
+type ActorFilterMode = 'all' | 'humans' | 'agents';
+
+interface ActivityFilterState {
   taskId: string;
+  mode: ActivityFilterMode;
+  actorMode: ActorFilterMode;
   showExactUtcTime: boolean;
 }
 
@@ -289,7 +294,6 @@ function formatExactUtcTime(value: string): string | undefined {
   const offsetMs = (offsetHour * 60 + offsetMinute) * 60_000 * offsetSign;
   const utc = new Date(calendarDate.getTime() - offsetMs);
   const normalizedFraction = fraction.replace(/0+$/, '').padEnd(3, '0');
-  // Preserve expanded-year ISO prefixes (e.g. -000001 / +010000); do not slice a fixed 19 chars.
   const utcDateTime = utc.toISOString().replace(/\.\d{3}Z$/, '');
   return `${utcDateTime}.${normalizedFraction || '000'}Z`;
 }
@@ -337,18 +341,22 @@ function CopyActivityActorId({ actorId }: { actorId: string }) {
 }
 
 export function AuditLog({ taskId }: AuditLogProps) {
-  const exactUtcToggleId = useId();
+  const activityFilterId = useId();
   const [pageState, setPageState] = useState({ taskId, page: 1 });
   if (pageState.taskId !== taskId) setPageState({ taskId, page: 1 });
   const page = pageState.taskId === taskId ? pageState.page : 1;
-  const [exactTimeState, setExactTimeState] = useState<ExactTimeViewState>({
+  const [filterState, setFilterState] = useState<ActivityFilterState>({
     taskId,
+    mode: 'all' as ActivityFilterMode,
+    actorMode: 'all' as ActorFilterMode,
     showExactUtcTime: false,
   });
-  if (exactTimeState.taskId !== taskId) {
-    setExactTimeState({ taskId, showExactUtcTime: false });
+  if (filterState.taskId !== taskId) {
+    setFilterState({ taskId, mode: 'all', actorMode: 'all', showExactUtcTime: false });
   }
-  const showExactUtcTime = exactTimeState.taskId === taskId && exactTimeState.showExactUtcTime;
+  const filterMode = filterState.taskId === taskId ? filterState.mode : 'all';
+  const actorFilterMode = filterState.taskId === taskId ? filterState.actorMode : 'all';
+  const showExactUtcTime = filterState.taskId === taskId && filterState.showExactUtcTime;
   const { data, isLoading, isError, isFetching, refetch } = useActivity(taskId, page);
   const total = data !== undefined && Number.isSafeInteger(data.total) && data.total >= 0
     ? data.total
@@ -363,11 +371,30 @@ export function AuditLog({ taskId }: AuditLogProps) {
     : undefined;
   const pageOutOfRange = responsePageMatches && pageCount !== undefined && page > pageCount;
   if (pageOutOfRange) setPageState({ taskId, page: 1 });
-  const entries = responsePageIsUsable && !pageOutOfRange
+  const currentPageEntries = responsePageIsUsable && !pageOutOfRange
     ? (data?.data ?? []).filter((entry) => !entry.taskId || entry.taskId === taskId)
     : [];
+  const actionFilteredEntries = filterMode === 'status_changes'
+    ? currentPageEntries.filter((entry) => entry.action === 'task:status_changed')
+    : currentPageEntries;
+  const entries = actorFilterMode === 'humans'
+    ? actionFilteredEntries.filter((entry) => entry.actorType === 'human')
+    : actorFilterMode === 'agents'
+      ? actionFilteredEntries.filter((entry) => entry.actorType === 'agent')
+      : actionFilteredEntries;
+  const canShowVisibleCount = data !== undefined && responsePageMatches &&
+    responsePageIsUsable && !pageOutOfRange && !isLoading && !isError && !isFetching;
 
   const setPage = (nextPage: number) => setPageState({ taskId, page: nextPage });
+  const updateFilterState = (updates: Partial<Omit<ActivityFilterState, 'taskId'>>) => {
+    setFilterState((current) => ({
+      taskId,
+      mode: current.taskId === taskId ? current.mode : 'all',
+      actorMode: current.taskId === taskId ? current.actorMode : 'all',
+      showExactUtcTime: current.taskId === taskId ? current.showExactUtcTime : false,
+      ...updates,
+    }));
+  };
 
   if (!taskId) return null;
 
@@ -436,16 +463,53 @@ export function AuditLog({ taskId }: AuditLogProps) {
       </h4>
 
       <div className="mb-3 flex items-center gap-2 text-xs">
+        <label htmlFor={activityFilterId}>Activity filter</label>
+        <select
+          id={activityFilterId}
+          value={filterMode}
+          onChange={(event) => updateFilterState({
+            mode: event.target.value === 'status_changes' ? 'status_changes' : 'all',
+          })}
+          className="rounded border bg-background px-2 py-1"
+        >
+          <option value="all">All activity</option>
+          <option value="status_changes">Status changes on this page</option>
+        </select>
+      </div>
+
+      <div className="mb-3 flex items-center gap-2 text-xs">
+        <label htmlFor={`${activityFilterId}-actor`}>Actor filter</label>
+        <select
+          id={`${activityFilterId}-actor`}
+          value={actorFilterMode}
+          onChange={(event) => updateFilterState({
+            actorMode: event.target.value === 'humans' || event.target.value === 'agents'
+              ? event.target.value
+              : 'all',
+          })}
+          className="rounded border bg-background px-2 py-1"
+        >
+          <option value="all">All actors</option>
+          <option value="humans">Humans on this page</option>
+          <option value="agents">Agents on this page</option>
+        </select>
+      </div>
+
+      {canShowVisibleCount && (
+        <p role="status" className="mb-3 text-xs text-muted-foreground">
+          Showing {entries.length} of {currentPageEntries.length} loaded activity{' '}
+          {currentPageEntries.length === 1 ? 'entry' : 'entries'} on this page.
+        </p>
+      )}
+
+      <div className="mb-3 flex items-center gap-2 text-xs">
         <input
-          id={exactUtcToggleId}
+          id={`${activityFilterId}-exact-utc`}
           type="checkbox"
           checked={showExactUtcTime}
-          onChange={(event) => setExactTimeState({
-            taskId,
-            showExactUtcTime: event.target.checked,
-          })}
+          onChange={(event) => updateFilterState({ showExactUtcTime: event.target.checked })}
         />
-        <label htmlFor={exactUtcToggleId}>Show exact UTC timestamps</label>
+        <label htmlFor={`${activityFilterId}-exact-utc`}>Show exact UTC timestamps</label>
       </div>
 
       <ScrollArea className="h-64">
@@ -522,7 +586,13 @@ export function AuditLog({ taskId }: AuditLogProps) {
           })}
         </ul>
         {entries.length === 0 && (
-          <p className="py-3 text-xs text-muted-foreground">No activity on this page.</p>
+          <p className="py-3 text-xs text-muted-foreground">
+            {actorFilterMode !== 'all'
+              ? 'No matching activity on this page.'
+              : filterMode === 'status_changes'
+              ? 'No status changes on this page.'
+              : 'No activity on this page.'}
+          </p>
         )}
       </ScrollArea>
 
