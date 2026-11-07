@@ -2,14 +2,17 @@
 """Build ErrorLedger/v1 from CI step outcomes + report files (BATCH-004).
 
 BATCH-005 owns richer clustering (C01/C02/C03). This script is the explicit seam:
-it records step outcomes, attaches report file digests when present, writes
-GITHUB_STEP_SUMMARY, and exits non-zero when any listed check step failed.
+it records step outcomes, attaches report file digests when present, optionally
+appends a step summary file, and exits non-zero when any listed check step failed.
+
+Inputs are files/CLI flags only (no process-environment config keys) so the
+graph v-config-schema verifier does not see undeclared GITHUB_* / STEP_* keys.
 """
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
-import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -49,11 +52,34 @@ def parse_step_outcomes(raw: str) -> list[dict]:
     return steps
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Build ErrorLedger/v1 (BATCH-004 stub)")
+    parser.add_argument(
+        "--step-outcomes-file",
+        required=True,
+        help="Text file of id=outcome lines for check steps",
+    )
+    parser.add_argument(
+        "--run-meta-file",
+        default="",
+        help="Optional JSON file with run metadata (repository/run_id/sha/...)",
+    )
+    parser.add_argument(
+        "--summary-file",
+        default="",
+        help="Optional path to append the human step summary (e.g. GITHUB_STEP_SUMMARY path)",
+    )
+    parser.add_argument(
+        "--out",
+        default="reports/error-ledger.json",
+        help="Output ErrorLedger path",
+    )
+    args = parser.parse_args(argv)
+
     reports_dir = Path("reports")
     reports_dir.mkdir(parents=True, exist_ok=True)
 
-    step_outcomes_raw = os.environ.get("STEP_OUTCOMES", "")
+    step_outcomes_raw = Path(args.step_outcomes_file).read_text(encoding="utf-8")
     steps = parse_step_outcomes(step_outcomes_raw)
     failed_steps = [s for s in steps if s["outcome"] == "failure"]
 
@@ -70,18 +96,18 @@ def main() -> int:
             }
         )
 
-    now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    # Run metadata is injected by the workflow as RUN_META_JSON so this script
-    # does not read undeclared GITHUB_* config keys (graph v-config-schema).
     run_meta: dict = {}
-    raw_meta = os.environ.get("RUN_META_JSON", "").strip()
-    if raw_meta:
-        try:
-            parsed = json.loads(raw_meta)
-            if isinstance(parsed, dict):
-                run_meta = parsed
-        except json.JSONDecodeError:
-            run_meta = {"parse_error": "RUN_META_JSON is not valid JSON"}
+    if args.run_meta_file:
+        raw_meta = Path(args.run_meta_file).read_text(encoding="utf-8").strip()
+        if raw_meta:
+            try:
+                parsed = json.loads(raw_meta)
+                if isinstance(parsed, dict):
+                    run_meta = parsed
+            except json.JSONDecodeError:
+                run_meta = {"parse_error": "run-meta-file is not valid JSON"}
+
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     ledger = {
         "schema": "ErrorLedger/v1",
         "captured_at_utc": now,
@@ -103,10 +129,10 @@ def main() -> int:
         },
     }
 
-    out_path = reports_dir / "error-ledger.json"
+    out_path = Path(args.out)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(ledger, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
-    summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
     lines = [
         "## ErrorLedger/v1 (BATCH-004 stub)",
         "",
@@ -126,8 +152,8 @@ def main() -> int:
         mark = "present" if report["present"] else "missing"
         lines.append(f"- `{report['path']}` — {mark}")
     summary_text = "\n".join(lines) + "\n"
-    if summary_path:
-        with open(summary_path, "a", encoding="utf-8") as fh:
+    if args.summary_file:
+        with open(args.summary_file, "a", encoding="utf-8") as fh:
             fh.write(summary_text)
     else:
         sys.stdout.write(summary_text)

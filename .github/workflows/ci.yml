@@ -279,27 +279,47 @@ jobs:
       - name: Collect ErrorLedger
         id: collect
         if: always() && needs.tested-tree.outputs.reuse != 'true'
-        env:
-          RUN_META_JSON: >-
-            {"repository":"${{ github.repository }}","run_id":"${{ github.run_id }}","run_attempt":"${{ github.run_attempt }}","sha":"${{ github.sha }}","ref":"${{ github.ref }}","event_name":"${{ github.event_name }}","head_ref":"${{ github.head_ref }}"}
-          STEP_OUTCOMES: |
-            opsbot_secret_gate_test=${{ steps.opsbot_secret_gate_test.outcome }}
-            runner_broker_preflight_test=${{ steps.runner_broker_preflight_test.outcome }}
-            tested_tree_unit=${{ steps.tested_tree_unit.outcome }}
-            semantic_readback_contract=${{ steps.semantic_readback_contract.outcome }}
-            health_identity_probe_test=${{ steps.health_identity_probe_test.outcome }}
-            contract_digest_probe_test=${{ steps.contract_digest_probe_test.outcome }}
-            canary_red_test=${{ steps.canary_red_test.outcome }}
-            sanitize_browser_stderr_test=${{ steps.sanitize_browser_stderr_test.outcome }}
-            eslint=${{ steps.eslint.outcome }}
-            tsc=${{ steps.tsc.outcome }}
-            build_types=${{ steps.build_types.outcome }}
-            build=${{ steps.build.outcome }}
-            semantic_readback_db=${{ steps.semantic_readback_db.outcome }}
-            jest=${{ steps.jest.outcome }}
-            vitest=${{ steps.vitest.outcome }}
-            verify_structure=${{ steps.verify_structure.outcome }}
-        run: python3 -I scripts/ci/collect-error-ledger.py
+        run: |
+          mkdir -p reports "${RUNNER_TEMP}/error-ledger"
+          cat > "${RUNNER_TEMP}/error-ledger/step-outcomes.txt" <<'EOF'
+          opsbot_secret_gate_test=${{ steps.opsbot_secret_gate_test.outcome }}
+          runner_broker_preflight_test=${{ steps.runner_broker_preflight_test.outcome }}
+          tested_tree_unit=${{ steps.tested_tree_unit.outcome }}
+          semantic_readback_contract=${{ steps.semantic_readback_contract.outcome }}
+          health_identity_probe_test=${{ steps.health_identity_probe_test.outcome }}
+          contract_digest_probe_test=${{ steps.contract_digest_probe_test.outcome }}
+          canary_red_test=${{ steps.canary_red_test.outcome }}
+          sanitize_browser_stderr_test=${{ steps.sanitize_browser_stderr_test.outcome }}
+          eslint=${{ steps.eslint.outcome }}
+          tsc=${{ steps.tsc.outcome }}
+          build_types=${{ steps.build_types.outcome }}
+          build=${{ steps.build.outcome }}
+          semantic_readback_db=${{ steps.semantic_readback_db.outcome }}
+          jest=${{ steps.jest.outcome }}
+          vitest=${{ steps.vitest.outcome }}
+          verify_structure=${{ steps.verify_structure.outcome }}
+          EOF
+          python3 - <<'PY' > "${RUNNER_TEMP}/error-ledger/run-meta.json"
+          import json
+          print(json.dumps({
+            "repository": """${{ github.repository }}""",
+            "run_id": """${{ github.run_id }}""",
+            "run_attempt": """${{ github.run_attempt }}""",
+            "sha": """${{ github.sha }}""",
+            "ref": """${{ github.ref }}""",
+            "event_name": """${{ github.event_name }}""",
+            "head_ref": """${{ github.head_ref }}""",
+          }))
+          PY
+          summary_args=()
+          if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+            summary_args=(--summary-file "${GITHUB_STEP_SUMMARY}")
+          fi
+          python3 -I scripts/ci/collect-error-ledger.py \
+            --step-outcomes-file "${RUNNER_TEMP}/error-ledger/step-outcomes.txt" \
+            --run-meta-file "${RUNNER_TEMP}/error-ledger/run-meta.json" \
+            --out reports/error-ledger.json \
+            "${summary_args[@]}"
       - name: Upload ErrorLedger artifact
         if: always() && needs.tested-tree.outputs.reuse != 'true'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
