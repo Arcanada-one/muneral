@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { Copy, GitBranch, GitCommit, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useTaskGitRefs } from '@/lib/api/tasks';
+import { useTaskGitRefs, type TaskGitRef } from '@/lib/api/tasks';
 import { safeRepositoryUrl } from '@/components/project/ProjectRepository';
 
 const iconMap = {
@@ -17,6 +17,8 @@ const referenceLabels = {
   branch: 'branch',
   commit: 'commit',
 };
+
+type GitReferenceKind = 'all' | TaskGitRef['type'];
 
 function CopyGitReference({ value, label }: { value: string; label: string }) {
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
@@ -61,7 +63,17 @@ function CopyGitReference({ value, label }: { value: string; label: string }) {
 }
 
 export function TaskGitRefs({ taskId }: { taskId: string }) {
+  return <TaskGitRefsForTask key={taskId} taskId={taskId} />;
+}
+
+function TaskGitRefsForTask({ taskId }: { taskId: string }) {
+  const [selectedKind, setSelectedKind] = useState<GitReferenceKind>('all');
+  const [wrapReferenceText, setWrapReferenceText] = useState(false);
+  const kindSelectId = useId();
   const { data: refs, isLoading, isError, isFetching, refetch } = useTaskGitRefs(taskId);
+  const visibleRefs = selectedKind === 'all'
+    ? refs ?? []
+    : (refs ?? []).filter((ref) => ref.type === selectedKind);
 
   return (
     <div className="rounded-lg border p-4">
@@ -86,40 +98,79 @@ export function TaskGitRefs({ taskId }: { taskId: string }) {
       ) : refs.length === 0 ? (
         <p className="text-sm text-muted-foreground">No Git references.</p>
       ) : (
-        <ul className="space-y-2">
-          {refs.map((ref) => {
-            const Icon = iconMap[ref.type];
-            if (!safeRepositoryUrl(ref.url)) {
-              return (
-                <li key={ref.id}>
-                  <span role="alert" className="text-sm text-muted-foreground">
-                    Reference link unavailable
-                  </span>
-                </li>
-              );
-            }
+        <>
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <label htmlFor={kindSelectId} className="text-sm">
+              Git reference kind
+            </label>
+            <select
+              id={kindSelectId}
+              aria-label="Git reference kind"
+              className="rounded border bg-background px-2 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              value={selectedKind}
+              onChange={(event) => setSelectedKind(event.target.value as GitReferenceKind)}
+            >
+              <option value="all">All references</option>
+              <option value="repo">Repositories</option>
+              <option value="branch">Branches</option>
+              <option value="commit">Commits</option>
+            </select>
+            <label htmlFor={`${kindSelectId}-wrap`} className="inline-flex items-center gap-2 text-sm">
+              <input
+                id={`${kindSelectId}-wrap`}
+                type="checkbox"
+                checked={wrapReferenceText}
+                onChange={(event) => setWrapReferenceText(event.target.checked)}
+              />
+              Wrap Git reference text
+            </label>
+          </div>
+          <p className="mb-3 text-xs text-muted-foreground">
+            Showing {visibleRefs.length} of {refs.length} loaded Git references.
+          </p>
+          {visibleRefs.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No matching Git references in the loaded list. Choose All references to show all.
+            </p>
+          ) : (
+            <ul className="space-y-2">
+              {visibleRefs.map((ref) => {
+                const Icon = iconMap[ref.type];
+                if (!safeRepositoryUrl(ref.url)) {
+                  return (
+                    <li key={ref.id}>
+                      <span role="alert" className="text-sm text-muted-foreground">
+                        Reference link unavailable
+                      </span>
+                    </li>
+                  );
+                }
 
-            return (
-              <li key={ref.id} className="flex flex-wrap items-center gap-2">
-                <a
-                  href={ref.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex min-w-0 flex-1 items-center gap-2 text-sm text-primary hover:underline"
-                >
-                  <Icon className="h-4 w-4 flex-shrink-0" />
-                  <span className="truncate font-mono text-xs">{ref.ref || ref.url}</span>
-                  <ExternalLink className="h-3 w-3 flex-shrink-0 opacity-50" />
-                </a>
-                <CopyGitReference
-                  key={`${taskId}:${ref.id}:${ref.ref || ref.url}`}
-                  value={ref.ref || ref.url}
-                  label={referenceLabels[ref.type]}
-                />
-              </li>
-            );
-          })}
-        </ul>
+                return (
+                  <li key={ref.id} className="flex flex-wrap items-center gap-2">
+                    <a
+                      href={ref.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex min-w-0 flex-1 items-center gap-2 text-sm text-primary hover:underline"
+                    >
+                      <Icon className="h-4 w-4 flex-shrink-0" />
+                      <span className={wrapReferenceText
+                        ? 'min-w-0 flex-1 whitespace-normal break-all font-mono text-xs'
+                        : 'truncate font-mono text-xs'}>{ref.ref || ref.url}</span>
+                      <ExternalLink className="h-3 w-3 flex-shrink-0 opacity-50" />
+                    </a>
+                    <CopyGitReference
+                      key={`${taskId}:${ref.id}:${ref.ref || ref.url}`}
+                      value={ref.ref || ref.url}
+                      label={referenceLabels[ref.type]}
+                    />
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </>
       )}
     </div>
   );
