@@ -1,6 +1,6 @@
 {
   "formatVersion": "assembly-mutation-evidence-v4",
-  "generatedAt": "2026-11-06T19:49:02.832Z",
+  "generatedAt": "2026-11-07T04:25:41.954Z",
   "invocation": {
     "cwd": ".",
     "argv": [
@@ -11,18 +11,18 @@
     ]
   },
   "tools": {
-    "node": "v24.22.1",
+    "node": "v26.13.0",
     "jest": "29.7.0",
     "typescript": "5.9.3",
     "pnpm": "11.5.2"
   },
   "toolchainCompatibility": {
-    "nodeMajorMinor": "24.22",
+    "nodeMajorMinor": "26.13",
     "pnpmMajor": 11
   },
   "binding": {
     "algorithm": "sha256",
-    "aggregateSha256": "d7bf1770fb7cf34461d82180a86783791b73a8739fe231d846c0e013d3e3d568",
+    "aggregateSha256": "fbb0d92e7bf4df52ba51672e32eee78802ff9accb7150ef2baeab5e37b11f414",
     "files": [
       {
         "path": "apps/api/package.json",
@@ -262,7 +262,7 @@
       },
       {
         "path": "package.json",
-        "sha256": "409a26048790575cdae9e19930194a3d7511c76e5b15ec7c1470abf50b0d32d2"
+        "sha256": "08044a6a30936010a03968a1d41b9908639428c6312f5bcd98c52b04b97bfd09"
       },
       {
         "path": "pnpm-lock.yaml",
@@ -276,8 +276,8 @@
       "apps/web/",
       "receipts/"
     ],
-    "trackedTreeWithoutEvidence": "08f1bf87980f60b0fe06ecfd641eaad8fc295a45",
-    "trackedSnapshotDiffSha256": "a3f1b2620bd4f6a92ff464ef703a11fb71a057abaf80c3f565cbb16203eb1921"
+    "trackedTreeWithoutEvidence": "c5a78405898bf03e492a9a842ff5e6f529e47f03",
+    "trackedSnapshotDiffSha256": "835f212925f909e730087dc18859684b3f78523ae05b5b87d035711c9057bfa6"
   },
   "baseline": {
     "outcome": "SURVIVED",
