@@ -9,7 +9,9 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { maySubscribeToProject } from '../plan-graph/project-membership.js';
+import { ProjectMembershipService } from '../plan-graph/project-membership.service.js';
 
 export type KanbanEvent =
   | 'task:moved'
@@ -22,6 +24,9 @@ export type KanbanEvent =
  * KanbanGateway — Socket.io gateway for real-time Kanban board updates.
  * Auth: validate JWT from socket.handshake.auth.token on connect.
  * Rooms: project:{projectId} — clients subscribe per-project.
+ *
+ * KCLIVE-10 AC4: join:project requires current workspace membership of the
+ * project's workspace. A logged-in socket alone is insufficient.
  */
 @Injectable()
 @WebSocketGateway({
@@ -34,10 +39,15 @@ export type KanbanEvent =
 export class KanbanGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
+  private readonly logger = new Logger(KanbanGateway.name);
+
   @WebSocketServer()
   server: Server;
 
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly projectMembership: ProjectMembershipService,
+  ) {}
 
   async handleConnection(socket: Socket): Promise<void> {
     const token = socket.handshake.auth['token'] as string | undefined;
@@ -68,14 +78,24 @@ export class KanbanGateway
   }
 
   @SubscribeMessage('join:project')
-  handleJoinProject(
+  async handleJoinProject(
     @MessageBody() data: { projectId: string },
     @ConnectedSocket() socket: Socket,
-  ): void {
-    if (!socket.data['userId']) {
-      return;
+  ): Promise<{ ok: boolean; reason: string }> {
+    const userId = socket.data['userId'] as string | undefined;
+    const projectId = data?.projectId;
+
+    const membership = await this.projectMembership.lookup(userId, projectId);
+    const decision = maySubscribeToProject(userId, projectId, membership);
+    if (!decision.allowed) {
+      this.logger.warn(
+        `join:project refused user=${userId ?? 'none'} project=${projectId ?? 'none'} reason=${decision.reason}`,
+      );
+      return { ok: false, reason: decision.reason };
     }
-    void socket.join(`project:${data.projectId}`);
+
+    await socket.join(`project:${projectId}`);
+    return { ok: true, reason: decision.reason };
   }
 
   @SubscribeMessage('leave:project')
