@@ -354,6 +354,20 @@ function DependencyList({
         >
           Clear search
         </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            invalidateCopyBatch();
+            setDirection('all');
+            setHideCompleted(false);
+            onSearchQueryChange('');
+          }}
+          disabled={direction === 'all' && !hideCompleted && searchQuery.length === 0}
+        >
+          Show all loaded dependencies
+        </Button>
         <span aria-live="polite" className="text-muted-foreground">
           Showing {visibleDeps.length}{normalizedQuery ? ' matching' : ''} of {deps.length} loaded dependencies.
         </span>
