@@ -482,6 +482,7 @@ export function AuditLog({ taskId }: AuditLogProps) {
       ...updates,
     }));
   };
+  const canResetActivityFilters = filterMode !== 'all' || actorFilterMode !== 'all';
 
   if (!taskId) return null;
 
@@ -580,6 +581,18 @@ export function AuditLog({ taskId }: AuditLogProps) {
           <option value="humans">Humans on this page</option>
           <option value="agents">Agents on this page</option>
         </select>
+      </div>
+
+      <div className="mb-3">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => updateFilterState({ mode: 'all', actorMode: 'all' })}
+          disabled={!canResetActivityFilters}
+        >
+          Reset activity filters
+        </Button>
       </div>
 
       {canShowVisibleCount && (
