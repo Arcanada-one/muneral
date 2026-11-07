@@ -12,13 +12,13 @@ vi.mock('@/lib/api/client', () => ({ default: api }));
 
 const taskId = '10000000-0000-4000-8000-000000000001';
 const otherTaskId = '10000000-0000-4000-8000-000000000099';
-const items: ChecklistItem[] = [
-  { id: '10000000-0000-4000-8000-000000000002', taskId, label: 'Draft agenda', checked: false, order: 0 },
-  { id: '10000000-0000-4000-8000-000000000003', taskId, label: 'Approve agenda', checked: true, order: 1 },
-  { id: '10000000-0000-4000-8000-000000000004', taskId, label: 'Deliver notes', checked: false, order: 2 },
+const items = [
+  { id: '10000000-0000-4000-8000-000000000002', taskId, text: 'Draft agenda', checked: false, position: 0 },
+  { id: '10000000-0000-4000-8000-000000000003', taskId, text: 'Approve agenda', checked: true, position: 1 },
+  { id: '10000000-0000-4000-8000-000000000004', taskId, text: 'Deliver notes', checked: false, position: 2 },
 ];
-const otherItems: ChecklistItem[] = [
-  { id: '10000000-0000-4000-8000-000000000005', taskId: otherTaskId, label: 'Other task item', checked: false, order: 0 },
+const otherItems = [
+  { id: '10000000-0000-4000-8000-000000000005', taskId: otherTaskId, text: 'Other task item', checked: false, position: 0 },
 ];
 
 function deferred<T>() {
