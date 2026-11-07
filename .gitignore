@@ -21,6 +21,9 @@ out/
 *.log
 npm-debug.log*
 pnpm-debug.log*
+# Retained ErrorLedger fixtures (BATCH-005); must stay trackable despite *.log
+!data/pr108_lint_and_test.log
+!data/pr108_graph_admission.log
 
 # Editor
 .DS_Store
