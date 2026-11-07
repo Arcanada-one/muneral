@@ -189,7 +189,7 @@ describe('reset all loaded dependency filters', () => {
     fireEvent.change(screen.getByRole('combobox', { name: 'Dependency direction' }), {
       target: { value: 'incoming' },
     });
-    apiClient.get.mockClear();
+    vi.mocked(apiClient.get).mockClear();
     mutations.forEach((mutation) => mutation.mockClear());
     fetchSpy.mockClear();
     storageWrites.mockClear();
