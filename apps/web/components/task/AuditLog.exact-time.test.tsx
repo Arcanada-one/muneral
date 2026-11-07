@@ -123,6 +123,27 @@ describe('AuditLog exact UTC activity time', () => {
     expect(writeText).toHaveBeenCalledWith('utc-row-actor');
   });
 
+  it('keeps the exact-UTC toggle after loaded entry disclosures in document order', () => {
+    const longBody = `Start\n${'detail '.repeat(180)}End`;
+    ready(taskA, 1, [{
+      id: 'long-comment',
+      taskId: taskA,
+      actorId: 'long-comment-actor',
+      actorName: 'Writer',
+      actorType: 'human',
+      action: 'comment',
+      payload: { body: longBody },
+      createdAt: '2026-10-29T11:30:00.000Z',
+    }], 1);
+
+    render(<AuditLog taskId={taskA} />);
+    const summary = screen.getByText('Read full comment');
+    const toggle = screen.getByRole('checkbox', { name: 'Show exact UTC timestamps' });
+    expect(summary.compareDocumentPosition(toggle) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(toggle).not.toBeChecked();
+    expect(screen.getByText('30m ago')).toBeInTheDocument();
+  });
+
   it('shows a generic message for invalid and zone-less input without reflecting raw values', () => {
     const invalid = '2026-02-30T10:00:00Z';
     const zoneLess = '2026-10-29T11:30:00';

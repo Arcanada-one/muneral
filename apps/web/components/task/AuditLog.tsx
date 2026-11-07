@@ -502,16 +502,6 @@ export function AuditLog({ taskId }: AuditLogProps) {
         </p>
       )}
 
-      <div className="mb-3 flex items-center gap-2 text-xs">
-        <input
-          id={`${activityFilterId}-exact-utc`}
-          type="checkbox"
-          checked={showExactUtcTime}
-          onChange={(event) => updateFilterState({ showExactUtcTime: event.target.checked })}
-        />
-        <label htmlFor={`${activityFilterId}-exact-utc`}>Show exact UTC timestamps</label>
-      </div>
-
       <ScrollArea className="h-64">
         <ul className="space-y-3">
           {entries.map((entry) => {
@@ -595,6 +585,17 @@ export function AuditLog({ taskId }: AuditLogProps) {
           </p>
         )}
       </ScrollArea>
+
+      {/* Exact-UTC toggle stays after loaded entries so keyboard focus reaches disclosures first. */}
+      <div className="mt-3 mb-3 flex items-center gap-2 text-xs">
+        <input
+          id={`${activityFilterId}-exact-utc`}
+          type="checkbox"
+          checked={showExactUtcTime}
+          onChange={(event) => updateFilterState({ showExactUtcTime: event.target.checked })}
+        />
+        <label htmlFor={`${activityFilterId}-exact-utc`}>Show exact UTC timestamps</label>
+      </div>
 
       <nav aria-label="Activity pagination" className="mt-3 flex items-center justify-between gap-3 text-xs">
         <span aria-live="polite" className="text-muted-foreground">
