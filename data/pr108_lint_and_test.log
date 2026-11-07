@@ -1,0 +1,2398 @@
+Current runner version: '2.337.0'
+Runner name: 'arcana-ci-general'
+Runner group name: 'default'
+Machine name: 'arcana-devs'
+##[group]GITHUB_TOKEN Permissions
+Contents: read
+Metadata: read
+Packages: read
+##[endgroup]
+Secret source: Actions
+Cache mode: write
+Prepare workflow directory
+Prepare all required actions
+Getting action download info
+Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)
+Download action repository 'actions/setup-node@820762786026740c76f36085b0efc47a31fe5020' (SHA:820762786026740c76f36085b0efc47a31fe5020)
+Complete job name: lint-and-test
+##[group]Checking docker version
+##[command]/usr/bin/docker version --format '{{.Server.APIVersion}}'
+'1.54'
+Docker daemon API version: '1.54'
+##[command]/usr/bin/docker version --format '{{.Client.APIVersion}}'
+'1.54'
+Docker client API version: '1.54'
+##[endgroup]
+##[group]Clean up resources from previous jobs
+##[command]/usr/bin/docker ps --all --quiet --no-trunc --filter "label=f4ac29"
+##[command]/usr/bin/docker network prune --force --filter "label=f4ac29"
+##[endgroup]
+##[group]Create local container network
+##[command]/usr/bin/docker network create --label f4ac29 github_network_9ccd5fd81ebc4187bdbf5b963a4d0262
+e7bd2112195efd02be2dd7632331fc10e9de2cfb6b9c8ca9b6edd097382df149
+##[endgroup]
+##[group]Starting postgres service container
+##[command]/usr/bin/docker pull postgres:16
+16: Pulling from library/postgres
+Digest: sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94
+Status: Image is up to date for postgres:16
+docker.io/library/postgres:16
+##[command]/usr/bin/docker create --name 3b4f0b586abe43a18ddd1f368f934569_postgres16_540e3e --label f4ac29 --network github_network_9ccd5fd81ebc4187bdbf5b963a4d0262 --network-alias postgres -p 5432 --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5 -e "POSTGRES_USER=test" -e "POSTGRES_PASSWORD=test" -e "POSTGRES_DB=muneral_test" -e GITHUB_ACTIONS=true -e CI=true postgres:16
+bcf972ac992d671c29d33a73a6ac6bbb16d433b4dd84d1c3afb2a05a998e2b7d
+##[command]/usr/bin/docker start bcf972ac992d671c29d33a73a6ac6bbb16d433b4dd84d1c3afb2a05a998e2b7d
+bcf972ac992d671c29d33a73a6ac6bbb16d433b4dd84d1c3afb2a05a998e2b7d
+##[command]/usr/bin/docker ps --all --filter id=bcf972ac992d671c29d33a73a6ac6bbb16d433b4dd84d1c3afb2a05a998e2b7d --filter status=running --no-trunc --format "{{.ID}} {{.Status}}"
+bcf972ac992d671c29d33a73a6ac6bbb16d433b4dd84d1c3afb2a05a998e2b7d Up Less than a second (health: starting)
+##[command]/usr/bin/docker port bcf972ac992d671c29d33a73a6ac6bbb16d433b4dd84d1c3afb2a05a998e2b7d
+5432/tcp -> 0.0.0.0:33321
+5432/tcp -> [::]:33321
+##[endgroup]
+##[group]Waiting for all services to be ready
+##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" bcf972ac992d671c29d33a73a6ac6bbb16d433b4dd84d1c3afb2a05a998e2b7d
+starting
+postgres service is starting, waiting 2 seconds before checking again.
+##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" bcf972ac992d671c29d33a73a6ac6bbb16d433b4dd84d1c3afb2a05a998e2b7d
+starting
+postgres service is starting, waiting 3 seconds before checking again.
+##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" bcf972ac992d671c29d33a73a6ac6bbb16d433b4dd84d1c3afb2a05a998e2b7d
+starting
+postgres service is starting, waiting 8 seconds before checking again.
+##[command]/usr/bin/docker inspect --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}" bcf972ac992d671c29d33a73a6ac6bbb16d433b4dd84d1c3afb2a05a998e2b7d
+healthy
+postgres service is healthy.
+##[endgroup]
+##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+with:
+  repository: Arcanada-one/muneral
+  token: ***
+  ssh-strict: true
+  ssh-user: git
+  persist-credentials: true
+  clean: true
+  sparse-checkout-cone-mode: true
+  fetch-depth: 1
+  fetch-tags: false
+  show-progress: true
+  lfs: false
+  submodules: false
+  set-safe-directory: true
+  allow-unsafe-pr-checkout: false
+##[endgroup]
+Syncing repository: Arcanada-one/muneral
+##[group]Getting Git version info
+Working directory is '/home/ci-isolated/runner-general/_work/muneral/muneral'
+[command]/usr/bin/git version
+git version 2.43.0
+##[endgroup]
+Copying '/home/ci-isolated/.gitconfig' to '/home/ci-isolated/runner-general/_work/_temp/0b16d63b-b282-4b13-8157-e67864e79d5d/.gitconfig'
+Temporarily overriding HOME='/home/ci-isolated/runner-general/_work/_temp/0b16d63b-b282-4b13-8157-e67864e79d5d' before making global git config changes
+Adding repository directory to the temporary git global config as a safe directory
+[command]/usr/bin/git config --global --add safe.directory /home/ci-isolated/runner-general/_work/muneral/muneral
+[command]/usr/bin/git config --local --get remote.origin.url
+https://github.com/Arcanada-one/muneral
+##[group]Removing previously created refs, to avoid conflicts
+[command]/usr/bin/git rev-parse --symbolic-full-name --verify --quiet HEAD
+refs/heads/main
+[command]/usr/bin/git checkout --detach
+HEAD is now at a4d1a1b build(deps): bump @tanstack/react-query from 5.101.0 to 5.102.8 (#60)
+[command]/usr/bin/git branch --delete --force main
+Deleted branch main (was a4d1a1b).
+##[endgroup]
+[command]/usr/bin/git submodule status
+##[group]Cleaning the repository
+[command]/usr/bin/git clean -ffdx
+Removing .turbo/
+Removing apps/api/.turbo/
+Removing apps/api/dist/
+Removing apps/api/node_modules/
+Removing apps/api/test/assembly/__pycache__/
+Removing apps/web/.next/
+Removing apps/web/.turbo/
+Removing apps/web/node_modules/
+Removing node_modules/
+Removing packages/types/.turbo/
+Removing packages/types/dist/
+Removing packages/types/node_modules/
+[command]/usr/bin/git reset --hard HEAD
+HEAD is now at a4d1a1b build(deps): bump @tanstack/react-query from 5.101.0 to 5.102.8 (#60)
+##[endgroup]
+##[group]Disabling automatic garbage collection
+[command]/usr/bin/git config --local gc.auto 0
+##[endgroup]
+##[group]Setting up auth
+Removing SSH command configuration
+[command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+[command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Removing HTTP extra header
+[command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+[command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Removing includeIf entries pointing to credentials config files
+[command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+[command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+[command]/usr/bin/git config --file /home/ci-isolated/runner-general/_work/_temp/git-credentials-08583c47-6546-46b7-b42c-9a52e2e00628.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+[command]/usr/bin/git config --local includeIf.gitdir:/home/ci-isolated/runner-general/_work/muneral/muneral/.git.path /home/ci-isolated/runner-general/_work/_temp/git-credentials-08583c47-6546-46b7-b42c-9a52e2e00628.config
+[command]/usr/bin/git config --local includeIf.gitdir:/home/ci-isolated/runner-general/_work/muneral/muneral/.git/worktrees/*.path /home/ci-isolated/runner-general/_work/_temp/git-credentials-08583c47-6546-46b7-b42c-9a52e2e00628.config
+[command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-08583c47-6546-46b7-b42c-9a52e2e00628.config
+[command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-08583c47-6546-46b7-b42c-9a52e2e00628.config
+##[endgroup]
+##[group]Fetching the repository
+[command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +d8bfc70eb18a883a38297f54e3dac6d78fc0004f:refs/remotes/pull/108/merge
+From https://github.com/Arcanada-one/muneral
+ * [new ref]         d8bfc70eb18a883a38297f54e3dac6d78fc0004f -> pull/108/merge
+##[endgroup]
+##[group]Determining the checkout info
+##[endgroup]
+[command]/usr/bin/git sparse-checkout disable
+[command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+##[group]Checking out the ref
+[command]/usr/bin/git checkout --progress --force refs/remotes/pull/108/merge
+Previous HEAD position was a4d1a1b build(deps): bump @tanstack/react-query from 5.101.0 to 5.102.8 (#60)
+HEAD is now at d8bfc70 Merge c1eae2a6b3390eabbb1fe3c64711e38911e6738d into a4d1a1b92b14ece45b3891d15405de8c397e3dba
+##[endgroup]
+[command]/usr/bin/git log -1 --format=%H
+d8bfc70eb18a883a38297f54e3dac6d78fc0004f
+##[group]Run bash scripts/ci/opsbot-secret-gate.test.sh
+bash scripts/ci/opsbot-secret-gate.test.sh
+shell: /usr/bin/bash -e {0}
+##[endgroup]
+PASS: canonical_key
+PASS: missing_key
+PASS: empty_key
+PASS: wrong_prefix
+PASS: short_key
+PASS: invalid_character
+PASS: embedded_whitespace
+All Ops Bot secret-gate regression cases passed.
+##[group]Run bash scripts/ci/runner-broker-preflight.test.sh
+bash scripts/ci/runner-broker-preflight.test.sh
+shell: /usr/bin/bash -e {0}
+##[endgroup]
+PASS: happy_path_before_group_retired
+PASS: broker_absent
+PASS: broker_is_symlink
+PASS: broker_not_executable
+PASS: broker_writable_by_runner
+PASS: broker_wrong_mode
+PASS: still_in_docker_group_after_retirement
+PASS: out_of_docker_group_after_retirement
+PASS: in_docker_group_before_retirement
+All runner broker preflight regression cases passed.
+##[group]Run node --test apps/api/scripts/semantic-aggregate-readback.test.mjs
+node --test apps/api/scripts/semantic-aggregate-readback.test.mjs
+bash scripts/ci/semantic-readback-caller-contract.test.sh
+bash scripts/ci/semantic-readback-caller-contract.sh
+shell: /usr/bin/bash -e {0}
+##[endgroup]
+✔ runs the fixed aggregate query inside repeatable-read read-only and rolls back (1.565657ms)
+✔ fails closed when PostgreSQL does not confirm a read-only transaction (1.469894ms)
+✔ rolls back and emits only a safe code when the aggregate query fails (0.586518ms)
+✔ rejects negative, fractional, oversized, missing, and extra aggregate fields (0.724778ms)
+✔ fixed SQL selects counts and invariants without payload or credential fields (0.358296ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 56.449611
+PASS: fixed_zero_argument_caller
+PASS: caller_supplied_sql
+PASS: missing_preflight_gate
+PASS: direct_database_bypass
+PASS: caller_receives_database_url
+All semantic readback caller contract cases passed.
+semantic-readback-caller-contract: PASS fixed zero-argument broker caller
+##[group]Run COREPACK_HOME="${RUNNER_TEMP}/corepack-bin"
+COREPACK_HOME="${RUNNER_TEMP}/corepack-bin"
+mkdir -p "${COREPACK_HOME}"
+corepack enable --install-directory "${COREPACK_HOME}"
+echo "${COREPACK_HOME}" >> "${GITHUB_PATH}"
+shell: /usr/bin/bash -e {0}
+##[endgroup]
+##[group]Run actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+with:
+  node-version: 24.20.0
+  cache: pnpm
+  check-latest: false
+  token: ***
+  package-manager-cache: true
+##[endgroup]
+Found in cache @ /home/ci-isolated/runner-general/_work/_tool/node/24.20.0/x64
+##[group]Environment details
+[warning]This project is configured to use pnpm because /home/ci-isolated/runner-general/_work/muneral/muneral/package.json has a "packageManager" field
+
+node: v24.20.0
+npm: 11.19.0
+yarn: 
+##[endgroup]
+[command]/home/ci-isolated/runner-general/_work/_temp/corepack-bin/pnpm store path --silent
+/home/ci-isolated/.local/share/pnpm/store/v11
+pnpm cache is not found
+##[group]Run pnpm install --frozen-lockfile
+pnpm install --frozen-lockfile
+shell: /usr/bin/bash -e {0}
+##[endgroup]
+Scope: all 4 workspace projects
+? Verifying lockfile against supply-chain policies (1311 entries)...
+✓ Lockfile passes supply-chain policies (1311 entries in 4.3s)
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +1194
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 1194, reused 1137, downloaded 56, added 1194, done
+.../node_modules/unrs-resolver postinstall$ node postinstall.js
+.../bcrypt@6.0.0/node_modules/bcrypt install$ node-gyp-build
+.../node_modules/unrs-resolver postinstall: Done
+.../bcrypt@6.0.0/node_modules/bcrypt install: Done
+.../node_modules/prisma preinstall$ node scripts/preinstall-entry.js
+.../node_modules/prisma preinstall: Done
+
+devDependencies:
++ prisma 7.8.0
++ turbo 2.9.18
+
+Done in 6.5s using pnpm v11.5.2
+##[group]Run pnpm lint
+pnpm lint
+shell: /usr/bin/bash -e {0}
+##[endgroup]
+$ turbo run lint
+
+   • Packages in scope: @muneral/api, @muneral/types, @muneral/web
+   • Running lint in 3 packages
+   • Remote caching disabled
+
+##[group]@muneral/api:lint
+cache miss, executing 1e9041abfb25c587
+$ eslint src --ext .ts
+
+/home/ci-isolated/runner-general/_work/muneral/muneral/apps/api/src/common/guards/workspace-role.guard.ts
+##[warning]  6:3  warning  'SetMetadata' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/ci-isolated/runner-general/_work/muneral/muneral/apps/api/src/sync/sync.service.ts
+##[warning]  2:10  warning  'Prisma' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/ci-isolated/runner-general/_work/muneral/muneral/apps/api/src/webhooks/dto/create-webhook.dto.ts
+##[warning]  1:20  warning  'IsNotEmpty' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 3 problems (0 errors, 3 warnings)
+
+##[endgroup]
+##[group]@muneral/web:lint
+cache miss, executing e68d50c580af2680
+$ next lint
+`next lint` is deprecated and will be removed in Next.js 16.
+For new projects, use create-next-app to choose your preferred linter.
+For existing projects, migrate to the ESLint CLI:
+npx @next/codemod@canary next-lint-to-eslint-cli .
+
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+✔ No ESLint warnings or errors
+##[endgroup]
+
+ Tasks:    2 successful, 2 total
+Cached:    0 cached, 2 total
+  Time:    3.828s 
+
+##[group]Run pnpm --filter @muneral/types build
+pnpm --filter @muneral/types build
+shell: /usr/bin/bash -e {0}
+##[endgroup]
+$ tsc
+##[group]Run pnpm exec prisma generate
+pnpm exec prisma generate
+shell: /usr/bin/bash -e {0}
+env:
+  DATABASE_URL: ***localhost:33321/muneral_test
+##[endgroup]
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from apps/api/prisma/schema.prisma.
+
+✔ Generated Prisma Client (v7.8.0) to ./node_modules/.pnpm/@prisma+client@7.8.0_prisma@7.8.0_@types+node@22.19.21_@types+react-dom@19.2.3_@types+r_577010712c53406199bdaa1e0b930584/node_modules/@prisma/client in 357ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+
+##[group]Run pnpm build
+pnpm build
+shell: /usr/bin/bash -e {0}
+##[endgroup]
+$ turbo run build
+
+   • Packages in scope: @muneral/api, @muneral/types, @muneral/web
+   • Running build in 3 packages
+   • Remote caching disabled
+
+##[group]@muneral/types:build
+cache miss, executing 7e689e91cf99d725
+$ tsc
+##[endgroup]
+##[group]@muneral/api:build
+cache miss, executing 9464c0e0f6ef784a
+$ tsc -p tsconfig.json
+##[endgroup]
+##[group]@muneral/web:build
+cache miss, executing dc78d4b134ed2ff2
+$ next build
+   ▲ Next.js 15.5.24
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 10.5s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/6) ...
+   Generating static pages (1/6) 
+   Generating static pages (2/6) 
+   Generating static pages (4/6) 
+ ✓ Generating static pages (6/6)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                                     Size  First Load JS
+┌ ƒ /                                                          124 B         103 kB
+├ ○ /_not-found                                                 1 kB         104 kB
+├ ƒ /api/auth/[...nextauth]                                    159 B         106 kB
+├ ○ /login                                                   3.11 kB         118 kB
+├ ƒ /workspaces                                              4.96 kB         151 kB
+├ ƒ /workspaces/[wsSlug]                                     3.98 kB         150 kB
+├ ƒ /workspaces/[wsSlug]/dashboard                            105 kB         262 kB
+├ ƒ /workspaces/[wsSlug]/milestones                          2.97 kB         146 kB
+├ ƒ /workspaces/[wsSlug]/projects/[projSlug]                 36.9 kB         190 kB
+├ ƒ /workspaces/[wsSlug]/projects/[projSlug]/tasks/[taskId]  6.47 kB         163 kB
+├ ƒ /workspaces/[wsSlug]/settings                            3.02 kB         152 kB
+├ ƒ /workspaces/[wsSlug]/settings/api-keys                   7.66 kB         151 kB
+├ ƒ /workspaces/[wsSlug]/settings/webhooks                   6.07 kB         149 kB
+└ ƒ /workspaces/[wsSlug]/sprints                             2.76 kB         146 kB
++ First Load JS shared by all                                 103 kB
+  ├ chunks/409-2ae2e04e5e12a5ea.js                           46.7 kB
+  ├ chunks/5af303d7-b24e198f36bb2e83.js                      54.2 kB
+  └ other shared chunks (total)                              1.98 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+##[endgroup]
+
+ Tasks:    3 successful, 3 total
+Cached:    0 cached, 3 total
+  Time:    25.877s 
+
+ WARNING  no output files found for task @muneral/web#build. Please check your `outputs` key in `turbo.json`
+##[group]Run pnpm exec prisma migrate deploy
+pnpm exec prisma migrate deploy
+shell: /usr/bin/bash -e {0}
+env:
+  DATABASE_URL: ***localhost:33321/muneral_test
+##[endgroup]
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from apps/api/prisma/schema.prisma.
+Datasource "db": PostgreSQL database "muneral_test", schema "public" at "localhost:33321"
+
+12 migrations found in prisma/migrations
+
+Applying migration `20260607103126_init_schema`
+Applying migration `20260607200000_add_field_tracking`
+Applying migration `20260715170000_add_muneral_kb_task_changes`
+Applying migration `20260730000000_add_execution_authority`
+Applying migration `20260730010000_add_outbox_relay`
+Applying migration `20260731010000_add_committed_result_refs`
+Applying migration `20260731090000_add_execution_truncate_guard`
+Applying migration `20260801093000_harden_result_authority_binding`
+Applying migration `20260809180000_add_solution_log_head_receipts`
+Applying migration `20260905120000_add_migration_import_surface`
+Applying migration `20260905190000_add_status_map_provenance`
+Applying migration `20260905210000_add_archived_task_status`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20260607103126_init_schema/
+    └─ migration.sql
+  └─ 20260607200000_add_field_tracking/
+    └─ migration.sql
+  └─ 20260715170000_add_muneral_kb_task_changes/
+    └─ migration.sql
+  └─ 20260730000000_add_execution_authority/
+    └─ migration.sql
+  └─ 20260730010000_add_outbox_relay/
+    └─ migration.sql
+  └─ 20260731010000_add_committed_result_refs/
+    └─ migration.sql
+  └─ 20260731090000_add_execution_truncate_guard/
+    └─ migration.sql
+  └─ 20260801093000_harden_result_authority_binding/
+    └─ migration.sql
+  └─ 20260809180000_add_solution_log_head_receipts/
+    └─ migration.sql
+  └─ 20260905120000_add_migration_import_surface/
+    └─ migration.sql
+  └─ 20260905190000_add_status_map_provenance/
+    └─ migration.sql
+  └─ 20260905210000_add_archived_task_status/
+    └─ migration.sql
+
+All migrations have been successfully applied.
+##[group]Run node apps/api/scripts/semantic-aggregate-readback.mjs
+node apps/api/scripts/semantic-aggregate-readback.mjs
+shell: /usr/bin/bash -e {0}
+env:
+  DATABASE_URL: ***localhost:33321/muneral_test
+##[endgroup]
+MUNERAL_AGGREGATE_READBACK_V1 {"schema":"muneral-semantic-readback-v1","transactionReadOnly":true,"counts":{"executionStates":0,"attempts":0,"transitions":0,"committedResultRefs":0,"outboxEvents":0,"pendingLeases":0,"leasedLeases":0,"deliveredLeases":0,"quarantinedLeases":0,"deliveryAttempts":0,"quarantineEvidence":0,"consumerInbox":0},"integrityFailures":{"transitionsWithoutOutbox":0,"outboxEventsWithoutLease":0,"deliveredWithoutEvidence":0,"quarantinedWithoutEvidence":0,"committedRefsWithoutTransition":0,"total":0},"integrityOk":true}
+##[group]Run pnpm test
+pnpm test
+shell: /usr/bin/bash -e {0}
+env:
+  DATABASE_URL: ***localhost:33321/muneral_test
+  MUN0020_DB_URL: ***localhost:33321/muneral_test
+##[endgroup]
+$ turbo run test
+
+   • Packages in scope: @muneral/api, @muneral/types, @muneral/web
+   • Running test in 3 packages
+   • Remote caching disabled
+
+##[group]@muneral/types:build
+cache hit, replaying logs 7e689e91cf99d725
+$ tsc
+##[endgroup]
+##[group]@muneral/web:test
+cache miss, executing 02bb496e96327a1b
+$ vitest run
+
+ RUN  v4.1.11 /home/ci-isolated/runner-general/_work/muneral/muneral/apps/web
+
+ ✓ __tests__/kanban-board.test.ts (9 tests) 8ms
+ ✓ __tests__/api-client.test.ts (5 tests) 10ms
+ ✓ __tests__/ws-kanban.test.ts (12 tests) 16ms
+ ✓ __tests__/telegram-auth.test.ts (8 tests) 18ms
+ ✓ __tests__/store-workspace.test.ts (16 tests) 9ms
+
+ Test Files  5 passed (5)
+      Tests  50 passed (50)
+   Start at  09:38:49
+   Duration  989ms (transform 253ms, setup 342ms, import 380ms, tests 61ms, environment 3.35s)
+
+##[endgroup]
+@muneral/api:test
+cache miss, executing c4b9474124c3c25d
+$ jest --passWithNoTests --runInBand
+PASS test/migration.status-mutation.spec.ts (44.253 s)
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+FAIL test/tasks-agent-scope.e2e.spec.ts
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /home/ci-isolated/runner-general/_work/muneral/muneral/node_modules/.pnpm/@nestjs+jwt@12.0.1_@nestjs+common@11.1.26_class-transformer@0.5.1_class-validator@0.15._5db53e259d78d57ecdd0fcfed2a08f8e/node_modules/@nestjs/jwt/dist/index.js:1
+    ({"Object.<anonymous>":function(module,exports,require,__dirname,__filename,jest){import jsonwebtoken from 'jsonwebtoken';
+                                                                                      ^^^^^^
+
+    SyntaxError: Cannot use import statement outside a module
+
+       9 | } from '@nestjs/websockets';
+      10 | import { Server, Socket } from 'socket.io';
+    > 11 | import { JwtService } from '@nestjs/jwt';
+         | ^
+      12 | import { Injectable } from '@nestjs/common';
+      13 |
+      14 | export type KanbanEvent =
+
+      at Runtime.createScriptFromCode (../../node_modules/.pnpm/jest-runtime@29.7.0/node_modules/jest-runtime/build/index.js:1505:14)
+      at Object.<anonymous> (src/ws/kanban.gateway.ts:11:1)
+      at Object.<anonymous> (src/ws/kanban.service.ts:2:1)
+      at Object.<anonymous> (src/tasks/tasks.service.ts:14:1)
+      at Object.<anonymous> (src/tasks/tasks.module.ts:2:1)
+##[error]@muneral/api#test: command (/home/ci-isolated/runner-general/_work/muneral/muneral/apps/api) /home/ci-isolated/runner-general/_work/_temp/corepack-bin/pnpm run test exited (1)
+ ERROR  @muneral/api#test: command (/home/ci-isolated/runner-general/_work/muneral/muneral/apps/api) /home/ci-isolated/runner-general/_work/_temp/corepack-bin/pnpm run test exited (1)
+      at Object.<anonymous> (test/tasks-agent-scope.e2e.spec.ts:22:1)
+
+FAIL test/mutation-evidence.spec.ts (12.451 s)
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+  ● Assembly mutation evidence verification › accepts the exact current evidence structure
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 1
+
+      44 |
+      45 |   it('accepts the exact current evidence structure', () => {
+    > 46 |     expect(verify(EVIDENCE).status).toBe(0);
+         |                                     ^
+      47 |   });
+      48 |
+      49 |   // F9 (REPORT-PROJ-RULE0): the evidence document itself must still satisfy
+
+      at Object.<anonymous> (test/mutation-evidence.spec.ts:46:37)
+
+  ● Assembly mutation evidence verification › accepts a node/pnpm record that differs only in patch version
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 1
+
+      65 |     const file = path.join(directory, 'same-major-minor-different-patch.json');
+      66 |     fs.writeFileSync(file, `${JSON.stringify(tampered)}\n`);
+    > 67 |     expect(verify(file).status).toBe(0);
+         |                                 ^
+      68 |   });
+      69 |
+      70 |   // (b) a different major is outside the recorded compatibility range and
+
+      at Object.<anonymous> (test/mutation-evidence.spec.ts:67:33)
+
+  ● Assembly mutation evidence verification › uses a non-self-referential Git snapshot supplement
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+      Object {
+    -   "trackedSnapshotDiffSha256": "77107d6110b729279bf841ae94f55e9f56db4f25b6885dd4de29d628870e93d5",
+    -   "trackedTreeWithoutEvidence": "10b53904164324d0d7c0d45d4365450df664e108",
+    +   "trackedSnapshotDiffSha256": "e1a1dee69aa27ba3ba67e3a4377c6d5e3401da23d4b301d05d94f3a6b5b22000",
+    +   "trackedTreeWithoutEvidence": "a0494cf682e41be5dc9baa5e291038887be0253c",
+      }
+
+      101 |     };
+      102 |     const supplement = harness.gitSupplement();
+    > 103 |     expect(supplement).toEqual(original.supplementalGit);
+          |                        ^
+      104 |     expect(Object.keys(supplement).sort()).toEqual([
+      105 |       'trackedSnapshotDiffSha256',
+      106 |       'trackedTreeWithoutEvidence',
+
+      at Object.<anonymous> (test/mutation-evidence.spec.ts:103:24)
+
+FAIL test/field-changes.e2e.spec.ts
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /home/ci-isolated/runner-general/_work/muneral/muneral/node_modules/.pnpm/@nestjs+jwt@12.0.1_@nestjs+common@11.1.26_class-transformer@0.5.1_class-validator@0.15._5db53e259d78d57ecdd0fcfed2a08f8e/node_modules/@nestjs/jwt/dist/index.js:1
+    ({"Object.<anonymous>":function(module,exports,require,__dirname,__filename,jest){import jsonwebtoken from 'jsonwebtoken';
+                                                                                      ^^^^^^
+
+    SyntaxError: Cannot use import statement outside a module
+
+       9 | } from '@nestjs/websockets';
+      10 | import { Server, Socket } from 'socket.io';
+    > 11 | import { JwtService } from '@nestjs/jwt';
+         | ^
+      12 | import { Injectable } from '@nestjs/common';
+      13 |
+      14 | export type KanbanEvent =
+
+      at Runtime.createScriptFromCode (../../node_modules/.pnpm/jest-runtime@29.7.0/node_modules/jest-runtime/build/index.js:1505:14)
+      at Object.<anonymous> (src/ws/kanban.gateway.ts:11:1)
+      at Object.<anonymous> (src/ws/kanban.service.ts:2:1)
+      at Object.<anonymous> (src/tasks/tasks.service.ts:14:1)
+      at Object.<anonymous> (src/tasks/tasks.module.ts:2:1)
+      at Object.<anonymous> (test/field-changes.e2e.spec.ts:10:1)
+
+PASS test/migration.postgres.spec.ts (5.274 s)
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+    console.log
+      
+      [migration-import-pg] Mode: container. Allocated dynamic port: 41605
+
+      at Object.start (test/support/disposable-postgres.ts:229:17)
+
+    console.log
+      [migration-import-pg] Starting disposable container: muneral-migration-import-test-b7856b5a
+
+      at Object.start (test/support/disposable-postgres.ts:234:17)
+
+    console.log
+      [migration-import-pg] Waiting for PostgreSQL to accept connections...
+
+      at Object.start (test/support/disposable-postgres.ts:278:15)
+
+    console.log
+      [migration-import-pg] PostgreSQL is ready.
+
+      at waitForReady (test/support/disposable-postgres.ts:119:15)
+
+    console.log
+      [migration-import-pg] Applying migrations...
+
+      at Object.start (test/support/disposable-postgres.ts:281:15)
+
+    console.log
+      [migration-import-pg]   Applying 20260607103126_init_schema/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [migration-import-pg]   Applying 20260607200000_add_field_tracking/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [migration-import-pg]   Applying 20260715170000_add_muneral_kb_task_changes/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [migration-import-pg]   Applying 20260730000000_add_execution_authority/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [migration-import-pg]   Applying 20260730010000_add_outbox_relay/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [migration-import-pg]   Applying 20260731010000_add_committed_result_refs/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [migration-import-pg]   Applying 20260731090000_add_execution_truncate_guard/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [migration-import-pg]   Applying 20260801093000_harden_result_authority_binding/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [migration-import-pg]   Applying 20260809180000_add_solution_log_head_receipts/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [migration-import-pg]   Applying 20260905120000_add_migration_import_surface/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [migration-import-pg]   Applying 20260905190000_add_status_map_provenance/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [migration-import-pg]   Applying 20260905210000_add_archived_task_status/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [migration-import-pg] All migrations applied.
+
+      at Object.start (test/support/disposable-postgres.ts:283:15)
+
+    console.log
+      
+      [migration-import-pg] Removing container: muneral-migration-import-test-b7856b5a
+
+      at Object.stop (test/support/disposable-postgres.ts:329:15)
+
+    console.log
+      [migration-import-pg] Cleanup evidence: container=muneral-migration-import-test-b7856b5a port=41605 database=***localhost:41605/muneral_migration_import_test?schema=public
+
+      at Object.stop (test/support/disposable-postgres.ts:397:15)
+
+    console.log
+      [migration-import-pg] No shared or production database was touched.
+
+      at Object.stop (test/support/disposable-postgres.ts:401:15)
+
+PASS test/outbox.relay.postgres.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+    console.log
+      
+      [outbox-pg] Mode: container. Allocated dynamic port: 33255
+
+      at Object.start (test/support/disposable-postgres.ts:229:17)
+
+    console.log
+      [outbox-pg] Starting disposable container: muneral-outbox-test-7f2f071d
+
+      at Object.start (test/support/disposable-postgres.ts:234:17)
+
+    console.log
+      [outbox-pg] Waiting for PostgreSQL to accept connections...
+
+      at Object.start (test/support/disposable-postgres.ts:278:15)
+
+    console.log
+      [outbox-pg] PostgreSQL is ready.
+
+      at waitForReady (test/support/disposable-postgres.ts:119:15)
+
+    console.log
+      [outbox-pg] Applying migrations...
+
+      at Object.start (test/support/disposable-postgres.ts:281:15)
+
+    console.log
+      [outbox-pg]   Applying 20260607103126_init_schema/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [outbox-pg]   Applying 20260607200000_add_field_tracking/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [outbox-pg]   Applying 20260715170000_add_muneral_kb_task_changes/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [outbox-pg]   Applying 20260730000000_add_execution_authority/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [outbox-pg]   Applying 20260730010000_add_outbox_relay/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [outbox-pg]   Applying 20260731010000_add_committed_result_refs/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [outbox-pg]   Applying 20260731090000_add_execution_truncate_guard/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [outbox-pg]   Applying 20260801093000_harden_result_authority_binding/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [outbox-pg]   Applying 20260809180000_add_solution_log_head_receipts/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [outbox-pg]   Applying 20260905120000_add_migration_import_surface/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [outbox-pg]   Applying 20260905190000_add_status_map_provenance/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [outbox-pg]   Applying 20260905210000_add_archived_task_status/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [outbox-pg] All migrations applied.
+
+      at Object.start (test/support/disposable-postgres.ts:283:15)
+
+    console.log
+      
+      [outbox-pg] Removing container: muneral-outbox-test-7f2f071d
+
+      at Object.stop (test/support/disposable-postgres.ts:329:15)
+
+    console.log
+      [outbox-pg] Cleanup evidence: container=muneral-outbox-test-7f2f071d port=33255 database=***localhost:33255/muneral_outbox_test?schema=public
+
+      at Object.stop (test/support/disposable-postgres.ts:397:15)
+
+    console.log
+      [outbox-pg] No shared or production database was touched.
+
+      at Object.stop (test/support/disposable-postgres.ts:401:15)
+
+PASS test/result-authority.postgres.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+    console.log
+      
+      [result-authority-pg] Mode: container. Allocated dynamic port: 46771
+
+      at Object.start (test/support/disposable-postgres.ts:229:17)
+
+    console.log
+      [result-authority-pg] Starting disposable container: muneral-result-authority-test-3516a320
+
+      at Object.start (test/support/disposable-postgres.ts:234:17)
+
+    console.log
+      [result-authority-pg] Waiting for PostgreSQL to accept connections...
+
+      at Object.start (test/support/disposable-postgres.ts:278:15)
+
+    console.log
+      [result-authority-pg] PostgreSQL is ready.
+
+      at waitForReady (test/support/disposable-postgres.ts:119:15)
+
+    console.log
+      [result-authority-pg] Applying migrations...
+
+      at Object.start (test/support/disposable-postgres.ts:281:15)
+
+    console.log
+      [result-authority-pg]   Applying 20260607103126_init_schema/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [result-authority-pg]   Applying 20260607200000_add_field_tracking/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [result-authority-pg]   Applying 20260715170000_add_muneral_kb_task_changes/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [result-authority-pg]   Applying 20260730000000_add_execution_authority/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [result-authority-pg]   Applying 20260730010000_add_outbox_relay/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [result-authority-pg]   Applying 20260731010000_add_committed_result_refs/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [result-authority-pg]   Applying 20260731090000_add_execution_truncate_guard/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [result-authority-pg]   Applying 20260801093000_harden_result_authority_binding/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [result-authority-pg]   Applying 20260809180000_add_solution_log_head_receipts/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [result-authority-pg]   Applying 20260905120000_add_migration_import_surface/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [result-authority-pg]   Applying 20260905190000_add_status_map_provenance/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [result-authority-pg]   Applying 20260905210000_add_archived_task_status/migration.sql
+
+      at applyMigrations (test/support/disposable-postgres.ts:104:15)
+
+    console.log
+      [result-authority-pg] All migrations applied.
+
+      at Object.start (test/support/disposable-postgres.ts:283:15)
+
+    console.log
+      
+      [result-authority-pg] Removing container: muneral-result-authority-test-3516a320
+
+      at Object.stop (test/support/disposable-postgres.ts:329:15)
+
+    console.log
+      [result-authority-pg] Cleanup evidence: container=muneral-result-authority-test-3516a320 port=46771 database=***localhost:46771/muneral_result_authority_test?schema=public
+
+      at Object.stop (test/support/disposable-postgres.ts:397:15)
+
+    console.log
+      [result-authority-pg] No shared or production database was touched.
+
+      at Object.stop (test/support/disposable-postgres.ts:401:15)
+
+FAIL test/solution-log-head.postgres.spec.ts
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /home/ci-isolated/runner-general/_work/muneral/muneral/node_modules/.pnpm/@nestjs+jwt@12.0.1_@nestjs+common@11.1.26_class-transformer@0.5.1_class-validator@0.15._5db53e259d78d57ecdd0fcfed2a08f8e/node_modules/@nestjs/jwt/dist/index.js:1
+    ({"Object.<anonymous>":function(module,exports,require,__dirname,__filename,jest){import jsonwebtoken from 'jsonwebtoken';
+                                                                                      ^^^^^^
+
+    SyntaxError: Cannot use import statement outside a module
+
+      4 |   BadRequestException,
+      5 | } from '@nestjs/common';
+    > 6 | import { JwtService as NestJwtService } from '@nestjs/jwt';
+        | ^
+      7 | import * as bcrypt from 'bcrypt';
+      8 | import * as crypto from 'crypto';
+      9 | import { v4 as uuidv4 } from 'uuid';
+
+      at Runtime.createScriptFromCode (../../node_modules/.pnpm/jest-runtime@29.7.0/node_modules/jest-runtime/build/index.js:1505:14)
+      at Object.<anonymous> (src/auth/auth.service.ts:6:1)
+      at Object.<anonymous> (src/auth/guards/api-key.guard.ts:8:1)
+      at Object.<anonymous> (src/solution-log-head/solution-log-head.controller.ts:4:1)
+      at Object.<anonymous> (src/solution-log-head/index.ts:6:1)
+      at Object.<anonymous> (test/solution-log-head.postgres.spec.ts:9:1)
+
+PASS test/assembly/assembly.falsification.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "/home/ci-isolated/runner-general/_work/muneral/muneral/apps/api/test/assembly/validate_assembly_fixtures.py", line 61, in canonical_json
+    validate_canonical_value(value)
+  File "/home/ci-isolated/runner-general/_work/muneral/muneral/apps/api/test/assembly/validate_assembly_fixtures.py", line 106, in validate_canonical_value
+    validate_canonical_value(child, depth + 1, budget)
+  File "/home/ci-isolated/runner-general/_work/muneral/muneral/apps/api/test/assembly/validate_assembly_fixtures.py", line 87, in validate_canonical_value
+    raise CanonicalError("floats are outside the canonical domain")
+v.CanonicalError: floats are outside the canonical domain
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "/home/ci-isolated/runner-general/_work/muneral/muneral/apps/api/test/assembly/validate_assembly_fixtures.py", line 64, in canonical_json
+    raise CanonicalError("emitted canonical JSON exceeds byte budget")
+v.CanonicalError: emitted canonical JSON exceeds byte budget
+PASS test/assembly/assembly.parity.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/execution-authority.service-smoke.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+FAIL test/app-module-boot.e2e.spec.ts
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /home/ci-isolated/runner-general/_work/muneral/muneral/node_modules/.pnpm/@nestjs+jwt@12.0.1_@nestjs+common@11.1.26_class-transformer@0.5.1_class-validator@0.15._5db53e259d78d57ecdd0fcfed2a08f8e/node_modules/@nestjs/jwt/dist/index.js:1
+    ({"Object.<anonymous>":function(module,exports,require,__dirname,__filename,jest){import jsonwebtoken from 'jsonwebtoken';
+                                                                                      ^^^^^^
+
+    SyntaxError: Cannot use import statement outside a module
+
+      1 | import { Module, Provider, Logger } from '@nestjs/common';
+    > 2 | import { JwtModule } from '@nestjs/jwt';
+        | ^
+      3 | import { PassportModule } from '@nestjs/passport';
+      4 | import { AuthService } from './auth.service';
+      5 | import { AuthController } from './auth.controller';
+
+      at Runtime.createScriptFromCode (../../node_modules/.pnpm/jest-runtime@29.7.0/node_modules/jest-runtime/build/index.js:1505:14)
+      at Object.<anonymous> (src/auth/auth.module.ts:2:1)
+      at Object.<anonymous> (test/app-module-boot.e2e.spec.ts:22:1)
+
+PASS test/assembly/assembly.credential-policy.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/assembly/assembly.f10.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/assembly/assembly.validatorcli.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ suppress logs { quiet: true }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/assembly/assembly.rereview-regressions.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+FAIL test/tasks.service.spec.ts
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /home/ci-isolated/runner-general/_work/muneral/muneral/node_modules/.pnpm/@nestjs+jwt@12.0.1_@nestjs+common@11.1.26_class-transformer@0.5.1_class-validator@0.15._5db53e259d78d57ecdd0fcfed2a08f8e/node_modules/@nestjs/jwt/dist/index.js:1
+    ({"Object.<anonymous>":function(module,exports,require,__dirname,__filename,jest){import jsonwebtoken from 'jsonwebtoken';
+                                                                                      ^^^^^^
+
+    SyntaxError: Cannot use import statement outside a module
+
+       9 | } from '@nestjs/websockets';
+      10 | import { Server, Socket } from 'socket.io';
+    > 11 | import { JwtService } from '@nestjs/jwt';
+         | ^
+      12 | import { Injectable } from '@nestjs/common';
+      13 |
+      14 | export type KanbanEvent =
+
+      at Runtime.createScriptFromCode (../../node_modules/.pnpm/jest-runtime@29.7.0/node_modules/jest-runtime/build/index.js:1505:14)
+      at Object.<anonymous> (src/ws/kanban.gateway.ts:11:1)
+      at Object.<anonymous> (src/ws/kanban.service.ts:2:1)
+      at Object.<anonymous> (src/tasks/tasks.service.ts:14:1)
+      at Object.<anonymous> (test/tasks.service.spec.ts:3:1)
+
+FAIL test/migration.controller.spec.ts
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /home/ci-isolated/runner-general/_work/muneral/muneral/node_modules/.pnpm/@nestjs+jwt@12.0.1_@nestjs+common@11.1.26_class-transformer@0.5.1_class-validator@0.15._5db53e259d78d57ecdd0fcfed2a08f8e/node_modules/@nestjs/jwt/dist/index.js:1
+    ({"Object.<anonymous>":function(module,exports,require,__dirname,__filename,jest){import jsonwebtoken from 'jsonwebtoken';
+                                                                                      ^^^^^^
+
+    SyntaxError: Cannot use import statement outside a module
+
+      4 |   BadRequestException,
+      5 | } from '@nestjs/common';
+    > 6 | import { JwtService as NestJwtService } from '@nestjs/jwt';
+        | ^
+      7 | import * as bcrypt from 'bcrypt';
+      8 | import * as crypto from 'crypto';
+      9 | import { v4 as uuidv4 } from 'uuid';
+
+      at Runtime.createScriptFromCode (../../node_modules/.pnpm/jest-runtime@29.7.0/node_modules/jest-runtime/build/index.js:1505:14)
+      at Object.<anonymous> (src/auth/auth.service.ts:6:1)
+      at Object.<anonymous> (src/auth/guards/api-key.guard.ts:8:1)
+      at Object.<anonymous> (test/migration.controller.spec.ts:7:1)
+
+PASS test/outbox.relay.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/sync.service.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+FAIL test/auth.service.spec.ts
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /home/ci-isolated/runner-general/_work/muneral/muneral/node_modules/.pnpm/@nestjs+jwt@12.0.1_@nestjs+common@11.1.26_class-transformer@0.5.1_class-validator@0.15._5db53e259d78d57ecdd0fcfed2a08f8e/node_modules/@nestjs/jwt/dist/index.js:1
+    ({"Object.<anonymous>":function(module,exports,require,__dirname,__filename,jest){import jsonwebtoken from 'jsonwebtoken';
+                                                                                      ^^^^^^
+
+    SyntaxError: Cannot use import statement outside a module
+
+      1 | import { Test, TestingModule } from '@nestjs/testing';
+    > 2 | import { JwtService } from '@nestjs/jwt';
+        | ^
+      3 | import { UnauthorizedException, BadRequestException } from '@nestjs/common';
+      4 | import { AuthService } from '../src/auth/auth.service';
+      5 | import { PrismaService } from '../src/prisma/prisma.service';
+
+      at Runtime.createScriptFromCode (../../node_modules/.pnpm/jest-runtime@29.7.0/node_modules/jest-runtime/build/index.js:1505:14)
+      at Object.<anonymous> (test/auth.service.spec.ts:2:1)
+
+PASS test/activity.service.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ suppress logs { quiet: true }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/status-map-rev3.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ suppress logs { quiet: true }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/result-authority.contract.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ suppress logs { quiet: true }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/agent-task-scope.guard.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/assembly/assembly.errors.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/task-field-state.service.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/assembly/assembly.rejectionsites.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+[Nest] 3762435  - 09/13/2026, 9:40:09 AM   ERROR [TaskExecutionRecorderService] execution recording threw for task task-1 (-> in_progress): connection reset
+PASS test/task-execution-recorder.service.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/migration.status.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+FAIL test/solution-log-head.controller.spec.ts
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /home/ci-isolated/runner-general/_work/muneral/muneral/node_modules/.pnpm/@nestjs+jwt@12.0.1_@nestjs+common@11.1.26_class-transformer@0.5.1_class-validator@0.15._5db53e259d78d57ecdd0fcfed2a08f8e/node_modules/@nestjs/jwt/dist/index.js:1
+    ({"Object.<anonymous>":function(module,exports,require,__dirname,__filename,jest){import jsonwebtoken from 'jsonwebtoken';
+                                                                                      ^^^^^^
+
+    SyntaxError: Cannot use import statement outside a module
+
+      4 |   BadRequestException,
+      5 | } from '@nestjs/common';
+    > 6 | import { JwtService as NestJwtService } from '@nestjs/jwt';
+        | ^
+      7 | import * as bcrypt from 'bcrypt';
+      8 | import * as crypto from 'crypto';
+      9 | import { v4 as uuidv4 } from 'uuid';
+
+      at Runtime.createScriptFromCode (../../node_modules/.pnpm/jest-runtime@29.7.0/node_modules/jest-runtime/build/index.js:1505:14)
+      at Object.<anonymous> (src/auth/auth.service.ts:6:1)
+      at Object.<anonymous> (src/auth/guards/api-key.guard.ts:8:1)
+      at Object.<anonymous> (test/solution-log-head.controller.spec.ts:2:1)
+
+FAIL test/solution-log-head.contract.spec.ts
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /home/ci-isolated/runner-general/_work/muneral/muneral/node_modules/.pnpm/@nestjs+jwt@12.0.1_@nestjs+common@11.1.26_class-transformer@0.5.1_class-validator@0.15._5db53e259d78d57ecdd0fcfed2a08f8e/node_modules/@nestjs/jwt/dist/index.js:1
+    ({"Object.<anonymous>":function(module,exports,require,__dirname,__filename,jest){import jsonwebtoken from 'jsonwebtoken';
+                                                                                      ^^^^^^
+
+    SyntaxError: Cannot use import statement outside a module
+
+      4 |   BadRequestException,
+      5 | } from '@nestjs/common';
+    > 6 | import { JwtService as NestJwtService } from '@nestjs/jwt';
+        | ^
+      7 | import * as bcrypt from 'bcrypt';
+      8 | import * as crypto from 'crypto';
+      9 | import { v4 as uuidv4 } from 'uuid';
+
+      at Runtime.createScriptFromCode (../../node_modules/.pnpm/jest-runtime@29.7.0/node_modules/jest-runtime/build/index.js:1505:14)
+      at Object.<anonymous> (src/auth/auth.service.ts:6:1)
+      at Object.<anonymous> (src/auth/guards/api-key.guard.ts:8:1)
+      at Object.<anonymous> (src/solution-log-head/solution-log-head.controller.ts:4:1)
+      at Object.<anonymous> (src/solution-log-head/index.ts:6:1)
+      at Object.<anonymous> (test/solution-log-head.contract.spec.ts:1:1)
+
+FAIL test/jwt-or-api-key.guard.spec.ts
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /home/ci-isolated/runner-general/_work/muneral/muneral/node_modules/.pnpm/@nestjs+jwt@12.0.1_@nestjs+common@11.1.26_class-transformer@0.5.1_class-validator@0.15._5db53e259d78d57ecdd0fcfed2a08f8e/node_modules/@nestjs/jwt/dist/index.js:1
+    ({"Object.<anonymous>":function(module,exports,require,__dirname,__filename,jest){import jsonwebtoken from 'jsonwebtoken';
+                                                                                      ^^^^^^
+
+    SyntaxError: Cannot use import statement outside a module
+
+      4 |   BadRequestException,
+      5 | } from '@nestjs/common';
+    > 6 | import { JwtService as NestJwtService } from '@nestjs/jwt';
+        | ^
+      7 | import * as bcrypt from 'bcrypt';
+      8 | import * as crypto from 'crypto';
+      9 | import { v4 as uuidv4 } from 'uuid';
+
+      at Runtime.createScriptFromCode (../../node_modules/.pnpm/jest-runtime@29.7.0/node_modules/jest-runtime/build/index.js:1505:14)
+      at Object.<anonymous> (src/auth/auth.service.ts:6:1)
+      at Object.<anonymous> (src/auth/guards/api-key.guard.ts:8:1)
+      at Object.<anonymous> (src/auth/guards/jwt-or-api-key.guard.ts:5:1)
+      at Object.<anonymous> (test/jwt-or-api-key.guard.spec.ts:2:1)
+
+[Nest] 3762435  - 09/13/2026, 9:40:09 AM    WARN [TaskExecutionRecorderService] execution recording failed for task task-1 (-> in_progress): issue_initial_attempt: Stale version for task task-1: expected 0, got 3
+PASS test/assembly/assembly.validator.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/rbac.guard.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/task-staleness.service.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/solution-log-head.service.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/execution-authority.service.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/assembly/assembly.boundary.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/assembly/assembly.canonical.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ suppress logs { quiet: true }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/health.controller.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/outbox.migration.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/execution-authority.replay.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/task-state-machine.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/assembly/assembly.instant.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/assembly/assembly.lexical.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ suppress logs { quiet: true }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/assembly/assembly.compiler.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/result-authority.migration.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/assembly/assembly.purity.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/execution-authority.migration.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/execution-authority.evidence-ref.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/assembly/assembly.closedschema.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/execution-authority.canonical-json.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/assembly/assembly.bounds.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/migration.migration.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/execution-authority.reducer.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/assembly/assembly.generator.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/muneral-kb-change-registry.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/assembly/assembly.types.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/execution-authority.types.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/archived-status.migration.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ enable debugging { debug: true }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/solution-log-head.migration.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+PASS test/assembly/assembly.keyorder.spec.ts
+  ● Console
+
+    console.log
+      ◇ injected env (0) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+
+      at _log (../../node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main.js:131:11)
+
+
+Summary of all failing tests
+FAIL test/tasks-agent-scope.e2e.spec.ts
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /home/ci-isolated/runner-general/_work/muneral/muneral/node_modules/.pnpm/@nestjs+jwt@12.0.1_@nestjs+common@11.1.26_class-transformer@0.5.1_class-validator@0.15._5db53e259d78d57ecdd0fcfed2a08f8e/node_modules/@nestjs/jwt/dist/index.js:1
+    ({"Object.<anonymous>":function(module,exports,require,__dirname,__filename,jest){import jsonwebtoken from 'jsonwebtoken';
+                                                                                      ^^^^^^
+
+    SyntaxError: Cannot use import statement outside a module
+
+       9 | } from '@nestjs/websockets';
+      10 | import { Server, Socket } from 'socket.io';
+    > 11 | import { JwtService } from '@nestjs/jwt';
+         | ^
+      12 | import { Injectable } from '@nestjs/common';
+      13 |
+      14 | export type KanbanEvent =
+
+      at Runtime.createScriptFromCode (../../node_modules/.pnpm/jest-runtime@29.7.0/node_modules/jest-runtime/build/index.js:1505:14)
+      at Object.<anonymous> (src/ws/kanban.gateway.ts:11:1)
+      at Object.<anonymous> (src/ws/kanban.service.ts:2:1)
+      at Object.<anonymous> (src/tasks/tasks.service.ts:14:1)
+      at Object.<anonymous> (src/tasks/tasks.module.ts:2:1)
+      at Object.<anonymous> (test/tasks-agent-scope.e2e.spec.ts:22:1)
+
+FAIL test/mutation-evidence.spec.ts (12.451 s)
+  ● Assembly mutation evidence verification › accepts the exact current evidence structure
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 1
+
+      44 |
+      45 |   it('accepts the exact current evidence structure', () => {
+    > 46 |     expect(verify(EVIDENCE).status).toBe(0);
+         |                                     ^
+      47 |   });
+      48 |
+      49 |   // F9 (REPORT-PROJ-RULE0): the evidence document itself must still satisfy
+
+      at Object.<anonymous> (test/mutation-evidence.spec.ts:46:37)
+
+  ● Assembly mutation evidence verification › accepts a node/pnpm record that differs only in patch version
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 1
+
+      65 |     const file = path.join(directory, 'same-major-minor-different-patch.json');
+      66 |     fs.writeFileSync(file, `${JSON.stringify(tampered)}\n`);
+    > 67 |     expect(verify(file).status).toBe(0);
+         |                                 ^
+      68 |   });
+      69 |
+      70 |   // (b) a different major is outside the recorded compatibility range and
+
+      at Object.<anonymous> (test/mutation-evidence.spec.ts:67:33)
+
+  ● Assembly mutation evidence verification › uses a non-self-referential Git snapshot supplement
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+      Object {
+    -   "trackedSnapshotDiffSha256": "77107d6110b729279bf841ae94f55e9f56db4f25b6885dd4de29d628870e93d5",
+    -   "trackedTreeWithoutEvidence": "10b53904164324d0d7c0d45d4365450df664e108",
+    +   "trackedSnapshotDiffSha256": "e1a1dee69aa27ba3ba67e3a4377c6d5e3401da23d4b301d05d94f3a6b5b22000",
+    +   "trackedTreeWithoutEvidence": "a0494cf682e41be5dc9baa5e291038887be0253c",
+      }
+
+      101 |     };
+      102 |     const supplement = harness.gitSupplement();
+    > 103 |     expect(supplement).toEqual(original.supplementalGit);
+          |                        ^
+      104 |     expect(Object.keys(supplement).sort()).toEqual([
+      105 |       'trackedSnapshotDiffSha256',
+      106 |       'trackedTreeWithoutEvidence',
+
+      at Object.<anonymous> (test/mutation-evidence.spec.ts:103:24)
+
+FAIL test/field-changes.e2e.spec.ts
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /home/ci-isolated/runner-general/_work/muneral/muneral/node_modules/.pnpm/@nestjs+jwt@12.0.1_@nestjs+common@11.1.26_class-transformer@0.5.1_class-validator@0.15._5db53e259d78d57ecdd0fcfed2a08f8e/node_modules/@nestjs/jwt/dist/index.js:1
+    ({"Object.<anonymous>":function(module,exports,require,__dirname,__filename,jest){import jsonwebtoken from 'jsonwebtoken';
+                                                                                      ^^^^^^
+
+    SyntaxError: Cannot use import statement outside a module
+
+       9 | } from '@nestjs/websockets';
+      10 | import { Server, Socket } from 'socket.io';
+    > 11 | import { JwtService } from '@nestjs/jwt';
+         | ^
+      12 | import { Injectable } from '@nestjs/common';
+      13 |
+      14 | export type KanbanEvent =
+
+      at Runtime.createScriptFromCode (../../node_modules/.pnpm/jest-runtime@29.7.0/node_modules/jest-runtime/build/index.js:1505:14)
+      at Object.<anonymous> (src/ws/kanban.gateway.ts:11:1)
+      at Object.<anonymous> (src/ws/kanban.service.ts:2:1)
+      at Object.<anonymous> (src/tasks/tasks.service.ts:14:1)
+      at Object.<anonymous> (src/tasks/tasks.module.ts:2:1)
+      at Object.<anonymous> (test/field-changes.e2e.spec.ts:10:1)
+
+FAIL test/solution-log-head.postgres.spec.ts
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /home/ci-isolated/runner-general/_work/muneral/muneral/node_modules/.pnpm/@nestjs+jwt@12.0.1_@nestjs+common@11.1.26_class-transformer@0.5.1_class-validator@0.15._5db53e259d78d57ecdd0fcfed2a08f8e/node_modules/@nestjs/jwt/dist/index.js:1
+    ({"Object.<anonymous>":function(module,exports,require,__dirname,__filename,jest){import jsonwebtoken from 'jsonwebtoken';
+                                                                                      ^^^^^^
+
+    SyntaxError: Cannot use import statement outside a module
+
+      4 |   BadRequestException,
+      5 | } from '@nestjs/common';
+    > 6 | import { JwtService as NestJwtService } from '@nestjs/jwt';
+        | ^
+      7 | import * as bcrypt from 'bcrypt';
+      8 | import * as crypto from 'crypto';
+      9 | import { v4 as uuidv4 } from 'uuid';
+
+      at Runtime.createScriptFromCode (../../node_modules/.pnpm/jest-runtime@29.7.0/node_modules/jest-runtime/build/index.js:1505:14)
+      at Object.<anonymous> (src/auth/auth.service.ts:6:1)
+      at Object.<anonymous> (src/auth/guards/api-key.guard.ts:8:1)
+      at Object.<anonymous> (src/solution-log-head/solution-log-head.controller.ts:4:1)
+      at Object.<anonymous> (src/solution-log-head/index.ts:6:1)
+      at Object.<anonymous> (test/solution-log-head.postgres.spec.ts:9:1)
+
+FAIL test/app-module-boot.e2e.spec.ts
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /home/ci-isolated/runner-general/_work/muneral/muneral/node_modules/.pnpm/@nestjs+jwt@12.0.1_@nestjs+common@11.1.26_class-transformer@0.5.1_class-validator@0.15._5db53e259d78d57ecdd0fcfed2a08f8e/node_modules/@nestjs/jwt/dist/index.js:1
+    ({"Object.<anonymous>":function(module,exports,require,__dirname,__filename,jest){import jsonwebtoken from 'jsonwebtoken';
+                                                                                      ^^^^^^
+
+    SyntaxError: Cannot use import statement outside a module
+
+      1 | import { Module, Provider, Logger } from '@nestjs/common';
+    > 2 | import { JwtModule } from '@nestjs/jwt';
+        | ^
+      3 | import { PassportModule } from '@nestjs/passport';
+      4 | import { AuthService } from './auth.service';
+      5 | import { AuthController } from './auth.controller';
+
+      at Runtime.createScriptFromCode (../../node_modules/.pnpm/jest-runtime@29.7.0/node_modules/jest-runtime/build/index.js:1505:14)
+      at Object.<anonymous> (src/auth/auth.module.ts:2:1)
+      at Object.<anonymous> (test/app-module-boot.e2e.spec.ts:22:1)
+
+FAIL test/tasks.service.spec.ts
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /home/ci-isolated/runner-general/_work/muneral/muneral/node_modules/.pnpm/@nestjs+jwt@12.0.1_@nestjs+common@11.1.26_class-transformer@0.5.1_class-validator@0.15._5db53e259d78d57ecdd0fcfed2a08f8e/node_modules/@nestjs/jwt/dist/index.js:1
+    ({"Object.<anonymous>":function(module,exports,require,__dirname,__filename,jest){import jsonwebtoken from 'jsonwebtoken';
+                                                                                      ^^^^^^
+
+    SyntaxError: Cannot use import statement outside a module
+
+       9 | } from '@nestjs/websockets';
+      10 | import { Server, Socket } from 'socket.io';
+    > 11 | import { JwtService } from '@nestjs/jwt';
+         | ^
+      12 | import { Injectable } from '@nestjs/common';
+      13 |
+      14 | export type KanbanEvent =
+
+      at Runtime.createScriptFromCode (../../node_modules/.pnpm/jest-runtime@29.7.0/node_modules/jest-runtime/build/index.js:1505:14)
+      at Object.<anonymous> (src/ws/kanban.gateway.ts:11:1)
+      at Object.<anonymous> (src/ws/kanban.service.ts:2:1)
+      at Object.<anonymous> (src/tasks/tasks.service.ts:14:1)
+      at Object.<anonymous> (test/tasks.service.spec.ts:3:1)
+
+FAIL test/migration.controller.spec.ts
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /home/ci-isolated/runner-general/_work/muneral/muneral/node_modules/.pnpm/@nestjs+jwt@12.0.1_@nestjs+common@11.1.26_class-transformer@0.5.1_class-validator@0.15._5db53e259d78d57ecdd0fcfed2a08f8e/node_modules/@nestjs/jwt/dist/index.js:1
+    ({"Object.<anonymous>":function(module,exports,require,__dirname,__filename,jest){import jsonwebtoken from 'jsonwebtoken';
+                                                                                      ^^^^^^
+
+    SyntaxError: Cannot use import statement outside a module
+
+      4 |   BadRequestException,
+      5 | } from '@nestjs/common';
+    > 6 | import { JwtService as NestJwtService } from '@nestjs/jwt';
+        | ^
+      7 | import * as bcrypt from 'bcrypt';
+      8 | import * as crypto from 'crypto';
+      9 | import { v4 as uuidv4 } from 'uuid';
+
+      at Runtime.createScriptFromCode (../../node_modules/.pnpm/jest-runtime@29.7.0/node_modules/jest-runtime/build/index.js:1505:14)
+      at Object.<anonymous> (src/auth/auth.service.ts:6:1)
+      at Object.<anonymous> (src/auth/guards/api-key.guard.ts:8:1)
+      at Object.<anonymous> (test/migration.controller.spec.ts:7:1)
+
+FAIL test/auth.service.spec.ts
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /home/ci-isolated/runner-general/_work/muneral/muneral/node_modules/.pnpm/@nestjs+jwt@12.0.1_@nestjs+common@11.1.26_class-transformer@0.5.1_class-validator@0.15._5db53e259d78d57ecdd0fcfed2a08f8e/node_modules/@nestjs/jwt/dist/index.js:1
+    ({"Object.<anonymous>":function(module,exports,require,__dirname,__filename,jest){import jsonwebtoken from 'jsonwebtoken';
+                                                                                      ^^^^^^
+
+    SyntaxError: Cannot use import statement outside a module
+
+      1 | import { Test, TestingModule } from '@nestjs/testing';
+    > 2 | import { JwtService } from '@nestjs/jwt';
+        | ^
+      3 | import { UnauthorizedException, BadRequestException } from '@nestjs/common';
+      4 | import { AuthService } from '../src/auth/auth.service';
+      5 | import { PrismaService } from '../src/prisma/prisma.service';
+
+      at Runtime.createScriptFromCode (../../node_modules/.pnpm/jest-runtime@29.7.0/node_modules/jest-runtime/build/index.js:1505:14)
+      at Object.<anonymous> (test/auth.service.spec.ts:2:1)
+
+FAIL test/solution-log-head.controller.spec.ts
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /home/ci-isolated/runner-general/_work/muneral/muneral/node_modules/.pnpm/@nestjs+jwt@12.0.1_@nestjs+common@11.1.26_class-transformer@0.5.1_class-validator@0.15._5db53e259d78d57ecdd0fcfed2a08f8e/node_modules/@nestjs/jwt/dist/index.js:1
+    ({"Object.<anonymous>":function(module,exports,require,__dirname,__filename,jest){import jsonwebtoken from 'jsonwebtoken';
+                                                                                      ^^^^^^
+
+    SyntaxError: Cannot use import statement outside a module
+
+      4 |   BadRequestException,
+      5 | } from '@nestjs/common';
+    > 6 | import { JwtService as NestJwtService } from '@nestjs/jwt';
+        | ^
+      7 | import * as bcrypt from 'bcrypt';
+      8 | import * as crypto from 'crypto';
+      9 | import { v4 as uuidv4 } from 'uuid';
+
+      at Runtime.createScriptFromCode (../../node_modules/.pnpm/jest-runtime@29.7.0/node_modules/jest-runtime/build/index.js:1505:14)
+      at Object.<anonymous> (src/auth/auth.service.ts:6:1)
+      at Object.<anonymous> (src/auth/guards/api-key.guard.ts:8:1)
+      at Object.<anonymous> (test/solution-log-head.controller.spec.ts:2:1)
+
+FAIL test/solution-log-head.contract.spec.ts
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /home/ci-isolated/runner-general/_work/muneral/muneral/node_modules/.pnpm/@nestjs+jwt@12.0.1_@nestjs+common@11.1.26_class-transformer@0.5.1_class-validator@0.15._5db53e259d78d57ecdd0fcfed2a08f8e/node_modules/@nestjs/jwt/dist/index.js:1
+    ({"Object.<anonymous>":function(module,exports,require,__dirname,__filename,jest){import jsonwebtoken from 'jsonwebtoken';
+                                                                                      ^^^^^^
+
+    SyntaxError: Cannot use import statement outside a module
+
+      4 |   BadRequestException,
+      5 | } from '@nestjs/common';
+    > 6 | import { JwtService as NestJwtService } from '@nestjs/jwt';
+        | ^
+      7 | import * as bcrypt from 'bcrypt';
+      8 | import * as crypto from 'crypto';
+      9 | import { v4 as uuidv4 } from 'uuid';
+
+      at Runtime.createScriptFromCode (../../node_modules/.pnpm/jest-runtime@29.7.0/node_modules/jest-runtime/build/index.js:1505:14)
+      at Object.<anonymous> (src/auth/auth.service.ts:6:1)
+      at Object.<anonymous> (src/auth/guards/api-key.guard.ts:8:1)
+      at Object.<anonymous> (src/solution-log-head/solution-log-head.controller.ts:4:1)
+      at Object.<anonymous> (src/solution-log-head/index.ts:6:1)
+      at Object.<anonymous> (test/solution-log-head.contract.spec.ts:1:1)
+
+FAIL test/jwt-or-api-key.guard.spec.ts
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /home/ci-isolated/runner-general/_work/muneral/muneral/node_modules/.pnpm/@nestjs+jwt@12.0.1_@nestjs+common@11.1.26_class-transformer@0.5.1_class-validator@0.15._5db53e259d78d57ecdd0fcfed2a08f8e/node_modules/@nestjs/jwt/dist/index.js:1
+    ({"Object.<anonymous>":function(module,exports,require,__dirname,__filename,jest){import jsonwebtoken from 'jsonwebtoken';
+                                                                                      ^^^^^^
+
+    SyntaxError: Cannot use import statement outside a module
+
+      4 |   BadRequestException,
+      5 | } from '@nestjs/common';
+    > 6 | import { JwtService as NestJwtService } from '@nestjs/jwt';
+        | ^
+      7 | import * as bcrypt from 'bcrypt';
+      8 | import * as crypto from 'crypto';
+      9 | import { v4 as uuidv4 } from 'uuid';
+
+      at Runtime.createScriptFromCode (../../node_modules/.pnpm/jest-runtime@29.7.0/node_modules/jest-runtime/build/index.js:1505:14)
+      at Object.<anonymous> (src/auth/auth.service.ts:6:1)
+      at Object.<anonymous> (src/auth/guards/api-key.guard.ts:8:1)
+      at Object.<anonymous> (src/auth/guards/jwt-or-api-key.guard.ts:5:1)
+      at Object.<anonymous> (test/jwt-or-api-key.guard.spec.ts:2:1)
+
+
+Test Suites: 11 failed, 52 passed, 63 total
+Tests:       3 failed, 1236 passed, 1239 total
+Snapshots:   0 total
+Time:        81.36 s, estimated 128 s
+Ran all test suites.
+[ELIFECYCLE] Test failed. See above for more details.
+
+ Tasks:    2 successful, 3 total
+Cached:    1 cached, 3 total
+  Time:    1m22.172s 
+Failed:    @muneral/api#test
+
+ ERROR  run failed: command  exited (1)
+[ELIFECYCLE] Test failed. See above for more details.
+##[error]Process completed with exit code 1.
+Post job cleanup.
+[command]/usr/bin/git version
+git version 2.43.0
+Copying '/home/ci-isolated/.gitconfig' to '/home/ci-isolated/runner-general/_work/_temp/c9f00a03-f016-4f74-8aee-88ee88d2ed3a/.gitconfig'
+Temporarily overriding HOME='/home/ci-isolated/runner-general/_work/_temp/c9f00a03-f016-4f74-8aee-88ee88d2ed3a' before making global git config changes
+Adding repository directory to the temporary git global config as a safe directory
+[command]/usr/bin/git config --global --add safe.directory /home/ci-isolated/runner-general/_work/muneral/muneral
+Removing SSH command configuration
+[command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+[command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Removing HTTP extra header
+[command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+[command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Removing includeIf entries pointing to credentials config files
+[command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+includeif.gitdir:/home/ci-isolated/runner-general/_work/muneral/muneral/.git.path
+includeif.gitdir:/home/ci-isolated/runner-general/_work/muneral/muneral/.git/worktrees/*.path
+includeif.gitdir:/github/workspace/.git.path
+includeif.gitdir:/github/workspace/.git/worktrees/*.path
+[command]/usr/bin/git config --local --get-all includeif.gitdir:/home/ci-isolated/runner-general/_work/muneral/muneral/.git.path
+/home/ci-isolated/runner-general/_work/_temp/git-credentials-08583c47-6546-46b7-b42c-9a52e2e00628.config
+[command]/usr/bin/git config --local --unset includeif.gitdir:/home/ci-isolated/runner-general/_work/muneral/muneral/.git.path \/home\/ci\-isolated\/runner\-general\/_work\/_temp\/git\-credentials\-08583c47\-6546\-46b7\-b42c\-9a52e2e00628\.config
+[command]/usr/bin/git config --local --get-all includeif.gitdir:/home/ci-isolated/runner-general/_work/muneral/muneral/.git/worktrees/*.path
+/home/ci-isolated/runner-general/_work/_temp/git-credentials-08583c47-6546-46b7-b42c-9a52e2e00628.config
+[command]/usr/bin/git config --local --unset includeif.gitdir:/home/ci-isolated/runner-general/_work/muneral/muneral/.git/worktrees/*.path \/home\/ci\-isolated\/runner\-general\/_work\/_temp\/git\-credentials\-08583c47\-6546\-46b7\-b42c\-9a52e2e00628\.config
+[command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+/github/runner_temp/git-credentials-08583c47-6546-46b7-b42c-9a52e2e00628.config
+[command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path \/github\/runner_temp\/git\-credentials\-08583c47\-6546\-46b7\-b42c\-9a52e2e00628\.config
+[command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+/github/runner_temp/git-credentials-08583c47-6546-46b7-b42c-9a52e2e00628.config
+[command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path \/github\/runner_temp\/git\-credentials\-08583c47\-6546\-46b7\-b42c\-9a52e2e00628\.config
+[command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Removing credentials config '/home/ci-isolated/runner-general/_work/_temp/git-credentials-08583c47-6546-46b7-b42c-9a52e2e00628.config'
+Print service container logs: 3b4f0b586abe43a18ddd1f368f934569_postgres16_540e3e
+##[command]/usr/bin/docker logs --details bcf972ac992d671c29d33a73a6ac6bbb16d433b4dd84d1c3afb2a05a998e2b7d
+ initdb: warning: enabling "trust" authentication for local connections
+ The files belonging to this database system will be owned by user "postgres".
+ This user must also own the server process.
+ 
+ The database cluster will be initialized with locale "en_US.utf8".
+ The default database encoding has accordingly been set to "UTF8".
+ The default text search configuration will be set to "english".
+ 
+ Data page checksums are disabled.
+ 
+ fixing permissions on existing directory /var/lib/postgresql/data ... ok
+ creating subdirectories ... ok
+ selecting dynamic shared memory implementation ... posix
+ selecting default max_connections ... 100
+ selecting default shared_buffers ... 128MB
+ selecting default time zone ... Etc/UTC
+ creating configuration files ... ok
+ running bootstrap script ... ok
+ initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+ 2026-09-13 09:37:50.126 UTC [1] LOG:  starting PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+ 2026-09-13 09:37:50.126 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+ 2026-09-13 09:37:50.126 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+ 2026-09-13 09:37:50.130 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+ 2026-09-13 09:37:50.134 UTC [64] LOG:  database system was shut down at 2026-09-13 09:37:49 UTC
+ 2026-09-13 09:37:50.138 UTC [1] LOG:  database system is ready to accept connections
+ 2026-09-13 09:37:59.076 UTC [75] FATAL:  role "root" does not exist
+ 2026-09-13 09:38:09.140 UTC [83] FATAL:  role "root" does not exist
+ 2026-09-13 09:38:19.211 UTC [91] FATAL:  role "root" does not exist
+ 2026-09-13 09:38:29.273 UTC [100] FATAL:  role "root" does not exist
+ 2026-09-13 09:38:39.345 UTC [108] FATAL:  role "root" does not exist
+ 2026-09-13 09:38:49.412 UTC [119] FATAL:  role "root" does not exist
+ 2026-09-13 09:38:59.482 UTC [128] FATAL:  role "root" does not exist
+ 2026-09-13 09:39:09.554 UTC [135] FATAL:  role "root" does not exist
+ 2026-09-13 09:39:19.619 UTC [143] FATAL:  role "root" does not exist
+ 2026-09-13 09:39:29.683 UTC [152] FATAL:  role "root" does not exist
+ 2026-09-13 09:39:39.748 UTC [160] FATAL:  role "root" does not exist
+ 2026-09-13 09:39:49.824 UTC [169] FATAL:  role "root" does not exist
+ 2026-09-13 09:39:59.958 UTC [177] FATAL:  role "root" does not exist
+ 2026-09-13 09:40:07.242 UTC [179] ERROR:  insert or update on table "task_execution_state" violates foreign key constraint "task_execution_state_current_attempt_fkey"
+ 2026-09-13 09:40:07.242 UTC [179] DETAIL:  Key (current_attempt_id, task_id)=(6c0fca1c-992f-4baf-ae7f-9866406498db, d9ee9245-a129-450d-9201-bb503d8aa9b2) is not present in table "task_execution_attempts".
+ 2026-09-13 09:40:07.511 UTC [180] ERROR:  MUN0020 injected crash after journal insert
+ 2026-09-13 09:40:07.511 UTC [180] CONTEXT:  PL/pgSQL function public.mun0020_rollback_test() line 3 at RAISE
+ 2026-09-13 09:40:07.511 UTC [180] STATEMENT:  INSERT INTO "public"."task_execution_transitions" ("id","task_id","attempt_id","aggregate_version","event_type","idempotency_key","command_digest","transition_payload","committed_result","evidence_refs","causation_id","correlation_id","recorded_at") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING "public"."task_execution_transitions"."id", "public"."task_execution_transitions"."task_id", "public"."task_execution_transitions"."attempt_id", "public"."task_execution_transitions"."aggregate_version", "public"."task_execution_transitions"."event_type", "public"."task_execution_transitions"."idempotency_key", "public"."task_execution_transitions"."command_digest", "public"."task_execution_transitions"."transition_payload", "public"."task_execution_transitions"."committed_result", "public"."task_execution_transitions"."evidence_refs", "public"."task_execution_transitions"."causation_id", "public"."task_execution_transitions"."correlation_id", "public"."task_execution_transitions"."recorded_at"
+ 2026-09-13 09:40:07.621 UTC [180] ERROR:  duplicate key value violates unique constraint "task_execution_attempts_pkey"
+ 2026-09-13 09:40:07.621 UTC [180] DETAIL:  Key (attempt_id)=(855cefef-ab42-4c4e-8ff5-2a59dd948eb5) already exists.
+ 2026-09-13 09:40:07.621 UTC [180] STATEMENT:  INSERT INTO "public"."task_execution_attempts" ("attempt_id","task_id","ordinal","status","issued_at","started_at","completed_at") VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING "public"."task_execution_attempts"."attempt_id", "public"."task_execution_attempts"."task_id", "public"."task_execution_attempts"."ordinal", "public"."task_execution_attempts"."status", "public"."task_execution_attempts"."issued_at", "public"."task_execution_attempts"."started_at", "public"."task_execution_attempts"."completed_at"
+ 2026-09-13 09:40:07.666 UTC [186] ERROR:  duplicate key value violates unique constraint "task_execution_state_pkey"
+ 2026-09-13 09:40:07.666 UTC [186] DETAIL:  Key (task_id)=(ec6faeac-6543-475c-8138-279e9bf8cf13) already exists.
+ 2026-09-13 09:40:07.666 UTC [186] STATEMENT:  INSERT INTO "public"."task_execution_state" ("task_id","aggregate_version","current_attempt_id","retry_budget","retry_count","retry_backoff_ms","retry_eligible_at") VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING "public"."task_execution_state"."task_id", "public"."task_execution_state"."aggregate_version", "public"."task_execution_state"."current_attempt_id", "public"."task_execution_state"."retry_budget", "public"."task_execution_state"."retry_count", "public"."task_execution_state"."retry_backoff_ms", "public"."task_execution_state"."retry_eligible_at"
+ 2026-09-13 09:40:10.023 UTC [193] FATAL:  role "root" does not exist
+ performing post-bootstrap initialization ... ok
+ syncing data to disk ... ok
+ 
+ 
+ Success. You can now start the database server using:
+ 
+     pg_ctl -D /var/lib/postgresql/data -l logfile start
+ 
+ waiting for server to start....2026-09-13 09:37:49.690 UTC [48] LOG:  starting PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+ 2026-09-13 09:37:49.691 UTC [48] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+ 2026-09-13 09:37:49.699 UTC [51] LOG:  database system was shut down at 2026-09-13 09:37:49 UTC
+ 2026-09-13 09:37:49.704 UTC [48] LOG:  database system is ready to accept connections
+  done
+ server started
+ CREATE DATABASE
+ 
+ 
+ /usr/local/bin/docker-entrypoint.sh: ignoring /docker-entrypoint-initdb.d/*
+ 
+ waiting for server to shut down....2026-09-13 09:37:49.901 UTC [48] LOG:  received fast shutdown request
+ 2026-09-13 09:37:49.904 UTC [48] LOG:  aborting any active transactions
+ 2026-09-13 09:37:49.905 UTC [48] LOG:  background worker "logical replication launcher" (PID 54) exited with exit code 1
+ 2026-09-13 09:37:49.906 UTC [49] LOG:  shutting down
+ 2026-09-13 09:37:49.908 UTC [49] LOG:  checkpoint starting: shutdown immediate
+ 2026-09-13 09:37:50.002 UTC [49] LOG:  checkpoint complete: wrote 926 buffers (5.7%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.015 s, sync=0.071 s, total=0.097 s; sync files=301, longest=0.002 s, average=0.001 s; distance=4273 kB, estimate=4273 kB; lsn=0/191F0E8, redo lsn=0/191F0E8
+ 2026-09-13 09:37:50.006 UTC [48] LOG:  database system is shut down
+  done
+ server stopped
+ 
+ PostgreSQL init process complete; ready for start up.
+ 
+Stop and remove container: 3b4f0b586abe43a18ddd1f368f934569_postgres16_540e3e
+##[command]/usr/bin/docker rm --force bcf972ac992d671c29d33a73a6ac6bbb16d433b4dd84d1c3afb2a05a998e2b7d
+bcf972ac992d671c29d33a73a6ac6bbb16d433b4dd84d1c3afb2a05a998e2b7d
+Remove container network: github_network_9ccd5fd81ebc4187bdbf5b963a4d0262
+##[command]/usr/bin/docker network rm github_network_9ccd5fd81ebc4187bdbf5b963a4d0262
+github_network_9ccd5fd81ebc4187bdbf5b963a4d0262
+Cleaning up orphan processes

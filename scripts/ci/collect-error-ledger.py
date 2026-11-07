@@ -1,18 +1,21 @@
 #!/usr/bin/env python3
-"""Build ErrorLedger/v1 from CI step outcomes + report files (BATCH-004).
+"""Build ErrorLedger/v1 from CI step outcomes + report files.
 
-BATCH-005 owns richer clustering (C01/C02/C03). This script is the explicit seam:
-it records step outcomes, attaches report file digests when present, optionally
-appends a step summary file, and exits non-zero when any listed check step failed.
+BATCH-004 owns the continue-on-error + reports + collect job wiring in ci.yml.
+BATCH-005 owns clustering: this script records step outcomes, then shells out to
+`scripts/ci/error-ledger.mjs` to fill `clusters` over reports/ (+ optional
+graph-admission-result.json and raw --log inputs).
 
-Inputs are files/CLI flags only (no process-environment config keys) so the
-graph v-config-schema verifier does not see undeclared GITHUB_* / STEP_* keys.
+Deploy-on-main is never modified here. Inputs are files/CLI flags only (no
+process-environment config keys) so the graph v-config-schema verifier does not
+see undeclared GITHUB_* / STEP_* keys.
 """
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
+import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -52,12 +55,51 @@ def parse_step_outcomes(raw: str) -> list[dict]:
     return steps
 
 
+def run_cluster_collector(
+    *,
+    reports_dir: Path,
+    out_json: Path,
+    out_md: Path,
+    graph_admission: Path,
+    extra_logs: list[Path],
+    repo_root: Path,
+) -> dict:
+    """Invoke error-ledger.mjs; return parsed ledger (clusters + summary)."""
+    script = repo_root / "scripts" / "ci" / "error-ledger.mjs"
+    cmd = [
+        "node",
+        str(script),
+        "--reports-dir",
+        str(reports_dir),
+        "--out",
+        str(out_json),
+        "--md",
+        str(out_md),
+    ]
+    if graph_admission.is_file():
+        cmd.extend(["--graph-admission", str(graph_admission)])
+    for log in extra_logs:
+        if log.is_file():
+            cmd.extend(["--log", str(log)])
+    receipts = repo_root / "receipts" / "graph"
+    if receipts.is_dir():
+        cmd.extend(["--receipts-dir", str(receipts)])
+    proc = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True)
+    if proc.returncode != 0:
+        sys.stderr.write(proc.stdout or "")
+        sys.stderr.write(proc.stderr or "")
+        raise SystemExit(f"error-ledger.mjs failed with rc={proc.returncode}")
+    if proc.stdout:
+        sys.stdout.write(proc.stdout)
+    return json.loads(out_json.read_text(encoding="utf-8"))
+
+
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Build ErrorLedger/v1 (BATCH-004 stub)")
+    parser = argparse.ArgumentParser(description="Build ErrorLedger/v1 (BATCH-004 collect + BATCH-005 clusters)")
     parser.add_argument(
         "--step-outcomes-file",
-        required=True,
-        help="Text file of id=outcome lines for check steps",
+        default="",
+        help="Text file of id=outcome lines for check steps (optional for local cluster-only runs)",
     )
     parser.add_argument(
         "--run-meta-file",
@@ -74,18 +116,47 @@ def main(argv: list[str] | None = None) -> int:
         default="reports/error-ledger.json",
         help="Output ErrorLedger path",
     )
+    parser.add_argument(
+        "--md",
+        default="reports/error-ledger.md",
+        help="Output ErrorLedger markdown path",
+    )
+    parser.add_argument(
+        "--reports-dir",
+        default="reports",
+        help="BATCH-004 reports directory",
+    )
+    parser.add_argument(
+        "--graph-admission",
+        default="graph-admission-result.json",
+        help="Optional graph-admission-result.json",
+    )
+    parser.add_argument(
+        "--log",
+        action="append",
+        default=[],
+        help="Optional raw CI log (repeatable)",
+    )
+    parser.add_argument(
+        "--repo-root",
+        default=".",
+        help="Repository root (default: cwd)",
+    )
     args = parser.parse_args(argv)
 
-    reports_dir = Path("reports")
+    repo_root = Path(args.repo_root).resolve()
+    reports_dir = (repo_root / args.reports_dir).resolve()
     reports_dir.mkdir(parents=True, exist_ok=True)
 
-    step_outcomes_raw = Path(args.step_outcomes_file).read_text(encoding="utf-8")
-    steps = parse_step_outcomes(step_outcomes_raw)
+    steps: list[dict] = []
+    if args.step_outcomes_file:
+        step_outcomes_raw = Path(args.step_outcomes_file).read_text(encoding="utf-8")
+        steps = parse_step_outcomes(step_outcomes_raw)
     failed_steps = [s for s in steps if s["outcome"] == "failure"]
 
     reports = []
     for rel in REPORT_FILES:
-        path = Path(rel)
+        path = repo_root / rel
         digest = sha256_file(path)
         reports.append(
             {
@@ -107,18 +178,32 @@ def main(argv: list[str] | None = None) -> int:
             except json.JSONDecodeError:
                 run_meta = {"parse_error": "run-meta-file is not valid JSON"}
 
+    out_path = (repo_root / args.out).resolve()
+    md_path = (repo_root / args.md).resolve()
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    clustered = run_cluster_collector(
+        reports_dir=reports_dir,
+        out_json=out_path,
+        out_md=md_path,
+        graph_admission=(repo_root / args.graph_admission).resolve(),
+        extra_logs=[(repo_root / p).resolve() for p in args.log],
+        repo_root=repo_root,
+    )
+
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     ledger = {
         "schema": "ErrorLedger/v1",
-        "captured_at_utc": now,
+        "captured_at_utc": clustered.get("captured_at_utc") or now,
         "run": run_meta,
         "steps": steps,
         "reports": reports,
-        "clusters": [],
+        "clusters": clustered.get("clusters") or [],
         "collector": {
-            "status": "stub",
-            "seam_for": "BATCH-005",
-            "note": "Clusters left empty; BATCH-005 replaces stub clustering over the same reports/ + steps.",
+            "status": "active",
+            "seam_for": "BATCH-004+BATCH-005",
+            "note": "Step outcomes from collect-error-ledger.py; clusters from error-ledger.mjs.",
+            "cluster_collector": clustered.get("collector"),
         },
         "summary": {
             "check_steps": len(steps),
@@ -126,20 +211,38 @@ def main(argv: list[str] | None = None) -> int:
             "failed_step_ids": [s["id"] for s in failed_steps],
             "reports_present": sum(1 for r in reports if r["present"]),
             "reports_expected": len(REPORT_FILES),
+            "cluster_count": len(clustered.get("clusters") or []),
+            "by_class": (clustered.get("summary") or {}).get("by_class"),
         },
     }
 
-    out_path = Path(args.out)
-    out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(ledger, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-
-    lines = [
-        "## ErrorLedger/v1 (BATCH-004 stub)",
+    # Re-render md is already written by mjs; append step summary section
+    md_extra = [
+        "",
+        "## Collect step outcomes",
         "",
         f"- failed check steps: **{len(failed_steps)}** / {len(steps)}",
         f"- reports present: **{ledger['summary']['reports_present']}** / {ledger['summary']['reports_expected']}",
+        f"- clusters: **{ledger['summary']['cluster_count']}**",
+        "",
+    ]
+    if failed_steps:
+        md_extra.append("### Failed steps")
+        for step in failed_steps:
+            md_extra.append(f"- `{step['id']}` → `{step['outcome']}`")
+        md_extra.append("")
+    with md_path.open("a", encoding="utf-8") as fh:
+        fh.write("\n".join(md_extra) + "\n")
+
+    lines = [
+        "## ErrorLedger/v1",
+        "",
+        f"- failed check steps: **{len(failed_steps)}** / {len(steps)}",
+        f"- reports present: **{ledger['summary']['reports_present']}** / {ledger['summary']['reports_expected']}",
+        f"- clusters: **{ledger['summary']['cluster_count']}**",
         f"- artifact path: `{out_path.as_posix()}`",
-        f"- collector: stub seam for `{ledger['collector']['seam_for']}`",
+        f"- collector: active seam BATCH-004+BATCH-005",
         "",
     ]
     if failed_steps:
@@ -147,10 +250,6 @@ def main(argv: list[str] | None = None) -> int:
         for step in failed_steps:
             lines.append(f"- `{step['id']}` → `{step['outcome']}`")
         lines.append("")
-    lines.append("### Reports")
-    for report in reports:
-        mark = "present" if report["present"] else "missing"
-        lines.append(f"- `{report['path']}` — {mark}")
     summary_text = "\n".join(lines) + "\n"
     if args.summary_file:
         with open(args.summary_file, "a", encoding="utf-8") as fh:
