@@ -123,25 +123,32 @@ describe('AuditLog exact UTC activity time', () => {
     expect(writeText).toHaveBeenCalledWith('utc-row-actor');
   });
 
-  it('keeps the exact-UTC toggle after loaded entry disclosures in document order', () => {
-    const longBody = `Start\n${'detail '.repeat(180)}End`;
-    ready(taskA, 1, [{
-      id: 'long-comment',
-      taskId: taskA,
-      actorId: 'long-comment-actor',
-      actorName: 'Writer',
-      actorType: 'human',
-      action: 'comment',
-      payload: { body: longBody },
-      createdAt: '2026-10-29T11:30:00.000Z',
-    }], 1);
+  it('keeps exact-UTC opt-in independent of activity and actor filters without extra fetches', () => {
+    ready(taskA, 1, [
+      entry('status-row', taskA, '2026-10-29T11:00:00Z', 'task:status_changed'),
+      entry('comment-row', taskA, '2026-10-29T11:15:00Z'),
+    ], 2);
 
     render(<AuditLog taskId={taskA} />);
-    const summary = screen.getByText('Read full comment');
     const toggle = screen.getByRole('checkbox', { name: 'Show exact UTC timestamps' });
-    expect(summary.compareDocumentPosition(toggle) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(toggle).not.toBeChecked();
-    expect(screen.getByText('30m ago')).toBeInTheDocument();
+    const queryKeysBefore = [...state.queryKeys];
+
+    fireEvent.change(screen.getByRole('combobox', { name: 'Activity filter' }), {
+      target: { value: 'status_changes' },
+    });
+    fireEvent.change(screen.getByRole('combobox', { name: 'Actor filter' }), {
+      target: { value: 'agents' },
+    });
+    fireEvent.click(toggle);
+
+    expect(screen.getByRole('checkbox', { name: 'Show exact UTC timestamps' })).toBeChecked();
+    expect(screen.getByRole('combobox', { name: 'Activity filter' })).toHaveValue('status_changes');
+    expect(screen.getByRole('combobox', { name: 'Actor filter' })).toHaveValue('agents');
+    expect(screen.getByText('2026-10-29T11:00:00.000Z')).toBeInTheDocument();
+    expect(screen.queryByText('comment-row')).not.toBeInTheDocument();
+    expect(state.queryKeys).toEqual(queryKeysBefore);
+    expect(state.refetch).not.toHaveBeenCalled();
   });
 
   it('shows a generic message for invalid and zone-less input without reflecting raw values', () => {
