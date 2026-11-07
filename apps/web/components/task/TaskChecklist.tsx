@@ -22,6 +22,7 @@ interface ChecklistItemsProps {
   onHideCompletedChange: (hideCompleted: boolean) => void;
   onShowCompletedOnlyChange: (showCompletedOnly: boolean) => void;
   onShowAll: () => void;
+  onResetFilters: () => void;
   onSearchQueryChange: (searchQuery: string) => void;
 }
 
@@ -37,6 +38,7 @@ function ChecklistItems({
   onHideCompletedChange,
   onShowCompletedOnlyChange,
   onShowAll,
+  onResetFilters,
   onSearchQueryChange,
 }: ChecklistItemsProps) {
   if (!expanded) return null;
@@ -51,6 +53,8 @@ function ChecklistItems({
     item.label.toLowerCase().includes(normalizedSearchQuery),
   );
   const hasSearch = normalizedSearchQuery.length > 0;
+  const filtersAtDefault =
+    searchQuery.length === 0 && !hideCompleted && !showCompletedOnly;
   const searchId = `task-checklist-search-${taskId}`;
   const copyBatchKey = JSON.stringify([
     taskId,
@@ -106,6 +110,15 @@ function ChecklistItems({
             disabled={searchQuery.length === 0}
           >
             Clear search
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onResetFilters}
+            disabled={filtersAtDefault}
+          >
+            Reset checklist filters
           </Button>
         </div>
         <p className="text-xs text-muted-foreground" aria-live="polite">
@@ -381,6 +394,12 @@ export function TaskChecklist({ taskId }: TaskChecklistProps) {
           showCompletedOnly: false,
           searchQuery: current.taskId === taskId ? current.searchQuery : '',
         }))}
+        onResetFilters={() => setFilterState({
+          taskId,
+          hideCompleted: false,
+          showCompletedOnly: false,
+          searchQuery: '',
+        })}
         onSearchQueryChange={(nextSearchQuery) => setFilterState((current) => ({
           taskId,
           hideCompleted: current.taskId === taskId && current.hideCompleted,
