@@ -184,12 +184,15 @@ export function TaskGitRefs({ taskId }: { taskId: string }) {
 function TaskGitRefsForTask({ taskId }: { taskId: string }) {
   const [selectedKind, setSelectedKind] = useState<GitReferenceKind>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [availableLinksOnly, setAvailableLinksOnly] = useState(false);
   const kindSelectId = useId();
   const searchInputId = useId();
+  const availableOnlyId = `${kindSelectId}-available-only`;
   const { data: refs, dataUpdatedAt, isLoading, isError, isFetching, refetch } = useTaskGitRefs(taskId);
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
   const filteredRefs = (refs ?? []).filter((ref) => {
     if (selectedKind !== 'all' && ref.type !== selectedKind) return false;
+    if (availableLinksOnly && !safeRepositoryUrl(ref.url)) return false;
     if (!normalizedSearchQuery) return true;
 
     if (!safeRepositoryUrl(ref.url)) {
@@ -207,6 +210,7 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
     taskId,
     selectedKind,
     searchQuery,
+    availableLinksOnly,
     (refs ?? []).map((ref) => [ref.id, ref.type, ref.ref, ref.url]),
   ]);
   const availableReferencesKey = JSON.stringify([
@@ -295,6 +299,15 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
             aria-keyshortcuts="Escape"
             className="min-w-0 rounded border bg-background px-2 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
+          <label htmlFor={availableOnlyId} className="inline-flex items-center gap-2 text-sm">
+            <input
+              id={availableOnlyId}
+              type="checkbox"
+              checked={availableLinksOnly}
+              onChange={(event) => setAvailableLinksOnly(event.target.checked)}
+            />
+            Show available links only
+          </label>
           {searchQuery !== '' && (
             <Button type="button" variant="outline" size="sm" onClick={() => setSearchQuery('')}>
               Clear search
@@ -312,6 +325,7 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
             {searchQuery !== ''
               ? 'Clear search or choose All references to show more.'
               : 'Choose All references to show more.'}
+            {availableLinksOnly && ' Turn off Show available links only to include unavailable references.'}
           </p>
         ) : (
           <ul className="space-y-2">
