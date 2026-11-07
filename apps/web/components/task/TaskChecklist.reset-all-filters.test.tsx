@@ -285,8 +285,8 @@ describe('reset all loaded checklist filters', () => {
           taskId,
           label: 'Draft agenda',
           checked: true,
-          position: 0,
-        } as ChecklistItem,
+          order: 0,
+        } satisfies ChecklistItem,
       });
       await pendingPatch.promise;
     });
