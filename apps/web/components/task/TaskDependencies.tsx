@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { ArrowRight, Copy, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,8 @@ import { getTaskStatusLabel } from '@/lib/task-status-labels';
 interface TaskDependenciesProps {
   taskId: string;
 }
+
+type DependencyDirectionFilter = 'all' | 'incoming' | 'outgoing';
 
 const typeLabels: Record<string, { incoming: string; outgoing: string; className: string }> = {
   depends_on: { incoming: 'Required by', outgoing: 'Depends on', className: 'text-blue-600' },
@@ -60,9 +62,18 @@ function CopyTaskIdButton({ taskId }: { taskId: string }) {
 }
 
 export function TaskDependencies({ taskId }: TaskDependenciesProps) {
+  return <TaskDependenciesForTask key={taskId} taskId={taskId} />;
+}
+
+function TaskDependenciesForTask({ taskId }: TaskDependenciesProps) {
   const [retryingTaskId, setRetryingTaskId] = useState<string | null>(null);
+  const [selectedDirection, setSelectedDirection] = useState<DependencyDirectionFilter>('all');
+  const directionSelectId = useId();
   const { data: deps, isPending, isError, isFetching, refetch } = useDependencyGraph(taskId);
   const isRetrying = retryingTaskId === taskId;
+  const visibleDeps = selectedDirection === 'all'
+    ? deps ?? []
+    : (deps ?? []).filter((dep) => dep.direction === selectedDirection);
 
   const retryDependencies = () => {
     if (isFetching || isRetrying) return;
@@ -105,31 +116,56 @@ export function TaskDependencies({ taskId }: TaskDependenciesProps) {
         Dependencies
       </h4>
 
-      <ul className="space-y-2">
-        {deps.map((dep) => {
-          const config = typeLabels[dep.type];
-          const label = config?.[dep.direction] ?? dep.type;
-          const statusLabel = getTaskStatusLabel(dep.otherTaskStatus);
-          const counterpartTitle = dep.otherTaskTitleWithheld === true ? null : dep.otherTaskTitle;
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <label htmlFor={directionSelectId} className="text-sm">
+          Dependency direction
+        </label>
+        <select
+          id={directionSelectId}
+          aria-label="Dependency direction"
+          className="rounded border bg-background px-2 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          value={selectedDirection}
+          onChange={(event) => setSelectedDirection(event.target.value as DependencyDirectionFilter)}
+        >
+          <option value="all">All dependencies</option>
+          <option value="incoming">Incoming</option>
+          <option value="outgoing">Outgoing</option>
+        </select>
+      </div>
+      <p className="mb-3 text-xs text-muted-foreground">
+        Showing {visibleDeps.length} of {deps.length} loaded dependencies.
+      </p>
+      {visibleDeps.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          No matching dependencies in the loaded list. Choose All dependencies to show all.
+        </p>
+      ) : (
+        <ul className="space-y-2">
+          {visibleDeps.map((dep) => {
+            const config = typeLabels[dep.type];
+            const label = config?.[dep.direction] ?? dep.type;
+            const statusLabel = getTaskStatusLabel(dep.otherTaskStatus);
+            const counterpartTitle = dep.otherTaskTitleWithheld === true ? null : dep.otherTaskTitle;
 
-          return (
-            <li key={dep.id} className="flex flex-wrap items-center gap-2 text-sm">
-              <span className={(config?.className ?? 'text-gray-600') + ' text-xs font-medium min-w-[80px]'}>
-                {label}
-              </span>
-              <ArrowRight className="h-3 w-3 text-muted-foreground" />
-              {counterpartTitle !== null && (
-                <span className="min-w-0 break-words font-medium">{counterpartTitle}</span>
-              )}
-              <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono">
-                {dep.otherTaskId.slice(0, 8)}
-              </code>
-              {statusLabel && <Badge variant="secondary">{statusLabel}</Badge>}
-              <CopyTaskIdButton key={`${taskId}:${dep.id}:${dep.otherTaskId}`} taskId={dep.otherTaskId} />
-            </li>
-          );
-        })}
-      </ul>
+            return (
+              <li key={dep.id} className="flex flex-wrap items-center gap-2 text-sm">
+                <span className={(config?.className ?? 'text-gray-600') + ' text-xs font-medium min-w-[80px]'}>
+                  {label}
+                </span>
+                <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                {counterpartTitle !== null && (
+                  <span className="min-w-0 break-words font-medium">{counterpartTitle}</span>
+                )}
+                <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono">
+                  {dep.otherTaskId.slice(0, 8)}
+                </code>
+                {statusLabel && <Badge variant="secondary">{statusLabel}</Badge>}
+                <CopyTaskIdButton key={`${taskId}:${dep.id}:${dep.otherTaskId}`} taskId={dep.otherTaskId} />
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 }
