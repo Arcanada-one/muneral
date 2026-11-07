@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { Bot, User, Clock, Copy } from 'lucide-react';
 import { TASK_STATUSES, type TaskPriority, type TaskStatus } from '@muneral/types';
 import { useActivity } from '@/lib/api/tasks';
@@ -10,6 +10,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface AuditLogProps {
   taskId: string;
+}
+
+interface ExactTimeViewState {
+  taskId: string;
+  showExactUtcTime: boolean;
 }
 
 const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
@@ -253,6 +258,42 @@ function formatRelativeTime(dateStr: string): string {
   return date.toLocaleDateString();
 }
 
+function formatExactUtcTime(value: string): string | undefined {
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?(Z|([+-])(\d{2}):(\d{2}))$/.exec(value);
+  if (!match) return undefined;
+
+  const [, yearText, monthText, dayText, hourText, minuteText, secondText, fraction = '', zone, sign, offsetHourText, offsetMinuteText] = match;
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const hour = Number(hourText);
+  const minute = Number(minuteText);
+  const second = Number(secondText);
+  const offsetHour = Number(offsetHourText ?? '0');
+  const offsetMinute = Number(offsetMinuteText ?? '0');
+
+  if (
+    month < 1 || month > 12 || day < 1 || day > 31 || hour > 23 || minute > 59 || second > 59
+    || offsetHour > 23 || offsetMinute > 59 || (zone !== 'Z' && sign === '-' && offsetHour === 0 && offsetMinute === 0)
+  ) return undefined;
+
+  const calendarDate = new Date(0);
+  calendarDate.setUTCFullYear(year, month - 1, day);
+  calendarDate.setUTCHours(hour, minute, second, 0);
+  if (
+    calendarDate.getUTCFullYear() !== year || calendarDate.getUTCMonth() !== month - 1
+    || calendarDate.getUTCDate() !== day || calendarDate.getUTCHours() !== hour
+  ) return undefined;
+
+  const offsetSign = sign === '-' ? -1 : 1;
+  const offsetMs = (offsetHour * 60 + offsetMinute) * 60_000 * offsetSign;
+  const utc = new Date(calendarDate.getTime() - offsetMs);
+  const normalizedFraction = fraction.replace(/0+$/, '').padEnd(3, '0');
+  // Preserve expanded-year ISO prefixes (e.g. -000001 / +010000); do not slice a fixed 19 chars.
+  const utcDateTime = utc.toISOString().replace(/\.\d{3}Z$/, '');
+  return `${utcDateTime}.${normalizedFraction || '000'}Z`;
+}
+
 function CopyActivityActorId({ actorId }: { actorId: string }) {
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const [isCopying, setIsCopying] = useState(false);
@@ -296,9 +337,18 @@ function CopyActivityActorId({ actorId }: { actorId: string }) {
 }
 
 export function AuditLog({ taskId }: AuditLogProps) {
+  const exactUtcToggleId = useId();
   const [pageState, setPageState] = useState({ taskId, page: 1 });
   if (pageState.taskId !== taskId) setPageState({ taskId, page: 1 });
   const page = pageState.taskId === taskId ? pageState.page : 1;
+  const [exactTimeState, setExactTimeState] = useState<ExactTimeViewState>({
+    taskId,
+    showExactUtcTime: false,
+  });
+  if (exactTimeState.taskId !== taskId) {
+    setExactTimeState({ taskId, showExactUtcTime: false });
+  }
+  const showExactUtcTime = exactTimeState.taskId === taskId && exactTimeState.showExactUtcTime;
   const { data, isLoading, isError, isFetching, refetch } = useActivity(taskId, page);
   const total = data !== undefined && Number.isSafeInteger(data.total) && data.total >= 0
     ? data.total
@@ -385,6 +435,19 @@ export function AuditLog({ taskId }: AuditLogProps) {
         Activity Log
       </h4>
 
+      <div className="mb-3 flex items-center gap-2 text-xs">
+        <input
+          id={exactUtcToggleId}
+          type="checkbox"
+          checked={showExactUtcTime}
+          onChange={(event) => setExactTimeState({
+            taskId,
+            showExactUtcTime: event.target.checked,
+          })}
+        />
+        <label htmlFor={exactUtcToggleId}>Show exact UTC timestamps</label>
+      </div>
+
       <ScrollArea className="h-64">
         <ul className="space-y-3">
           {entries.map((entry) => {
@@ -400,6 +463,7 @@ export function AuditLog({ taskId }: AuditLogProps) {
             const evidenceDetails = entry.action === 'task:evidence_attached'
               ? getEvidenceActivityDetails(entry.payload)
               : undefined;
+            const exactUtcTime = showExactUtcTime ? formatExactUtcTime(entry.createdAt) : undefined;
 
             return (
               <li key={entry.id} className="flex gap-3">
@@ -430,7 +494,9 @@ export function AuditLog({ taskId }: AuditLogProps) {
                     </span>
                   </div>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    {formatRelativeTime(entry.createdAt)}
+                    {showExactUtcTime
+                      ? (exactUtcTime ?? 'Exact time unavailable')
+                      : formatRelativeTime(entry.createdAt)}
                   </p>
                   {taskCreatedDetails !== undefined && (
                     <p className="mt-1 text-xs text-muted-foreground">
