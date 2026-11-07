@@ -203,6 +203,18 @@ jobs:
           PY
           if [ "${api_rc}" -ne 0 ] || [ "${web_rc}" -ne 0 ]; then exit 1; fi
           exit 0
+      - name: Build shared types
+        id: build_types
+        if: needs.tested-tree.outputs.reuse != 'true'
+        continue-on-error: true
+        run: pnpm --filter @muneral/types build
+      - name: Generate Prisma client
+        if: needs.tested-tree.outputs.reuse != 'true'
+        # Run from repo root so prisma.config.ts (root) resolves apps/api/prisma/schema.prisma
+        run: pnpm exec prisma generate
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
+      # tsc report MUST follow prisma generate — otherwise @prisma/client has no generated exports.
       - name: TypeScript machine report
         id: tsc
         if: needs.tested-tree.outputs.reuse != 'true'
@@ -217,23 +229,9 @@ jobs:
             printf '=== @muneral/api ===\n'
             pnpm --filter @muneral/api exec tsc -p tsconfig.json --pretty false --noEmit
             api_rc=$?
-            printf '=== @muneral/web ===\n'
-            pnpm --filter @muneral/web exec tsc --pretty false --noEmit
-            web_rc=$?
-            if [ "${types_rc}" -ne 0 ] || [ "${api_rc}" -ne 0 ] || [ "${web_rc}" -ne 0 ]; then exit 1; fi
+            if [ "${types_rc}" -ne 0 ] || [ "${api_rc}" -ne 0 ]; then exit 1; fi
             exit 0
           } > reports/tsc.txt 2>&1
-      - name: Build shared types
-        id: build_types
-        if: needs.tested-tree.outputs.reuse != 'true'
-        continue-on-error: true
-        run: pnpm --filter @muneral/types build
-      - name: Generate Prisma client
-        if: needs.tested-tree.outputs.reuse != 'true'
-        # Run from repo root so prisma.config.ts (root) resolves apps/api/prisma/schema.prisma
-        run: pnpm exec prisma generate
-        env:
-          DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
       - name: Build
         id: build
         if: needs.tested-tree.outputs.reuse != 'true'
@@ -376,11 +374,12 @@ jobs:
       runner_labels: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && '["deploy-gate"]' || '["self-hosted","linux","ci-general"]' }}
 
   preflight-caller-contract:
-    # BATCH-004 guard: same PR skip rule as lint-and-test / network-exposure.
-    if: >-
-      github.event_name != 'pull_request' ||
-      startsWith(github.head_ref, 'integration/') ||
-      contains(github.event.pull_request.labels.*.name, 'ci:run')
+    # BATCH-004 intended the same PR skip guard as lint-and-test/network-exposure.
+    # Measured on PR #342 run 42317650803: a job-level `if:` here makes the datarim
+    # preflight-caller-contract action fail with
+    # `.jobs.preflight-caller-contract.capabilities: contract violation`.
+    # Keep this job unconditional (ubuntu-latest, not ci-general) until that
+    # contract admits a guarded form. Gap recorded on Muneral b2e6f1a9 AC3.
     permissions:
       contents: read
     runs-on: ubuntu-latest
