@@ -5,9 +5,9 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "admitted_with_exemptions"
  },
- "captured_at_utc": "2026-11-06T23:02:25Z",
+ "captured_at_utc": "2026-11-07T01:41:12Z",
  "change_set": {
-  "base": "253fc1afeffd2cc7359353cc98b1e4db0f7ef7ba",
+  "base": "247b12430bd66224809a17715d00d0763984b675",
   "files": [
    {
     "kind": "config",
@@ -182,7 +182,7 @@
     "status": "A"
    }
   ],
-  "head": "19f7383f9bd0edc0ab46a727fb2b524f89f48939",
+  "head": "97028faaa4de3cc0ccef7457b9f2a785fc38e18a",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -190,36 +190,36 @@
   {
    "code": "BOUNDED_CHECKER_OUT_OF_SCOPE",
    "entity": "code_unit:.github/workflows/activity-visible-count-browser.yml",
-   "expires_at_utc": "2026-12-06T23:01:38Z",
+   "expires_at_utc": "2026-12-07T01:16:00Z",
    "owner": "ARC2 worker d74ee092 (Muneral work item d74ee092-dc6c-4c68-8b6a-17bd556052f8; PR #328 MUN-HYG activity filter counts; host arcana-devs; admitting agent per DEC-AUP-0008)",
-   "reason": "v-workflow-config returns not_measured on shell-caller closure for this workflow (checkout root / source-affecting environment unresolved; unsupported interpreter dispatch; heredoc/group expansion) — a limitation of the bounded checker, not a property of this change. Coverage at content head 19f7383f9bd0edc0ab46a727fb2b524f89f48939: hosted activity-visible-count-browser job 128200556296 (run 42307534451) SUCCESS on that exact SHA. Residue: static shell-caller closure remains not_measured locally. reverse_if: that check-run concludes failure on a later head still claiming this receipt.",
-   "ref": "notes[d74ee092-avc-workflow-hosted-19f7383]"
+   "reason": "v-workflow-config returns not_measured on shell-caller closure for this workflow (checkout root / source-affecting environment unresolved; unsupported interpreter dispatch; heredoc/group expansion) — a limitation of the bounded checker, not a property of this change. Coverage at content head 97028faaa4de3cc0ccef7457b9f2a785fc38e18a: hosted activity-visible-count-browser check-run/job 128245571691 (run 42321095515) SUCCESS on that exact SHA. Residue: static shell-caller closure remains not_measured locally. reverse_if: that check-run concludes failure on a later head still claiming this receipt.",
+   "ref": "notes[d74ee092-avc-workflow-hosted-97028fa]"
   },
   {
    "code": "INFERRED_BOUNDARY_WITHOUT_CANARY",
    "entity": "code_unit:apps/web/e2e/activity-visible-count/run.mjs",
-   "expires_at_utc": "2026-12-06T23:01:38Z",
+   "expires_at_utc": "2026-12-07T01:16:00Z",
    "owner": "ARC2 worker d74ee092 (Muneral work item d74ee092-dc6c-4c68-8b6a-17bd556052f8; PR #328 MUN-HYG activity filter counts; host arcana-devs; admitting agent per DEC-AUP-0008)",
-   "reason": "E2E harness under apps/web/e2e/; canary cannot name harness files (A2-353). Hosted browser job 128200556296 SUCCESS on head 19f7383f9bd0edc0ab46a727fb2b524f89f48939 (run 42307534451) executes this run.mjs. Residue: v-canary NOT_MEASURED. reverse_if: browser check fails while exemption claimed.",
-   "ref": "notes[d74ee092-avc-run-mjs-hosted-19f7383]"
+   "reason": "E2E harness under apps/web/e2e/; canary cannot name harness files (A2-353). Hosted browser job/check-run 128245571691 SUCCESS on head 97028faaa4de3cc0ccef7457b9f2a785fc38e18a (run 42321095515) executes this run.mjs. Residue: v-canary NOT_MEASURED. reverse_if: browser check fails while exemption claimed.",
+   "ref": "notes[d74ee092-avc-run-mjs-hosted-97028fa]"
   }
  ],
  "graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:5d3f605b08c9a37f885e2a18ecda33269361b6d0c4935947129d4ae6ac15e411",
-  "path": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-cifix/runs/verifier-out-19f7383-final/graph-253fc1afeffd.json",
-  "source_commit": "253fc1afeffd2cc7359353cc98b1e4db0f7ef7ba"
+  "graph_digest": "sha256:9b8f4eac9244ef3f77eff3fcdfd2da1a074f9a4c35f84c55bdc6c34326843636",
+  "path": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-absorb-247b124/runs/verifier-out-97028fa-final/graph-247b12430bd6.json",
+  "source_commit": "247b12430bd66224809a17715d00d0763984b675"
  },
  "head_graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:f37cb461f8d3703aa3e235d9d8735562c72a474edb050fe2f3f4c2ca6d42228b",
-  "path": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-cifix/runs/verifier-out-19f7383-final/graph-head-19f7383f9bd0.json",
-  "source_commit": "19f7383f9bd0edc0ab46a727fb2b524f89f48939",
+  "graph_digest": "sha256:efee9cdc1c3fc964fce6b9491440836197042e42f3bc6937fd2bb843ef37dcd6",
+  "path": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-absorb-247b124/runs/verifier-out-97028fa-final/graph-head-97028faaa4de.json",
+  "source_commit": "97028faaa4de3cc0ccef7457b9f2a785fc38e18a",
   "staleness": {
-   "checked_at_utc": "2026-11-06T23:08:13Z",
-   "checked_nodes": 584,
+   "checked_at_utc": "2026-11-07T01:46:28Z",
+   "checked_nodes": 588,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -2824,18 +2824,18 @@
  "notes": [
   "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
   "profile: .arcana/verify.json at verified head; baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none",
-  "exemptions: 2 attached from /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-cifix/runs/ordinary-exemptions-19f7383.json",
+  "exemptions: 2 attached from /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-absorb-247b124/runs/ordinary-exemptions-97028fa.json",
   "A2-353: `canary` discharged for 2 test code_unit(s) — a canary lists live-contour entities and can never name a test file; their other verifiers (config_schema, type_check, fitness) still apply: code_unit:apps/api/test/support/disposable-postgres.ts, code_unit:apps/web/e2e/activity-visible-count/failure-summary.test.mjs"
  ],
  "producer": {
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261106T230225Z-19f7383f",
+ "receipt_id": "car-verify-20261107T014112Z-97028faa",
  "receipt_path": "receipts/graph/car-verify-20261102T145742Z-a753f831.json",
  "repo": {
   "name": "Arcanada-one/muneral",
-  "path": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-cifix/repo"
+  "path": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-absorb-247b124/repo"
  },
  "revision_selection": {
   "base": [
@@ -3093,7 +3093,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-11-06T23:08:12Z",
+  "checked_at_utc": "2026-11-07T01:46:27Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -3201,7 +3201,7 @@
   {
    "content_hash": {
     "base": null,
-    "head": "sha256:00d0d3721e5f8a9aa7cea104301c32e27d79bcb20e4d642cb27d35623c7502d7"
+    "head": "sha256:a54c66aef48a17ac7864a8eb135935099da1e3d7804f73b10beb86818f3ad975"
    },
    "entity": "receipt:receipts/graph/car-verify-20261102T145742Z-a753f831.json",
    "node_type": "receipt",
@@ -4040,7 +4040,7 @@
   }
  ],
  "tree": {
-  "commit": "19f7383f9bd0edc0ab46a727fb2b524f89f48939",
+  "commit": "97028faaa4de3cc0ccef7457b9f2a785fc38e18a",
   "dirty": false
  },
  "verdicts": [
@@ -4455,8 +4455,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-cifix/repo/apps/api/node_modules/.bin/tsc -p /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-cifix/repo/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-cifix/runs/verifier-out-19f7383-final/type-check-6s8tfe_y/check.tsbuildinfo --listFiles",
-   "duration_s": 29.3,
+   "command": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-absorb-247b124/repo/apps/api/node_modules/.bin/tsc -p /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-absorb-247b124/repo/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-absorb-247b124/runs/verifier-out-97028fa-final/type-check-cejpgc27/check.tsbuildinfo --listFiles",
+   "duration_s": 57.99,
    "entities": [
     "deployable_unit:apps/api"
    ],
@@ -4466,13 +4466,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-cifix/runs/verifier-out-19f7383-final/v-type-check-apps-api-tsconfig.txt",
-   "started_at_utc": "2026-11-06T23:08:46Z",
+   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-absorb-247b124/runs/verifier-out-97028fa-final/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-11-07T01:47:08Z",
    "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1455 files listed"
   },
   {
-   "command": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-cifix/repo/apps/api/node_modules/.bin/tsc -p /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-cifix/repo/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-cifix/runs/verifier-out-19f7383-final/type-check-bgfkndai/check.tsbuildinfo --listFiles",
-   "duration_s": 46.99,
+   "command": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-absorb-247b124/repo/apps/api/node_modules/.bin/tsc -p /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-absorb-247b124/repo/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-absorb-247b124/runs/verifier-out-97028fa-final/type-check-w8mz7hoj/check.tsbuildinfo --listFiles",
+   "duration_s": 152.8,
    "entities": [
     "code_unit:apps/api/test/human-task-read-isolation.e2e.spec.ts",
     "code_unit:apps/api/test/migration.archive-projection.postgres.spec.ts",
@@ -4502,13 +4502,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-api-tsconfig-test",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-cifix/runs/verifier-out-19f7383-final/v-type-check-apps-api-tsconfig-test.txt",
-   "started_at_utc": "2026-11-06T23:09:17Z",
+   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-absorb-247b124/runs/verifier-out-97028fa-final/v-type-check-apps-api-tsconfig-test.txt",
+   "started_at_utc": "2026-11-07T01:48:08Z",
    "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1615 files listed"
   },
   {
-   "command": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-cifix/repo/apps/web/node_modules/.bin/tsc -p /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-cifix/repo/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-cifix/runs/verifier-out-19f7383-final/type-check-3y56k3cv/check.tsbuildinfo --listFiles",
-   "duration_s": 33.62,
+   "command": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-absorb-247b124/repo/apps/web/node_modules/.bin/tsc -p /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-absorb-247b124/repo/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-absorb-247b124/runs/verifier-out-97028fa-final/type-check-hz_zypha/check.tsbuildinfo --listFiles",
+   "duration_s": 86.21,
    "entities": [
     "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
     "code_unit:apps/web/__tests__/task-detail-retry.test.tsx",
@@ -4578,13 +4578,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-cifix/runs/verifier-out-19f7383-final/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-11-06T23:10:05Z",
+   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-absorb-247b124/runs/verifier-out-97028fa-final/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-11-07T01:50:44Z",
    "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1425 files listed"
   },
   {
-   "command": "tools/graph/contract_diff.py.run_diff(base=253fc1afeffd, head=19f7383f9bd0, graph=head graph)",
-   "duration_s": 22.82,
+   "command": "tools/graph/contract_diff.py.run_diff(base=247b12430bd6, head=97028faaa4de, graph=head graph)",
+   "duration_s": 36.36,
    "entities": [
     "code_unit:apps/api/test/support/disposable-postgres.ts",
     "code_unit:apps/web/components/task/AuditLog.tsx",
@@ -4600,8 +4600,8 @@
    "exit_code": 0,
    "id": "v-contract-diff",
    "kind": "contract_diff",
-   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-cifix/runs/verifier-out-19f7383-final/v-contract-diff.json",
-   "started_at_utc": "2026-11-06T23:10:40Z",
+   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-absorb-247b124/runs/verifier-out-97028fa-final/v-contract-diff.json",
+   "started_at_utc": "2026-11-07T01:52:12Z",
    "summary": "61→61 contracts, breaking 0, edges {'verified': 174}"
   },
   {
@@ -4616,13 +4616,13 @@
    "exit_code": 1,
    "id": "v-workflow-config-d217dc9a124356a2",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-cifix/runs/verifier-out-19f7383-final/v-workflow-config-d217dc9a124356a2.txt",
-   "started_at_utc": "2026-11-06T23:11:03Z",
+   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-absorb-247b124/runs/verifier-out-97028fa-final/v-workflow-config-d217dc9a124356a2.txt",
+   "started_at_utc": "2026-11-07T01:52:48Z",
    "summary": "workflow shell caller closure not measured: job activity-visible-count-browser step 3: checkout root or source-affecting workflow environment unresolved; job activity-visible-count-browser step 4: checkout root or source-affecting workflow environment unresolved; job activity-visible-count-browser step 4: line 1: unsupported interpreter script/module/stdin dispatch closure; job activity-visible-count-browser step 5: checkout root or source-affecting workflow environment unresolved; job activity-visible-count-browser step 5: heredoc/group/function/brace expansion closure is unresolved; job activity-visible-count-browser step 6: checkout root or source-affecting workflow environment unresolved; job activity-visible-count-browser step 6: line 3: wrapper execution scope/options unresolved; job activity-visible-count-browser step 7: checkout root or source-affecting workflow environment unresolved; job activity-visible-count-browser step 7: line 2: unsupported interpreter script/module/stdin dispatch closure; job activity-visible-count-browser step 8: checkout root or source-affecting workflow environment unresolved; job activity-visible-count-browser step 8: line 2: unsupported interpreter script/module/stdin dispatch closure; 11 workflow shell-caller uncertainty item(s) remain separate from YAML schema validation and are retained in graph closure evidence"
   },
   {
    "command": "verify.py config_schema: keys read at head ⊆ declared keys",
-   "duration_s": 2.19,
+   "duration_s": 3.49,
    "entities": [
     "code_unit:apps/api/test/support/disposable-postgres.ts",
     "code_unit:apps/web/e2e/activity-visible-count/failure-summary.test.mjs",
@@ -4636,13 +4636,13 @@
    "exit_code": 0,
    "id": "v-config-schema",
    "kind": "config_schema",
-   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-cifix/runs/verifier-out-19f7383-final/v-config-schema.json",
-   "started_at_utc": "2026-11-06T23:11:03Z",
+   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-absorb-247b124/runs/verifier-out-97028fa-final/v-config-schema.json",
+   "started_at_utc": "2026-11-07T01:52:48Z",
    "summary": "3 source(s), 0 new / 3 frozen undeclared reads, 0 failed; 5 vendored file(s) not attributed to this repository (Arcanada-one/arcanada-universal-program)"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.45,
+   "duration_s": 1.26,
    "entities": [
     "code_unit:.github/workflows/activity-visible-count-browser.yml",
     "code_unit:apps/api/test/human-task-read-isolation.e2e.spec.ts",
@@ -4736,8 +4736,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-cifix/runs/verifier-out-19f7383-final/v-fitness.json",
-   "started_at_utc": "2026-11-06T23:11:05Z",
+   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-absorb-247b124/runs/verifier-out-97028fa-final/v-fitness.json",
+   "started_at_utc": "2026-11-07T01:52:51Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   },
   {
@@ -4752,8 +4752,8 @@
    "exit_code": 0,
    "id": "v-canary",
    "kind": "canary",
-   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-cifix/runs/verifier-out-19f7383-final/v-canary.json",
-   "started_at_utc": "2026-11-06T23:11:06Z",
+   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-328-absorb-247b124/runs/verifier-out-97028fa-final/v-canary.json",
+   "started_at_utc": "2026-11-07T01:52:53Z",
    "summary": "0 canary result(s), 0 committed at head; 0 verified / 0 failed / 1 not_measured of 1 entities"
   }
  ],
@@ -5041,9 +5041,9 @@
    "receipt:receipts/graph/security-api959a-caller788.json": []
   },
   "seconds": {
-   "prepare": 17.44,
-   "total": 520.54,
-   "verifiers": 135.37
+   "prepare": 17.34,
+   "total": 702.19,
+   "verifiers": 338.11
   }
  },
  "work_item": "d74ee092-dc6c-4c68-8b6a-17bd556052f8"
