@@ -1,0 +1,107 @@
+name: Repository destination browser user path
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  repository-destination-browser:
+    # ci-general spans more than one host. The fixture fails with a bounded,
+    # sanitized reason unless the root-managed CfT binary is present.
+    runs-on: [self-hosted, linux, ci-general]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.22.1
+
+      - name: Enable the repository-pinned pnpm
+        run: |
+          set -euo pipefail
+          corepack_home="${RUNNER_TEMP}/repository-destination-corepack"
+          mkdir -m 700 "${corepack_home}"
+          corepack enable --install-directory "${corepack_home}"
+          printf '%s\n' "${corepack_home}" >> "${GITHUB_PATH}"
+
+      - name: Install locked workspace dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install the isolated browser helper
+        # package.json pins playwright-core@1.63.0; no nested lockfile (avoids
+        # graph-admission global_fallback on basename pnpm-lock.yaml).
+        run: >-
+          pnpm --dir apps/web/e2e/repository-destination --ignore-workspace
+          install
+          --config.store-dir="${RUNNER_TEMP}/repository-destination-helper-store"
+
+      - name: Allocate fresh candidate-bound output and private roots
+        id: allocate-output
+        env:
+          REPOSITORY_DESTINATION_RUN_ID: ${{ github.run_id }}
+          REPOSITORY_DESTINATION_RUN_ATTEMPT: ${{ github.run_attempt }}
+          REPOSITORY_DESTINATION_CANDIDATE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          umask 077
+          [[ "${REPOSITORY_DESTINATION_RUN_ID}" =~ ^[0-9]+$ ]]
+          [[ "${REPOSITORY_DESTINATION_RUN_ATTEMPT}" =~ ^[1-9][0-9]*$ ]]
+          [[ "${REPOSITORY_DESTINATION_CANDIDATE_SHA}" =~ ^[a-f0-9]{40}$ ]]
+          artifact_parent="${RUNNER_TEMP}/repository-destination-artifacts/${REPOSITORY_DESTINATION_RUN_ID}/${REPOSITORY_DESTINATION_RUN_ATTEMPT}"
+          private_parent="${RUNNER_TEMP}/repository-destination-private/${REPOSITORY_DESTINATION_RUN_ID}/${REPOSITORY_DESTINATION_RUN_ATTEMPT}"
+          mkdir -p -m 700 "${artifact_parent}" "${private_parent}"
+          artifact_root="${artifact_parent}/${REPOSITORY_DESTINATION_CANDIDATE_SHA}"
+          private_root="${private_parent}/${REPOSITORY_DESTINATION_CANDIDATE_SHA}"
+          mkdir -m 700 "${artifact_root}"
+          mkdir -m 700 "${private_root}"
+          printf 'artifact_root=%s\n' "${artifact_root}" >> "${GITHUB_OUTPUT}"
+          printf 'private_root=%s\n' "${private_root}" >> "${GITHUB_OUTPUT}"
+          printf 'ready=true\n' >> "${GITHUB_OUTPUT}"
+
+      - name: Run the repository destination browser fixture
+        if: steps.allocate-output.outputs.ready == 'true'
+        env:
+          CHROME_PATH: /opt/arcanada-browsers/cft-156.0.8078.4/chrome-linux64/chrome
+          REPOSITORY_DESTINATION_OUTPUT_ROOT: ${{ steps.allocate-output.outputs.artifact_root }}
+          REPOSITORY_DESTINATION_PRIVATE_ROOT: ${{ steps.allocate-output.outputs.private_root }}
+          REPOSITORY_DESTINATION_RUN_ID: ${{ github.run_id }}
+          REPOSITORY_DESTINATION_RUN_ATTEMPT: ${{ github.run_attempt }}
+          REPOSITORY_DESTINATION_CANDIDATE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          umask 077
+          set +e
+          timeout --signal=TERM --kill-after=15s 600s \
+            node apps/web/e2e/repository-destination/run.mjs
+          rc=$?
+          set -e
+          node apps/web/e2e/repository-destination/run.mjs --write-runner-exit "${rc}"
+          exit "${rc}"
+
+      - name: Validate exact sanitized upload records
+        id: validate-artifacts
+        if: always() && steps.allocate-output.outputs.ready == 'true'
+        env:
+          REPOSITORY_DESTINATION_OUTPUT_ROOT: ${{ steps.allocate-output.outputs.artifact_root }}
+          REPOSITORY_DESTINATION_RUN_ID: ${{ github.run_id }}
+          REPOSITORY_DESTINATION_RUN_ATTEMPT: ${{ github.run_attempt }}
+          REPOSITORY_DESTINATION_CANDIDATE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          node apps/web/e2e/repository-destination/run.mjs --validate-artifacts
+          printf 'valid=true\n' >> "${GITHUB_OUTPUT}"
+
+      - name: Retain the sanitized browser result
+        if: always() && steps.validate-artifacts.outputs.valid == 'true'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: repository-destination-browser-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ steps.allocate-output.outputs.artifact_root }}/result.json
+            ${{ steps.allocate-output.outputs.artifact_root }}/runner-exit.json
+          if-no-files-found: error
