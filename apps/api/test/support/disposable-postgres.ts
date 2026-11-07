@@ -143,6 +143,34 @@ async function waitForReady(url: string, label: string): Promise<void> {
   }
 }
 
+async function waitForPortReleased(
+  port: number,
+  label: string,
+  attempts = 30,
+  delayMs = 500,
+): Promise<{ released: boolean; error?: string }> {
+  for (let i = 0; i < attempts; i += 1) {
+    const listener = spawnSync('ss', ['-tlnp', `sport = :${port}`], {
+      encoding: 'utf8',
+      stdio: 'pipe',
+    });
+    if (listener.error || listener.status !== 0) {
+      return {
+        released: false,
+        error: listener.error?.message ?? String(listener.stderr).slice(0, 300),
+      };
+    }
+    if (!String(listener.stdout).includes('LISTEN')) {
+      if (i > 0) {
+        console.log(`[${label}-pg] Port ${port} released after ${i * delayMs}ms.`);
+      }
+      return { released: true };
+    }
+    await new Promise((r) => setTimeout(r, delayMs));
+  }
+  return { released: false };
+}
+
 /** Swap the database component of a connection string. */
 function withDatabase(url: string, database: string): string {
   const parsed = new URL(url);
@@ -376,17 +404,13 @@ export function createDisposablePostgres(label: string): DisposablePostgres {
         failures.push(`container survived cleanup: ${String(remaining.stdout).trim()}`);
       }
 
-      const listener = spawnSync('ss', ['-tlnp', `sport = :${assignedPort}`], {
-        encoding: 'utf8',
-        stdio: 'pipe',
-      });
-      if (listener.error || listener.status !== 0) {
-        failures.push(
-          `listener verification failed: ${
-            listener.error?.message ?? String(listener.stderr).slice(0, 300)
-          }`,
-        );
-      } else if (String(listener.stdout).includes('LISTEN')) {
+      // Docker's userland-proxy can leave the host port in LISTEN for a short
+      // window after `docker rm -f`. Poll before fail-closed so a race does not
+      // turn an otherwise green suite red (measured on PR #328 lint-and-test).
+      const portReleased = await waitForPortReleased(assignedPort, label);
+      if (portReleased.error) {
+        failures.push(`listener verification failed: ${portReleased.error}`);
+      } else if (!portReleased.released) {
         failures.push(`port ${assignedPort} remains in LISTEN state`);
       }
 
