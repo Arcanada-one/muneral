@@ -1,0 +1,562 @@
+Current runner version: '2.337.0'
+##[group]Runner Image Provisioner
+Hosted Compute Agent
+Version: 20260828.587
+Commit: abac92662cab4cc7352de4f9f9d2e2419aad9c29
+Build Date: 2026-08-28T16:44:25Z
+Worker ID: {1ef8061b-c951-4557-9931-ea69a63ccaf7}
+Azure Region: westus
+##[endgroup]
+##[group]Operating System
+Ubuntu
+24.04.5
+LTS
+##[endgroup]
+##[group]Runner Image
+Image: ubuntu-24.04
+Version: 20260907.300.1
+Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260907.300/images/ubuntu/Ubuntu2404-Readme.md
+Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260907.300
+##[endgroup]
+##[group]GITHUB_TOKEN Permissions
+Contents: read
+Metadata: read
+##[endgroup]
+Secret source: Actions
+Cache mode: write
+Prepare workflow directory
+Prepare all required actions
+Getting action download info
+Download action repository 'actions/checkout@11d5960a326750d5838078e36cf38b85af677262' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+Download action repository 'actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97' (SHA:5fda3b95a4ea91299a34e894583c3862153e4b97)
+Download action repository 'actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+Download action repository 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a' (SHA:043fb46d1a93c77aae656e7c1c64a875d1fc6a0a)
+Uses: Arcanada-one/muneral/.github/workflows/graph-admission.yml@refs/pull/108/merge (d8bfc70eb18a883a38297f54e3dac6d78fc0004f)
+##[group] Inputs
+  program_ref: dc7cb7b15fdbe122151de11722b2b68252fcba34
+  tools_path: .github/graph-admission
+  receipt_globs: receipts/graph/**/*.json
+receipts/**/change-admission-*.json
+
+  enforcement: off
+  build_graph: true
+  runs_on: ubuntu-latest
+  verifier_job: lint-and-test
+  derived_artefact_node_version: 22
+  signing_key_fingerprint: SHA256:9QFqysn44UjA8rXyfHjItP3b2Oadhnbf1bDNqXrsCig
+  verifier_conclusion: failure
+##[endgroup]
+Complete job name: graph-admission / graph-admission
+Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+##[group]Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+with:
+  fetch-depth: 0
+  persist-credentials: false
+  ref: c1eae2a6b3390eabbb1fe3c64711e38911e6738d
+  repository: Arcanada-one/muneral
+  token: ***
+  ssh-strict: true
+  ssh-user: git
+  clean: true
+  sparse-checkout-cone-mode: true
+  fetch-tags: false
+  show-progress: true
+  lfs: false
+  submodules: false
+  set-safe-directory: true
+  allow-unsafe-pr-checkout: false
+##[endgroup]
+Syncing repository: Arcanada-one/muneral
+##[group]Getting Git version info
+Working directory is '/home/runner/work/muneral/muneral'
+[command]/usr/bin/git version
+git version 2.55.0
+##[endgroup]
+Temporarily overriding HOME='/home/runner/work/_temp/5f5063da-44c7-4386-bb87-1ed4044e952b' before making global git config changes
+Adding repository directory to the temporary git global config as a safe directory
+[command]/usr/bin/git config --global --add safe.directory /home/runner/work/muneral/muneral
+Deleting the contents of '/home/runner/work/muneral/muneral'
+##[group]Initializing the repository
+[command]/usr/bin/git init /home/runner/work/muneral/muneral
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: will change to "main" in Git 3.0. To configure the initial branch name
+hint: to use in all of your new repositories, which will suppress this warning,
+hint: call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+hint:
+hint: Disable this message with "git config set advice.defaultBranchName false"
+Initialized empty Git repository in /home/runner/work/muneral/muneral/.git/
+[command]/usr/bin/git remote add origin https://github.com/Arcanada-one/muneral
+##[endgroup]
+##[group]Disabling automatic garbage collection
+[command]/usr/bin/git config --local gc.auto 0
+##[endgroup]
+##[group]Setting up auth
+[command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+[command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+[command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+[command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+[command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+[command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+[command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+##[endgroup]
+##[group]Fetching the repository
+[command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
+From https://github.com/Arcanada-one/muneral
+ * [new branch]      aup/graph-006-gate4c-bundle-refresh -> origin/aup/graph-006-gate4c-bundle-refresh
+ * [new branch]      chore/jsdom-30-relock   -> origin/chore/jsdom-30-relock
+ * [new branch]      ci-actions-pin-refresh  -> origin/ci-actions-pin-refresh
+ * [new branch]      ci-pins-checkout-setup-node-governance -> origin/ci-pins-checkout-setup-node-governance
+ * [new branch]      combined-datarim-bump   -> origin/combined-datarim-bump
+ * [new branch]      dependabot/docker/apps/api/node-26.8-alpine -> origin/dependabot/docker/apps/api/node-26.8-alpine
+ * [new branch]      dependabot/github_actions/Arcanada-one/shared-workflows/dot-github/actions/governance-diff-guard-0dec9a70b4796928c383ccf4438be19367f7ad3b -> origin/dependabot/github_actions/Arcanada-one/shared-workflows/dot-github/actions/governance-diff-guard-0dec9a70b4796928c383ccf4438be19367f7ad3b
+ * [new branch]      dependabot/github_actions/actions/setup-python-7.0.0 -> origin/dependabot/github_actions/actions/setup-python-7.0.0
+ * [new branch]      dependabot/github_actions/actions/upload-artifact-7.0.1 -> origin/dependabot/github_actions/actions/upload-artifact-7.0.1
+ * [new branch]      dependabot/npm_and_yarn/class-validator-0.15.1 -> origin/dependabot/npm_and_yarn/class-validator-0.15.1
+ * [new branch]      dependabot/npm_and_yarn/eslint-10.9.0 -> origin/dependabot/npm_and_yarn/eslint-10.9.0
+ * [new branch]      dependabot/npm_and_yarn/eslint-config-next-16.3.2 -> origin/dependabot/npm_and_yarn/eslint-config-next-16.3.2
+ * [new branch]      dependabot/npm_and_yarn/eslint/js-10.0.1 -> origin/dependabot/npm_and_yarn/eslint/js-10.0.1
+ * [new branch]      dependabot/npm_and_yarn/lucide-react-1.34.0 -> origin/dependabot/npm_and_yarn/lucide-react-1.34.0
+ * [new branch]      dependabot/npm_and_yarn/nestjs/jwt-12.0.1 -> origin/dependabot/npm_and_yarn/nestjs/jwt-12.0.1
+ * [new branch]      dependabot/npm_and_yarn/nestjs/platform-express-11.2.1 -> origin/dependabot/npm_and_yarn/nestjs/platform-express-11.2.1
+ * [new branch]      dependabot/npm_and_yarn/radix-ui/react-avatar-1.2.6 -> origin/dependabot/npm_and_yarn/radix-ui/react-avatar-1.2.6
+ * [new branch]      dependabot/npm_and_yarn/radix-ui/react-scroll-area-1.2.18 -> origin/dependabot/npm_and_yarn/radix-ui/react-scroll-area-1.2.18
+ * [new branch]      feat/ARCA-0194-r6-05-readback-caller-20260811 -> origin/feat/ARCA-0194-r6-05-readback-caller-20260811
+ * [new branch]      feat/ARCA-0198-solution-log-head-v0-20260809 -> origin/feat/ARCA-0198-solution-log-head-v0-20260809
+ * [new branch]      feat/MUN-0040-execution-recording -> origin/feat/MUN-0040-execution-recording
+ * [new branch]      feat/MUN-0044-toolchain-range -> origin/feat/MUN-0044-toolchain-range
+ * [new branch]      feat/MUN-0048-task-query-endpoint -> origin/feat/MUN-0048-task-query-endpoint
+ * [new branch]      fix/ARCA-0194-muneral-caller-contract-20260810 -> origin/fix/ARCA-0194-muneral-caller-contract-20260810
+ * [new branch]      fix/ARCA-0198-muneral-executor-role-lock-20260809 -> origin/fix/ARCA-0198-muneral-executor-role-lock-20260809
+ * [new branch]      fix/regenerate-push-race -> origin/fix/regenerate-push-race
+ * [new branch]      fix/ts-jest-29.4.12-relock -> origin/fix/ts-jest-29.4.12-relock
+ * [new branch]      integration/batch-1     -> origin/integration/batch-1
+ * [new branch]      main                    -> origin/main
+ * [new branch]      mun-0045-agent-write-scope -> origin/mun-0045-agent-write-scope
+ * [new branch]      mun-0046a-comments-scope -> origin/mun-0046a-comments-scope
+ * [new branch]      node-pin-24.20.0-reconciliation -> origin/node-pin-24.20.0-reconciliation
+ * [new branch]      rescue/ARCA-0198-solution-log-head-v0-20260809-004dd5f -> origin/rescue/ARCA-0198-solution-log-head-v0-20260809-004dd5f
+ * [new branch]      rescue/INFRA-0394/feat/ARCA-0195-cross-plane -> origin/rescue/INFRA-0394/feat/ARCA-0195-cross-plane
+ * [new branch]      rescue/INFRA-0394/fix/MUN-0020-qa-red-findings -> origin/rescue/INFRA-0394/fix/MUN-0020-qa-red-findings
+ * [new branch]      rescue/INFRA-0394/fix/MUN-0021-compliance-whitespace -> origin/rescue/INFRA-0394/fix/MUN-0021-compliance-whitespace
+ * [new branch]      rescue/INFRA-0394/main  -> origin/rescue/INFRA-0394/main
+ * [new branch]      rescue/feat/ARCA-0198-solution-log-head-v0-20260809-20260811 -> origin/rescue/feat/ARCA-0198-solution-log-head-v0-20260809-20260811
+ * [new branch]      sec-0032-security-policy -> origin/sec-0032-security-policy
+ * [new branch]      sec-0034-dependabot-config -> origin/sec-0034-dependabot-config
+ * [new branch]      sec-0034/muneral-authjs -> origin/sec-0034/muneral-authjs
+ * [new branch]      sec-0039-phase2         -> origin/sec-0039-phase2
+ * [new branch]      sec/vitest-4-ghsa-82fw-gwwq-j7x9 -> origin/sec/vitest-4-ghsa-82fw-gwwq-j7x9
+ * [new branch]      vendor-gate-fallback-fix -> origin/vendor-gate-fallback-fix
+[command]/usr/bin/git rev-parse --verify --quiet c1eae2a6b3390eabbb1fe3c64711e38911e6738d^{object}
+c1eae2a6b3390eabbb1fe3c64711e38911e6738d
+##[endgroup]
+##[group]Determining the checkout info
+##[endgroup]
+[command]/usr/bin/git sparse-checkout disable
+[command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+##[group]Checking out the ref
+[command]/usr/bin/git checkout --progress --force c1eae2a6b3390eabbb1fe3c64711e38911e6738d
+Note: switching to 'c1eae2a6b3390eabbb1fe3c64711e38911e6738d'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at c1eae2a build(deps): one integration branch for sixteen pull requests
+##[endgroup]
+[command]/usr/bin/git log -1 --format=%H
+c1eae2a6b3390eabbb1fe3c64711e38911e6738d
+##[group]Removing auth
+[command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+[command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+[command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+http.https://github.com/.extraheader
+[command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+[command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+[command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+[command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+##[endgroup]
+##[group]Run actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+with:
+  python-version: 3.12
+  check-latest: false
+  token: ***
+  update-environment: true
+  allow-prereleases: false
+  freethreaded: false
+##[endgroup]
+##[group]Installed versions
+Successfully set up CPython (3.12.14)
+##[endgroup]
+##[group]Run set -euo pipefail
+set -euo pipefail
+if [ -f .arcana/derived-artefacts.v1.json ]; then
+  echo "declared=yes" >> "$GITHUB_OUTPUT"
+else
+  echo "declared=no" >> "$GITHUB_OUTPUT"
+fi
+# B6.4 runs the caller's own verifier, and a verifier that records its toolchain compares
+# what it ran on against what the evidence was built with. The input's default cannot know
+# that: muneral pins engines.node 24.20.0 and its own test job installs exactly that, so
+# the gate measured the artefact on the default 22 and reported TOOLCHAIN_MISMATCH —
+# a red that says nothing about the artefact. The caller cannot fix it in its ci.yml
+# either: pin_only_edit refuses a bundle refresh whose ci.yml carries any line that is not
+# the program_ref pin, and rightly so.
+# So the version is read from where the caller already declares it. An exact pin only
+# ("24.20.0", not "^24"): a range would install some other patch and reintroduce the same
+# mismatch under a different number. Nothing declared, or a range, falls back to the input.
+node_version=""
+if [ -f package.json ]; then
+  node_version=$(python3 -c "import json;print((json.load(open('package.json')).get('engines') or {}).get('node',''))" 2>/dev/null || true)
+fi
+case "$node_version" in
+  [0-9]*.[0-9]*.[0-9]*) : ;;
+  *) node_version="" ;;
+esac
+echo "node_version=$node_version" >> "$GITHUB_OUTPUT"
+shell: /usr/bin/bash -e {0}
+env:
+  pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+  PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+  Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+  Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+  Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+  LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+##[endgroup]
+Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+##[group]Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+with:
+  node-version: 24.20.0
+  always-auth: false
+  check-latest: false
+  token: ***
+env:
+  pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+  PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+  Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+  Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+  Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+  LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+##[endgroup]
+Found in cache @ /opt/hostedtoolcache/node/24.20.0/x64
+(node:2363) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+##[group]Environment details
+node: v24.20.0
+npm: 11.19.0
+yarn: 1.22.22
+##[endgroup]
+##[group]Run set -euo pipefail
+set -euo pipefail
+# `corepack enable --install-directory` lstat()s the directory and exits 1 if it does not
+# exist ("Internal Error: ENOENT ... lstat '/home/runner/work/_temp/corepack-bin'").
+# Measured on the real subject: muneral #73's first run failed here, and the gate failed
+# CLOSED — it skipped the admission run and reported red rather than passing without B6.
+mkdir -p "${RUNNER_TEMP}/corepack-bin"
+corepack enable --install-directory "${RUNNER_TEMP}/corepack-bin"
+echo "${RUNNER_TEMP}/corepack-bin" >> "$GITHUB_PATH"
+shell: /usr/bin/bash -e {0}
+env:
+  pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+  PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+  Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+  Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+  Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+  LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+##[endgroup]
+##[group]Run set -euo pipefail
+set -euo pipefail
+if [ -n "${PR_BASE:-}" ]; then
+  BASE="$(git merge-base "$PR_BASE" "$PR_HEAD")"
+  HEAD_SHA="$PR_HEAD"
+else
+  BASE="$(git rev-parse HEAD~1)"
+  HEAD_SHA="$(git rev-parse HEAD)"
+fi
+echo "base=$BASE" >> "$GITHUB_OUTPUT"
+echo "head=$HEAD_SHA" >> "$GITHUB_OUTPUT"
+shell: /usr/bin/bash -e {0}
+env:
+  pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+  PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+  Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+  Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+  Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+  LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+  PR_BASE: a4d1a1b92b14ece45b3891d15405de8c397e3dba
+  PR_HEAD: c1eae2a6b3390eabbb1fe3c64711e38911e6738d
+##[endgroup]
+##[group]Run set -euo pipefail
+set -euo pipefail
+mkdir -p "${RUNNER_TEMP}/graph-admission"
+printf '%s' "${PR_BODY:-}" > "${RUNNER_TEMP}/graph-admission/pr-body.txt"
+shell: /usr/bin/bash -e {0}
+env:
+  pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+  PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+  Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+  Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+  Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+  LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+  PR_BODY: build(deps): one integration branch for sixteen pull requests
+
+Sixteen open pull requests were conflicting with each other rather than with
+main: nine were DIRTY, and every one of them carried pnpm-lock.yaml,
+apps/*/package.json and apps/api/test/assembly/mutation-results.json. Because
+the evidence hashes the WHOLE tracked tree, merging any one of them invalidated
+the evidence of all the others — measured live today, merging #60 turned #107
+DIRTY within the minute. That is a quadratic cost in the number of open pull
+requests, not a queue that needs more patience.
+
+So this is one branch carrying all of them, one lockfile resolution instead of
+twelve, and one battery instead of sixteen.
+
+WHAT IS CARRIED
+
+  #107        the push race in regenerate-derived-artefacts (force-with-lease)
+  #99 #101    action pins, re-verified at the source rather than taken from the
+              bot: upload-artifact 043fb46d = tag v7.0.1, setup-python 5fda3b95
+              = tag v7.0.0, both matching character for character
+  #32 #33 #56 #58 #59 #61 #85 #86 #87 #102 #104 #105
+              thirteen dependency bumps, resolved in ONE
+              `pnpm install --lockfile-only` (7.6 s)
+
+vitest 4.1.11 closes GHSA-82fw-gwwq-j7x9, the repository's three open dependabot
+alerts.
+
+THREE REAL INCOMPATIBILITIES, FOUND LOCALLY IN MINUTES
+
+Batching found these before CI did — each would otherwise have been a separate
+red run of fifteen minutes.
+
+1. vitest 4 widened `vi.fn()`'s return type, so `ReturnType<typeof vi.fn>` no
+   longer type-checks as callable. Switched to vi.mocked(), the typed accessor
+   vitest ships. That surfaced a second thing: Session never declared
+   accessToken, though lib/auth/nextauth.ts returns it — production reached it
+   by casting the session to Record<string, unknown>. Now declared, so the field
+   is checked instead of asserted.
+
+2. lucide-react 1.x removed its brand icons outright: `Github` is gone, not
+   renamed (the 1.39 typings export GitBranch, GitFork, GitMerge and no brand
+   mark). A generic git glyph would misidentify the provider on a sign-in
+   button, so the official mark is inlined.
+
+3. eslint 10 dropped eslintrc entirely. apps/api was already on a flat config;
+   apps/web is migrated to one, extending the same next/core-web-vitals preset.
+   No rule changed.
+
+ONE BUMP HELD BACK, BY MEASUREMENT
+
+eslint 10 stays in apps/api and is NOT taken in apps/web. eslint-plugin-react,
+which the next preset pulls in, is at 7.37.5 — its newest release — and declares
+`eslint ^3 || … || ^9.7`. There is no version of it compatible with eslint 10;
+running it under 10 throws `contextOrFilename.getFilename is not a function`.
+apps/web therefore stays on eslint 9 until that plugin ships support. Twelve
+bumps land, one waits: a batch must not fail whole because one member cannot.
+
+ALSO FIXED HERE, FOUND WHILE MEASURING
+
+regenerate-derived-artefacts wedged a run for 31 minutes: its concurrency group
+degenerates to the constant `regenerate-derived-` whenever
+`github.event.workflow_run.head_branch` is empty, so unrelated branches share one
+bucket. Run 34748798617 (09:00:55Z) was still `queued` while a later run of the
+same workflow had finished, and the API refuses to cancel it — 409, "Cannot
+cancel a workflow run that has not been queued yet". The group now falls back to
+`github.run_id`.
+
+MEASURED BEFORE PUSHING — the caller's own steps, in the caller's own order
+
+  tsc --noEmit  apps/api            0 errors
+  tsc --noEmit  apps/web            0 errors
+  vitest run                        50 tests, 5 files, all passing
+  pnpm lint                         2/2, "No ESLint warnings or errors"
+  pnpm build                        3/3 successful
+  mutation battery, full regen      85 sites, 0 survived, "No surviving mutant"
+  --verify-structure                rc 0, 85 source-bound records
+
+Baseline measured separately on a clean clone of main: apps/web tsc reports 0
+errors there too, so the zero above is a comparison and not an assertion. That
+baseline also caught a mistake of mine mid-way: a `declare module` without an
+import REPLACES the module rather than augmenting it, and had added six fresh
+TS7031 errors to lib/auth/nextauth.ts against that zero.
+
+NOT MEASURED
+
+  deploy against the live host, and the broker/health checks that only run there
+  network-exposure and preflight-caller-contract, which need repository vars
+  whether the thirteen bumps interact at runtime beyond what these suites cover
+
+---
+
+## Supersedes
+
+This branch carries the content of, and replaces, these pull requests. Each is
+closed only after its change is verified present here — never before.
+
+| PR | Carried as |
+|---|---|
+| #107 | `force-with-lease` in regenerate-derived-artefacts |
+| #99 | `upload-artifact` pin, re-verified at the tag |
+| #101 | `setup-python` pin, re-verified at the tag |
+| #32 #33 #56 #58 #59 #61 #85 #86 #87 #102 #104 #105 | one lockfile resolution |
+
+GOVERNANCE-CHANGE: two workflow files change. `graph-admission.yml` moves two
+action pins forward to SHAs verified against the upstream tags rather than taken
+from the proposing bot, which is exactly the reason `.github/workflows/**` is
+excluded from the automated-author path (SEC-0039) — a human-authored change is
+the intended route for it. `regenerate-derived-artefacts.yml` receives two
+narrowing fixes: a push guarded by `--force-with-lease` against an explicitly
+measured SHA, which can only refuse where the previous unguarded push would have
+succeeded and can never overwrite a concurrent writer; and a concurrency group
+that falls back to `github.run_id` when the branch name is empty, which gives a
+context-less event its own bucket instead of wedging the shared one. Neither
+grants the workflow any capability it did not already have.
+
+##[endgroup]
+##[group]Run set -uo pipefail
+set -uo pipefail
+# NOT `set -e`: the gate's non-zero exit is a VERDICT, not a crash. The step must still
+# write the summary, upload the result and hand the verdict to the last step, which is the
+# single place the check turns red (GitHub starts this shell with -e; it is cleared here).
+set +e
+ARGS=()
+while IFS= read -r g; do [ -n "$g" ] && ARGS+=(--receipt-glob "$g"); done <<< "$RECEIPT_GLOBS"
+if [ "$BUILD_GRAPH" = "true" ]; then ARGS+=(--build-graph); fi
+if [ -n "${EVENT_PATH:-}" ] && [ -f "$EVENT_PATH" ]; then ARGS+=(--event-file "$EVENT_PATH"); fi
+if [ -n "${VERIFIER_JOB:-}" ]; then ARGS+=(--verifier-job "$VERIFIER_JOB"); fi
+if [ -n "${VERIFIER_CONCLUSION:-}" ]; then ARGS+=(--verifier-conclusion "$VERIFIER_CONCLUSION"); fi
+ARGS+=(--verifier-output-ref "$VERIFIER_OUTPUT_REF")
+if [ -n "${SIGNING_KEY_FINGERPRINT:-}" ]; then ARGS+=(--signing-key-fingerprint "$SIGNING_KEY_FINGERPRINT"); fi
+python3 "${TOOLS_PATH}/tools/graph/ci_gate.py" run \
+  --repo . \
+  --repo-name "$REPO_NAME" \
+  --tools "$TOOLS_PATH" \
+  --program-ref "$PROGRAM_REF" \
+  --base "$RANGE_BASE" \
+  --head "$RANGE_HEAD" \
+  --pr-body-file "${RUNNER_TEMP}/graph-admission/pr-body.txt" \
+  --enforcement "$ENFORCEMENT" \
+  --workdir "${RUNNER_TEMP}/graph-admission" \
+  --out "${RUNNER_TEMP}/graph-admission/graph-admission-result.json" \
+  --summary "${GITHUB_STEP_SUMMARY}" \
+  "${ARGS[@]}"
+RC=$?
+echo "rc=$RC" >> "$GITHUB_OUTPUT"
+exit 0
+shell: /usr/bin/bash -e {0}
+env:
+  pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+  PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+  Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+  Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+  Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+  LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+  RECEIPT_GLOBS: receipts/graph/**/*.json
+receipts/**/change-admission-*.json
+
+  BUILD_GRAPH: true
+  TOOLS_PATH: .github/graph-admission
+  PROGRAM_REF: dc7cb7b15fdbe122151de11722b2b68252fcba34
+  ENFORCEMENT: off
+  REPO_NAME: Arcanada-one/muneral
+  RANGE_BASE: a4d1a1b92b14ece45b3891d15405de8c397e3dba
+  RANGE_HEAD: c1eae2a6b3390eabbb1fe3c64711e38911e6738d
+  EVENT_PATH: /home/runner/work/_temp/_github_workflow/event.json
+  VERIFIER_JOB: lint-and-test
+  VERIFIER_CONCLUSION: failure
+  VERIFIER_OUTPUT_REF: https://github.com/Arcanada-one/muneral/actions/runs/34749867268
+  SIGNING_KEY_FINGERPRINT: SHA256:9QFqysn44UjA8rXyfHjItP3b2Oadhnbf1bDNqXrsCig
+##[endgroup]
+### graph-admission — refused (failure)
+
+- repository `Arcanada-one/muneral`, range `a4d1a1b92b14..c1eae2a6b339`, 11 changed file(s)
+- receipts: 0 from the head tree, 0 from the pull-request body
+- reason codes: AUTOMATED_AUTHOR_NOT_ELIGIBLE, RECEIPT_MISSING
+
+- **verified** `BUNDLE_SIGNATURE_VERIFIED` — BUNDLE.json carries a valid Ed25519 SSHSIG detached signature in namespace 'graph-admission-bundle' by SHA256:9QFqysn44UjA8rXyfHjItP3b2Oadhnbf1bDNqXrsCig, which is the key this caller pins. Every per-file sha256 below is therefore signed, not merely self-consistent.
+- **refuse** `RECEIPT_SOURCES_EMPTY` — no ChangeAdmissionReceipt/v1 in the head tree (receipts/graph/**/*.json, receipts/**/change-admission-*.json) and none as a ```json block in the pull-request body. «Нет receipt — нет мержа».
+- **admit** `AUTOMATED_AUTHOR_NOT_ELIGIBLE` — login/id/type 'Arcanada'/275027503/'User' matches no registered automated author (dependabot[bot]); the head branch name 'integration/batch-1' is not evidence of authorship
+- **refuse** `RECEIPT_MISSING` — no ChangeAdmissionReceipt/v1 bound to a4d1a1b92b14..c1eae2a6b339 (0 candidate receipt(s) examined)
+
+Rule (DEC-AUP-0008, AUP-GRAPH-006): «нет receipt — нет мержа». `not_measured` is a third verdict, never read as pass. CI is a POST-HOC gate (DEC-AUP-0007): the authoritative admission is the local `tools/graph/admit_change.py gate` run of the agent that made the change.
+
+##[group]Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+with:
+  name: graph-admission-result
+  path: /home/runner/work/_temp/graph-admission/*.json
+  if-no-files-found: warn
+  compression-level: 6
+  overwrite: false
+  include-hidden-files: false
+  archive: true
+env:
+  pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+  PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+  Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+  Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+  Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+  LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+##[endgroup]
+With the provided path, there will be 2 files uploaded
+Artifact name is valid!
+Root directory input is valid!
+Uploading artifact: graph-admission-result.zip
+Beginning upload of artifact content to blob storage
+Uploaded bytes 3493
+Finished uploading artifact content to blob storage!
+SHA256 digest of uploaded artifact is cebcb867fb9c0dc02e50594f8085c15389faa8f0699d97955accbc3426a87b90
+Finalizing artifact upload
+Artifact graph-admission-result successfully finalized. Artifact ID 10314509849
+Artifact graph-admission-result has been successfully uploaded! Final size is 3493 bytes. Artifact ID is 10314509849
+Artifact download URL: https://github.com/Arcanada-one/muneral/actions/runs/34749867268/artifacts/10314509849
+##[group]Run set -uo pipefail
+set -uo pipefail
+if [ "${RC:-}" != "0" ]; then
+  echo "::error title=graph-admission::the admission gate returned ${RC:-<no verdict>} — see the job summary and the graph-admission-result artefact"
+  exit 1
+fi
+echo "graph-admission: admitted"
+shell: /usr/bin/bash -e {0}
+env:
+  pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+  PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+  Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+  Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+  Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+  LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+  RC: 1
+##[endgroup]
+##[error]the admission gate returned 1 — see the job summary and the graph-admission-result artefact
+##[error]Process completed with exit code 1.
+Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Post job cleanup.
+[command]/usr/bin/git version
+git version 2.55.0
+Temporarily overriding HOME='/home/runner/work/_temp/21191462-c4ad-4719-b062-2c0c47f0d301' before making global git config changes
+Adding repository directory to the temporary git global config as a safe directory
+[command]/usr/bin/git config --global --add safe.directory /home/runner/work/muneral/muneral
+[command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+[command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+[command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+[command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+[command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+[command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Cleaning up orphan processes
+##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11d5960a326750d5838078e36cf38b85af677262, actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

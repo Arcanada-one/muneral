@@ -1,0 +1,199 @@
+{
+ "admission": {
+  "rule": "admitted requires every verdict = verified; failed without exemption \u21d2 refused; not_measured without exemption \u21d2 paused_safe; exemptions (owner + expiry) are attached by the admitting agent, never by the verifier (DEC-AUP-0008, matrix P1/P4)",
+  "structural_exclusion_rule": "DEC-AUP-0034: an affected entity is NOT verdict-owing when all three hold \u2014 the verifier matrix declares neither a mandatory nor a selectable verifier for its node type (so the only verdict it could ever carry states a property of the MATRIX, not of this change), the change set does not contain it, and its bytes are identical at base and head. Each one is listed in structural_exclusions with the content hash at both revisions that proves the byte-identity, and impact_pair.receipt_problems re-derives that proof from Git rather than believing the receipt.",
+  "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item \u2014 the ordinary case after a rebase or a second commit on a card \u2014 the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
+  "verdict": "admitted"
+ },
+ "captured_at_utc": "2026-11-07T06:10:50Z",
+ "change_set": {
+  "base": "486181ee5ce9a30935b12469dc2acdcad8c20863",
+  "files": [
+   {
+    "kind": "test",
+    "node_id": "code_unit:apps/web/components/task/TaskReadiness.blocker-disclosure.test.tsx",
+    "node_ids": [
+     "code_unit:apps/web/components/task/TaskReadiness.blocker-disclosure.test.tsx"
+    ],
+    "path": "apps/web/components/task/TaskReadiness.blocker-disclosure.test.tsx",
+    "status": "A"
+   }
+  ],
+  "head": "f8b8533527a9f9921a3dd4071cb8c216f91eb6cf",
+  "mode": "diff"
+ },
+ "decision_ref": "DEC-AUP-0008",
+ "exemptions": [],
+ "graph": {
+  "builder_version": "1.0.6",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:3e0c2ad74aef0fd63f01d25bf47f703ace1f4d11934cb1470db68f079f6bf0fe",
+  "path": "/tmp/arcana-verify-8oz93jel/verifier-out/graph-486181ee5ce9.json",
+  "source_commit": "486181ee5ce9a30935b12469dc2acdcad8c20863"
+ },
+ "head_graph": {
+  "builder_version": "1.0.6",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:76f6d69cd08210023bc8b7948e55882a73d43302f19d9b107050affcf5698747",
+  "path": "/tmp/arcana-verify-8oz93jel/verifier-out/graph-head-f8b8533527a9.json",
+  "source_commit": "f8b8533527a9f9921a3dd4071cb8c216f91eb6cf",
+  "staleness": {
+   "checked_at_utc": "2026-11-07T06:21:09Z",
+   "checked_nodes": 604,
+   "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+   "mismatched_nodes": [],
+   "verdict": "fresh"
+  }
+ },
+ "host": "ci-general",
+ "host_redacted": true,
+ "host_sha256": "8f243259b236590f27c7ba51d6da650f92d2149ca893ab7d68f191e8dbbde5ce",
+ "impact_set": {
+  "deterministic_core": [
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "deployable_unit:apps/web",
+    "node_type": "deployable_unit",
+    "path": [
+     {
+      "edge_type": "deploys_to",
+      "from": "code_unit:apps/web/components/task/TaskReadiness.blocker-disclosure.test.tsx",
+      "provenance": "deterministic",
+      "to": "deployable_unit:apps/web",
+      "via": "containment"
+     }
+    ],
+    "revisions": [
+     "head"
+    ],
+    "verifier_hint": "can-i-deploy gate (GRAPH-008)"
+   }
+  ],
+  "edge_types": "all",
+  "global_fallback": {
+   "triggered": false
+  },
+  "inferred_tail": [],
+  "max_depth": 3,
+  "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
+  "total": 1
+ },
+ "notes": [
+  "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = \u22c3 edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i\u2026",
+  "profile: .arcana/verify.json at verified head; baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none"
+ ],
+ "producer": {
+  "tool": "tools/graph/verify.py",
+  "version": "1.4.1"
+ },
+ "receipt_id": "car-verify-20261107T061050Z-f8b85335",
+ "repo": {
+  "name": "Arcanada-one/muneral",
+  "path": "/home/dev/aup/claude-work/mun-hyg-20261022/kb-ingest-scope-20261105/true-positive-followthrough-20261106/next-20261106T1113Z/merge-approve-held-20261107T0507Z/mun-hyg-pr348-car-merge/muneral"
+ },
+ "revision_selection": {
+  "base": [],
+  "head": [
+   "code_unit:apps/web/components/task/TaskReadiness.blocker-disclosure.test.tsx",
+   "deployable_unit:apps/web"
+  ],
+  "schema": "RevisionImpactSelection/v1",
+  "unmeasured_head_files": []
+ },
+ "schema": "ChangeAdmissionReceipt/v1",
+ "staleness": {
+  "checked_at_utc": "2026-11-07T06:21:00Z",
+  "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+  "mismatched_nodes": [],
+  "verdict": "fresh"
+ },
+ "structural_exclusions": [],
+ "tree": {
+  "commit": "f8b8533527a9f9921a3dd4071cb8c216f91eb6cf",
+  "dirty": false
+ },
+ "verdicts": [
+  {
+   "entity": "code_unit:apps/web/components/task/TaskReadiness.blocker-disclosure.test.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
+   "entity": "deployable_unit:apps/web",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: 0 errors; v-fitness: no new violation in apps/web",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  }
+ ],
+ "verifier_selection": {
+  "applied": {},
+  "not_applied": [],
+  "requested": [],
+  "schema": "VerifierSelection/v1"
+ },
+ "verifiers": [
+  {
+   "command": "/home/dev/aup/claude-work/mun-hyg-20261022/kb-ingest-scope-20261105/true-positive-followthrough-20261106/next-20261106T1113Z/merge-approve-held-20261107T0507Z/mun-hyg-pr348-car-merge/muneral/apps/web/node_modules/.bin/tsc -p /home/dev/aup/claude-work/mun-hyg-20261022/kb-ingest-scope-20261105/true-positive-followthrough-20261106/next-20261106T1113Z/merge-approve-held-20261107T0507Z/mun-hyg-pr348-car-merge/muneral/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/arcana-verify-8oz93jel/verifier-out/type-check-ilc4swtn/check.tsbuildinfo --listFiles",
+   "duration_s": 186.58,
+   "entities": [
+    "code_unit:apps/web/components/task/TaskReadiness.blocker-disclosure.test.tsx",
+    "deployable_unit:apps/web"
+   ],
+   "entity_verdicts": {
+    "code_unit:apps/web/components/task/TaskReadiness.blocker-disclosure.test.tsx": "verified",
+    "deployable_unit:apps/web": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-type-check-apps-web-tsconfig",
+   "kind": "type_check",
+   "output_ref": "/tmp/arcana-verify-8oz93jel/verifier-out/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-11-07T06:24:01Z",
+   "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1431 files listed"
+  },
+  {
+   "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
+   "duration_s": 0.47,
+   "entities": [
+    "code_unit:apps/web/components/task/TaskReadiness.blocker-disclosure.test.tsx",
+    "deployable_unit:apps/web"
+   ],
+   "entity_verdicts": {
+    "code_unit:apps/web/components/task/TaskReadiness.blocker-disclosure.test.tsx": "verified",
+    "deployable_unit:apps/web": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-fitness",
+   "kind": "fitness_rules",
+   "output_ref": "/tmp/arcana-verify-8oz93jel/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-11-07T06:27:10Z",
+   "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
+  }
+ ],
+ "verify": {
+  "events": [],
+  "required_by_entity": {
+   "code_unit:apps/web/components/task/TaskReadiness.blocker-disclosure.test.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "deployable_unit:apps/web": [
+    "fitness_rules",
+    "type_check"
+   ]
+  },
+  "seconds": {
+   "prepare": 84.56,
+   "total": 980.2,
+   "verifiers": 187.05
+  }
+ },
+ "work_item": "eacc90ef-a0be-40e6-a283-04eaa54c2732"
+}
