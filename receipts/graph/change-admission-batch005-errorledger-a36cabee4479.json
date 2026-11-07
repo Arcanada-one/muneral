@@ -1,0 +1,468 @@
+{
+ "admission": {
+  "rule": "admitted requires every verdict = verified; failed without exemption ⇒ refused; not_measured without exemption ⇒ paused_safe; exemptions (owner + expiry) are attached by the admitting agent, never by the verifier (DEC-AUP-0008, matrix P1/P4)",
+  "structural_exclusion_rule": "DEC-AUP-0034: an affected entity is NOT verdict-owing when all three hold — the verifier matrix declares neither a mandatory nor a selectable verifier for its node type (so the only verdict it could ever carry states a property of the MATRIX, not of this change), the change set does not contain it, and its bytes are identical at base and head. Each one is listed in structural_exclusions with the content hash at both revisions that proves the byte-identity, and impact_pair.receipt_problems re-derives that proof from Git rather than believing the receipt.",
+  "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
+  "verdict": "admitted_with_exemptions"
+ },
+ "captured_at_utc": "2026-11-07T03:33:14Z",
+ "change_set": {
+  "base": "a8d449215da5f43ab177aa7f7455d4d1d8bdce49",
+  "files": [
+   {
+    "kind": "other",
+    "path": ".gitignore",
+    "status": "M",
+    "uncovered": true
+   },
+   {
+    "kind": "test",
+    "path": "apps/api/test/assembly/mutation-results.json",
+    "status": "M",
+    "uncovered": true
+   },
+   {
+    "kind": "other",
+    "new": true,
+    "path": "data/pr108_graph_admission.log",
+    "status": "A"
+   },
+   {
+    "kind": "other",
+    "new": true,
+    "path": "data/pr108_lint_and_test.log",
+    "status": "A"
+   },
+   {
+    "kind": "other",
+    "node_id": "code_unit:scripts/ci/collect-error-ledger.py",
+    "node_ids": [
+     "code_unit:scripts/ci/collect-error-ledger.py"
+    ],
+    "path": "scripts/ci/collect-error-ledger.py",
+    "status": "A"
+   },
+   {
+    "kind": "code",
+    "node_id": "code_unit:scripts/ci/error-ledger.mjs",
+    "node_ids": [
+     "code_unit:scripts/ci/error-ledger.mjs"
+    ],
+    "path": "scripts/ci/error-ledger.mjs",
+    "status": "A"
+   },
+   {
+    "kind": "test",
+    "node_id": "code_unit:scripts/ci/error-ledger.test.mjs",
+    "node_ids": [
+     "code_unit:scripts/ci/error-ledger.test.mjs"
+    ],
+    "path": "scripts/ci/error-ledger.test.mjs",
+    "status": "A"
+   }
+  ],
+  "head": "a36cabee44790d648597a62f1719f4740ac3d25a",
+  "mode": "diff"
+ },
+ "decision_ref": "DEC-AUP-0008",
+ "empty_impact_explanation": {
+  "binding": {
+   "input": {
+    "base": "a8d449215da5f43ab177aa7f7455d4d1d8bdce49",
+    "base_graph_digest": "sha256:8616dd5bd6a72b5db0da0bfda1b2ad4954054a6cb82e07dde00781f3103f5683",
+    "head": "a36cabee44790d648597a62f1719f4740ac3d25a",
+    "head_graph_digest": "sha256:f2545f7c7463189ae17da6275e546e391ebe847c57eec492bbedb45a20a64c40",
+    "reason": "BATCH-005 adds ErrorLedger/v1 collector scripts under scripts/ci/ plus retained #108 log fixtures under data/ and a .gitignore negation for those fixtures; mutation-results.json only rebinds supplementalGit. None of these paths are TypeScript deployable graph seeds with dependents: the collector is invoked by CI collect / node --test and does not import into apps/api or apps/web. Empty dependent prediction is therefore expected, not an approval.",
+    "schema": "EmptyImpactExplanation/v1",
+    "scope": "graph_non_seed_dependents"
+   },
+   "input_sha256": "sha256:d733fae2840112166fe06933e9e940ffee27942f85a44779563e02ac9845ee99",
+   "schema": "BoundEmptyImpactExplanation/v1"
+  },
+  "graph_metadata": {
+   "revisions": {
+    "base": {
+     "changed_node_known_to_graph": false,
+     "edge_types": "all",
+     "external_reverse_edges": 0,
+     "extractors": [
+      "imports",
+      "routes",
+      "contracts",
+      "prisma",
+      "config",
+      "reuse",
+      "di",
+      "queue",
+      "tests",
+      "http_client",
+      "deployables",
+      "docs",
+      "work_items",
+      "receipts",
+      "rust",
+      "python",
+      "systemd"
+     ],
+     "files": [
+      {
+       "kind": "other",
+       "path": ".gitignore",
+       "status": "M",
+       "uncovered": true
+      },
+      {
+       "kind": "test",
+       "path": "apps/api/test/assembly/mutation-results.json",
+       "status": "M",
+       "uncovered": true
+      },
+      {
+       "kind": "other",
+       "new": true,
+       "path": "data/pr108_graph_admission.log",
+       "status": "A"
+      },
+      {
+       "kind": "other",
+       "new": true,
+       "path": "data/pr108_lint_and_test.log",
+       "status": "A"
+      },
+      {
+       "kind": "other",
+       "new": true,
+       "path": "scripts/ci/collect-error-ledger.py",
+       "status": "A"
+      },
+      {
+       "kind": "code",
+       "new": true,
+       "path": "scripts/ci/error-ledger.mjs",
+       "status": "A"
+      },
+      {
+       "kind": "test",
+       "new": true,
+       "path": "scripts/ci/error-ledger.test.mjs",
+       "status": "A"
+      }
+     ],
+     "graph_digest": "sha256:8616dd5bd6a72b5db0da0bfda1b2ad4954054a6cb82e07dde00781f3103f5683",
+     "internal_reverse_edges": 0,
+     "language_coverage": [
+      "typescript",
+      "javascript",
+      "prisma",
+      "markdown",
+      "json-receipts",
+      "rust",
+      "python",
+      "bash",
+      "bats"
+     ],
+     "max_depth": 3,
+     "seeds": [],
+     "source_commit": "a8d449215da5f43ab177aa7f7455d4d1d8bdce49"
+    },
+    "head": {
+     "changed_node_known_to_graph": true,
+     "edge_types": "all",
+     "external_reverse_edges": 0,
+     "extractors": [
+      "imports",
+      "routes",
+      "contracts",
+      "prisma",
+      "config",
+      "reuse",
+      "di",
+      "queue",
+      "tests",
+      "http_client",
+      "deployables",
+      "docs",
+      "work_items",
+      "receipts",
+      "rust",
+      "python",
+      "systemd"
+     ],
+     "files": [
+      {
+       "kind": "other",
+       "path": ".gitignore",
+       "status": "M",
+       "uncovered": true
+      },
+      {
+       "kind": "test",
+       "path": "apps/api/test/assembly/mutation-results.json",
+       "status": "M",
+       "uncovered": true
+      },
+      {
+       "kind": "other",
+       "new": true,
+       "path": "data/pr108_graph_admission.log",
+       "status": "A"
+      },
+      {
+       "kind": "other",
+       "new": true,
+       "path": "data/pr108_lint_and_test.log",
+       "status": "A"
+      },
+      {
+       "kind": "other",
+       "node_id": "code_unit:scripts/ci/collect-error-ledger.py",
+       "node_ids": [
+        "code_unit:scripts/ci/collect-error-ledger.py"
+       ],
+       "path": "scripts/ci/collect-error-ledger.py",
+       "status": "A"
+      },
+      {
+       "kind": "code",
+       "node_id": "code_unit:scripts/ci/error-ledger.mjs",
+       "node_ids": [
+        "code_unit:scripts/ci/error-ledger.mjs"
+       ],
+       "path": "scripts/ci/error-ledger.mjs",
+       "status": "A"
+      },
+      {
+       "kind": "test",
+       "node_id": "code_unit:scripts/ci/error-ledger.test.mjs",
+       "node_ids": [
+        "code_unit:scripts/ci/error-ledger.test.mjs"
+       ],
+       "path": "scripts/ci/error-ledger.test.mjs",
+       "status": "A"
+      }
+     ],
+     "graph_digest": "sha256:f2545f7c7463189ae17da6275e546e391ebe847c57eec492bbedb45a20a64c40",
+     "internal_reverse_edges": 2,
+     "language_coverage": [
+      "typescript",
+      "javascript",
+      "prisma",
+      "markdown",
+      "json-receipts",
+      "rust",
+      "python",
+      "bash",
+      "bats"
+     ],
+     "max_depth": 3,
+     "seeds": [
+      "code_unit:scripts/ci/collect-error-ledger.py",
+      "code_unit:scripts/ci/error-ledger.mjs",
+      "code_unit:scripts/ci/error-ledger.test.mjs"
+     ],
+     "source_commit": "a36cabee44790d648597a62f1719f4740ac3d25a"
+    }
+   },
+   "scope": "graph_non_seed_dependents"
+  },
+  "reason": "BATCH-005 adds ErrorLedger/v1 collector scripts under scripts/ci/ plus retained #108 log fixtures under data/ and a .gitignore negation for those fixtures; mutation-results.json only rebinds supplementalGit. None of these paths are TypeScript deployable graph seeds with dependents: the collector is invoked by CI collect / node --test and does not import into apps/api or apps/web. Empty dependent prediction is therefore expected, not an approval.",
+  "schema": "BoundEmptyImpactExplanation/v1"
+ },
+ "exemptions": [
+  {
+   "code": "UNTYPED_SCRIPT_BEHAVIOUR_TESTED",
+   "entity": "code_unit:scripts/ci/error-ledger.mjs",
+   "expires_at_utc": "2027-05-07T00:00:00Z",
+   "owner": "Arcanada (BATCH-005 / 76507918-300d-49bd-a244-df7f22e3f6e3)",
+   "reason": "No tsconfig covers scripts/ci/*.mjs (COVERAGE_GAP). Behaviour is measured by scripts/ci/error-ledger.test.mjs via node --test (5/5 PASS): PR#108 fixtures yield exactly C01/C02/C03; environment clusters get null fix_hint; CLI writes error-ledger.json+.md."
+  },
+  {
+   "code": "UNTYPED_SCRIPT_BEHAVIOUR_TESTED",
+   "entity": "code_unit:scripts/ci/error-ledger.test.mjs",
+   "expires_at_utc": "2027-05-07T00:00:00Z",
+   "owner": "Arcanada (BATCH-005 / 76507918-300d-49bd-a244-df7f22e3f6e3)",
+   "reason": "The test file itself is the measurement harness (node --test scripts/ci/error-ledger.test.mjs). It is not part of a TypeScript deployable; type-check COVERAGE_GAP is expected and does not claim the collector untested."
+  }
+ ],
+ "graph": {
+  "builder_version": "1.0.6",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:8616dd5bd6a72b5db0da0bfda1b2ad4954054a6cb82e07dde00781f3103f5683",
+  "path": "/home/dev/aup/claude-work/janitor-resume-20261106/ws-batch005/repo/receipts/graph/verifier-out/batch005-c/graph-a8d449215da5.json",
+  "source_commit": "a8d449215da5f43ab177aa7f7455d4d1d8bdce49"
+ },
+ "head_graph": {
+  "builder_version": "1.0.6",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:f2545f7c7463189ae17da6275e546e391ebe847c57eec492bbedb45a20a64c40",
+  "path": "/home/dev/aup/claude-work/janitor-resume-20261106/ws-batch005/repo/receipts/graph/verifier-out/batch005-c/graph-head-a36cabee4479.json",
+  "source_commit": "a36cabee44790d648597a62f1719f4740ac3d25a",
+  "staleness": {
+   "checked_at_utc": "2026-11-07T03:37:58Z",
+   "checked_nodes": 586,
+   "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+   "mismatched_nodes": [],
+   "verdict": "fresh"
+  }
+ },
+ "host": "arcana-devs",
+ "impact_set": {
+  "deterministic_core": [],
+  "edge_types": "all",
+  "global_fallback": {
+   "triggered": false
+  },
+  "inferred_tail": [],
+  "max_depth": 3,
+  "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
+  "total": 0
+ },
+ "notes": [
+  "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
+  "profile: .arcana/verify.json at verified head; baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none",
+  "exemptions: 2 attached from /home/dev/aup/claude-work/janitor-resume-20261106/ws-batch005/refs/car/exemptions.json"
+ ],
+ "producer": {
+  "tool": "tools/graph/verify.py",
+  "version": "1.4.1"
+ },
+ "receipt_id": "car-verify-20261107T033314Z-a36cabee",
+ "receipt_path": "receipts/graph/change-admission-batch005-errorledger-a36cabee4479.json",
+ "repo": {
+  "name": "Arcanada-one/muneral",
+  "path": "/home/dev/aup/claude-work/janitor-resume-20261106/ws-batch005/repo"
+ },
+ "revision_selection": {
+  "base": [],
+  "head": [
+   "code_unit:scripts/ci/collect-error-ledger.py",
+   "code_unit:scripts/ci/error-ledger.mjs",
+   "code_unit:scripts/ci/error-ledger.test.mjs"
+  ],
+  "schema": "RevisionImpactSelection/v1",
+  "unmeasured_head_files": []
+ },
+ "schema": "ChangeAdmissionReceipt/v1",
+ "staleness": {
+  "checked_at_utc": "2026-11-07T03:37:57Z",
+  "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+  "mismatched_nodes": [],
+  "verdict": "fresh"
+ },
+ "structural_exclusions": [],
+ "tree": {
+  "commit": "a36cabee44790d648597a62f1719f4740ac3d25a",
+  "dirty": false
+ },
+ "verdicts": [
+  {
+   "entity": "code_unit:scripts/ci/collect-error-ledger.py",
+   "reason": "v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness"
+   ]
+  },
+  {
+   "entity": "code_unit:scripts/ci/error-ledger.mjs",
+   "reason": "v-type-check-uncovered: COVERAGE_GAP: scripts/ci/error-ledger.mjs lies in no deployable with a TypeScript project and no tsconfig.json exists in its directory, any directory above it, or the root",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-uncovered"
+   ]
+  },
+  {
+   "entity": "code_unit:scripts/ci/error-ledger.test.mjs",
+   "reason": "v-type-check-uncovered: COVERAGE_GAP: scripts/ci/error-ledger.test.mjs lies in no deployable with a TypeScript project and no tsconfig.json exists in its directory, any directory above it, or the root",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-uncovered"
+   ]
+  }
+ ],
+ "verifier_selection": {
+  "applied": {},
+  "not_applied": [],
+  "requested": [],
+  "schema": "VerifierSelection/v1"
+ },
+ "verifiers": [
+  {
+   "command": "(none: no compiler project is attributed to these entities)",
+   "duration_s": 0.0,
+   "entities": [
+    "code_unit:scripts/ci/error-ledger.mjs",
+    "code_unit:scripts/ci/error-ledger.test.mjs"
+   ],
+   "entity_verdicts": {
+    "code_unit:scripts/ci/error-ledger.mjs": "not_measured",
+    "code_unit:scripts/ci/error-ledger.test.mjs": "not_measured"
+   },
+   "exit_code": 127,
+   "id": "v-type-check-uncovered",
+   "kind": "type_check",
+   "output_ref": "/home/dev/aup/claude-work/janitor-resume-20261106/ws-batch005/repo/receipts/graph/verifier-out/batch005-c/v-type-check-uncovered.txt",
+   "started_at_utc": "2026-11-07T03:38:51Z",
+   "summary": "not_measured: 2 entity(ies) no tsconfig covers"
+  },
+  {
+   "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
+   "duration_s": 0.98,
+   "entities": [
+    "code_unit:scripts/ci/collect-error-ledger.py",
+    "code_unit:scripts/ci/error-ledger.mjs",
+    "code_unit:scripts/ci/error-ledger.test.mjs"
+   ],
+   "entity_verdicts": {
+    "code_unit:scripts/ci/collect-error-ledger.py": "verified",
+    "code_unit:scripts/ci/error-ledger.mjs": "verified",
+    "code_unit:scripts/ci/error-ledger.test.mjs": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-fitness",
+   "kind": "fitness_rules",
+   "output_ref": "/home/dev/aup/claude-work/janitor-resume-20261106/ws-batch005/repo/receipts/graph/verifier-out/batch005-c/v-fitness.json",
+   "started_at_utc": "2026-11-07T03:38:51Z",
+   "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
+  }
+ ],
+ "verify": {
+  "events": [
+   {
+    "code": {
+     "code": "EMPTY_IMPACT_REQUIRES_EXPLANATION",
+     "revision": "base",
+     "text": "non-documentation change with an empty impact set: a prediction that must be explained in the receipt (empty_impact_explanation), never an approval"
+    }
+   },
+   {
+    "code": {
+     "code": "EMPTY_IMPACT_REQUIRES_EXPLANATION",
+     "revision": "head",
+     "text": "non-documentation change with an empty impact set: a prediction that must be explained in the receipt (empty_impact_explanation), never an approval"
+    }
+   }
+  ],
+  "required_by_entity": {
+   "code_unit:scripts/ci/collect-error-ledger.py": [
+    "fitness_rules"
+   ],
+   "code_unit:scripts/ci/error-ledger.mjs": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:scripts/ci/error-ledger.test.mjs": [
+    "fitness_rules",
+    "type_check"
+   ]
+  },
+  "seconds": {
+   "prepare": 32.0,
+   "total": 337.81,
+   "verifiers": 0.98
+  }
+ },
+ "work_item": "76507918-300d-49bd-a244-df7f22e3f6e3"
+}
