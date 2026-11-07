@@ -54,7 +54,20 @@ function CopyBlockerTaskIdButton({ blockerTaskId }: { blockerTaskId: string }) {
 }
 
 export function TaskReadiness({ taskId }: TaskReadinessProps) {
-  const { data, isLoading, isError, isFetching, refetch } = useTaskReadiness(taskId);
+  const readiness = useTaskReadiness(taskId);
+
+  return <TaskReadinessPanel key={taskId} taskId={taskId} readiness={readiness} />;
+}
+
+function TaskReadinessPanel({
+  taskId,
+  readiness,
+}: {
+  taskId: string;
+  readiness: ReturnType<typeof useTaskReadiness>;
+}) {
+  const { data, isLoading, isError, isFetching, refetch } = readiness;
+  const [blockersExpanded, setBlockersExpanded] = useState(true);
 
   let content;
   if (!taskId) {
@@ -77,7 +90,22 @@ export function TaskReadiness({ taskId }: TaskReadinessProps) {
         <p className="text-sm text-muted-foreground">
           {data.blockedBy.length} of {data.dependencyCount} dependency links are blocking this task.
         </p>
-        <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
+        {data.blockedBy.length > 0 && (
+          <button
+            type="button"
+            aria-controls={`task-readiness-${taskId}-blockers`}
+            aria-expanded={blockersExpanded}
+            className="mt-2 rounded text-sm text-foreground underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            onClick={() => setBlockersExpanded((expanded) => !expanded)}
+          >
+            {blockersExpanded ? 'Hide blocking tasks' : 'Show blocking tasks'}
+          </button>
+        )}
+        <ul
+          id={`task-readiness-${taskId}-blockers`}
+          hidden={!blockersExpanded}
+          className="mt-2 list-disc space-y-1 pl-5 text-sm"
+        >
           {data.blockedBy.map((edge) => {
             const title = edge.otherTaskTitleWithheld === true ? null : edge.otherTaskTitle;
             const status = getTaskStatusLabel(edge.otherTaskStatus);
