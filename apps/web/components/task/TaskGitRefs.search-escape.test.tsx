@@ -40,7 +40,7 @@ const refs = [
 const privateMarker = 'private-credential';
 const originalClipboard = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
 
-function renderRefs(parentKeyDown?: ReturnType<typeof vi.fn>) {
+function renderRefs(parentKeyDown = vi.fn()) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const view = render(
     <div onKeyDown={parentKeyDown}>
