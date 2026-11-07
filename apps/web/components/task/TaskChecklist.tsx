@@ -15,10 +15,13 @@ interface ChecklistItemsProps {
   items: ChecklistItem[];
   expanded: boolean;
   hideCompleted: boolean;
+  showCompletedOnly: boolean;
   searchQuery: string;
   pendingToggleKeys: Set<string>;
   onToggle: (itemId: string, checked: boolean) => void;
   onHideCompletedChange: (hideCompleted: boolean) => void;
+  onShowCompletedOnlyChange: (showCompletedOnly: boolean) => void;
+  onShowAll: () => void;
   onSearchQueryChange: (searchQuery: string) => void;
 }
 
@@ -27,15 +30,22 @@ function ChecklistItems({
   items,
   expanded,
   hideCompleted,
+  showCompletedOnly,
   searchQuery,
   pendingToggleKeys,
   onToggle,
   onHideCompletedChange,
+  onShowCompletedOnlyChange,
+  onShowAll,
   onSearchQueryChange,
 }: ChecklistItemsProps) {
   if (!expanded) return null;
 
-  const eligibleItems = hideCompleted ? items.filter((item) => !item.checked) : items;
+  const eligibleItems = hideCompleted
+    ? items.filter((item) => !item.checked)
+    : showCompletedOnly
+      ? items.filter((item) => item.checked)
+      : items;
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
   const visibleItems = eligibleItems.filter((item) =>
     item.label.toLowerCase().includes(normalizedSearchQuery),
@@ -45,6 +55,7 @@ function ChecklistItems({
   const copyBatchKey = JSON.stringify([
     taskId,
     hideCompleted,
+    showCompletedOnly,
     searchQuery,
     visibleItems.map((item) => [item.id, item.label]),
   ]);
@@ -88,8 +99,17 @@ function ChecklistItems({
           >
             Hide completed items
           </Button>
-          {hideCompleted && (
-            <Button type="button" variant="outline" size="sm" onClick={() => onHideCompletedChange(false)}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            aria-pressed={showCompletedOnly}
+            onClick={() => onShowCompletedOnlyChange(!showCompletedOnly)}
+          >
+            Show completed items only
+          </Button>
+          {(hideCompleted || showCompletedOnly) && (
+            <Button type="button" variant="outline" size="sm" onClick={onShowAll}>
               Show all items
             </Button>
           )}
@@ -103,8 +123,14 @@ function ChecklistItems({
           {hasSearch
             ? hideCompleted
               ? 'No incomplete loaded checklist items match this search. Clear search or show all items.'
-              : 'No loaded checklist items match this search. Clear search to show the loaded items.'
-            : 'No incomplete items in this loaded checklist.'}
+              : showCompletedOnly
+                ? 'No completed loaded checklist items match this search. Clear search or show all items.'
+                : 'No loaded checklist items match this search. Clear search to show the loaded items.'
+            : hideCompleted
+              ? 'No incomplete items in this loaded checklist.'
+              : showCompletedOnly
+                ? 'No completed items in this loaded checklist.'
+                : 'No loaded checklist items are available.'}
         </p>
       ) : (
         <ul className="space-y-2">
@@ -189,12 +215,18 @@ function CopyVisibleChecklistLabels({ visibleItems }: { visibleItems: ChecklistI
 export function TaskChecklist({ taskId }: TaskChecklistProps) {
   const [expanded, setExpanded] = useState(true);
   const [retryingTaskId, setRetryingTaskId] = useState<string | null>(null);
-  const [filterState, setFilterState] = useState({ taskId, hideCompleted: false, searchQuery: '' });
+  const [filterState, setFilterState] = useState({
+    taskId,
+    hideCompleted: false,
+    showCompletedOnly: false,
+    searchQuery: '',
+  });
   const filterTaskIdRef = useRef(taskId);
   const pendingToggleKeysRef = useRef(new Set<string>());
   const [pendingToggleKeys, setPendingToggleKeys] = useState<Set<string>>(new Set());
   const { data, isPending, isError, isFetching, refetch } = useChecklist(taskId);
   const hideCompleted = filterState.taskId === taskId && filterState.hideCompleted;
+  const showCompletedOnly = filterState.taskId === taskId && filterState.showCompletedOnly;
   const searchQuery = filterState.taskId === taskId ? filterState.searchQuery : '';
   const items = data ?? [];
   const toggle = useToggleChecklistItem();
@@ -208,7 +240,7 @@ export function TaskChecklist({ taskId }: TaskChecklistProps) {
   useEffect(() => {
     if (filterTaskIdRef.current === taskId) return;
     filterTaskIdRef.current = taskId;
-    setFilterState({ taskId, hideCompleted: false, searchQuery: '' });
+    setFilterState({ taskId, hideCompleted: false, showCompletedOnly: false, searchQuery: '' });
   }, [taskId]);
 
   const toggleChecklistItem = (itemId: string, checked: boolean) => {
@@ -305,17 +337,32 @@ export function TaskChecklist({ taskId }: TaskChecklistProps) {
         items={items}
         expanded={expanded}
         hideCompleted={hideCompleted}
+        showCompletedOnly={showCompletedOnly}
         searchQuery={searchQuery}
         pendingToggleKeys={pendingToggleKeys}
         onToggle={toggleChecklistItem}
         onHideCompletedChange={(nextHideCompleted) => setFilterState((current) => ({
           taskId,
           hideCompleted: nextHideCompleted,
+          showCompletedOnly: false,
+          searchQuery: current.taskId === taskId ? current.searchQuery : '',
+        }))}
+        onShowCompletedOnlyChange={(nextShowCompletedOnly) => setFilterState((current) => ({
+          taskId,
+          hideCompleted: false,
+          showCompletedOnly: nextShowCompletedOnly,
+          searchQuery: current.taskId === taskId ? current.searchQuery : '',
+        }))}
+        onShowAll={() => setFilterState((current) => ({
+          taskId,
+          hideCompleted: false,
+          showCompletedOnly: false,
           searchQuery: current.taskId === taskId ? current.searchQuery : '',
         }))}
         onSearchQueryChange={(nextSearchQuery) => setFilterState((current) => ({
           taskId,
           hideCompleted: current.taskId === taskId && current.hideCompleted,
+          showCompletedOnly: current.taskId === taskId && current.showCompletedOnly,
           searchQuery: nextSearchQuery,
         }))}
       />
