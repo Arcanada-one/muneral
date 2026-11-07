@@ -144,39 +144,17 @@ function DependencyList({
     id: number;
     generation: number;
   } | null>(null);
-  const copyGeneration = useRef({
-    generation: 0,
-    taskId,
-    deps,
-    direction,
-    hideCompleted,
-    searchQuery,
-  });
+  const [titleBatchCopyFeedback, setTitleBatchCopyFeedback] = useState<{
+    generation: number;
+    result: 'copied' | 'failed';
+  } | null>(null);
+  const [pendingTitleBatchCopy, setPendingTitleBatchCopy] = useState<{
+    id: number;
+    generation: number;
+  } | null>(null);
   const copyAttempt = useRef(0);
   const pendingCopyRef = useRef<{ id: number; generation: number } | null>(null);
-
-  const previousBatch = copyGeneration.current;
-  if (previousBatch.taskId !== taskId || previousBatch.deps !== deps
-      || previousBatch.direction !== direction || previousBatch.hideCompleted !== hideCompleted
-      || previousBatch.searchQuery !== searchQuery) {
-    copyGeneration.current = {
-      generation: previousBatch.generation + 1,
-      taskId,
-      deps,
-      direction,
-      hideCompleted,
-      searchQuery,
-    };
-  }
-
-  const invalidateCopyBatch = () => {
-    copyGeneration.current = {
-      ...copyGeneration.current,
-      generation: copyGeneration.current.generation + 1,
-    };
-    setBatchCopyFeedback(null);
-    setPendingBatchCopy(null);
-  };
+  const pendingTitleCopyRef = useRef<{ id: number; generation: number } | null>(null);
 
   const hideCompletedId = useId();
   const searchId = useId();
@@ -192,10 +170,78 @@ function DependencyList({
       && (direction === 'all' || dep.direction === direction)
       && (!hideCompleted || dep.otherTaskStatus !== 'done');
   });
+  const eligibleTitles = visibleDeps.flatMap((dep) => {
+    if (dep.otherTaskTitleWithheld === true) return [];
+    const title = dep.otherTaskTitle;
+    return typeof title === 'string' && title.trim().length > 0 ? [title] : [];
+  });
+  const titleBatchKey = JSON.stringify([
+    taskId,
+    direction,
+    hideCompleted,
+    searchQuery,
+    visibleDeps.map((dep) => {
+      if (dep.otherTaskTitleWithheld === true) {
+        return [dep.id, dep.type, dep.direction, dep.fromTaskId, dep.toTaskId,
+          dep.otherTaskId, 'withheld', dep.otherTaskStatus];
+      }
+      return [dep.id, dep.type, dep.direction, dep.fromTaskId, dep.toTaskId,
+        dep.otherTaskId, dep.otherTaskTitle, dep.otherTaskStatus];
+    }),
+  ]);
+  const copyGeneration = useRef({
+    generation: 0,
+    taskId,
+    deps,
+    direction,
+    hideCompleted,
+    searchQuery,
+    titleBatchKey,
+  });
+
+  const previousBatch = copyGeneration.current;
+  if (previousBatch.taskId !== taskId || previousBatch.deps !== deps
+      || previousBatch.direction !== direction || previousBatch.hideCompleted !== hideCompleted
+      || previousBatch.searchQuery !== searchQuery
+      || previousBatch.titleBatchKey !== titleBatchKey) {
+    copyGeneration.current = {
+      generation: previousBatch.generation + 1,
+      taskId,
+      deps,
+      direction,
+      hideCompleted,
+      searchQuery,
+      titleBatchKey,
+    };
+  }
+
+  const invalidateCopyBatch = () => {
+    copyGeneration.current = {
+      ...copyGeneration.current,
+      generation: copyGeneration.current.generation + 1,
+    };
+    setBatchCopyFeedback(null);
+    setPendingBatchCopy(null);
+    setTitleBatchCopyFeedback(null);
+    setPendingTitleBatchCopy(null);
+  };
+
+  useEffect(() => () => {
+    copyGeneration.current = {
+      ...copyGeneration.current,
+      generation: copyGeneration.current.generation + 1,
+    };
+    pendingCopyRef.current = null;
+    pendingTitleCopyRef.current = null;
+  }, []);
+
   const currentGeneration = copyGeneration.current.generation;
   const isBatchCopyPending = pendingBatchCopy?.generation === currentGeneration;
   const currentBatchCopyFeedback = batchCopyFeedback?.generation === currentGeneration
     ? batchCopyFeedback.result : null;
+  const isTitleBatchCopyPending = pendingTitleBatchCopy?.generation === currentGeneration;
+  const currentTitleBatchCopyFeedback = titleBatchCopyFeedback?.generation === currentGeneration
+    ? titleBatchCopyFeedback.result : null;
 
   const copyVisibleTaskIds = async () => {
     const generation = copyGeneration.current.generation;
@@ -220,6 +266,33 @@ function DependencyList({
       if (pendingCopyRef.current?.id === attempt.id) {
         pendingCopyRef.current = null;
         setPendingBatchCopy((current) => current?.id === attempt.id ? null : current);
+      }
+    }
+  };
+
+  const copyVisibleDependencyTitles = async () => {
+    const generation = copyGeneration.current.generation;
+    if (eligibleTitles.length === 0 || pendingTitleCopyRef.current?.generation === generation) return;
+
+    const attempt = { id: ++copyAttempt.current, generation };
+    pendingTitleCopyRef.current = attempt;
+    setPendingTitleBatchCopy(attempt);
+    setTitleBatchCopyFeedback(null);
+    try {
+      const clipboard = navigator.clipboard;
+      if (typeof clipboard?.writeText !== 'function') throw new Error('Clipboard unavailable');
+      await clipboard.writeText(eligibleTitles.join('\n'));
+      if (copyGeneration.current.generation === generation) {
+        setTitleBatchCopyFeedback({ generation, result: 'copied' });
+      }
+    } catch {
+      if (copyGeneration.current.generation === generation) {
+        setTitleBatchCopyFeedback({ generation, result: 'failed' });
+      }
+    } finally {
+      if (pendingTitleCopyRef.current?.id === attempt.id) {
+        pendingTitleCopyRef.current = null;
+        setPendingTitleBatchCopy((current) => current?.id === attempt.id ? null : current);
       }
     }
   };
@@ -302,6 +375,23 @@ function DependencyList({
         {currentBatchCopyFeedback === 'failed' && (
           <span role="alert" className="text-xs text-destructive">
             Could not copy dependency task IDs. Try again or copy them manually.
+          </span>
+        )}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => void copyVisibleDependencyTitles()}
+          disabled={eligibleTitles.length === 0 || isTitleBatchCopyPending}
+        >
+          Copy available dependency titles ({eligibleTitles.length})
+        </Button>
+        {currentTitleBatchCopyFeedback === 'copied' && (
+          <span role="status" className="text-xs text-green-700">Dependency titles copied.</span>
+        )}
+        {currentTitleBatchCopyFeedback === 'failed' && (
+          <span role="alert" className="text-xs text-destructive">
+            Could not copy dependency titles. Try again or copy them manually.
           </span>
         )}
       </div>
