@@ -119,6 +119,27 @@ function CopyAvailableGitReferenceLinks({ urls }: { urls: string[] }) {
   );
 }
 
+function VisibleGitReferenceKindSummary({ refs }: { refs: TaskGitRef[] }) {
+  let repositories = 0;
+  let branches = 0;
+  let commits = 0;
+  let other = 0;
+
+  for (const ref of refs) {
+    if (ref.type === 'repo') repositories += 1;
+    else if (ref.type === 'branch') branches += 1;
+    else if (ref.type === 'commit') commits += 1;
+    else other += 1;
+  }
+
+  return (
+    <p role="status" aria-label="Visible reference kinds" className="mb-3 text-xs text-muted-foreground">
+      Visible reference kinds for current loaded rows: Repositories {repositories}; Branches {branches}; Commits {commits}
+      {other > 0 ? `; Other ${other}` : ''}.
+    </p>
+  );
+}
+
 function CopyAvailableGitReferenceValues({ refs }: { refs: TaskGitRef[] }) {
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const [isCopying, setIsCopying] = useState(false);
@@ -206,6 +227,7 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
     .filter((ref) => safeRepositoryUrl(ref.url))
     .map((ref) => ref.url);
   const availableReferences = filteredRefs.filter((ref) => safeRepositoryUrl(ref.url));
+  const showVisibleKindSummary = !isLoading && !isError && !isFetching && refs !== undefined;
   const visibleBatchKey = JSON.stringify([
     taskId,
     selectedKind,
@@ -246,6 +268,7 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
     body = (
       <>
         <p className="text-sm text-muted-foreground">No Git references.</p>
+        {showVisibleKindSummary && <VisibleGitReferenceKindSummary refs={filteredRefs} />}
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <CopyAvailableGitReferenceLinks key={visibleBatchKey} urls={availableLinkUrls} />
           <CopyAvailableGitReferenceValues key={availableReferencesKey} refs={availableReferences} />
@@ -337,6 +360,7 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
         <p className="mb-3 text-xs text-muted-foreground">
           Showing {filteredRefs.length} of {refs.length} loaded Git references.
         </p>
+        {showVisibleKindSummary && <VisibleGitReferenceKindSummary refs={filteredRefs} />}
         {filteredRefs.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             No matching Git references in the loaded list.{' '}
