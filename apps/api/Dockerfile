@@ -1,8 +1,11 @@
 FROM node:26.13.0-alpine@sha256:8996bb5821d62a8fd9bb27c1cb07462f3fdce6e47d640c6a881ead0b064ce216 AS builder
 WORKDIR /app
 
-# Enable corepack so pnpm is available (version comes from packageManager in package.json)
-RUN corepack enable
+# Node 26+ official images no longer ship corepack. Restore it, then honor
+# packageManager (pnpm@11.5.2) from package.json as the source of truth.
+RUN npm install --global corepack@0.36.0 \
+  && corepack enable \
+  && corepack prepare pnpm@11.5.2 --activate
 
 # Copy workspace manifests + lockfile + .npmrc (needed for @prisma/* public-hoist-pattern)
 COPY .npmrc ./
