@@ -5,9 +5,9 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "admitted"
  },
- "captured_at_utc": "2026-11-08T02:03:32Z",
+ "captured_at_utc": "2026-11-08T02:32:33Z",
  "change_set": {
-  "base": "b0d21394164a0ec66ebb726f19d7a35bec531d3b",
+  "base": "ae6d45afcf1e2e26f762df7ce632b2c19f811d17",
   "files": [
    {
     "kind": "code",
@@ -37,7 +37,7 @@
     "status": "A"
    }
   ],
-  "head": "44634c66b202e497a717536a7d7e4ba17ac7bf41",
+  "head": "3fed9fbf9dd83089d0642d748cb64b25ae6a89c3",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -45,19 +45,19 @@
  "graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:bb38058a09816cc487f92044fa0d1a519d8d753b4a0630a6c01fa19f61a76411",
-  "path": "/tmp/arcana-verify-bcm8lmbe/verifier-out/graph-b0d21394164a.json",
-  "source_commit": "b0d21394164a0ec66ebb726f19d7a35bec531d3b"
+  "graph_digest": "sha256:5441ea165ff39156c5ca8a6a059d0b700efaa503174892358dd6785b261cb891",
+  "path": "/tmp/arcana-verify-frj3c1ct/verifier-out/graph-ae6d45afcf1e.json",
+  "source_commit": "ae6d45afcf1e2e26f762df7ce632b2c19f811d17"
  },
  "head_graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:44cc9a011d3965a4505c1923cd551452df5186c5f1c77e621393079d9679e70b",
-  "path": "/tmp/arcana-verify-bcm8lmbe/verifier-out/graph-head-44634c66b202.json",
-  "source_commit": "44634c66b202e497a717536a7d7e4ba17ac7bf41",
+  "graph_digest": "sha256:7c5297b3e802c06a6eca13eb3db456fe081ae96e5f50448f016c9a178a29f3c4",
+  "path": "/tmp/arcana-verify-frj3c1ct/verifier-out/graph-head-3fed9fbf9dd8.json",
+  "source_commit": "3fed9fbf9dd83089d0642d748cb64b25ae6a89c3",
   "staleness": {
-   "checked_at_utc": "2026-11-08T02:07:55Z",
-   "checked_nodes": 636,
+   "checked_at_utc": "2026-11-08T02:35:52Z",
+   "checked_nodes": 638,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -65,7 +65,7 @@
  },
  "host": "mun-hyg-da3aebdd-lane",
  "host_redacted": true,
- "host_sha256": "e4de8240ae43f1933dbdd38378bb8e86195c5d2facaca5b63a498f7143c5a63c",
+ "host_sha256": "91e2328aabffc90c5ff2ac6477781b3ce762740a1ebeeb64bcdae784fa521e6f",
  "impact_set": {
   "deterministic_core": [
    {
@@ -428,6 +428,26 @@
    {
     "boundary": "intra_unit",
     "depth": 1,
+    "entity": "code_unit:apps/web/components/task/TaskGitRefs.destination-disclosure.test.tsx",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:apps/web/components/task/TaskGitRefs.destination-disclosure.test.tsx",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "relative"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
     "entity": "code_unit:apps/web/components/task/TaskGitRefs.reset-filters.test.tsx",
     "node_type": "code_unit",
     "path": [
@@ -675,6 +695,26 @@
      {
       "edge_type": "verifies",
       "from": "receipt:receipts/graph/car-verify-mun-hyg-327-repository-destination.json",
+      "provenance": "deterministic",
+      "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-49d7a18e-gitref-destination-disclosure.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-49d7a18e-gitref-destination-disclosure.json",
       "provenance": "deterministic",
       "to": "code_unit:apps/web/components/task/TaskGitRefs.tsx",
       "via": "explicit-path"
@@ -2531,7 +2571,7 @@
   "inferred_tail": [],
   "max_depth": 3,
   "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
-  "total": 100
+  "total": 102
  },
  "notes": [
   "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
@@ -2541,7 +2581,7 @@
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261108T020332Z-44634c66",
+ "receipt_id": "car-verify-20261108T023233Z-3fed9fbf",
  "receipt_path": "receipts/graph/change-admission-muneral-task-gitrefs-unavailable-only-20261108.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -2563,6 +2603,7 @@
    "code_unit:apps/web/components/task/TaskGitRefs.copy-visible-links.test.tsx",
    "code_unit:apps/web/components/task/TaskGitRefs.copy-visible-values.test.tsx",
    "code_unit:apps/web/components/task/TaskGitRefs.copy.test.tsx",
+   "code_unit:apps/web/components/task/TaskGitRefs.destination-disclosure.test.tsx",
    "code_unit:apps/web/components/task/TaskGitRefs.reset-filters.test.tsx",
    "code_unit:apps/web/components/task/TaskGitRefs.retry.test.tsx",
    "code_unit:apps/web/components/task/TaskGitRefs.search-escape.test.tsx",
@@ -2576,6 +2617,7 @@
    "receipt:receipts/graph/backend-workspace-isolation-20261008.json",
    "receipt:receipts/graph/car-verify-20261102T145742Z-a753f831.json",
    "receipt:receipts/graph/car-verify-mun-hyg-327-repository-destination.json",
+   "receipt:receipts/graph/change-admission-49d7a18e-gitref-destination-disclosure.json",
    "receipt:receipts/graph/change-admission-61c598d4-gitref-search-escape.json",
    "receipt:receipts/graph/change-admission-7f48736d-pr351.json",
    "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json",
@@ -2666,6 +2708,7 @@
    "code_unit:apps/web/components/task/TaskGitRefs.copy-visible-links.test.tsx",
    "code_unit:apps/web/components/task/TaskGitRefs.copy-visible-values.test.tsx",
    "code_unit:apps/web/components/task/TaskGitRefs.copy.test.tsx",
+   "code_unit:apps/web/components/task/TaskGitRefs.destination-disclosure.test.tsx",
    "code_unit:apps/web/components/task/TaskGitRefs.reset-filters.test.tsx",
    "code_unit:apps/web/components/task/TaskGitRefs.retry.test.tsx",
    "code_unit:apps/web/components/task/TaskGitRefs.search-escape.test.tsx",
@@ -2680,6 +2723,7 @@
    "receipt:receipts/graph/backend-workspace-isolation-20261008.json",
    "receipt:receipts/graph/car-verify-20261102T145742Z-a753f831.json",
    "receipt:receipts/graph/car-verify-mun-hyg-327-repository-destination.json",
+   "receipt:receipts/graph/change-admission-49d7a18e-gitref-destination-disclosure.json",
    "receipt:receipts/graph/change-admission-61c598d4-gitref-search-escape.json",
    "receipt:receipts/graph/change-admission-7f48736d-pr351.json",
    "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json",
@@ -2761,7 +2805,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-11-08T02:07:54Z",
+  "checked_at_utc": "2026-11-08T02:35:52Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -2841,6 +2885,17 @@
    "entity": "receipt:receipts/graph/car-verify-mun-hyg-327-repository-destination.json",
    "node_type": "receipt",
    "path": "receipts/graph/car-verify-mun-hyg-327-repository-destination.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:8c13483f639453f61bc661d2642e8b154c97fc2b62225e52a1b82182b9ed17da",
+    "head": "sha256:8c13483f639453f61bc661d2642e8b154c97fc2b62225e52a1b82182b9ed17da"
+   },
+   "entity": "receipt:receipts/graph/change-admission-49d7a18e-gitref-destination-disclosure.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-49d7a18e-gitref-destination-disclosure.json",
    "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
    "rule": "DEC-AUP-0034"
   },
@@ -3430,7 +3485,7 @@
   {
    "content_hash": {
     "base": null,
-    "head": "sha256:28c9ae726b9c15368cc91100490809b901e060f2fa0d7e9175e4f142fe162961"
+    "head": "sha256:138c4d3e7ebe8c6bc86095927db13bc1054201cd258bca2dc52694ead2d417f8"
    },
    "entity": "receipt:receipts/graph/change-admission-muneral-task-gitrefs-unavailable-only-20261108.json",
    "node_type": "receipt",
@@ -3675,7 +3730,7 @@
   }
  ],
  "tree": {
-  "commit": "44634c66b202e497a717536a7d7e4ba17ac7bf41",
+  "commit": "3fed9fbf9dd83089d0642d748cb64b25ae6a89c3",
   "dirty": false
  },
  "verdicts": [
@@ -3806,6 +3861,15 @@
    ]
   },
   {
+   "entity": "code_unit:apps/web/components/task/TaskGitRefs.destination-disclosure.test.tsx",
+   "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-web-tsconfig"
+   ]
+  },
+  {
    "entity": "code_unit:apps/web/components/task/TaskGitRefs.reset-filters.test.tsx",
    "reason": "v-type-check-apps-web-tsconfig: apps/web/tsconfig.json: project compiles, 0 errors; v-fitness: no new fitness violation",
    "verdict": "verified",
@@ -3877,8 +3941,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-da3aebdd-gitref-unavailable-only/repo/apps/web/node_modules/.bin/tsc -p /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-da3aebdd-gitref-unavailable-only/repo/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/arcana-verify-bcm8lmbe/verifier-out/type-check-gwwdgpcj/check.tsbuildinfo --listFiles",
-   "duration_s": 41.17,
+   "command": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-da3aebdd-gitref-unavailable-only/repo/apps/web/node_modules/.bin/tsc -p /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-da3aebdd-gitref-unavailable-only/repo/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/arcana-verify-frj3c1ct/verifier-out/type-check-84fwyqhl/check.tsbuildinfo --listFiles",
+   "duration_s": 19.15,
    "entities": [
     "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
     "code_unit:apps/web/__tests__/task-detail-retry.test.tsx",
@@ -3894,6 +3958,7 @@
     "code_unit:apps/web/components/task/TaskGitRefs.copy-visible-links.test.tsx",
     "code_unit:apps/web/components/task/TaskGitRefs.copy-visible-values.test.tsx",
     "code_unit:apps/web/components/task/TaskGitRefs.copy.test.tsx",
+    "code_unit:apps/web/components/task/TaskGitRefs.destination-disclosure.test.tsx",
     "code_unit:apps/web/components/task/TaskGitRefs.reset-filters.test.tsx",
     "code_unit:apps/web/components/task/TaskGitRefs.retry.test.tsx",
     "code_unit:apps/web/components/task/TaskGitRefs.search-escape.test.tsx",
@@ -3917,6 +3982,7 @@
     "code_unit:apps/web/components/task/TaskGitRefs.copy-visible-links.test.tsx": "verified",
     "code_unit:apps/web/components/task/TaskGitRefs.copy-visible-values.test.tsx": "verified",
     "code_unit:apps/web/components/task/TaskGitRefs.copy.test.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskGitRefs.destination-disclosure.test.tsx": "verified",
     "code_unit:apps/web/components/task/TaskGitRefs.reset-filters.test.tsx": "verified",
     "code_unit:apps/web/components/task/TaskGitRefs.retry.test.tsx": "verified",
     "code_unit:apps/web/components/task/TaskGitRefs.search-escape.test.tsx": "verified",
@@ -3928,13 +3994,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/tmp/arcana-verify-bcm8lmbe/verifier-out/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-11-08T02:08:26Z",
-   "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1449 files listed"
+   "output_ref": "/tmp/arcana-verify-frj3c1ct/verifier-out/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-11-08T02:36:07Z",
+   "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1450 files listed"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.75,
+   "duration_s": 0.29,
    "entities": [
     "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
     "code_unit:apps/web/__tests__/task-detail-retry.test.tsx",
@@ -3950,6 +4016,7 @@
     "code_unit:apps/web/components/task/TaskGitRefs.copy-visible-links.test.tsx",
     "code_unit:apps/web/components/task/TaskGitRefs.copy-visible-values.test.tsx",
     "code_unit:apps/web/components/task/TaskGitRefs.copy.test.tsx",
+    "code_unit:apps/web/components/task/TaskGitRefs.destination-disclosure.test.tsx",
     "code_unit:apps/web/components/task/TaskGitRefs.reset-filters.test.tsx",
     "code_unit:apps/web/components/task/TaskGitRefs.retry.test.tsx",
     "code_unit:apps/web/components/task/TaskGitRefs.search-escape.test.tsx",
@@ -3973,6 +4040,7 @@
     "code_unit:apps/web/components/task/TaskGitRefs.copy-visible-links.test.tsx": "verified",
     "code_unit:apps/web/components/task/TaskGitRefs.copy-visible-values.test.tsx": "verified",
     "code_unit:apps/web/components/task/TaskGitRefs.copy.test.tsx": "verified",
+    "code_unit:apps/web/components/task/TaskGitRefs.destination-disclosure.test.tsx": "verified",
     "code_unit:apps/web/components/task/TaskGitRefs.reset-filters.test.tsx": "verified",
     "code_unit:apps/web/components/task/TaskGitRefs.retry.test.tsx": "verified",
     "code_unit:apps/web/components/task/TaskGitRefs.search-escape.test.tsx": "verified",
@@ -3984,8 +4052,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/tmp/arcana-verify-bcm8lmbe/verifier-out/v-fitness.json",
-   "started_at_utc": "2026-11-08T02:09:08Z",
+   "output_ref": "/tmp/arcana-verify-frj3c1ct/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-11-08T02:36:26Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   }
  ],
@@ -4000,7 +4068,7 @@
    {
     "code": "STRUCTURAL_EXCLUSION",
     "rule": "DEC-AUP-0034",
-    "text": "82 affected entity(ies) owe no verdict (receipt: 82): unchanged at both revisions and given no verifier by the matrix"
+    "text": "83 affected entity(ies) owe no verdict (receipt: 83): unchanged at both revisions and given no verifier by the matrix"
    }
   ],
   "required_by_entity": {
@@ -4060,6 +4128,10 @@
     "fitness_rules",
     "type_check"
    ],
+   "code_unit:apps/web/components/task/TaskGitRefs.destination-disclosure.test.tsx": [
+    "fitness_rules",
+    "type_check"
+   ],
    "code_unit:apps/web/components/task/TaskGitRefs.reset-filters.test.tsx": [
     "fitness_rules",
     "type_check"
@@ -4095,6 +4167,7 @@
    "receipt:receipts/graph/backend-workspace-isolation-20261008.json": [],
    "receipt:receipts/graph/car-verify-20261102T145742Z-a753f831.json": [],
    "receipt:receipts/graph/car-verify-mun-hyg-327-repository-destination.json": [],
+   "receipt:receipts/graph/change-admission-49d7a18e-gitref-destination-disclosure.json": [],
    "receipt:receipts/graph/change-admission-61c598d4-gitref-search-escape.json": [],
    "receipt:receipts/graph/change-admission-7f48736d-pr351.json": [],
    "receipt:receipts/graph/change-admission-MUNERAL210-075162f.json": [],
@@ -4172,9 +4245,9 @@
    "receipt:receipts/graph/security-api959a-caller788.json": []
   },
   "seconds": {
-   "prepare": 14.88,
-   "total": 337.53,
-   "verifiers": 41.92
+   "prepare": 7.07,
+   "total": 233.96,
+   "verifiers": 19.44
   }
  },
  "work_item": "da3aebdd-684f-4599-bed5-7e9818a93bbd"
