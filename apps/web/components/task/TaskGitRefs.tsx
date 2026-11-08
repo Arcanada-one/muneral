@@ -285,6 +285,7 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [availableLinksOnly, setAvailableLinksOnly] = useState(false);
   const [unavailableLinksOnly, setUnavailableLinksOnly] = useState(false);
+  const [wrapReferenceText, setWrapReferenceText] = useState(false);
   const kindSelectId = useId();
   const searchInputId = useId();
   const availableOnlyId = `${kindSelectId}-available-only`;
@@ -437,6 +438,15 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
             />
             Show unavailable links only
           </label>
+          <label htmlFor={`${kindSelectId}-wrap`} className="inline-flex items-center gap-2 text-sm">
+            <input
+              id={`${kindSelectId}-wrap`}
+              type="checkbox"
+              checked={wrapReferenceText}
+              onChange={(event) => setWrapReferenceText(event.target.checked)}
+            />
+            Wrap Git reference text
+          </label>
           {searchQuery !== '' && (
             <Button type="button" variant="outline" size="sm" onClick={() => setSearchQuery('')}>
               Clear search
@@ -496,7 +506,9 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
                     className="flex min-w-0 flex-1 items-center gap-2 text-sm text-primary hover:underline"
                   >
                     <Icon className="h-4 w-4 flex-shrink-0" />
-                    <span className="truncate font-mono text-xs">{referenceText}</span>
+                    <span className={wrapReferenceText
+                      ? 'min-w-0 flex-1 whitespace-normal break-all font-mono text-xs'
+                      : 'truncate font-mono text-xs'}>{referenceText}</span>
                     <ExternalLink className="h-3 w-3 flex-shrink-0 opacity-50" />
                   </a>
                   <CopyGitReference
