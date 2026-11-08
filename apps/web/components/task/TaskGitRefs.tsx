@@ -286,6 +286,7 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
   const [availableLinksOnly, setAvailableLinksOnly] = useState(false);
   const [unavailableLinksOnly, setUnavailableLinksOnly] = useState(false);
   const [wrapReferenceText, setWrapReferenceText] = useState(false);
+  const [reverseLoadedOrder, setReverseLoadedOrder] = useState(false);
   const kindSelectId = useId();
   const searchInputId = useId();
   const availableOnlyId = `${kindSelectId}-available-only`;
@@ -306,16 +307,18 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
     const referenceText = ref.ref || ref.url;
     return `${referenceText}\n${ref.url}`.toLowerCase().includes(normalizedSearchQuery);
   });
-  const availableLinkUrls = filteredRefs
+  const visibleRefs = reverseLoadedOrder ? [...filteredRefs].reverse() : filteredRefs;
+  const availableLinkUrls = visibleRefs
     .filter((ref) => safeRepositoryUrl(ref.url))
     .map((ref) => ref.url);
-  const availableReferences = filteredRefs.filter((ref) => safeRepositoryUrl(ref.url));
+  const availableReferences = visibleRefs.filter((ref) => safeRepositoryUrl(ref.url));
   const visibleBatchKey = JSON.stringify([
     taskId,
     selectedKind,
     searchQuery,
     availableLinksOnly,
     unavailableLinksOnly,
+    reverseLoadedOrder,
     (refs ?? []).map((ref) => [ref.id, ref.type, ref.ref, ref.url]),
   ]);
   const availableReferencesKey = JSON.stringify([
@@ -324,6 +327,7 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
     searchQuery,
     availableLinksOnly,
     unavailableLinksOnly,
+    reverseLoadedOrder,
     dataUpdatedAt,
     availableReferences.map((ref) => [ref.id, ref.type, ref.ref, ref.url]),
   ]);
@@ -438,6 +442,15 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
             />
             Show unavailable links only
           </label>
+          <label htmlFor={`${kindSelectId}-reverse-loaded-order`} className="inline-flex items-center gap-2 text-sm">
+            <input
+              id={`${kindSelectId}-reverse-loaded-order`}
+              type="checkbox"
+              checked={reverseLoadedOrder}
+              onChange={(event) => setReverseLoadedOrder(event.target.checked)}
+            />
+            Reverse loaded order
+          </label>
           <label htmlFor={`${kindSelectId}-wrap`} className="inline-flex items-center gap-2 text-sm">
             <input
               id={`${kindSelectId}-wrap`}
@@ -470,9 +483,9 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
           <CopyAvailableGitReferenceValues key={availableReferencesKey} refs={availableReferences} />
         </div>
         <p className="mb-3 text-xs text-muted-foreground">
-          Showing {filteredRefs.length} of {refs.length} loaded Git references.
+          Showing {visibleRefs.length} of {refs.length} loaded Git references.
         </p>
-        {filteredRefs.length === 0 ? (
+        {visibleRefs.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             No matching Git references in the loaded list.{' '}
             {searchQuery !== ''
@@ -483,7 +496,7 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
           </p>
         ) : (
           <ul className="space-y-2">
-            {filteredRefs.map((ref) => {
+            {visibleRefs.map((ref) => {
               const Icon = iconMap[ref.type] ?? ExternalLink;
               const referenceText = ref.ref || ref.url;
               const referenceLabel = referenceLabels[ref.type] ?? 'Git';
