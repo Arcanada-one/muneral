@@ -11,6 +11,8 @@ interface TaskReadinessProps {
   taskId: string;
 }
 
+type BlockerStatusFilter = 'all' | 'todo' | 'in_progress' | 'review' | 'blocked';
+
 function CopyBlockerTaskIdButton({ blockerTaskId }: { blockerTaskId: string }) {
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const [isCopying, setIsCopying] = useState(false);
@@ -201,10 +203,12 @@ function TaskReadinessPanel({
 }) {
   const { data, isLoading, isError, isFetching, refetch } = readiness;
   const [searchQuery, setSearchQuery] = useState('');
+  const [blockerStatusFilter, setBlockerStatusFilter] = useState<BlockerStatusFilter>('all');
   const [blockersExpanded, setBlockersExpanded] = useState(true);
   const [reverseBlockerOrder, setReverseBlockerOrder] = useState(false);
   const [visibleCopyRevision, setVisibleCopyRevision] = useState(0);
   const searchInputId = useId();
+  const statusFilterId = useId();
   const reverseOrderId = useId();
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
 
@@ -226,9 +230,15 @@ function TaskReadinessPanel({
   } else {
     const loadedBlockers = data.blockedBy;
     const loadedBlockerIds = Array.from(new Set(loadedBlockers.map((edge) => edge.otherTaskId)));
-    const filteredBlockers = normalizedSearchQuery
-      ? loadedBlockers.filter((edge) => blockerSearchText(edge).includes(normalizedSearchQuery))
-      : loadedBlockers;
+    const filteredBlockers = loadedBlockers.filter((edge) => {
+      if (blockerStatusFilter !== 'all' && edge.otherTaskStatus !== blockerStatusFilter) {
+        return false;
+      }
+      if (!normalizedSearchQuery) {
+        return true;
+      }
+      return blockerSearchText(edge).includes(normalizedSearchQuery);
+    });
     const visibleBlockers = reverseBlockerOrder
       ? [...filteredBlockers].reverse()
       : filteredBlockers;
@@ -238,6 +248,7 @@ function TaskReadinessPanel({
       visibleCopyRevision,
       reverseBlockerOrder,
       searchQuery,
+      blockerStatusFilter,
       visibleBlockerIds,
     ]);
 
@@ -265,7 +276,27 @@ function TaskReadinessPanel({
               blockerTaskIds={visibleBlockerIds}
               selectionKey={visibleCopySelectionKey}
             />
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+            <div className="mt-3 flex flex-wrap items-end gap-2">
+              <div className="flex flex-col gap-1">
+                <label htmlFor={statusFilterId} className="text-sm">
+                  Blocker status
+                </label>
+                <select
+                  id={statusFilterId}
+                  value={blockerStatusFilter}
+                  onChange={(event) => {
+                    setBlockerStatusFilter(event.target.value as BlockerStatusFilter);
+                    setVisibleCopyRevision((revision) => revision + 1);
+                  }}
+                  className="rounded border bg-background px-2 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  <option value="all">All blocker statuses</option>
+                  <option value="todo">To Do</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="review">Review</option>
+                  <option value="blocked">Blocked</option>
+                </select>
+              </div>
               <label htmlFor={searchInputId} className="text-sm">
                 Search loaded blockers
               </label>
@@ -340,7 +371,9 @@ function TaskReadinessPanel({
             <p className="mt-2 text-sm text-muted-foreground">
               {loadedBlockers.length === 0
                 ? 'No loaded readiness blockers.'
-                : 'No matching readiness blockers in the loaded list. Clear search to show more.'}
+                : blockerStatusFilter !== 'all'
+                  ? 'No loaded blocking dependencies match the selected filters. Choose All blocker statuses or clear search to broaden the loaded results.'
+                  : 'No matching readiness blockers in the loaded list. Clear search to show more.'}
             </p>
           ) : (
             <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
