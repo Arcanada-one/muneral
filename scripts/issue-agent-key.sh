@@ -13,6 +13,8 @@
 #
 # Exit: 0 on success; 2 on usage/policy refusal; 1 on API/transport failure.
 set -euo pipefail
+# New directories and API response files must be private from creation.
+umask 077
 
 BASE="${MUNERAL_API_BASE:-https://api.muneral.com/api/v1}"
 JWT="${MUNERAL_JWT:-}"
@@ -56,13 +58,21 @@ case "$OUT" in
   *) printf '%s\n' '--out must be an absolute path' >&2; exit 2 ;;
 esac
 
-# Refuse writing into a tracked git tree (including this clone).
+# Refuse any existing destination, including a dangling final symlink. Never
+# truncate an existing key or rely on chmod after its contents have been written.
+if [ -e "$OUT" ] || [ -L "$OUT" ]; then
+  printf '%s\n' 'refusing existing --out; choose a new protected filename' >&2
+  exit 2
+fi
+
+# Refuse writing into a git tree (including linked worktrees/submodules, whose
+# .git marker is a file). Resolve symlinked parents before walking ancestors.
 out_dir=$(dirname -- "$OUT")
 mkdir -p -- "$out_dir"
 resolved_out=$(cd -- "$out_dir" && pwd -P)/$(basename -- "$OUT")
 probe="$resolved_out"
 while [ "$probe" != "/" ]; do
-  if [ -d "$probe/.git" ]; then
+  if [ -e "$probe/.git" ] || [ -L "$probe/.git" ]; then
     printf 'refusing --out inside a git work tree (%s); use config/credentials/ or another protected path outside git\n' "$probe" >&2
     exit 2
   fi
@@ -124,7 +134,7 @@ if [ "$http_key" != "201" ] && [ "$http_key" != "200" ]; then
 fi
 
 python3 - <<'PY' "$tmp_key" "$resolved_out" "$agent_id" "$NAME"
-import json, os, sys, stat
+import json, os, sys, uuid
 payload = json.load(open(sys.argv[1]))
 out_path, agent_id, name = sys.argv[2], sys.argv[3], sys.argv[4]
 key = payload.get("key") or ""
@@ -139,11 +149,65 @@ body = (
     f"key_id={key_id}\n"
     f"mun_sk={key}\n"
 )
-fd = os.open(out_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-with os.fdopen(fd, "w", encoding="utf-8") as fh:
-    fh.write(body)
-os.chmod(out_path, stat.S_IRUSR | stat.S_IWUSR)
+# Pin the destination directory: a later path/symlink swap must not redirect
+# the write. Recheck git ancestry at publication time using directory handles.
+parent, filename = os.path.split(out_path)
+directory_flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+directory_fd = os.open(parent, directory_flags)
+staging = None
+try:
+    probe_fd = os.dup(directory_fd)
+    try:
+        while True:
+            try:
+                os.stat('.git', dir_fd=probe_fd, follow_symlinks=False)
+            except FileNotFoundError:
+                pass
+            else:
+                raise SystemExit('refusing --out inside a git work tree')
+            upper_fd = os.open('..', directory_flags, dir_fd=probe_fd)
+            here, upper = os.fstat(probe_fd), os.fstat(upper_fd)
+            if (here.st_dev, here.st_ino) == (upper.st_dev, upper.st_ino):
+                os.close(upper_fd)
+                break
+            os.close(probe_fd)
+            probe_fd = upper_fd
+    finally:
+        os.close(probe_fd)
+
+    # The staging file is 0600 before the first plaintext byte. Publish only
+    # after flush/fsync, via an atomic no-clobber link, never rename/replace.
+    candidate = '.muneral-key-' + uuid.uuid4().hex
+    fd = os.open(candidate, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                 0o600, dir_fd=directory_fd)
+    staging = candidate
+    with os.fdopen(fd, 'w', encoding='utf-8') as fh:
+        os.fchmod(fh.fileno(), 0o600)
+        fh.write(body)
+        fh.flush()
+        os.fsync(fh.fileno())
+    try:
+        os.link(staging, filename, src_dir_fd=directory_fd,
+                dst_dir_fd=directory_fd, follow_symlinks=False)
+    except FileExistsError:
+        raise SystemExit('refusing existing --out; destination appeared during issuance')
+    os.unlink(staging, dir_fd=directory_fd)
+    staging = None
+    try:
+        # Sync both publication and removal of the staging name.
+        os.fsync(directory_fd)
+    except OSError:
+        print(f'agentId={agent_id}\nkeyId={key_id}\nout={out_path}', file=sys.stderr)
+        raise SystemExit('credential file published with mode 0600, but durability '
+                         'confirmation failed; inspect --out before retrying')
+finally:
+    try:
+        if staging is not None:
+            os.unlink(staging, dir_fd=directory_fd)
+    finally:
+        os.close(directory_fd)
 print(f"agentId={agent_id}")
 print(f"keyId={key_id}")
 print(f"out={out_path}")
 PY
+
