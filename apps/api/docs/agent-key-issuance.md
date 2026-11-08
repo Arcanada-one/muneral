@@ -64,6 +64,30 @@ The helper:
 3. Writes `keyId`, `agentId`, `name`, and the raw key to `--out` (mode `0600`).
 4. Prints only non-secret identifiers to stdout (`agentId`, `keyId`, `out` path).
 
+`--out` must be a **new** filename outside every Git worktree, including linked
+worktrees and submodules with a `.git` file. Existing files, directories, and
+symlinks (including dangling ones) are refused before an API request. The helper
+never overwrites a previous key: use a new filename for a separately authorized
+issuance or rotation, and manage the old key through the normal lifecycle.
+
+The output is written to a private staging file with mode `0600` before the first
+byte, flushed and synced, then atomically linked to the destination without
+replacing it. A destination created concurrently is also refused. The destination
+filesystem must support hard links and directory syncing. A failure after the API
+has minted a key does not revoke that key automatically; inspect the non-secret
+agent/key identifiers through the authorized administration flow before retrying.
+Use a protected parent directory that other users cannot rename or modify.
+If the final directory sync fails after publication, the complete `0600` file is
+retained and the helper exits nonzero with an explicit publication warning plus
+non-secret identifiers. Inspect that destination before retrying; a nonzero exit
+alone does not mean that no key file exists.
+
+Offline file-safety regression tests (synthetic responses; no API calls):
+
+```bash
+python3 -I scripts/test_issue_agent_key.py
+```
+
 ## Issue by hand (same routes)
 
 ```bash
@@ -130,3 +154,4 @@ Automated proof: `apps/api/test/agent-key-attribution.e2e.spec.ts` (MUN-0066).
 - **MUN-0066** — documented issuance + Collective store cross-link; e2e that two
   keys produce two `actorId`s on status and comment; helper that writes only to a
   protected path.
+
