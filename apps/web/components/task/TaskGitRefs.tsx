@@ -228,17 +228,21 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
   const [selectedKind, setSelectedKind] = useState<GitReferenceKind>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [availableLinksOnly, setAvailableLinksOnly] = useState(false);
+  const [unavailableLinksOnly, setUnavailableLinksOnly] = useState(false);
   const kindSelectId = useId();
   const searchInputId = useId();
   const availableOnlyId = `${kindSelectId}-available-only`;
+  const unavailableOnlyId = `${kindSelectId}-unavailable-only`;
   const { data: refs, dataUpdatedAt, isLoading, isError, isFetching, refetch } = useTaskGitRefs(taskId);
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
   const filteredRefs = (refs ?? []).filter((ref) => {
     if (selectedKind !== 'all' && ref.type !== selectedKind) return false;
-    if (availableLinksOnly && !safeRepositoryUrl(ref.url)) return false;
+    const isSafeUrl = Boolean(safeRepositoryUrl(ref.url));
+    if (availableLinksOnly && !isSafeUrl) return false;
+    if (unavailableLinksOnly && isSafeUrl) return false;
     if (!normalizedSearchQuery) return true;
 
-    if (!safeRepositoryUrl(ref.url)) {
+    if (!isSafeUrl) {
       return 'Reference link unavailable'.toLowerCase().includes(normalizedSearchQuery);
     }
 
@@ -254,6 +258,7 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
     selectedKind,
     searchQuery,
     availableLinksOnly,
+    unavailableLinksOnly,
     (refs ?? []).map((ref) => [ref.id, ref.type, ref.ref, ref.url]),
   ]);
   const availableReferencesKey = JSON.stringify([
@@ -261,9 +266,12 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
     selectedKind,
     searchQuery,
     availableLinksOnly,
+    unavailableLinksOnly,
     dataUpdatedAt,
     availableReferences.map((ref) => [ref.id, ref.type, ref.ref, ref.url]),
   ]);
+  const filtersAreDefault =
+    selectedKind === 'all' && searchQuery === '' && !availableLinksOnly && !unavailableLinksOnly;
 
   let body;
   if (isLoading || (isError && isFetching)) {
@@ -352,9 +360,26 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
               id={availableOnlyId}
               type="checkbox"
               checked={availableLinksOnly}
-              onChange={(event) => setAvailableLinksOnly(event.target.checked)}
+              onChange={(event) => {
+                const checked = event.target.checked;
+                setAvailableLinksOnly(checked);
+                if (checked) setUnavailableLinksOnly(false);
+              }}
             />
             Show available links only
+          </label>
+          <label htmlFor={unavailableOnlyId} className="inline-flex items-center gap-2 text-sm">
+            <input
+              id={unavailableOnlyId}
+              type="checkbox"
+              checked={unavailableLinksOnly}
+              onChange={(event) => {
+                const checked = event.target.checked;
+                setUnavailableLinksOnly(checked);
+                if (checked) setAvailableLinksOnly(false);
+              }}
+            />
+            Show unavailable links only
           </label>
           {searchQuery !== '' && (
             <Button type="button" variant="outline" size="sm" onClick={() => setSearchQuery('')}>
@@ -365,11 +390,12 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
             type="button"
             variant="outline"
             size="sm"
-            disabled={selectedKind === 'all' && searchQuery === '' && !availableLinksOnly}
+            disabled={filtersAreDefault}
             onClick={() => {
               setSelectedKind('all');
               setSearchQuery('');
               setAvailableLinksOnly(false);
+              setUnavailableLinksOnly(false);
             }}
           >
             Reset Git reference filters
@@ -387,6 +413,7 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
               ? 'Clear search or choose All references to show more.'
               : 'Choose All references to show more.'}
             {availableLinksOnly && ' Turn off Show available links only to include unavailable references.'}
+            {unavailableLinksOnly && ' Turn off Show unavailable links only to include available references.'}
           </p>
         ) : (
           <ul className="space-y-2">
