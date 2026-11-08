@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useRef, useState } from 'react';
+import { useId, useLayoutEffect, useRef, useState } from 'react';
 import { Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -107,33 +107,45 @@ function CopyLoadedBlockerIdsButton({
 
 function CopyVisibleLoadedBlockerIdsButton({
   blockerTaskIds,
+  selectionKey,
 }: {
   blockerTaskIds: string[];
+  selectionKey: string;
 }) {
   const isCopyPending = useRef(false);
+  const selectionKeyRef = useRef(selectionKey);
+  useLayoutEffect(() => {
+    selectionKeyRef.current = selectionKey;
+  }, [selectionKey]);
   const [isCopying, setIsCopying] = useState(false);
-  const [copyResult, setCopyResult] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const [copyFeedback, setCopyFeedback] = useState<{
+    selectionKey: string;
+    result: 'idle' | 'copied' | 'failed';
+  }>({ selectionKey, result: 'idle' });
+  const copyResult = copyFeedback.selectionKey === selectionKey ? copyFeedback.result : 'idle';
 
   const copyVisibleLoadedBlockerIds = async () => {
     if (isCopyPending.current || blockerTaskIds.length === 0) return;
 
+    const requestedSelectionKey = selectionKey;
     isCopyPending.current = true;
     setIsCopying(true);
-    setCopyResult('idle');
-
-    const clipboard = typeof navigator === 'undefined' ? undefined : navigator.clipboard;
-    if (!clipboard || typeof clipboard.writeText !== 'function') {
-      isCopyPending.current = false;
-      setIsCopying(false);
-      setCopyResult('failed');
-      return;
-    }
+    setCopyFeedback({ selectionKey: requestedSelectionKey, result: 'idle' });
 
     try {
+      const clipboard = typeof navigator === 'undefined' ? undefined : navigator.clipboard;
+      if (!clipboard || typeof clipboard.writeText !== 'function') {
+        throw new Error('Clipboard unavailable');
+      }
+
       await clipboard.writeText(blockerTaskIds.join('\n'));
-      setCopyResult('copied');
+      if (selectionKeyRef.current === requestedSelectionKey) {
+        setCopyFeedback({ selectionKey: requestedSelectionKey, result: 'copied' });
+      }
     } catch {
-      setCopyResult('failed');
+      if (selectionKeyRef.current === requestedSelectionKey) {
+        setCopyFeedback({ selectionKey: requestedSelectionKey, result: 'failed' });
+      }
     } finally {
       isCopyPending.current = false;
       setIsCopying(false);
@@ -190,7 +202,10 @@ function TaskReadinessPanel({
   const { data, isLoading, isError, isFetching, refetch } = readiness;
   const [searchQuery, setSearchQuery] = useState('');
   const [blockersExpanded, setBlockersExpanded] = useState(true);
+  const [reverseBlockerOrder, setReverseBlockerOrder] = useState(false);
+  const [visibleCopyRevision, setVisibleCopyRevision] = useState(0);
   const searchInputId = useId();
+  const reverseOrderId = useId();
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
 
   let content;
@@ -211,10 +226,20 @@ function TaskReadinessPanel({
   } else {
     const loadedBlockers = data.blockedBy;
     const loadedBlockerIds = Array.from(new Set(loadedBlockers.map((edge) => edge.otherTaskId)));
-    const visibleBlockers = normalizedSearchQuery
+    const filteredBlockers = normalizedSearchQuery
       ? loadedBlockers.filter((edge) => blockerSearchText(edge).includes(normalizedSearchQuery))
       : loadedBlockers;
-    const visibleBlockerIds = Array.from(new Set(visibleBlockers.map((edge) => edge.otherTaskId)));
+    const visibleBlockers = reverseBlockerOrder
+      ? [...filteredBlockers].reverse()
+      : filteredBlockers;
+    const visibleBlockerIds = visibleBlockers.map((edge) => edge.otherTaskId);
+    const visibleCopySelectionKey = JSON.stringify([
+      taskId,
+      visibleCopyRevision,
+      reverseBlockerOrder,
+      searchQuery,
+      visibleBlockerIds,
+    ]);
 
     content = (
       <>
@@ -237,8 +262,8 @@ function TaskReadinessPanel({
               blockerTaskIds={loadedBlockerIds}
             />
             <CopyVisibleLoadedBlockerIdsButton
-              key={JSON.stringify(['visible', taskId, visibleBlockerIds])}
               blockerTaskIds={visibleBlockerIds}
+              selectionKey={visibleCopySelectionKey}
             />
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <label htmlFor={searchInputId} className="text-sm">
@@ -248,7 +273,10 @@ function TaskReadinessPanel({
                 id={searchInputId}
                 type="search"
                 value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
+                onChange={(event) => {
+                  setSearchQuery(event.target.value);
+                  setVisibleCopyRevision((revision) => revision + 1);
+                }}
                 onKeyDown={(event) => {
                   if (
                     event.key !== 'Escape' ||
@@ -265,6 +293,7 @@ function TaskReadinessPanel({
                   event.preventDefault();
                   event.stopPropagation();
                   setSearchQuery('');
+                  setVisibleCopyRevision((revision) => revision + 1);
                 }}
                 aria-describedby={`${searchInputId}-help`}
                 aria-keyshortcuts="Escape"
@@ -279,11 +308,27 @@ function TaskReadinessPanel({
                   type="button"
                   aria-label="Clear search"
                   className="rounded text-sm text-foreground underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  onClick={() => setSearchQuery('')}
+                  onClick={() => {
+                    setSearchQuery('');
+                    setVisibleCopyRevision((revision) => revision + 1);
+                  }}
                 >
                   Clear search
                 </button>
               )}
+              <label htmlFor={reverseOrderId} className="flex items-center gap-2 text-sm text-foreground">
+                <input
+                  id={reverseOrderId}
+                  type="checkbox"
+                  checked={reverseBlockerOrder}
+                  onChange={(event) => {
+                    setReverseBlockerOrder(event.target.checked);
+                    setVisibleCopyRevision((revision) => revision + 1);
+                  }}
+                  className="h-4 w-4 rounded border-input text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                />
+                Reverse loaded blocker order
+              </label>
               <p className="basis-full text-xs text-muted-foreground">
                 Showing {visibleBlockers.length} of {loadedBlockers.length} loaded blocking dependencies.
               </p>

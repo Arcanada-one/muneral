@@ -83,7 +83,7 @@ afterEach(() => {
 });
 
 describe('copy visible loaded blocker IDs', () => {
-  it('copies only currently visible unique IDs under local search, excluding search-hidden blockers', async () => {
+  it('copies currently visible row IDs under local search in rendered order, including duplicate rows', async () => {
     const writeText = installClipboard(vi.fn().mockResolvedValue(undefined));
     const get = vi.spyOn(apiClient, 'get').mockResolvedValueOnce({
       data: readiness({
@@ -115,7 +115,7 @@ describe('copy visible loaded blocker IDs', () => {
 
     renderReadiness();
     await screen.findByText('Alpha blocker');
-    expect(visibleCopyButton(3)).toBeEnabled();
+    expect(visibleCopyButton(4)).toBeEnabled();
 
     fireEvent.change(screen.getByRole('searchbox', { name: 'Search loaded blockers' }), {
       target: { value: ' needle ' },
