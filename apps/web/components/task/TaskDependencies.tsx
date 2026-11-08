@@ -372,8 +372,23 @@ function DependencyList({
             invalidateCopyBatch();
             onSearchQueryChange(event.target.value);
           }}
+          onKeyDown={(event) => {
+            if (event.key !== 'Escape' || event.nativeEvent.isComposing
+                || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey
+                || searchQuery.length === 0) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+            invalidateCopyBatch();
+            onSearchQueryChange('');
+          }}
+          aria-keyshortcuts="Escape"
+          aria-describedby={`${searchId}-escape-help`}
           className="min-w-0 rounded-md border bg-background px-2 py-1"
         />
+        <span id={`${searchId}-escape-help`} className="text-xs text-muted-foreground">
+          Press Escape to clear search.
+        </span>
         <Button
           type="button"
           variant="outline"
