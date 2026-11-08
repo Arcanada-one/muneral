@@ -115,11 +115,11 @@ class TestedTreeQualificationTests(unittest.TestCase):
     def test_comment_unrelated_job_malformed_and_missing_workflows_refuse(self):
         *_, workflow = fixture()
         mutations = (
-            workflow + b"\n# runs-on: [self-hosted, linux, ci-general]\n# node-version: 24.22.1\n",
+            workflow + b"\n# runs-on: [self-hosted, linux, ci-general]\n# node-version: 26.13.0\n",
             workflow.replace(
                 b"  notify-deploy-failure:\n",
                 b"  unrelated-decoy:\n    runs-on: [self-hosted, linux, ci-general]\n"
-                b"    steps:\n      - run: echo 'node-version: 24.22.1'\n"
+                b"    steps:\n      - run: echo 'node-version: 26.13.0'\n"
                 b"  notify-deploy-failure:\n",
                 1,
             ),
@@ -133,7 +133,7 @@ class TestedTreeQualificationTests(unittest.TestCase):
     def test_changed_effective_fields_refuse_even_with_old_value_decoys(self):
         *_, workflow = fixture()
         mutations = (
-            (b"node-version: 24.22.1", b"node-version: 25.1.0"),
+            (b"node-version: 26.13.0", b"node-version: 25.1.0"),
             (b"image: postgres:16", b"image: postgres:17"),
             (
                 b"actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",

@@ -27,7 +27,7 @@ const compose = readFileSync(join(repoRoot, 'docker-compose.prod.yml'), 'utf8');
 /** The Dockerfile's production stage — the ENVs of the builder stage never reach a container. */
 const productionStage = (() => {
   const marker = dockerfile.indexOf(
-    'FROM node:24.22.1-alpine@sha256:6a1c190e17215d844926b0677f4bf87273ff7d5e54db06d3b5b5863ab0b09a3d AS production',
+    'FROM node:26.13.0-alpine@sha256:8996bb5821d62a8fd9bb27c1cb07462f3fdce6e47d640c6a881ead0b064ce216 AS production',
   );
   expect(marker).toBeGreaterThan(-1);
   return dockerfile.slice(marker);
