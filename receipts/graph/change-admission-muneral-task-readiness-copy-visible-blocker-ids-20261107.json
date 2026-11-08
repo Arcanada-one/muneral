@@ -5,9 +5,9 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "admitted"
  },
- "captured_at_utc": "2026-11-08T00:10:56Z",
+ "captured_at_utc": "2026-11-08T00:31:17Z",
  "change_set": {
-  "base": "9e593485dfec8394a2e28c87162b590de433d13f",
+  "base": "d7ed40f52ec599f19e0ae24a96850351b6e2b3e9",
   "files": [
    {
     "kind": "test",
@@ -37,7 +37,7 @@
     "status": "A"
    }
   ],
-  "head": "3ff8fe047fc93b259e2f8e11b6650b667add2196",
+  "head": "88ba16ebd305c45e4ca614352938309343970975",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -45,19 +45,19 @@
  "graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:c68dcaae65411bc2bd08f59bae9303ee0d615c646f8320147d921d16fd07f891",
-  "path": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-a21a34e1-resume-cap/verify-work/verifier-out-reissue/graph-9e593485dfec.json",
-  "source_commit": "9e593485dfec8394a2e28c87162b590de433d13f"
+  "graph_digest": "sha256:13e48573b4c2866a6c10a57b8efe0a1147ef816333354053d86338c3ce2e0759",
+  "path": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-a21a34e1-resume-cap/verify-work/verifier-out-absorb371/graph-d7ed40f52ec5.json",
+  "source_commit": "d7ed40f52ec599f19e0ae24a96850351b6e2b3e9"
  },
  "head_graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:aa38241d274969db051d434c7272089779401848275b675387a424eb80821af2",
-  "path": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-a21a34e1-resume-cap/verify-work/verifier-out-reissue/graph-head-3ff8fe047fc9.json",
-  "source_commit": "3ff8fe047fc93b259e2f8e11b6650b667add2196",
+  "graph_digest": "sha256:9b4a249ba8ed2edb3505ee8e7356b54d348b5be63f76378435db573a235dc390",
+  "path": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-a21a34e1-resume-cap/verify-work/verifier-out-absorb371/graph-head-88ba16ebd305.json",
+  "source_commit": "88ba16ebd305c45e4ca614352938309343970975",
   "staleness": {
-   "checked_at_utc": "2026-11-08T00:14:47Z",
-   "checked_nodes": 631,
+   "checked_at_utc": "2026-11-08T00:35:38Z",
+   "checked_nodes": 632,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -65,7 +65,7 @@
  },
  "host": "lane-worker-a21a34e1",
  "host_redacted": true,
- "host_sha256": "24a75b9253b22a701ab40c10bb7b4bf58d4a1270b8b39c5154e9a0bbcf770271",
+ "host_sha256": "6da81da0f604a8284cc959b08fa6618a44e1ffc3c70622df279336bccfd473b6",
  "impact_set": {
   "deterministic_core": [
    {
@@ -2601,7 +2601,7 @@
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261108T001056Z-3ff8fe04",
+ "receipt_id": "car-verify-20261108T003117Z-88ba16eb",
  "receipt_path": "receipts/graph/change-admission-muneral-task-readiness-copy-visible-blocker-ids-20261107.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -2811,7 +2811,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-11-08T00:14:46Z",
+  "checked_at_utc": "2026-11-08T00:35:36Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -3557,7 +3557,7 @@
   {
    "content_hash": {
     "base": null,
-    "head": "sha256:9eca4bd2dbe7ed061ae92f13ab7d7fa298643997e7ea76cdfaae18421783a161"
+    "head": "sha256:3cb1f638b4c12c7edf8a1e7e4ed79737bbd23c3f372ad7872351f2a8253feb25"
    },
    "entity": "receipt:receipts/graph/change-admission-muneral-task-readiness-copy-visible-blocker-ids-20261107.json",
    "node_type": "receipt",
@@ -3714,7 +3714,7 @@
   }
  ],
  "tree": {
-  "commit": "3ff8fe047fc93b259e2f8e11b6650b667add2196",
+  "commit": "88ba16ebd305c45e4ca614352938309343970975",
   "dirty": false
  },
  "verdicts": [
@@ -3880,8 +3880,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-a21a34e1-resume-cap/repo/apps/web/node_modules/.bin/tsc -p /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-a21a34e1-resume-cap/repo/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-a21a34e1-resume-cap/verify-work/verifier-out-reissue/type-check-xowwaqbb/check.tsbuildinfo --listFiles",
-   "duration_s": 63.75,
+   "command": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-a21a34e1-resume-cap/repo/apps/web/node_modules/.bin/tsc -p /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-a21a34e1-resume-cap/repo/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-a21a34e1-resume-cap/verify-work/verifier-out-absorb371/type-check-8njrz94_/check.tsbuildinfo --listFiles",
+   "duration_s": 81.69,
    "entities": [
     "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
     "code_unit:apps/web/__tests__/task-detail-retry.test.tsx",
@@ -3923,13 +3923,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-a21a34e1-resume-cap/verify-work/verifier-out-reissue/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-11-08T00:15:29Z",
+   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-a21a34e1-resume-cap/verify-work/verifier-out-absorb371/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-11-08T00:36:18Z",
    "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1447 files listed"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 0.49,
+   "duration_s": 0.55,
    "entities": [
     "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
     "code_unit:apps/web/__tests__/task-detail-retry.test.tsx",
@@ -3971,8 +3971,8 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-a21a34e1-resume-cap/verify-work/verifier-out-reissue/v-fitness.json",
-   "started_at_utc": "2026-11-08T00:16:34Z",
+   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-a21a34e1-resume-cap/verify-work/verifier-out-absorb371/v-fitness.json",
+   "started_at_utc": "2026-11-08T00:37:41Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   }
  ],
@@ -4142,9 +4142,9 @@
    "receipt:receipts/graph/security-api959a-caller788.json": []
   },
   "seconds": {
-   "prepare": 16.36,
-   "total": 339.58,
-   "verifiers": 64.24
+   "prepare": 19.36,
+   "total": 385.46,
+   "verifiers": 82.24
   }
  },
  "work_item": "a21a34e1-0d88-4dea-b083-24b48782064d"
