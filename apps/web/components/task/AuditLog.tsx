@@ -20,6 +20,7 @@ interface ActivityFilterState {
   mode: ActivityFilterMode;
   actorMode: ActorFilterMode;
   showExactUtcTime: boolean;
+  reverseLoadedOrder: boolean;
 }
 
 interface VisibleEventIdCopyFeedback {
@@ -356,13 +357,21 @@ export function AuditLog({ taskId }: AuditLogProps) {
     mode: 'all' as ActivityFilterMode,
     actorMode: 'all' as ActorFilterMode,
     showExactUtcTime: false,
+    reverseLoadedOrder: false,
   });
   if (filterState.taskId !== taskId) {
-    setFilterState({ taskId, mode: 'all', actorMode: 'all', showExactUtcTime: false });
+    setFilterState({
+      taskId,
+      mode: 'all',
+      actorMode: 'all',
+      showExactUtcTime: false,
+      reverseLoadedOrder: false,
+    });
   }
   const filterMode = filterState.taskId === taskId ? filterState.mode : 'all';
   const actorFilterMode = filterState.taskId === taskId ? filterState.actorMode : 'all';
   const showExactUtcTime = filterState.taskId === taskId && filterState.showExactUtcTime;
+  const reverseLoadedOrder = filterState.taskId === taskId && filterState.reverseLoadedOrder;
   const { data, isLoading, isError, isFetching, refetch } = useActivity(taskId, page);
   const total = data !== undefined && Number.isSafeInteger(data.total) && data.total >= 0
     ? data.total
@@ -383,11 +392,12 @@ export function AuditLog({ taskId }: AuditLogProps) {
   const actionFilteredEntries = filterMode === 'status_changes'
     ? currentPageEntries.filter((entry) => entry.action === 'task:status_changed')
     : currentPageEntries;
-  const entries = actorFilterMode === 'humans'
+  const filteredEntries = actorFilterMode === 'humans'
     ? actionFilteredEntries.filter((entry) => entry.actorType === 'human')
     : actorFilterMode === 'agents'
       ? actionFilteredEntries.filter((entry) => entry.actorType === 'agent')
       : actionFilteredEntries;
+  const entries = reverseLoadedOrder ? [...filteredEntries].reverse() : filteredEntries;
   const canShowVisibleCount = data !== undefined && responsePageMatches &&
     responsePageIsUsable && !pageOutOfRange && !isLoading && !isError && !isFetching;
   const visibleEventIds = entries.map((entry) => entry.id);
@@ -397,6 +407,7 @@ export function AuditLog({ taskId }: AuditLogProps) {
     String(page),
     filterMode,
     actorFilterMode,
+    String(reverseLoadedOrder),
     JSON.stringify(visibleEventIds),
     data === undefined ? 'data:none' : `data:${String(data.page)}:${String(data.total)}:${String(data.limit)}`,
     String(isLoading),
@@ -481,6 +492,7 @@ export function AuditLog({ taskId }: AuditLogProps) {
       mode: current.taskId === taskId ? current.mode : 'all',
       actorMode: current.taskId === taskId ? current.actorMode : 'all',
       showExactUtcTime: current.taskId === taskId ? current.showExactUtcTime : false,
+      reverseLoadedOrder: current.taskId === taskId ? current.reverseLoadedOrder : false,
       ...updates,
     }));
   };
@@ -597,6 +609,24 @@ export function AuditLog({ taskId }: AuditLogProps) {
         </Button>
       </div>
 
+      {canShowVisibleCount && currentPageEntries.length > 0 && (
+        <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            aria-pressed={reverseLoadedOrder}
+            aria-describedby={`${activityFilterId}-reverse-order-help`}
+            onClick={() => updateFilterState({ reverseLoadedOrder: !reverseLoadedOrder })}
+          >
+            Reverse loaded activity order
+          </Button>
+          <span id={`${activityFilterId}-reverse-order-help`} className="text-muted-foreground">
+            Reverses only matching activity already loaded on this page.
+          </span>
+        </div>
+      )}
+
       {canShowVisibleCount && (
         <p role="status" className="mb-3 text-xs text-muted-foreground">
           Showing {entries.length} of {currentPageEntries.length} loaded activity{' '}
@@ -699,7 +729,16 @@ export function AuditLog({ taskId }: AuditLogProps) {
                     <EvidenceActivityDetailsView details={evidenceDetails} />
                   )}
                   <CopyActivityActorId
-                    key={`${taskId}:${entry.id}:${entry.actorId}`}
+                    key={JSON.stringify([
+                      taskId,
+                      page,
+                      filterMode,
+                      actorFilterMode,
+                      reverseLoadedOrder,
+                      visibleEventIdsText,
+                      entry.id,
+                      entry.actorId,
+                    ])}
                     actorId={entry.actorId}
                   />
                 </div>
