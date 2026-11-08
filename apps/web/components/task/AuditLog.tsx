@@ -447,10 +447,12 @@ export function AuditLog({ taskId }: AuditLogProps) {
     visibleEventIdCopyRequestRef.current = requestId;
     setVisibleEventIdCopyFeedback({ scopeKey, generation, status: 'pending' });
 
+    // Scope/generation alone decide whether feedback may land. requestRef only
+    // serializes in-flight clicks and is cleared on view change so a newer copy
+    // can start; it must not veto a still-current clipboard settlement.
     const isCurrentRequest = () =>
       visibleEventIdCopyScopeKeyRef.current === scopeKey &&
-      visibleEventIdCopyGenerationRef.current === generation &&
-      visibleEventIdCopyRequestRef.current === requestId;
+      visibleEventIdCopyGenerationRef.current === generation;
 
     try {
       const clipboard = typeof navigator === 'undefined' ? undefined : navigator.clipboard;

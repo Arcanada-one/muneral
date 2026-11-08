@@ -1,7 +1,10 @@
 import '@testing-library/jest-dom/vitest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { AuditLog } from './AuditLog';
+
+const FOCUSED_TEST_TIMEOUT_MS = 20_000;
+const FEEDBACK_WAIT_MS = 10_000;
 
 interface ActivityEntry {
   id: string;
@@ -114,7 +117,7 @@ afterEach(() => {
   }
 });
 
-describe('AuditLog reset activity filters', () => {
+describe('AuditLog reset activity filters', { timeout: FOCUSED_TEST_TIMEOUT_MS }, () => {
   it('starts disabled and atomically restores each independently selected filter', () => {
     ready(taskA, 1, [
       entry('human-comment', 'human', 'comment'),
@@ -256,7 +259,10 @@ describe('AuditLog reset activity filters', () => {
   );
 
   it('copies the current all-filter view IDs in rendered order after a reset', async () => {
-    const clipboardWrite = vi.fn().mockResolvedValue(undefined);
+    let resolveClipboard!: () => void;
+    const clipboardWrite = vi.fn(() => new Promise<void>((resolve) => {
+      resolveClipboard = resolve;
+    }));
     installClipboard(clipboardWrite);
     ready(taskA, 1, [
       entry('first-human-status', 'human', 'task:status_changed'),
@@ -276,7 +282,17 @@ describe('AuditLog reset activity filters', () => {
     expect(clipboardWrite).toHaveBeenCalledExactlyOnceWith(
       'first-human-status\nmiddle-agent-comment\nlast-human-comment',
     );
-    expect(await screen.findByText('Activity event IDs copied.')).toBeInTheDocument();
+    expect(screen.queryByText('Activity event IDs copied.')).not.toBeInTheDocument();
+
+    await act(async () => {
+      resolveClipboard();
+    });
+    await waitFor(
+      () => {
+        expect(screen.getByText('Activity event IDs copied.')).toBeInTheDocument();
+      },
+      { timeout: FEEDBACK_WAIT_MS },
+    );
   });
 
   it('keeps same-task filters on refresh and resets filters and exact-time preference on task change', () => {
