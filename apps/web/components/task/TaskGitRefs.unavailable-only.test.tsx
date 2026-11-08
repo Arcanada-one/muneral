@@ -169,7 +169,7 @@ describe('unavailable-only loaded Git reference filter', () => {
 
     expect(reset).toBeDisabled();
     expect(screen.getByRole('checkbox', { name: 'Wrap Git reference text' })).not.toBeChecked();
-    expect(screen.queryByRole('checkbox', { name: 'Reverse Git reference order' })).not.toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'Reverse loaded order' })).not.toBeChecked();
 
     fireEvent.click(unavailableOnly);
     expect(unavailableOnly).toBeChecked();
@@ -199,7 +199,7 @@ describe('unavailable-only loaded Git reference filter', () => {
     expect(reset).toBeDisabled();
     expect(screen.getByText('Showing 8 of 8 loaded Git references.')).toBeInTheDocument();
     expect(screen.getByRole('checkbox', { name: 'Wrap Git reference text' })).not.toBeChecked();
-    expect(screen.queryByRole('checkbox', { name: 'Reverse Git reference order' })).not.toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'Reverse loaded order' })).not.toBeChecked();
     expect(api.get).toHaveBeenCalledTimes(1);
   });
 
