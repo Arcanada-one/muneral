@@ -10,7 +10,7 @@ import os from 'node:os';
 
 const expectedBrowserPath = '/opt/arcanada-browsers/cft-156.0.8078.4/chrome-linux64/chrome';
 const expectedBrowserVersion = 'Google Chrome for Testing 156.0.8078.4';
-const expectedComponentSha256 = 'a9e81561dd91c7624bd8df6a8a2bee62b4764b8b6ad7b9553fbe05b42eebbc02';
+const expectedComponentSha256 = '4d24338b977bf945d392445a9a5f8d27fdbd602d440ea914d4944cab29997702';
 const baselineSourceCommit = '8a4ef29f34ccf57c01d7cbdf29eb1f9e40f75d2b';
 const baselineSourceTree = '6f5975e24406b253e060c68bc50c9516318234f7';
 const resultSchema = 'RepositoryDestinationBrowserFixture/v3';

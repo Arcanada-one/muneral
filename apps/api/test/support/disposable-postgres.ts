@@ -12,6 +12,13 @@
 //               runner, which deliberately has no docker escalation (SEC-0028)
 //               but does provide a per-job PostgreSQL service container.
 //
+// Selection order (planDisposablePostgresProvision):
+//   1. Explicit MUN0021_PG_BASE_URL, when non-empty, selects database mode
+//      after assertEphemeralBase and BEFORE any Docker/sudo probe. Invalid
+//      explicit input fails closed with no Docker/DATABASE_URL fallback.
+//   2. Otherwise Docker-first auto mode (docker / sudo -n docker info).
+//   3. Otherwise DATABASE_URL database-mode fallback (also assertEphemeralBase).
+//
 // Both modes are task-owned and disposable, and both clean up fail-closed: a
 // surviving container, task-named volume, listening port or leftover database
 // throws, so a leaked resource fails the suite instead of silently persisting.
@@ -92,6 +99,47 @@ function resolveDockerCommand(): string[] | null {
   return null;
 }
 
+export type DisposableProvisionPlan =
+  | { kind: 'container'; dockerCmd: string[] }
+  | { kind: 'database'; baseUrl: string };
+
+/**
+ * Decide container vs database mode without performing DB work.
+ *
+ * Explicit `MUN0021_PG_BASE_URL` wins before any Docker/sudo resolution so a
+ * CI-owned ephemeral base does not pay for (or depend on) docker probes.
+ * `resolveDocker` is injectable so unit controls can prove probe suppression
+ * without touching a real daemon.
+ */
+export function planDisposablePostgresProvision(
+  env: NodeJS.ProcessEnv,
+  resolveDocker: () => string[] | null = resolveDockerCommand,
+): DisposableProvisionPlan {
+  const explicit = env.MUN0021_PG_BASE_URL;
+  if (explicit !== undefined && explicit !== '') {
+    // Refusal rules run before Docker probes and before any Client/subprocess.
+    assertEphemeralBase(explicit);
+    return { kind: 'database', baseUrl: explicit };
+  }
+
+  const dockerCmd = resolveDocker();
+  if (dockerCmd) {
+    return { kind: 'container', dockerCmd };
+  }
+
+  const base = env.DATABASE_URL;
+  if (base) {
+    assertEphemeralBase(base);
+    return { kind: 'database', baseUrl: base };
+  }
+
+  throw new Error(
+    'No disposable PostgreSQL target available: docker is not reachable and ' +
+      'neither MUN0021_PG_BASE_URL nor DATABASE_URL is set. The database proofs ' +
+      'must run — they are not optional coverage.',
+  );
+}
+
 function migrationSqlFiles(): string[] {
   const migrationsDir = join(thisDir, '..', '..', 'prisma', 'migrations');
   return readdirSync(migrationsDir)
@@ -141,6 +189,34 @@ async function waitForReady(url: string, label: string): Promise<void> {
       await new Promise((r) => setTimeout(r, 1000));
     }
   }
+}
+
+async function waitForPortReleased(
+  port: number,
+  label: string,
+  attempts = 30,
+  delayMs = 500,
+): Promise<{ released: boolean; error?: string }> {
+  for (let i = 0; i < attempts; i += 1) {
+    const listener = spawnSync('ss', ['-tlnp', `sport = :${port}`], {
+      encoding: 'utf8',
+      stdio: 'pipe',
+    });
+    if (listener.error || listener.status !== 0) {
+      return {
+        released: false,
+        error: listener.error?.message ?? String(listener.stderr).slice(0, 300),
+      };
+    }
+    if (!String(listener.stdout).includes('LISTEN')) {
+      if (i > 0) {
+        console.log(`[${label}-pg] Port ${port} released after ${i * delayMs}ms.`);
+      }
+      return { released: true };
+    }
+    await new Promise((r) => setTimeout(r, delayMs));
+  }
+  return { released: false };
 }
 
 /** Swap the database component of a connection string. */
@@ -231,10 +307,10 @@ export function createDisposablePostgres(label: string): DisposablePostgres {
     port: () => assignedPort,
 
     async start(): Promise<void> {
-      dockerCmd = resolveDockerCommand();
-      const base = process.env.MUN0021_PG_BASE_URL ?? process.env.DATABASE_URL;
+      const plan = planDisposablePostgresProvision(process.env);
 
-      if (dockerCmd) {
+      if (plan.kind === 'container') {
+        dockerCmd = plan.dockerCmd;
         resolvedMode = 'container';
         assignedPort = await allocatePort();
         console.log(
@@ -255,14 +331,15 @@ export function createDisposablePostgres(label: string): DisposablePostgres {
         started = true;
         connectionString =
           `postgresql://${PG_USER}:${PG_PASS}@localhost:${assignedPort}/${baseDatabase}?schema=public`;
-      } else if (base) {
+      } else {
         resolvedMode = 'database';
-        assertEphemeralBase(base);
-        adminUrl = base;
-        assignedPort = Number(new URL(base).port || 5432);
+        // assertEphemeralBase already ran inside planDisposablePostgresProvision.
+        adminUrl = plan.baseUrl;
+        assignedPort = Number(new URL(plan.baseUrl).port || 5432);
         console.log(
-          `\n[${label}-pg] Mode: database (no docker escalation available). ` +
-          `Creating disposable database: ${scratchDatabase}`,
+          `\n[${label}-pg] Mode: database` +
+            `${process.env.MUN0021_PG_BASE_URL ? ' (explicit MUN0021_PG_BASE_URL).' : ' (no docker escalation available).'} ` +
+            `Creating disposable database: ${scratchDatabase}`,
         );
 
         await waitForReady(adminUrl, label);
@@ -277,13 +354,7 @@ export function createDisposablePostgres(label: string): DisposablePostgres {
           await admin.end();
         }
         started = true;
-        connectionString = withDatabase(base, scratchDatabase);
-      } else {
-        throw new Error(
-          'No disposable PostgreSQL target available: docker is not reachable and ' +
-          'neither MUN0021_PG_BASE_URL nor DATABASE_URL is set. The database proofs ' +
-          'must run — they are not optional coverage.',
-        );
+        connectionString = withDatabase(plan.baseUrl, scratchDatabase);
       }
 
       console.log(`[${label}-pg] Waiting for PostgreSQL to accept connections...`);
@@ -376,17 +447,13 @@ export function createDisposablePostgres(label: string): DisposablePostgres {
         failures.push(`container survived cleanup: ${String(remaining.stdout).trim()}`);
       }
 
-      const listener = spawnSync('ss', ['-tlnp', `sport = :${assignedPort}`], {
-        encoding: 'utf8',
-        stdio: 'pipe',
-      });
-      if (listener.error || listener.status !== 0) {
-        failures.push(
-          `listener verification failed: ${
-            listener.error?.message ?? String(listener.stderr).slice(0, 300)
-          }`,
-        );
-      } else if (String(listener.stdout).includes('LISTEN')) {
+      // Docker's userland-proxy can leave the host port in LISTEN for a short
+      // window after `docker rm -f`. Poll before fail-closed so a race does not
+      // turn an otherwise green suite red (measured on PR #328 lint-and-test).
+      const portReleased = await waitForPortReleased(assignedPort, label);
+      if (portReleased.error) {
+        failures.push(`listener verification failed: ${portReleased.error}`);
+      } else if (!portReleased.released) {
         failures.push(`port ${assignedPort} remains in LISTEN state`);
       }
 

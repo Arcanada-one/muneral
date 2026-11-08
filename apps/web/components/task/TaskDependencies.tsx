@@ -18,6 +18,15 @@ const typeLabels: Record<string, { incoming: string; outgoing: string; className
   duplicates: { incoming: 'Duplicates', outgoing: 'Duplicates', className: 'text-amber-600' },
 };
 
+function dependencyRowIdentity(
+  taskId: string,
+  dependencyId: string,
+  otherTaskId: string,
+): string {
+  return `${taskId}:${dependencyId}:${otherTaskId}`;
+}
+
+
 function CopyTaskIdButton({ taskId }: { taskId: string }) {
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const [isCopying, setIsCopying] = useState(false);
@@ -61,9 +70,13 @@ function CopyTaskIdButton({ taskId }: { taskId: string }) {
 
 export function TaskDependencies({ taskId }: TaskDependenciesProps) {
   const [retryingTaskId, setRetryingTaskId] = useState<string | null>(null);
+  const [expandedRowIds, setExpandedRowIds] = useState<ReadonlySet<string>>(() => new Set());
   const [searchState, setSearchState] = useState({ taskId, query: '' });
+  const searchTaskIdRef = useRef(taskId);
   useEffect(() => {
-    setSearchState((current) => current.taskId === taskId ? current : { taskId, query: '' });
+    if (searchTaskIdRef.current === taskId) return;
+    searchTaskIdRef.current = taskId;
+    setSearchState({ taskId, query: '' });
   }, [taskId]);
   const searchQuery = searchState.taskId === taskId ? searchState.query : '';
   const { data: deps, isPending, isError, isFetching, refetch } = useDependencyGraph(taskId);
@@ -77,6 +90,18 @@ export function TaskDependencies({ taskId }: TaskDependenciesProps) {
       currentTaskId === taskId ? null : currentTaskId,
     );
     void refetch().then(finishRetry, finishRetry);
+  };
+
+  const toggleFullTaskId = (rowIdentity: string) => {
+    setExpandedRowIds((current) => {
+      const next = new Set(current);
+      if (next.has(rowIdentity)) {
+        next.delete(rowIdentity);
+      } else {
+        next.add(rowIdentity);
+      }
+      return next;
+    });
   };
 
   if (isError || isRetrying) {
@@ -116,6 +141,8 @@ export function TaskDependencies({ taskId }: TaskDependenciesProps) {
         deps={deps}
         searchQuery={searchQuery}
         onSearchQueryChange={(query) => setSearchState({ taskId, query })}
+        expandedRowIds={expandedRowIds}
+        onToggleFullTaskId={toggleFullTaskId}
       />
     </div>
   );
@@ -128,11 +155,15 @@ function DependencyList({
   deps,
   searchQuery,
   onSearchQueryChange,
+  expandedRowIds,
+  onToggleFullTaskId,
 }: {
   taskId: string;
   deps: DependencyRow[];
   searchQuery: string;
   onSearchQueryChange: (query: string) => void;
+  expandedRowIds: ReadonlySet<string>;
+  onToggleFullTaskId: (rowIdentity: string) => void;
 }) {
   const [direction, setDirection] = useState<'all' | 'incoming' | 'outgoing'>('all');
   const [hideCompleted, setHideCompleted] = useState(false);
@@ -189,6 +220,7 @@ function DependencyList({
         dep.otherTaskId, dep.otherTaskTitle, dep.otherTaskStatus];
     }),
   ]);
+  const [batchGeneration, setBatchGeneration] = useState(0);
   const copyGeneration = useRef({
     generation: 0,
     taskId,
@@ -199,13 +231,10 @@ function DependencyList({
     titleBatchKey,
   });
 
-  const previousBatch = copyGeneration.current;
-  if (previousBatch.taskId !== taskId || previousBatch.deps !== deps
-      || previousBatch.direction !== direction || previousBatch.hideCompleted !== hideCompleted
-      || previousBatch.searchQuery !== searchQuery
-      || previousBatch.titleBatchKey !== titleBatchKey) {
+  useEffect(() => {
+    const nextGeneration = copyGeneration.current.generation + 1;
     copyGeneration.current = {
-      generation: previousBatch.generation + 1,
+      generation: nextGeneration,
       taskId,
       deps,
       direction,
@@ -213,13 +242,16 @@ function DependencyList({
       searchQuery,
       titleBatchKey,
     };
-  }
+    setBatchGeneration(nextGeneration);
+  }, [taskId, deps, direction, hideCompleted, searchQuery, titleBatchKey]);
 
   const invalidateCopyBatch = () => {
+    const nextGeneration = copyGeneration.current.generation + 1;
     copyGeneration.current = {
       ...copyGeneration.current,
-      generation: copyGeneration.current.generation + 1,
+      generation: nextGeneration,
     };
+    setBatchGeneration(nextGeneration);
     setBatchCopyFeedback(null);
     setPendingBatchCopy(null);
     setTitleBatchCopyFeedback(null);
@@ -235,7 +267,7 @@ function DependencyList({
     pendingTitleCopyRef.current = null;
   }, []);
 
-  const currentGeneration = copyGeneration.current.generation;
+  const currentGeneration = batchGeneration;
   const isBatchCopyPending = pendingBatchCopy?.generation === currentGeneration;
   const currentBatchCopyFeedback = batchCopyFeedback?.generation === currentGeneration
     ? batchCopyFeedback.result : null;
@@ -438,9 +470,11 @@ function DependencyList({
         <ul className="space-y-2">
           {visibleDeps.map((dep) => (
             <DependencyRowItem
-              key={JSON.stringify([taskId, dep.id, dep.otherTaskId])}
+              key={dependencyRowIdentity(taskId, dep.id, dep.otherTaskId)}
               taskId={taskId}
               dep={dep}
+              showFullTaskId={expandedRowIds.has(dependencyRowIdentity(taskId, dep.id, dep.otherTaskId))}
+              onToggleFullTaskId={() => onToggleFullTaskId(dependencyRowIdentity(taskId, dep.id, dep.otherTaskId))}
             />
           ))}
         </ul>
@@ -449,12 +483,23 @@ function DependencyList({
   );
 }
 
-function DependencyRowItem({ taskId, dep }: { taskId: string; dep: DependencyRow }) {
-  const [showFullTaskId, setShowFullTaskId] = useState(false);
+function DependencyRowItem({
+  taskId,
+  dep,
+  showFullTaskId,
+  onToggleFullTaskId,
+}: {
+  taskId: string;
+  dep: DependencyRow;
+  showFullTaskId: boolean;
+  onToggleFullTaskId: () => void;
+}) {
   const config = typeLabels[dep.type];
   const label = config?.[dep.direction] ?? dep.type;
   const statusLabel = getTaskStatusLabel(dep.otherTaskStatus);
   const counterpartTitle = dep.otherTaskTitleWithheld === true ? null : dep.otherTaskTitle;
+  const rowIdentity = dependencyRowIdentity(taskId, dep.id, dep.otherTaskId);
+  const taskIdTextId = `dependency-task-id-${dep.id}`;
 
   return (
     <li className="flex flex-wrap items-center gap-2 text-sm">
@@ -465,21 +510,29 @@ function DependencyRowItem({ taskId, dep }: { taskId: string; dep: DependencyRow
       {counterpartTitle !== null && (
         <span className="min-w-0 break-words font-medium">{counterpartTitle}</span>
       )}
-      <code className="max-w-full min-w-0 break-words rounded bg-muted px-1.5 py-0.5 text-xs font-mono" style={{ overflowWrap: 'anywhere' }}>
+      <code
+        id={taskIdTextId}
+        className={
+          showFullTaskId
+            ? 'min-w-0 max-w-full break-all rounded bg-muted px-1.5 py-0.5 text-xs font-mono'
+            : 'rounded bg-muted px-1.5 py-0.5 text-xs font-mono'
+        }
+      >
         {showFullTaskId ? dep.otherTaskId : dep.otherTaskId.slice(0, 8)}
       </code>
       <Button
         type="button"
         variant="ghost"
         size="sm"
-        className="h-7 px-2 text-xs"
+        className="h-7 shrink-0 px-2 text-xs"
         aria-expanded={showFullTaskId}
-        onClick={() => setShowFullTaskId((current) => !current)}
+        aria-controls={taskIdTextId}
+        onClick={onToggleFullTaskId}
       >
         {showFullTaskId ? 'Hide full task ID' : 'Show full task ID'}
       </Button>
       {statusLabel && <Badge variant="secondary">{statusLabel}</Badge>}
-      <CopyTaskIdButton key={`${taskId}:${dep.id}:${dep.otherTaskId}`} taskId={dep.otherTaskId} />
+      <CopyTaskIdButton key={rowIdentity} taskId={dep.otherTaskId} />
     </li>
   );
 }
