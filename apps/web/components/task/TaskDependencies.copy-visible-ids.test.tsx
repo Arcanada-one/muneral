@@ -283,6 +283,7 @@ describe('copy visible loaded dependency task IDs', () => {
       ['tasks', taskId, 'dependency-graph'],
       [dependency('cccccccc-cccc-4ccc-8ccc-cccccccccccc', '44444444-4444-4444-8444-444444444444', 'Updated', 'todo', 'outgoing')],
     ));
+    await waitFor(() => expect(screen.getByText('Updated')).toBeInTheDocument());
     await act(async () => oldWrite.reject(new Error('stale private rejection')));
 
     expect(screen.getByText('Updated')).toBeInTheDocument();
