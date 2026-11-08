@@ -447,10 +447,12 @@ export function AuditLog({ taskId }: AuditLogProps) {
     visibleEventIdCopyRequestRef.current = requestId;
     setVisibleEventIdCopyFeedback({ scopeKey, generation, status: 'pending' });
 
+    // Scope/generation alone decide whether feedback may land. requestRef only
+    // serializes in-flight clicks and is cleared on view change so a newer copy
+    // can start; it must not veto a still-current clipboard settlement.
     const isCurrentRequest = () =>
       visibleEventIdCopyScopeKeyRef.current === scopeKey &&
-      visibleEventIdCopyGenerationRef.current === generation &&
-      visibleEventIdCopyRequestRef.current === requestId;
+      visibleEventIdCopyGenerationRef.current === generation;
 
     try {
       const clipboard = typeof navigator === 'undefined' ? undefined : navigator.clipboard;
@@ -482,6 +484,7 @@ export function AuditLog({ taskId }: AuditLogProps) {
       ...updates,
     }));
   };
+  const canResetActivityFilters = filterMode !== 'all' || actorFilterMode !== 'all';
 
   if (!taskId) return null;
 
@@ -580,6 +583,18 @@ export function AuditLog({ taskId }: AuditLogProps) {
           <option value="humans">Humans on this page</option>
           <option value="agents">Agents on this page</option>
         </select>
+      </div>
+
+      <div className="mb-3">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => updateFilterState({ mode: 'all', actorMode: 'all' })}
+          disabled={!canResetActivityFilters}
+        >
+          Reset activity filters
+        </Button>
       </div>
 
       {canShowVisibleCount && (
