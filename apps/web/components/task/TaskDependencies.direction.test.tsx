@@ -107,11 +107,13 @@ function installClipboard(writeText: ReturnType<typeof vi.fn>) {
 }
 
 beforeEach(() => {
+  onlineManager.setOnline(true);
   vi.spyOn(apiClient, 'get').mockResolvedValue({ data: graph } as never);
 });
 
 afterEach(() => {
   cleanup();
+  onlineManager.setOnline(true);
   vi.restoreAllMocks();
   if (originalClipboardDescriptor) {
     Object.defineProperty(navigator, 'clipboard', originalClipboardDescriptor);
@@ -211,6 +213,63 @@ describe('task dependency directions', () => {
     expect(title.closest('li')).toHaveTextContent('In Progress');
   });
 
+  it('shows an empty state only after the validated graph read succeeds with no rows', async () => {
+    let resolveGraph: ((response: { data: [] }) => void) | undefined;
+    vi.mocked(apiClient.get).mockImplementationOnce(() => new Promise((resolve) => {
+      resolveGraph = resolve;
+    }) as never);
+    renderDependencies();
+
+    await waitFor(() => {
+      expect(apiClient.get).toHaveBeenCalledWith(`/tasks/${taskId}/dependency-graph`);
+    });
+    expect(screen.getByRole('status')).toHaveTextContent('Loading dependencies…');
+    expect(screen.queryByText('No dependencies.')).not.toBeInTheDocument();
+    await act(async () => {
+      resolveGraph?.({ data: [] });
+    });
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent('No dependencies.');
+    });
+  });
+
+  it('does not claim an empty graph while the initial read is paused', async () => {
+    onlineManager.setOnline(false);
+    const { queryClient } = renderDependencies();
+
+    await waitFor(() => {
+      expect(queryClient.getQueryState(['tasks', taskId, 'dependency-graph'])).toMatchObject({
+        status: 'pending',
+        fetchStatus: 'paused',
+        data: undefined,
+      });
+    });
+    expect(screen.getByRole('status')).toHaveTextContent('Loading dependencies…');
+    expect(screen.queryByText('No dependencies.')).not.toBeInTheDocument();
+    expect(apiClient.get).not.toHaveBeenCalled();
+  });
+
+  it('does not claim an empty graph when the query is disabled without a task ID', () => {
+    const { queryClient, container } = renderDependencies('');
+
+    expect(queryClient.getQueryState(['tasks', '', 'dependency-graph'])).toMatchObject({
+      status: 'pending',
+      fetchStatus: 'idle',
+      data: undefined,
+    });
+    expect(container).toBeEmptyDOMElement();
+    expect(screen.queryByText('No dependencies.')).not.toBeInTheDocument();
+    expect(apiClient.get).not.toHaveBeenCalled();
+  });
+
+  it('keeps malformed graph responses in the existing unavailable state', async () => {
+    vi.mocked(apiClient.get).mockResolvedValueOnce({ data: { rows: [] } } as never);
+    renderDependencies();
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Dependencies are unavailable.');
+    expect(screen.queryByText('No dependencies.')).not.toBeInTheDocument();
+  });
+
   it('keeps the validated UUID fallback when the API withholds a counterpart title', async () => {
     vi.mocked(apiClient.get).mockResolvedValueOnce({
       data: [{ ...graph[0], otherTaskTitle: null, otherTaskTitleWithheld: true }],
@@ -300,6 +359,7 @@ describe('task dependency directions', () => {
     renderDependencies();
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Dependencies are unavailable.');
+    expect(screen.queryByText('No dependencies.')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Retry dependencies' }));
 
     expect(await screen.findByText('Prerequisite task')).toBeInTheDocument();
