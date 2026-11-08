@@ -5,7 +5,7 @@
   "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
   "verdict": "admitted"
  },
- "captured_at_utc": "2026-11-08T01:56:20Z",
+ "captured_at_utc": "2026-11-08T02:03:32Z",
  "change_set": {
   "base": "b0d21394164a0ec66ebb726f19d7a35bec531d3b",
   "files": [
@@ -26,9 +26,18 @@
     ],
     "path": "apps/web/components/task/TaskGitRefs.unavailable-only.test.tsx",
     "status": "A"
+   },
+   {
+    "kind": "receipt",
+    "node_id": "receipt:receipts/graph/change-admission-muneral-task-gitrefs-unavailable-only-20261108.json",
+    "node_ids": [
+     "receipt:receipts/graph/change-admission-muneral-task-gitrefs-unavailable-only-20261108.json"
+    ],
+    "path": "receipts/graph/change-admission-muneral-task-gitrefs-unavailable-only-20261108.json",
+    "status": "A"
    }
   ],
-  "head": "9ce6fcbbc51d440c054ce7502503e384beb5ce3a",
+  "head": "44634c66b202e497a717536a7d7e4ba17ac7bf41",
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
@@ -37,18 +46,18 @@
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
   "graph_digest": "sha256:bb38058a09816cc487f92044fa0d1a519d8d753b4a0630a6c01fa19f61a76411",
-  "path": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-da3aebdd-gitref-unavailable-only/packet/verifier-out-rebind/graph-b0d21394164a.json",
+  "path": "/tmp/arcana-verify-bcm8lmbe/verifier-out/graph-b0d21394164a.json",
   "source_commit": "b0d21394164a0ec66ebb726f19d7a35bec531d3b"
  },
  "head_graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
-  "graph_digest": "sha256:ae2864d5b9ebbaef133b5ac8678118d2c12ff74543b5ce3e645867a3ce76a46a",
-  "path": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-da3aebdd-gitref-unavailable-only/packet/verifier-out-rebind/graph-head-9ce6fcbbc51d.json",
-  "source_commit": "9ce6fcbbc51d440c054ce7502503e384beb5ce3a",
+  "graph_digest": "sha256:44cc9a011d3965a4505c1923cd551452df5186c5f1c77e621393079d9679e70b",
+  "path": "/tmp/arcana-verify-bcm8lmbe/verifier-out/graph-head-44634c66b202.json",
+  "source_commit": "44634c66b202e497a717536a7d7e4ba17ac7bf41",
   "staleness": {
-   "checked_at_utc": "2026-11-08T02:01:29Z",
-   "checked_nodes": 635,
+   "checked_at_utc": "2026-11-08T02:07:55Z",
+   "checked_nodes": 636,
    "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
    "mismatched_nodes": [],
    "verdict": "fresh"
@@ -56,7 +65,7 @@
  },
  "host": "mun-hyg-da3aebdd-lane",
  "host_redacted": true,
- "host_sha256": "05797d605e6ea78ad9c532ec51fd79001ac2395f5ecda0d951d8d1b4f057fb33",
+ "host_sha256": "e4de8240ae43f1933dbdd38378bb8e86195c5d2facaca5b63a498f7143c5a63c",
  "impact_set": {
   "deterministic_core": [
    {
@@ -2532,7 +2541,7 @@
   "tool": "tools/graph/verify.py",
   "version": "1.4.1"
  },
- "receipt_id": "car-verify-20261108T015620Z-9ce6fcbb",
+ "receipt_id": "car-verify-20261108T020332Z-44634c66",
  "receipt_path": "receipts/graph/change-admission-muneral-task-gitrefs-unavailable-only-20261108.json",
  "repo": {
   "name": "Arcanada-one/muneral",
@@ -2724,6 +2733,7 @@
    "receipt:receipts/graph/change-admission-muneral-task-gitrefs-empty-response-20261025.json",
    "receipt:receipts/graph/change-admission-muneral-task-gitrefs-read-20261024.json",
    "receipt:receipts/graph/change-admission-muneral-task-gitrefs-read-retry-20261025.json",
+   "receipt:receipts/graph/change-admission-muneral-task-gitrefs-unavailable-only-20261108.json",
    "receipt:receipts/graph/change-admission-muneral-task-parent-reference-20261024.json",
    "receipt:receipts/graph/change-admission-muneral-task-parent-reference-due-date-20261025.json",
    "receipt:receipts/graph/change-admission-muneral-task-parent-reference-priority-20261025.json",
@@ -2751,7 +2761,7 @@
  },
  "schema": "ChangeAdmissionReceipt/v1",
  "staleness": {
-  "checked_at_utc": "2026-11-08T02:01:27Z",
+  "checked_at_utc": "2026-11-08T02:07:54Z",
   "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
   "mismatched_nodes": [],
   "verdict": "fresh"
@@ -3419,6 +3429,21 @@
   },
   {
    "content_hash": {
+    "base": null,
+    "head": "sha256:28c9ae726b9c15368cc91100490809b901e060f2fa0d7e9175e4f142fe162961"
+   },
+   "entity": "receipt:receipts/graph/change-admission-muneral-task-gitrefs-unavailable-only-20261108.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-muneral-task-gitrefs-unavailable-only-20261108.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it; superseded by construction — this run re-issues the receipt at receipts/graph/change-admission-muneral-task-gitrefs-unavailable-only-20261108.json for work item da3aebdd-684f-4599-bed5-7e9818a93bbd",
+   "rule": "DEC-AUP-0035",
+   "superseded": {
+    "receipt_path": "receipts/graph/change-admission-muneral-task-gitrefs-unavailable-only-20261108.json",
+    "work_item": "da3aebdd-684f-4599-bed5-7e9818a93bbd"
+   }
+  },
+  {
+   "content_hash": {
     "base": "sha256:832dabd092ce390e4ffc202ce0d435b0f1d9dd8c60d8b0fe84df227cba7a778e",
     "head": "sha256:832dabd092ce390e4ffc202ce0d435b0f1d9dd8c60d8b0fe84df227cba7a778e"
    },
@@ -3650,7 +3675,7 @@
   }
  ],
  "tree": {
-  "commit": "9ce6fcbbc51d440c054ce7502503e384beb5ce3a",
+  "commit": "44634c66b202e497a717536a7d7e4ba17ac7bf41",
   "dirty": false
  },
  "verdicts": [
@@ -3852,8 +3877,8 @@
  },
  "verifiers": [
   {
-   "command": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-da3aebdd-gitref-unavailable-only/repo/apps/web/node_modules/.bin/tsc -p /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-da3aebdd-gitref-unavailable-only/repo/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-da3aebdd-gitref-unavailable-only/packet/verifier-out-rebind/type-check-ljx_eucc/check.tsbuildinfo --listFiles",
-   "duration_s": 48.63,
+   "command": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-da3aebdd-gitref-unavailable-only/repo/apps/web/node_modules/.bin/tsc -p /home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-da3aebdd-gitref-unavailable-only/repo/apps/web/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /tmp/arcana-verify-bcm8lmbe/verifier-out/type-check-gwwdgpcj/check.tsbuildinfo --listFiles",
+   "duration_s": 41.17,
    "entities": [
     "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
     "code_unit:apps/web/__tests__/task-detail-retry.test.tsx",
@@ -3903,13 +3928,13 @@
    "exit_code": 0,
    "id": "v-type-check-apps-web-tsconfig",
    "kind": "type_check",
-   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-da3aebdd-gitref-unavailable-only/packet/verifier-out-rebind/v-type-check-apps-web-tsconfig.txt",
-   "started_at_utc": "2026-11-08T02:02:07Z",
+   "output_ref": "/tmp/arcana-verify-bcm8lmbe/verifier-out/v-type-check-apps-web-tsconfig.txt",
+   "started_at_utc": "2026-11-08T02:08:26Z",
    "summary": "apps/web/tsconfig.json: exit 0, 0 error(s), 1449 files listed"
   },
   {
    "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
-   "duration_s": 1.14,
+   "duration_s": 0.75,
    "entities": [
     "code_unit:apps/web/__tests__/task-detail-page-session.test.tsx",
     "code_unit:apps/web/__tests__/task-detail-retry.test.tsx",
@@ -3959,17 +3984,23 @@
    "exit_code": 0,
    "id": "v-fitness",
    "kind": "fitness_rules",
-   "output_ref": "/home/dev/aup/claude-work/arc2-backlog-20261106T0900/ARC2-dev-mun-hyg-da3aebdd-gitref-unavailable-only/packet/verifier-out-rebind/v-fitness.json",
-   "started_at_utc": "2026-11-08T02:02:56Z",
+   "output_ref": "/tmp/arcana-verify-bcm8lmbe/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-11-08T02:09:08Z",
    "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
   }
  ],
  "verify": {
   "events": [
    {
+    "code": "SUPERSEDED_SELF_EXCLUSION",
+    "entity": "receipt:receipts/graph/change-admission-muneral-task-gitrefs-unavailable-only-20261108.json",
+    "rule": "DEC-AUP-0035",
+    "text": "the receipt at receipts/graph/change-admission-muneral-task-gitrefs-unavailable-only-20261108.json is the previous version of the one this run is writing, for the same work item da3aebdd-684f-4599-bed5-7e9818a93bbd — superseded by construction, so it owes this change no verdict"
+   },
+   {
     "code": "STRUCTURAL_EXCLUSION",
     "rule": "DEC-AUP-0034",
-    "text": "81 affected entity(ies) owe no verdict (receipt: 81): unchanged at both revisions and given no verifier by the matrix"
+    "text": "82 affected entity(ies) owe no verdict (receipt: 82): unchanged at both revisions and given no verifier by the matrix"
    }
   ],
   "required_by_entity": {
@@ -4117,6 +4148,7 @@
    "receipt:receipts/graph/change-admission-muneral-task-gitrefs-empty-response-20261025.json": [],
    "receipt:receipts/graph/change-admission-muneral-task-gitrefs-read-20261024.json": [],
    "receipt:receipts/graph/change-admission-muneral-task-gitrefs-read-retry-20261025.json": [],
+   "receipt:receipts/graph/change-admission-muneral-task-gitrefs-unavailable-only-20261108.json": [],
    "receipt:receipts/graph/change-admission-muneral-task-parent-reference-20261024.json": [],
    "receipt:receipts/graph/change-admission-muneral-task-parent-reference-due-date-20261025.json": [],
    "receipt:receipts/graph/change-admission-muneral-task-parent-reference-priority-20261025.json": [],
@@ -4140,9 +4172,9 @@
    "receipt:receipts/graph/security-api959a-caller788.json": []
   },
   "seconds": {
-   "prepare": 15.37,
-   "total": 397.78,
-   "verifiers": 49.77
+   "prepare": 14.88,
+   "total": 337.53,
+   "verifiers": 41.92
   }
  },
  "work_item": "da3aebdd-684f-4599-bed5-7e9818a93bbd"
