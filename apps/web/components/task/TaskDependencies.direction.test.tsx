@@ -223,17 +223,19 @@ describe('task dependency directions', () => {
     await waitFor(() => {
       expect(apiClient.get).toHaveBeenCalledWith(`/tasks/${taskId}/dependency-graph`);
     });
-    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Loading dependencies…');
     expect(screen.queryByText('No dependencies.')).not.toBeInTheDocument();
     await act(async () => {
       resolveGraph?.({ data: [] });
     });
-    expect(await screen.findByRole('status')).toHaveTextContent('No dependencies.');
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent('No dependencies.');
+    });
   });
 
   it('does not claim an empty graph while the initial read is paused', async () => {
     onlineManager.setOnline(false);
-    const { queryClient, container } = renderDependencies();
+    const { queryClient } = renderDependencies();
 
     await waitFor(() => {
       expect(queryClient.getQueryState(['tasks', taskId, 'dependency-graph'])).toMatchObject({
@@ -242,7 +244,7 @@ describe('task dependency directions', () => {
         data: undefined,
       });
     });
-    expect(container).toBeEmptyDOMElement();
+    expect(screen.getByRole('status')).toHaveTextContent('Loading dependencies…');
     expect(screen.queryByText('No dependencies.')).not.toBeInTheDocument();
     expect(apiClient.get).not.toHaveBeenCalled();
   });

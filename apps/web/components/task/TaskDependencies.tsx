@@ -123,9 +123,9 @@ export function TaskDependencies({ taskId }: TaskDependenciesProps) {
       </div>
     );
   }
-  // Keep the dependency panel silent while the first validated read is in flight;
-  // only a successful empty graph may render the empty state.
-  if (isPending && deps === undefined) return null;
+  if (taskId && isPending && deps === undefined) {
+    return <p role="status" className="text-sm text-muted-foreground">Loading dependencies…</p>;
+  }
   if (deps === undefined) return null;
   if (deps.length === 0) {
     return (
