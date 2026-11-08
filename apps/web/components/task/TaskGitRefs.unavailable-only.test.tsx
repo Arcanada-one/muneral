@@ -168,7 +168,7 @@ describe('unavailable-only loaded Git reference filter', () => {
     const reset = screen.getByRole('button', { name: 'Reset Git reference filters' });
 
     expect(reset).toBeDisabled();
-    expect(screen.queryByRole('checkbox', { name: 'Wrap Git reference text' })).not.toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'Wrap Git reference text' })).not.toBeChecked();
     expect(screen.queryByRole('checkbox', { name: 'Reverse Git reference order' })).not.toBeInTheDocument();
 
     fireEvent.click(unavailableOnly);
@@ -198,7 +198,7 @@ describe('unavailable-only loaded Git reference filter', () => {
     expect(unavailableOnly).not.toBeChecked();
     expect(reset).toBeDisabled();
     expect(screen.getByText('Showing 8 of 8 loaded Git references.')).toBeInTheDocument();
-    expect(screen.queryByRole('checkbox', { name: 'Wrap Git reference text' })).not.toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'Wrap Git reference text' })).not.toBeChecked();
     expect(screen.queryByRole('checkbox', { name: 'Reverse Git reference order' })).not.toBeInTheDocument();
     expect(api.get).toHaveBeenCalledTimes(1);
   });
