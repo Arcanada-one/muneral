@@ -15,9 +15,14 @@ import {
   Headers,
   Res,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { TasksService } from './tasks.service.js';
+import {
+  resolveActiveStatusThresholds,
+  ThresholdValidationError,
+} from './active-status-staleness.report.js';
 import { CreateTaskDto } from './dto/create-task.dto.js';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto.js';
 import { QueryTasksDto } from './dto/query-tasks.dto.js';
@@ -301,6 +306,44 @@ export class TasksController {
       throw new ForbiddenException('The task index is available only to an agent API key holding a read grant (MUN-0052).');
     }
     return this.tasksService.indexForProject(projectId, scope.agentId, scope.projectReadGrant);
+  }
+
+  /**
+   * MUN-0067 — active-status staleness report (bodyless index fields only).
+   *
+   * Same project-index grant as `GET .../index`. Ages in_progress/review/blocked
+   * by generatedAt vs updatedAt into soft/hard buckets. Never PATCHes status.
+   * Optional `softDays` / `hardDays` (defaults 3 / 14) reject invalid scalars
+   * with HTTP 400 (MUN-0065 threshold-validation intent; does not reopen PR261).
+   */
+  @Get('project/:projectId/active-status-staleness')
+  @AgentScope('project-index')
+  getActiveStatusStalenessReport(
+    @Param('projectId') projectId: string,
+    @Req() req: AuthRequest,
+    @Query() query: Record<string, unknown>,
+  ) {
+    const scope = req.agentScope;
+    if (!scope || scope.kind !== 'project-index' || !scope.projectReadGrant) {
+      throw new ForbiddenException(
+        'The active-status staleness report is available only to an agent API key holding a read grant (MUN-0052/MUN-0067).',
+      );
+    }
+    let thresholds;
+    try {
+      thresholds = resolveActiveStatusThresholds(query);
+    } catch (err) {
+      if (err instanceof ThresholdValidationError) {
+        throw new BadRequestException(err.message);
+      }
+      throw err;
+    }
+    return this.tasksService.activeStatusStalenessForProject(
+      projectId,
+      scope.agentId,
+      scope.projectReadGrant,
+      thresholds,
+    );
   }
 
   /**
