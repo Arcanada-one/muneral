@@ -177,6 +177,49 @@ function CopyAvailableGitReferenceValues({ refs }: { refs: TaskGitRef[] }) {
   );
 }
 
+function GitReferenceDestinationDisclosure({
+  taskId,
+  edgeId,
+  url,
+}: {
+  taskId: string;
+  edgeId: string;
+  url: string;
+}) {
+  const identity = JSON.stringify([taskId, edgeId, url]);
+  const [disclosure, setDisclosure] = useState(() => ({ identity, isExpanded: false }));
+
+  if (disclosure.identity !== identity) {
+    setDisclosure({ identity, isExpanded: false });
+  }
+  const isExpanded = disclosure.identity === identity && disclosure.isExpanded;
+
+  if (!safeRepositoryUrl(url)) return null;
+
+  const destination = new URL(url);
+
+  return (
+    <div className="basis-full min-w-0">
+      <button
+        type="button"
+        className="rounded text-sm text-foreground underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        aria-expanded={isExpanded}
+        onClick={() => setDisclosure((current) => ({
+          identity,
+          isExpanded: current.identity === identity ? !current.isExpanded : true,
+        }))}
+      >
+        {isExpanded ? 'Hide link destination' : 'Show link destination'}
+      </button>
+      {isExpanded && (
+        <p className="min-w-0 whitespace-normal break-all font-mono text-xs text-muted-foreground">
+          {destination.host}{destination.pathname}
+        </p>
+      )}
+    </div>
+  );
+}
+
 export function TaskGitRefs({ taskId }: { taskId: string }) {
   return <TaskGitRefsForTask key={taskId} taskId={taskId} />;
 }
@@ -377,6 +420,11 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
                     key={`${taskId}:${ref.id}:${referenceText}`}
                     value={referenceText}
                     label={referenceLabel}
+                  />
+                  <GitReferenceDestinationDisclosure
+                    taskId={taskId}
+                    edgeId={ref.id}
+                    url={ref.url}
                   />
                 </li>
               );
