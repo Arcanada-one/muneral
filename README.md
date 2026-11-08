@@ -84,6 +84,11 @@ curl https://api.muneral.com/api/v1/tasks/$TASK_ID/readiness \
 > field the route does return, every field it does not, and which route answers
 > the question instead.
 
+> **Status discipline (MUN-0068):** a progress comment is not a status change.
+> Use stepwise `PATCH /tasks/:id/status` and criterion-mapped CONTENT before
+> `review`. How-to + offline verifier:
+> [`docs/how-to/agent-status-transition-discipline.md`](docs/how-to/agent-status-transition-discipline.md).
+
 ## Datarim Sync
 
 ```bash

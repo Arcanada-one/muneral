@@ -39,6 +39,15 @@ so an agent that finished a card makes three calls —
 goes to `blocked` (from `in_progress`) and stays there; nothing turns
 `blocked` into `done` directly. `todo → done` answers `400`.
 
+## Discipline (MUN-0068)
+
+A comment is not a status change. Author briefs, COMMON-RULES, and
+`launch_agent` first prompts must require stepwise `PATCH /tasks/:taskId/status`
+plus criterion-mapped CONTENT evidence before `review`. `NOT_MEASURED` is never
+PASS. How-to, remasured defect counts, automation remasurement, and the offline
+required-transition verifier:
+[`docs/how-to/agent-status-transition-discipline.md`](../../../docs/how-to/agent-status-transition-discipline.md).
+
 ## Answers
 
 | status | when |
