@@ -121,7 +121,7 @@ describe('reset loaded Git reference filters', () => {
     const reset = screen.getByRole('button', { name: 'Reset Git reference filters' });
     expect(reset).toBeDisabled();
     // Wrap control is absent on measured origin/main tip; preservation is NOT_MEASURED as a product surface here.
-    expect(screen.queryByRole('checkbox', { name: 'Wrap Git reference text' })).not.toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'Wrap Git reference text' })).not.toBeChecked();
 
     fireEvent.change(kind, { target: { value: 'branch' } });
     fireEvent.change(search, { target: { value: 'release/current' } });
@@ -137,7 +137,7 @@ describe('reset loaded Git reference filters', () => {
     expect(screen.getByRole('combobox', { name: 'Git reference kind' })).toHaveValue('all');
     expect(screen.getByRole('searchbox', { name: 'Search loaded Git references' })).toHaveValue('');
     expect(screen.getByRole('checkbox', { name: 'Show available links only' })).not.toBeChecked();
-    expect(screen.queryByRole('checkbox', { name: 'Wrap Git reference text' })).not.toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'Wrap Git reference text' })).not.toBeChecked();
     expect(screen.getByText('Showing 4 of 4 loaded Git references.')).toBeInTheDocument();
     expect(listLabels()).toEqual([
       'release/current', 'example/repo', 'Reference link unavailable', '0123456',
