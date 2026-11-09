@@ -755,6 +755,92 @@ describe('Agent-key scope on /tasks (e2e)', () => {
     expect(res.body.blockedBy).toHaveLength(0);
   });
 
+  // KCLIVE-12 — pin legacy GET /readiness terminal-status scheduling semantics.
+  // cancelled/archived count as satisfied for start-scheduling only; they are
+  // not accepted-output admission (see POST .../plan/readiness contrast tests).
+  it('treats a dependency on a cancelled task as satisfied (legacy scheduling)', async () => {
+    const blocker = await createTask({ status: 'cancelled' });
+    const blocked = await createTask();
+    await assign(blocked.id);
+    await dependency(blocked.id, blocker.id, 'depends_on');
+
+    const res = await supertest(app.getHttpServer())
+      .get(`/tasks/${blocked.id}/readiness`)
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .expect(200);
+
+    expect(res.body.dependencyCount).toBe(1);
+    expect(res.body.ready).toBe(true);
+    expect(res.body.blockedBy).toHaveLength(0);
+  });
+
+  it('treats a dependency on an archived task as satisfied (legacy scheduling)', async () => {
+    const blocker = await createTask({ status: 'archived' });
+    const blocked = await createTask();
+    await assign(blocked.id);
+    await dependency(blocked.id, blocker.id, 'depends_on');
+
+    const res = await supertest(app.getHttpServer())
+      .get(`/tasks/${blocked.id}/readiness`)
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .expect(200);
+
+    expect(res.body.dependencyCount).toBe(1);
+    expect(res.body.ready).toBe(true);
+    expect(res.body.blockedBy).toHaveLength(0);
+  });
+
+  it('names an open todo predecessor as the readiness blocker', async () => {
+    const blocker = await createTask({ status: 'todo' });
+    const blocked = await createTask();
+    await assign(blocked.id);
+    await dependency(blocked.id, blocker.id, 'depends_on');
+
+    const res = await supertest(app.getHttpServer())
+      .get(`/tasks/${blocked.id}/readiness`)
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .expect(200);
+
+    expect(res.body.ready).toBe(false);
+    expect(res.body.blockedBy).toHaveLength(1);
+    expect(res.body.blockedBy[0].otherTaskId).toBe(blocker.id);
+    expect(res.body.blockedBy[0].otherTaskStatus).toBe('todo');
+    // Agent-scoped graph redacts counterpart titles; naming is by id + status.
+    expect(res.body.blockedBy[0]).toEqual(
+      expect.objectContaining({
+        otherTaskId: blocker.id,
+        otherTaskStatus: 'todo',
+        type: 'depends_on',
+        direction: 'outgoing',
+      }),
+    );
+  });
+
+  it('names an in_progress predecessor as the readiness blocker', async () => {
+    const blocker = await createTask({ status: 'in_progress' });
+    const blocked = await createTask();
+    await assign(blocked.id);
+    await dependency(blocked.id, blocker.id, 'depends_on');
+
+    const res = await supertest(app.getHttpServer())
+      .get(`/tasks/${blocked.id}/readiness`)
+      .set('Authorization', `Bearer ${assignedKey}`)
+      .expect(200);
+
+    expect(res.body.ready).toBe(false);
+    expect(res.body.blockedBy).toHaveLength(1);
+    expect(res.body.blockedBy[0].otherTaskId).toBe(blocker.id);
+    expect(res.body.blockedBy[0].otherTaskStatus).toBe('in_progress');
+    expect(res.body.blockedBy[0]).toEqual(
+      expect.objectContaining({
+        otherTaskId: blocker.id,
+        otherTaskStatus: 'in_progress',
+        type: 'depends_on',
+        direction: 'outgoing',
+      }),
+    );
+  });
+
   it('does not treat `related_to` as blocking', async () => {
     const other = await createTask();
     const task = await createTask();
