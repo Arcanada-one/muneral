@@ -12,6 +12,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateTaskDto } from './dto/create-task.dto.js';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto.js';
+import { UpdateTaskMetadataDto } from './dto/update-task-metadata.dto.js';
 import { QueryTasksDto } from './dto/query-tasks.dto.js';
 import { AddDependencyDto } from './dto/add-dependency.dto.js';
 import { CreateChecklistItemDto } from './dto/create-checklist-item.dto.js';
@@ -678,6 +679,73 @@ export class TasksService {
     );
 
     return updated;
+  }
+
+  /**
+   * MUN-0077 — agent-safe metadata PATCH. Persists only priority / dueDate /
+   * estimateHours / sprintId. Never touches title, description or status.
+   * Returns the updated task plus the activity row id written in the same
+   * transaction so a caller can pin the write without a second read.
+   */
+  async updateMetadata(taskId: string, actor: Actor, dto: UpdateTaskMetadataDto) {
+    const updates: Partial<{
+      priority: string;
+      dueDate: string | null;
+      estimateHours: number | null;
+      sprintId: string | null;
+    }> = {};
+    if (dto.priority !== undefined) updates.priority = dto.priority;
+    if (dto.dueDate !== undefined) updates.dueDate = dto.dueDate;
+    if (dto.estimateHours !== undefined) updates.estimateHours = dto.estimateHours;
+    if (dto.sprintId !== undefined) updates.sprintId = dto.sprintId;
+
+    if (Object.keys(updates).length === 0) {
+      throw new BadRequestException(
+        'At least one agent-safe metadata field is required (priority, dueDate, estimateHours, sprintId).',
+      );
+    }
+
+    const task = await this.findOne(taskId);
+    const project = await this.prisma.project.findUnique({
+      where: { id: task.projectId },
+    });
+    if (!project) {
+      throw new NotFoundException('Project not found');
+    }
+
+    const data: Prisma.TaskUncheckedUpdateInput = {};
+    if (updates.priority !== undefined) data.priority = updates.priority;
+    if (updates.dueDate !== undefined) data.dueDate = updates.dueDate;
+    if (updates.estimateHours !== undefined) {
+      data.estimateHours =
+        updates.estimateHours != null
+          ? new Prisma.Decimal(updates.estimateHours)
+          : null;
+    }
+    if (updates.sprintId !== undefined) data.sprintId = updates.sprintId;
+
+    const { updated, auditEventId } = await this.prisma.$transaction(
+      async (tx) => {
+        const u = await tx.task.update({ where: { id: taskId }, data });
+        await this.fieldStateService.recompute(tx, u);
+        const audit = await tx.activityLog.create({
+          data: {
+            workspaceId: project.workspaceId,
+            taskId: task.id,
+            actorType: actor.type,
+            actorId: actor.id,
+            action: 'task:updated',
+            payload: updates as Prisma.InputJsonValue,
+          },
+          select: { id: true },
+        });
+        return { updated: u, auditEventId: audit.id };
+      },
+      { timeout: 10_000, isolationLevel: 'ReadCommitted' },
+    );
+
+    this.kanbanService.notify(project.id, 'task:updated', updated);
+    return { ...updated, auditEventId };
   }
 
   async update(

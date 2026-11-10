@@ -109,6 +109,24 @@ assignments**:
 | `GET /tasks/project/:projectId` | only the tasks in that project the agent is assigned to; `404` if the project is not in the agent's workspace |
 | `PATCH /tasks/:taskId/status` | the transition, if the agent is assigned to the task — otherwise `403` |
 
+## Updating agent-safe metadata (MUN-0077)
+
+`PATCH /tasks/:taskId` was missing entirely (`404 Cannot PATCH`), so an agent
+key that needed to correct priority or due date had no route short of borrowing
+a human token — and any attempt to send `title` or `status` on a generic PATCH
+was undefined. The route now accepts an agent key under the same `'task'` scope
+as GET/comment (creator or assigned, own workspace) and a JWT. The body may
+carry only `priority`, `dueDate`, `estimateHours` and/or `sprintId`; at least
+one is required. `title`, `description`, `status`, `projectId`, `parentId`,
+`contractDigest`, `tags` and any other property are refused with `400` before
+mutation. Status moves stay on `PATCH /tasks/:taskId/status`. A successful
+write returns the updated task plus `auditEventId` of the `task:updated`
+activity row.
+
+| route | an agent key gets |
+|---|---|
+| `PATCH /tasks/:taskId` | updates agent-safe metadata on a task it created or is assigned to — otherwise `403`; abusive fields → `400` |
+
 ## Creating a task with the agent key (MUN-0045)
 
 `POST /tasks` was closed to every agent key — even a well-formed request got
