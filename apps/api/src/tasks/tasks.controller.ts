@@ -117,6 +117,13 @@ type AuthRequest = Request & {
  * different kind of act from a comment or a status move, and naming it in the
  * allowlist keeps it revocable on its own. The body never carries the secret —
  * see `TaskRedactionService`.
+ *
+ * MUN-0081 — `GET /tasks/:taskId/assignees` is the bodyless assignment
+ * collection. `POST /agents/tasks/:taskId/assign` could write `task_agents`,
+ * and `GET /agents/tasks` listed only the caller's own rows, but no task-scoped
+ * read returned who is assigned to a task the key can already `GET`. Marked
+ * `@AgentScope('task')` — same refusal shape as `findOne` / `getActivity`.
+ * Projection is `{ agentId, role, assignedAt }` only (no API key material).
  */
 @Controller('tasks')
 @UseGuards(JwtOrApiKeyGuard, AgentTaskScopeGuard, HumanTaskReadGuard)
@@ -487,6 +494,25 @@ export class TasksController {
     @Param('itemId') itemId: string,
   ) {
     return this.tasksService.deleteChecklistItem(taskId, itemId);
+  }
+
+  // --- Assignees ---
+
+  /**
+   * MUN-0081 — list assignees for a task the key can already read.
+   *
+   * Bodyless projection over `task_agents`:
+   * `[{ agentId, role, assignedAt }, ...]` (oldest assignment first).
+   * Same `'task'` scope (and therefore the same 403 shape) as
+   * `GET /tasks/:taskId` / `GET .../activity` / `POST .../comments`.
+   */
+  @Get(':taskId/assignees')
+  @AgentScope('task')
+  getAssignees(@Param('taskId') taskId: string, @Req() req: AuthRequest) {
+    return this.tasksService.getAssignees(
+      taskId,
+      req.actor.type === 'human' ? req.actor.id : undefined,
+    );
   }
 
   // --- Dependencies ---
