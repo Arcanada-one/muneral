@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { Actor } from '@muneral/types';
+import { commentBodyFromPayload } from './comment-body.js';
 
 /**
  * Either the root Prisma client or an interactive-transaction client. Callers
@@ -59,6 +60,67 @@ export class ActivityService {
       this.prisma.activityLog.count({ where }),
     ]);
     return { data, total, page, limit };
+  }
+
+  /**
+   * MUN-0078 — bodyless agent-readable comment projection for one task.
+   *
+   * Filters `activity_log` to `action=comment` and returns only the fields an
+   * agent needs to list prior comments without scraping the mixed activity
+   * stream: id, createdAt, actorType, actorId, body. Workspace id, raw
+   * payload JSON, and other activity actions never leave this surface.
+   */
+  async findCommentsForTask(
+    taskId: string,
+    page = 1,
+    limit = 20,
+    humanUserId?: string,
+  ): Promise<{
+    data: Array<{
+      id: string;
+      createdAt: Date;
+      actorType: string;
+      actorId: string;
+      body: string;
+    }>;
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const skip = (page - 1) * limit;
+    const where = {
+      taskId,
+      action: 'comment',
+      ...(humanUserId ? { task: humanTaskWhere(humanUserId) } : {}),
+    };
+    const [rows, total] = await Promise.all([
+      this.prisma.activityLog.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          createdAt: true,
+          actorType: true,
+          actorId: true,
+          payload: true,
+        },
+      }),
+      this.prisma.activityLog.count({ where }),
+    ]);
+    return {
+      data: rows.map((row) => ({
+        id: row.id,
+        createdAt: row.createdAt,
+        actorType: row.actorType,
+        actorId: row.actorId,
+        body: commentBodyFromPayload(row.payload),
+      })),
+      total,
+      page,
+      limit,
+    };
   }
 
   async findForWorkspace(

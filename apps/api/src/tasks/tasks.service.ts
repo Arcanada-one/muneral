@@ -1030,6 +1030,11 @@ export class TasksService {
   async getActivity(taskId: string, page: number, limit: number, humanUserId?: string) {
     return this.activityService.findForTask(taskId, page, limit, humanUserId);
   }
+
+  /** MUN-0078 — bodyless comment projection (action=comment only). */
+  async getComments(taskId: string, page: number, limit: number, humanUserId?: string) {
+    return this.activityService.findCommentsForTask(taskId, page, limit, humanUserId);
+  }
 }
 
 function isForeignKeyRestrictViolation(err: unknown): boolean {

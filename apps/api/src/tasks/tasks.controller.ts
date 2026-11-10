@@ -76,14 +76,15 @@ type AuthRequest = Request & {
  * MUN-0047 — `GET /tasks/:taskId/activity` is scoped the same way (below).
  * Before this, `POST /tasks/:taskId/comments` (MUN-0046) was write-only to an
  * agent key: the comment landed in the ActivityLog but no route an agent key
- * could reach ever read it back — `getActivity` was unmarked (403) and there
- * is no separate `GET .../comments` route at all. A write no writer can read
- * back is not an audit trail. Deliberately reused `'task'`, not a new kind:
- * reading a task's history requires the same assignment `findOne` and
- * `updateStatus` already require, and `ActivityService.findForTask` returns
- * full `ActivityLog` rows including `payload.body` for a `comment` action, so
- * this one route also makes a dedicated `GET .../comments` unnecessary — see
- * `docs/agent-read-loop.md` for the measurement.
+ * could reach ever read it back — `getActivity` was unmarked (403). A write no
+ * writer can read back is not an audit trail. Deliberately reused `'task'`,
+ * not a new kind: reading a task's history requires the same assignment
+ * `findOne` already requires, and `ActivityService.findForTask` returns full
+ * `ActivityLog` rows including `payload.body` for a `comment` action.
+ *
+ * MUN-0078 — `GET /tasks/:taskId/comments` is the bodyless comment collection
+ * agents need without scraping mixed activity. Same `'task'` scope; response
+ * projects only id/createdAt/actorType/actorId/body.
  *
  * MUN-0045 — `POST /tasks` (`create`) is one exception: it is marked
  * `@AgentScope('project-write')`, because task creation with a `mun_sk_` key
@@ -557,10 +558,33 @@ export class TasksController {
     return this.tasksService.addComment(taskId, req.actor, dto.body);
   }
 
+  /**
+   * MUN-0078 — list comments for a task the key can read.
+   *
+   * Bodyless projection over `activity_log` rows with `action=comment`:
+   * `{ data: [{ id, createdAt, actorType, actorId, body }], total, page, limit }`.
+   * Same `'task'` scope (and therefore the same 403 shape) as
+   * `GET /tasks/:taskId` / `GET .../activity` / `POST .../comments`.
+   */
+  @Get(':taskId/comments')
+  @AgentScope('task')
+  getComments(
+    @Param('taskId') taskId: string,
+    @Req() req: AuthRequest,
+    @Query('page') page = '1',
+    @Query('limit') limit = '20',
+  ) {
+    return this.tasksService.getComments(
+      taskId,
+      parseInt(page, 10),
+      parseInt(limit, 10),
+      req.actor.type === 'human' ? req.actor.id : undefined,
+    );
+  }
+
   /** Readable by the assigned agent's API key (MUN-0047) or by a JWT. Returns
-   *  the full `ActivityLog` rows for the task, comment bodies included — this
-   *  is the only read surface for a comment an agent key posted (MUN-0046),
-   *  and there is no separate comments route to keep in sync with this one. */
+   *  the full `ActivityLog` rows for the task, comment bodies included. The
+   *  dedicated comments projection is `GET .../comments` (MUN-0078). */
   @Get(':taskId/activity')
   @AgentScope('task')
   getActivity(
