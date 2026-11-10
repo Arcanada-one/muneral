@@ -29,6 +29,9 @@ const otherTaskResponse = [
 ];
 
 let client: QueryClient;
+let clipboardDescriptor: PropertyDescriptor | undefined;
+let writeText: ReturnType<typeof vi.fn>;
+
 function wrapper({ children }: PropsWithChildren) {
   return createElement(QueryClientProvider, { client }, children);
 }
@@ -52,17 +55,38 @@ function deferred<T>() {
   return { promise, resolve, reject };
 }
 
+function setClipboard(nextWriteText: (text: string) => Promise<void>) {
+  Object.defineProperty(navigator, 'clipboard', {
+    configurable: true,
+    value: { writeText: nextWriteText },
+  });
+}
+
 beforeEach(() => {
   api.get.mockReset().mockImplementation(async (url: string) => ({
     data: url.startsWith(`/tasks/${otherTaskId}/`) ? otherTaskResponse : initialResponse,
   }));
   api.patch.mockReset();
-  client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  client = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  });
+  clipboardDescriptor = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
+  writeText = vi.fn().mockResolvedValue(undefined);
+  setClipboard(writeText);
 });
 
 afterEach(() => {
   cleanup();
   client.clear();
+  vi.restoreAllMocks();
+  if (clipboardDescriptor) {
+    Object.defineProperty(navigator, 'clipboard', clipboardDescriptor);
+  } else {
+    Reflect.deleteProperty(navigator, 'clipboard');
+  }
 });
 
 describe('TaskChecklist loaded-label search', () => {
@@ -103,6 +127,7 @@ describe('TaskChecklist loaded-label search', () => {
     expect(screen.getByText('Showing 3 of 4 loaded checklist items.')).toBeInTheDocument();
     expect(api.get).toHaveBeenCalledTimes(1);
     expect(api.patch).not.toHaveBeenCalled();
+    expect(writeText).not.toHaveBeenCalled();
   });
 
   it('offers clear-search and show-all recovery when loaded filters leave no matching rows', async () => {
@@ -130,6 +155,7 @@ describe('TaskChecklist loaded-label search', () => {
     expect(visibleLabels()).toEqual(['Update [API] docs', 'API docs done', 'Review api plan', 'Read API? notes']);
     expect(api.get).toHaveBeenCalledTimes(1);
     expect(api.patch).not.toHaveBeenCalled();
+    expect(writeText).not.toHaveBeenCalled();
   });
 
   it('retains the query across same-task updates, collapse, loaded-empty, and repopulation', async () => {
@@ -168,6 +194,7 @@ describe('TaskChecklist loaded-label search', () => {
     expect(visibleLabels()).toEqual(['Needle after empty']);
     expect(api.get).toHaveBeenCalledTimes(1);
     expect(api.patch).not.toHaveBeenCalled();
+    expect(writeText).not.toHaveBeenCalled();
   });
 
   it('resets the query after A-to-B-to-A task identity transitions without editing on B', async () => {
@@ -191,6 +218,7 @@ describe('TaskChecklist loaded-label search', () => {
     });
     expect(api.get).toHaveBeenCalledTimes(3);
     expect(api.patch).not.toHaveBeenCalled();
+    expect(writeText).not.toHaveBeenCalled();
   });
 
   it('adds no reads or mutations for search and preserves the existing pending and failure behavior of checkbox changes', async () => {
@@ -202,6 +230,7 @@ describe('TaskChecklist loaded-label search', () => {
     expect(visibleLabels()).toEqual(['Update [API] docs']);
     expect(api.get).toHaveBeenCalledTimes(1);
     expect(api.patch).not.toHaveBeenCalled();
+    expect(writeText).not.toHaveBeenCalled();
 
     const pendingPatch = deferred<{ data: ChecklistItem }>();
     api.patch.mockReturnValueOnce(pendingPatch.promise);
@@ -217,6 +246,7 @@ describe('TaskChecklist loaded-label search', () => {
     expect(screen.getByRole('alert')).not.toHaveTextContent('private transport detail');
     expect(screen.getByRole('checkbox', { name: 'Update [API] docs' })).toBeEnabled();
     expect(api.get).toHaveBeenCalledTimes(1);
+    expect(writeText).not.toHaveBeenCalled();
 
     view.unmount();
   });
