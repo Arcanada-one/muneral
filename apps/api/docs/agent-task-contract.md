@@ -183,7 +183,8 @@ secondary data source.
 | `GET /tasks` (filtered query) | **no — 403** | unscoped — **never use with an agent key** |
 | `DELETE /tasks/:id` | **no — 403** | unscoped |
 | `POST /tasks/:id/dependencies`, `DELETE /tasks/:id/dependencies/:depId` | yes, creator or executor of both endpoints in own workspace | `task-dependency` |
-| checklist routes | **no — 403** | unscoped |
+| `GET /tasks/:id/checklist` | yes | `task` (MUN-0080; read-only) |
+| `POST` / `PATCH` / `DELETE` checklist routes | **no — 403** | unscoped (writes stay JWT-only) |
 
 ### Refusal diagnosis (machine-readable for consumers)
 
@@ -292,3 +293,5 @@ Always pair the status with `/readiness`.
 - **MUN-0066** — documented per-runtime key issuance (JWT + protected credential
   path, Collective cross-link) so activity attribution stops collapsing onto one
   shared `actorId`. See [`agent-key-issuance.md`](agent-key-issuance.md).
+- **MUN-0080** — scoped `GET /tasks/:id/checklist` with `'task'` (read-only);
+  checklist writes remain unscoped / JWT-only.

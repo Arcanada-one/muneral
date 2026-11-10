@@ -69,9 +69,9 @@ type AuthRequest = Request & {
  * on every route that is not explicitly marked `@AgentScope(...)`. The one
  * additional project-grant path is the explicit metadata marker on `findOne`;
  * it returns only a narrow task projection. Routes with no scope marker —
- * delete, checklists — stay exactly as JWT-only as they
+ * delete and checklist writes — stay exactly as JWT-only as they
  * were; the only visible difference is that a valid key is now told 403
- * instead of 401.
+ * instead of 401. MUN-0080 scopes `GET …/checklist` read-only (`'task'`).
  *
  * MUN-0047 — `GET /tasks/:taskId/activity` is scoped the same way (below).
  * Before this, `POST /tasks/:taskId/comments` (MUN-0046) was write-only to an
@@ -458,7 +458,14 @@ export class TasksController {
 
   // --- Checklist ---
 
+  /**
+   * MUN-0080 — agent-readable checklist for a task the key can already read.
+   * Marked `@AgentScope('task')` so a `mun_sk_` key is not refused by the
+   * MUN-0043 allowlist. POST/PATCH/DELETE checklist routes stay unmarked
+   * (JWT-only writes).
+   */
   @Get(':taskId/checklist')
+  @AgentScope('task')
   getChecklist(@Param('taskId') taskId: string, @Req() req: AuthRequest) {
     return this.tasksService.getChecklist(taskId, req.actor.type === 'human' ? req.actor.id : undefined);
   }
