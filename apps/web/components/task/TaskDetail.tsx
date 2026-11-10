@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Bot, User, AlertCircle, Calendar, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -105,14 +105,7 @@ export function TaskDetail({ task, onReloadCurrentTask }: TaskDetailProps) {
       </div>
 
       {/* Description */}
-      {task.description && (
-        <div className="rounded-lg border p-4">
-          <h3 className="mb-2 text-sm font-medium">Description</h3>
-          <div className="prose prose-sm max-w-none text-sm text-muted-foreground">
-            <p className="whitespace-pre-wrap">{task.description}</p>
-          </div>
-        </div>
-      )}
+      {task.description && <TaskDescription key={task.id} description={task.description} />}
 
       {/* Tags */}
       {task.tags && task.tags.length > 0 && (
@@ -156,6 +149,32 @@ export function TaskDetail({ task, onReloadCurrentTask }: TaskDetailProps) {
       {/* Audit log */}
       <AuditLog taskId={task.id} />
     </div>
+  );
+}
+
+function TaskDescription({ description }: { description: string }) {
+  const [expanded, setExpanded] = useState(true);
+  const descriptionId = useId();
+
+  return (
+    <section className="rounded-lg border p-4">
+      <h3 className="mb-2">
+        <button
+          type="button"
+          className="text-sm font-medium"
+          aria-expanded={expanded}
+          aria-controls={descriptionId}
+          onClick={() => setExpanded((current) => !current)}
+        >
+          Description
+        </button>
+      </h3>
+      <div id={descriptionId} hidden={!expanded}>
+        <div className="prose prose-sm max-w-none text-sm text-muted-foreground">
+          <p className="whitespace-pre-wrap">{description}</p>
+        </div>
+      </div>
+    </section>
   );
 }
 
