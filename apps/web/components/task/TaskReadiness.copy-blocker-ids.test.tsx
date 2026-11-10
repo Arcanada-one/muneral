@@ -116,7 +116,7 @@ describe('TaskReadiness loaded blocker ID copy', () => {
     renderReadiness();
 
     expect(await screen.findByText('3 of 4 dependency links are blocking this task.')).toBeInTheDocument();
-    expect(screen.getByText('Blocked')).toBeInTheDocument();
+    expect(screen.getByText('Blocked', { selector: 'div' })).toBeInTheDocument();
     const blockerList = screen.getByRole('list');
     expect(within(blockerList).getAllByRole('listitem')).toHaveLength(3);
     expect(within(blockerList).queryByText('Withheld blocker title')).not.toBeInTheDocument();
