@@ -229,8 +229,20 @@ with `until` still ahead, may read that project's task **index**:
   one included — read back from the same table. The active-status staleness
   route writes `project:active_status_staleness_read` the same way.
 - The grant opens the index and the active-status staleness report. `GET /tasks/:taskId`, activity, comments,
-  status, redactions, assign, checklists, dependencies and the project list and
+  status, redactions, assign, checklists, dependencies, children (MUN-0070) and the project list and
   execution-staleness routes answer a granted key exactly as they answer any other key.
+
+## Listing direct children of a parent (MUN-0070)
+
+`GET /tasks/:taskId/children` answers with the direct children of a parent the
+caller can already read under `@AgentScope('task')` (assignment) or a human JWT
+workspace membership. Agents receive bodyless rows
+(`id, parentId, status, priority, actorType, createdAt, updatedAt, titleSha256`)
+plus `{parentId, counted, total, projection:"bodyless"}` — enough to reconcile
+child custody without dumping sibling free text. Humans receive full rows with
+`projection:"full"`, still narrowed by `humanTaskWhere`. Missing or out-of-scope
+parents refuse with the same shape as `GET /tasks/:taskId`. The route never
+PATCHes statuses.
 - A grant is a reviewed code change naming its decision, and it lapses at `until`
   by itself.
 
