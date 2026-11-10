@@ -11,6 +11,8 @@ interface TaskReadinessProps {
   taskId: string;
 }
 
+type BlockerStatusFilter = 'all' | 'todo' | 'in_progress' | 'review' | 'blocked';
+
 function CopyBlockerTaskIdButton({ blockerTaskId }: { blockerTaskId: string }) {
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const [isCopying, setIsCopying] = useState(false);
@@ -201,10 +203,12 @@ function TaskReadinessPanel({
 }) {
   const { data, isLoading, isError, isFetching, refetch } = readiness;
   const [searchQuery, setSearchQuery] = useState('');
+  const [blockerStatusFilter, setBlockerStatusFilter] = useState<BlockerStatusFilter>('all');
   const [blockersExpanded, setBlockersExpanded] = useState(true);
   const [reverseBlockerOrder, setReverseBlockerOrder] = useState(false);
   const [visibleCopyRevision, setVisibleCopyRevision] = useState(0);
   const searchInputId = useId();
+  const blockerStatusFilterId = useId();
   const reverseOrderId = useId();
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
 
@@ -226,9 +230,37 @@ function TaskReadinessPanel({
   } else {
     const loadedBlockers = data.blockedBy;
     const loadedBlockerIds = Array.from(new Set(loadedBlockers.map((edge) => edge.otherTaskId)));
-    const filteredBlockers = normalizedSearchQuery
-      ? loadedBlockers.filter((edge) => blockerSearchText(edge).includes(normalizedSearchQuery))
-      : loadedBlockers;
+    const filteredBlockers = loadedBlockers.filter((edge) => {
+      if (blockerStatusFilter !== 'all' && edge.otherTaskStatus !== blockerStatusFilter) {
+        return false;
+      }
+      if (!normalizedSearchQuery) {
+        return true;
+      }
+      return blockerSearchText(edge).includes(normalizedSearchQuery);
+    });
+    const blockerStatusCounts = filteredBlockers.reduce(
+      (counts, edge) => {
+        switch (edge.otherTaskStatus) {
+          case 'todo':
+            counts.todo += 1;
+            break;
+          case 'in_progress':
+            counts.inProgress += 1;
+            break;
+          case 'review':
+            counts.review += 1;
+            break;
+          case 'blocked':
+            counts.blocked += 1;
+            break;
+          default:
+            counts.other += 1;
+        }
+        return counts;
+      },
+      { todo: 0, inProgress: 0, review: 0, blocked: 0, other: 0 },
+    );
     const visibleBlockers = reverseBlockerOrder
       ? [...filteredBlockers].reverse()
       : filteredBlockers;
@@ -237,15 +269,27 @@ function TaskReadinessPanel({
       taskId,
       visibleCopyRevision,
       reverseBlockerOrder,
+      blockerStatusFilter,
       searchQuery,
       visibleBlockerIds,
     ]);
+    const filtersActive = normalizedSearchQuery !== '' || blockerStatusFilter !== 'all';
 
     content = (
       <>
         <p className="text-sm text-muted-foreground">
           {data.blockedBy.length} of {data.dependencyCount} dependency links are blocking this task.
         </p>
+        <div role="group" aria-label="Filtered blocker statuses" className="mt-2 text-sm text-muted-foreground">
+          <p>Counts of filtered loaded blocker edges:</p>
+          <ul className="flex flex-wrap gap-x-3" aria-label="Filtered blocker status counts">
+            <li>To Do {blockerStatusCounts.todo}</li>
+            <li>In Progress {blockerStatusCounts.inProgress}</li>
+            <li>Review {blockerStatusCounts.review}</li>
+            <li>Blocked {blockerStatusCounts.blocked}</li>
+            {blockerStatusCounts.other > 0 && <li>Other {blockerStatusCounts.other}</li>}
+          </ul>
+        </div>
         {loadedBlockers.length > 0 && (
           <>
             <button
@@ -266,6 +310,26 @@ function TaskReadinessPanel({
               selectionKey={visibleCopySelectionKey}
             />
             <div className="mt-3 flex flex-wrap items-center gap-2">
+              <div className="flex flex-col gap-1">
+                <label htmlFor={blockerStatusFilterId} className="text-sm">
+                  Blocker status
+                </label>
+                <select
+                  id={blockerStatusFilterId}
+                  value={blockerStatusFilter}
+                  onChange={(event) => {
+                    setBlockerStatusFilter(event.target.value as BlockerStatusFilter);
+                    setVisibleCopyRevision((revision) => revision + 1);
+                  }}
+                  className="rounded-md border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  <option value="all">All blocker statuses</option>
+                  <option value="todo">To Do</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="review">Review</option>
+                  <option value="blocked">Blocked</option>
+                </select>
+              </div>
               <label htmlFor={searchInputId} className="text-sm">
                 Search loaded blockers
               </label>
@@ -340,7 +404,9 @@ function TaskReadinessPanel({
             <p className="mt-2 text-sm text-muted-foreground">
               {loadedBlockers.length === 0
                 ? 'No loaded readiness blockers.'
-                : 'No matching readiness blockers in the loaded list. Clear search to show more.'}
+                : filtersActive
+                  ? 'No loaded blocking dependencies match the selected filters. Choose All blocker statuses or clear search to broaden the loaded results.'
+                  : 'No matching readiness blockers in the loaded list. Clear search to show more.'}
             </p>
           ) : (
             <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
