@@ -23,6 +23,10 @@ import {
   resolveActiveStatusThresholds,
   ThresholdValidationError,
 } from './active-status-staleness.report.js';
+import {
+  resolveTransitionReportWindow,
+  WindowValidationError,
+} from './transition-report.report.js';
 import { CreateTaskDto } from './dto/create-task.dto.js';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto.js';
 import { QueryTasksDto } from './dto/query-tasks.dto.js';
@@ -343,6 +347,43 @@ export class TasksController {
       scope.agentId,
       scope.projectReadGrant,
       thresholds,
+    );
+  }
+
+  /**
+   * MUN-0076 — transition report (statusCounts + task:status_changed edges).
+   *
+   * Same project-index grant as `GET .../index`. Required half-open UTC window
+   * via `startInclusiveUtc` / `endExclusiveUtc`. Invalid windows → HTTP 400.
+   * Never PATCHes status. rates/comparability stay NOT_MEASURED.
+   */
+  @Get('project/:projectId/transition-report')
+  @AgentScope('project-index')
+  getTransitionReport(
+    @Param('projectId') projectId: string,
+    @Req() req: AuthRequest,
+    @Query() query: Record<string, unknown>,
+  ) {
+    const scope = req.agentScope;
+    if (!scope || scope.kind !== 'project-index' || !scope.projectReadGrant) {
+      throw new ForbiddenException(
+        'The transition report is available only to an agent API key holding a read grant (MUN-0052/MUN-0076).',
+      );
+    }
+    let window;
+    try {
+      window = resolveTransitionReportWindow(query);
+    } catch (err) {
+      if (err instanceof WindowValidationError) {
+        throw new BadRequestException(err.message);
+      }
+      throw err;
+    }
+    return this.tasksService.transitionReportForProject(
+      projectId,
+      scope.agentId,
+      scope.projectReadGrant,
+      window,
     );
   }
 
