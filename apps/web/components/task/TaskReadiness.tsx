@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useId, useLayoutEffect, useRef, useState } from 'react';
 import { Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,8 @@ import { getTaskStatusLabel } from '@/lib/task-status-labels';
 interface TaskReadinessProps {
   taskId: string;
 }
+
+type BlockerStatusFilter = 'all' | 'todo' | 'in_progress' | 'review' | 'blocked';
 
 function CopyBlockerTaskIdButton({ blockerTaskId }: { blockerTaskId: string }) {
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
@@ -105,9 +107,90 @@ function CopyLoadedBlockerIdsButton({
   );
 }
 
+function CopyVisibleLoadedBlockerIdsButton({
+  blockerTaskIds,
+  selectionKey,
+}: {
+  blockerTaskIds: string[];
+  selectionKey: string;
+}) {
+  const isCopyPending = useRef(false);
+  const selectionKeyRef = useRef(selectionKey);
+  useLayoutEffect(() => {
+    selectionKeyRef.current = selectionKey;
+  }, [selectionKey]);
+  const [isCopying, setIsCopying] = useState(false);
+  const [copyFeedback, setCopyFeedback] = useState<{
+    selectionKey: string;
+    result: 'idle' | 'copied' | 'failed';
+  }>({ selectionKey, result: 'idle' });
+  const copyResult = copyFeedback.selectionKey === selectionKey ? copyFeedback.result : 'idle';
+
+  const copyVisibleLoadedBlockerIds = async () => {
+    if (isCopyPending.current || blockerTaskIds.length === 0) return;
+
+    const requestedSelectionKey = selectionKey;
+    isCopyPending.current = true;
+    setIsCopying(true);
+    setCopyFeedback({ selectionKey: requestedSelectionKey, result: 'idle' });
+
+    try {
+      const clipboard = typeof navigator === 'undefined' ? undefined : navigator.clipboard;
+      if (!clipboard || typeof clipboard.writeText !== 'function') {
+        throw new Error('Clipboard unavailable');
+      }
+
+      await clipboard.writeText(blockerTaskIds.join('\n'));
+      if (selectionKeyRef.current === requestedSelectionKey) {
+        setCopyFeedback({ selectionKey: requestedSelectionKey, result: 'copied' });
+      }
+    } catch {
+      if (selectionKeyRef.current === requestedSelectionKey) {
+        setCopyFeedback({ selectionKey: requestedSelectionKey, result: 'failed' });
+      }
+    } finally {
+      isCopyPending.current = false;
+      setIsCopying(false);
+    }
+  };
+
+  return (
+    <div className="mt-2">
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={copyVisibleLoadedBlockerIds}
+        disabled={blockerTaskIds.length === 0 || isCopying}
+      >
+        Copy visible loaded blocker IDs ({blockerTaskIds.length})
+      </Button>
+      {copyResult === 'copied' && (
+        <span role="status" className="ml-2 text-xs text-green-700">Visible blocker IDs copied.</span>
+      )}
+      {copyResult === 'failed' && (
+        <span role="alert" className="ml-2 text-xs text-destructive">
+          Could not copy visible blocker IDs. Try copying them manually.
+        </span>
+      )}
+    </div>
+  );
+}
+
+function blockerSearchText(edge: {
+  otherTaskId: string;
+  otherTaskTitle?: string | null;
+  otherTaskTitleWithheld?: true;
+}): string {
+  const parts = [edge.otherTaskId];
+  if (edge.otherTaskTitleWithheld !== true && edge.otherTaskTitle) {
+    parts.push(edge.otherTaskTitle);
+  }
+  return parts.join('\n').toLowerCase();
+}
+
 export function TaskReadiness({ taskId }: TaskReadinessProps) {
   const readiness = useTaskReadiness(taskId);
-
   return <TaskReadinessPanel key={taskId} taskId={taskId} readiness={readiness} />;
 }
 
@@ -119,7 +202,15 @@ function TaskReadinessPanel({
   readiness: ReturnType<typeof useTaskReadiness>;
 }) {
   const { data, isLoading, isError, isFetching, refetch } = readiness;
+  const [searchQuery, setSearchQuery] = useState('');
+  const [blockerStatusFilter, setBlockerStatusFilter] = useState<BlockerStatusFilter>('all');
   const [blockersExpanded, setBlockersExpanded] = useState(true);
+  const [reverseBlockerOrder, setReverseBlockerOrder] = useState(false);
+  const [visibleCopyRevision, setVisibleCopyRevision] = useState(0);
+  const searchInputId = useId();
+  const statusFilterId = useId();
+  const reverseOrderId = useId();
+  const normalizedSearchQuery = searchQuery.trim().toLowerCase();
 
   let content;
   if (!taskId) {
@@ -137,14 +228,36 @@ function TaskReadinessPanel({
       Ready: no blocking dependencies among {data.dependencyCount} dependency links.
     </p>;
   } else {
-    const loadedBlockerIds = Array.from(new Set(data.blockedBy.map((edge) => edge.otherTaskId)));
+    const loadedBlockers = data.blockedBy;
+    const loadedBlockerIds = Array.from(new Set(loadedBlockers.map((edge) => edge.otherTaskId)));
+    const filteredBlockers = loadedBlockers.filter((edge) => {
+      if (blockerStatusFilter !== 'all' && edge.otherTaskStatus !== blockerStatusFilter) {
+        return false;
+      }
+      if (!normalizedSearchQuery) {
+        return true;
+      }
+      return blockerSearchText(edge).includes(normalizedSearchQuery);
+    });
+    const visibleBlockers = reverseBlockerOrder
+      ? [...filteredBlockers].reverse()
+      : filteredBlockers;
+    const visibleBlockerIds = visibleBlockers.map((edge) => edge.otherTaskId);
+    const visibleCopySelectionKey = JSON.stringify([
+      taskId,
+      visibleCopyRevision,
+      reverseBlockerOrder,
+      searchQuery,
+      blockerStatusFilter,
+      visibleBlockerIds,
+    ]);
 
     content = (
       <>
         <p className="text-sm text-muted-foreground">
           {data.blockedBy.length} of {data.dependencyCount} dependency links are blocking this task.
         </p>
-        {data.blockedBy.length > 0 && (
+        {loadedBlockers.length > 0 && (
           <>
             <button
               type="button"
@@ -159,27 +272,127 @@ function TaskReadinessPanel({
               key={JSON.stringify([taskId, loadedBlockerIds])}
               blockerTaskIds={loadedBlockerIds}
             />
+            <CopyVisibleLoadedBlockerIdsButton
+              blockerTaskIds={visibleBlockerIds}
+              selectionKey={visibleCopySelectionKey}
+            />
+            <div className="mt-3 flex flex-wrap items-end gap-2">
+              <div className="flex flex-col gap-1">
+                <label htmlFor={statusFilterId} className="text-sm">
+                  Blocker status
+                </label>
+                <select
+                  id={statusFilterId}
+                  value={blockerStatusFilter}
+                  onChange={(event) => {
+                    setBlockerStatusFilter(event.target.value as BlockerStatusFilter);
+                    setVisibleCopyRevision((revision) => revision + 1);
+                  }}
+                  className="rounded border bg-background px-2 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  <option value="all">All blocker statuses</option>
+                  <option value="todo">To Do</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="review">Review</option>
+                  <option value="blocked">Blocked</option>
+                </select>
+              </div>
+              <label htmlFor={searchInputId} className="text-sm">
+                Search loaded blockers
+              </label>
+              <input
+                id={searchInputId}
+                type="search"
+                value={searchQuery}
+                onChange={(event) => {
+                  setSearchQuery(event.target.value);
+                  setVisibleCopyRevision((revision) => revision + 1);
+                }}
+                onKeyDown={(event) => {
+                  if (
+                    event.key !== 'Escape' ||
+                    searchQuery === '' ||
+                    event.nativeEvent.isComposing ||
+                    event.altKey ||
+                    event.ctrlKey ||
+                    event.metaKey ||
+                    event.shiftKey
+                  ) {
+                    return;
+                  }
+
+                  event.preventDefault();
+                  event.stopPropagation();
+                  setSearchQuery('');
+                  setVisibleCopyRevision((revision) => revision + 1);
+                }}
+                aria-describedby={`${searchInputId}-help`}
+                aria-keyshortcuts="Escape"
+                placeholder="Title or task ID"
+                className="min-w-0 flex-1 rounded border bg-background px-2 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              />
+              <span id={`${searchInputId}-help`} className="basis-full text-xs text-muted-foreground">
+                Filters the already-loaded readiness blockers locally. Press Escape to clear search.
+              </span>
+              {searchQuery !== '' && (
+                <button
+                  type="button"
+                  aria-label="Clear search"
+                  className="rounded text-sm text-foreground underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setVisibleCopyRevision((revision) => revision + 1);
+                  }}
+                >
+                  Clear search
+                </button>
+              )}
+              <label htmlFor={reverseOrderId} className="flex items-center gap-2 text-sm text-foreground">
+                <input
+                  id={reverseOrderId}
+                  type="checkbox"
+                  checked={reverseBlockerOrder}
+                  onChange={(event) => {
+                    setReverseBlockerOrder(event.target.checked);
+                    setVisibleCopyRevision((revision) => revision + 1);
+                  }}
+                  className="h-4 w-4 rounded border-input text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                />
+                Reverse loaded blocker order
+              </label>
+              <p className="basis-full text-xs text-muted-foreground">
+                Showing {visibleBlockers.length} of {loadedBlockers.length} loaded blocking dependencies.
+              </p>
+            </div>
           </>
         )}
-        <ul
-          id={`task-readiness-${taskId}-blockers`}
-          hidden={!blockersExpanded}
-          className="mt-2 list-disc space-y-1 pl-5 text-sm"
-        >
-          {data.blockedBy.map((edge) => {
-            const title = edge.otherTaskTitleWithheld === true ? null : edge.otherTaskTitle;
-            const status = getTaskStatusLabel(edge.otherTaskStatus);
-            return (
-              <li key={`${taskId}:${edge.id}:${edge.otherTaskId}`} className="break-words">
-                {title || edge.otherTaskId}
-                {status ? <Badge className="ml-2" variant="secondary">{status}</Badge> : null}
-                <CopyBlockerTaskIdButton
-                  blockerTaskId={edge.otherTaskId}
-                />
-              </li>
-            );
-          })}
-        </ul>
+        <div id={`task-readiness-${taskId}-blockers`} hidden={!blockersExpanded}>
+          {visibleBlockers.length === 0 ? (
+            <p className="mt-2 text-sm text-muted-foreground">
+              {loadedBlockers.length === 0
+                ? 'No loaded readiness blockers.'
+                : blockerStatusFilter !== 'all'
+                  ? 'No loaded blocking dependencies match the selected filters. Choose All blocker statuses or clear search to broaden the loaded results.'
+                  : 'No matching readiness blockers in the loaded list. Clear search to show more.'}
+            </p>
+          ) : (
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
+              {visibleBlockers.map((edge) => {
+                const title = edge.otherTaskTitleWithheld === true ? null : edge.otherTaskTitle;
+                const status = getTaskStatusLabel(edge.otherTaskStatus);
+                return (
+                  <li key={`${taskId}:${edge.id}:${edge.otherTaskId}`} className="break-words">
+                    {title || edge.otherTaskId}
+                    {status ? <Badge className="ml-2" variant="secondary">{status}</Badge> : null}
+                    <CopyBlockerTaskIdButton
+                      blockerTaskId={edge.otherTaskId}
+                    />
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
       </>
     );
   }

@@ -1,0 +1,9 @@
+{
+  "name": "repository-destination-browser-helper",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "playwright-core": "1.63.0"
+  }
+}

@@ -21,6 +21,9 @@ out/
 *.log
 npm-debug.log*
 pnpm-debug.log*
+# Retained ErrorLedger fixtures (BATCH-005); must stay trackable despite *.log
+!data/pr108_lint_and_test.log
+!data/pr108_graph_admission.log
 
 # Editor
 .DS_Store
@@ -34,6 +37,9 @@ datarim/
 # Test coverage
 coverage/
 .nyc_output/
+
+# BATCH-004 CI machine reports (eslint/tsc/jest/vitest/ErrorLedger); produced on the runner
+reports/
 
 # Runtime data
 pids/

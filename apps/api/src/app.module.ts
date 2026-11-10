@@ -24,6 +24,7 @@ import { WsModule } from './ws/ws.module.js';
 import { SolutionLogHeadModule } from './solution-log-head/solution-log-head.module.js';
 import { MigrationModule } from './migration/migration.module.js';
 import { OutboxModule } from './outbox/outbox.module.js';
+import { PlanGraphModule } from './plan-graph/plan-graph.module.js';
 
 @Module({
   controllers: [HealthController, RouteTableController],
@@ -63,6 +64,7 @@ import { OutboxModule } from './outbox/outbox.module.js';
     SolutionLogHeadModule,
     MigrationModule,
     OutboxModule,
+    PlanGraphModule,
   ],
   providers: [
     {

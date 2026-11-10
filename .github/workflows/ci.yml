@@ -14,13 +14,12 @@ on:
 permissions:
   contents: read
 
-# A newer push to a pull-request branch supersedes that branch's older run, which
-# otherwise keeps queueing on the shared self-hosted runners. Only pull_request
-# runs are ever cancelled: push (main), tag, schedule and workflow_dispatch runs get
-# a group unique to the run, so they are never cancelled or replaced while pending.
+# BATCH-004: one concurrency group per PR number (or ref on non-PR). A newer push
+# to the same PR cancels the superseded run. Non-PR events use github.ref and keep
+# cancel-in-progress false, so main/deploy runs are never cancelled mid-flight.
 # Job-level deploy locks are separate groups and are not touched.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  group: ci-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
@@ -68,9 +67,16 @@ jobs:
     # This job remains successful on reuse so it cannot skip a transitive deploy
     # ancestor. The exact reuse proof runs while ordinary verification steps skip.
     # Dedicated deploy gates remain on their existing isolated lane.
+    # BATCH-004 guard: ordinary (non-integration, unlabeled) PRs skip this job so
+    # they do not occupy ci-general; required checks stay unset and block merge.
     runs-on: [self-hosted, linux, ci-general]
     needs: tested-tree
-    if: always()
+    if: >-
+      always() && (
+        github.event_name != 'pull_request' ||
+        startsWith(github.head_ref, 'integration/') ||
+        contains(github.event.pull_request.labels.*.name, 'ci:run')
+      )
     services:
       postgres:
         image: postgres:16
@@ -93,19 +99,30 @@ jobs:
           - 5432
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - name: Prepare reports directory
+        if: needs.tested-tree.outputs.reuse != 'true'
+        run: mkdir -p reports
       - name: Confirm tested-tree reuse proof
         run: printf 'tested-tree reuse=%s tree=%s\n' '${{ needs.tested-tree.outputs.reuse }}' "$(git rev-parse 'HEAD^{tree}')"
       - name: Test Ops Bot secret gate contract
+        id: opsbot_secret_gate_test
         if: needs.tested-tree.outputs.reuse != 'true'
+        continue-on-error: true
         run: bash scripts/ci/opsbot-secret-gate.test.sh
       - name: Test runner deploy-broker preflight contract
+        id: runner_broker_preflight_test
         if: needs.tested-tree.outputs.reuse != 'true'
+        continue-on-error: true
         run: bash scripts/ci/runner-broker-preflight.test.sh
       - name: Test tested-tree reuse qualification
+        id: tested_tree_unit
         if: needs.tested-tree.outputs.reuse != 'true'
+        continue-on-error: true
         run: python3 -I scripts/ci/test_tested_tree.py
       - name: Test semantic aggregate readback contract
+        id: semantic_readback_contract
         if: needs.tested-tree.outputs.reuse != 'true'
+        continue-on-error: true
         run: |
           node --test apps/api/scripts/semantic-aggregate-readback.test.mjs
           bash scripts/ci/semantic-readback-caller-contract.test.sh
@@ -114,18 +131,23 @@ jobs:
       # bodies and asserts each one goes RED — including the exact hole A2-251 measured, where the
       # controller's `0.0.0-unknown` sentinel was recorded as a valid version.
       - name: Test /health identity probes go red on a build that cannot name itself
+        id: health_identity_probe_test
         if: needs.tested-tree.outputs.reuse != 'true'
+        continue-on-error: true
         run: bash scripts/ci/probe-health-identity.test.sh
-          bash scripts/ci/semantic-readback-caller-contract.sh
       # A2-267: the agent-task list must carry `contractDigest` on every row. This serves rows with
       # the key missing or malformed from a loopback stub and asserts the probe goes RED on each.
       - name: Test the contract-digest probe goes red on a build without the field
+        id: contract_digest_probe_test
         if: needs.tested-tree.outputs.reuse != 'true'
+        continue-on-error: true
         run: bash scripts/ci/probe-contract-digest.test.sh
       # A2-330: the post-deploy canary must be able to go red — a route missing from the resident
       # route table, a 405, a router no-match 404 — and must never send anything but a GET.
       - name: Test the post-deploy canary goes red
+        id: canary_red_test
         if: needs.tested-tree.outputs.reuse != 'true'
+        continue-on-error: true
         run: python3 -m unittest discover -s scripts/canary -p 'test_*.py'
       - name: Enable corepack (pnpm@11.5.2 from packageManager field)
         if: needs.tested-tree.outputs.reuse != 'true'
@@ -137,19 +159,54 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
         if: needs.tested-tree.outputs.reuse != 'true'
         with:
-          node-version: 24.22.1
+          node-version: 26.13.0
           cache: pnpm
       - name: Test standalone browser stderr sanitizer
+        id: sanitize_browser_stderr_test
         if: needs.tested-tree.outputs.reuse != 'true'
+        continue-on-error: true
         run: node --test scripts/diagnostics/sanitize-browser-stderr.test.mjs
       - name: Install dependencies
         if: needs.tested-tree.outputs.reuse != 'true'
         run: pnpm install --frozen-lockfile
-      - name: Lint
+      # BATCH-004 machine reports: continue-on-error so one failure does not hide the rest.
+      # `collect` below is the sole step that turns prior check outcomes into a red job.
+      - name: ESLint machine report
+        id: eslint
         if: needs.tested-tree.outputs.reuse != 'true'
-        run: pnpm lint
+        continue-on-error: true
+        run: |
+          set +e
+          mkdir -p reports
+          # Combine api + web eslint JSON arrays into reports/eslint.json
+          pnpm --filter @muneral/api exec eslint src --ext .ts -f json -o ../../reports/eslint-api.json
+          api_rc=$?
+          pnpm --filter @muneral/web exec eslint . -f json -o ../../reports/eslint-web.json
+          web_rc=$?
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          parts = []
+          for name in ("reports/eslint-api.json", "reports/eslint-web.json"):
+              p = Path(name)
+              if not p.is_file() or p.stat().st_size == 0:
+                  continue
+              try:
+                  data = json.loads(p.read_text())
+              except json.JSONDecodeError:
+                  continue
+              if isinstance(data, list):
+                  parts.extend(data)
+              else:
+                  parts.append(data)
+          Path("reports/eslint.json").write_text(json.dumps(parts, indent=2) + "\n")
+          PY
+          if [ "${api_rc}" -ne 0 ] || [ "${web_rc}" -ne 0 ]; then exit 1; fi
+          exit 0
       - name: Build shared types
+        id: build_types
         if: needs.tested-tree.outputs.reuse != 'true'
+        continue-on-error: true
         run: pnpm --filter @muneral/types build
       - name: Generate Prisma client
         if: needs.tested-tree.outputs.reuse != 'true'
@@ -157,8 +214,28 @@ jobs:
         run: pnpm exec prisma generate
         env:
           DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
-      - name: Build
+      # tsc report MUST follow prisma generate — otherwise @prisma/client has no generated exports.
+      - name: TypeScript machine report
+        id: tsc
         if: needs.tested-tree.outputs.reuse != 'true'
+        continue-on-error: true
+        run: |
+          set +e
+          mkdir -p reports
+          {
+            printf '=== @muneral/types ===\n'
+            pnpm --filter @muneral/types exec tsc --pretty false
+            types_rc=$?
+            printf '=== @muneral/api ===\n'
+            pnpm --filter @muneral/api exec tsc -p tsconfig.json --pretty false --noEmit
+            api_rc=$?
+            if [ "${types_rc}" -ne 0 ] || [ "${api_rc}" -ne 0 ]; then exit 1; fi
+            exit 0
+          } > reports/tsc.txt 2>&1
+      - name: Build
+        id: build
+        if: needs.tested-tree.outputs.reuse != 'true'
+        continue-on-error: true
         run: pnpm build
       - name: Apply DB migrations
         if: needs.tested-tree.outputs.reuse != 'true'
@@ -167,16 +244,95 @@ jobs:
         env:
           DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
       - name: Test semantic aggregate readback against disposable PostgreSQL
+        id: semantic_readback_db
         if: needs.tested-tree.outputs.reuse != 'true'
+        continue-on-error: true
         run: node apps/api/scripts/semantic-aggregate-readback.mjs
         env:
           DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
-      - name: Test
+      - name: Jest machine report
+        id: jest
         if: needs.tested-tree.outputs.reuse != 'true'
-        run: pnpm test
+        continue-on-error: true
+        run: |
+          mkdir -p reports
+          # No --bail: collect every failure into the JSON report.
+          NODE_OPTIONS=--experimental-vm-modules \
+            pnpm --filter @muneral/api exec node scripts/run-jest-isolated.mjs --passWithNoTests --json --outputFile ../../reports/jest.json
         env:
           DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
           MUN0020_DB_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
+      - name: Vitest machine report
+        id: vitest
+        if: needs.tested-tree.outputs.reuse != 'true'
+        continue-on-error: true
+        run: |
+          mkdir -p reports
+          pnpm --filter @muneral/web exec vitest run --reporter=json --outputFile ../../reports/vitest.json
+      - name: Verify structure machine report
+        id: verify_structure
+        if: needs.tested-tree.outputs.reuse != 'true'
+        continue-on-error: true
+        run: |
+          mkdir -p reports
+          bash scripts/ci/verify-structure.sh > reports/verify-structure.txt 2>&1
+      - name: Collect ErrorLedger
+        id: collect
+        if: always() && needs.tested-tree.outputs.reuse != 'true'
+        run: |
+          mkdir -p reports "${RUNNER_TEMP}/error-ledger"
+          cat > "${RUNNER_TEMP}/error-ledger/step-outcomes.txt" <<'EOF'
+          opsbot_secret_gate_test=${{ steps.opsbot_secret_gate_test.outcome }}
+          runner_broker_preflight_test=${{ steps.runner_broker_preflight_test.outcome }}
+          tested_tree_unit=${{ steps.tested_tree_unit.outcome }}
+          semantic_readback_contract=${{ steps.semantic_readback_contract.outcome }}
+          health_identity_probe_test=${{ steps.health_identity_probe_test.outcome }}
+          contract_digest_probe_test=${{ steps.contract_digest_probe_test.outcome }}
+          canary_red_test=${{ steps.canary_red_test.outcome }}
+          sanitize_browser_stderr_test=${{ steps.sanitize_browser_stderr_test.outcome }}
+          eslint=${{ steps.eslint.outcome }}
+          tsc=${{ steps.tsc.outcome }}
+          build_types=${{ steps.build_types.outcome }}
+          build=${{ steps.build.outcome }}
+          semantic_readback_db=${{ steps.semantic_readback_db.outcome }}
+          jest=${{ steps.jest.outcome }}
+          vitest=${{ steps.vitest.outcome }}
+          verify_structure=${{ steps.verify_structure.outcome }}
+          EOF
+          python3 - <<'PY' > "${RUNNER_TEMP}/error-ledger/run-meta.json"
+          import json
+          print(json.dumps({
+            "repository": """${{ github.repository }}""",
+            "run_id": """${{ github.run_id }}""",
+            "run_attempt": """${{ github.run_attempt }}""",
+            "sha": """${{ github.sha }}""",
+            "ref": """${{ github.ref }}""",
+            "event_name": """${{ github.event_name }}""",
+            "head_ref": """${{ github.head_ref }}""",
+          }))
+          PY
+          summary_args=()
+          if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+            summary_args=(--summary-file "${GITHUB_STEP_SUMMARY}")
+          fi
+          python3 -I scripts/ci/collect-error-ledger.py \
+            --step-outcomes-file "${RUNNER_TEMP}/error-ledger/step-outcomes.txt" \
+            --run-meta-file "${RUNNER_TEMP}/error-ledger/run-meta.json" \
+            --out reports/error-ledger.json \
+            "${summary_args[@]}"
+      - name: Upload ErrorLedger artifact
+        if: always() && needs.tested-tree.outputs.reuse != 'true'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: error-ledger-${{ github.sha }}
+          path: |
+            reports/error-ledger.json
+            reports/eslint.json
+            reports/tsc.txt
+            reports/jest.json
+            reports/vitest.json
+            reports/verify-structure.txt
+          if-no-files-found: warn
 
   # AUP-GRAPH-006 `gate1` (DEC-AUP-0008): «нет receipt — нет мержа». A pull request is admitted only
   # when a ChangeAdmissionReceipt/v1 is bound to exactly this change range — in the head tree under
@@ -227,14 +383,27 @@ jobs:
       signing_key_fingerprint: 'SHA256:9QFqysn44UjA8rXyfHjItP3b2Oadhnbf1bDNqXrsCig'
 
   network-exposure:
-    uses: Arcanada-one/datarim/.github/workflows/network-exposure-lint.yml@50351e0468f57a39b280d75cf41827329d6393d2
+    # BATCH-004 guard: skip unlabeled non-integration PRs (do not occupy ci-general).
+    if: >-
+      github.event_name != 'pull_request' ||
+      startsWith(github.head_ref, 'integration/') ||
+      contains(github.event.pull_request.labels.*.name, 'ci:run')
+    uses: Arcanada-one/datarim/.github/workflows/network-exposure-lint.yml@1fbb6bd89202b032f4ef9b9a6de4b186d9cf316c
     with:
       compose_paths: docker-compose.prod.yml
-      datarim_ref: '50351e0468f57a39b280d75cf41827329d6393d2'
+      datarim_ref: '1fbb6bd89202b032f4ef9b9a6de4b186d9cf316c'
       # A2-315: on the deploying push this gate takes the `deploy-gate` lane too (default is ci-general).
       runner_labels: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && '["deploy-gate"]' || '["self-hosted","linux","ci-general"]' }}
 
   preflight-caller-contract:
+    # BATCH-004 guard: same PR skip rule as lint-and-test / network-exposure.
+    # Job stays on ubuntu-latest (not ci-general). Required `if:` restored for AC3;
+    # capabilities allowlist in pinned datarim preflight-caller-contract is unchanged
+    # (no deploy/vault/contract-step weakening).
+    if: >-
+      github.event_name != 'pull_request' ||
+      startsWith(github.head_ref, 'integration/') ||
+      contains(github.event.pull_request.labels.*.name, 'ci:run')
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -244,7 +413,7 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ github.workflow_sha }}
-      - uses: Arcanada-one/datarim/.github/actions/preflight-caller-contract@50351e0468f57a39b280d75cf41827329d6393d2
+      - uses: Arcanada-one/datarim/.github/actions/preflight-caller-contract@1fbb6bd89202b032f4ef9b9a6de4b186d9cf316c
         with:
           vault-addr: ${{ vars.VAULT_ADDR }}
 
@@ -302,7 +471,7 @@ jobs:
     steps:
       - name: Pre-deploy host readiness
         id: preflight
-        uses: Arcanada-one/datarim/.github/actions/preflight-check@50351e0468f57a39b280d75cf41827329d6393d2
+        uses: Arcanada-one/datarim/.github/actions/preflight-check@1fbb6bd89202b032f4ef9b9a6de4b186d9cf316c
         with:
           target-host: arcana-prd
           service-name: muneral

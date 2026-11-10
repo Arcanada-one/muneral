@@ -33,9 +33,18 @@ import {
 import type { WorkspaceDigestGrantEntry } from '../auth/workspace-digest-grants.js';
 import { digestRenewalDueAt } from '../auth/workspace-digest-grants.js';
 import { QueryWorkspaceDigestDto } from './dto/query-workspace-digest.dto.js';
+import {
+  buildActiveStatusStalenessReport,
+  type ActiveStatusStalenessReport,
+  type ActiveStatusStalenessThresholds,
+} from './active-status-staleness.report.js';
 
 /** MUN-0052: the activity action one task-index read records. */
 export const PROJECT_INDEX_READ_ACTION = 'project:index_read';
+
+/** MUN-0067: the activity action one active-status staleness report records. */
+export const PROJECT_ACTIVE_STATUS_STALENESS_READ_ACTION =
+  'project:active_status_staleness_read';
 
 /** MUN-0052: what the index's `total` counts, stated in the answer (I4). */
 export const PROJECT_INDEX_COUNTED =
@@ -337,6 +346,99 @@ export class TasksService {
               renewalDueAt: renewalDueAt(grant),
             },
       tasks,
+    };
+  }
+
+  /**
+   * MUN-0067 — grant-scoped active-status staleness report.
+   *
+   * Uses the same bodyless columns as `indexForProject` under the same
+   * project-index grant. Ages `in_progress` / `review` / `blocked` by
+   * `generatedAt - updatedAt`. Never PATCHes statuses (`autoPatch: false`).
+   * Title/description never leave; title is hashed exactly as the index.
+   */
+  async activeStatusStalenessForProject(
+    projectId: string,
+    agentId: string,
+    grant: ProjectReadGrantEntry,
+    thresholds: ActiveStatusStalenessThresholds,
+  ): Promise<
+    ActiveStatusStalenessReport & {
+      auditEventId: string;
+      auditReadCount: number;
+      grant:
+        | { decision: string; until: string }
+        | { decision: string; until: string; renewalDueAt: string };
+    }
+  > {
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      select: { workspaceId: true },
+    });
+    if (!project) {
+      throw new NotFoundException(`Project ${projectId} not found.`);
+    }
+
+    const rows = await this.prisma.task.findMany({
+      where: { projectId },
+      select: PROJECT_INDEX_SELECT,
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+    });
+    const tasks = rows.map(({ title, ...rest }) => ({
+      ...rest,
+      createdAt: rest.createdAt.toISOString(),
+      updatedAt: rest.updatedAt.toISOString(),
+      titleSha256: createHash('sha256').update(title, 'utf8').digest('hex'),
+    }));
+
+    const audit = await this.prisma.activityLog.create({
+      data: {
+        workspaceId: project.workspaceId,
+        taskId: null,
+        actorType: 'agent',
+        actorId: agentId,
+        action: PROJECT_ACTIVE_STATUS_STALENESS_READ_ACTION,
+        payload: {
+          projectId,
+          decision: grant.decision,
+          rowCount: tasks.length,
+          softDays: thresholds.softDays,
+          hardDays: thresholds.hardDays,
+          autoPatch: false,
+        } as Prisma.InputJsonValue,
+      },
+      select: { id: true, createdAt: true },
+    });
+
+    const auditReadCount = await this.prisma.activityLog.count({
+      where: {
+        workspaceId: project.workspaceId,
+        actorId: agentId,
+        action: PROJECT_ACTIVE_STATUS_STALENESS_READ_ACTION,
+      },
+    });
+
+    const report = buildActiveStatusStalenessReport(
+      {
+        projectId,
+        generatedAt: audit.createdAt.toISOString(),
+        tasks,
+      },
+      thresholds,
+    );
+
+    return {
+      ...report,
+      auditEventId: audit.id,
+      auditReadCount,
+      grant:
+        grant.standing === true
+          ? { decision: grant.decision, until: grant.until }
+          : {
+              decision: grant.decision,
+              until: grant.until,
+              renewalDueAt: renewalDueAt(grant),
+            },
     };
   }
 
