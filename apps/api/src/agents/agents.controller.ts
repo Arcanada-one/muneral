@@ -94,6 +94,18 @@ export class AgentsController {
     return this.agentsService.createApiKey(agentId, body.label);
   }
 
+  /**
+   * MUN-0074 — rotate the presenting agent API key. Declared before
+   * `keys/:keyId/rotate` so `self` is never captured as a JWT keyId (prod
+   * measured that shadowing as HTTP 401 for mun_sk_ callers).
+   */
+  @Post('keys/self/rotate')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(ApiKeyGuard)
+  rotateOwnApiKey(@Req() req: Request & { apiKeyAgent: Agent; apiKeyId: string }) {
+    return this.agentsService.rotateOwnApiKey(req.apiKeyId, req.apiKeyAgent);
+  }
+
   @Post('keys/:keyId/rotate')
   @UseGuards(JwtAuthGuard)
   rotateApiKey(@Param('keyId') keyId: string) {

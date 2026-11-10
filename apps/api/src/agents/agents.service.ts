@@ -125,6 +125,11 @@ export class AgentsService {
     return this.authService.rotateApiKey(keyId);
   }
 
+  /** MUN-0074 — rotate only the presenting agent API key. */
+  async rotateOwnApiKey(keyId: string, agent: { id: string; workspaceId: string }) {
+    return this.authService.rotateOwnApiKey(keyId, agent);
+  }
+
   async revokeOwnApiKey(keyId: string, agent: { id: string; workspaceId: string }) {
     return this.authService.revokeOwnApiKey(keyId, agent);
   }
