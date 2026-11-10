@@ -22,11 +22,11 @@
   },
   "binding": {
     "algorithm": "sha256",
-    "aggregateSha256": "fbb0d92e7bf4df52ba51672e32eee78802ff9accb7150ef2baeab5e37b11f414",
+    "aggregateSha256": "b339cc5ef3d1a84ee20510138be838a239a55521ac96c9ea4cafda7e96fd3a5c",
     "files": [
       {
         "path": "apps/api/package.json",
-        "sha256": "3fadf5ee75e3db07943a38c98b1a69eab8ddbdab2347c908b099b83bb4452348"
+        "sha256": "0726ca5f358349e2016e8c3da72ee485669417c6f38fe8cdf8f3528c80c3dad4"
       },
       {
         "path": "apps/api/src/assembly/assembly.canonical.ts",
@@ -262,11 +262,11 @@
       },
       {
         "path": "package.json",
-        "sha256": "08044a6a30936010a03968a1d41b9908639428c6312f5bcd98c52b04b97bfd09"
+        "sha256": "1c17a035a9f3628b21dff0cfe44c1e86fa0b2724af3ccd25b5cbcdfb21b30555"
       },
       {
         "path": "pnpm-lock.yaml",
-        "sha256": "b9fd7a00c104eccb56944baa49ef119aee98792efb68467fd6018cfae5d84978"
+        "sha256": "e5a68763996dfa027c1e06ba81db00a18cd1f21c3957f1d4086b28e721b0e2df"
       }
     ]
   },
@@ -276,8 +276,8 @@
       "apps/web/",
       "receipts/"
     ],
-    "trackedTreeWithoutEvidence": "2c6631e154786f5960a0b49f2468d07e8992844e",
-    "trackedSnapshotDiffSha256": "dc350ca61f39db6caa37abed9ae23df2b0ce4e250baaa19e9f72035e8bf9271d"
+    "trackedTreeWithoutEvidence": "969ea8b5665c0e08cd706c4b78e13a22b22605ae",
+    "trackedSnapshotDiffSha256": "f6f70b5ea9ed27f22ba55426741e980855b7adb34c8e290bc0ae31c92b669e3a"
   },
   "baseline": {
     "outcome": "SURVIVED",
@@ -1830,10 +1830,8 @@
   "restoration": {
     "verified": true,
     "files": {
-      "apps/api/src/assembly/assembly.errors.ts": "a1bf3c097c639034cae219cc4b8bb11fd60bc414409d15b980b85975874968df",
       "apps/api/src/assembly/assembly.validator.ts": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "apps/api/src/assembly/assembly.canonical.ts": "4e52a503637d583bc1292b3d9cd3c9a9dad25148790547ba15d91eff9ff0c28d",
-      "apps/api/src/assembly/assembly.compiler.ts": "9a37682a5558d2215caddc453e2edacab44eeb07c740054e7493e89a60abee99",
       "apps/api/src/execution-authority/canonical-json-v1.ts": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e"
     }
   }
