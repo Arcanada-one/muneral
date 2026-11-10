@@ -159,7 +159,7 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
         if: needs.tested-tree.outputs.reuse != 'true'
         with:
-          node-version: 24.22.1
+          node-version: 26.13.0
           cache: pnpm
       - name: Test standalone browser stderr sanitizer
         id: sanitize_browser_stderr_test

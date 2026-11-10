@@ -119,8 +119,8 @@ describe('TaskDetail dependency readiness summary', () => {
 
     expect(await screen.findByText('1 of 2 dependency links are blocking this task.')).toBeInTheDocument();
     expect(screen.getByText('Release prerequisite')).toBeInTheDocument();
-    expect(screen.getByText('In Progress')).toBeInTheDocument();
-    expect(screen.getByText('Blocked')).toBeInTheDocument();
+    expect(screen.getByText('In Progress', { selector: 'div' })).toBeInTheDocument();
+    expect(screen.getByText('Blocked', { selector: 'div' })).toBeInTheDocument();
   });
 
   it.each([

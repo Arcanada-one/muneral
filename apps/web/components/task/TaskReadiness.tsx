@@ -208,7 +208,7 @@ function TaskReadinessPanel({
   const [reverseBlockerOrder, setReverseBlockerOrder] = useState(false);
   const [visibleCopyRevision, setVisibleCopyRevision] = useState(0);
   const searchInputId = useId();
-  const blockerStatusFilterId = useId();
+  const statusFilterId = useId();
   const reverseOrderId = useId();
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
 
@@ -260,7 +260,7 @@ function TaskReadinessPanel({
         return counts;
       },
       { todo: 0, inProgress: 0, review: 0, blocked: 0, other: 0 },
-    );
+    )
     const visibleBlockers = reverseBlockerOrder
       ? [...filteredBlockers].reverse()
       : filteredBlockers;
@@ -269,8 +269,8 @@ function TaskReadinessPanel({
       taskId,
       visibleCopyRevision,
       reverseBlockerOrder,
-      blockerStatusFilter,
       searchQuery,
+      blockerStatusFilter,
       visibleBlockerIds,
     ]);
     const filtersActive = normalizedSearchQuery !== '' || blockerStatusFilter !== 'all';
@@ -309,19 +309,19 @@ function TaskReadinessPanel({
               blockerTaskIds={visibleBlockerIds}
               selectionKey={visibleCopySelectionKey}
             />
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+            <div className="mt-3 flex flex-wrap items-end gap-2">
               <div className="flex flex-col gap-1">
-                <label htmlFor={blockerStatusFilterId} className="text-sm">
+                <label htmlFor={statusFilterId} className="text-sm">
                   Blocker status
                 </label>
                 <select
-                  id={blockerStatusFilterId}
+                  id={statusFilterId}
                   value={blockerStatusFilter}
                   onChange={(event) => {
                     setBlockerStatusFilter(event.target.value as BlockerStatusFilter);
                     setVisibleCopyRevision((revision) => revision + 1);
                   }}
-                  className="rounded-md border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className="rounded border bg-background px-2 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   <option value="all">All blocker statuses</option>
                   <option value="todo">To Do</option>

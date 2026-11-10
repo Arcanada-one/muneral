@@ -126,7 +126,18 @@ export function TaskDependencies({ taskId }: TaskDependenciesProps) {
   if (taskId && isPending && deps === undefined) {
     return <p role="status" className="text-sm text-muted-foreground">Loading dependencies…</p>;
   }
-  if (!deps || deps.length === 0) return null;
+  if (deps === undefined) return null;
+  if (deps.length === 0) {
+    return (
+      <div className="rounded-lg border p-4">
+        <h4 className="mb-3 flex items-center gap-2 text-sm font-medium">
+          <Link2 className="h-4 w-4" />
+          Dependencies
+        </h4>
+        <p role="status" className="text-sm text-muted-foreground">No dependencies.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-lg border p-4">

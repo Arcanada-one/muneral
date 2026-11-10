@@ -1120,7 +1120,7 @@ jobs:
           export NPM_CONFIG_USERCONFIG="$CONFIG_ROOT/user.npmrc"
           export NPM_CONFIG_GLOBALCONFIG="$CONFIG_ROOT/global.npmrc"
           pnpm --version | grep -Fx '10.30.3'
-          node --version | grep -Fx 'v24.22.1'
+          node --version | grep -Fx 'v26.13.0'
           # The source validator pins pnpm-workspace.yaml to base, including its onlyBuiltDependencies allowlist.
           pnpm install --frozen-lockfile --ignore-scripts --ignore-pnpmfile --registry=https://registry.npmjs.org/
           pnpm exec prisma generate
