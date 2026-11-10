@@ -53,6 +53,16 @@ export class AgentsController {
   }
 
   /**
+   * MUN-0071 — self-identity for the presenting API key.
+   * Agent key only; never enumerates sibling agents (no GET /agents list).
+   */
+  @Get('me')
+  @UseGuards(ApiKeyGuard)
+  me(@Req() req: Request & { apiKeyAgent: Agent; apiKeyId: string }) {
+    return this.agentsService.selfIdentity(req.apiKeyAgent, req.apiKeyId);
+  }
+
+  /**
    * Called by the human dashboard (JWT) or by an agent's long-lived API key.
    *
    * MUN-0051: the key is scoped (`'task-assign'`). Before, `JwtOrApiKeyGuard`

@@ -50,6 +50,33 @@ export class AgentsService {
   }
 
   /**
+   * MUN-0071 — project the calling key's agent for attribution verification.
+   * Takes the guard-resolved agent row (already authenticated); never loads
+   * other agents. Omits capabilities and every secret column of api_keys.
+   */
+  selfIdentity(
+    agent: {
+      id: string;
+      workspaceId: string;
+      name: string;
+      model: string | null;
+      provider: string | null;
+      createdAt: Date;
+    },
+    apiKeyId: string,
+  ) {
+    return {
+      id: agent.id,
+      workspaceId: agent.workspaceId,
+      name: agent.name,
+      model: agent.model,
+      provider: agent.provider,
+      createdAt: agent.createdAt,
+      apiKeyId,
+    };
+  }
+
+  /**
    * MUN-0051: the row and its activity entry are written in one transaction,
    * attributed to `actor` (resolved from the credential, never the body), with
    * the basis the scope guard admitted a key on (`'jwt'` for a human). Before,
