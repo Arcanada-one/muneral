@@ -31,6 +31,7 @@ re-attribution. New writes must use the correct key.
 | `POST /agents/:agentId/keys` | human JWT | Mints a `mun_sk_…` for that row (plaintext once) |
 | `POST /agents/keys/:keyId/rotate` | human JWT | New key; old key expires after the grace window |
 | `DELETE /agents/keys/:keyId` | human JWT | Hard revoke |
+| `GET /agents/keys/self` | the agent key itself | Non-secret metadata for the presenting key (MUN-0072) |
 | `POST /agents/keys/self/revoke` | the agent key itself | Emergency self-revoke (MUN-0053) |
 
 Agent keys **cannot** register sibling agents or mint keys for other rows.
@@ -148,6 +149,7 @@ Automated proof: `apps/api/test/agent-key-attribution.e2e.spec.ts` (MUN-0066).
   [`agent-task-contract.md`](agent-task-contract.md)
 - Status transitions: [`agent-status-transitions.md`](agent-status-transitions.md)
 - Self-revoke: `POST /agents/keys/self/revoke` (MUN-0053)
+- Self key metadata: `GET /agents/keys/self` (MUN-0072; non-secret fields only)
 
 ## History
 

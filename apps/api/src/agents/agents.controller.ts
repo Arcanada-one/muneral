@@ -85,6 +85,16 @@ export class AgentsController {
 
   // --- API Key lifecycle ---
 
+  /**
+   * MUN-0072 — non-secret metadata for the presenting API key itself.
+   * Agent key only; never enumerates sibling keys (no GET /agents/:id/keys list).
+   */
+  @Get('keys/self')
+  @UseGuards(ApiKeyGuard)
+  ownApiKey(@Req() req: Request & { apiKeyAgent: Agent; apiKeyId: string }) {
+    return this.agentsService.ownApiKeyProjection(req.apiKeyId, req.apiKeyAgent.id);
+  }
+
   @Post(':agentId/keys')
   @UseGuards(JwtAuthGuard)
   createApiKey(
