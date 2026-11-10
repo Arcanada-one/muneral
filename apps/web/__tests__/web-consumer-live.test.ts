@@ -75,7 +75,7 @@ describe.skipIf(!fixturePath)('MUN artifact actual web-to-API HTTP consumer seam
     const listed=await apiClient.get(`/tasks/${state.fixture.taskId}/artifacts`, {headers:auth, validateStatus:()=>true});
     expect(listed.status).toBe(200);
     expect(listed.data.total).toBeGreaterThanOrEqual(1);
-    expect(listed.data.items.some((row: {id:string})=>row.id===uploaded.data.id)).toBe(true);
+    expect(listed.data.data.some((row: {id:string})=>row.id===uploaded.data.id)).toBe(true);
 
     const byId=await apiClient.get(`/tasks/${state.fixture.taskId}/artifacts/${uploaded.data.id}`, {headers:auth, validateStatus:()=>true});
     expect(byId.status).toBe(200);
