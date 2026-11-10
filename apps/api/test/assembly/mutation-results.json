@@ -1830,8 +1830,10 @@
   "restoration": {
     "verified": true,
     "files": {
+      "apps/api/src/assembly/assembly.errors.ts": "a1bf3c097c639034cae219cc4b8bb11fd60bc414409d15b980b85975874968df",
       "apps/api/src/assembly/assembly.validator.ts": "24a794074f9ea035188c94535d87d8902d8a5b8242763a077de4eac30a4d2452",
       "apps/api/src/assembly/assembly.canonical.ts": "4e52a503637d583bc1292b3d9cd3c9a9dad25148790547ba15d91eff9ff0c28d",
+      "apps/api/src/assembly/assembly.compiler.ts": "9a37682a5558d2215caddc453e2edacab44eeb07c740054e7493e89a60abee99",
       "apps/api/src/execution-authority/canonical-json-v1.ts": "f7a27c0c60fe95c9cb3e7f734a916142a433e3370ecb92cb707e0bd28dd1167e"
     }
   }
