@@ -33,11 +33,32 @@ unknown id and a malformed id all answer `403`, so the route cannot be used to
 enumerate task ids. A JWT passes as on every task route.
 
 The state machine is not part of the scope and binds every caller alike:
-`TASK_TRANSITIONS` in `@muneral/types`. `done` is reachable only from `review`,
+`TASK_TRANSITIONS` in `@muneral/types` (human JWT and agent key share one map;
+there is no separate agent allowlist). `done` is reachable only from `review`,
 so an agent that finished a card makes three calls —
 `todo → in_progress → review → done`. A card that must stop short of a claim
-goes to `blocked` (from `in_progress`) and stays there; nothing turns
+goes to `blocked` (from `in_progress`) or, once already in `review`, may go to
+`cancelled` (MUN-0072) to abandon without claiming done — for example a
+disposable canary with an APPROVE cancel-recommendation. Nothing turns
 `blocked` into `done` directly. `todo → done` answers `400`.
+
+Live matrix (source of truth = `TASK_TRANSITIONS`; archive is filing settled
+work away, not an alternate cancel path):
+
+| from \ to | in_progress | review | blocked | done | cancelled | archived | todo |
+|---|---|---|---|---|---|---|---|
+| todo | yes | — | — | — | yes | — | — |
+| in_progress | — | yes | yes | — | yes | — | yes |
+| review | yes | — | yes | yes | yes | — | — |
+| blocked | yes | — | — | — | yes | — | — |
+| done | yes | — | — | — | — | yes | — |
+| cancelled | — | — | — | — | — | yes | yes |
+| archived | — | — | — | — | — | — | yes |
+
+Statuses that may transition **to `cancelled`**: `todo`, `in_progress`,
+`review`, `blocked`. Not from `done` or `archived` (use `archived` only after
+`done`/`cancelled`). Delete remains a separate JWT-gated route, not a status
+transition.
 
 ## Discipline (MUN-0068)
 

@@ -320,6 +320,28 @@ describe('PATCH /tasks/:taskId/status with an agent key — creator or executor 
     expect((await prisma.task.findUniqueOrThrow({ where: { id: task.id } })).status).toBe('blocked');
   });
 
+  // MUN-0072: disposable canaries that reached review need an admitted abandon
+  // path. review → cancelled is one measured PATCH; review → todo stays refused
+  // with the stable 400 Invalid status transition shape.
+  it('lets the creator cancel from review and still refuses review → todo with 400', async () => {
+    const task = await createTask({ status: 'review' });
+
+    const refused = await patch(task.id, creatorKey, 'todo').expect(400);
+    expect(refused.body.message).toContain('Invalid status transition');
+    expect(refused.body.message).toContain('review → todo');
+    expect((await prisma.task.findUniqueOrThrow({ where: { id: task.id } })).status).toBe('review');
+    expect(await statusRows(task.id)).toHaveLength(0);
+
+    const cancelled = await patch(task.id, creatorKey, 'cancelled').expect(200);
+    expect(cancelled.body.status).toBe('cancelled');
+
+    const rows = await statusRows(task.id);
+    expect(rows).toHaveLength(1);
+    expect(rows[0].payload).toEqual({ from: 'review', to: 'cancelled' });
+    expect(rows[0].actorType).toBe('agent');
+    expect(rows[0].actorId).toBe(creatorAgentId);
+  });
+
   // -------------------------------------------------------------------------
   // Idempotent repeat
   // -------------------------------------------------------------------------
@@ -380,6 +402,33 @@ describe('PATCH /tasks/:taskId/status with an agent key — creator or executor 
       .expect(200);
     expect(again.body.idempotent).toBe(true);
     expect(await statusRows(task.id)).toHaveLength(1);
+  });
+
+  // MUN-0072: human JWT shares TASK_TRANSITIONS with agent keys.
+  it('a JWT can cancel from review and still gets 400 for review → todo', async () => {
+    const task = await humanTask('review');
+    const jwt = authSvc.signAccess(userId);
+
+    const refused = await supertest(app.getHttpServer())
+      .patch(`/tasks/${task.id}/status`)
+      .set('Authorization', `Bearer ${jwt}`)
+      .send({ status: 'todo' })
+      .expect(400);
+    expect(refused.body.message).toContain('Invalid status transition');
+    expect(refused.body.message).toContain('review → todo');
+
+    const cancelled = await supertest(app.getHttpServer())
+      .patch(`/tasks/${task.id}/status`)
+      .set('Authorization', `Bearer ${jwt}`)
+      .send({ status: 'cancelled' })
+      .expect(200);
+    expect(cancelled.body.status).toBe('cancelled');
+
+    const rows = await statusRows(task.id);
+    expect(rows).toHaveLength(1);
+    expect(rows[0].payload).toEqual({ from: 'review', to: 'cancelled' });
+    expect(rows[0].actorType).toBe('human');
+    expect(rows[0].actorId).toBe(userId);
   });
 
   // -------------------------------------------------------------------------
