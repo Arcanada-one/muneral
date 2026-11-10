@@ -231,6 +231,10 @@ with `until` still ahead, may read that project's task **index**:
 - The grant opens the index and the active-status staleness report. `GET /tasks/:taskId`, activity, comments,
   status, redactions, assign, checklists, dependencies and the project list and
   execution-staleness routes answer a granted key exactly as they answer any other key.
+  MUN-0065: `GET /tasks/project/:projectId/staleness` optional `thresholdHours`
+  must be a single positive finite number of hours (default 24 when omitted);
+  invalid values return HTTP `400` before evaluation and never a false
+  healthy/stalled report.
 - A grant is a reviewed code change naming its decision, and it lapses at `until`
   by itself.
 

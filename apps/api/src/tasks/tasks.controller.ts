@@ -352,17 +352,53 @@ export class TasksController {
    * MUN-0020 execution-authority recording is never reported as healthy or
    * stalled (see TaskStalenessService header). Same agent-key narrowing as
    * `findByProject` above, for the same cross-tenant reason (MUN-0043).
+   *
+   * MUN-0065: optional `thresholdHours` must be a single positive finite
+   * number of hours. Invalid scalars (NaN/Infinity/blank/zero/negative/
+   * repeated/structured/overflowing) return HTTP 400 before evaluation so
+   * they never produce a false healthy/stalled report.
    */
   @Get('project/:projectId/staleness')
   @AgentScope('project')
   getStalenessReport(
     @Param('projectId') projectId: string,
     @Req() req: AuthRequest,
-    @Query('thresholdHours') thresholdHours?: string,
+    @Query() query: Record<string, unknown>,
   ) {
-    const thresholdMs = thresholdHours
-      ? Number(thresholdHours) * 3_600_000
-      : undefined;
+    const thresholdKeys = Object.keys(query).filter(
+      (key) => key === 'thresholdHours' || key.startsWith('thresholdHours['),
+    );
+    if (thresholdKeys.some((key) => key !== 'thresholdHours')) {
+      throw new BadRequestException(
+        'thresholdHours must be a single positive finite number of hours.',
+      );
+    }
+
+    const rawThreshold = query.thresholdHours;
+    let thresholdMs: number | undefined;
+    if (rawThreshold !== undefined) {
+      if (
+        typeof rawThreshold !== 'string' ||
+        !/^\+?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i.test(rawThreshold.trim())
+      ) {
+        throw new BadRequestException(
+          'thresholdHours must be a single positive finite number of hours.',
+        );
+      }
+      const hours = Number(rawThreshold.trim());
+      thresholdMs = hours * 3_600_000;
+      if (
+        !Number.isFinite(hours) ||
+        hours <= 0 ||
+        !Number.isFinite(thresholdMs) ||
+        thresholdMs <= 0
+      ) {
+        throw new BadRequestException(
+          'thresholdHours must be a single positive finite number of hours.',
+        );
+      }
+    }
+
     return this.stalenessService.reportForProject(
       projectId,
       thresholdMs,
