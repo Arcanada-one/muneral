@@ -63,7 +63,14 @@ export class ProjectsController {
     return this.projectsService.addGitRef(dto);
   }
 
+  /**
+   * MUN-0079 — agent-readable git refs for a task the key can already read.
+   * Marked `@AgentScope('task')` so a `mun_sk_` key is not refused by the
+   * MUN-0043 allowlist before HumanTaskReadGuard (which already passes
+   * `apiKeyAgent` through). POST/DELETE git-ref routes stay unmarked.
+   */
   @Get('tasks/:taskId/git-refs')
+  @AgentScope('task')
   @UseGuards(HumanTaskReadGuard)
   getGitRefs(@Param('taskId') taskId: string, @Req() req: Request & { actor: Actor }) {
     return this.projectsService.getGitRefs(taskId, req.actor.type === 'human' ? req.actor.id : undefined);
