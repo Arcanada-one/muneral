@@ -38,6 +38,12 @@ import {
   type ActiveStatusStalenessReport,
   type ActiveStatusStalenessThresholds,
 } from './active-status-staleness.report.js';
+import {
+  STATUS_TRANSITION_ACTION,
+  buildStatusTransitionCountsReport,
+  type StatusTransitionCountsReport,
+  type StatusTransitionWindow,
+} from './status-transition-counts.report.js';
 
 /** MUN-0052: the activity action one task-index read records. */
 export const PROJECT_INDEX_READ_ACTION = 'project:index_read';
@@ -45,6 +51,10 @@ export const PROJECT_INDEX_READ_ACTION = 'project:index_read';
 /** MUN-0067: the activity action one active-status staleness report records. */
 export const PROJECT_ACTIVE_STATUS_STALENESS_READ_ACTION =
   'project:active_status_staleness_read';
+
+/** MUN-0075: the activity action one status-transition-counts report records. */
+export const PROJECT_STATUS_TRANSITION_COUNTS_READ_ACTION =
+  'project:status_transition_counts_read';
 
 /** MUN-0052: what the index's `total` counts, stated in the answer (I4). */
 export const PROJECT_INDEX_COUNTED =
@@ -426,6 +436,116 @@ export class TasksService {
       },
       thresholds,
     );
+
+    return {
+      ...report,
+      auditEventId: audit.id,
+      auditReadCount,
+      grant:
+        grant.standing === true
+          ? { decision: grant.decision, until: grant.until }
+          : {
+              decision: grant.decision,
+              until: grant.until,
+              renewalDueAt: renewalDueAt(grant),
+            },
+    };
+  }
+
+  /**
+   * MUN-0075 — grant-scoped status-transition counts for one project.
+   *
+   * Same project-index grant as `indexForProject`. Counts only
+   * `task:status_changed` activity rows whose taskId is currently in the
+   * project cohort and whose createdAt falls in the half-open UTC window.
+   * Never PATCHes status; never returns free-text titles.
+   */
+  async statusTransitionCountsForProject(
+    projectId: string,
+    agentId: string,
+    grant: ProjectReadGrantEntry,
+    window: StatusTransitionWindow,
+  ): Promise<
+    StatusTransitionCountsReport & {
+      auditEventId: string;
+      auditReadCount: number;
+      grant:
+        | { decision: string; until: string }
+        | { decision: string; until: string; renewalDueAt: string };
+    }
+  > {
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      select: { workspaceId: true },
+    });
+    if (!project) {
+      throw new NotFoundException(`Project ${projectId} not found.`);
+    }
+
+    const taskRows = await this.prisma.task.findMany({
+      where: { projectId },
+      select: { id: true },
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+    });
+    const taskIds = taskRows.map((row) => row.id);
+
+    const events =
+      taskIds.length === 0
+        ? []
+        : await this.prisma.activityLog.findMany({
+            where: {
+              action: STATUS_TRANSITION_ACTION,
+              taskId: { in: taskIds },
+              createdAt: {
+                gte: new Date(window.startMs),
+                lt: new Date(window.endMs),
+              },
+            },
+            select: { id: true, taskId: true, createdAt: true },
+            orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+          });
+
+    const audit = await this.prisma.activityLog.create({
+      data: {
+        workspaceId: project.workspaceId,
+        taskId: null,
+        actorType: 'agent',
+        actorId: agentId,
+        action: PROJECT_STATUS_TRANSITION_COUNTS_READ_ACTION,
+        payload: {
+          projectId,
+          decision: grant.decision,
+          cohortTaskCount: taskIds.length,
+          observedTotal: events.length,
+          startInclusiveUtc: window.startInclusiveUtc,
+          endExclusiveUtc: window.endExclusiveUtc,
+          autoPatch: false,
+        } as Prisma.InputJsonValue,
+      },
+      select: { id: true, createdAt: true },
+    });
+
+    const auditReadCount = await this.prisma.activityLog.count({
+      where: {
+        workspaceId: project.workspaceId,
+        actorId: agentId,
+        action: PROJECT_STATUS_TRANSITION_COUNTS_READ_ACTION,
+      },
+    });
+
+    const report = buildStatusTransitionCountsReport({
+      projectId,
+      generatedAt: audit.createdAt.toISOString(),
+      auditEventId: audit.id,
+      cohortTaskCount: taskIds.length,
+      window,
+      events: events.map((event) => ({
+        id: event.id,
+        taskId: event.taskId as string,
+        createdAt: event.createdAt.toISOString(),
+        createdAtMs: event.createdAt.getTime(),
+      })),
+    });
 
     return {
       ...report,
