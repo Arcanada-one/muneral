@@ -320,10 +320,9 @@ describe('task dependency full-id disclosure', () => {
     vi.mocked(apiClient.get).mockResolvedValueOnce({ data: [] } as never);
     const emptyView = renderDependencies();
     await waitFor(() => {
-      expect(apiClient.get).toHaveBeenCalled();
+      expect(screen.getByRole('status')).toHaveTextContent('No dependencies.');
     });
     expect(screen.queryByRole('button', { name: 'Show full task ID' })).not.toBeInTheDocument();
-    expect(screen.queryByText('Dependencies')).not.toBeInTheDocument();
     emptyView.unmount();
     emptyView.queryClient.clear();
   });

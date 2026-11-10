@@ -100,12 +100,15 @@ import { SetMetadata } from '@nestjs/common';
  *                      be named for that project, with `until` still ahead, in
  *                      `project-read-grants.ts`; otherwise 404, the answer an
  *                      unknown project gets. The index itself returns no free
- *                      text. Separately, `GET /tasks/:taskId` keeps this file's
- *                      existing `'task'` kind and may carry
- *                      `@ProjectReadTaskMetadata()` as a route-specific marker:
- *                      only that handler may use the same grant list for the
- *                      minimal task metadata response. History and writes have
- *                      no such marker and retain their existing checks.
+ *                      text. MUN-0067 reuses this same grant for
+ *                      `GET /tasks/project/:projectId/active-status-staleness`
+ *                      (bodyless age buckets; never patches status). Separately,
+ *                      `GET /tasks/:taskId` keeps this file's existing `'task'`
+ *                      kind and may carry `@ProjectReadTaskMetadata()` as a
+ *                      route-specific marker: only that handler may use the
+ *                      same grant list for the minimal task metadata response.
+ *                      History and writes have no such marker and retain their
+ *                      existing checks.
  *   'workspace-digest' — A2-284. The route names NOTHING: no `:taskId`, no
  *                      `:projectId`. Its scope is the key's OWN workspace, and
  *                      it answers that workspace's tasks — id, projectId,

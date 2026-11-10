@@ -174,26 +174,31 @@ function buildReport(input) {
 }
 
 export async function readBounded(readable, maxBytes = MAX_INPUT_BYTES) {
-  const chunks = [];
+  if (!Number.isSafeInteger(maxBytes) || maxBytes < 0 || maxBytes > MAX_INPUT_BYTES) {
+    throw new InputError('INPUT_INVALID');
+  }
+
+  const bytes = Buffer.allocUnsafe(maxBytes);
   let byteLength = 0;
   try {
     for await (const chunk of readable) {
       if (!Buffer.isBuffer(chunk)) throw new InputError('INPUT_INVALID');
+      if (chunk.buffer.byteLength > INPUT_READ_CHUNK_BYTES) throw new InputError('INPUT_TOO_LARGE');
       if (chunk.length > maxBytes - byteLength) throw new InputError('INPUT_TOO_LARGE');
-      chunks.push(chunk);
+      chunk.copy(bytes, byteLength);
       byteLength += chunk.length;
     }
   } catch (error) {
     if (error instanceof InputError) throw error;
     throw new InputError('INPUT_UNAVAILABLE');
   }
-  return Buffer.concat(chunks, byteLength);
+  return bytes.subarray(0, byteLength);
 }
 
-export async function reportFromFile(inputPath) {
+async function reportFromStream(readable) {
   let bytes;
   try {
-    bytes = await readBounded(createReadStream(inputPath, { highWaterMark: INPUT_READ_CHUNK_BYTES }));
+    bytes = await readBounded(readable);
   } catch (error) {
     if (error instanceof InputError) throw error;
     throw new InputError('INPUT_UNAVAILABLE');
@@ -207,16 +212,27 @@ export async function reportFromFile(inputPath) {
   return buildReport(parsed);
 }
 
+export async function reportFromFile(inputPath) {
+  try {
+    return await reportFromStream(createReadStream(inputPath, { highWaterMark: INPUT_READ_CHUNK_BYTES }));
+  } catch (error) {
+    if (error instanceof InputError) throw error;
+    throw new InputError('INPUT_UNAVAILABLE');
+  }
+}
+
 export { buildReport };
 
 async function main() {
   if (process.argv.length !== 3) {
-    process.stderr.write('Usage: node scripts/reporting/status-transition-counts.mjs <sanitized-envelope.json>\n');
+    process.stderr.write('Usage: node scripts/reporting/status-transition-counts.mjs <sanitized-envelope.json|->\n');
     process.exitCode = 2;
     return;
   }
   try {
-    const report = await reportFromFile(process.argv[2]);
+    const report = process.argv[2] === '-'
+      ? await reportFromStream(process.stdin)
+      : await reportFromFile(process.argv[2]);
     process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
   } catch (error) {
     const code = error instanceof InputError ? error.code : 'INPUT_INVALID';
