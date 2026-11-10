@@ -27,6 +27,10 @@ import { CreateTaskDto } from './dto/create-task.dto.js';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto.js';
 import { QueryTasksDto } from './dto/query-tasks.dto.js';
 import { QueryWorkspaceDigestDto } from './dto/query-workspace-digest.dto.js';
+import { QueryWorkspaceDigestTransitionsDto } from './dto/query-workspace-digest-transitions.dto.js';
+import {
+  DigestTransitionWindowError,
+} from './workspace-digest-transitions.report.js';
 import { AddDependencyDto } from './dto/add-dependency.dto.js';
 import { CreateChecklistItemDto } from './dto/create-checklist-item.dto.js';
 import { AddCommentDto } from './dto/add-comment.dto.js';
@@ -147,6 +151,45 @@ export class TasksController {
   @Get()
   query(@Query() dto: QueryTasksDto, @Req() req: AuthRequest) {
     return this.tasksService.query(dto, req.actor.id);
+  }
+
+  /**
+   * MUN-0069 — transition-sourced workspace digest counts.
+   *
+   * Declared BEFORE `@Get('digest')` and `@Get(':taskId')` so Nest does not
+   * treat `digest/transitions` as a task id or as the plain digest route.
+   * Same workspace-digest grant as A2-284; does not invent a second grant list.
+   */
+  @Get('digest/transitions')
+  @AgentScope('workspace-digest')
+  digestTransitions(
+    @Req() req: AuthRequest,
+    @Query() dto: QueryWorkspaceDigestTransitionsDto,
+  ) {
+    const scope = req.agentScope;
+    if (
+      !scope ||
+      scope.kind !== 'workspace-digest' ||
+      !scope.workspaceDigestGrant ||
+      !scope.workspaceId
+    ) {
+      throw new ForbiddenException(
+        'The workspace task digest is available only to an agent API key holding a digest grant (A2-284).',
+      );
+    }
+    try {
+      return this.tasksService.digestTransitionsForWorkspace(
+        scope.workspaceId,
+        scope.agentId,
+        scope.workspaceDigestGrant,
+        dto,
+      );
+    } catch (err) {
+      if (err instanceof DigestTransitionWindowError) {
+        throw new BadRequestException(err.message);
+      }
+      throw err;
+    }
   }
 
   /**

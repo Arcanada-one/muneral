@@ -125,6 +125,10 @@ import { SetMetadata } from '@nestjs/common';
  *                      grant file for why that widening is the point of the
  *                      route and what bounds it. Read-only: no write consults
  *                      the list, and the route has no write sibling.
+ *                      MUN-0069 reuses this same grant for
+ *                      `GET /tasks/digest/transitions` (transition-sourced
+ *                      counts; age crossings remain MUN-0067; no second grant
+ *                      list and no grant inferred from task scope).
  */
 export const AGENT_SCOPE_KEY = 'mun0043:agentScope';
 

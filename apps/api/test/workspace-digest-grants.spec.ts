@@ -166,6 +166,25 @@ describe("workspaceDigestGrantState", () => {
     expect(workspaceDigestGrantState(AGENT, WS, now).kind).toBe("none");
   });
 
+  it("does not invent a digest grant for aup-orchestrator (MUN-0069 AC1)", () => {
+    // Shared orchestrator key is project-index granted elsewhere; digest remains
+    // an explicit per-agent merge (A2-284). Live probe: GET /tasks/digest → 403
+    // DIGEST_GRANT_REQUIRED for this agentId.
+    const orchestrator = "9437639a-5f7c-4fe4-be04-18112ba0bada";
+    const workspace = "05f8cddf-e91f-430b-81e3-d67965aa4de3";
+    expect(
+      workspaceDigestGrantState(orchestrator, workspace, now).kind,
+    ).toBe("none");
+    expect(
+      WORKSPACE_DIGEST_GRANT_LIST.some(
+        (g) => g.agentId.toLowerCase() === orchestrator,
+      ),
+    ).toBe(false);
+    expect(WORKSPACE_DIGEST_GRANT_LIST.map((g) => g.agentName)).toEqual([
+      "arcanada-assistant",
+    ]);
+  });
+
   it("answers `live` for the granted (standing) pair, at any instant", () => {
     const granted = WORKSPACE_DIGEST_GRANT_LIST[0]!;
     expect(granted.standing).toBe(true);

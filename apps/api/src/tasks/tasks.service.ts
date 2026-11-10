@@ -33,11 +33,20 @@ import {
 import type { WorkspaceDigestGrantEntry } from '../auth/workspace-digest-grants.js';
 import { digestRenewalDueAt } from '../auth/workspace-digest-grants.js';
 import { QueryWorkspaceDigestDto } from './dto/query-workspace-digest.dto.js';
+import { QueryWorkspaceDigestTransitionsDto } from './dto/query-workspace-digest-transitions.dto.js';
 import {
   buildActiveStatusStalenessReport,
   type ActiveStatusStalenessReport,
   type ActiveStatusStalenessThresholds,
 } from './active-status-staleness.report.js';
+import {
+  TRANSITION_ACTION,
+  WORKSPACE_DIGEST_TRANSITIONS_COUNTED,
+  buildDigestTransitionsReport,
+  parseTransitionPayload,
+  resolveDigestTransitionWindow,
+  type DigestTransitionEvent,
+} from './workspace-digest-transitions.report.js';
 
 /** MUN-0052: the activity action one task-index read records. */
 export const PROJECT_INDEX_READ_ACTION = 'project:index_read';
@@ -52,6 +61,10 @@ export const PROJECT_INDEX_COUNTED =
 
 /** A2-284: the activity action one workspace-digest read records. */
 export const WORKSPACE_DIGEST_READ_ACTION = 'workspace:digest_read';
+
+/** MUN-0069: the activity action one transition-sourced digest read records. */
+export const WORKSPACE_DIGEST_TRANSITIONS_READ_ACTION =
+  'workspace:digest_transitions_read';
 
 /** A2-284: what the digest's `total` counts, stated in the answer — the count
  *  is BEFORE paging, so an empty page and an empty workspace are different
@@ -543,6 +556,137 @@ export class TasksService {
       // workspace-digest-grants.ts on the two days of silence that cost. A
       // standing grant (DEC-AUP-0049 A7) has nothing to renew, so the key is
       // omitted rather than sent empty.
+      grant: grant.standing
+        ? { decision: grant.decision, until: grant.until }
+        : {
+            decision: grant.decision,
+            until: grant.until,
+            renewalDueAt: digestRenewalDueAt(grant),
+          },
+    };
+  }
+
+  /**
+   * MUN-0069 — transition-sourced workspace digest counts.
+   *
+   * Same `@AgentScope('workspace-digest')` grant as `digestForWorkspace`. Counts
+   * `task:status_changed` inside a half-open activity window. Comment volume and
+   * `updatedAt` edits are excluded. Age crossings stay on MUN-0067. Optional
+   * bodyless status histogram is a current-row snapshot, not a transition count.
+   * Item titles remain plaintext (PREFIX-NNNN visibility for digest consumers).
+   */
+  async digestTransitionsForWorkspace(
+    workspaceId: string,
+    agentId: string,
+    grant: WorkspaceDigestGrantEntry,
+    dto: QueryWorkspaceDigestTransitionsDto,
+  ) {
+    const window = resolveDigestTransitionWindow({
+      sinceInclusive: dto.sinceInclusive,
+      beforeExclusive: dto.beforeExclusive,
+    });
+    const limit = dto.limit ?? 50;
+    const offset = dto.offset ?? 0;
+    const includeStatusHistogram = dto.includeStatusHistogram === 'true';
+
+    const since = new Date(window.sinceInclusive);
+    const before = new Date(window.beforeExclusive);
+
+    const activityWhere: Prisma.ActivityLogWhereInput = {
+      workspaceId,
+      action: TRANSITION_ACTION,
+      createdAt: { gte: since, lt: before },
+      ...(dto.projectId
+        ? { task: { is: { projectId: dto.projectId } } }
+        : {}),
+    };
+
+    const rows = await this.prisma.activityLog.findMany({
+      where: activityWhere,
+      select: {
+        id: true,
+        taskId: true,
+        createdAt: true,
+        payload: true,
+        task: {
+          select: {
+            id: true,
+            projectId: true,
+            title: true,
+            status: true,
+          },
+        },
+      },
+      orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
+    });
+
+    const events: DigestTransitionEvent[] = [];
+    for (const row of rows) {
+      if (!row.taskId || !row.task) continue;
+      const parsed = parseTransitionPayload(row.payload);
+      if (!parsed) continue;
+      events.push({
+        id: row.id,
+        taskId: row.taskId,
+        createdAt: row.createdAt.toISOString(),
+        from: parsed.from,
+        to: parsed.to,
+        projectId: row.task.projectId,
+        title: row.task.title,
+        status: row.task.status as TaskStatus,
+      });
+    }
+
+    let statusRows: { status: string }[] | undefined;
+    if (includeStatusHistogram) {
+      statusRows = await this.prisma.task.findMany({
+        where: {
+          project: { workspaceId },
+          ...(dto.projectId ? { projectId: dto.projectId } : {}),
+        },
+        select: { status: true },
+      });
+    }
+
+    const report = buildDigestTransitionsReport({
+      window,
+      events,
+      limit,
+      offset,
+      statusRows,
+    });
+
+    const audit = await this.prisma.activityLog.create({
+      data: {
+        workspaceId,
+        taskId: null,
+        actorType: 'agent',
+        actorId: agentId,
+        action: WORKSPACE_DIGEST_TRANSITIONS_READ_ACTION,
+        payload: {
+          decision: grant.decision,
+          rowCount: report.items.length,
+          total: report.total,
+          filters: {
+            sinceInclusive: window.sinceInclusive,
+            beforeExclusive: window.beforeExclusive,
+            projectId: dto.projectId ?? null,
+            includeStatusHistogram,
+            limit,
+            offset,
+          },
+          counted: WORKSPACE_DIGEST_TRANSITIONS_COUNTED,
+          ageCrossingsIncluded: false,
+          commentVolumeIncluded: false,
+        } as Prisma.InputJsonValue,
+      },
+      select: { id: true, createdAt: true },
+    });
+
+    return {
+      ...report,
+      generatedAt: audit.createdAt.toISOString(),
+      auditEventId: audit.id,
       grant: grant.standing
         ? { decision: grant.decision, until: grant.until }
         : {
