@@ -52,4 +52,39 @@ describe.skipIf(!fixturePath)('MUN artifact actual web-to-API HTTP consumer seam
     const response=await apiClient.post('/auth/telegram',data,{validateStatus:()=>true});
     expect(response.status).toBe(400); expect(response.data.message).toBe('Invalid Telegram auth data');
   });
+
+  it('uploads lists and reads back artifact bytes through the web apiClient', async () => {
+    // Agent-scoped task-evidence key rides the same axios consumer the dashboard uses.
+    const agentKey=state.fixture.agentKey;
+    if (typeof agentKey !== 'string' || agentKey.length === 0) {
+      throw new Error('Fixture must supply agentKey for artifact upload/list/get/readback');
+    }
+    const auth={Authorization:`Bearer ${agentKey}`};
+    const body=Buffer.from(`web-canary-artifact:${state.fixture.taskId}`, 'utf8');
+    const sha=createHash('sha256').update(body).digest('hex');
+    const uploaded=await apiClient.post(`/tasks/${state.fixture.taskId}/artifacts`, {
+      name:'web-canary.json',
+      contentType:'application/json',
+      contentBase64:body.toString('base64'),
+      sha256:sha,
+    }, {headers:auth, validateStatus:()=>true});
+    expect(uploaded.status).toBe(201);
+    expect(uploaded.data).toMatchObject({sha256:sha, sizeBytes:body.length});
+    expect(uploaded.data.contentBase64).toBeUndefined();
+
+    const listed=await apiClient.get(`/tasks/${state.fixture.taskId}/artifacts`, {headers:auth, validateStatus:()=>true});
+    expect(listed.status).toBe(200);
+    expect(listed.data.total).toBeGreaterThanOrEqual(1);
+    expect(listed.data.items.some((row: {id:string})=>row.id===uploaded.data.id)).toBe(true);
+
+    const byId=await apiClient.get(`/tasks/${state.fixture.taskId}/artifacts/${uploaded.data.id}`, {headers:auth, validateStatus:()=>true});
+    expect(byId.status).toBe(200);
+    expect(byId.data.contentBase64).toBe(body.toString('base64'));
+    expect(createHash('sha256').update(Buffer.from(byId.data.contentBase64,'base64')).digest('hex')).toBe(sha);
+
+    const bySha=await apiClient.get(`/tasks/${state.fixture.taskId}/artifacts/by-sha/${sha}`, {headers:auth, validateStatus:()=>true});
+    expect(bySha.status).toBe(200);
+    expect(bySha.data.id).toBe(uploaded.data.id);
+    expect(bySha.data.contentBase64).toBe(body.toString('base64'));
+  });
 });

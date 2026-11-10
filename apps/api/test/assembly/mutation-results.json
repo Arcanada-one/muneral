@@ -22,11 +22,11 @@
   },
   "binding": {
     "algorithm": "sha256",
-    "aggregateSha256": "fbb0d92e7bf4df52ba51672e32eee78802ff9accb7150ef2baeab5e37b11f414",
+    "aggregateSha256": "b339cc5ef3d1a84ee20510138be838a239a55521ac96c9ea4cafda7e96fd3a5c",
     "files": [
       {
         "path": "apps/api/package.json",
-        "sha256": "3fadf5ee75e3db07943a38c98b1a69eab8ddbdab2347c908b099b83bb4452348"
+        "sha256": "0726ca5f358349e2016e8c3da72ee485669417c6f38fe8cdf8f3528c80c3dad4"
       },
       {
         "path": "apps/api/src/assembly/assembly.canonical.ts",
@@ -262,11 +262,11 @@
       },
       {
         "path": "package.json",
-        "sha256": "08044a6a30936010a03968a1d41b9908639428c6312f5bcd98c52b04b97bfd09"
+        "sha256": "1c17a035a9f3628b21dff0cfe44c1e86fa0b2724af3ccd25b5cbcdfb21b30555"
       },
       {
         "path": "pnpm-lock.yaml",
-        "sha256": "b9fd7a00c104eccb56944baa49ef119aee98792efb68467fd6018cfae5d84978"
+        "sha256": "e5a68763996dfa027c1e06ba81db00a18cd1f21c3957f1d4086b28e721b0e2df"
       }
     ]
   },
@@ -276,8 +276,8 @@
       "apps/web/",
       "receipts/"
     ],
-    "trackedTreeWithoutEvidence": "2c6631e154786f5960a0b49f2468d07e8992844e",
-    "trackedSnapshotDiffSha256": "dc350ca61f39db6caa37abed9ae23df2b0ce4e250baaa19e9f72035e8bf9271d"
+    "trackedTreeWithoutEvidence": "2de961c31846a2b5972da8e9a760c9b0aea50a26",
+    "trackedSnapshotDiffSha256": "6cd9fa8f8a442e1982a7096245df23d8dea74d116730360fccc625c43b9813a3"
   },
   "baseline": {
     "outcome": "SURVIVED",
