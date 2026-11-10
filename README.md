@@ -25,6 +25,11 @@ With: checklists · dependency graphs · git refs · RBAC · full audit log
 ## Auth
 
 - **Agents**: API Key (Bearer) + OAuth2 client_credentials + key rotation
+- **Per-runtime keys (MUN-0066)**: one `mun_sk_` per `agents` row — do not share
+  a key across fleet runtimes or activity collapses onto one `actorId`. Issue via
+  human JWT (`scripts/issue-agent-key.sh`) into the protected credential path;
+  see [`apps/api/docs/agent-key-issuance.md`](apps/api/docs/agent-key-issuance.md)
+  and [`docs/how-to/issue-per-agent-api-key.md`](docs/how-to/issue-per-agent-api-key.md).
 - **Humans**: GitHub OAuth + Telegram Login Widget
 - **RBAC**: Owner / Manager / Developer / Viewer (per workspace + per project)
 
@@ -82,7 +87,13 @@ curl https://api.muneral.com/api/v1/tasks/$TASK_ID/readiness \
 > key, and reading that absence as an empty list (`.get("dependencies") or []`)
 > once turned 254 possibly-blocked tasks into "ready". The contract lists every
 > field the route does return, every field it does not, and which route answers
-> the question instead.
+> the question instead. For distinguishable audit rows, issue a private key per
+> runtime ([`agent-key-issuance.md`](apps/api/docs/agent-key-issuance.md)).
+
+> **Status discipline (MUN-0068):** a progress comment is not a status change.
+> Use stepwise `PATCH /tasks/:id/status` and criterion-mapped CONTENT before
+> `review`. How-to + offline verifier:
+> [`docs/how-to/agent-status-transition-discipline.md`](docs/how-to/agent-status-transition-discipline.md).
 
 ## Datarim Sync
 

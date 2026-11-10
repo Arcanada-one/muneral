@@ -291,7 +291,14 @@ describe('copy available visible dependency titles', () => {
       ['tasks', taskId, 'dependency-graph'],
       [dependency('dep-new', 'new-id', 'New title')],
     ));
-    await act(async () => oldWrite.reject(new Error('stale private failure')));
+    // Wait for the loaded-data refresh to paint and bump copy generation before the
+    // in-flight rejection settles — mirrors the ids suite and avoids CI load flakes.
+    await waitFor(() => expect(screen.getByText('New title')).toBeInTheDocument());
+    await waitFor(() => expect(titleCopyButton(1)).toBeEnabled());
+    await act(async () => {
+      oldWrite.reject(new Error('stale private failure'));
+      await Promise.allSettled([oldWrite.promise]);
+    });
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     expect(titleCopyButton(1)).toBeEnabled();
     fireEvent.click(titleCopyButton(1));
@@ -302,6 +309,7 @@ describe('copy available visible dependency titles', () => {
       ['tasks', taskId, 'dependency-graph'],
       [dependency('dep-newer', 'newer-id', 'Newest title')],
     ));
+    await waitFor(() => expect(screen.getByText('Newest title')).toBeInTheDocument());
     await waitFor(() => expect(screen.queryByText('Dependency titles copied.')).not.toBeInTheDocument());
   });
 

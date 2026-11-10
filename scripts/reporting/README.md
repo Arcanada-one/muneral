@@ -1,4 +1,42 @@
-# Offline status-transition counts
+# Offline status-transition tooling
+
+Author discipline for when agents must call `PATCH /tasks/:id/status` (and when
+a comment is not enough): [`docs/how-to/agent-status-transition-discipline.md`](../../docs/how-to/agent-status-transition-discipline.md).
+
+## Required-transition verifier (MUN-0068)
+
+`verify-required-status-transition.mjs` checks one sanitized envelope for a
+single required `task:status_changed` event. It does not call Muneral. Use it
+from a future merge/close hook or author preflight so comment-only close fails
+closed. Exit codes: `0` PASS, `1` FAIL, `3` NOT_MEASURED (incomplete input),
+`2` invalid input.
+
+```sh
+node scripts/reporting/verify-required-status-transition.mjs scripts/reporting/fixtures/required-transition-pass.json
+```
+
+Input shape:
+
+```json
+{
+  "schemaVersion": 1,
+  "required": {
+    "taskId": "11111111-1111-4111-8111-111111111111",
+    "from": "in_progress",
+    "to": "review"
+  },
+  "completeness": {
+    "state": "complete",
+    "evidenceId": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"
+  },
+  "events": []
+}
+```
+
+`completeness.state: "incomplete"` yields `NOT_MEASURED` (never PASS). Comments
+never satisfy the required transition.
+
+## Offline status-transition counts
 
 `status-transition-counts.mjs` reads one caller-supplied, sanitized JSON envelope and writes one scoped JSON report to stdout. It does not call Muneral, open a database, collect activity, or publish a digest. The caller is responsible for supplying the explicit event cohort, UTC interval, and completeness evidence.
 

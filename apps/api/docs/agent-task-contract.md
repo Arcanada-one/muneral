@@ -134,6 +134,21 @@ Returns raw `task_dependencies` rows **filtered on `fromTaskId` only**.
 > absent-reads-as-empty trap one layer down. Use `/readiness` unless you
 > specifically want the rows recorded *on* this task.
 
+## Attribution: one key per runtime (MUN-0066)
+
+Activity rows (`task:status_changed`, `comment`, …) carry `actorType=agent` and
+`actorId=<agents.id>` taken from the credential that authenticated the request.
+Two runtimes that share one `mun_sk_` are therefore indistinguishable in
+`activity_log`.
+
+**Issuance is JWT-only** (`POST /agents`, `POST /agents/:agentId/keys`). Agent
+keys cannot mint keys for peers; `GET /agents*` stays human-JWT. Store each
+plaintext key under the workspace protected credential path the same way
+Collective stores per-agent `mbx_…` tokens — never in git. Full steps, helper
+script, and Collective cross-link:
+[`agent-key-issuance.md`](agent-key-issuance.md) and
+[`docs/how-to/issue-per-agent-api-key.md`](../../../docs/how-to/issue-per-agent-api-key.md).
+
 ## What an agent key may and may not reach
 
 The default for a `mun_sk_` key is **refusal**. A route is reachable only if it
@@ -247,6 +262,8 @@ Always pair the status with `/readiness`.
 
 - [ ] Discover work via `GET /agents/tasks` or `GET /tasks/project/:projectId` —
       never generic `GET /tasks` with an agent key.
+- [ ] Hold a **runtime-private** `mun_sk_` (MUN-0066); do not share the key with
+      other lanes if you need distinguishable `actorId`s.
 - [ ] Never `.get("dependencies")` on a `/tasks/:id` body. The key does not exist.
 - [ ] Call `/tasks/:id/readiness` and branch on `ready`.
 - [ ] Treat a non-`200` as **unknown**, never as ready. A `403` is not an empty list.
@@ -272,3 +289,6 @@ Always pair the status with `/readiness`.
   `GET /agents/tasks`, still forbade generic `GET /tasks` only in passing, and
   sibling docs still called dependency writes "JWT-only" after
   `'task-dependency'` shipped. Refusal diagnosis table and checklist updated.
+- **MUN-0066** — documented per-runtime key issuance (JWT + protected credential
+  path, Collective cross-link) so activity attribution stops collapsing onto one
+  shared `actorId`. See [`agent-key-issuance.md`](agent-key-issuance.md).

@@ -102,10 +102,10 @@ describe('visible Git reference kind counts', () => {
     expectNoMutations();
   });
 
-  it('intersects kind, search, and available-only filters; reverse control absent so order invariance is not measured here', async () => {
+  it('intersects kind, search, available-only, and reverse controls; reverse does not change kind counts', async () => {
     const view = renderRefs();
     await screen.findByRole('combobox', { name: 'Git reference kind' });
-    expect(screen.queryByRole('checkbox', { name: 'Reverse loaded order' })).not.toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'Reverse loaded order' })).toBeInTheDocument();
     const rows = [
       makeRef('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', taskA, 'repo', 'example/repo', 'https://github.com/example/repo'),
       makeRef('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', taskA, 'branch', 'release/current', 'https://github.com/example/repo/tree/release/current'),
@@ -114,6 +114,9 @@ describe('visible Git reference kind counts', () => {
       makeRef('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee', taskA, 'tag', 'release-tag', 'https://github.com/example/repo/tree/release-tag'),
     ];
     await act(async () => { view.client.setQueryData(taskAKey, rows); });
+    await waitFor(() => expect(summaryText()).toHaveTextContent('Repositories 1; Branches 2; Commits 1; Other 1.'));
+
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Reverse loaded order' }));
     await waitFor(() => expect(summaryText()).toHaveTextContent('Repositories 1; Branches 2; Commits 1; Other 1.'));
 
     fireEvent.change(screen.getByRole('searchbox', { name: 'Search loaded Git references' }), {
@@ -131,6 +134,8 @@ describe('visible Git reference kind counts', () => {
     fireEvent.click(screen.getByRole('checkbox', { name: 'Show available links only' }));
     await waitFor(() => expect(summaryText()).toHaveTextContent('Repositories 0; Branches 1; Commits 0.'));
     expect(screen.getByText('Showing 1 of 5 loaded Git references.')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Reverse loaded order' }));
+    await waitFor(() => expect(summaryText()).toHaveTextContent('Repositories 0; Branches 1; Commits 0.'));
     expect(api.get).toHaveBeenCalledTimes(1);
     expectNoMutations();
   });
