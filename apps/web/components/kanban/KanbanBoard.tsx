@@ -112,6 +112,38 @@ export function KanbanBoard({ projectId, wsSlug, projSlug }: KanbanBoardProps) {
     }
   }, [projSlug, visibleTasks, viewToken, wsSlug]);
 
+  // Status-change error feedback is scoped to the current project visit: a new scope object
+  // is created per projectId; a layout effect advances the current-scope ref on change, so an
+  // error recorded under an earlier scope is no longer shown (cleared by derivation, which
+  // avoids setState inside an effect); the per-call error handler re-checks the same scope
+  // object so late errors after a project change are suppressed.
+  const statusScope = useMemo(() => ({ projectId }), [projectId]);
+  const currentStatusScopeRef = useRef<object>(statusScope);
+  const [statusError, setStatusError] = useState<{ scope: object } | null>(null);
+
+  useLayoutEffect(() => {
+    currentStatusScopeRef.current = statusScope;
+  }, [statusScope]);
+
+  const changeStatus = useCallback(
+    (taskId: string, status: TaskStatus) => {
+      const scope = statusScope;
+      setStatusError(null);
+      updateStatus.mutate(
+        { taskId, status },
+        {
+          onError: () => {
+            if (currentStatusScopeRef.current === scope) {
+              setStatusError({ scope });
+            }
+          },
+        },
+      );
+    },
+    [statusScope, updateStatus],
+  );
+  const currentStatusError = statusError?.scope === statusScope ? statusError : null;
+
   const currentCopyFeedback = copyFeedback?.viewToken === viewToken ? copyFeedback : null;
   const copyIsPending = currentCopyFeedback?.status === 'pending';
 
@@ -182,7 +214,7 @@ export function KanbanBoard({ projectId, wsSlug, projSlug }: KanbanBoardProps) {
       if (KANBAN_STATUSES.includes(overId as TaskStatus)) {
         const newStatus = overId as TaskStatus;
         if (task.status !== newStatus) {
-          updateStatus.mutate({ taskId, status: newStatus });
+          changeStatus(taskId, newStatus);
         }
         return;
       }
@@ -190,10 +222,10 @@ export function KanbanBoard({ projectId, wsSlug, projSlug }: KanbanBoardProps) {
       // Dropped on another card — move within or across columns
       const overTask = tasks.find((t) => t.id === overId);
       if (overTask && overTask.status !== task.status) {
-        updateStatus.mutate({ taskId, status: overTask.status });
+        changeStatus(taskId, overTask.status);
       }
     },
-    [tasks, updateStatus],
+    [tasks, changeStatus],
   );
 
   return (
@@ -236,6 +268,12 @@ export function KanbanBoard({ projectId, wsSlug, projSlug }: KanbanBoardProps) {
           </p>
         )}
       </div>
+
+      {currentStatusError && (
+        <p role="alert" className="mb-3 text-sm text-destructive">
+          Could not change the task status. Try again.
+        </p>
+      )}
 
       <DndContext
         sensors={sensors}

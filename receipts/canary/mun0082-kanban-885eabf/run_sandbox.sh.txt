@@ -1,0 +1,12 @@
+#!/bin/bash
+# usage: run_sandbox.sh <wt-measure> <canary-work>
+set -eu
+WT=$1; CW=$2
+exec bwrap --unshare-user --unshare-net --unshare-pid --unshare-ipc --unshare-uts --die-with-parent \
+  --tmpfs / --ro-bind /usr /usr --symlink usr/lib /lib --symlink usr/lib64 /lib64 --symlink usr/bin /bin \
+  --proc /proc --dev /dev --tmpfs /tmp --dir /home/canary \
+  --ro-bind "$WT" /repo --ro-bind "$CW/plan" /plan --bind "$CW/out" /out \
+  --dir /node --dir /node/bin --ro-bind /usr/bin/node /node/bin/node \
+  --setenv CI 1 --setenv NO_COLOR 1 --setenv HOME /home/canary --setenv LANG C.UTF-8 --setenv PATH /node/bin:/usr/bin:/bin \
+  --setenv TMPDIR /tmp --setenv TZ UTC \
+  /usr/bin/python3 -I /out/harness.py
