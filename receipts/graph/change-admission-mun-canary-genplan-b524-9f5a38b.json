@@ -1,0 +1,406 @@
+{
+ "admission": {
+  "rule": "admitted requires every verdict = verified; failed without exemption ⇒ refused; not_measured without exemption ⇒ paused_safe; exemptions (owner + expiry) are attached by the admitting agent, never by the verifier (DEC-AUP-0008, matrix P1/P4)",
+  "structural_exclusion_rule": "DEC-AUP-0034: an affected entity is NOT verdict-owing when all three hold — the verifier matrix declares neither a mandatory nor a selectable verifier for its node type (so the only verdict it could ever carry states a property of the MATRIX, not of this change), the change set does not contain it, and its bytes are identical at base and head. Each one is listed in structural_exclusions with the content hash at both revisions that proves the byte-identity, and impact_pair.receipt_problems re-derives that proof from Git rather than believing the receipt.",
+  "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
+  "verdict": "admitted"
+ },
+ "captured_at_utc": "2026-11-11T21:46:55Z",
+ "change_set": {
+  "base": "7ac749cd9b240a379cee9304e5cbc248e6aa681a",
+  "files": [
+   {
+    "kind": "other",
+    "node_id": "code_unit:scripts/canary/gen_plan.py",
+    "node_ids": [
+     "code_unit:scripts/canary/gen_plan.py"
+    ],
+    "path": "scripts/canary/gen_plan.py",
+    "status": "M"
+   },
+   {
+    "kind": "other",
+    "node_id": "code_unit:scripts/canary/test_gen_plan.py",
+    "node_ids": [
+     "code_unit:scripts/canary/test_gen_plan.py"
+    ],
+    "path": "scripts/canary/test_gen_plan.py",
+    "status": "A"
+   }
+  ],
+  "head": "9f5a38b1896032bebf545e66d784eb45b96403b9",
+  "mode": "diff"
+ },
+ "decision_ref": "DEC-AUP-0008",
+ "exemptions": [],
+ "graph": {
+  "builder_version": "1.0.6",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:d20c548ef16b5bab81046f584db48ceeaf1fa7f4a8fe05a89391c27ffe0f17a2",
+  "path": "/home/dev/aup/claude-work/mun-hyg-20261022/mun-0083-exemption-canaries-20261111/tmp/arcana-verify-m4h00ftl/verifier-out/graph-7ac749cd9b24.json",
+  "source_commit": "7ac749cd9b240a379cee9304e5cbc248e6aa681a"
+ },
+ "head_graph": {
+  "builder_version": "1.0.6",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:d91cd63ff396a03df91319655ac0564abd379042a3f4913cc8012934217fe1ff",
+  "path": "/home/dev/aup/claude-work/mun-hyg-20261022/mun-0083-exemption-canaries-20261111/tmp/arcana-verify-m4h00ftl/verifier-out/graph-head-9f5a38b18960.json",
+  "source_commit": "9f5a38b1896032bebf545e66d784eb45b96403b9",
+  "staleness": {
+   "checked_at_utc": "2026-11-11T21:48:40Z",
+   "checked_nodes": 756,
+   "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+   "mismatched_nodes": [],
+   "verdict": "fresh"
+  }
+ },
+ "host": "arcana-devs",
+ "impact_set": {
+  "deterministic_core": [
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "document:receipts/canary/mun-0083-exemption-canaries-20261111/CONTOUR.md",
+    "node_type": "document",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "document:receipts/canary/mun-0083-exemption-canaries-20261111/CONTOUR.md",
+      "provenance": "deterministic",
+      "to": "code_unit:scripts/canary/gen_plan.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-pr332-25ce824.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-pr332-25ce824.json",
+      "provenance": "deterministic",
+      "to": "code_unit:scripts/canary/gen_plan.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/A2-330-muneral-canary.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/A2-330-muneral-canary.json",
+      "provenance": "deterministic",
+      "to": "code_unit:scripts/canary/gen_plan.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+      "provenance": "deterministic",
+      "to": "code_unit:scripts/canary/gen_plan.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-mun-canary-b524-83a8975.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "document:receipts/canary/mun-0083-exemption-canaries-20261111/CONTOUR.md",
+      "provenance": "deterministic",
+      "to": "code_unit:scripts/canary/gen_plan.py",
+      "via": "explicit-path"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun-canary-b524-83a8975.json",
+      "provenance": "deterministic",
+      "to": "document:receipts/canary/mun-0083-exemption-canaries-20261111/CONTOUR.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:scripts/canary/gen_plan.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   }
+  ],
+  "edge_types": "all",
+  "global_fallback": {
+   "triggered": false
+  },
+  "inferred_tail": [],
+  "max_depth": 3,
+  "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
+  "total": 6
+ },
+ "notes": [
+  "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
+  "profile: .arcana/verify.json at verified head; baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none",
+  "DEC-AUP-0035 not applied to receipt:receipts/graph/change-admission-mun-canary-b524-83a8975.json: it declares this run's work item b5245745-f678-4bbd-94f7-0f0083a53df8, but the receipt is being written to /home/dev/aup/claude-work/mun-hyg-20261022/mun-0083-exemption-canaries-20261111/tmp/gp/receipt.json, which is outside this repository, so no path in the tree is the one this run supersedes."
+ ],
+ "producer": {
+  "tool": "tools/graph/verify.py",
+  "version": "1.4.1"
+ },
+ "receipt_id": "car-verify-20261111T214655Z-9f5a38b1",
+ "repo": {
+  "name": "Arcanada-one/muneral",
+  "path": "/home/dev/aup/claude-work/mun-hyg-20261022/mun-0083-exemption-canaries-20261111/wt-genplan"
+ },
+ "revision_selection": {
+  "base": [
+   "code_unit:scripts/canary/gen_plan.py",
+   "document:receipts/canary/mun-0083-exemption-canaries-20261111/CONTOUR.md",
+   "receipt:receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-pr332-25ce824.json",
+   "receipt:receipts/graph/A2-330-muneral-canary.json",
+   "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+   "receipt:receipts/graph/change-admission-mun-canary-b524-83a8975.json",
+   "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json"
+  ],
+  "head": [
+   "code_unit:scripts/canary/gen_plan.py",
+   "code_unit:scripts/canary/test_gen_plan.py",
+   "document:receipts/canary/mun-0083-exemption-canaries-20261111/CONTOUR.md",
+   "receipt:receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-pr332-25ce824.json",
+   "receipt:receipts/graph/A2-330-muneral-canary.json",
+   "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+   "receipt:receipts/graph/change-admission-mun-canary-b524-83a8975.json",
+   "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json"
+  ],
+  "schema": "RevisionImpactSelection/v1",
+  "unmeasured_head_files": []
+ },
+ "schema": "ChangeAdmissionReceipt/v1",
+ "staleness": {
+  "checked_at_utc": "2026-11-11T21:48:40Z",
+  "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+  "mismatched_nodes": [],
+  "verdict": "fresh"
+ },
+ "structural_exclusions": [
+  {
+   "content_hash": {
+    "base": "sha256:3d8d8020e74b6f11dae0c59ee88896b1681bd19bd8afe3b544372942ff588b82",
+    "head": "sha256:3d8d8020e74b6f11dae0c59ee88896b1681bd19bd8afe3b544372942ff588b82"
+   },
+   "entity": "receipt:receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-pr332-25ce824.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-pr332-25ce824.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:a73540259214a704ad157daae543068ebaf78c3102d33b45fed9abb53a0cccb5",
+    "head": "sha256:a73540259214a704ad157daae543068ebaf78c3102d33b45fed9abb53a0cccb5"
+   },
+   "entity": "receipt:receipts/graph/A2-330-muneral-canary.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/A2-330-muneral-canary.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:d3f5ed8037490d1f8fb3eaad1764945d4dbabc6fcb6a88a3be173bdba9bd3441",
+    "head": "sha256:d3f5ed8037490d1f8fb3eaad1764945d4dbabc6fcb6a88a3be173bdba9bd3441"
+   },
+   "entity": "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/A2-370-outbox-relay-wired.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:5bbdcf112fd4fdce4c9eea15984affd4f1e88b38a066bf4e6b507652f62d4685",
+    "head": "sha256:5bbdcf112fd4fdce4c9eea15984affd4f1e88b38a066bf4e6b507652f62d4685"
+   },
+   "entity": "receipt:receipts/graph/change-admission-mun-canary-b524-83a8975.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-mun-canary-b524-83a8975.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  },
+  {
+   "content_hash": {
+    "base": "sha256:c6bb244a2bff2d9e89a0dd6edb65a5f25606e9e7cd710c9e1ebce0426f3c1b6e",
+    "head": "sha256:c6bb244a2bff2d9e89a0dd6edb65a5f25606e9e7cd710c9e1ebce0426f3c1b6e"
+   },
+   "entity": "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json",
+   "node_type": "receipt",
+   "path": "receipts/graph/change-admission-node24221-20261021T203351Z.json",
+   "reason": "historical receipt: asserted, never re-verified (I14); a new receipt supersedes it",
+   "rule": "DEC-AUP-0034"
+  }
+ ],
+ "tree": {
+  "commit": "9f5a38b1896032bebf545e66d784eb45b96403b9",
+  "dirty": false
+ },
+ "verdicts": [
+  {
+   "entity": "code_unit:scripts/canary/gen_plan.py",
+   "reason": "v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness"
+   ]
+  },
+  {
+   "entity": "code_unit:scripts/canary/test_gen_plan.py",
+   "reason": "v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness"
+   ]
+  },
+  {
+   "entity": "document:receipts/canary/mun-0083-exemption-canaries-20261111/CONTOUR.md",
+   "reason": "v-doc-reference: 7 reference(s) resolve at head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-doc-reference"
+   ]
+  }
+ ],
+ "verifier_selection": {
+  "applied": {},
+  "not_applied": [],
+  "requested": [],
+  "schema": "VerifierSelection/v1"
+ },
+ "verifiers": [
+  {
+   "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
+   "duration_s": 0.2,
+   "entities": [
+    "code_unit:scripts/canary/gen_plan.py",
+    "code_unit:scripts/canary/test_gen_plan.py"
+   ],
+   "entity_verdicts": {
+    "code_unit:scripts/canary/gen_plan.py": "verified",
+    "code_unit:scripts/canary/test_gen_plan.py": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-fitness",
+   "kind": "fitness_rules",
+   "output_ref": "/home/dev/aup/claude-work/mun-hyg-20261022/mun-0083-exemption-canaries-20261111/tmp/arcana-verify-m4h00ftl/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-11-11T21:48:51Z",
+   "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
+  },
+  {
+   "command": "verify.py doc_reference: path / route / model references of affected documents resolve at head",
+   "duration_s": 0.0,
+   "entities": [
+    "document:receipts/canary/mun-0083-exemption-canaries-20261111/CONTOUR.md"
+   ],
+   "entity_verdicts": {
+    "document:receipts/canary/mun-0083-exemption-canaries-20261111/CONTOUR.md": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-doc-reference",
+   "kind": "doc_reference",
+   "output_ref": "/home/dev/aup/claude-work/mun-hyg-20261022/mun-0083-exemption-canaries-20261111/tmp/arcana-verify-m4h00ftl/verifier-out/v-doc-reference.txt",
+   "started_at_utc": "2026-11-11T21:48:51Z",
+   "summary": "1 document(s), 0 failed"
+  }
+ ],
+ "verify": {
+  "events": [
+   {
+    "code": "SUPERSEDED_SELF_NOT_APPLICABLE",
+    "rule": "DEC-AUP-0035",
+    "text": "DEC-AUP-0035 not applied to receipt:receipts/graph/change-admission-mun-canary-b524-83a8975.json: it declares this run's work item b5245745-f678-4bbd-94f7-0f0083a53df8, but the receipt is being written to /home/dev/aup/claude-work/mun-hyg-20261022/mun-0083-exemption-canaries-20261111/tmp/gp/receipt.json, which is outside this repository, so no path in the tree is the one this run supersedes."
+   },
+   {
+    "code": "STRUCTURAL_EXCLUSION",
+    "rule": "DEC-AUP-0034",
+    "text": "5 affected entity(ies) owe no verdict (receipt: 5): unchanged at both revisions and given no verifier by the matrix"
+   }
+  ],
+  "required_by_entity": {
+   "code_unit:scripts/canary/gen_plan.py": [
+    "fitness_rules"
+   ],
+   "code_unit:scripts/canary/test_gen_plan.py": [
+    "fitness_rules"
+   ],
+   "document:receipts/canary/mun-0083-exemption-canaries-20261111/CONTOUR.md": [
+    "doc_reference"
+   ],
+   "receipt:receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-pr332-25ce824.json": [],
+   "receipt:receipts/graph/A2-330-muneral-canary.json": [],
+   "receipt:receipts/graph/A2-370-outbox-relay-wired.json": [],
+   "receipt:receipts/graph/change-admission-mun-canary-b524-83a8975.json": [],
+   "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json": []
+  },
+  "seconds": {
+   "prepare": 5.69,
+   "total": 116.56,
+   "verifiers": 0.2
+  }
+ },
+ "work_item": "b5245745-f678-4bbd-94f7-0f0083a53df8"
+}
