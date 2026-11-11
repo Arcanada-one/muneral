@@ -1007,6 +1007,23 @@ export class TasksService {
     };
   }
 
+  /**
+   * MUN-0081 — bodyless assignee projection for a task the caller may read.
+   *
+   * Returns only `{ agentId, role, assignedAt }` rows from `task_agents`.
+   * No agent name/model/capabilities and no API key fields — hygiene needs
+   * claim detection, not a directory dump. Human JWT reads require membership
+   * via `findOne`; agent keys are already narrowed by `@AgentScope('task')`.
+   */
+  async getAssignees(taskId: string, humanUserId?: string) {
+    await this.findOne(taskId, humanUserId);
+    return this.prisma.taskAgent.findMany({
+      where: { taskId },
+      select: { agentId: true, role: true, assignedAt: true },
+      orderBy: { assignedAt: 'asc' },
+    });
+  }
+
   // --- Comments (via ActivityLog) ---
 
   async addComment(taskId: string, actor: Actor, body: string): Promise<void> {
