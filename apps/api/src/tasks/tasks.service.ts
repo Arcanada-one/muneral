@@ -117,6 +117,13 @@ const PROJECT_INDEX_SELECT = {
   title: true,
 } satisfies Prisma.TaskSelect;
 
+/** MUN-0064: the exact-task identity route's complete database projection. */
+const TASK_IDENTITY_SELECT = {
+  id: true,
+  projectId: true,
+  status: true,
+} satisfies Prisma.TaskSelect;
+
 @Injectable()
 export class TasksService {
   private readonly projectReadGrants: readonly ProjectReadGrantEntry[];
@@ -215,6 +222,23 @@ export class TasksService {
       throw new NotFoundException('Task not found');
     }
     return task;
+  }
+
+  /** MUN-0064 — the bodyless identity projection needed to resolve a task's project. */
+  async findIdentity(taskId: string, humanUserId?: string) {
+    const identity = humanUserId
+      ? await this.prisma.task.findFirst({
+          where: { id: taskId, ...humanTaskWhere(humanUserId) },
+          select: TASK_IDENTITY_SELECT,
+        })
+      : await this.prisma.task.findUnique({
+          where: { id: taskId },
+          select: TASK_IDENTITY_SELECT,
+        });
+    if (!identity) {
+      throw new NotFoundException('Task not found');
+    }
+    return identity;
   }
 
   /**
