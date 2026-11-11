@@ -1,0 +1,276 @@
+{
+  "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces on arcana-devs, source of candidate commit 8bfe508ccbb90285f8540e4acd01145577cde542 (tree 1c1d358774fd15c9963d09a60b3ddd36014d579e; base main ac0a332865a5aa5f27d6c3588ff3180f4f2ef556) mounted read-only at /repo, no network, NOT a production probe",
+  "id": "muneral-hyg-jwt-fail-closed-8bfe508",
+  "owner": "MUN-HYG leaf, Muneral task b5245745-f678-4bbd-94f7-0f0083a53df8",
+  "probes": [
+    {
+      "argv": [
+        "/node/bin/node",
+        "--experimental-vm-modules",
+        "/repo/apps/api/node_modules/jest/bin/jest.js",
+        "--config",
+        "/canary/jest.canary.config.json",
+        "--runInBand"
+      ],
+      "artifacts": [],
+      "capture_limit_bytes": 1048576,
+      "cwd": "apps/api",
+      "entities": [
+        "code_unit:apps/api/src/auth/auth.module.ts",
+        "code_unit:apps/api/src/auth/jwt-secret.ts",
+        "code_unit:apps/api/src/auth/strategies/jwt.strategy.ts",
+        "code_unit:apps/api/src/ws/kanban.gateway.ts",
+        "code_unit:apps/api/src/ws/ws.module.ts"
+      ],
+      "env_keys": [
+        "CI",
+        "HOME",
+        "LANG",
+        "NO_COLOR",
+        "PATH",
+        "TMPDIR",
+        "TZ"
+      ],
+      "executable_sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+      "execution_files": [
+        {
+          "attribution": {
+            "kind": "system_executable",
+            "source_id": "/node/bin/node",
+            "version": "sha256:89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+          },
+          "path": "/node/bin/node",
+          "sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+        },
+        {
+          "attribution": {
+            "kind": "system_executable",
+            "source_id": "/spec/jwt-unset.canary.spec.ts",
+            "version": "sha256:c5bd72fb23885a6e36c1404091284eeac32cf63bb6454d552294cc9879d8fa4d"
+          },
+          "path": "/spec/jwt-unset.canary.spec.ts",
+          "sha256": "c5bd72fb23885a6e36c1404091284eeac32cf63bb6454d552294cc9879d8fa4d"
+        },
+        {
+          "attribution": {
+            "kind": "system_executable",
+            "source_id": "/spec/jwt-set.canary.spec.ts",
+            "version": "sha256:44e53b9c12930d561ad88445ee2b8a0f262e56346c863d4109eb7c9898245497"
+          },
+          "path": "/spec/jwt-set.canary.spec.ts",
+          "sha256": "44e53b9c12930d561ad88445ee2b8a0f262e56346c863d4109eb7c9898245497"
+        },
+        {
+          "attribution": {
+            "kind": "system_executable",
+            "source_id": "/canary/jest.canary.config.json",
+            "version": "sha256:6cac3c72a3f3b7854e9187bad6a2c4ba983303872ac89253b82720f39781f6d5"
+          },
+          "path": "/canary/jest.canary.config.json",
+          "sha256": "6cac3c72a3f3b7854e9187bad6a2c4ba983303872ac89253b82720f39781f6d5"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/src/ws/kanban.gateway.ts",
+          "sha256": "8e885dc160afd1917ed9c7e5ffa214dcd7e47a37c919820e07aa81a7f0c85f98"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/src/ws/ws.module.ts",
+          "sha256": "216875a6d16c29496c823ef61dae06bf89fd245753b9b935e0667ad16e93659b"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/src/auth/jwt-secret.ts",
+          "sha256": "c9924dd26f2ad3833f8bb2a74d7efc92680da035e82f64a6df9f7a5c68cfb746"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/src/auth/auth.module.ts",
+          "sha256": "309c21e60b3b8428db3610d7df35554fe74815e195d839e1e49f371a6e0b53c0"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/src/auth/strategies/jwt.strategy.ts",
+          "sha256": "d589433e1cbabb76f748c2c7d3d9dc5b46999bbd075f73d926aaa9a6e9f67ae1"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/test/support/throttler-test-double.ts",
+          "sha256": "70062e68beafcb4525d6dc88ec472595327ae02c8c8d8fc4bd779ff765e5c838"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/src/plan-graph/project-membership.ts",
+          "sha256": "ffd6c3b678459700a20a2481d5aa8b1d5079eee7e11d486df0aa0c67e11c6bde"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/src/plan-graph/project-membership.service.ts",
+          "sha256": "4e6e4541436e2c12bede6dc10e577eddab19bc8872d4895cc791ab784da5e0b3"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/src/prisma/prisma.service.ts",
+          "sha256": "06565eb93814d23f37958b0a9f857353355438e2ab062f071eb6a52d6c4a393b"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/test/setup-env.ts",
+          "sha256": "5f9c2ed5f9629a27050721cd2ad8f43c3c74b3e22626d44c8be930cc7f9e6483"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/tsconfig.json",
+          "sha256": "e9d48a8d90da20846c7725067dd944d1f1f7c6d21faff18022360aa8759740bf"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/tsconfig.test.json",
+          "sha256": "b45b51f10e6897b5fa212f421842c1334c9e1f7942e446dcf278bb08b9c55d1d"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/package.json",
+          "sha256": "0726ca5f358349e2016e8c3da72ee485669417c6f38fe8cdf8f3528c80c3dad4"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/package.json",
+          "sha256": "1c17a035a9f3628b21dff0cfe44c1e86fa0b2724af3ccd25b5cbcdfb21b30555"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/pnpm-lock.yaml",
+          "sha256": "e5a68763996dfa027c1e06ba81db00a18cd1f21c3957f1d4086b28e721b0e2df"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/node_modules/jest/package.json",
+          "sha256": "679fd6f49e8dcb1fd82b7d610c5d555b70204ad2e5e5092e284e9bc10eb9f353"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/node_modules/jest/bin/jest.js",
+          "sha256": "2a9b435eab8a343bd09fe285b2e2043ff9ff89fae4e1d1f46ba3df28659d8a2c"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/node_modules/ts-jest/package.json",
+          "sha256": "c7007459a6274967dd175e6a6d48864369237521d4e337238b8b71b42113936f"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/node_modules/@nestjs/core/package.json",
+          "sha256": "036da50955d0fd6b4cada2631ff4c8925a341a68e56bcfb308fe2292a641d61c"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/node_modules/@nestjs/common/package.json",
+          "sha256": "5d9eb1930c2d545faee136c26b464ca074c48bb3ee4c2624f3add3925ae042b2"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/node_modules/@nestjs/jwt/package.json",
+          "sha256": "845cc898ce4ccae33ed7200e062ffa52ec79adf8fc65fd6c09086bd770abca11"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/node_modules/@nestjs/testing/package.json",
+          "sha256": "ced12a62136ef7c2d907fdb4fca991e816d0a12a79072d44baf24ffdef14f11f"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/node_modules/@nestjs/platform-socket.io/package.json",
+          "sha256": "6deddff13eeb212d78c8f056b23eb2c2c4f45cde5a04f5ad40a8ef0eb0a5b9dc"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/node_modules/socket.io/package.json",
+          "sha256": "6ecffdc4e5b6e9b3495c5262c11d5c1188e15d542dc0b657896218a2a7ae67d6"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/web/node_modules/socket.io-client/package.json",
+          "sha256": "8df41267a412d30761aea8850bb56e3d8b33aa7e0e4b1698565b080721c20ece"
+        }
+      ],
+      "expect": {
+        "exit_codes": [
+          0
+        ],
+        "stderr_contains": [
+          "Tests:       15 passed, 15 total",
+          "Test Suites: 2 passed, 2 total"
+        ]
+      },
+      "id": "jwt-fail-closed-nest-socketio-loopback",
+      "kind": "process",
+      "mutating": false,
+      "timeout_seconds": 120
+    }
+  ],
+  "producer_repository": "/repo",
+  "read_only": true,
+  "schema": "CanaryPlan/v2",
+  "subject": {
+    "commit": "8bfe508ccbb90285f8540e4acd01145577cde542",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "60bc2d76673c69efbf18030eacacf21cf9e82ae5a50601e88fe29a42dc1881a7",
+      "source_field": "commit"
+    },
+    "schema": "GitCanarySubject/v1",
+    "tree": "1c1d358774fd15c9963d09a60b3ddd36014d579e"
+  }
+}

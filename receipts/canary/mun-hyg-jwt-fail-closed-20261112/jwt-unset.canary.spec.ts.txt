@@ -1,0 +1,43 @@
+// MUN-HYG jwt-fail-closed process canary, case: JWT_SECRET UNSET. Stored as .txt (record namespace);
+// the sandbox runs it as /spec/jwt-unset.canary.spec.ts. contour=candidate-local, NOT production.
+// The variable is removed BEFORE any product module is imported, so every module-level read is exercised.
+// No secret value is printed or asserted anywhere; error text is checked to name the variable only.
+import { jest } from '@jest/globals';
+delete process.env.JWT_SECRET;
+
+const OLD_PUBLIC_DEFAULT = ['change-me', 'in-production'].join('-');
+const A = '/repo/apps/api/src';
+
+describe('JWT_SECRET unset: every changed code unit refuses', () => {
+  it('getJwtSecret throws, naming the variable and no value (unset and blank)', async () => {
+    const { getJwtSecret } = await import(`${A}/auth/jwt-secret`);
+    for (const v of [undefined, '', '   ']) {
+      if (v === undefined) delete process.env.JWT_SECRET; else process.env.JWT_SECRET = v;
+      let msg = '';
+      try { getJwtSecret(); } catch (e: any) { msg = String(e?.message); }
+      expect(msg).toMatch(/JWT_SECRET/);
+      expect(msg).not.toContain(OLD_PUBLIC_DEFAULT);
+    }
+    delete process.env.JWT_SECRET;
+  });
+  it('ws.module.ts refuses at import (module construction)', async () => {
+    await expect(import(`${A}/ws/ws.module`)).rejects.toThrow(/JWT_SECRET/);
+  });
+  it('auth.module.ts refuses at import (module construction)', async () => {
+    await expect(import(`${A}/auth/auth.module`)).rejects.toThrow(/JWT_SECRET/);
+  });
+  it('jwt.strategy.ts refuses at construction', async () => {
+    const { JwtStrategy } = await import(`${A}/auth/strategies/jwt.strategy`);
+    expect(() => new JwtStrategy({ validateJwtPayload: async () => null } as any)).toThrow(/JWT_SECRET/);
+  });
+  it('kanban.gateway.ts rejects a handshake and never verifies a token', async () => {
+    const { KanbanGateway } = await import(`${A}/ws/kanban.gateway`);
+    const verify = jest.fn();
+    const gateway = new KanbanGateway({ verify } as any, {} as any);
+    const socket: any = { handshake: { auth: { token: 'any.token.value' } }, data: {}, disconnect: jest.fn() };
+    await gateway.handleConnection(socket);
+    expect(socket.disconnect).toHaveBeenCalledWith(true);
+    expect(verify).not.toHaveBeenCalled();
+    expect(socket.data.userId).toBeUndefined();
+  });
+});
