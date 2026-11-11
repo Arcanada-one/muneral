@@ -31,6 +31,7 @@ With: checklists · dependency graphs · git refs · RBAC · full audit log
   see [`apps/api/docs/agent-key-issuance.md`](apps/api/docs/agent-key-issuance.md)
   and [`docs/how-to/issue-per-agent-api-key.md`](docs/how-to/issue-per-agent-api-key.md).
 - **Humans**: GitHub OAuth + Telegram Login Widget
+  (web deploy is dormant behind a compose profile: [`docs/how-to/activate-muneral-web.md`](docs/how-to/activate-muneral-web.md))
 - **RBAC**: Owner / Manager / Developer / Viewer (per workspace + per project)
 
 ## Quick Start (Self-hosted)
