@@ -39,3 +39,8 @@ This pure codec does not measure a serialized HTTP response body, enforce an enu
 The current Prisma `ActivityLog.payload Json?` and `createdAt DateTime @db.Timestamptz()` types do not prove exact numeric-token or microsecond preservation. Existing Prisma `findMany` activity reads also do not provide a pre-transfer row/byte bound. A later adapter must supply exact decimal text and six-digit UTC timestamp text, and must establish source count, decompressed payload size, bounded transfer, and transaction consistency before materializing the values. The codec's in-memory byte checks do not prove those source-side bounds.
 
 This codec establishes no route behavior, current ACL or revocation semantics, repeatable-read snapshot, PostgreSQL ordering, concurrency, quota accounting, expiry enforcement, cleanup, consumer fit, KC adoption, runtime behavior, or deployment result. Those remain `NOT_MEASURED` until separately implemented and verified.
+
+## Related assessment
+
+Owner-facing G01 Q3 assessment and typed cursor proposal (no route): [`task-activity-snapshot-assessment-g01.md`](./task-activity-snapshot-assessment-g01.md). Proposal helpers live in `src/activity-snapshot/task-activity-snapshot-cursor-proposal.ts` and are not wired into Nest.
+
