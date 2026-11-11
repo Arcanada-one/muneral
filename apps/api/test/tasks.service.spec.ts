@@ -269,6 +269,31 @@ describe('TasksService', () => {
       ).rejects.toThrow(BadRequestException);
     });
 
+    // MUN-0072: review → cancelled is admitted; review → todo stays refused.
+    it('allows review → cancelled and refuses review → todo', async () => {
+      prisma.task.findUnique.mockResolvedValue({ ...MOCK_TASK, status: 'review' });
+      prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
+      prisma.task.update.mockResolvedValue({ ...MOCK_TASK, status: 'cancelled' });
+
+      const result = await service.updateStatus('task-1', humanActor, {
+        status: 'cancelled',
+      });
+      expect(result.status).toBe('cancelled');
+      expect(prisma.activityLog.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            action: 'task:status_changed',
+            payload: { from: 'review', to: 'cancelled' },
+          }),
+        }),
+      );
+
+      prisma.task.findUnique.mockResolvedValue({ ...MOCK_TASK, status: 'review' });
+      await expect(
+        service.updateStatus('task-1', humanActor, { status: 'todo' }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
     it('throws NotFoundException for missing task', async () => {
       prisma.task.findUnique.mockResolvedValue(null);
 

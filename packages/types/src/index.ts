@@ -43,6 +43,12 @@ export interface PaginatedResult<T> {
 
 // Task state machine — valid transitions.
 //
+// `cancelled` abandons live (or reviewed-but-not-accepted) work without a
+// completion claim. MUN-0072 admits `review → cancelled` so a disposable
+// canary that reached review with an APPROVE cancel-recommendation can close
+// through the same `PATCH /tasks/:id/status` map that binds human JWT and
+// agent keys alike — there is no separate agent/human transition table.
+//
 // `archived` is reachable only from the two statuses where the card is already
 // off the working set (`done`, `cancelled`): archiving is the act of filing a
 // settled card away, not a way to abandon live work — that is what `cancelled`
@@ -51,7 +57,7 @@ export interface PaginatedResult<T> {
 export const TASK_TRANSITIONS: Record<TaskStatus, TaskStatus[]> = {
   todo: ['in_progress', 'cancelled'],
   in_progress: ['review', 'blocked', 'todo', 'cancelled'],
-  review: ['in_progress', 'done', 'blocked'],
+  review: ['in_progress', 'done', 'blocked', 'cancelled'],
   blocked: ['in_progress', 'cancelled'],
   done: ['in_progress', 'archived'],
   cancelled: ['todo', 'archived'],

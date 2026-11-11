@@ -13,6 +13,8 @@ describe('Task State Machine', () => {
       ['review', 'in_progress'],
       ['review', 'done'],
       ['review', 'blocked'],
+      // MUN-0072: review may abandon without claiming done (disposable canaries).
+      ['review', 'cancelled'],
       ['blocked', 'in_progress'],
       ['blocked', 'cancelled'],
       ['done', 'in_progress'],
@@ -37,7 +39,6 @@ describe('Task State Machine', () => {
       ['todo', 'blocked'],
       ['in_progress', 'done'], // must go through review first
       ['review', 'todo'],
-      ['review', 'cancelled'],
       ['blocked', 'done'],
       ['blocked', 'review'],
       ['done', 'cancelled'],
