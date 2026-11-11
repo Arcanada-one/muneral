@@ -1,0 +1,9 @@
+{
+  "captured_at_utc": "2026-11-11T22:52:06Z",
+  "commit": "d62cea754d2d1ac1dcdabd69694a5f9c1b1d491f",
+  "dirty": false,
+  "producer": "git rev-parse/status in a clean detached worktree of the measured commit d62cea75 (branch mun-hyg/mun-ci-head-ref-env-20261112, base main 84938538ecd10a4b8ebaf371adeb2e8f4443cd91; MUN-HYG leaf, task b5245745)",
+  "repository_path": "/repo",
+  "schema": "MeasuredGitSource/v1",
+  "tree": "1aef16b9191bc48e86139f219e69e24151d94656"
+}
