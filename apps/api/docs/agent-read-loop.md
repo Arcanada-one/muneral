@@ -173,14 +173,12 @@ produced and which of those routes are `not_measured` for agent intent.
 
 ## Reading activity with the agent key (MUN-0047)
 
-MUN-0046 opened `POST /tasks/:taskId/comments` but no route an agent key could
-reach ever read that content back: `GET /tasks/:taskId/activity` was unmarked
-(`403`), and there is no separate `GET /tasks/:taskId/comments` route at all —
-an agent could write a record neither it nor any other agent could ever read.
-`getActivity` now accepts an agent key too, **scoped to the agent's own
-assignment** — the identical `'task'` scope (and the identical
-`assertAssignedToTask` check) `POST .../comments` already uses, since reading
-a task's history is bounded by the same assignment as acting on it:
+MUN-0046 opened `POST /tasks/:taskId/comments` but initially no route an agent
+key could reach ever read that content back: `GET /tasks/:taskId/activity` was
+unmarked (`403`). `getActivity` now accepts an agent key too, **scoped to the
+agent's own assignment** — the identical `'task'` scope `POST .../comments`
+already uses, since reading a task's history is bounded by the same assignment
+as acting on it. MUN-0078 later adds the dedicated comments collection (below).
 
 | route | an agent key gets |
 |---|---|
@@ -213,14 +211,34 @@ input contract.
 
 `ActivityService.findForTask` returns the full stored row, so a `comment`
 action's response includes `payload.body` verbatim — the same content
-`POST .../comments` accepted. **This is why no dedicated `GET
-.../comments` route was added**: the activity stream already carries comment
-bodies in full, unfiltered, and a second route returning the same rows in a
-different shape would be duplication to maintain, not a new capability.
-Because reading and posting share one scope check, there is no separate
-"read-only" abuse case here distinct from the negative control: an unassigned
-agent (same workspace) and an agent from another workspace both get the same
-`403` an unassigned agent already gets on `POST .../comments`.
+`POST .../comments` accepted. Activity remains the mixed audit stream
+(status moves, assignments, comments, …).
+
+## Listing comments with the agent key (MUN-0078)
+
+Measured 2026-11-10: `GET /tasks/:taskId/comments` answered HTTP 404 while
+`POST .../comments` returned 201 and comment rows appeared only inside
+`GET .../activity` (`action=comment`). Agents needed a bodyless collection of
+prior comments without scraping the mixed activity stream.
+
+| route | an agent key gets |
+|---|---|
+| `GET /tasks/:taskId/comments` | comment projection for the task, if the agent created or is assigned to it — otherwise `403` (same `'task'` scope as `GET /tasks/:taskId`) |
+
+```http
+GET /api/v1/tasks/550e8400-e29b-41d4-a716-446655440000/comments?page=1&limit=20
+Authorization: Bearer mun_sk_<key>
+```
+
+Response envelope: `{ "data": [...], "total": N, "page": 1, "limit": 20 }`.
+Each `data` row is `{ id, createdAt, actorType, actorId, body }` — no
+`workspaceId`, no raw `payload` object, no non-comment activity actions.
+Paging defaults and caveats match `GET .../activity` (offset pages; no snapshot
+token; `parseInt` on query values with no documented malformed-input contract).
+
+Because listing and posting share one scope check, an unassigned agent (same
+workspace) and an agent from another workspace both get the same `403`
+`POST .../comments` already returns.
 
 ## Reading a project's task index with a read grant (MUN-0052)
 

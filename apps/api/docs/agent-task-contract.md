@@ -195,6 +195,7 @@ secondary data source.
 | `GET /tasks/:id/dependency-graph` | yes | `task` |
 | `GET /tasks/:id/dependencies` | yes | `task` |
 | `GET /tasks/:id/activity` | yes | `task` |
+| `GET /tasks/:id/comments` | yes — bodyless comment projection (MUN-0078) | `task` |
 | `POST /tasks/:id/comments` | yes | `task` |
 | `PATCH /tasks/:id` | yes — agent-safe metadata only (`priority`, `dueDate`, `estimateHours`, `sprintId`); title/description/status refused | `task` (creator or assigned) |
 | `PATCH /tasks/:id/status` | yes | `task-status` (creator or executor) |
@@ -300,6 +301,7 @@ Always pair the status with `/readiness`.
 
 - **MUN-0043** — agent keys reached `/tasks/*` at all; allowlist scoping introduced.
 - **MUN-0045/0046/0047** — task creation, comments, activity read scoped in turn.
+- **MUN-0078** — `GET /tasks/:id/comments` bodyless comment projection.
 - **MUN-0054** — the defect this document records: `/tasks/:id` served no
   dependency field and the only dependency route answered `403` to an agent key,
   so an executor had no authorized way to distinguish "unblocked" from "not

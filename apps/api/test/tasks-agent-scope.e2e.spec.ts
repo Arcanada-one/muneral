@@ -609,9 +609,8 @@ describe('Agent-key scope on /tasks (e2e)', () => {
       (e: { action: string }) => e.action === 'comment',
     );
     expect(entry).toBeDefined();
-    // Byte-compare, not just "truthy": the activity payload is the ONLY
-    // surface an agent key can read this content back from (no GET
-    // .../comments route exists at all — see docs/agent-read-loop.md).
+    // Byte-compare against the activity payload; the dedicated comments
+    // projection is covered separately under MUN-0078.
     expect(entry.payload.body).toBe(posted);
     expect(entry.actorType).toBe('agent');
     expect(entry.actorId).toBe(assignedAgentId);
