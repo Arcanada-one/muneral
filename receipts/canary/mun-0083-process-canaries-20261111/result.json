@@ -1,0 +1,637 @@
+{
+  "schema": "CanaryResult/v2",
+  "captured_at_utc": "2026-11-11T20:49:06Z",
+  "producer": {
+    "tool": "receipts/canary/mun-0083-process-canaries-20261111/harness.py.txt",
+    "version": "1.0.0"
+  },
+  "model": "none: deterministic process producer",
+  "plan": {
+    "id": "muneral-mun0083-process-canaries-f3b87b6",
+    "path": "plan.json",
+    "digest": "472e68fd2b510caec46aa270f2066a63a4016e925d08afdac06570e489a71bae"
+  },
+  "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces on arcana-devs, source of main f3b87b6e19202cffee3b1e73900458dce8125bdd mounted read-only at /repo, no network, NOT a production probe",
+  "phase": "pre",
+  "read_only": true,
+  "observation_owner": "MUN-HYG leaf, Muneral task b5245745-f678-4bbd-94f7-0f0083a53df8",
+  "resident_version": null,
+  "subject": {
+    "commit": "f3b87b6e19202cffee3b1e73900458dce8125bdd",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "a7405671205334c0a2ce67cc90d17c44734f9654a8e987903ffa55b9ef2f2526",
+      "source_field": "commit"
+    },
+    "schema": "GitCanarySubject/v1",
+    "tree": "f977794e3532d926da1665b44e06ce6fe0feed4b"
+  },
+  "probes": [
+    {
+      "id": "kanban-gateway-nest-socketio-loopback",
+      "kind": "process",
+      "executed": true,
+      "termination": {
+        "kind": "exit",
+        "code": 0
+      },
+      "outcome": "verified",
+      "reason": "Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+      "execution_identity_unchanged": true,
+      "capture_complete": true,
+      "artifacts_verifiable": true,
+      "executable_sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+      "invocation_digest": "d2844790642602bb3fe23b50f2f095185ef749606fa659a391a539bf9397de84",
+      "environment_keys": [
+        "CI",
+        "HOME",
+        "LANG",
+        "NO_COLOR",
+        "PATH",
+        "TMPDIR",
+        "TZ"
+      ],
+      "elapsed_ms": 8104.489,
+      "started_at_utc": "2026-11-11T20:48:54.493821+00:00",
+      "finished_at_utc": "2026-11-11T20:49:02.913913+00:00",
+      "execution_files": [
+        {
+          "path": "/node/bin/node",
+          "sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+          "bytes": 126458664,
+          "matched": true,
+          "attribution": {
+            "kind": "system_executable",
+            "source_id": "/node/bin/node",
+            "version": "sha256:89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+          }
+        },
+        {
+          "path": "/spec/kanban-gateway.canary.spec.ts",
+          "sha256": "f854626ca9d15b391ba7b2cae913c94a262be77b6d51341f41d83bfa74bd6f95",
+          "bytes": 4465,
+          "matched": true,
+          "attribution": {
+            "kind": "system_executable",
+            "source_id": "/spec/kanban-gateway.canary.spec.ts",
+            "version": "sha256:f854626ca9d15b391ba7b2cae913c94a262be77b6d51341f41d83bfa74bd6f95"
+          }
+        },
+        {
+          "path": "/canary/jest.canary.config.json",
+          "sha256": "a530c64705b46efd12b83f79ac6c1204cfa45723e8747a268c3668c45b79f73a",
+          "bytes": 651,
+          "matched": true,
+          "attribution": {
+            "kind": "system_executable",
+            "source_id": "/canary/jest.canary.config.json",
+            "version": "sha256:a530c64705b46efd12b83f79ac6c1204cfa45723e8747a268c3668c45b79f73a"
+          }
+        },
+        {
+          "path": "/repo/apps/api/src/ws/kanban.gateway.ts",
+          "sha256": "b69bb7185f226a1897d45af2e07d39e39eedcb73903c11adc1ff60f9c9a4c10a",
+          "bytes": 3489,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/src/plan-graph/project-membership.ts",
+          "sha256": "ffd6c3b678459700a20a2481d5aa8b1d5079eee7e11d486df0aa0c67e11c6bde",
+          "bytes": 1948,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/src/plan-graph/project-membership.service.ts",
+          "sha256": "4e6e4541436e2c12bede6dc10e577eddab19bc8872d4895cc791ab784da5e0b3",
+          "bytes": 1823,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/src/prisma/prisma.service.ts",
+          "sha256": "06565eb93814d23f37958b0a9f857353355438e2ab062f071eb6a52d6c4a393b",
+          "bytes": 695,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/test/setup-env.ts",
+          "sha256": "82d499fbda25da528b66c84d159e58cc94a363408d7ad9d3dc36d21e1a465d00",
+          "bytes": 1001,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/tsconfig.json",
+          "sha256": "e9d48a8d90da20846c7725067dd944d1f1f7c6d21faff18022360aa8759740bf",
+          "bytes": 1003,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/tsconfig.test.json",
+          "sha256": "b45b51f10e6897b5fa212f421842c1334c9e1f7942e446dcf278bb08b9c55d1d",
+          "bytes": 1041,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/package.json",
+          "sha256": "0726ca5f358349e2016e8c3da72ee485669417c6f38fe8cdf8f3528c80c3dad4",
+          "bytes": 2885,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/package.json",
+          "sha256": "1c17a035a9f3628b21dff0cfe44c1e86fa0b2724af3ccd25b5cbcdfb21b30555",
+          "bytes": 390,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/pnpm-lock.yaml",
+          "sha256": "e5a68763996dfa027c1e06ba81db00a18cd1f21c3957f1d4086b28e721b0e2df",
+          "bytes": 474409,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/node_modules/jest/package.json",
+          "sha256": "679fd6f49e8dcb1fd82b7d610c5d555b70204ad2e5e5092e284e9bc10eb9f353",
+          "bytes": 1472,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/node_modules/jest/bin/jest.js",
+          "sha256": "2a9b435eab8a343bd09fe285b2e2043ff9ff89fae4e1d1f46ba3df28659d8a2c",
+          "bytes": 324,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/node_modules/ts-jest/package.json",
+          "sha256": "c7007459a6274967dd175e6a6d48864369237521d4e337238b8b71b42113936f",
+          "bytes": 4238,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/node_modules/@nestjs/core/package.json",
+          "sha256": "036da50955d0fd6b4cada2631ff4c8925a341a68e56bcfb308fe2292a641d61c",
+          "bytes": 1762,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/node_modules/@nestjs/common/package.json",
+          "sha256": "5d9eb1930c2d545faee136c26b464ca074c48bb3ee4c2624f3add3925ae042b2",
+          "bytes": 1464,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/node_modules/@nestjs/jwt/package.json",
+          "sha256": "845cc898ce4ccae33ed7200e062ffa52ec79adf8fc65fd6c09086bd770abca11",
+          "bytes": 1913,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/node_modules/@nestjs/testing/package.json",
+          "sha256": "ced12a62136ef7c2d907fdb4fca991e816d0a12a79072d44baf24ffdef14f11f",
+          "bytes": 1280,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/node_modules/@nestjs/platform-socket.io/package.json",
+          "sha256": "6deddff13eeb212d78c8f056b23eb2c2c4f45cde5a04f5ad40a8ef0eb0a5b9dc",
+          "bytes": 1092,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/node_modules/socket.io/package.json",
+          "sha256": "6ecffdc4e5b6e9b3495c5262c11d5c1188e15d542dc0b657896218a2a7ae67d6",
+          "bytes": 2074,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/node_modules/socket.io-client/package.json",
+          "sha256": "8df41267a412d30761aea8850bb56e3d8b33aa7e0e4b1698565b080721c20ece",
+          "bytes": 2904,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        }
+      ],
+      "artifacts": [],
+      "streams": {
+        "stdout": {
+          "captured_bytes": 194,
+          "sha256": "5ac3dff8e3f2761dccff2ca4d481eeb864a82a5c85e3d0393666862b516cf414",
+          "capture": "digest_only",
+          "truncated": false
+        },
+        "stderr": {
+          "captured_bytes": 3190,
+          "sha256": "22ded0eb9f5476ec859a257fe6df0a333723ee487b085918ea6f94dc6c4c32f1",
+          "capture": "digest_only",
+          "truncated": false
+        }
+      },
+      "output_checks": [
+        {
+          "stream": "stderr",
+          "expected": "Tests:       6 passed, 6 total",
+          "matched": true
+        },
+        {
+          "stream": "stderr",
+          "expected": "Test Suites: 1 passed, 1 total",
+          "matched": true
+        }
+      ],
+      "cleanup": {
+        "group_signalled_before_leader_reaped": true,
+        "escaped_descendants": "not_proven_absent",
+        "sandbox": false
+      }
+    },
+    {
+      "id": "web-api-client-interceptor-vitest",
+      "kind": "process",
+      "executed": true,
+      "termination": {
+        "kind": "exit",
+        "code": 0
+      },
+      "outcome": "verified",
+      "reason": "Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+      "execution_identity_unchanged": true,
+      "capture_complete": true,
+      "artifacts_verifiable": true,
+      "executable_sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+      "invocation_digest": "2196bb3fff11cebe2c679ff4377a10fe5c7df5653ef9b6bd8621fb60ba3ccfbf",
+      "environment_keys": [
+        "CI",
+        "HOME",
+        "LANG",
+        "NO_COLOR",
+        "PATH",
+        "TMPDIR",
+        "TZ"
+      ],
+      "elapsed_ms": 2233.752,
+      "started_at_utc": "2026-11-11T20:49:02.914117+00:00",
+      "finished_at_utc": "2026-11-11T20:49:05.413627+00:00",
+      "execution_files": [
+        {
+          "path": "/node/bin/node",
+          "sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+          "bytes": 126458664,
+          "matched": true,
+          "attribution": {
+            "kind": "system_executable",
+            "source_id": "/node/bin/node",
+            "version": "sha256:89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+          }
+        },
+        {
+          "path": "/repo/apps/web/lib/api/client.ts",
+          "sha256": "b7f97540ed6877398f8f77d9d34fc201bcf5f68b3b62b9f43034e1a38791da7b",
+          "bytes": 3083,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/__tests__/task-detail-no-auth-retry.test.ts",
+          "sha256": "ea38dcbf6f57c0687a996eb66c3fc2cb96a5e8e3bf718c1ccd9cc28a78137942",
+          "bytes": 1276,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/vitest.config.ts",
+          "sha256": "a3688859e6fe27f3e8e670a50d3476b4f2854fe2a2c81895d979f58b36cba66f",
+          "bytes": 557,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/vitest.setup.ts",
+          "sha256": "a46d66851af2c056e805fdd574bf5ec3adb1181c43c5e41f0a1c592e338afe64",
+          "bytes": 36,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/package.json",
+          "sha256": "1c67cd1ac2e564369c174667662648bae6c9382dacf05807b13e33197e0a4f55",
+          "bytes": 1861,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/package.json",
+          "sha256": "1c17a035a9f3628b21dff0cfe44c1e86fa0b2724af3ccd25b5cbcdfb21b30555",
+          "bytes": 390,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/pnpm-lock.yaml",
+          "sha256": "e5a68763996dfa027c1e06ba81db00a18cd1f21c3957f1d4086b28e721b0e2df",
+          "bytes": 474409,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/node_modules/vitest/package.json",
+          "sha256": "cc2979885d9d149c8456128e7ae48038d815352cf1e6d1932eb631057a99f973",
+          "bytes": 5736,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/node_modules/vitest/vitest.mjs",
+          "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6",
+          "bytes": 43,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/node_modules/axios/package.json",
+          "sha256": "cc221510be6315b0ebf648d7e4346680e47a828fafcbb9cc141922d2d219761e",
+          "bytes": 6681,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/node_modules/next-auth/package.json",
+          "sha256": "7f38b7950178fa3446995ff5f9005ce016d0c1513a9ebef1fce0c5a4f0a2f8cc",
+          "bytes": 2743,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        }
+      ],
+      "artifacts": [],
+      "streams": {
+        "stdout": {
+          "captured_bytes": 263,
+          "sha256": "6a46fb84c4624a59878ac683cfb33ed4df56313363860d37a67e509a03e8e619",
+          "capture": "digest_only",
+          "truncated": false
+        },
+        "stderr": {
+          "captured_bytes": 375,
+          "sha256": "b4acd4f819050212c4fe3b3ed8416421330f7ff8c72cb9bb667c335f3e24a94e",
+          "capture": "digest_only",
+          "truncated": false
+        }
+      },
+      "output_checks": [
+        {
+          "stream": "stdout",
+          "expected": "Test Files  1 passed (1)",
+          "matched": true
+        },
+        {
+          "stream": "stdout",
+          "expected": "Tests  1 passed (1)",
+          "matched": true
+        }
+      ],
+      "cleanup": {
+        "group_signalled_before_leader_reaped": true,
+        "escaped_descendants": "not_proven_absent",
+        "sandbox": false
+      }
+    },
+    {
+      "id": "activity-visible-count-run-mjs-source-tests",
+      "kind": "process",
+      "executed": true,
+      "termination": {
+        "kind": "exit",
+        "code": 0
+      },
+      "outcome": "verified",
+      "reason": "Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+      "execution_identity_unchanged": true,
+      "capture_complete": true,
+      "artifacts_verifiable": true,
+      "executable_sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+      "invocation_digest": "9f73cfc1c061a1ba62a1f78c3218c9a89383ec98b4100f626f7f6761b0af590b",
+      "environment_keys": [
+        "CI",
+        "HOME",
+        "LANG",
+        "NO_COLOR",
+        "PATH",
+        "TMPDIR",
+        "TZ"
+      ],
+      "elapsed_ms": 1151.499,
+      "started_at_utc": "2026-11-11T20:49:05.413745+00:00",
+      "finished_at_utc": "2026-11-11T20:49:06.849739+00:00",
+      "execution_files": [
+        {
+          "path": "/node/bin/node",
+          "sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+          "bytes": 126458664,
+          "matched": true,
+          "attribution": {
+            "kind": "system_executable",
+            "source_id": "/node/bin/node",
+            "version": "sha256:89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+          }
+        },
+        {
+          "path": "/repo/apps/web/e2e/activity-visible-count/run.mjs",
+          "sha256": "f66fbfbd06dd1dcf5ed84c587bf133c52084e5b4d8f566e43cf02c3a594208c7",
+          "bytes": 51861,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/e2e/activity-visible-count/source.test.mjs",
+          "sha256": "128ad5a056f8f052de9f334044bdd28eb7b1d4bf69afd91fba5ba4e130c943a8",
+          "bytes": 14087,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/e2e/activity-visible-count/failure-summary.mjs",
+          "sha256": "c3c104500f276330c81e296fc18f47d36bff6dd066e466e71284bb642d3b60d4",
+          "bytes": 16973,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/e2e/activity-visible-count/synthetic-api-client.mjs",
+          "sha256": "59c1bfe429f599794f9b8cfe57061dcefe58a98e2bc51f76e05f28f915732d70",
+          "bytes": 4406,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/package.json",
+          "sha256": "1c67cd1ac2e564369c174667662648bae6c9382dacf05807b13e33197e0a4f55",
+          "bytes": 1861,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/package.json",
+          "sha256": "1c17a035a9f3628b21dff0cfe44c1e86fa0b2724af3ccd25b5cbcdfb21b30555",
+          "bytes": 390,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        }
+      ],
+      "artifacts": [],
+      "streams": {
+        "stdout": {
+          "captured_bytes": 1264,
+          "sha256": "7d073acc956cebe949126ac23cb6378c2255fcaf136232bf5f5087c7b683c811",
+          "capture": "digest_only",
+          "truncated": false
+        },
+        "stderr": {
+          "captured_bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "capture": "digest_only",
+          "truncated": false
+        }
+      },
+      "output_checks": [
+        {
+          "stream": "stdout",
+          "expected": "\u2139 tests 13",
+          "matched": true
+        },
+        {
+          "stream": "stdout",
+          "expected": "\u2139 pass 13",
+          "matched": true
+        },
+        {
+          "stream": "stdout",
+          "expected": "\u2139 fail 0",
+          "matched": true
+        }
+      ],
+      "cleanup": {
+        "group_signalled_before_leader_reaped": true,
+        "escaped_descendants": "not_proven_absent",
+        "sandbox": false
+      }
+    }
+  ],
+  "entity_verdicts": [
+    {
+      "entity": "code_unit:apps/api/src/ws/kanban.gateway.ts",
+      "verdict": "verified",
+      "reason": "Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+      "probe_ids": [
+        "kanban-gateway-nest-socketio-loopback"
+      ]
+    },
+    {
+      "entity": "code_unit:apps/web/lib/api/client.ts",
+      "verdict": "verified",
+      "reason": "Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+      "probe_ids": [
+        "web-api-client-interceptor-vitest"
+      ]
+    },
+    {
+      "entity": "code_unit:apps/web/e2e/activity-visible-count/run.mjs",
+      "verdict": "verified",
+      "reason": "Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+      "probe_ids": [
+        "activity-visible-count-run-mjs-source-tests"
+      ]
+    }
+  ],
+  "source_binding_errors": []
+}

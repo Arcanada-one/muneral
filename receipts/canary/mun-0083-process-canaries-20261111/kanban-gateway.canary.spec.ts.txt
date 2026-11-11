@@ -1,0 +1,85 @@
+// MUN-0083 process canary for code_unit:apps/api/src/ws/kanban.gateway.ts.
+// Stored as .txt (record namespace); the harness runs it as kanban-gateway.canary.spec.ts from /spec.
+// Real Nest application + real socket.io server on loopback, real socket.io-client, real @nestjs/jwt.
+// Only ProjectMembershipService is a stub (it would need PostgreSQL); it is declared here, not hidden.
+import { Test } from '@nestjs/testing';
+import { JwtService } from '@nestjs/jwt';
+import { IoAdapter } from '@nestjs/platform-socket.io';
+import { io as connect } from '/repo/apps/web/node_modules/socket.io-client/build/esm/index.js';
+import { KanbanGateway } from '/repo/apps/api/src/ws/kanban.gateway';
+import { ProjectMembershipService } from '/repo/apps/api/src/plan-graph/project-membership.service';
+
+const SECRET = process.env.JWT_SECRET ?? 'change-me-in-production';
+const P = '11111111-1111-4111-8111-111111111111';
+const MEMBER = 'member-user';
+const OUTSIDER = 'outsider-user';
+const jwt = new JwtService({ secret: SECRET });
+const tok = (sub: string, type = 'access') => jwt.sign({ sub, type });
+const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+let app: any; let url: string; let gateway: KanbanGateway;
+const open: any[] = [];
+
+beforeAll(async () => {
+  const moduleRef = await Test.createTestingModule({
+    providers: [
+      KanbanGateway,
+      { provide: JwtService, useValue: jwt },
+      { provide: ProjectMembershipService, useValue: {
+          lookup: async (u?: string, p?: string) => (u && p ? { userId: u, projectId: p, isMember: u === MEMBER } : null) } },
+    ],
+  }).compile();
+  app = moduleRef.createNestApplication();
+  app.useWebSocketAdapter(new IoAdapter(app));
+  await app.listen(0, '127.0.0.1');
+  const addr = app.getHttpServer().address();
+  url = `http://127.0.0.1:${addr.port}/kanban`;
+  gateway = moduleRef.get(KanbanGateway);
+});
+afterAll(async () => { open.forEach((s) => s.close()); await app.close(); });
+
+const client = (auth: Record<string, unknown>) => {
+  const s = connect(url, { auth, transports: ['websocket'], reconnection: false, forceNew: true });
+  (s as any).closed = new Promise<string>((res) => s.on('disconnect', res));
+  open.push(s); return s;
+};
+const connected = (s: any) => new Promise<void>((res, rej) => { s.on('connect', res); s.on('connect_error', rej); });
+const disconnected = (s: any) => (s as any).closed as Promise<string>;
+const join = (s: any, projectId: string) => new Promise<any>((res) => s.emit('join:project', { projectId }, res));
+
+describe('KanbanGateway over a real Nest + socket.io loopback server', () => {
+  it('disconnects a socket with no token', async () => {
+    const s = client({}); await connected(s);
+    expect(await disconnected(s)).toBe('io server disconnect');
+  });
+  it('disconnects a socket carrying a non-access token', async () => {
+    const s = client({ token: tok(MEMBER, 'refresh') }); await connected(s);
+    expect(await disconnected(s)).toBe('io server disconnect');
+  });
+  it('disconnects a socket carrying a garbage token', async () => {
+    const s = client({ token: 'not-a-jwt' }); await connected(s);
+    expect(await disconnected(s)).toBe('io server disconnect');
+  });
+  it('lets a project member join and receive emitted events', async () => {
+    const s = client({ token: tok(MEMBER) }); await connected(s);
+    expect(await join(s, P)).toEqual({ ok: true, reason: 'current_project_membership' });
+    const got = new Promise<any>((r) => s.on('task:moved', r));
+    gateway.emit(P, 'task:moved', { id: 't1', to: 'done' });
+    expect(await got).toEqual({ id: 't1', to: 'done' });
+  });
+  it('refuses a non-member join and delivers nothing to that socket', async () => {
+    const s = client({ token: tok(OUTSIDER) }); await connected(s);
+    expect(await join(s, P)).toEqual({ ok: false, reason: 'not_project_workspace_member' });
+    let received = false; s.on('task:updated', () => { received = true; });
+    gateway.emit(P, 'task:updated', { id: 't2' }); await wait(400);
+    expect(received).toBe(false);
+  });
+  it('stops delivery after leave:project', async () => {
+    const s = client({ token: tok(MEMBER) }); await connected(s);
+    expect((await join(s, P)).ok).toBe(true);
+    s.emit('leave:project', { projectId: P }); await wait(300);
+    let received = false; s.on('task:created', () => { received = true; });
+    gateway.emit(P, 'task:created', { id: 't3' }); await wait(400);
+    expect(received).toBe(false);
+  });
+});
