@@ -53,3 +53,22 @@ This first delivery contains artifact storage only. Checklist writes, typed
 CAS graph documents, the aggregate open-task read, fleet adoption and pointer
 backfill are subsequent stages of Muneral task
 `1f99b768-65e6-4afe-93e6-611db53e3366`.
+
+## Web consumer canary (isolated loopback)
+
+`apps/web/__tests__/web-consumer-live.test.ts` stays skipped unless
+`MUN_ARTIFACT_CANARY_FIXTURE` points at a local JSON fixture whose `baseUrl` is
+exactly `http://127.0.0.1:25456`. Hosted vitest does not set that variable.
+
+To measure upload/list/get/readback against an isolated Nest candidate on the
+exact tip, from `apps/api`:
+
+```bash
+MUN_ARTIFACT_CANARY_MEASURE=1 pnpm exec node --experimental-vm-modules \
+  ../../node_modules/jest/bin/jest.js \
+  --runInBand test/mun-artifacts-web-canary.measure.spec.ts
+```
+
+The measure suite boots disposable Postgres, serves Nest on loopback `:25456`
+(with Workspaces, Projects and Tasks), writes the fixture, then runs the web
+vitest file. It never targets production.

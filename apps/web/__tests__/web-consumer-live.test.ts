@@ -5,6 +5,7 @@ import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import axios from 'axios';
 import { apiClient } from '../lib/api/client';
 import { fetchWorkspaces } from '../lib/api/workspaces';
 import { useTask } from '../lib/api/tasks';
@@ -15,30 +16,34 @@ vi.mock('next-auth/react', () => ({ getSession: async () => ({ accessToken: stat
 import '../lib/auth/nextauth';
 
 const fixturePath=process.env.MUN_ARTIFACT_CANARY_FIXTURE;
+const CANARY_TIMEOUT_MS=30_000;
 describe.skipIf(!fixturePath)('MUN artifact actual web-to-API HTTP consumer seam', () => {
   beforeAll(() => {
     state.fixture=JSON.parse(fs.readFileSync(fixturePath!, 'utf8'));
     if (state.fixture.baseUrl !== 'http://127.0.0.1:25456') throw new Error('Only isolated loopback candidate permitted');
     apiClient.defaults.baseURL=state.fixture.baseUrl+'/api/v1';
-    // Node HTTP transport still performs real requests; session lookup above is the sole frontend seam.
-    apiClient.defaults.adapter='http';
+    // Force Node http adapter (string 'http' is unreliable under jsdom/vitest and can hang).
+    apiClient.defaults.adapter=axios.getAdapter('http');
+    apiClient.defaults.timeout=CANARY_TIMEOUT_MS;
+    apiClient.defaults.headers.common.Authorization=`Bearer ${state.fixture.accessToken}`;
+    apiClient.defaults.proxy=false;
   });
   it('reads real workspace response with the existing workspace consumer', async () => {
     const rows=await fetchWorkspaces();
     expect(rows.some(w=>w.id===state.fixture.workspaceId)).toBe(true);
-  });
+  }, CANARY_TIMEOUT_MS);
   it('reads real task response through the existing React task query', async () => {
     const query=new QueryClient({defaultOptions:{queries:{retry:false}}});
     const wrapper=({children}:{children:React.ReactNode})=>React.createElement(QueryClientProvider,{client:query},children);
     const hook=renderHook(()=>useTask(state.fixture.taskId),{wrapper});
-    await waitFor(()=>expect(hook.result.current.data?.id).toBe(state.fixture.taskId),{timeout:10000});
+    await waitFor(()=>expect(hook.result.current.data?.id).toBe(state.fixture.taskId),{timeout:CANARY_TIMEOUT_MS});
     hook.unmount(); query.clear();
-  });
+  }, CANARY_TIMEOUT_MS);
   it('binds workspace/project/task identities through actual task detail HTTP reads', async () => {
     const query=new QueryClient();
     const row=await taskDetailReadPort(query).load({workspaceSlug:state.fixture.workspaceSlug,projectSlug:state.fixture.projectSlug,taskId:state.fixture.taskId},new AbortController().signal);
     expect(row.id).toBe(state.fixture.taskId); expect(row.projectId).toBe(state.fixture.projectId);query.clear();
-  });
+  }, CANARY_TIMEOUT_MS);
   it('observes the existing Telegram protocol refusal through the actual NextAuth consumer and API', async () => {
     process.env.TELEGRAM_BOT_TOKEN=state.fixture.telegramBotToken;
     const data:any={id:999001,first_name:'Local fixture',auth_date:Math.floor(Date.now()/1000)};
@@ -51,7 +56,7 @@ describe.skipIf(!fixturePath)('MUN artifact actual web-to-API HTTP consumer seam
     expect(row).toBeNull();
     const response=await apiClient.post('/auth/telegram',data,{validateStatus:()=>true});
     expect(response.status).toBe(400); expect(response.data.message).toBe('Invalid Telegram auth data');
-  });
+  }, CANARY_TIMEOUT_MS);
 
   it('uploads lists and reads back artifact bytes through the web apiClient', async () => {
     // Agent-scoped task-evidence key rides the same axios consumer the dashboard uses.
@@ -59,6 +64,8 @@ describe.skipIf(!fixturePath)('MUN artifact actual web-to-API HTTP consumer seam
     if (typeof agentKey !== 'string' || agentKey.length === 0) {
       throw new Error('Fixture must supply agentKey for artifact upload/list/get/readback');
     }
+    // Drop the human JWT default so the explicit agent Authorization is the one sent.
+    delete apiClient.defaults.headers.common.Authorization;
     const auth={Authorization:`Bearer ${agentKey}`};
     const body=Buffer.from(`web-canary-artifact:${state.fixture.taskId}`, 'utf8');
     const sha=createHash('sha256').update(body).digest('hex');
@@ -86,5 +93,5 @@ describe.skipIf(!fixturePath)('MUN artifact actual web-to-API HTTP consumer seam
     expect(bySha.status).toBe(200);
     expect(bySha.data.id).toBe(uploaded.data.id);
     expect(bySha.data.contentBase64).toBe(body.toString('base64'));
-  });
+  }, CANARY_TIMEOUT_MS);
 });
