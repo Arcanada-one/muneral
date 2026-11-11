@@ -196,6 +196,7 @@ secondary data source.
 | `GET /tasks/:id/dependencies` | yes | `task` |
 | `GET /tasks/:id/activity` | yes | `task` |
 | `POST /tasks/:id/comments` | yes | `task` |
+| `PATCH /tasks/:id` | yes — agent-safe metadata only (`priority`, `dueDate`, `estimateHours`, `sprintId`); title/description/status refused | `task` (creator or assigned) |
 | `PATCH /tasks/:id/status` | yes | `task-status` (creator or executor) |
 | `GET /tasks/project/:projectId` | yes, narrowed to own assignments | `project` |
 | `POST /tasks` | yes | `project-write` |

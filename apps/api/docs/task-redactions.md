@@ -7,8 +7,10 @@ the knowledge base and refuses one that carries secret-shaped material. It
 names the refusal by *(rule, sha256 of the matched span)* and never by the
 cleartext. Three imported `datarim-history` tasks carried such a span in their
 **title**; every sync run named them and exited 1. No Muneral route rewrote a
-title or a description (`PATCH /tasks/:taskId/status` and the checklist routes
-are the only task PATCHes; a migration re-import never rewrites either field),
+title or a description (`PATCH /tasks/:taskId/status`, the agent-safe metadata
+`PATCH /tasks/:taskId` (MUN-0077; priority/dueDate/estimateHours/sprintId only),
+and the checklist routes are the only task PATCHes; a migration re-import never
+rewrites either free-text field),
 and writing to the database directly is forbidden. This route is the
 narrowest thing that closes that gap.
 

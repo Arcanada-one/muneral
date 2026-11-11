@@ -33,6 +33,7 @@ import {
 } from './transition-report.report.js';
 import { CreateTaskDto } from './dto/create-task.dto.js';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto.js';
+import { UpdateTaskMetadataDto } from './dto/update-task-metadata.dto.js';
 import { QueryTasksDto } from './dto/query-tasks.dto.js';
 import { QueryWorkspaceDigestDto } from './dto/query-workspace-digest.dto.js';
 import { QueryWorkspaceDigestTransitionsDto } from './dto/query-workspace-digest-transitions.dto.js';
@@ -83,7 +84,8 @@ type AuthRequest = Request & {
  * it returns only a narrow task projection. Routes with no scope marker —
  * delete, checklists — stay exactly as JWT-only as they
  * were; the only visible difference is that a valid key is now told 403
- * instead of 401.
+ * instead of 401. MUN-0077 adds `PATCH /tasks/:taskId` under `'task'` for
+ * agent-safe metadata only (not title/status).
  *
  * MUN-0047 — `GET /tasks/:taskId/activity` is scoped the same way (below).
  * Before this, `POST /tasks/:taskId/comments` (MUN-0046) was write-only to an
@@ -580,6 +582,22 @@ export class TasksController {
     @Body() dto: UpdateTaskStatusDto,
   ) {
     return this.tasksService.updateStatus(taskId, req.actor, dto);
+  }
+
+  /** MUN-0077 — agent-safe metadata only (priority / dueDate / estimateHours /
+   *  sprintId). Title, description and status are refused by the DTO whitelist
+   *  (`forbidNonWhitelisted`); status moves stay on `PATCH .../status`. Scoped
+   *  `'task'` — creator or assigned agent in the key's own workspace (same
+   *  own-task predicate as GET/comment). Returns the updated task plus
+   *  `auditEventId` of the `task:updated` activity row. */
+  @Patch(':taskId')
+  @AgentScope('task')
+  updateMetadata(
+    @Param('taskId') taskId: string,
+    @Req() req: AuthRequest,
+    @Body() dto: UpdateTaskMetadataDto,
+  ) {
+    return this.tasksService.updateMetadata(taskId, req.actor, dto);
   }
 
   /** MUN-0049. Removes one secret-shaped span, named by scanner rule and
