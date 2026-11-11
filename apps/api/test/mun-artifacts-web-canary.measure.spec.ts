@@ -1,7 +1,7 @@
 /**
- * Lane measurement for the web consumer artifact canary (not matched by jest
- * testRegex `.*\.spec\.ts$`, so default CI jest stays inert). Invoke via
- * --runTestsByPath test/mun-artifacts-web-canary.measure.ts.
+ * Optional measurement for the web consumer artifact canary.
+ * Skipped unless MUN_ARTIFACT_CANARY_MEASURE=1 (declared in apps/web/.env.example)
+ * so default jest/CI stays inert.
  *
  * Boots disposable Postgres + Nest on 127.0.0.1:25456 (Workspaces + Projects +
  * Tasks), writes MUN_ARTIFACT_CANARY_FIXTURE, then runs
@@ -27,6 +27,9 @@ import { AuthService } from '../src/auth/auth.service.js';
 import { KanbanService } from '../src/ws/kanban.service.js';
 import { createDisposablePostgres } from './support/disposable-postgres.js';
 
+const MEASURE = process.env.MUN_ARTIFACT_CANARY_MEASURE === '1';
+const describeCanary = MEASURE ? describe : describe.skip;
+
 @Module({
   imports: [
     PrismaModule,
@@ -41,7 +44,7 @@ import { createDisposablePostgres } from './support/disposable-postgres.js';
 })
 class CanaryAppModule {}
 
-describe('MUN-ARTIFACTS web canary measurement', () => {
+describeCanary('MUN-ARTIFACTS web canary measurement', () => {
   jest.setTimeout(300_000);
   const pg = createDisposablePostgres('mun-artifacts-web-canary');
   const savedUrl = process.env.DATABASE_URL;
