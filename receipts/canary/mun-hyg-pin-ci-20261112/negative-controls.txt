@@ -1,0 +1,21 @@
+== NEG0 control: unmodified copy of the measured tree (same raw command, same sandbox)
+----------------------------------------------------------------------
+Ran 14 tests in 0.090s
+
+OK
+exit=0
+== NEG1 pin mutant: QUALIFIED_WORKFLOW_SHA256 first hex char 8 -> 9 in tested_tree.py (copy)
+FAIL: test_complete_workflow_bytes_match_fixed_identity (__main__.TestedTreeQualificationTests.test_complete_workflow_bytes_match_fixed_identity)
+AssertionError: '82351bb6bdaccf6811215042ce1699c957974a2a316ff90cd1f0b35f0d6deb6d' != '92351bb6bdaccf6811215042ce1699c957974a2a316ff90cd1f0b35f0d6deb6d'
+FAIL: test_exact_merged_pr_and_successful_pinned_workflow_job_qualify (__main__.TestedTreeQualificationTests.test_exact_merged_pr_and_successful_pinned_workflow_job_qualify)
+Ran 14 tests in 0.084s
+FAILED (failures=2)
+exit=1
+== NEG2 workflow mutant: one byte (#) appended to ci.yml (copy), qualification must be false
+FAIL: test_complete_workflow_bytes_match_fixed_identity (__main__.TestedTreeQualificationTests.test_complete_workflow_bytes_match_fixed_identity)
+AssertionError: '5b232cec6f96d6699bdff7c11c2c4308473f2db09767a4b830644dd5be6287e6' != '82351bb6bdaccf6811215042ce1699c957974a2a316ff90cd1f0b35f0d6deb6d'
+FAIL: test_exact_merged_pr_and_successful_pinned_workflow_job_qualify (__main__.TestedTreeQualificationTests.test_exact_merged_pr_and_successful_pinned_workflow_job_qualify)
+AssertionError: False is not true
+Ran 14 tests in 0.081s
+FAILED (failures=2)
+exit=1
