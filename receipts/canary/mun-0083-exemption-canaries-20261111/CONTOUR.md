@@ -47,3 +47,17 @@ NOT_MEASURED (3; no CanaryResult lists them):
 - `code_unit:apps/web/e2e/activity-visible-count/run.mjs`
 
 Count: 102 verified + 5 refused + 3 not measured = 110.
+
+## Finding F1 - two GET probes: status 200 does not describe the candidate
+
+Correction: an earlier author statement "no network use" is WRONG and is withdrawn.
+
+Proven from the files and the probe script at the base commit:
+
+- `route-result.json` probes `route-get-auth-github` and `route-get-auth-github-callback` report status 200 with body sizes 46648 and 46649 bytes. The other protected GET probes report status 401 with 43 or 70 byte bodies.
+- `scripts/canary/canary_probe.py` `fetch()` uses `urllib.request.urlopen` with the default opener, which follows HTTP redirects. The recorded `url` of each probe is the candidate URL (`http://127.0.0.1:3511/...`), not a final URL; no redirect chain is stored.
+- `apps/api/src/auth/auth.controller.ts` marks both handlers as Passport redirects ("Passport redirects - no body needed").
+
+INFERRED, NOT MEASURED: with a configured GitHub strategy the candidate answers a redirect to an external host, so these two probes most likely left the host and contacted github.com with the PLACEHOLDER client id. The final host is not recorded and was not measured.
+
+Consequence: for these two routes the status 200 and the body are not an observation of the candidate. Their `verified` outcome rests on route-table membership only (`declared_by_resident_route_table: true`). The other 100 probes are not affected by this finding.
