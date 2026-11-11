@@ -118,6 +118,25 @@ An edge blocks when it is unsatisfied and points the blocking way:
 An edge is **satisfied** once the counterpart reaches `done`, `cancelled` or
 `archived`.
 
+#### Scheduling predicate vs accepted-output admission (KCLIVE-12)
+
+`GET /tasks/:taskId/readiness` is a **scheduling** predicate only. It answers
+"may start work against native dependency edges?" and treats `cancelled` and
+`archived` predecessors as satisfied the same way as `done`. It does **not**
+assert that a predecessor produced accepted output or that a plan acceptance
+contract was met.
+
+Accepted-output admission for plan graphs lives on a separate route:
+
+- `POST /tasks/:taskId/plan/readiness` — for `required_for_acceptance` edges,
+  readiness requires both a native terminal status **and**
+  `acceptedOutputSatisfied: true`. A cancelled or archived predecessor with
+  `acceptedOutputSatisfied: false` returns `ready: false` with reason
+  `accepted_output_missing`. Optional plan edges never block.
+
+See also [`docs/reference/kclive-10-command-plan-graph.md`](../../../docs/reference/kclive-10-command-plan-graph.md)
+for the plan-graph surface that owns `POST .../plan/readiness`.
+
 ### `GET /tasks/:taskId/dependency-graph`
 
 Every edge touching the task, both directions, with the counterpart's `id`,

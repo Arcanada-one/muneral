@@ -23,6 +23,16 @@ Owner-managed Muneral surfaces for Live Lab Agent Runs. Spec pin:
 | `POST` | `/api/v1/tasks/:taskId/plan/lease` | Bind execution lease to plan revision+digest |
 | `POST` | `/api/v1/tasks/:taskId/plan/readiness` | required_for_acceptance readiness (cancelled/archived alone insufficient) |
 
+Contrast with native scheduling readiness:
+
+| Method | Path | Role |
+| --- | --- | --- |
+| `GET` | `/api/v1/tasks/:taskId/readiness` | Scheduling predicate — `done` / `cancelled` / `archived` satisfy native edges |
+| `POST` | `/api/v1/tasks/:taskId/plan/readiness` | Accepted-output admission for `required_for_acceptance` plan edges |
+
+Agent-facing detail of the scheduling route:
+[`apps/api/docs/agent-task-contract.md`](../../apps/api/docs/agent-task-contract.md#get-taskstaskidreadiness--use-this-one).
+
 ## Semantics
 
 1. **Idempotency.** Scope = principal + project + operation + key. Same normalized
