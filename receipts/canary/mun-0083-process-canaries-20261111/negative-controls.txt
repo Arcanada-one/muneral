@@ -1,0 +1,25 @@
+== NEG1 gateway mutant (join gate disabled)
+    ✓ disconnects a socket with no token (22 ms)
+    ✓ disconnects a socket carrying a non-access token (7 ms)
+    ✓ disconnects a socket carrying a garbage token (4 ms)
+    ✓ lets a project member join and receive emitted events (8 ms)
+    ✕ refuses a non-member join and delivers nothing to that socket (6 ms)
+    ✓ stops delivery after leave:project (707 ms)
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 5 passed, 6 total
+exit=1
+== NEG2 client mutant (skipAuthRefresh ignored)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected Error: Synthetic refresh blocked to match object { response: { status: 401 } }
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+exit=1
+== NEG3 run.mjs mutant (method check removed)
+✖ only same-origin GETs for Vite and the bounded fixture source tree are allowed (1.291681ms)
+✖ the typed fixture entry is the only admitted root module path (0.368116ms)
+ℹ pass 11
+ℹ fail 2
+✖ failing tests:
+✖ only same-origin GETs for Vite and the bounded fixture source tree are allowed (1.291681ms)
+✖ the typed fixture entry is the only admitted root module path (0.368116ms)
+exit=1
