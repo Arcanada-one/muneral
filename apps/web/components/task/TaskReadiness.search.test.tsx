@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import apiClient from '@/lib/api/client';
 import { TaskReadiness } from './TaskReadiness';
@@ -194,7 +194,8 @@ describe('TaskReadiness local search over loaded blockers', () => {
       target: { value: otherTaskId },
     });
 
-    const items = screen.getAllByRole('listitem');
+    const items = within(screen.getByRole('list', { name: 'Loaded readiness blockers' }))
+      .getAllByRole('listitem');
     expect(items).toHaveLength(2);
     expect(items[0]).toHaveTextContent('Alpha gate');
     expect(items[1]).toHaveTextContent('Alpha gate again');

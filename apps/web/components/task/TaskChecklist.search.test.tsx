@@ -55,7 +55,7 @@ function deferred<T>() {
   return { promise, resolve, reject };
 }
 
-function setClipboard(nextWriteText: (text: string) => Promise<void>) {
+function setClipboard(nextWriteText: ReturnType<typeof vi.fn>) {
   Object.defineProperty(navigator, 'clipboard', {
     configurable: true,
     value: { writeText: nextWriteText },

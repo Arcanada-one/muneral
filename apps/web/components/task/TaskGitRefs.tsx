@@ -189,7 +189,7 @@ function VisibleGitReferenceKindSummary({ refs }: { refs: TaskGitRef[] }) {
   }
 
   return (
-    <p role="status" aria-label="Visible reference kinds" className="mb-3 text-xs text-muted-foreground">
+    <p aria-label="Visible reference kinds" className="mb-3 text-xs text-muted-foreground">
       Visible reference kinds for current loaded rows: Repositories {repositories}; Branches {branches}; Commits {commits}
       {other > 0 ? `; Other ${other}` : ''}.
     </p>

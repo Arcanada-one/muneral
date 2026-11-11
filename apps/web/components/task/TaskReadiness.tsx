@@ -404,12 +404,17 @@ function TaskReadinessPanel({
             <p className="mt-2 text-sm text-muted-foreground">
               {loadedBlockers.length === 0
                 ? 'No loaded readiness blockers.'
-                : filtersActive
-                  ? 'No loaded blocking dependencies match the selected filters. Choose All blocker statuses or clear search to broaden the loaded results.'
-                  : 'No matching readiness blockers in the loaded list. Clear search to show more.'}
+                : normalizedSearchQuery !== '' && blockerStatusFilter === 'all'
+                  ? 'No matching readiness blockers in the loaded list. Clear search to show more.'
+                  : filtersActive
+                    ? 'No loaded blocking dependencies match the selected filters. Choose All blocker statuses or clear search to broaden the loaded results.'
+                    : 'No matching readiness blockers in the loaded list. Clear search to show more.'}
             </p>
           ) : (
-            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
+            <ul
+              aria-label="Loaded readiness blockers"
+              className="mt-2 list-disc space-y-1 pl-5 text-sm"
+            >
               {visibleBlockers.map((edge) => {
                 const title = edge.otherTaskTitleWithheld === true ? null : edge.otherTaskTitle;
                 const status = getTaskStatusLabel(edge.otherTaskStatus);

@@ -57,7 +57,7 @@ function renderRefs(currentTaskId = taskA) {
 }
 
 function summaryText() {
-  return screen.getByRole('status', { name: 'Visible reference kinds' });
+  return screen.getByLabelText('Visible reference kinds');
 }
 
 function expectNoMutations() {
@@ -167,7 +167,7 @@ describe('visible Git reference kind counts', () => {
       await Promise.resolve();
     });
     await waitFor(() => expect(view.client.getQueryState(taskAKey)?.fetchStatus).toBe('fetching'));
-    expect(screen.queryByRole('status', { name: 'Visible reference kinds' })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Visible reference kinds')).not.toBeInTheDocument();
     await act(async () => {
       resolveRefresh?.({ data: refreshedA });
       await refresh;
@@ -183,11 +183,11 @@ describe('visible Git reference kind counts', () => {
     await waitFor(() => expect(summaryText()).toHaveTextContent('Repositories 0; Branches 1; Commits 0.'));
 
     view.rerenderTask(taskB);
-    expect(await screen.findByRole('status', { name: 'Visible reference kinds' })).toHaveTextContent(
+    expect(await screen.findByLabelText('Visible reference kinds')).toHaveTextContent(
       'Repositories 1; Branches 0; Commits 1.',
     );
     view.rerenderTask(taskA);
-    expect(await screen.findByRole('status', { name: 'Visible reference kinds' })).toHaveTextContent(
+    expect(await screen.findByLabelText('Visible reference kinds')).toHaveTextContent(
       'Repositories 1; Branches 1; Commits 2.',
     );
     expect(api.get.mock.calls).toEqual([
@@ -204,7 +204,7 @@ describe('visible Git reference kind counts', () => {
     api.get.mockImplementationOnce(() => new Promise((resolve) => { resolveInitial = resolve; }));
     const view = renderRefs();
     expect(screen.getByText('Loading Git references…')).toBeInTheDocument();
-    expect(screen.queryByRole('status', { name: 'Visible reference kinds' })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Visible reference kinds')).not.toBeInTheDocument();
     await act(async () => { resolveInitial?.({ data: initialA }); });
     await screen.findByRole('combobox', { name: 'Git reference kind' });
     expect(summaryText()).toHaveTextContent('Repositories 1; Branches 2; Commits 1.');
@@ -217,13 +217,13 @@ describe('visible Git reference kind counts', () => {
       await Promise.resolve();
     });
     await waitFor(() => expect(view.client.getQueryState(taskAKey)?.fetchStatus).toBe('fetching'));
-    expect(screen.queryByRole('status', { name: 'Visible reference kinds' })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Visible reference kinds')).not.toBeInTheDocument();
     await act(async () => {
       rejectRefresh?.(new Error('Synthetic refresh failure'));
       await refresh;
     });
     expect(await screen.findByRole('alert')).toHaveTextContent('Git references are unavailable.');
-    expect(screen.queryByRole('status', { name: 'Visible reference kinds' })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Visible reference kinds')).not.toBeInTheDocument();
     expect(api.get).toHaveBeenCalledTimes(2);
     expectNoMutations();
   });

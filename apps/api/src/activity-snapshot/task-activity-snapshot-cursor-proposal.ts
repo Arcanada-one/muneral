@@ -227,10 +227,9 @@ export function turnSnapshotPage(
 
   const pageSize = normalizePageSize(request.page_size);
   let startIndex = 0;
-  let claims: SnapshotCursorClaims | null = null;
 
   if (request.cursor) {
-    claims = verifySnapshotCursor(request.cursor, secret, nowMs, request.task_id, auth.key_id_hash);
+    const claims = verifySnapshotCursor(request.cursor, secret, nowMs, request.task_id, auth.key_id_hash);
     if (claims.snapshot_id !== open.snapshot_id || claims.epoch !== open.epoch) {
       fail('SNAPSHOT_CHANGED', 'cursor epoch/snapshot no longer matches open cut');
     }
