@@ -1,0 +1,88 @@
+{
+  "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces on arcana-devs, source of branch commit d62cea754d2d1ac1dcdabd69694a5f9c1b1d491f (base main 84938538ecd10a4b8ebaf371adeb2e8f4443cd91) mounted read-only at /repo, no network, NOT a production probe",
+  "id": "muneral-mun-hyg-pin-ci-d62cea7",
+  "owner": "MUN-HYG leaf, Muneral task b5245745-f678-4bbd-94f7-0f0083a53df8",
+  "probes": [
+    {
+      "argv": [
+        "/usr/bin/python3.12",
+        "-I",
+        "scripts/ci/test_tested_tree.py"
+      ],
+      "artifacts": [],
+      "capture_limit_bytes": 1048576,
+      "cwd": ".",
+      "entities": [
+        "code_unit:scripts/ci/tested_tree.py"
+      ],
+      "env_keys": [
+        "CI",
+        "HOME",
+        "LANG",
+        "NO_COLOR",
+        "PATH",
+        "TMPDIR",
+        "TZ"
+      ],
+      "executable_sha256": "e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f",
+      "execution_files": [
+        {
+          "attribution": {
+            "kind": "system_executable",
+            "source_id": "/usr/bin/python3.12",
+            "version": "sha256:e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f"
+          },
+          "path": "/usr/bin/python3.12",
+          "sha256": "e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/scripts/ci/tested_tree.py",
+          "sha256": "05b84c16f777f0b0828087c4a55c16b3219c06ce5d3cec0c715fb3b3cf381899"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/scripts/ci/test_tested_tree.py",
+          "sha256": "8642aba61c5af57853a0708494d0589985eeb682a9f940cae62b098c9fcc5f58"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/.github/workflows/ci.yml",
+          "sha256": "82351bb6bdaccf6811215042ce1699c957974a2a316ff90cd1f0b35f0d6deb6d"
+        }
+      ],
+      "expect": {
+        "exit_codes": [
+          0
+        ],
+        "stderr_contains": [
+          "Ran 14 tests",
+          "\nOK"
+        ]
+      },
+      "id": "ci-tested-tree-qualification-unit-tests",
+      "kind": "process",
+      "mutating": false,
+      "timeout_seconds": 120
+    }
+  ],
+  "producer_repository": "/repo",
+  "read_only": true,
+  "schema": "CanaryPlan/v2",
+  "subject": {
+    "commit": "d62cea754d2d1ac1dcdabd69694a5f9c1b1d491f",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "0194425ee1d76bcd1cd0dc8fa4259037036bca061bdf7b642544a267bc125a1f",
+      "source_field": "commit"
+    },
+    "schema": "GitCanarySubject/v1",
+    "tree": "1aef16b9191bc48e86139f219e69e24151d94656"
+  }
+}
