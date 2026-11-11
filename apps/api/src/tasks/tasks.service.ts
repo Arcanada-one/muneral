@@ -1581,6 +1581,7 @@ export class TasksService {
       projection: 'bodyless' as const,
       tasks,
     };
+  }
 
   /** MUN-0078 — bodyless comment projection (action=comment only). */
   async getComments(taskId: string, page: number, limit: number, humanUserId?: string) {
