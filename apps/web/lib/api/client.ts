@@ -12,9 +12,10 @@ export const apiClient = axios.create({
   timeout: 15_000,
 });
 
-// Attach JWT to every request
+// Attach JWT to every request when the caller did not already set Authorization
+// (agent-scoped canaries and explicit Bearer headers must not be overwritten).
 apiClient.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== 'undefined' && !config.headers.get('Authorization')) {
     const session = await getSession();
     const token = (session as Record<string, unknown> | null)?.accessToken;
     if (typeof token === 'string' && token.length > 0) {

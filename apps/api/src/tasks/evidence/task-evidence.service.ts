@@ -20,7 +20,7 @@ export const WORK_ITEM_EVIDENCE_SCHEMA = 'WorkItemEvidenceAttachment/v1';
 export const EVIDENCE_ATTACHED_ACTION = 'task:evidence_attached';
 
 /**
- * WorkItemEvidenceAttachment/v1 — the record as the API returns it.
+ * Legacy pointer-only WorkItemEvidenceAttachment/v1 — the record as the API returns it.
  *
  * snake_case, as `RedactionResult` next door. `idempotent` is present on the
  * POST answer and absent from the list: it is a fact about one call, not about
@@ -45,6 +45,7 @@ export interface WorkItemEvidenceList {
 }
 
 /**
+ * Legacy pointer-only API. New producers use POST /tasks/:taskId/artifacts.
  * A2-274 (MUN-EVIDENCE) — attach an artefact to a work item and read the list
  * back.
  *

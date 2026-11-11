@@ -14,11 +14,13 @@ import { ExecutionAuthorityModule } from '../execution-authority/execution-autho
 import { TaskExecutionRecorderService } from '../execution-authority/task-execution-recorder.service.js';
 import { TaskStalenessService } from '../execution-authority/task-staleness.service.js';
 import { TaskRedactionService } from './redactions/task-redaction.service.js';
+import { TaskContentService } from './content/task-content.service.js';
+import { TaskContentController } from './content/task-content.controller.js';
 import { TaskEvidenceService } from './evidence/task-evidence.service.js';
 
 @Module({
   imports: [ActivityModule, WsModule, AuthModule, ExecutionAuthorityModule],
-  controllers: [TasksController, FieldChangesController, TaskContractBindingController],
+  controllers: [TaskContentController, TasksController, FieldChangesController, TaskContractBindingController],
   providers: [
     HumanTaskReadGuard,
     TasksService,
@@ -29,6 +31,7 @@ import { TaskEvidenceService } from './evidence/task-evidence.service.js';
     TaskStalenessService,
     TaskRedactionService,
     TaskEvidenceService,
+    TaskContentService,
   ],
   exports: [TasksService, TaskFieldStateService, FieldChangesService],
 })
