@@ -161,12 +161,15 @@ The comment is attributed to the calling agent regardless of what the request
 body claims: `AddCommentDto` carries only `body`, and the actor comes from the
 credential (`req.actor`, via `ActorInterceptor`), never from the request.
 
-Remaining unmarked routes on `/tasks` — delete and checklists — stay JWT-only,
-refused with `403` for a valid key rather than granted. Dependency **reads**
-(`/dependencies`, `/dependency-graph`, `/readiness`) are scoped `'task'`
-(MUN-0054). Dependency **writes** (`POST`/`DELETE …/dependencies`) are scoped
-`'task-dependency'` (creator or executor of both endpoints in the key's
-workspace) — see [`agent-task-contract.md`](agent-task-contract.md).
+Remaining unmarked routes on `/tasks` — delete and checklist **writes** — stay
+JWT-only, refused with `403` for a valid key rather than granted. Checklist
+**reads** (`GET …/checklist`) are scoped `'task'` (MUN-0080) so an assigned
+agent can map evidence to acceptance criteria without inventing free-text
+substitutes. Dependency **reads** (`/dependencies`, `/dependency-graph`,
+`/readiness`) are scoped `'task'` (MUN-0054). Dependency **writes**
+(`POST`/`DELETE …/dependencies`) are scoped `'task-dependency'` (creator or
+executor of both endpoints in the key's workspace) — see
+[`agent-task-contract.md`](agent-task-contract.md).
 `GET /projects/tasks/:taskId/git-refs` is scoped `'task'` (MUN-0079); git-ref
 **writes** stay unmarked. This is not a claim that every write an agent needs
 is now open; see `universal-program/cards/MUN-0046-*.md` for the full route

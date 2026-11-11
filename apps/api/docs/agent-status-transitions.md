@@ -91,7 +91,8 @@ of them — do not treat this section as the live allowlist. Live matrix:
 
 - Delete, checklists, and the migration CAS transition path remain JWT-only /
   unscoped for agent keys (`tasks.revision` still moves only on the migration
-  path; this status route leaves it at 0).
+  path; this status route leaves it at 0). *(Later: MUN-0080 scopes GET
+  checklist read-only; checklist writes stay unmarked — see live matrix.)*
 - Dependency **reads** were later opened by MUN-0054 (`'task'`). Dependency
   **writes** are scoped `'task-dependency'` (creator or executor of both
   endpoints) — not JWT-only.
