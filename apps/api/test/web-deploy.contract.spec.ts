@@ -79,4 +79,13 @@ describe('muneral-web deploy descriptors (MUN-0084 PR-A)', () => {
     expect(dockerfile).toMatch(/^USER node$/m);
     expect(dockerfile).toMatch(/CMD \["node_modules\/\.bin\/next", "start", "-p", "3501"\]/);
   });
+
+  it('does not depend on the checkout umask: every production-stage COPY sets ownership to node', () => {
+    const production = dockerfile.slice(dockerfile.indexOf('AS production'));
+    const copies = production.split('\n').filter((l) => /^COPY\b/.test(l));
+    expect(copies.length).toBeGreaterThan(0);
+    for (const line of copies) {
+      expect(line).toMatch(/--chown=node:node\b|--chmod=/);
+    }
+  });
 });

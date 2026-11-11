@@ -36,14 +36,16 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # the host side is pinned to 127.0.0.1 in docker-compose.prod.yml.
 ENV HOSTNAME=0.0.0.0
 
+# Every COPY below sets --chown=node:node: the image must not depend on the umask of whoever
+# checked the repo out on the deploy host (mode 600 files owned by root are unreadable by USER node).
 # `next start` needs the workspace node_modules (pnpm symlinks into .pnpm), the build output,
 # the config file and the transpiled workspace package. Same whole-tree copy as the API image.
-COPY --from=builder /app/.npmrc /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/apps/web/package.json /app/apps/web/next.config.ts /app/apps/web/tsconfig.json ./apps/web/
-COPY --from=builder /app/apps/web/node_modules ./apps/web/node_modules
-COPY --from=builder /app/apps/web/.next ./apps/web/.next
-COPY --from=builder /app/packages/types ./packages/types
+COPY --from=builder --chown=node:node /app/.npmrc /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml ./
+COPY --from=builder --chown=node:node /app/node_modules ./node_modules
+COPY --from=builder --chown=node:node /app/apps/web/package.json /app/apps/web/next.config.ts /app/apps/web/tsconfig.json ./apps/web/
+COPY --from=builder --chown=node:node /app/apps/web/node_modules ./apps/web/node_modules
+COPY --from=builder --chown=node:node /app/apps/web/.next ./apps/web/.next
+COPY --from=builder --chown=node:node /app/packages/types ./packages/types
 
 WORKDIR /app/apps/web
 EXPOSE 3501
