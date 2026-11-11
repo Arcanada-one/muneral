@@ -1,0 +1,331 @@
+{
+  "schema": "CanaryResult/v2",
+  "captured_at_utc": "2026-11-11T19:32:21Z",
+  "producer": {
+    "tool": "receipts/canary/mun0082-kanban-885eabf/harness.py.txt",
+    "version": "1.0.0"
+  },
+  "model": "none: deterministic process producer",
+  "plan": {
+    "id": "muneral-mun0082-kanban-status-feedback-885eabf-vitest",
+    "path": "plan.json",
+    "digest": "74938960e8c20e39b84b8bdb6d3e00b0513011df67c7b26c177117bcc1f20dbb"
+  },
+  "environment": "bubblewrap private user/net/pid/ipc/uts namespaces on arcana-devs, source mounted at /repo, no network, no production contour",
+  "phase": "pre",
+  "read_only": true,
+  "observation_owner": "MUN-HYG leaf, Muneral task 2e57aa3d-cf84-4362-9e87-200ec02a7253",
+  "resident_version": null,
+  "subject": {
+    "commit": "885eabf1560d139e33ac877321357ad57d14369e",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "f0a932c562c0e9899701f495bdc52a40cf218f4fb55d89defc1a9e1302d8cb0d",
+      "source_field": "commit"
+    },
+    "schema": "GitCanarySubject/v1",
+    "tree": "0442624179b0d30923e2f5a073c6b38e78f057d2"
+  },
+  "probes": [
+    {
+      "id": "kanban-status-error-vitest-regressions",
+      "kind": "process",
+      "executed": true,
+      "termination": {
+        "kind": "exit",
+        "code": 0
+      },
+      "outcome": "verified",
+      "reason": "Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+      "execution_identity_unchanged": true,
+      "capture_complete": true,
+      "artifacts_verifiable": true,
+      "executable_sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+      "invocation_digest": "a908e1c3c13eb99953bd7cd71c5d409bf333536c7213314e42de8727927ec8b1",
+      "environment_keys": [
+        "CI",
+        "HOME",
+        "LANG",
+        "NO_COLOR",
+        "PATH",
+        "TMPDIR",
+        "TZ"
+      ],
+      "elapsed_ms": 3264.531,
+      "started_at_utc": "2026-11-11T19:32:18.090502+00:00",
+      "finished_at_utc": "2026-11-11T19:32:21.708139+00:00",
+      "execution_files": [
+        {
+          "path": "/node/bin/node",
+          "sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+          "bytes": 126458664,
+          "matched": true,
+          "attribution": {
+            "kind": "system_executable",
+            "source_id": "/node/bin/node",
+            "version": "sha256:89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+          }
+        },
+        {
+          "path": "/repo/apps/web/components/kanban/KanbanBoard.status-error.test.tsx",
+          "sha256": "d9edc1fc7dc4acaa8851573b3b82a0d093d635c4d087a92ed955fbf6beb757d3",
+          "bytes": 4997,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/components/kanban/KanbanBoard.tsx",
+          "sha256": "3062607d5b86c37c32ba6018a4ad84544fffb5dc377329173b45766bf49052cc",
+          "bytes": 10202,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/components/kanban/KanbanCard.tsx",
+          "sha256": "e96afb2c74800e078a8014a3074485d10d23931a2d72cc116d1d28ea59fca0e5",
+          "bytes": 3042,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/components/kanban/KanbanColumn.tsx",
+          "sha256": "cb3c5664c244808f1c66454e5969b9d0b5dbffd42196e443eda1d34a90279208",
+          "bytes": 2580,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/components/ui/badge.tsx",
+          "sha256": "5ed5c0e45ea80103bf7e2dd2e8f19e9bbd8fc5607b1f65297e8306751a2d87d2",
+          "bytes": 1312,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/components/ui/button.tsx",
+          "sha256": "13a9bd3e988d89fc84d9a8b76b8300a7ca2d92ccc0abeb0c46e15f9542e9c8e0",
+          "bytes": 1803,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/lib/api/tasks.ts",
+          "sha256": "bc7eff1a047e8dc9085fa36fc61f360306fe94e945df326cd0364788bbe544a0",
+          "bytes": 9431,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/lib/task-detail-href.ts",
+          "sha256": "5db47bfb0be3c087f1db015b4544712c84d2d8ad376da44d4b267f30418c137b",
+          "bytes": 164,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/lib/utils.ts",
+          "sha256": "74e8fe9d0d680c442ed6adb13e7d119d6c210c19ae6c114313b2a72552be0883",
+          "bytes": 169,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/node_modules/@dnd-kit/core/package.json",
+          "sha256": "4da9a60c80aa9c0564d1f31ba1502058f2b84240842269c6d54801c8d3175d77",
+          "bytes": 1030,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/node_modules/@tanstack/react-query/package.json",
+          "sha256": "2a2d66d46321b0a124a3ad5f8d6378ec08621bcc18f91ab3128b4fc884d51cbe",
+          "bytes": 3728,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/node_modules/@testing-library/react/package.json",
+          "sha256": "8ec075b66acb20cf1705fc56c7bfeca0ba88eb62f354827c29d65afc25a3d967",
+          "bytes": 3469,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/node_modules/@vitejs/plugin-react/package.json",
+          "sha256": "f62de08fb2c523097a9fa74bf1766e977be80d59dcdc8cd2443a603f1b56ae9c",
+          "bytes": 2238,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/node_modules/jsdom/package.json",
+          "sha256": "d05b7f08c60feb43d726447adf6f8eaec18913a8f0fe8cbd7e3af06f7c8510ba",
+          "bytes": 4096,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/node_modules/react-dom/package.json",
+          "sha256": "89d54f11575c9b0f7819962d9d72a31970dfb4d103f07e8b1d1b37e6d1fc3258",
+          "bytes": 3054,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/node_modules/react/package.json",
+          "sha256": "9cc9c3de5441a2eea7f41f52f3f2a15a4fc51f90c0b72741f0d7638643a85e67",
+          "bytes": 1242,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/node_modules/vite/package.json",
+          "sha256": "c190c4c3dadb457bedc5d756a2269cd648b134a293da9f4d873c01fc66f4186c",
+          "bytes": 5058,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/node_modules/vitest/package.json",
+          "sha256": "cc2979885d9d149c8456128e7ae48038d815352cf1e6d1932eb631057a99f973",
+          "bytes": 5736,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/node_modules/vitest/vitest.mjs",
+          "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6",
+          "bytes": 43,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/package.json",
+          "sha256": "1c67cd1ac2e564369c174667662648bae6c9382dacf05807b13e33197e0a4f55",
+          "bytes": 1861,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/vitest.config.ts",
+          "sha256": "a3688859e6fe27f3e8e670a50d3476b4f2854fe2a2c81895d979f58b36cba66f",
+          "bytes": 557,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/web/vitest.setup.ts",
+          "sha256": "a46d66851af2c056e805fdd574bf5ec3adb1181c43c5e41f0a1c592e338afe64",
+          "bytes": 36,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/packages/types/src/index.ts",
+          "sha256": "91d249deb3624a07a539e45502b5684f52ab8982a0f148b1e15d008b8c45c32d",
+          "bytes": 3670,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/pnpm-lock.yaml",
+          "sha256": "e5a68763996dfa027c1e06ba81db00a18cd1f21c3957f1d4086b28e721b0e2df",
+          "bytes": 474409,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        }
+      ],
+      "artifacts": [],
+      "streams": {
+        "stdout": {
+          "captured_bytes": 264,
+          "sha256": "820721e868395e3b4f73b357a42224c57965cd3257ca63e1a723ef6f0f7bce82",
+          "capture": "digest_only",
+          "truncated": false
+        },
+        "stderr": {
+          "captured_bytes": 375,
+          "sha256": "b4acd4f819050212c4fe3b3ed8416421330f7ff8c72cb9bb667c335f3e24a94e",
+          "capture": "digest_only",
+          "truncated": false
+        }
+      },
+      "output_checks": [
+        {
+          "stream": "stdout",
+          "expected": "Test Files  1 passed (1)",
+          "matched": true
+        },
+        {
+          "stream": "stdout",
+          "expected": "Tests  3 passed (3)",
+          "matched": true
+        }
+      ],
+      "cleanup": {
+        "group_signalled_before_leader_reaped": true,
+        "escaped_descendants": "not_proven_absent",
+        "sandbox": false
+      }
+    }
+  ],
+  "entity_verdicts": [
+    {
+      "entity": "code_unit:apps/web/components/kanban/KanbanBoard.tsx",
+      "verdict": "verified",
+      "reason": "Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+      "probe_ids": [
+        "kanban-status-error-vitest-regressions"
+      ]
+    }
+  ],
+  "source_binding_errors": []
+}
