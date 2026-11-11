@@ -64,11 +64,12 @@ To measure upload/list/get/readback against an isolated Nest candidate on the
 exact tip, from `apps/api`:
 
 ```bash
-MUN_ARTIFACT_CANARY_MEASURE=1 pnpm exec node --experimental-vm-modules \
-  ../../node_modules/jest/bin/jest.js \
-  --runInBand test/mun-artifacts-web-canary.measure.spec.ts
+NODE_OPTIONS=--experimental-vm-modules node node_modules/jest/bin/jest.js \
+  --runInBand --runTestsByPath --testTimeout=300000 \
+  test/mun-artifacts-web-canary.measure.ts
 ```
 
-The measure suite boots disposable Postgres, serves Nest on loopback `:25456`
+The measure file is intentionally outside jest `*.spec.ts` discovery so hosted
+CI stays inert. It boots disposable Postgres, serves Nest on loopback `:25456`
 (with Workspaces, Projects and Tasks), writes the fixture, then runs the web
 vitest file. It never targets production.
