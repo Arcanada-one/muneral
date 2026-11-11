@@ -38,6 +38,7 @@ describe('API959a scoped project discovery and dependency writes',()=>{
   });
   afterAll(async()=>{
     await db.taskDependency.deleteMany({where:{fromTaskId:{in:tasks}}});
+    await db.taskGitRef.deleteMany({where:{taskId:{in:tasks}}});
     await db.taskAgent.deleteMany({where:{taskId:{in:tasks}}});
     await db.activityLog.deleteMany({where:{taskId:{in:tasks}}});
     await db.task.deleteMany({where:{id:{in:tasks}}});
@@ -97,6 +98,17 @@ describe('API959a scoped project discovery and dependency writes',()=>{
     await request().post('/projects/git-refs').auth(key,{type:'bearer'}).send({}).expect(403);
     await request().post('/workspaces/'+ws+'/members/'+randomUUID()).auth(key,{type:'bearer'}).expect(403);
     await request().post('/workspaces').auth(key,{type:'bearer'}).send({}).expect(403);
+  });
+  it('MUN-0079: agent reads git-refs on an owned task and is refused on foreign/unowned',async()=>{
+    const owned=await task();
+    const unowned=await task(false);
+    const foreign=await task(true,foreignProject);
+    await db.taskGitRef.create({data:{taskId:owned,type:'branch',url:'https://example.invalid/repo',ref:'mun-0079'}});
+    const ok=await request().get('/projects/tasks/'+owned+'/git-refs').auth(key,{type:'bearer'}).expect(200);
+    expect(ok.body).toEqual([expect.objectContaining({taskId:owned,type:'branch',url:'https://example.invalid/repo',ref:'mun-0079'})]);
+    await request().get('/projects/tasks/'+unowned+'/git-refs').auth(key,{type:'bearer'}).expect(403);
+    await request().get('/projects/tasks/'+foreign+'/git-refs').auth(key,{type:'bearer'}).expect(403);
+    await request().delete('/projects/git-refs/'+ok.body[0].id).auth(key,{type:'bearer'}).expect(403);
   });
   it('creates, reads graph and deletes a dependency between owned tasks',async()=>{
     const a=await task(),b=await task();

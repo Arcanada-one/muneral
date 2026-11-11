@@ -202,10 +202,12 @@ secondary data source.
 | `GET /tasks/project/:projectId` | yes, narrowed to own assignments | `project` |
 | `POST /tasks` | yes | `project-write` |
 | `GET /tasks/:id/field-changes`, `POST /tasks/:id/field-ack` | yes | `task-workspace` |
+| `GET /projects/tasks/:taskId/git-refs` | yes | `task` (MUN-0079) |
 | `GET /tasks` (filtered query) | **no — 403** | unscoped — **never use with an agent key** |
 | `DELETE /tasks/:id` | **no — 403** | unscoped |
 | `POST /tasks/:id/dependencies`, `DELETE /tasks/:id/dependencies/:depId` | yes, creator or executor of both endpoints in own workspace | `task-dependency` |
 | checklist routes | **no — 403** | unscoped |
+| `POST /projects/git-refs`, `DELETE /projects/git-refs/:refId` | **no — 403** | unscoped (writes stay JWT-only) |
 
 ### Refusal diagnosis (machine-readable for consumers)
 
@@ -247,8 +249,10 @@ The slug uses lowercase letters, digits and hyphens, with at most 50 characters;
 the name must be nonempty and at most 200 characters. Concurrent requests with
 the same workspace, slug and properties return the same project. Conflicting
 properties or an ambiguous existing slug return `409`. Project deletion, Git
-reference writes, workspace creation and membership writes remain unscoped for
-agent keys and return `403`.
+reference **writes** (`POST /projects/git-refs`, `DELETE /projects/git-refs/:refId`),
+workspace creation and membership writes remain unscoped for agent keys and
+return `403`. Git reference **reads** (`GET /projects/tasks/:taskId/git-refs`)
+are scoped `'task'` (MUN-0079).
 
 ## Writing task dependencies with an agent key
 

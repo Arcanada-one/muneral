@@ -166,10 +166,12 @@ refused with `403` for a valid key rather than granted. Dependency **reads**
 (`/dependencies`, `/dependency-graph`, `/readiness`) are scoped `'task'`
 (MUN-0054). Dependency **writes** (`POST`/`DELETE …/dependencies`) are scoped
 `'task-dependency'` (creator or executor of both endpoints in the key's
-workspace) — see [`agent-task-contract.md`](agent-task-contract.md). This is
-not a claim that every write an agent needs is now open; see
-`universal-program/cards/MUN-0046-*.md` for the full route sweep this card
-produced and which of those routes are `not_measured` for agent intent.
+workspace) — see [`agent-task-contract.md`](agent-task-contract.md).
+`GET /projects/tasks/:taskId/git-refs` is scoped `'task'` (MUN-0079); git-ref
+**writes** stay unmarked. This is not a claim that every write an agent needs
+is now open; see `universal-program/cards/MUN-0046-*.md` for the full route
+sweep this card produced and which of those routes are `not_measured` for
+agent intent.
 
 ## Reading activity with the agent key (MUN-0047)
 
