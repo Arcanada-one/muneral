@@ -1,0 +1,293 @@
+{
+ "admission": {
+  "rule": "admitted requires every verdict = verified; failed without exemption ⇒ refused; not_measured without exemption ⇒ paused_safe; exemptions (owner + expiry) are attached by the admitting agent, never by the verifier (DEC-AUP-0008, matrix P1/P4)",
+  "structural_exclusion_rule": "DEC-AUP-0034: an affected entity is NOT verdict-owing when all three hold — the verifier matrix declares neither a mandatory nor a selectable verifier for its node type (so the only verdict it could ever carry states a property of the MATRIX, not of this change), the change set does not contain it, and its bytes are identical at base and head. Each one is listed in structural_exclusions with the content hash at both revisions that proves the byte-identity, and impact_pair.receipt_problems re-derives that proof from Git rather than believing the receipt.",
+  "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
+  "verdict": "admitted"
+ },
+ "captured_at_utc": "2026-11-11T21:04:31Z",
+ "change_set": {
+  "base": "f3b87b6e19202cffee3b1e73900458dce8125bdd",
+  "files": [
+   {
+    "kind": "doc",
+    "node_id": "document:README.md",
+    "node_ids": [
+     "document:README.md"
+    ],
+    "path": "README.md",
+    "status": "M"
+   },
+   {
+    "kind": "test",
+    "path": "apps/api/test/assembly/mutation-results.json",
+    "status": "M",
+    "uncovered": true
+   },
+   {
+    "kind": "test",
+    "node_id": "code_unit:apps/api/test/web-deploy.contract.spec.ts",
+    "node_ids": [
+     "code_unit:apps/api/test/web-deploy.contract.spec.ts"
+    ],
+    "path": "apps/api/test/web-deploy.contract.spec.ts",
+    "status": "A"
+   },
+   {
+    "kind": "config",
+    "new": true,
+    "path": "apps/web/Dockerfile",
+    "status": "A"
+   },
+   {
+    "kind": "config",
+    "path": "docker-compose.prod.yml",
+    "status": "M",
+    "uncovered": true
+   },
+   {
+    "kind": "doc",
+    "node_id": "document:docs/how-to/activate-muneral-web.md",
+    "node_ids": [
+     "document:docs/how-to/activate-muneral-web.md"
+    ],
+    "path": "docs/how-to/activate-muneral-web.md",
+    "status": "A"
+   }
+  ],
+  "head": "48583d437e3f1d93fa64efed6de2218aa09458b2",
+  "mode": "diff"
+ },
+ "decision_ref": "DEC-AUP-0008",
+ "exemptions": [],
+ "graph": {
+  "builder_version": "1.0.6",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:0ad9afba5fc7cfc240d557216af295ded3643e39b39ce88370b3f25b1e19d4e7",
+  "path": "/home/dev/aup/claude-work/mun-hyg-20261022/mun-web-deploy-20261111/tmp/arcana-verify-azogr8xs/verifier-out/graph-f3b87b6e1920.json",
+  "source_commit": "f3b87b6e19202cffee3b1e73900458dce8125bdd"
+ },
+ "head_graph": {
+  "builder_version": "1.0.6",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:cd8cb375d3ea4a3b37143945283ffb46492cc50a5fa66b677bca558f077805a3",
+  "path": "/home/dev/aup/claude-work/mun-hyg-20261022/mun-web-deploy-20261111/tmp/arcana-verify-azogr8xs/verifier-out/graph-head-48583d437e3f.json",
+  "source_commit": "48583d437e3f1d93fa64efed6de2218aa09458b2",
+  "staleness": {
+   "checked_at_utc": "2026-11-11T21:05:39Z",
+   "checked_nodes": 752,
+   "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+   "mismatched_nodes": [],
+   "verdict": "fresh"
+  }
+ },
+ "host": "arcana-devs",
+ "impact_set": {
+  "deterministic_core": [
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "deployable_unit:apps/api",
+    "node_type": "deployable_unit",
+    "path": [
+     {
+      "edge_type": "deploys_to",
+      "from": "code_unit:apps/api/test/web-deploy.contract.spec.ts",
+      "provenance": "deterministic",
+      "to": "deployable_unit:apps/api",
+      "via": "containment"
+     }
+    ],
+    "revisions": [
+     "head"
+    ],
+    "verifier_hint": "can-i-deploy gate (GRAPH-008)"
+   }
+  ],
+  "edge_types": "all",
+  "global_fallback": {
+   "triggered": false
+  },
+  "inferred_tail": [],
+  "max_depth": 3,
+  "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
+  "total": 1
+ },
+ "notes": [
+  "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.1) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
+  "profile: .arcana/verify.json at verified head; baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none"
+ ],
+ "producer": {
+  "tool": "tools/graph/verify.py",
+  "version": "1.4.1"
+ },
+ "receipt_id": "car-verify-20261111T210431Z-48583d43",
+ "repo": {
+  "name": "Arcanada-one/muneral",
+  "path": "/home/dev/aup/claude-work/mun-hyg-20261022/mun-web-deploy-20261111/wt-pra"
+ },
+ "revision_selection": {
+  "base": [
+   "document:README.md"
+  ],
+  "head": [
+   "code_unit:apps/api/test/web-deploy.contract.spec.ts",
+   "deployable_unit:apps/api",
+   "document:README.md",
+   "document:docs/how-to/activate-muneral-web.md"
+  ],
+  "schema": "RevisionImpactSelection/v1",
+  "unmeasured_head_files": []
+ },
+ "schema": "ChangeAdmissionReceipt/v1",
+ "staleness": {
+  "checked_at_utc": "2026-11-11T21:05:39Z",
+  "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+  "mismatched_nodes": [],
+  "verdict": "fresh"
+ },
+ "structural_exclusions": [],
+ "tree": {
+  "commit": "48583d437e3f1d93fa64efed6de2218aa09458b2",
+  "dirty": false
+ },
+ "verdicts": [
+  {
+   "entity": "code_unit:apps/api/test/web-deploy.contract.spec.ts",
+   "reason": "v-type-check-apps-api-tsconfig-test: apps/api/tsconfig.test.json: project compiles, 0 errors; v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-api-tsconfig-test"
+   ]
+  },
+  {
+   "entity": "deployable_unit:apps/api",
+   "reason": "v-type-check-apps-api-tsconfig: apps/api/tsconfig.json: 0 errors; v-fitness: no new violation in apps/api (5 frozen)",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-apps-api-tsconfig"
+   ]
+  },
+  {
+   "entity": "document:README.md",
+   "reason": "v-doc-reference: 8 reference(s) resolve at head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-doc-reference"
+   ]
+  },
+  {
+   "entity": "document:docs/how-to/activate-muneral-web.md",
+   "reason": "v-doc-reference: 3 reference(s) resolve at head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-doc-reference"
+   ]
+  }
+ ],
+ "verifier_selection": {
+  "applied": {},
+  "not_applied": [],
+  "requested": [],
+  "schema": "VerifierSelection/v1"
+ },
+ "verifiers": [
+  {
+   "command": "/home/dev/aup/claude-work/mun-hyg-20261022/mun-web-deploy-20261111/wt-pra/apps/api/node_modules/.bin/tsc -p /home/dev/aup/claude-work/mun-hyg-20261022/mun-web-deploy-20261111/wt-pra/apps/api/tsconfig.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/claude-work/mun-hyg-20261022/mun-web-deploy-20261111/tmp/arcana-verify-azogr8xs/verifier-out/type-check-k2a7v_mc/check.tsbuildinfo --listFiles",
+   "duration_s": 4.59,
+   "entities": [
+    "deployable_unit:apps/api"
+   ],
+   "entity_verdicts": {
+    "deployable_unit:apps/api": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-type-check-apps-api-tsconfig",
+   "kind": "type_check",
+   "output_ref": "/home/dev/aup/claude-work/mun-hyg-20261022/mun-web-deploy-20261111/tmp/arcana-verify-azogr8xs/verifier-out/v-type-check-apps-api-tsconfig.txt",
+   "started_at_utc": "2026-11-11T21:05:48Z",
+   "summary": "apps/api/tsconfig.json: exit 0, 0 error(s), 1513 files listed"
+  },
+  {
+   "command": "/home/dev/aup/claude-work/mun-hyg-20261022/mun-web-deploy-20261111/wt-pra/apps/api/node_modules/.bin/tsc -p /home/dev/aup/claude-work/mun-hyg-20261022/mun-web-deploy-20261111/wt-pra/apps/api/tsconfig.test.json --noEmit --incremental true --tsBuildInfoFile /home/dev/aup/claude-work/mun-hyg-20261022/mun-web-deploy-20261111/tmp/arcana-verify-azogr8xs/verifier-out/type-check-dl__efah/check.tsbuildinfo --listFiles",
+   "duration_s": 7.47,
+   "entities": [
+    "code_unit:apps/api/test/web-deploy.contract.spec.ts",
+    "deployable_unit:apps/api"
+   ],
+   "entity_verdicts": {
+    "code_unit:apps/api/test/web-deploy.contract.spec.ts": "verified",
+    "deployable_unit:apps/api": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-type-check-apps-api-tsconfig-test",
+   "kind": "type_check",
+   "output_ref": "/home/dev/aup/claude-work/mun-hyg-20261022/mun-web-deploy-20261111/tmp/arcana-verify-azogr8xs/verifier-out/v-type-check-apps-api-tsconfig-test.txt",
+   "started_at_utc": "2026-11-11T21:05:52Z",
+   "summary": "apps/api/tsconfig.test.json: exit 0, 0 error(s), 1703 files listed"
+  },
+  {
+   "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
+   "duration_s": 0.23,
+   "entities": [
+    "code_unit:apps/api/test/web-deploy.contract.spec.ts",
+    "deployable_unit:apps/api"
+   ],
+   "entity_verdicts": {
+    "code_unit:apps/api/test/web-deploy.contract.spec.ts": "verified",
+    "deployable_unit:apps/api": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-fitness",
+   "kind": "fitness_rules",
+   "output_ref": "/home/dev/aup/claude-work/mun-hyg-20261022/mun-web-deploy-20261111/tmp/arcana-verify-azogr8xs/verifier-out/v-fitness.json",
+   "started_at_utc": "2026-11-11T21:06:00Z",
+   "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
+  },
+  {
+   "command": "verify.py doc_reference: path / route / model references of affected documents resolve at head",
+   "duration_s": 0.0,
+   "entities": [
+    "document:README.md",
+    "document:docs/how-to/activate-muneral-web.md"
+   ],
+   "entity_verdicts": {
+    "document:README.md": "verified",
+    "document:docs/how-to/activate-muneral-web.md": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-doc-reference",
+   "kind": "doc_reference",
+   "output_ref": "/home/dev/aup/claude-work/mun-hyg-20261022/mun-web-deploy-20261111/tmp/arcana-verify-azogr8xs/verifier-out/v-doc-reference.txt",
+   "started_at_utc": "2026-11-11T21:06:01Z",
+   "summary": "2 document(s), 0 failed"
+  }
+ ],
+ "verify": {
+  "events": [],
+  "required_by_entity": {
+   "code_unit:apps/api/test/web-deploy.contract.spec.ts": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "deployable_unit:apps/api": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "document:README.md": [
+    "doc_reference"
+   ],
+   "document:docs/how-to/activate-muneral-web.md": [
+    "doc_reference"
+   ]
+  },
+  "seconds": {
+   "prepare": 3.68,
+   "total": 89.64,
+   "verifiers": 12.29
+  }
+ },
+ "work_item": "MUN-0084"
+}
