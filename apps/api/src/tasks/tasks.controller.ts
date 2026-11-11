@@ -591,6 +591,24 @@ export class TasksController {
     return this.tasksService.deleteChecklistItem(taskId, itemId);
   }
 
+  // --- Children (MUN-0070) ---
+
+  /**
+   * MUN-0070 — direct children of this task (`parentId = :taskId`).
+   *
+   * Scoped `'task'`: the same assignment/membership gate as `findOne`. Agent
+   * keys receive bodyless rows (`titleSha256`); human JWTs receive full rows
+   * narrowed by workspace membership. Does not PATCH statuses.
+   */
+  @Get(':taskId/children')
+  @AgentScope('task')
+  listChildren(@Param('taskId') taskId: string, @Req() req: AuthRequest) {
+    return this.tasksService.listChildren(
+      taskId,
+      req.actor.type === 'human' ? req.actor.id : undefined,
+    );
+  }
+
   // --- Assignees ---
 
   /**

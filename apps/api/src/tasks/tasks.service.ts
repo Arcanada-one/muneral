@@ -59,6 +59,10 @@ export const PROJECT_ACTIVE_STATUS_STALENESS_READ_ACTION =
 export const PROJECT_INDEX_COUNTED =
   'every task of the project, all statuses including cancelled and archived';
 
+/** MUN-0070: what `GET /tasks/:taskId/children` `total` counts. */
+export const TASK_CHILDREN_COUNTED =
+  'every direct child task of the parent (parentId match), all statuses including cancelled and archived';
+
 /** A2-284: the activity action one workspace-digest read records. */
 export const WORKSPACE_DIGEST_READ_ACTION = 'workspace:digest_read';
 
@@ -1214,6 +1218,51 @@ export class TasksService {
 
   async getActivity(taskId: string, page: number, limit: number, humanUserId?: string) {
     return this.activityService.findForTask(taskId, page, limit, humanUserId);
+  }
+
+  /**
+   * MUN-0070 — direct children of a parent task (`parentId = :taskId`).
+   *
+   * Parent readability uses the same gate as `findOne` / other `:taskId`
+   * sub-routes. Agents that hold task scope on the parent receive the same
+   * bodyless columns as the project index (`titleSha256`, no plain title or
+   * description) for every direct child — enough to reconcile custody without
+   * turning parent assignment into a free-text sibling dump. Humans receive
+   * full child rows narrowed by `humanTaskWhere`.
+   */
+  async listChildren(parentId: string, humanUserId?: string) {
+    await this.findOne(parentId, humanUserId);
+
+    if (humanUserId) {
+      const tasks = await this.prisma.task.findMany({
+        where: { parentId, ...humanTaskWhere(humanUserId) },
+        orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+      });
+      return {
+        parentId,
+        counted: TASK_CHILDREN_COUNTED,
+        total: tasks.length,
+        projection: 'full' as const,
+        tasks,
+      };
+    }
+
+    const rows = await this.prisma.task.findMany({
+      where: { parentId },
+      select: PROJECT_INDEX_SELECT,
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+    });
+    const tasks = rows.map(({ title, ...rest }) => ({
+      ...rest,
+      titleSha256: createHash('sha256').update(title, 'utf8').digest('hex'),
+    }));
+    return {
+      parentId,
+      counted: TASK_CHILDREN_COUNTED,
+      total: tasks.length,
+      projection: 'bodyless' as const,
+      tasks,
+    };
   }
 }
 
