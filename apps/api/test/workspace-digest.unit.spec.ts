@@ -148,3 +148,132 @@ describe('TasksService.digestForWorkspace (A2-284)', () => {
     await expect(service.digestForWorkspace('ws-1', 'agent-1', GRANT, {})).rejects.toThrow('log is down');
   });
 });
+
+function makeTransitionService() {
+  const prisma = {
+    activityLog: {
+      findMany: jest.fn().mockResolvedValue([
+        {
+          id: 'act-1',
+          taskId: 't-1',
+          createdAt: new Date('2026-11-10T12:00:00Z'),
+          payload: { from: 'todo', to: 'done' },
+          task: {
+            id: 't-1',
+            projectId: 'p-1',
+            title: 'MUN-0069: transition title',
+            status: 'done',
+          },
+        },
+        {
+          id: 'act-comment',
+          taskId: 't-2',
+          createdAt: new Date('2026-11-10T13:00:00Z'),
+          payload: { body: 'not a transition' },
+          task: {
+            id: 't-2',
+            projectId: 'p-1',
+            title: 'ignored',
+            status: 'todo',
+          },
+        },
+      ]),
+      create: jest
+        .fn()
+        .mockResolvedValue({ id: 'audit-t', createdAt: new Date('2026-11-10T14:00:00Z') }),
+    },
+    task: {
+      findMany: jest.fn().mockResolvedValue([{ status: 'done' }, { status: 'todo' }]),
+    },
+  };
+  const service = new TasksService(
+    prisma as unknown as PrismaService,
+    {} as ActivityService,
+    {} as KanbanService,
+    {} as TaskFieldStateService,
+    {} as TaskExecutionRecorderService,
+  );
+  return { prisma, service };
+}
+
+describe('TasksController.digestTransitions (MUN-0069)', () => {
+  const digestTransitionsForWorkspace = jest.fn().mockResolvedValue({ total: 0 });
+  const tasks = { digestTransitionsForWorkspace } as unknown as TasksService;
+  const stub = {} as never;
+  const controller = new TasksController(tasks, stub, stub, stub, stub);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const call = (agentScope: unknown, dto: Record<string, string> = {}) =>
+    controller.digestTransitions({ agentScope } as any, dto as any);
+
+  beforeEach(() => digestTransitionsForWorkspace.mockClear());
+
+  it('refuses JWT / wrong scope the same way as digest', () => {
+    expect(() => call(undefined)).toThrow(ForbiddenException);
+    expect(() => call({ agentId: 'a', kind: 'task' })).toThrow(ForbiddenException);
+    expect(digestTransitionsForWorkspace).not.toHaveBeenCalled();
+  });
+
+  it('passes the guard-resolved workspace, never a caller workspace', async () => {
+    await call(
+      {
+        agentId: 'agent-1',
+        kind: 'workspace-digest',
+        workspaceDigestGrant: GRANT,
+        workspaceId: 'ws-1',
+      },
+      {
+        sinceInclusive: '2026-11-10T00:00:00Z',
+        beforeExclusive: '2026-11-11T00:00:00Z',
+      },
+    );
+    expect(digestTransitionsForWorkspace).toHaveBeenCalledWith(
+      'ws-1',
+      'agent-1',
+      GRANT,
+      expect.objectContaining({
+        sinceInclusive: '2026-11-10T00:00:00Z',
+        beforeExclusive: '2026-11-11T00:00:00Z',
+      }),
+    );
+  });
+});
+
+describe('TasksService.digestTransitionsForWorkspace (MUN-0069)', () => {
+  it('queries only task:status_changed in the workspace window and keeps titles', async () => {
+    const { prisma, service } = makeTransitionService();
+    const answer = await service.digestTransitionsForWorkspace('ws-1', 'agent-1', GRANT, {
+      sinceInclusive: '2026-11-10T00:00:00Z',
+      beforeExclusive: '2026-11-11T00:00:00Z',
+      includeStatusHistogram: 'true',
+      limit: 10,
+    });
+
+    expect(prisma.activityLog.findMany).toHaveBeenCalledTimes(1);
+    const args = prisma.activityLog.findMany.mock.calls[0][0] as {
+      where: Record<string, unknown>;
+    };
+    expect(args.where.workspaceId).toBe('ws-1');
+    expect(args.where.action).toBe('task:status_changed');
+    expect(answer.transitions.observedTotal).toBe(1);
+    expect(answer.items[0]?.title).toBe('MUN-0069: transition title');
+    expect(answer.commentVolume.included).toBe(false);
+    expect(answer.ageCrossings.included).toBe(false);
+    expect(answer.statusHistogram.included).toBe(true);
+    expect(answer.statusHistogram.byStatus).toEqual({ done: 1, todo: 1 });
+    expect(answer.auditEventId).toBe('audit-t');
+    expect(prisma.activityLog.create.mock.calls[0][0].data.action).toBe(
+      'workspace:digest_transitions_read',
+    );
+  });
+
+  it('fails closed when the audit row cannot be written', async () => {
+    const { prisma, service } = makeTransitionService();
+    prisma.activityLog.create.mockRejectedValueOnce(new Error('log is down'));
+    await expect(
+      service.digestTransitionsForWorkspace('ws-1', 'agent-1', GRANT, {
+        sinceInclusive: '2026-11-10T00:00:00Z',
+        beforeExclusive: '2026-11-11T00:00:00Z',
+      }),
+    ).rejects.toThrow('log is down');
+  });
+});

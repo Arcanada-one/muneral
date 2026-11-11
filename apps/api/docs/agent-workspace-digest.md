@@ -132,3 +132,22 @@ and still cannot reach `GET /tasks`; that is pinned in
    and `evidence`.
 3. The consumer needs no redeploy for the grant itself — but it does need the
    path `/api/v1/tasks/digest`.
+
+## Transition-sourced counts (MUN-0069)
+
+`GET /tasks/digest` still filters **task rows** by `updatedAt`, which
+over-reports a done task edited later the same day and under-reports nothing.
+For quantitative digest totals prefer:
+
+```http
+GET /tasks/digest/transitions?sinceInclusive=2026-11-10T00:00:00Z&beforeExclusive=2026-11-11T00:00:00Z&includeStatusHistogram=true&limit=50
+Authorization: Bearer mun_sk_<key>
+```
+
+Same workspace-digest grant (no second list, no grant inferred from task
+scope). Counts are `task:status_changed` events by destination status and
+project. Comment volume is excluded. Age/staleness crossings are **not** mixed
+in — use `GET /tasks/project/:projectId/active-status-staleness` (MUN-0067).
+Optional `includeStatusHistogram=true` attaches a bodyless current-status
+snapshot separate from transitions. Item titles remain plaintext
+(PREFIX-NNNN). See `docs/reference/workspace-digest-transitions.md`.
