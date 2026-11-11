@@ -1,0 +1,236 @@
+{
+  "environment": "bubblewrap private user/net/pid/ipc/uts namespaces on arcana-devs, source mounted at /repo, no network, no production contour",
+  "id": "muneral-mun0082-kanban-status-feedback-885eabf-vitest",
+  "owner": "MUN-HYG leaf, Muneral task 2e57aa3d-cf84-4362-9e87-200ec02a7253",
+  "probes": [
+    {
+      "argv": [
+        "/node/bin/node",
+        "/repo/apps/web/node_modules/vitest/vitest.mjs",
+        "run",
+        "components/kanban/KanbanBoard.status-error.test.tsx"
+      ],
+      "artifacts": [],
+      "capture_limit_bytes": 1048576,
+      "cwd": "apps/web",
+      "entities": [
+        "code_unit:apps/web/components/kanban/KanbanBoard.tsx"
+      ],
+      "env_keys": [
+        "CI",
+        "HOME",
+        "LANG",
+        "NO_COLOR",
+        "PATH",
+        "TMPDIR",
+        "TZ"
+      ],
+      "executable_sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+      "execution_files": [
+        {
+          "attribution": {
+            "kind": "system_executable",
+            "source_id": "/node/bin/node",
+            "version": "sha256:89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+          },
+          "path": "/node/bin/node",
+          "sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/web/components/kanban/KanbanBoard.status-error.test.tsx",
+          "sha256": "d9edc1fc7dc4acaa8851573b3b82a0d093d635c4d087a92ed955fbf6beb757d3"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/web/components/kanban/KanbanBoard.tsx",
+          "sha256": "3062607d5b86c37c32ba6018a4ad84544fffb5dc377329173b45766bf49052cc"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/web/components/kanban/KanbanCard.tsx",
+          "sha256": "e96afb2c74800e078a8014a3074485d10d23931a2d72cc116d1d28ea59fca0e5"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/web/components/kanban/KanbanColumn.tsx",
+          "sha256": "cb3c5664c244808f1c66454e5969b9d0b5dbffd42196e443eda1d34a90279208"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/web/components/ui/badge.tsx",
+          "sha256": "5ed5c0e45ea80103bf7e2dd2e8f19e9bbd8fc5607b1f65297e8306751a2d87d2"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/web/components/ui/button.tsx",
+          "sha256": "13a9bd3e988d89fc84d9a8b76b8300a7ca2d92ccc0abeb0c46e15f9542e9c8e0"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/web/lib/api/tasks.ts",
+          "sha256": "bc7eff1a047e8dc9085fa36fc61f360306fe94e945df326cd0364788bbe544a0"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/web/lib/task-detail-href.ts",
+          "sha256": "5db47bfb0be3c087f1db015b4544712c84d2d8ad376da44d4b267f30418c137b"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/web/lib/utils.ts",
+          "sha256": "74e8fe9d0d680c442ed6adb13e7d119d6c210c19ae6c114313b2a72552be0883"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/web/node_modules/@dnd-kit/core/package.json",
+          "sha256": "4da9a60c80aa9c0564d1f31ba1502058f2b84240842269c6d54801c8d3175d77"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/web/node_modules/@tanstack/react-query/package.json",
+          "sha256": "2a2d66d46321b0a124a3ad5f8d6378ec08621bcc18f91ab3128b4fc884d51cbe"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/web/node_modules/@testing-library/react/package.json",
+          "sha256": "8ec075b66acb20cf1705fc56c7bfeca0ba88eb62f354827c29d65afc25a3d967"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/web/node_modules/@vitejs/plugin-react/package.json",
+          "sha256": "f62de08fb2c523097a9fa74bf1766e977be80d59dcdc8cd2443a603f1b56ae9c"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/web/node_modules/jsdom/package.json",
+          "sha256": "d05b7f08c60feb43d726447adf6f8eaec18913a8f0fe8cbd7e3af06f7c8510ba"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/web/node_modules/react-dom/package.json",
+          "sha256": "89d54f11575c9b0f7819962d9d72a31970dfb4d103f07e8b1d1b37e6d1fc3258"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/web/node_modules/react/package.json",
+          "sha256": "9cc9c3de5441a2eea7f41f52f3f2a15a4fc51f90c0b72741f0d7638643a85e67"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/web/node_modules/vite/package.json",
+          "sha256": "c190c4c3dadb457bedc5d756a2269cd648b134a293da9f4d873c01fc66f4186c"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/web/node_modules/vitest/package.json",
+          "sha256": "cc2979885d9d149c8456128e7ae48038d815352cf1e6d1932eb631057a99f973"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/web/node_modules/vitest/vitest.mjs",
+          "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/web/package.json",
+          "sha256": "1c67cd1ac2e564369c174667662648bae6c9382dacf05807b13e33197e0a4f55"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/web/vitest.config.ts",
+          "sha256": "a3688859e6fe27f3e8e670a50d3476b4f2854fe2a2c81895d979f58b36cba66f"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/web/vitest.setup.ts",
+          "sha256": "a46d66851af2c056e805fdd574bf5ec3adb1181c43c5e41f0a1c592e338afe64"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/packages/types/src/index.ts",
+          "sha256": "91d249deb3624a07a539e45502b5684f52ab8982a0f148b1e15d008b8c45c32d"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/pnpm-lock.yaml",
+          "sha256": "e5a68763996dfa027c1e06ba81db00a18cd1f21c3957f1d4086b28e721b0e2df"
+        }
+      ],
+      "expect": {
+        "exit_codes": [
+          0
+        ],
+        "stdout_contains": [
+          "Test Files  1 passed (1)",
+          "Tests  3 passed (3)"
+        ]
+      },
+      "id": "kanban-status-error-vitest-regressions",
+      "kind": "process",
+      "mutating": false,
+      "timeout_seconds": 120
+    }
+  ],
+  "producer_repository": "/repo",
+  "read_only": true,
+  "schema": "CanaryPlan/v2",
+  "subject": {
+    "commit": "885eabf1560d139e33ac877321357ad57d14369e",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "f0a932c562c0e9899701f495bdc52a40cf218f4fb55d89defc1a9e1302d8cb0d",
+      "source_field": "commit"
+    },
+    "schema": "GitCanarySubject/v1",
+    "tree": "0442624179b0d30923e2f5a073c6b38e78f057d2"
+  }
+}
