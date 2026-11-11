@@ -541,6 +541,28 @@ jobs:
           sudo -n /usr/local/sbin/arcanada-compose-broker muneral logs 100
           exit 1
 
+      # MUN-0084: the web (apps/web, service muneral-web, 127.0.0.1:3501) is built and brought up by the
+      # SAME broker `build` / `up` calls above (they run `docker compose build|up -d` for the whole
+      # stack, no service argument), so no second mechanism exists. This probe makes a deploy that does
+      # not serve the web fail visibly: nginx proxies app.muneral.com to this port, and before the
+      # service existed the edge answered 502. /login needs no session. The container healthcheck
+      # alone would not fail the job, so the status is read over HTTP here.
+      - name: Wait for web healthy
+        if: steps.preflight.outputs.status != 'fail'
+        run: |
+          set -e
+          for i in $(seq 1 24); do
+            code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:3501/login || true)"
+            if [ "${code}" = "200" ]; then
+              echo "muneral-web serving /login (HTTP 200) on attempt ${i}"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error title=muneral-web::web not serving on 127.0.0.1:3501 after 120s (last HTTP status: ${code:-none})"
+          sudo -n /usr/local/sbin/arcanada-compose-broker muneral logs 100
+          exit 1
+
       # A2-330: the post-deploy canary (observed-edges-and-deploy-gate.v1 rules C1/C3/C5). The program's
       # admission policy lists muneral under decision_exemptions.no_live_contour.live_contours, so an
       # inferred boundary here is lifted by running this, never by an exemption. Route presence is

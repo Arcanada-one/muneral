@@ -23,6 +23,33 @@ services:
       timeout: 10s
       retries: 3
 
+  # MUN-0084: the web app. nginx (site muneral-app on arcana-prd) proxies app.muneral.com to
+  # 127.0.0.1:3501; before this service existed nothing listened there and the edge answered 502.
+  # Loopback bind ONLY (network-exposure-lint). It gets NO env_file: the API's .env holds database
+  # and signing secrets the browser-facing web must not carry. The two variables below are
+  # interpolated by name from the broker-installed root-owned .env, so only these two reach the
+  # container (empty when the file does not define them - not_measured, see the PR notes).
+  muneral-web:
+    image: muneral-web:latest
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        # Public by construction (inlined into the browser bundle); the API origin, no /api/v1.
+        NEXT_PUBLIC_API_URL: https://api.muneral.com
+    ports:
+      - "127.0.0.1:3501:3501"
+    environment:
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-}
+      AUTH_TRUST_HOST: "true"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3501/login"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
   # muneral-worker: disabled — worker.js not yet implemented (MUN-0007+)
   # muneral-worker:
   #   image: muneral-api:latest
