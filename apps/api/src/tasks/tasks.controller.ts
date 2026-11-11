@@ -23,6 +23,10 @@ import {
   resolveActiveStatusThresholds,
   ThresholdValidationError,
 } from './active-status-staleness.report.js';
+import {
+  resolveStatusTransitionWindow,
+  WindowValidationError,
+} from './status-transition-counts.report.js';
 import { CreateTaskDto } from './dto/create-task.dto.js';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto.js';
 import { QueryTasksDto } from './dto/query-tasks.dto.js';
@@ -409,6 +413,43 @@ export class TasksController {
       scope.agentId,
       scope.projectReadGrant,
       thresholds,
+    );
+  }
+
+  /**
+   * MUN-0075 — status-transition counts (activity_log `task:status_changed`).
+   *
+   * Same project-index grant as `GET .../index`. Required half-open UTC window
+   * via `startInclusiveUtc` / `endExclusiveUtc`. Invalid windows → HTTP 400.
+   * Never PATCHes status. rates/comparability stay NOT_MEASURED.
+   */
+  @Get('project/:projectId/status-transition-counts')
+  @AgentScope('project-index')
+  getStatusTransitionCounts(
+    @Param('projectId') projectId: string,
+    @Req() req: AuthRequest,
+    @Query() query: Record<string, unknown>,
+  ) {
+    const scope = req.agentScope;
+    if (!scope || scope.kind !== 'project-index' || !scope.projectReadGrant) {
+      throw new ForbiddenException(
+        'The status-transition counts report is available only to an agent API key holding a read grant (MUN-0052/MUN-0075).',
+      );
+    }
+    let window;
+    try {
+      window = resolveStatusTransitionWindow(query);
+    } catch (err) {
+      if (err instanceof WindowValidationError) {
+        throw new BadRequestException(err.message);
+      }
+      throw err;
+    }
+    return this.tasksService.statusTransitionCountsForProject(
+      projectId,
+      scope.agentId,
+      scope.projectReadGrant,
+      window,
     );
   }
 

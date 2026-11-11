@@ -221,6 +221,7 @@ with `until` still ahead, may read that project's task **index**:
 | `GET /tasks/project/:projectId/index` | with a live grant for that project: `{projectId, counted, total, generatedAt, auditEventId, auditReadCount, grant, tasks}`, one row per task of the project (all statuses) with `id, parentId, status, priority, actorType, createdAt, updatedAt, titleSha256`; without one — no grant, expired, another project, another workspace, unknown or malformed id — `404`, the answer an unknown project gets. A JWT gets `403`. |
 | `GET /tasks/project/:projectId/active-status-staleness` | MUN-0067, same project-index grant: ages `in_progress` / `review` / `blocked` by `generatedAt − updatedAt` into soft/hard buckets (defaults `softDays=3`, `hardDays=14`). Bodyless fields only (`autoPatch: false` — never PATCHes status). Invalid threshold query values → `400`. Same 404/403 refusal shape as the index. Offline recipe: apply `buildActiveStatusStalenessReport` in `src/tasks/active-status-staleness.report.ts` to a stored index envelope. See `docs/reference/active-status-staleness.md`. |
 | `GET /tasks/digest/transitions` | MUN-0069, same workspace-digest grant as `GET /tasks/digest` (A2-284): half-open window over `task:status_changed` only; optional bodyless status histogram; age crossings excluded (use MUN-0067). No second grant list. See `docs/reference/workspace-digest-transitions.md`. |
+| `GET /tasks/project/:projectId/status-transition-counts` | MUN-0075, same project-index grant: counts `activity_log` rows with action `task:status_changed` for the project's current task cohort inside a required half-open UTC window (`startInclusiveUtc`, `endExclusiveUtc`). Invalid windows → `400`. `transitions.verdict=MEASURED`; `rates`/`comparability` stay `NOT_MEASURED`. `autoPatch: false`. Same 404/403 refusal shape as the index. See `docs/reference/status-transition-counts.md`. |
 
 - No free text: the title leaves as a sha256, the description, bootstrap stamp,
   creator id and revision do not leave at all.
@@ -229,7 +230,8 @@ with `until` still ahead, may read that project's task **index**:
   `auditReadCount` — this agent's index reads on record in the workspace, this
   one included — read back from the same table. The active-status staleness
   route writes `project:active_status_staleness_read` the same way.
-- The grant opens the index and the active-status staleness report. `GET /tasks/:taskId`, activity, comments,
+- The grant opens the index, the active-status staleness report, and the
+  status-transition counts report. `GET /tasks/:taskId`, activity, comments,
   status, redactions, assign, checklists, dependencies, children (MUN-0070) and the project list and
   execution-staleness routes answer a granted key exactly as they answer any other key.
   MUN-0065: `GET /tasks/project/:projectId/staleness` optional `thresholdHours`

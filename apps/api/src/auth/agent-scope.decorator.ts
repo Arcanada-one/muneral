@@ -102,7 +102,11 @@ import { SetMetadata } from '@nestjs/common';
  *                      unknown project gets. The index itself returns no free
  *                      text. MUN-0067 reuses this same grant for
  *                      `GET /tasks/project/:projectId/active-status-staleness`
- *                      (bodyless age buckets; never patches status). Separately,
+ *                      (bodyless age buckets; never patches status). MUN-0075
+ *                      reuses it for
+ *                      `GET /tasks/project/:projectId/status-transition-counts`
+ *                      (daily `task:status_changed` counts; never patches
+ *                      status). Separately,
  *                      `GET /tasks/:taskId` keeps this file's existing `'task'`
  *                      kind and may carry `@ProjectReadTaskMetadata()` as a
  *                      route-specific marker: only that handler may use the
