@@ -53,6 +53,11 @@ import {
   type StatusTransitionCountsReport,
   type StatusTransitionWindow,
 } from './status-transition-counts.report.js';
+import {
+  buildTransitionReport,
+  type TransitionReport,
+  type TransitionReportWindow,
+} from './transition-report.report.js';
 
 /** MUN-0052: the activity action one task-index read records. */
 export const PROJECT_INDEX_READ_ACTION = 'project:index_read';
@@ -64,6 +69,10 @@ export const PROJECT_ACTIVE_STATUS_STALENESS_READ_ACTION =
 /** MUN-0075: the activity action one status-transition-counts report records. */
 export const PROJECT_STATUS_TRANSITION_COUNTS_READ_ACTION =
   'project:status_transition_counts_read';
+
+/** MUN-0076: the activity action one transition-report read records. */
+export const PROJECT_TRANSITION_REPORT_READ_ACTION =
+  'project:transition_report_read';
 
 /** MUN-0052: what the index's `total` counts, stated in the answer (I4). */
 export const PROJECT_INDEX_COUNTED =
@@ -628,7 +637,144 @@ export class TasksService {
    * same receipt discipline as the project index (MUN-0052). A read whose row
    * cannot be written fails.
    */
-  async digestForWorkspace(
+
+  async transitionReportForProject(
+    projectId: string,
+    agentId: string,
+    grant: ProjectReadGrantEntry,
+    window: TransitionReportWindow,
+  ): Promise<
+    TransitionReport & {
+      auditEventId: string;
+      auditReadCount: number;
+      grant:
+        | { decision: string; until: string }
+        | { decision: string; until: string; renewalDueAt: string };
+    }
+  > {
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      select: { workspaceId: true },
+    });
+    if (!project) {
+      throw new NotFoundException(`Project ${projectId} not found.`);
+    }
+
+    const taskRows = await this.prisma.task.findMany({
+      where: { projectId },
+      select: { id: true, status: true },
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+    });
+    const taskIds = taskRows.map((row) => row.id);
+
+    const events =
+      taskIds.length === 0
+        ? []
+        : await this.prisma.activityLog.findMany({
+            where: {
+              action: STATUS_TRANSITION_ACTION,
+              taskId: { in: taskIds },
+              createdAt: {
+                gte: new Date(window.startMs),
+                lt: new Date(window.endMs),
+              },
+            },
+            select: { id: true, taskId: true, createdAt: true, payload: true },
+            orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+          });
+
+    const audit = await this.prisma.activityLog.create({
+      data: {
+        workspaceId: project.workspaceId,
+        taskId: null,
+        actorType: 'agent',
+        actorId: agentId,
+        action: PROJECT_TRANSITION_REPORT_READ_ACTION,
+        payload: {
+          projectId,
+          decision: grant.decision,
+          cohortTaskCount: taskIds.length,
+          observedTotal: events.length,
+          startInclusiveUtc: window.startInclusiveUtc,
+          endExclusiveUtc: window.endExclusiveUtc,
+          autoPatch: false,
+        } as Prisma.InputJsonValue,
+      },
+      select: { id: true, createdAt: true },
+    });
+
+    const auditReadCount = await this.prisma.activityLog.count({
+      where: {
+        workspaceId: project.workspaceId,
+        actorId: agentId,
+        action: PROJECT_TRANSITION_REPORT_READ_ACTION,
+      },
+    });
+
+    const report = buildTransitionReport({
+      projectId,
+      generatedAt: audit.createdAt.toISOString(),
+      auditEventId: audit.id,
+      cohortStatuses: taskRows.map((row) => row.status),
+      window,
+      events: events.map((event) => {
+        const payload =
+          event.payload !== null &&
+          typeof event.payload === 'object' &&
+          !Array.isArray(event.payload)
+            ? (event.payload as Record<string, unknown>)
+            : {};
+        return {
+          id: event.id,
+          taskId: event.taskId as string,
+          createdAt: event.createdAt.toISOString(),
+          createdAtMs: event.createdAt.getTime(),
+          from: typeof payload.from === 'string' ? payload.from : undefined,
+          to: typeof payload.to === 'string' ? payload.to : undefined,
+        };
+      }),
+    });
+
+    return {
+      ...report,
+      auditEventId: audit.id,
+      auditReadCount,
+      grant:
+        grant.standing === true
+          ? { decision: grant.decision, until: grant.until }
+          : {
+              decision: grant.decision,
+              until: grant.until,
+              renewalDueAt: renewalDueAt(grant),
+            },
+    };
+  }
+
+  /**
+   * A2-284 — the workspace task digest for an agent key holding a grant
+   * (`@AgentScope('workspace-digest')`).
+   *
+   * Why this route exists at all: `GET /tasks` answers a `mun_sk_` key 403
+   * (unmarked route, MUN-0043) while its own DTO names the assistant's digest
+   * as the consumer it was built for, and the one route a key COULD reach —
+   * `GET /tasks/project/:id` — answered `[]` on a board of 880+ rows because
+   * the key owns none of them. Measured live 2026-09-24, A2-281. An authorised,
+   * well-formed, completely empty answer is worse than the 403: nothing about
+   * it looks wrong.
+   *
+   * Why a route of its own rather than `@AgentScope` on `GET /tasks`:
+   * `query()` above has no workspace narrowing at all, by design, so scoping it
+   * would mean a conditional narrowing whose DEFAULT is every workspace — one
+   * forgotten branch away from a cross-tenant list. Here the workspace is a
+   * required parameter of the only method the route calls, ANDed into the where
+   * clause below; there is no argument list that answers unscoped. The cost is
+   * named in `docs/agent-workspace-digest.md`: the consumer changes one path.
+   *
+   * Each read writes one activity row naming the agent, the decision and the
+   * row count before it answers, and the answer carries that row's id — the
+   * same receipt discipline as the project index (MUN-0052). A read whose row
+   * cannot be written fails.
+   */  async digestForWorkspace(
     workspaceId: string,
     agentId: string,
     grant: WorkspaceDigestGrantEntry,
