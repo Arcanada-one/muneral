@@ -1,0 +1,142 @@
+{
+  "schema": "CanaryResult/v2",
+  "captured_at_utc": "2026-11-11T23:39:50Z",
+  "producer": {
+    "tool": "receipts/canary/mun-jest-pin-ci-20261112/harness.py.txt",
+    "version": "1.0.0"
+  },
+  "model": "none: deterministic process producer",
+  "plan": {
+    "id": "muneral-mun-jest-pin-ci-8e49727",
+    "path": "plan.json",
+    "digest": "3b977782b6abf7ea518487b166a632e8c68371c7b30bf676be31dfb376f9a394"
+  },
+  "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces on arcana-devs, source of branch commit 8e497274222bb7d9dd888b2f2c1ae60b8201d197 (merge of main 335a500a717b87aa308daa43fd4f15c659ee484d) mounted read-only at /repo, no network, NOT a production probe",
+  "phase": "pre",
+  "read_only": true,
+  "observation_owner": "JANITOR-dev-mun-jest author lane, Muneral task 361f4902-1dd0-4e15-a089-70aae4982aaf",
+  "resident_version": null,
+  "subject": {
+    "commit": "8e497274222bb7d9dd888b2f2c1ae60b8201d197",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "508a79a28495c3e32371216741c71422974a2df3bca77297ee530b687592eeaf",
+      "source_field": "commit"
+    },
+    "schema": "GitCanarySubject/v1",
+    "tree": "0fa96178dc9fd5ed00d9547e29a1d193fc567ab7"
+  },
+  "probes": [
+    {
+      "id": "ci-tested-tree-qualification-unit-tests",
+      "kind": "process",
+      "executed": true,
+      "termination": {
+        "kind": "exit",
+        "code": 0
+      },
+      "outcome": "verified",
+      "reason": "Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+      "execution_identity_unchanged": true,
+      "capture_complete": true,
+      "artifacts_verifiable": true,
+      "executable_sha256": "e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f",
+      "invocation_digest": "b320ad2b44bc05933b4da47d8781d65f813bb91c83a2a86fcb44a1a25bd338df",
+      "environment_keys": [
+        "CI",
+        "HOME",
+        "LANG",
+        "NO_COLOR",
+        "PATH",
+        "TMPDIR",
+        "TZ"
+      ],
+      "elapsed_ms": 265.448,
+      "started_at_utc": "2026-11-11T23:39:50.028352+00:00",
+      "finished_at_utc": "2026-11-11T23:39:50.312389+00:00",
+      "execution_files": [
+        {
+          "path": "/usr/bin/python3.12",
+          "sha256": "e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f",
+          "bytes": 8020928,
+          "matched": true,
+          "attribution": {
+            "kind": "system_executable",
+            "source_id": "/usr/bin/python3.12",
+            "version": "sha256:e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f"
+          }
+        },
+        {
+          "path": "/repo/scripts/ci/tested_tree.py",
+          "sha256": "d6cb5078703a3777c10a74917ed3da3797ba1b945e29355e12f51738e8a22f84",
+          "bytes": 8583,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/scripts/ci/test_tested_tree.py",
+          "sha256": "8642aba61c5af57853a0708494d0589985eeb682a9f940cae62b098c9fcc5f58",
+          "bytes": 11953,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/.github/workflows/ci.yml",
+          "sha256": "27793610e73665c8dc7b15e44d753f90bbe19c55c9a6accaa5a209984759dbc5",
+          "bytes": 31020,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        }
+      ],
+      "artifacts": [],
+      "streams": {
+        "stdout": {
+          "captured_bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "capture": "digest_only",
+          "truncated": false
+        },
+        "stderr": {
+          "captured_bytes": 113,
+          "sha256": "f2dfea9eb8d553b11472dcf672c13331cc9564bdd3119fa87c7043efa87881bc",
+          "capture": "digest_only",
+          "truncated": false
+        }
+      },
+      "output_checks": [
+        {
+          "stream": "stderr",
+          "expected": "Ran 14 tests",
+          "matched": true
+        },
+        {
+          "stream": "stderr",
+          "expected": "\nOK",
+          "matched": true
+        }
+      ],
+      "cleanup": {
+        "group_signalled_before_leader_reaped": true,
+        "escaped_descendants": "not_proven_absent",
+        "sandbox": false
+      }
+    }
+  ],
+  "entity_verdicts": [
+    {
+      "entity": "code_unit:scripts/ci/tested_tree.py",
+      "verdict": "verified",
+      "reason": "Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+      "probe_ids": [
+        "ci-tested-tree-qualification-unit-tests"
+      ]
+    }
+  ],
+  "source_binding_errors": []
+}

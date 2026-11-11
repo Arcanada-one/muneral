@@ -1,0 +1,88 @@
+{
+  "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces on arcana-devs, source of branch commit 8e497274222bb7d9dd888b2f2c1ae60b8201d197 (merge of main 335a500a717b87aa308daa43fd4f15c659ee484d) mounted read-only at /repo, no network, NOT a production probe",
+  "id": "muneral-mun-jest-pin-ci-8e49727",
+  "owner": "JANITOR-dev-mun-jest author lane, Muneral task 361f4902-1dd0-4e15-a089-70aae4982aaf",
+  "probes": [
+    {
+      "argv": [
+        "/usr/bin/python3.12",
+        "-I",
+        "scripts/ci/test_tested_tree.py"
+      ],
+      "artifacts": [],
+      "capture_limit_bytes": 1048576,
+      "cwd": ".",
+      "entities": [
+        "code_unit:scripts/ci/tested_tree.py"
+      ],
+      "env_keys": [
+        "CI",
+        "HOME",
+        "LANG",
+        "NO_COLOR",
+        "PATH",
+        "TMPDIR",
+        "TZ"
+      ],
+      "executable_sha256": "e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f",
+      "execution_files": [
+        {
+          "attribution": {
+            "kind": "system_executable",
+            "source_id": "/usr/bin/python3.12",
+            "version": "sha256:e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f"
+          },
+          "path": "/usr/bin/python3.12",
+          "sha256": "e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/scripts/ci/tested_tree.py",
+          "sha256": "d6cb5078703a3777c10a74917ed3da3797ba1b945e29355e12f51738e8a22f84"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/scripts/ci/test_tested_tree.py",
+          "sha256": "8642aba61c5af57853a0708494d0589985eeb682a9f940cae62b098c9fcc5f58"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/.github/workflows/ci.yml",
+          "sha256": "27793610e73665c8dc7b15e44d753f90bbe19c55c9a6accaa5a209984759dbc5"
+        }
+      ],
+      "expect": {
+        "exit_codes": [
+          0
+        ],
+        "stderr_contains": [
+          "Ran 14 tests",
+          "\nOK"
+        ]
+      },
+      "id": "ci-tested-tree-qualification-unit-tests",
+      "kind": "process",
+      "mutating": false,
+      "timeout_seconds": 120
+    }
+  ],
+  "producer_repository": "/repo",
+  "read_only": true,
+  "schema": "CanaryPlan/v2",
+  "subject": {
+    "commit": "8e497274222bb7d9dd888b2f2c1ae60b8201d197",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "508a79a28495c3e32371216741c71422974a2df3bca77297ee530b687592eeaf",
+      "source_field": "commit"
+    },
+    "schema": "GitCanarySubject/v1",
+    "tree": "0fa96178dc9fd5ed00d9547e29a1d193fc567ab7"
+  }
+}
