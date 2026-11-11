@@ -279,6 +279,8 @@ jobs:
       - name: Collect ErrorLedger
         id: collect
         if: always() && needs.tested-tree.outputs.reuse != 'true'
+        env:
+          HEAD_REF: ${{ github.head_ref }}
         run: |
           mkdir -p reports "${RUNNER_TEMP}/error-ledger"
           cat > "${RUNNER_TEMP}/error-ledger/step-outcomes.txt" <<'EOF'
@@ -301,6 +303,7 @@ jobs:
           EOF
           python3 - <<'PY' > "${RUNNER_TEMP}/error-ledger/run-meta.json"
           import json
+          import os
           print(json.dumps({
             "repository": """${{ github.repository }}""",
             "run_id": """${{ github.run_id }}""",
@@ -308,7 +311,7 @@ jobs:
             "sha": """${{ github.sha }}""",
             "ref": """${{ github.ref }}""",
             "event_name": """${{ github.event_name }}""",
-            "head_ref": """${{ github.head_ref }}""",
+            "head_ref": os.environ["HEAD_REF"],
           }))
           PY
           summary_args=()
