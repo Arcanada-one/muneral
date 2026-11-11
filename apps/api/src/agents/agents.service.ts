@@ -1,5 +1,10 @@
 import { Prisma } from '@prisma/client';
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import type { Actor } from '@muneral/types';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateAgentDto } from './dto/create-agent.dto.js';
@@ -10,6 +15,17 @@ import type { AssignBasis } from '../auth/guards/agent-task-scope.guard.js';
 
 /** MUN-0051: the activity row every assignment writes. */
 export const AGENT_ASSIGNED_ACTION = 'task:agent_assigned';
+
+/** MUN-0072: non-secret columns projected by GET /agents/keys/self. */
+const OWN_API_KEY_SELECT = {
+  id: true,
+  agentId: true,
+  label: true,
+  lastUsedAt: true,
+  expiresAt: true,
+  revokedAt: true,
+  createdAt: true,
+} as const;
 
 @Injectable()
 export class AgentsService {
@@ -47,6 +63,33 @@ export class AgentsService {
       where: { agentId },
       include: { task: true },
     });
+  }
+
+  /**
+   * MUN-0071 — project the calling key's agent for attribution verification.
+   * Takes the guard-resolved agent row (already authenticated); never loads
+   * other agents. Omits capabilities and every secret column of api_keys.
+   */
+  selfIdentity(
+    agent: {
+      id: string;
+      workspaceId: string;
+      name: string;
+      model: string | null;
+      provider: string | null;
+      createdAt: Date;
+    },
+    apiKeyId: string,
+  ) {
+    return {
+      id: agent.id,
+      workspaceId: agent.workspaceId,
+      name: agent.name,
+      model: agent.model,
+      provider: agent.provider,
+      createdAt: agent.createdAt,
+      apiKeyId,
+    };
   }
 
   /**
@@ -116,6 +159,22 @@ export class AgentsService {
 
   // --- API Key lifecycle (delegates to AuthService) ---
 
+  /**
+   * MUN-0072 — project non-secret metadata for the calling API key.
+   * Bound to (keyId, agentId) from ApiKeyGuard so a caller cannot name another
+   * key. Never selects keyHash / lookupHash or returns raw key material.
+   */
+  async ownApiKeyProjection(keyId: string, agentId: string) {
+    const row = await this.prisma.apiKey.findFirst({
+      where: { id: keyId, agentId },
+      select: OWN_API_KEY_SELECT,
+    });
+    if (!row) {
+      throw new UnauthorizedException('Invalid or expired API key');
+    }
+    return row;
+  }
+
   async createApiKey(agentId: string, label?: string) {
     await this.findOne(agentId);
     return this.authService.createApiKey(agentId, label);
@@ -123,6 +182,11 @@ export class AgentsService {
 
   async rotateApiKey(keyId: string) {
     return this.authService.rotateApiKey(keyId);
+  }
+
+  /** MUN-0074 — rotate only the presenting agent API key. */
+  async rotateOwnApiKey(keyId: string, agent: { id: string; workspaceId: string }) {
+    return this.authService.rotateOwnApiKey(keyId, agent);
   }
 
   async revokeOwnApiKey(keyId: string, agent: { id: string; workspaceId: string }) {

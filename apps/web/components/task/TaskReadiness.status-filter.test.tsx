@@ -81,7 +81,7 @@ function installClipboard(writeText: ReturnType<typeof vi.fn>) {
 }
 
 function blockerList() {
-  return within(screen.getByRole('list'));
+  return within(screen.getByRole('list', { name: 'Loaded readiness blockers' }));
 }
 
 function visibleCopyButton(count: number) {

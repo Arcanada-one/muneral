@@ -35,6 +35,7 @@ const makePrisma = () => {
   };
   const task = {
     create: jest.fn(),
+    findFirst: jest.fn(),
     findUnique: jest.fn(),
     findMany: jest.fn().mockResolvedValue([]),
     update: jest.fn(),
@@ -190,6 +191,33 @@ describe('TasksService', () => {
     });
   });
 
+  describe('findIdentity', () => {
+    it('selects exactly id, projectId, and status for an agent task read', async () => {
+      const identity = { id: 'task-1', projectId: 'proj-1', status: 'todo' as const };
+      prisma.task.findUnique.mockResolvedValue(identity);
+
+      await expect(service.findIdentity('task-1')).resolves.toEqual(identity);
+      expect(prisma.task.findUnique).toHaveBeenCalledWith({
+        where: { id: 'task-1' },
+        select: { id: true, projectId: true, status: true },
+      });
+    });
+
+    it('uses the same exact select while retaining human workspace membership filtering', async () => {
+      const identity = { id: 'task-1', projectId: 'proj-1', status: 'todo' as const };
+      prisma.task.findFirst.mockResolvedValue(identity);
+
+      await expect(service.findIdentity('task-1', 'user-1')).resolves.toEqual(identity);
+      expect(prisma.task.findFirst).toHaveBeenCalledWith({
+        where: {
+          id: 'task-1',
+          project: { workspace: { members: { some: { userId: 'user-1' } } } },
+        },
+        select: { id: true, projectId: true, status: true },
+      });
+    });
+  });
+
   describe('updateStatus (state machine)', () => {
     it('allows valid transition and logs it', async () => {
       prisma.task.findUnique.mockResolvedValue({ ...MOCK_TASK });
@@ -238,6 +266,31 @@ describe('TasksService', () => {
 
       await expect(
         service.updateStatus('task-1', humanActor, { status: 'done' }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    // MUN-0072: review → cancelled is admitted; review → todo stays refused.
+    it('allows review → cancelled and refuses review → todo', async () => {
+      prisma.task.findUnique.mockResolvedValue({ ...MOCK_TASK, status: 'review' });
+      prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
+      prisma.task.update.mockResolvedValue({ ...MOCK_TASK, status: 'cancelled' });
+
+      const result = await service.updateStatus('task-1', humanActor, {
+        status: 'cancelled',
+      });
+      expect(result.status).toBe('cancelled');
+      expect(prisma.activityLog.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            action: 'task:status_changed',
+            payload: { from: 'review', to: 'cancelled' },
+          }),
+        }),
+      );
+
+      prisma.task.findUnique.mockResolvedValue({ ...MOCK_TASK, status: 'review' });
+      await expect(
+        service.updateStatus('task-1', humanActor, { status: 'todo' }),
       ).rejects.toThrow(BadRequestException);
     });
 

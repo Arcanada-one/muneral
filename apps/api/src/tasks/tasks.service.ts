@@ -12,6 +12,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateTaskDto } from './dto/create-task.dto.js';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto.js';
+import { UpdateTaskMetadataDto } from './dto/update-task-metadata.dto.js';
 import { QueryTasksDto } from './dto/query-tasks.dto.js';
 import { AddDependencyDto } from './dto/add-dependency.dto.js';
 import { CreateChecklistItemDto } from './dto/create-checklist-item.dto.js';
@@ -33,11 +34,31 @@ import {
 import type { WorkspaceDigestGrantEntry } from '../auth/workspace-digest-grants.js';
 import { digestRenewalDueAt } from '../auth/workspace-digest-grants.js';
 import { QueryWorkspaceDigestDto } from './dto/query-workspace-digest.dto.js';
+import { QueryWorkspaceDigestTransitionsDto } from './dto/query-workspace-digest-transitions.dto.js';
 import {
   buildActiveStatusStalenessReport,
   type ActiveStatusStalenessReport,
   type ActiveStatusStalenessThresholds,
 } from './active-status-staleness.report.js';
+import {
+  TRANSITION_ACTION,
+  WORKSPACE_DIGEST_TRANSITIONS_COUNTED,
+  buildDigestTransitionsReport,
+  parseTransitionPayload,
+  resolveDigestTransitionWindow,
+  type DigestTransitionEvent,
+} from './workspace-digest-transitions.report.js';
+import {
+  STATUS_TRANSITION_ACTION,
+  buildStatusTransitionCountsReport,
+  type StatusTransitionCountsReport,
+  type StatusTransitionWindow,
+} from './status-transition-counts.report.js';
+import {
+  buildTransitionReport,
+  type TransitionReport,
+  type TransitionReportWindow,
+} from './transition-report.report.js';
 
 /** MUN-0052: the activity action one task-index read records. */
 export const PROJECT_INDEX_READ_ACTION = 'project:index_read';
@@ -46,12 +67,28 @@ export const PROJECT_INDEX_READ_ACTION = 'project:index_read';
 export const PROJECT_ACTIVE_STATUS_STALENESS_READ_ACTION =
   'project:active_status_staleness_read';
 
+/** MUN-0075: the activity action one status-transition-counts report records. */
+export const PROJECT_STATUS_TRANSITION_COUNTS_READ_ACTION =
+  'project:status_transition_counts_read';
+
+/** MUN-0076: the activity action one transition-report read records. */
+export const PROJECT_TRANSITION_REPORT_READ_ACTION =
+  'project:transition_report_read';
+
 /** MUN-0052: what the index's `total` counts, stated in the answer (I4). */
 export const PROJECT_INDEX_COUNTED =
   'every task of the project, all statuses including cancelled and archived';
 
+/** MUN-0070: what `GET /tasks/:taskId/children` `total` counts. */
+export const TASK_CHILDREN_COUNTED =
+  'every direct child task of the parent (parentId match), all statuses including cancelled and archived';
+
 /** A2-284: the activity action one workspace-digest read records. */
 export const WORKSPACE_DIGEST_READ_ACTION = 'workspace:digest_read';
+
+/** MUN-0069: the activity action one transition-sourced digest read records. */
+export const WORKSPACE_DIGEST_TRANSITIONS_READ_ACTION =
+  'workspace:digest_transitions_read';
 
 /** A2-284: what the digest's `total` counts, stated in the answer — the count
  *  is BEFORE paging, so an empty page and an empty workspace are different
@@ -102,6 +139,13 @@ const PROJECT_INDEX_SELECT = {
   createdAt: true,
   updatedAt: true,
   title: true,
+} satisfies Prisma.TaskSelect;
+
+/** MUN-0064: the exact-task identity route's complete database projection. */
+const TASK_IDENTITY_SELECT = {
+  id: true,
+  projectId: true,
+  status: true,
 } satisfies Prisma.TaskSelect;
 
 @Injectable()
@@ -202,6 +246,23 @@ export class TasksService {
       throw new NotFoundException('Task not found');
     }
     return task;
+  }
+
+  /** MUN-0064 — the bodyless identity projection needed to resolve a task's project. */
+  async findIdentity(taskId: string, humanUserId?: string) {
+    const identity = humanUserId
+      ? await this.prisma.task.findFirst({
+          where: { id: taskId, ...humanTaskWhere(humanUserId) },
+          select: TASK_IDENTITY_SELECT,
+        })
+      : await this.prisma.task.findUnique({
+          where: { id: taskId },
+          select: TASK_IDENTITY_SELECT,
+        });
+    if (!identity) {
+      throw new NotFoundException('Task not found');
+    }
+    return identity;
   }
 
   /**
@@ -443,6 +504,237 @@ export class TasksService {
   }
 
   /**
+   * MUN-0075 — grant-scoped status-transition counts for one project.
+   *
+   * Same project-index grant as `indexForProject`. Counts only
+   * `task:status_changed` activity rows whose taskId is currently in the
+   * project cohort and whose createdAt falls in the half-open UTC window.
+   * Never PATCHes status; never returns free-text titles.
+   */
+  async statusTransitionCountsForProject(
+    projectId: string,
+    agentId: string,
+    grant: ProjectReadGrantEntry,
+    window: StatusTransitionWindow,
+  ): Promise<
+    StatusTransitionCountsReport & {
+      auditEventId: string;
+      auditReadCount: number;
+      grant:
+        | { decision: string; until: string }
+        | { decision: string; until: string; renewalDueAt: string };
+    }
+  > {
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      select: { workspaceId: true },
+    });
+    if (!project) {
+      throw new NotFoundException(`Project ${projectId} not found.`);
+    }
+
+    const taskRows = await this.prisma.task.findMany({
+      where: { projectId },
+      select: { id: true },
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+    });
+    const taskIds = taskRows.map((row) => row.id);
+
+    const events =
+      taskIds.length === 0
+        ? []
+        : await this.prisma.activityLog.findMany({
+            where: {
+              action: STATUS_TRANSITION_ACTION,
+              taskId: { in: taskIds },
+              createdAt: {
+                gte: new Date(window.startMs),
+                lt: new Date(window.endMs),
+              },
+            },
+            select: { id: true, taskId: true, createdAt: true },
+            orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+          });
+
+    const audit = await this.prisma.activityLog.create({
+      data: {
+        workspaceId: project.workspaceId,
+        taskId: null,
+        actorType: 'agent',
+        actorId: agentId,
+        action: PROJECT_STATUS_TRANSITION_COUNTS_READ_ACTION,
+        payload: {
+          projectId,
+          decision: grant.decision,
+          cohortTaskCount: taskIds.length,
+          observedTotal: events.length,
+          startInclusiveUtc: window.startInclusiveUtc,
+          endExclusiveUtc: window.endExclusiveUtc,
+          autoPatch: false,
+        } as Prisma.InputJsonValue,
+      },
+      select: { id: true, createdAt: true },
+    });
+
+    const auditReadCount = await this.prisma.activityLog.count({
+      where: {
+        workspaceId: project.workspaceId,
+        actorId: agentId,
+        action: PROJECT_STATUS_TRANSITION_COUNTS_READ_ACTION,
+      },
+    });
+
+    const report = buildStatusTransitionCountsReport({
+      projectId,
+      generatedAt: audit.createdAt.toISOString(),
+      auditEventId: audit.id,
+      cohortTaskCount: taskIds.length,
+      window,
+      events: events.map((event) => ({
+        id: event.id,
+        taskId: event.taskId as string,
+        createdAt: event.createdAt.toISOString(),
+        createdAtMs: event.createdAt.getTime(),
+      })),
+    });
+
+    return {
+      ...report,
+      auditEventId: audit.id,
+      auditReadCount,
+      grant:
+        grant.standing === true
+          ? { decision: grant.decision, until: grant.until }
+          : {
+              decision: grant.decision,
+              until: grant.until,
+              renewalDueAt: renewalDueAt(grant),
+            },
+    };
+  }
+
+  /**
+   * MUN-0076 — grant-scoped transition report for one project.
+   *
+   * Same project-index grant as `indexForProject`. Returns the current cohort
+   * statusCounts histogram plus `task:status_changed` dailyCounts and
+   * from→to edgeCounts inside the half-open UTC window. Never PATCHes status;
+   * never returns free-text titles.
+   */
+  async transitionReportForProject(
+    projectId: string,
+    agentId: string,
+    grant: ProjectReadGrantEntry,
+    window: TransitionReportWindow,
+  ): Promise<
+    TransitionReport & {
+      auditEventId: string;
+      auditReadCount: number;
+      grant:
+        | { decision: string; until: string }
+        | { decision: string; until: string; renewalDueAt: string };
+    }
+  > {
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      select: { workspaceId: true },
+    });
+    if (!project) {
+      throw new NotFoundException(`Project ${projectId} not found.`);
+    }
+
+    const taskRows = await this.prisma.task.findMany({
+      where: { projectId },
+      select: { id: true, status: true },
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+    });
+    const taskIds = taskRows.map((row) => row.id);
+
+    const events =
+      taskIds.length === 0
+        ? []
+        : await this.prisma.activityLog.findMany({
+            where: {
+              action: STATUS_TRANSITION_ACTION,
+              taskId: { in: taskIds },
+              createdAt: {
+                gte: new Date(window.startMs),
+                lt: new Date(window.endMs),
+              },
+            },
+            select: { id: true, taskId: true, createdAt: true, payload: true },
+            orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+          });
+
+    const audit = await this.prisma.activityLog.create({
+      data: {
+        workspaceId: project.workspaceId,
+        taskId: null,
+        actorType: 'agent',
+        actorId: agentId,
+        action: PROJECT_TRANSITION_REPORT_READ_ACTION,
+        payload: {
+          projectId,
+          decision: grant.decision,
+          cohortTaskCount: taskIds.length,
+          observedTotal: events.length,
+          startInclusiveUtc: window.startInclusiveUtc,
+          endExclusiveUtc: window.endExclusiveUtc,
+          autoPatch: false,
+        } as Prisma.InputJsonValue,
+      },
+      select: { id: true, createdAt: true },
+    });
+
+    const auditReadCount = await this.prisma.activityLog.count({
+      where: {
+        workspaceId: project.workspaceId,
+        actorId: agentId,
+        action: PROJECT_TRANSITION_REPORT_READ_ACTION,
+      },
+    });
+
+    const report = buildTransitionReport({
+      projectId,
+      generatedAt: audit.createdAt.toISOString(),
+      auditEventId: audit.id,
+      cohortStatuses: taskRows.map((row) => row.status),
+      window,
+      events: events.map((event) => {
+        const payload =
+          event.payload !== null &&
+          typeof event.payload === 'object' &&
+          !Array.isArray(event.payload)
+            ? (event.payload as Record<string, unknown>)
+            : {};
+        return {
+          id: event.id,
+          taskId: event.taskId as string,
+          createdAt: event.createdAt.toISOString(),
+          createdAtMs: event.createdAt.getTime(),
+          from: typeof payload.from === 'string' ? payload.from : undefined,
+          to: typeof payload.to === 'string' ? payload.to : undefined,
+        };
+      }),
+    });
+
+    return {
+      ...report,
+      auditEventId: audit.id,
+      auditReadCount,
+      grant:
+        grant.standing === true
+          ? { decision: grant.decision, until: grant.until }
+          : {
+              decision: grant.decision,
+              until: grant.until,
+              renewalDueAt: renewalDueAt(grant),
+            },
+    };
+  }
+
+
+  /**
    * A2-284 — the workspace task digest for an agent key holding a grant
    * (`@AgentScope('workspace-digest')`).
    *
@@ -543,6 +835,137 @@ export class TasksService {
       // workspace-digest-grants.ts on the two days of silence that cost. A
       // standing grant (DEC-AUP-0049 A7) has nothing to renew, so the key is
       // omitted rather than sent empty.
+      grant: grant.standing
+        ? { decision: grant.decision, until: grant.until }
+        : {
+            decision: grant.decision,
+            until: grant.until,
+            renewalDueAt: digestRenewalDueAt(grant),
+          },
+    };
+  }
+
+  /**
+   * MUN-0069 — transition-sourced workspace digest counts.
+   *
+   * Same `@AgentScope('workspace-digest')` grant as `digestForWorkspace`. Counts
+   * `task:status_changed` inside a half-open activity window. Comment volume and
+   * `updatedAt` edits are excluded. Age crossings stay on MUN-0067. Optional
+   * bodyless status histogram is a current-row snapshot, not a transition count.
+   * Item titles remain plaintext (PREFIX-NNNN visibility for digest consumers).
+   */
+  async digestTransitionsForWorkspace(
+    workspaceId: string,
+    agentId: string,
+    grant: WorkspaceDigestGrantEntry,
+    dto: QueryWorkspaceDigestTransitionsDto,
+  ) {
+    const window = resolveDigestTransitionWindow({
+      sinceInclusive: dto.sinceInclusive,
+      beforeExclusive: dto.beforeExclusive,
+    });
+    const limit = dto.limit ?? 50;
+    const offset = dto.offset ?? 0;
+    const includeStatusHistogram = dto.includeStatusHistogram === 'true';
+
+    const since = new Date(window.sinceInclusive);
+    const before = new Date(window.beforeExclusive);
+
+    const activityWhere: Prisma.ActivityLogWhereInput = {
+      workspaceId,
+      action: TRANSITION_ACTION,
+      createdAt: { gte: since, lt: before },
+      ...(dto.projectId
+        ? { task: { is: { projectId: dto.projectId } } }
+        : {}),
+    };
+
+    const rows = await this.prisma.activityLog.findMany({
+      where: activityWhere,
+      select: {
+        id: true,
+        taskId: true,
+        createdAt: true,
+        payload: true,
+        task: {
+          select: {
+            id: true,
+            projectId: true,
+            title: true,
+            status: true,
+          },
+        },
+      },
+      orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
+    });
+
+    const events: DigestTransitionEvent[] = [];
+    for (const row of rows) {
+      if (!row.taskId || !row.task) continue;
+      const parsed = parseTransitionPayload(row.payload);
+      if (!parsed) continue;
+      events.push({
+        id: row.id,
+        taskId: row.taskId,
+        createdAt: row.createdAt.toISOString(),
+        from: parsed.from,
+        to: parsed.to,
+        projectId: row.task.projectId,
+        title: row.task.title,
+        status: row.task.status as TaskStatus,
+      });
+    }
+
+    let statusRows: { status: string }[] | undefined;
+    if (includeStatusHistogram) {
+      statusRows = await this.prisma.task.findMany({
+        where: {
+          project: { workspaceId },
+          ...(dto.projectId ? { projectId: dto.projectId } : {}),
+        },
+        select: { status: true },
+      });
+    }
+
+    const report = buildDigestTransitionsReport({
+      window,
+      events,
+      limit,
+      offset,
+      statusRows,
+    });
+
+    const audit = await this.prisma.activityLog.create({
+      data: {
+        workspaceId,
+        taskId: null,
+        actorType: 'agent',
+        actorId: agentId,
+        action: WORKSPACE_DIGEST_TRANSITIONS_READ_ACTION,
+        payload: {
+          decision: grant.decision,
+          rowCount: report.items.length,
+          total: report.total,
+          filters: {
+            sinceInclusive: window.sinceInclusive,
+            beforeExclusive: window.beforeExclusive,
+            projectId: dto.projectId ?? null,
+            includeStatusHistogram,
+            limit,
+            offset,
+          },
+          counted: WORKSPACE_DIGEST_TRANSITIONS_COUNTED,
+          ageCrossingsIncluded: false,
+          commentVolumeIncluded: false,
+        } as Prisma.InputJsonValue,
+      },
+      select: { id: true, createdAt: true },
+    });
+
+    return {
+      ...report,
+      generatedAt: audit.createdAt.toISOString(),
+      auditEventId: audit.id,
       grant: grant.standing
         ? { decision: grant.decision, until: grant.until }
         : {
@@ -678,6 +1101,73 @@ export class TasksService {
     );
 
     return updated;
+  }
+
+  /**
+   * MUN-0077 — agent-safe metadata PATCH. Persists only priority / dueDate /
+   * estimateHours / sprintId. Never touches title, description or status.
+   * Returns the updated task plus the activity row id written in the same
+   * transaction so a caller can pin the write without a second read.
+   */
+  async updateMetadata(taskId: string, actor: Actor, dto: UpdateTaskMetadataDto) {
+    const updates: Partial<{
+      priority: string;
+      dueDate: string | null;
+      estimateHours: number | null;
+      sprintId: string | null;
+    }> = {};
+    if (dto.priority !== undefined) updates.priority = dto.priority;
+    if (dto.dueDate !== undefined) updates.dueDate = dto.dueDate;
+    if (dto.estimateHours !== undefined) updates.estimateHours = dto.estimateHours;
+    if (dto.sprintId !== undefined) updates.sprintId = dto.sprintId;
+
+    if (Object.keys(updates).length === 0) {
+      throw new BadRequestException(
+        'At least one agent-safe metadata field is required (priority, dueDate, estimateHours, sprintId).',
+      );
+    }
+
+    const task = await this.findOne(taskId);
+    const project = await this.prisma.project.findUnique({
+      where: { id: task.projectId },
+    });
+    if (!project) {
+      throw new NotFoundException('Project not found');
+    }
+
+    const data: Prisma.TaskUncheckedUpdateInput = {};
+    if (updates.priority !== undefined) data.priority = updates.priority;
+    if (updates.dueDate !== undefined) data.dueDate = updates.dueDate;
+    if (updates.estimateHours !== undefined) {
+      data.estimateHours =
+        updates.estimateHours != null
+          ? new Prisma.Decimal(updates.estimateHours)
+          : null;
+    }
+    if (updates.sprintId !== undefined) data.sprintId = updates.sprintId;
+
+    const { updated, auditEventId } = await this.prisma.$transaction(
+      async (tx) => {
+        const u = await tx.task.update({ where: { id: taskId }, data });
+        await this.fieldStateService.recompute(tx, u);
+        const audit = await tx.activityLog.create({
+          data: {
+            workspaceId: project.workspaceId,
+            taskId: task.id,
+            actorType: actor.type,
+            actorId: actor.id,
+            action: 'task:updated',
+            payload: updates as Prisma.InputJsonValue,
+          },
+          select: { id: true },
+        });
+        return { updated: u, auditEventId: audit.id };
+      },
+      { timeout: 10_000, isolationLevel: 'ReadCommitted' },
+    );
+
+    this.kanbanService.notify(project.id, 'task:updated', updated);
+    return { ...updated, auditEventId };
   }
 
   async update(
@@ -1046,6 +1536,56 @@ export class TasksService {
 
   async getActivity(taskId: string, page: number, limit: number, humanUserId?: string) {
     return this.activityService.findForTask(taskId, page, limit, humanUserId);
+  }
+
+  /**
+   * MUN-0070 — direct children of a parent task (`parentId = :taskId`).
+   *
+   * Parent readability uses the same gate as `findOne` / other `:taskId`
+   * sub-routes. Agents that hold task scope on the parent receive the same
+   * bodyless columns as the project index (`titleSha256`, no plain title or
+   * description) for every direct child — enough to reconcile custody without
+   * turning parent assignment into a free-text sibling dump. Humans receive
+   * full child rows narrowed by `humanTaskWhere`.
+   */
+  async listChildren(parentId: string, humanUserId?: string) {
+    await this.findOne(parentId, humanUserId);
+
+    if (humanUserId) {
+      const tasks = await this.prisma.task.findMany({
+        where: { parentId, ...humanTaskWhere(humanUserId) },
+        orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+      });
+      return {
+        parentId,
+        counted: TASK_CHILDREN_COUNTED,
+        total: tasks.length,
+        projection: 'full' as const,
+        tasks,
+      };
+    }
+
+    const rows = await this.prisma.task.findMany({
+      where: { parentId },
+      select: PROJECT_INDEX_SELECT,
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+    });
+    const tasks = rows.map(({ title, ...rest }) => ({
+      ...rest,
+      titleSha256: createHash('sha256').update(title, 'utf8').digest('hex'),
+    }));
+    return {
+      parentId,
+      counted: TASK_CHILDREN_COUNTED,
+      total: tasks.length,
+      projection: 'bodyless' as const,
+      tasks,
+    };
+  }
+
+  /** MUN-0078 — bodyless comment projection (action=comment only). */
+  async getComments(taskId: string, page: number, limit: number, humanUserId?: string) {
+    return this.activityService.findCommentsForTask(taskId, page, limit, humanUserId);
   }
 }
 

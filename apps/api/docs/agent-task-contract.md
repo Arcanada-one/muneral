@@ -118,6 +118,25 @@ An edge blocks when it is unsatisfied and points the blocking way:
 An edge is **satisfied** once the counterpart reaches `done`, `cancelled` or
 `archived`.
 
+#### Scheduling predicate vs accepted-output admission (KCLIVE-12)
+
+`GET /tasks/:taskId/readiness` is a **scheduling** predicate only. It answers
+"may start work against native dependency edges?" and treats `cancelled` and
+`archived` predecessors as satisfied the same way as `done`. It does **not**
+assert that a predecessor produced accepted output or that a plan acceptance
+contract was met.
+
+Accepted-output admission for plan graphs lives on a separate route:
+
+- `POST /tasks/:taskId/plan/readiness` — for `required_for_acceptance` edges,
+  readiness requires both a native terminal status **and**
+  `acceptedOutputSatisfied: true`. A cancelled or archived predecessor with
+  `acceptedOutputSatisfied: false` returns `ready: false` with reason
+  `accepted_output_missing`. Optional plan edges never block.
+
+See also [`docs/reference/kclive-10-command-plan-graph.md`](../../../docs/reference/kclive-10-command-plan-graph.md)
+for the plan-graph surface that owns `POST .../plan/readiness`.
+
 ### `GET /tasks/:taskId/dependency-graph`
 
 Every edge touching the task, both directions, with the counterpart's `id`,
@@ -171,19 +190,25 @@ secondary data source.
 |---|---|---|
 | `GET /agents/tasks` | yes — own assignments across the key's workspace | ApiKeyGuard (agent self-list) |
 | `GET /tasks/:id` | yes | `task` (assigned) |
+| `GET /tasks/:id/identity` | yes | `task` (only `id`, `projectId`, `status`) |
 | `GET /tasks/:id/readiness` | yes | `task` |
 | `GET /tasks/:id/dependency-graph` | yes | `task` |
 | `GET /tasks/:id/dependencies` | yes | `task` |
 | `GET /tasks/:id/activity` | yes | `task` |
+| `GET /tasks/:id/comments` | yes — bodyless comment projection (MUN-0078) | `task` |
 | `POST /tasks/:id/comments` | yes | `task` |
+| `PATCH /tasks/:id` | yes — agent-safe metadata only (`priority`, `dueDate`, `estimateHours`, `sprintId`); title/description/status refused | `task` (creator or assigned) |
 | `PATCH /tasks/:id/status` | yes | `task-status` (creator or executor) |
 | `GET /tasks/project/:projectId` | yes, narrowed to own assignments | `project` |
 | `POST /tasks` | yes | `project-write` |
 | `GET /tasks/:id/field-changes`, `POST /tasks/:id/field-ack` | yes | `task-workspace` |
+| `GET /projects/tasks/:taskId/git-refs` | yes | `task` (MUN-0079) |
 | `GET /tasks` (filtered query) | **no — 403** | unscoped — **never use with an agent key** |
 | `DELETE /tasks/:id` | **no — 403** | unscoped |
 | `POST /tasks/:id/dependencies`, `DELETE /tasks/:id/dependencies/:depId` | yes, creator or executor of both endpoints in own workspace | `task-dependency` |
-| checklist routes | **no — 403** | unscoped |
+| `GET /tasks/:id/checklist` | yes | `task` (MUN-0080; read-only) |
+| `POST` / `PATCH` / `DELETE` checklist routes | **no — 403** | unscoped (writes stay JWT-only) |
+| `POST /projects/git-refs`, `DELETE /projects/git-refs/:refId` | **no — 403** | unscoped (writes stay JWT-only) |
 
 ### Refusal diagnosis (machine-readable for consumers)
 
@@ -225,8 +250,10 @@ The slug uses lowercase letters, digits and hyphens, with at most 50 characters;
 the name must be nonempty and at most 200 characters. Concurrent requests with
 the same workspace, slug and properties return the same project. Conflicting
 properties or an ambiguous existing slug return `409`. Project deletion, Git
-reference writes, workspace creation and membership writes remain unscoped for
-agent keys and return `403`.
+reference **writes** (`POST /projects/git-refs`, `DELETE /projects/git-refs/:refId`),
+workspace creation and membership writes remain unscoped for agent keys and
+return `403`. Git reference **reads** (`GET /projects/tasks/:taskId/git-refs`)
+are scoped `'task'` (MUN-0079).
 
 ## Writing task dependencies with an agent key
 
@@ -279,6 +306,7 @@ Always pair the status with `/readiness`.
 
 - **MUN-0043** — agent keys reached `/tasks/*` at all; allowlist scoping introduced.
 - **MUN-0045/0046/0047** — task creation, comments, activity read scoped in turn.
+- **MUN-0078** — `GET /tasks/:id/comments` bodyless comment projection.
 - **MUN-0054** — the defect this document records: `/tasks/:id` served no
   dependency field and the only dependency route answered `403` to an agent key,
   so an executor had no authorized way to distinguish "unblocked" from "not
@@ -292,3 +320,5 @@ Always pair the status with `/readiness`.
 - **MUN-0066** — documented per-runtime key issuance (JWT + protected credential
   path, Collective cross-link) so activity attribution stops collapsing onto one
   shared `actorId`. See [`agent-key-issuance.md`](agent-key-issuance.md).
+- **MUN-0080** — scoped `GET /tasks/:id/checklist` with `'task'` (read-only);
+  checklist writes remain unscoped / JWT-only.

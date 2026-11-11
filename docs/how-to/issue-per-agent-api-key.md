@@ -25,7 +25,10 @@ scripts/issue-agent-key.sh \
 ```
 
 4. Point only that runtime's process env / MCP config at the new key.
-5. Confirm attribution: status and comment activity from two runtimes must show
+5. Confirm self-identity: `GET /agents/me` with the new key returns that
+   runtime's `id` / `workspaceId` / `name` (MUN-0071; see
+   `docs/reference/agents-me.md`).
+6. Confirm attribution: status and comment activity from two runtimes must show
    two different `actorId` values.
 
 ## Collective parallel

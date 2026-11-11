@@ -4,6 +4,8 @@
 # pattern is muneral #106). Source path ADDENDUM-RESULT.md §1.5 was unavailable
 # on this host; YAML follows the Muneral task body.
 version: 2
+# pip ecosystem: none — no requirements.txt/pyproject at package roots in this repo (graph-admission tools are vendored).
+# github-actions ecosystem remains omitted (BATCH-003 / SEC-0039).
 updates:
   - package-ecosystem: npm
     directory: /

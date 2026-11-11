@@ -165,6 +165,78 @@ describe('KCLIVE-10 plan-graph unit surface', () => {
       );
     });
 
+    // KCLIVE-12 contrast with legacy GET /tasks/:id/readiness: plan readiness
+    // requires acceptedOutputSatisfied on required_for_acceptance edges.
+    // Layer: unit (evaluatePlanReadiness) — no HTTP e2e suite boots PlanGraph
+    // with caller-supplied states; the controller delegates to this pure fn.
+    it('archived with acceptedOutputSatisfied:false is not ready (accepted_output_missing)', () => {
+      const snapshot: PlanSnapshotV1 = {
+        schema: 'MuneralPlanSnapshot/v1',
+        rootTaskId: 'r',
+        revision: 1,
+        nodes: [{ nodeId: 'dep' }, { nodeId: 'work' }],
+        edges: [
+          {
+            fromNodeId: 'dep',
+            toNodeId: 'work',
+            acceptanceRole: 'required_for_acceptance',
+          },
+        ],
+        planDigest: '0'.repeat(64),
+      };
+      const result = evaluatePlanReadiness(
+        snapshot,
+        new Map([
+          [
+            'dep',
+            {
+              nodeId: 'dep',
+              status: 'archived',
+              acceptedOutputSatisfied: false,
+            },
+          ],
+        ]),
+        'work',
+      );
+      expect(result.ready).toBe(false);
+      expect(result.blockedBy).toEqual([
+        { fromNodeId: 'dep', reason: 'accepted_output_missing' },
+      ]);
+    });
+
+    it('done with acceptedOutputSatisfied:true is ready for required_for_acceptance', () => {
+      const snapshot: PlanSnapshotV1 = {
+        schema: 'MuneralPlanSnapshot/v1',
+        rootTaskId: 'r',
+        revision: 1,
+        nodes: [{ nodeId: 'dep' }, { nodeId: 'work' }],
+        edges: [
+          {
+            fromNodeId: 'dep',
+            toNodeId: 'work',
+            acceptanceRole: 'required_for_acceptance',
+          },
+        ],
+        planDigest: '0'.repeat(64),
+      };
+      const result = evaluatePlanReadiness(
+        snapshot,
+        new Map([
+          [
+            'dep',
+            {
+              nodeId: 'dep',
+              status: 'done',
+              acceptedOutputSatisfied: true,
+            },
+          ],
+        ]),
+        'work',
+      );
+      expect(result.ready).toBe(true);
+      expect(result.blockedBy).toHaveLength(0);
+    });
+
     it('optional edges never block readiness', () => {
       const snapshot: PlanSnapshotV1 = {
         schema: 'MuneralPlanSnapshot/v1',
@@ -182,6 +254,40 @@ describe('KCLIVE-10 plan-graph unit surface', () => {
       };
       const result = evaluatePlanReadiness(snapshot, new Map(), 'work');
       expect(result.ready).toBe(true);
+      expect(result.blockedBy).toHaveLength(0);
+    });
+
+    it('optional predecessor with missing accepted output still does not block', () => {
+      const snapshot: PlanSnapshotV1 = {
+        schema: 'MuneralPlanSnapshot/v1',
+        rootTaskId: 'r',
+        revision: 1,
+        nodes: [{ nodeId: 'research' }, { nodeId: 'work' }],
+        edges: [
+          {
+            fromNodeId: 'research',
+            toNodeId: 'work',
+            acceptanceRole: 'optional',
+          },
+        ],
+        planDigest: '0'.repeat(64),
+      };
+      const result = evaluatePlanReadiness(
+        snapshot,
+        new Map([
+          [
+            'research',
+            {
+              nodeId: 'research',
+              status: 'todo',
+              acceptedOutputSatisfied: false,
+            },
+          ],
+        ]),
+        'work',
+      );
+      expect(result.ready).toBe(true);
+      expect(result.blockedBy).toHaveLength(0);
     });
   });
 

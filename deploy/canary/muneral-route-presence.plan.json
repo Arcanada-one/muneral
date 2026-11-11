@@ -527,6 +527,17 @@
    ]
   },
   {
+   "id": "route-patch-tasks-taskid",
+   "kind": "route_presence",
+   "method": "PATCH",
+   "route": "/api/v1/tasks/:taskId",
+   "path": "/api/v1/tasks/00000000-0000-4000-8000-000000000000",
+   "entities": [
+    "route:PATCH /tasks/:taskId",
+    "code_unit:apps/api/src/tasks/tasks.controller.ts"
+   ]
+  },
+  {
    "id": "route-patch-tasks-taskid-status",
    "kind": "route_presence",
    "method": "PATCH",

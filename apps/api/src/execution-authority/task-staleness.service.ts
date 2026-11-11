@@ -12,7 +12,7 @@ import { humanTaskWhere } from '../auth/human-task-visibility.js';
 // task with a running attempt gets a real `healthy`/`stalled` verdict, timed
 // from that attempt's `startedAt` (falling back to `issuedAt` for the
 // vanishingly short window between issue and start).
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { agentOwnTaskWhere } from '../auth/agent-task-visibility.js';
 
@@ -27,6 +27,16 @@ export interface TaskStalenessEntry {
 }
 
 const DEFAULT_THRESHOLD_MS = 24 * 3_600_000; // 24h
+
+// MUN-0065: NaN/Infinity/non-positive thresholds previously made
+// `ageMs > thresholdMs` false and reported running attempts as healthy.
+function assertValidThresholdMs(thresholdMs: number): void {
+  if (!Number.isFinite(thresholdMs) || thresholdMs <= 0) {
+    throw new BadRequestException(
+      'Staleness threshold must be a positive finite number of milliseconds.',
+    );
+  }
+}
 
 @Injectable()
 export class TaskStalenessService {
@@ -46,6 +56,7 @@ export class TaskStalenessService {
     now: Date = new Date(),
     humanUserId?: string,
   ): Promise<TaskStalenessEntry[]> {
+    assertValidThresholdMs(thresholdMs);
     const tasks = await this.prisma.task.findMany({
       where: {
         projectId,
@@ -67,6 +78,7 @@ export class TaskStalenessService {
     thresholdMs: number = DEFAULT_THRESHOLD_MS,
     now: Date = new Date(),
   ): Promise<TaskStalenessEntry> {
+    assertValidThresholdMs(thresholdMs);
     const state = await this.prisma.taskExecutionState.findUnique({
       where: { taskId },
     });

@@ -23,10 +23,23 @@ import {
   resolveActiveStatusThresholds,
   ThresholdValidationError,
 } from './active-status-staleness.report.js';
+import {
+  resolveStatusTransitionWindow,
+  WindowValidationError as StatusTransitionWindowValidationError,
+} from './status-transition-counts.report.js';
+import {
+  resolveTransitionReportWindow,
+  WindowValidationError as TransitionReportWindowValidationError,
+} from './transition-report.report.js';
 import { CreateTaskDto } from './dto/create-task.dto.js';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto.js';
+import { UpdateTaskMetadataDto } from './dto/update-task-metadata.dto.js';
 import { QueryTasksDto } from './dto/query-tasks.dto.js';
 import { QueryWorkspaceDigestDto } from './dto/query-workspace-digest.dto.js';
+import { QueryWorkspaceDigestTransitionsDto } from './dto/query-workspace-digest-transitions.dto.js';
+import {
+  DigestTransitionWindowError,
+} from './workspace-digest-transitions.report.js';
 import { AddDependencyDto } from './dto/add-dependency.dto.js';
 import { CreateChecklistItemDto } from './dto/create-checklist-item.dto.js';
 import { AddCommentDto } from './dto/add-comment.dto.js';
@@ -69,21 +82,24 @@ type AuthRequest = Request & {
  * on every route that is not explicitly marked `@AgentScope(...)`. The one
  * additional project-grant path is the explicit metadata marker on `findOne`;
  * it returns only a narrow task projection. Routes with no scope marker —
- * delete, checklists — stay exactly as JWT-only as they
+ * delete and checklist writes — stay exactly as JWT-only as they
  * were; the only visible difference is that a valid key is now told 403
- * instead of 401.
+ * instead of 401. MUN-0077 adds `PATCH /tasks/:taskId` under `'task'` for
+ * agent-safe metadata only (not title/status). MUN-0080 scopes
+ * `GET …/checklist` read-only (`'task'`).
  *
  * MUN-0047 — `GET /tasks/:taskId/activity` is scoped the same way (below).
  * Before this, `POST /tasks/:taskId/comments` (MUN-0046) was write-only to an
  * agent key: the comment landed in the ActivityLog but no route an agent key
- * could reach ever read it back — `getActivity` was unmarked (403) and there
- * is no separate `GET .../comments` route at all. A write no writer can read
- * back is not an audit trail. Deliberately reused `'task'`, not a new kind:
- * reading a task's history requires the same assignment `findOne` and
- * `updateStatus` already require, and `ActivityService.findForTask` returns
- * full `ActivityLog` rows including `payload.body` for a `comment` action, so
- * this one route also makes a dedicated `GET .../comments` unnecessary — see
- * `docs/agent-read-loop.md` for the measurement.
+ * could reach ever read it back — `getActivity` was unmarked (403). A write no
+ * writer can read back is not an audit trail. Deliberately reused `'task'`,
+ * not a new kind: reading a task's history requires the same assignment
+ * `findOne` already requires, and `ActivityService.findForTask` returns full
+ * `ActivityLog` rows including `payload.body` for a `comment` action.
+ *
+ * MUN-0078 — `GET /tasks/:taskId/comments` is the bodyless comment collection
+ * agents need without scraping mixed activity. Same `'task'` scope; response
+ * projects only id/createdAt/actorType/actorId/body.
  *
  * MUN-0045 — `POST /tasks` (`create`) is one exception: it is marked
  * `@AgentScope('project-write')`, because task creation with a `mun_sk_` key
@@ -157,6 +173,45 @@ export class TasksController {
   }
 
   /**
+   * MUN-0069 — transition-sourced workspace digest counts.
+   *
+   * Declared BEFORE `@Get('digest')` and `@Get(':taskId')` so Nest does not
+   * treat `digest/transitions` as a task id or as the plain digest route.
+   * Same workspace-digest grant as A2-284; does not invent a second grant list.
+   */
+  @Get('digest/transitions')
+  @AgentScope('workspace-digest')
+  digestTransitions(
+    @Req() req: AuthRequest,
+    @Query() dto: QueryWorkspaceDigestTransitionsDto,
+  ) {
+    const scope = req.agentScope;
+    if (
+      !scope ||
+      scope.kind !== 'workspace-digest' ||
+      !scope.workspaceDigestGrant ||
+      !scope.workspaceId
+    ) {
+      throw new ForbiddenException(
+        'The workspace task digest is available only to an agent API key holding a digest grant (A2-284).',
+      );
+    }
+    try {
+      return this.tasksService.digestTransitionsForWorkspace(
+        scope.workspaceId,
+        scope.agentId,
+        scope.workspaceDigestGrant,
+        dto,
+      );
+    } catch (err) {
+      if (err instanceof DigestTransitionWindowError) {
+        throw new BadRequestException(err.message);
+      }
+      throw err;
+    }
+  }
+
+  /**
    * A2-284 — the workspace task digest, for an agent key holding a grant.
    *
    * Declared with the other literal path BEFORE `@Get(':taskId')`, for the
@@ -189,6 +244,22 @@ export class TasksController {
       scope.agentId,
       scope.workspaceDigestGrant,
       dto,
+    );
+  }
+
+  /**
+   * MUN-0064 — exact-task identity without returning the task card. The existing
+   * `task` guard retains the same creator/assignment/workspace boundary as the
+   * other task reads; ordinary authentication bookkeeping remains unchanged.
+   * Declared BEFORE `@Get(':taskId')` so the literal `/identity` segment is not
+   * swallowed by the parameterised card route.
+   */
+  @Get(':taskId/identity')
+  @AgentScope('task')
+  getIdentity(@Param('taskId') taskId: string, @Req() req: AuthRequest) {
+    return this.tasksService.findIdentity(
+      taskId,
+      req.actor.type === 'human' ? req.actor.id : undefined,
     );
   }
 
@@ -354,22 +425,132 @@ export class TasksController {
   }
 
   /**
+   * MUN-0075 — status-transition counts (activity_log `task:status_changed`).
+   *
+   * Same project-index grant as `GET .../index`. Required half-open UTC window
+   * via `startInclusiveUtc` / `endExclusiveUtc`. Invalid windows → HTTP 400.
+   * Never PATCHes status. rates/comparability stay NOT_MEASURED.
+   */
+  @Get('project/:projectId/status-transition-counts')
+  @AgentScope('project-index')
+  getStatusTransitionCounts(
+    @Param('projectId') projectId: string,
+    @Req() req: AuthRequest,
+    @Query() query: Record<string, unknown>,
+  ) {
+    const scope = req.agentScope;
+    if (!scope || scope.kind !== 'project-index' || !scope.projectReadGrant) {
+      throw new ForbiddenException(
+        'The status-transition counts report is available only to an agent API key holding a read grant (MUN-0052/MUN-0075).',
+      );
+    }
+    let window;
+    try {
+      window = resolveStatusTransitionWindow(query);
+    } catch (err) {
+      if (err instanceof StatusTransitionWindowValidationError) {
+        throw new BadRequestException(err.message);
+      }
+      throw err;
+    }
+    return this.tasksService.statusTransitionCountsForProject(
+      projectId,
+      scope.agentId,
+      scope.projectReadGrant,
+      window,
+    );
+  }
+
+  /**
+   * MUN-0076 — transition report (statusCounts + task:status_changed edges).
+   *
+   * Same project-index grant as `GET .../index`. Required half-open UTC window
+   * via `startInclusiveUtc` / `endExclusiveUtc`. Invalid windows → HTTP 400.
+   * Never PATCHes status. rates/comparability stay NOT_MEASURED.
+   */
+  @Get('project/:projectId/transition-report')
+  @AgentScope('project-index')
+  getTransitionReport(
+    @Param('projectId') projectId: string,
+    @Req() req: AuthRequest,
+    @Query() query: Record<string, unknown>,
+  ) {
+    const scope = req.agentScope;
+    if (!scope || scope.kind !== 'project-index' || !scope.projectReadGrant) {
+      throw new ForbiddenException(
+        'The transition report is available only to an agent API key holding a read grant (MUN-0052/MUN-0076).',
+      );
+    }
+    let window;
+    try {
+      window = resolveTransitionReportWindow(query);
+    } catch (err) {
+      if (err instanceof TransitionReportWindowValidationError) {
+        throw new BadRequestException(err.message);
+      }
+      throw err;
+    }
+    return this.tasksService.transitionReportForProject(
+      projectId,
+      scope.agentId,
+      scope.projectReadGrant,
+      window,
+    );
+  }
+
+  /**
    * MUN-0040: turns "this task has been in_progress too long" into a number.
    * Tri-valued on purpose — `not_measured` for any in_progress task with no
    * MUN-0020 execution-authority recording is never reported as healthy or
    * stalled (see TaskStalenessService header). Same agent-key narrowing as
    * `findByProject` above, for the same cross-tenant reason (MUN-0043).
+   *
+   * MUN-0065: optional `thresholdHours` must be a single positive finite
+   * number of hours. Invalid scalars (NaN/Infinity/blank/zero/negative/
+   * repeated/structured/overflowing) return HTTP 400 before evaluation so
+   * they never produce a false healthy/stalled report.
    */
   @Get('project/:projectId/staleness')
   @AgentScope('project')
   getStalenessReport(
     @Param('projectId') projectId: string,
     @Req() req: AuthRequest,
-    @Query('thresholdHours') thresholdHours?: string,
+    @Query() query: Record<string, unknown>,
   ) {
-    const thresholdMs = thresholdHours
-      ? Number(thresholdHours) * 3_600_000
-      : undefined;
+    const thresholdKeys = Object.keys(query).filter(
+      (key) => key === 'thresholdHours' || key.startsWith('thresholdHours['),
+    );
+    if (thresholdKeys.some((key) => key !== 'thresholdHours')) {
+      throw new BadRequestException(
+        'thresholdHours must be a single positive finite number of hours.',
+      );
+    }
+
+    const rawThreshold = query.thresholdHours;
+    let thresholdMs: number | undefined;
+    if (rawThreshold !== undefined) {
+      if (
+        typeof rawThreshold !== 'string' ||
+        !/^\+?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i.test(rawThreshold.trim())
+      ) {
+        throw new BadRequestException(
+          'thresholdHours must be a single positive finite number of hours.',
+        );
+      }
+      const hours = Number(rawThreshold.trim());
+      thresholdMs = hours * 3_600_000;
+      if (
+        !Number.isFinite(hours) ||
+        hours <= 0 ||
+        !Number.isFinite(thresholdMs) ||
+        thresholdMs <= 0
+      ) {
+        throw new BadRequestException(
+          'thresholdHours must be a single positive finite number of hours.',
+        );
+      }
+    }
+
     return this.stalenessService.reportForProject(
       projectId,
       thresholdMs,
@@ -403,6 +584,22 @@ export class TasksController {
     @Body() dto: UpdateTaskStatusDto,
   ) {
     return this.tasksService.updateStatus(taskId, req.actor, dto);
+  }
+
+  /** MUN-0077 — agent-safe metadata only (priority / dueDate / estimateHours /
+   *  sprintId). Title, description and status are refused by the DTO whitelist
+   *  (`forbidNonWhitelisted`); status moves stay on `PATCH .../status`. Scoped
+   *  `'task'` — creator or assigned agent in the key's own workspace (same
+   *  own-task predicate as GET/comment). Returns the updated task plus
+   *  `auditEventId` of the `task:updated` activity row. */
+  @Patch(':taskId')
+  @AgentScope('task')
+  updateMetadata(
+    @Param('taskId') taskId: string,
+    @Req() req: AuthRequest,
+    @Body() dto: UpdateTaskMetadataDto,
+  ) {
+    return this.tasksService.updateMetadata(taskId, req.actor, dto);
   }
 
   /** MUN-0049. Removes one secret-shaped span, named by scanner rule and
@@ -465,7 +662,14 @@ export class TasksController {
 
   // --- Checklist ---
 
+  /**
+   * MUN-0080 — agent-readable checklist for a task the key can already read.
+   * Marked `@AgentScope('task')` so a `mun_sk_` key is not refused by the
+   * MUN-0043 allowlist. POST/PATCH/DELETE checklist routes stay unmarked
+   * (JWT-only writes).
+   */
   @Get(':taskId/checklist')
+  @AgentScope('task')
   getChecklist(@Param('taskId') taskId: string, @Req() req: AuthRequest) {
     return this.tasksService.getChecklist(taskId, req.actor.type === 'human' ? req.actor.id : undefined);
   }
@@ -494,6 +698,24 @@ export class TasksController {
     @Param('itemId') itemId: string,
   ) {
     return this.tasksService.deleteChecklistItem(taskId, itemId);
+  }
+
+  // --- Children (MUN-0070) ---
+
+  /**
+   * MUN-0070 — direct children of this task (`parentId = :taskId`).
+   *
+   * Scoped `'task'`: the same assignment/membership gate as `findOne`. Agent
+   * keys receive bodyless rows (`titleSha256`); human JWTs receive full rows
+   * narrowed by workspace membership. Does not PATCH statuses.
+   */
+  @Get(':taskId/children')
+  @AgentScope('task')
+  listChildren(@Param('taskId') taskId: string, @Req() req: AuthRequest) {
+    return this.tasksService.listChildren(
+      taskId,
+      req.actor.type === 'human' ? req.actor.id : undefined,
+    );
   }
 
   // --- Assignees ---
@@ -583,10 +805,33 @@ export class TasksController {
     return this.tasksService.addComment(taskId, req.actor, dto.body);
   }
 
+  /**
+   * MUN-0078 — list comments for a task the key can read.
+   *
+   * Bodyless projection over `activity_log` rows with `action=comment`:
+   * `{ data: [{ id, createdAt, actorType, actorId, body }], total, page, limit }`.
+   * Same `'task'` scope (and therefore the same 403 shape) as
+   * `GET /tasks/:taskId` / `GET .../activity` / `POST .../comments`.
+   */
+  @Get(':taskId/comments')
+  @AgentScope('task')
+  getComments(
+    @Param('taskId') taskId: string,
+    @Req() req: AuthRequest,
+    @Query('page') page = '1',
+    @Query('limit') limit = '20',
+  ) {
+    return this.tasksService.getComments(
+      taskId,
+      parseInt(page, 10),
+      parseInt(limit, 10),
+      req.actor.type === 'human' ? req.actor.id : undefined,
+    );
+  }
+
   /** Readable by the assigned agent's API key (MUN-0047) or by a JWT. Returns
-   *  the full `ActivityLog` rows for the task, comment bodies included — this
-   *  is the only read surface for a comment an agent key posted (MUN-0046),
-   *  and there is no separate comments route to keep in sync with this one. */
+   *  the full `ActivityLog` rows for the task, comment bodies included. The
+   *  dedicated comments projection is `GET .../comments` (MUN-0078). */
   @Get(':taskId/activity')
   @AgentScope('task')
   getActivity(

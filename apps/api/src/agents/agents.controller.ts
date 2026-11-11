@@ -53,6 +53,16 @@ export class AgentsController {
   }
 
   /**
+   * MUN-0071 — self-identity for the presenting API key.
+   * Agent key only; never enumerates sibling agents (no GET /agents list).
+   */
+  @Get('me')
+  @UseGuards(ApiKeyGuard)
+  me(@Req() req: Request & { apiKeyAgent: Agent; apiKeyId: string }) {
+    return this.agentsService.selfIdentity(req.apiKeyAgent, req.apiKeyId);
+  }
+
+  /**
    * Called by the human dashboard (JWT) or by an agent's long-lived API key.
    *
    * MUN-0051: the key is scoped (`'task-assign'`). Before, `JwtOrApiKeyGuard`
@@ -85,6 +95,16 @@ export class AgentsController {
 
   // --- API Key lifecycle ---
 
+  /**
+   * MUN-0072 — non-secret metadata for the presenting API key itself.
+   * Agent key only; never enumerates sibling keys (no GET /agents/:id/keys list).
+   */
+  @Get('keys/self')
+  @UseGuards(ApiKeyGuard)
+  ownApiKey(@Req() req: Request & { apiKeyAgent: Agent; apiKeyId: string }) {
+    return this.agentsService.ownApiKeyProjection(req.apiKeyId, req.apiKeyAgent.id);
+  }
+
   @Post(':agentId/keys')
   @UseGuards(JwtAuthGuard)
   createApiKey(
@@ -92,6 +112,18 @@ export class AgentsController {
     @Body() body: { label?: string },
   ) {
     return this.agentsService.createApiKey(agentId, body.label);
+  }
+
+  /**
+   * MUN-0074 — rotate the presenting agent API key. Declared before
+   * `keys/:keyId/rotate` so `self` is never captured as a JWT keyId (prod
+   * measured that shadowing as HTTP 401 for mun_sk_ callers).
+   */
+  @Post('keys/self/rotate')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(ApiKeyGuard)
+  rotateOwnApiKey(@Req() req: Request & { apiKeyAgent: Agent; apiKeyId: string }) {
+    return this.agentsService.rotateOwnApiKey(req.apiKeyId, req.apiKeyAgent);
   }
 
   @Post('keys/:keyId/rotate')

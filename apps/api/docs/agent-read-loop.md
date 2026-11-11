@@ -109,6 +109,24 @@ assignments**:
 | `GET /tasks/project/:projectId` | only the tasks in that project the agent is assigned to; `404` if the project is not in the agent's workspace |
 | `PATCH /tasks/:taskId/status` | the transition, if the agent is assigned to the task — otherwise `403` |
 
+## Updating agent-safe metadata (MUN-0077)
+
+`PATCH /tasks/:taskId` was missing entirely (`404 Cannot PATCH`), so an agent
+key that needed to correct priority or due date had no route short of borrowing
+a human token — and any attempt to send `title` or `status` on a generic PATCH
+was undefined. The route now accepts an agent key under the same `'task'` scope
+as GET/comment (creator or assigned, own workspace) and a JWT. The body may
+carry only `priority`, `dueDate`, `estimateHours` and/or `sprintId`; at least
+one is required. `title`, `description`, `status`, `projectId`, `parentId`,
+`contractDigest`, `tags` and any other property are refused with `400` before
+mutation. Status moves stay on `PATCH /tasks/:taskId/status`. A successful
+write returns the updated task plus `auditEventId` of the `task:updated`
+activity row.
+
+| route | an agent key gets |
+|---|---|
+| `PATCH /tasks/:taskId` | updates agent-safe metadata on a task it created or is assigned to — otherwise `403`; abusive fields → `400` |
+
 ## Creating a task with the agent key (MUN-0045)
 
 `POST /tasks` was closed to every agent key — even a well-formed request got
@@ -143,26 +161,29 @@ The comment is attributed to the calling agent regardless of what the request
 body claims: `AddCommentDto` carries only `body`, and the actor comes from the
 credential (`req.actor`, via `ActorInterceptor`), never from the request.
 
-Remaining unmarked routes on `/tasks` — delete and checklists — stay JWT-only,
-refused with `403` for a valid key rather than granted. Dependency **reads**
-(`/dependencies`, `/dependency-graph`, `/readiness`) are scoped `'task'`
-(MUN-0054). Dependency **writes** (`POST`/`DELETE …/dependencies`) are scoped
-`'task-dependency'` (creator or executor of both endpoints in the key's
-workspace) — see [`agent-task-contract.md`](agent-task-contract.md). This is
-not a claim that every write an agent needs is now open; see
-`universal-program/cards/MUN-0046-*.md` for the full route sweep this card
-produced and which of those routes are `not_measured` for agent intent.
+Remaining unmarked routes on `/tasks` — delete and checklist **writes** — stay
+JWT-only, refused with `403` for a valid key rather than granted. Checklist
+**reads** (`GET …/checklist`) are scoped `'task'` (MUN-0080) so an assigned
+agent can map evidence to acceptance criteria without inventing free-text
+substitutes. Dependency **reads** (`/dependencies`, `/dependency-graph`,
+`/readiness`) are scoped `'task'` (MUN-0054). Dependency **writes**
+(`POST`/`DELETE …/dependencies`) are scoped `'task-dependency'` (creator or
+executor of both endpoints in the key's workspace) — see
+[`agent-task-contract.md`](agent-task-contract.md).
+`GET /projects/tasks/:taskId/git-refs` is scoped `'task'` (MUN-0079); git-ref
+**writes** stay unmarked. This is not a claim that every write an agent needs
+is now open; see `universal-program/cards/MUN-0046-*.md` for the full route
+sweep this card produced and which of those routes are `not_measured` for
+agent intent.
 
 ## Reading activity with the agent key (MUN-0047)
 
-MUN-0046 opened `POST /tasks/:taskId/comments` but no route an agent key could
-reach ever read that content back: `GET /tasks/:taskId/activity` was unmarked
-(`403`), and there is no separate `GET /tasks/:taskId/comments` route at all —
-an agent could write a record neither it nor any other agent could ever read.
-`getActivity` now accepts an agent key too, **scoped to the agent's own
-assignment** — the identical `'task'` scope (and the identical
-`assertAssignedToTask` check) `POST .../comments` already uses, since reading
-a task's history is bounded by the same assignment as acting on it:
+MUN-0046 opened `POST /tasks/:taskId/comments` but initially no route an agent
+key could reach ever read that content back: `GET /tasks/:taskId/activity` was
+unmarked (`403`). `getActivity` now accepts an agent key too, **scoped to the
+agent's own assignment** — the identical `'task'` scope `POST .../comments`
+already uses, since reading a task's history is bounded by the same assignment
+as acting on it. MUN-0078 later adds the dedicated comments collection (below).
 
 | route | an agent key gets |
 |---|---|
@@ -195,14 +216,34 @@ input contract.
 
 `ActivityService.findForTask` returns the full stored row, so a `comment`
 action's response includes `payload.body` verbatim — the same content
-`POST .../comments` accepted. **This is why no dedicated `GET
-.../comments` route was added**: the activity stream already carries comment
-bodies in full, unfiltered, and a second route returning the same rows in a
-different shape would be duplication to maintain, not a new capability.
-Because reading and posting share one scope check, there is no separate
-"read-only" abuse case here distinct from the negative control: an unassigned
-agent (same workspace) and an agent from another workspace both get the same
-`403` an unassigned agent already gets on `POST .../comments`.
+`POST .../comments` accepted. Activity remains the mixed audit stream
+(status moves, assignments, comments, …).
+
+## Listing comments with the agent key (MUN-0078)
+
+Measured 2026-11-10: `GET /tasks/:taskId/comments` answered HTTP 404 while
+`POST .../comments` returned 201 and comment rows appeared only inside
+`GET .../activity` (`action=comment`). Agents needed a bodyless collection of
+prior comments without scraping the mixed activity stream.
+
+| route | an agent key gets |
+|---|---|
+| `GET /tasks/:taskId/comments` | comment projection for the task, if the agent created or is assigned to it — otherwise `403` (same `'task'` scope as `GET /tasks/:taskId`) |
+
+```http
+GET /api/v1/tasks/550e8400-e29b-41d4-a716-446655440000/comments?page=1&limit=20
+Authorization: Bearer mun_sk_<key>
+```
+
+Response envelope: `{ "data": [...], "total": N, "page": 1, "limit": 20 }`.
+Each `data` row is `{ id, createdAt, actorType, actorId, body }` — no
+`workspaceId`, no raw `payload` object, no non-comment activity actions.
+Paging defaults and caveats match `GET .../activity` (offset pages; no snapshot
+token; `parseInt` on query values with no documented malformed-input contract).
+
+Because listing and posting share one scope check, an unassigned agent (same
+workspace) and an agent from another workspace both get the same `403`
+`POST .../comments` already returns.
 
 ## Reading a project's task index with a read grant (MUN-0052)
 
@@ -220,6 +261,9 @@ with `until` still ahead, may read that project's task **index**:
 |---|---|
 | `GET /tasks/project/:projectId/index` | with a live grant for that project: `{projectId, counted, total, generatedAt, auditEventId, auditReadCount, grant, tasks}`, one row per task of the project (all statuses) with `id, parentId, status, priority, actorType, createdAt, updatedAt, titleSha256`; without one — no grant, expired, another project, another workspace, unknown or malformed id — `404`, the answer an unknown project gets. A JWT gets `403`. |
 | `GET /tasks/project/:projectId/active-status-staleness` | MUN-0067, same project-index grant: ages `in_progress` / `review` / `blocked` by `generatedAt − updatedAt` into soft/hard buckets (defaults `softDays=3`, `hardDays=14`). Bodyless fields only (`autoPatch: false` — never PATCHes status). Invalid threshold query values → `400`. Same 404/403 refusal shape as the index. Offline recipe: apply `buildActiveStatusStalenessReport` in `src/tasks/active-status-staleness.report.ts` to a stored index envelope. See `docs/reference/active-status-staleness.md`. |
+| `GET /tasks/digest/transitions` | MUN-0069, same workspace-digest grant as `GET /tasks/digest` (A2-284): half-open window over `task:status_changed` only; optional bodyless status histogram; age crossings excluded (use MUN-0067). No second grant list. See `docs/reference/workspace-digest-transitions.md`. |
+| `GET /tasks/project/:projectId/status-transition-counts` | MUN-0075, same project-index grant: counts `activity_log` rows with action `task:status_changed` for the project's current task cohort inside a required half-open UTC window (`startInclusiveUtc`, `endExclusiveUtc`). Invalid windows → `400`. `transitions.verdict=MEASURED`; `rates`/`comparability` stay `NOT_MEASURED`. `autoPatch: false`. Same 404/403 refusal shape as the index. See `docs/reference/status-transition-counts.md`. |
+| `GET /tasks/project/:projectId/transition-report` | MUN-0076, same project-index grant: current cohort `statusCounts` plus `activity_log` rows with action `task:status_changed` inside a required half-open UTC window (`startInclusiveUtc`, `endExclusiveUtc`). Returns UTC `dailyCounts` and from→to `edgeCounts`. Invalid windows → `400`. `statusCounts`/`transitions` verdicts `MEASURED`; `rates`/`comparability` stay `NOT_MEASURED`. `autoPatch: false`. Same 404/403 refusal shape as the index. See `docs/reference/transition-report.md`. |
 
 - No free text: the title leaves as a sha256, the description, bootstrap stamp,
   creator id and revision do not leave at all.
@@ -227,10 +271,30 @@ with `until` still ahead, may read that project's task **index**:
   `{projectId, decision, rowCount}`) and returns its id as `auditEventId`, with
   `auditReadCount` — this agent's index reads on record in the workspace, this
   one included — read back from the same table. The active-status staleness
-  route writes `project:active_status_staleness_read` the same way.
-- The grant opens the index and the active-status staleness report. `GET /tasks/:taskId`, activity, comments,
-  status, redactions, assign, checklists, dependencies and the project list and
+  route writes `project:active_status_staleness_read` the same way. The
+  status-transition-counts route writes `project:status_transition_counts_read`
+  and the transition-report route writes `project:transition_report_read` the
+  same way.
+- The grant opens the index, the active-status staleness report, the
+  status-transition counts report, and the transition report. `GET /tasks/:taskId`, activity, comments,
+  status, redactions, assign, checklists, dependencies, children (MUN-0070) and the project list and
   execution-staleness routes answer a granted key exactly as they answer any other key.
+  MUN-0065: `GET /tasks/project/:projectId/staleness` optional `thresholdHours`
+  must be a single positive finite number of hours (default 24 when omitted);
+  invalid values return HTTP `400` before evaluation and never a false
+  healthy/stalled report.
+
+## Listing direct children of a parent (MUN-0070)
+
+`GET /tasks/:taskId/children` answers with the direct children of a parent the
+caller can already read under `@AgentScope('task')` (assignment) or a human JWT
+workspace membership. Agents receive bodyless rows
+(`id, parentId, status, priority, actorType, createdAt, updatedAt, titleSha256`)
+plus `{parentId, counted, total, projection:"bodyless"}` — enough to reconcile
+child custody without dumping sibling free text. Humans receive full rows with
+`projection:"full"`, still narrowed by `humanTaskWhere`. Missing or out-of-scope
+parents refuse with the same shape as `GET /tasks/:taskId`. The route never
+PATCHes statuses.
 - A grant is a reviewed code change naming its decision, and it lapses at `until`
   by itself.
 

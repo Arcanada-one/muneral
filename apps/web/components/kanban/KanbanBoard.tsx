@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   DndContext,
   DragEndEvent,
@@ -15,6 +15,9 @@ import { KanbanColumn } from './KanbanColumn';
 import { KanbanCard } from './KanbanCard';
 import { useTasks, useUpdateTaskStatus, type Task } from '@/lib/api/tasks';
 import { createKanbanWsClient, type KanbanWsClient } from '@/lib/ws/kanban';
+import { Button } from '@/components/ui/button';
+import { taskDetailHref } from '@/lib/task-detail-href';
+import { Copy } from 'lucide-react';
 import type { TaskStatus } from '@muneral/types';
 
 interface KanbanBoardProps {
@@ -41,6 +44,76 @@ export function KanbanBoard({ projectId, wsSlug, projSlug }: KanbanBoardProps) {
   const updateStatus = useUpdateTaskStatus();
 
   const tasks = useMemo(() => tasksResult?.data ?? [], [tasksResult]);
+  const getTasksByStatus = useCallback(
+    (status: TaskStatus) => tasks.filter((t) => t.status === status),
+    [tasks],
+  );
+  const visibleTasks = useMemo(
+    () => KANBAN_STATUSES.flatMap((status) => getTasksByStatus(status)),
+    [getTasksByStatus],
+  );
+  const viewKey = JSON.stringify([
+    projectId,
+    wsSlug,
+    projSlug,
+    visibleTasks.map((task) => task.id),
+  ]);
+  const viewToken = useMemo(() => ({ key: viewKey }), [viewKey]);
+  const currentViewTokenRef = useRef<object | null>(viewToken);
+  const pendingCopyRef = useRef<{ viewToken: object } | null>(null);
+  const [copyFeedback, setCopyFeedback] = useState<{
+    viewToken: object;
+    status: 'pending' | 'success' | 'failed';
+  } | null>(null);
+
+  useLayoutEffect(() => {
+    currentViewTokenRef.current = viewToken;
+  }, [viewToken]);
+
+  useEffect(() => {
+    currentViewTokenRef.current = viewToken;
+    return () => {
+      if (currentViewTokenRef.current === viewToken) {
+        currentViewTokenRef.current = null;
+      }
+    };
+  }, [viewToken]);
+
+  const copyVisibleTaskLinks = useCallback(async () => {
+    if (pendingCopyRef.current?.viewToken === viewToken || visibleTasks.length === 0) return;
+
+    const request = { viewToken };
+    pendingCopyRef.current = request;
+    setCopyFeedback({ viewToken, status: 'pending' });
+
+    try {
+      const seen = new Set<string>();
+      const urls = visibleTasks.flatMap((task) => {
+        if (seen.has(task.id)) return [];
+        seen.add(task.id);
+        return [new URL(taskDetailHref(wsSlug, projSlug, task.id), window.location.origin).href];
+      });
+      const clipboard = navigator.clipboard;
+      if (!clipboard || typeof clipboard.writeText !== 'function') {
+        throw new Error('Clipboard is unavailable');
+      }
+      await clipboard.writeText(urls.join('\n'));
+      if (currentViewTokenRef.current === viewToken && pendingCopyRef.current === request) {
+        setCopyFeedback({ viewToken, status: 'success' });
+      }
+    } catch {
+      if (currentViewTokenRef.current === viewToken && pendingCopyRef.current === request) {
+        setCopyFeedback({ viewToken, status: 'failed' });
+      }
+    } finally {
+      if (pendingCopyRef.current === request) {
+        pendingCopyRef.current = null;
+      }
+    }
+  }, [projSlug, visibleTasks, viewToken, wsSlug]);
+
+  const currentCopyFeedback = copyFeedback?.viewToken === viewToken ? copyFeedback : null;
+  const copyIsPending = currentCopyFeedback?.status === 'pending';
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -84,11 +157,6 @@ export function KanbanBoard({ projectId, wsSlug, projSlug }: KanbanBoardProps) {
     }, 10_000);
     return () => clearInterval(timer);
   }, [pollingEnabled, refetch]);
-
-  const getTasksByStatus = useCallback(
-    (status: TaskStatus) => tasks.filter((t) => t.status === status),
-    [tasks],
-  );
 
   const handleDragStart = useCallback(
     (event: { active: { id: string | number } }) => {
@@ -136,6 +204,38 @@ export function KanbanBoard({ projectId, wsSlug, projSlug }: KanbanBoardProps) {
           Live updates paused — polling every 10s
         </div>
       )}
+
+      <div className="mb-3 flex flex-wrap items-center gap-3" role="group" aria-label="Task list actions">
+        <Button
+          type="button"
+          onClick={copyVisibleTaskLinks}
+          disabled={visibleTasks.length === 0 || copyIsPending}
+          aria-describedby="copy-visible-task-links-help"
+        >
+          <Copy className="h-4 w-4" aria-hidden="true" />
+          {copyIsPending ? 'Copying task links…' : 'Copy visible task links'}
+        </Button>
+        <p id="copy-visible-task-links-help" className="text-sm text-muted-foreground">
+          {visibleTasks.length === 0
+            ? 'There are no visible task cards to copy.'
+            : 'Copies links for the task cards currently shown on this board.'}
+        </p>
+        {currentCopyFeedback?.status === 'pending' && (
+          <p role="status" className="basis-full text-sm text-muted-foreground">
+            Copying task links…
+          </p>
+        )}
+        {currentCopyFeedback?.status === 'success' && (
+          <p role="status" className="basis-full text-sm text-green-700">
+            Task links copied.
+          </p>
+        )}
+        {currentCopyFeedback?.status === 'failed' && (
+          <p role="alert" className="basis-full text-sm text-destructive">
+            Could not copy task links. Try again or copy a task link manually.
+          </p>
+        )}
+      </div>
 
       <DndContext
         sensors={sensors}

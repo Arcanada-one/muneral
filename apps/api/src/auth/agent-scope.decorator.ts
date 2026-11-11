@@ -102,7 +102,11 @@ import { SetMetadata } from '@nestjs/common';
  *                      unknown project gets. The index itself returns no free
  *                      text. MUN-0067 reuses this same grant for
  *                      `GET /tasks/project/:projectId/active-status-staleness`
- *                      (bodyless age buckets; never patches status). Separately,
+ *                      (bodyless age buckets; never patches status). MUN-0075
+ *                      reuses it for
+ *                      `GET /tasks/project/:projectId/status-transition-counts`
+ *                      (daily `task:status_changed` counts; never patches
+ *                      status). Separately,
  *                      `GET /tasks/:taskId` keeps this file's existing `'task'`
  *                      kind and may carry `@ProjectReadTaskMetadata()` as a
  *                      route-specific marker: only that handler may use the
@@ -125,6 +129,10 @@ import { SetMetadata } from '@nestjs/common';
  *                      grant file for why that widening is the point of the
  *                      route and what bounds it. Read-only: no write consults
  *                      the list, and the route has no write sibling.
+ *                      MUN-0069 reuses this same grant for
+ *                      `GET /tasks/digest/transitions` (transition-sourced
+ *                      counts; age crossings remain MUN-0067; no second grant
+ *                      list and no grant inferred from task scope).
  */
 export const AGENT_SCOPE_KEY = 'mun0043:agentScope';
 

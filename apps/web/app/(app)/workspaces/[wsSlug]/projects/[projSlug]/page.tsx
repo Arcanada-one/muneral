@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ProjectRepository } from '@/components/project/ProjectRepository';
 import { TASK_STATUS_LABELS } from '@/lib/task-status-labels';
+import { taskDetailHref } from '@/lib/task-detail-href';
 
 function formatBacklogDueDate(value: string): string {
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
@@ -103,7 +104,7 @@ export default function ProjectPage() {
                   <tr key={task.id} className="hover:bg-muted/30 transition-colors">
                     <td className="px-4 py-2.5">
                       <a
-                        href={`/workspaces/${wsSlug}/projects/${projSlug}/tasks/${task.id}`}
+                        href={taskDetailHref(wsSlug, projSlug, task.id)}
                         className="font-medium hover:underline"
                       >
                         {task.title}

@@ -69,7 +69,7 @@ describe('Human task reads isolate workspace membership (real HTTP/PostgreSQL)',
     }
   }, 120_000);
   afterAll(async () => { if (app) await app.close(); await pg.stop(); }, 120_000);
-  const taskRoutes = ['', '/evidence', '/checklist', '/activity', '/dependencies', '/dependency-graph', '/readiness'];
+  const taskRoutes = ['', '/evidence', '/checklist', '/activity', '/children', '/dependencies', '/dependency-graph', '/readiness'];
   const assertDenied = (r: supertest.Response, target: number) => {
     // Express may add a weak validator for the generic error body. It must
     // never expose the protected task's actual, independently measured ETag.
@@ -89,6 +89,9 @@ describe('Human task reads isolate workspace membership (real HTTP/PostgreSQL)',
       if (suffix === '/dependencies') expect(r.body[0]).toMatchObject({ fromTaskId: tasks[i], toTaskId: counterparts[i] });
       if (suffix === '/dependency-graph') expect(r.body[0]).toMatchObject({ otherTaskId: counterparts[i], otherTaskTitle: `Synthetic counterpart ${i}` });
       if (suffix === '/readiness') { expect(r.body).toMatchObject({ taskId: tasks[i], ready: false, dependencyCount: 1 }); expect(r.body.blockedBy[0].otherTaskId).toBe(counterparts[i]); }
+      if (suffix === '/children') {
+        expect(r.body).toMatchObject({ parentId: tasks[i], projection: 'full', total: 0, tasks: [] });
+      }
     });
     it(`principal ${i} foreign populated task ${suffix || 'row'} is denied`, async () => {
       const r = await supertest(app.getHttpServer()).get(`/tasks/${tasks[1-i]}${suffix}`).auth(tokens[i], { type: 'bearer' }).expect(403);

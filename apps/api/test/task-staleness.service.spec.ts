@@ -145,6 +145,21 @@ describe('TaskStalenessService', () => {
 
       expect(result.ageMs).toBe(5 * HOUR);
     });
+
+    // MUN-0065: invalid thresholds must refuse before reading execution state.
+    it('rejects a non-finite or non-positive threshold before reading execution state', async () => {
+      for (const thresholdMs of [Number.NaN, Number.POSITIVE_INFINITY, 0, -1]) {
+        await expect(
+          service.evaluateTask('t1', 'high', thresholdMs, NOW),
+        ).rejects.toMatchObject({
+          response: {
+            message:
+              'Staleness threshold must be a positive finite number of milliseconds.',
+          },
+        });
+      }
+      expect(prisma.taskExecutionState.findUnique).not.toHaveBeenCalled();
+    });
   });
 
   describe('reportForProject', () => {
