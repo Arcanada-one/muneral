@@ -3,6 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service.js';
 import { AuthController } from './auth.controller.js';
+import { getJwtSecret } from './jwt-secret.js';
 import { JwtStrategy } from './strategies/jwt.strategy.js';
 import { GithubStrategy } from './strategies/github.strategy.js';
 import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
@@ -31,7 +32,7 @@ if (process.env.GITHUB_CLIENT_ID) {
     // `Nest can't resolve dependencies of the JwtAuthGuard (?)` 80 times.
     PassportModule.register({}),
     JwtModule.register({
-      secret: process.env.JWT_SECRET ?? 'change-me-in-production',
+      secret: getJwtSecret(),
       signOptions: { expiresIn: '15m' },
     }),
   ],
