@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { AuditLog } from './AuditLog';
 
@@ -89,6 +89,32 @@ function ready(taskId: string, number: number, total: number, limit = 20) {
   });
 }
 
+// Every control under test carries an explicit aria-label. Resolving it through
+// getByLabelText avoids the accessibility-tree walk (getComputedStyle per ancestor)
+// that getByRole performs in jsdom: that walk made the first case cost ~300 ms of
+// pure CPU and let it cross the 5000 ms limit under CI host load (MUN-HYG).
+// The element must still be a real <button>, so the accessible-name contract holds.
+function button(name: string): HTMLButtonElement {
+  const element = screen.getByLabelText(name);
+  expect(element).toBeInstanceOf(HTMLButtonElement);
+  return element as HTMLButtonElement;
+}
+
+function maybeButton(name: string): HTMLElement | null {
+  return screen.queryByLabelText(name);
+}
+
+// The first render in a fresh jsdom worker pays a one-off cold-start cost (module
+// JIT, React and jsdom warm-up, ~190 ms measured). Pay it here, under the hook's own
+// timeout, so the first case is not measured against it.
+beforeAll(() => {
+  ready(taskA, 1, 21);
+  render(<AuditLog taskId={taskA} />);
+  cleanup();
+  state.results.clear();
+  state.requested = [];
+});
+
 beforeEach(() => {
   state.results.clear();
   state.requested = [];
@@ -104,16 +130,16 @@ describe('AuditLog activity pagination', () => {
     render(<AuditLog taskId={taskA} />);
     expect(screen.getByText('Showing 1–20 of 21')).toBeInTheDocument();
     expect(screen.getByText('event-1')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Previous activity page' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Next activity page' })).toBeEnabled();
+    expect(button('Previous activity page')).toBeDisabled();
+    expect(button('Next activity page')).toBeEnabled();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Next activity page' }));
+    fireEvent.click(button('Next activity page'));
     expect(state.requested.at(-1)).toEqual({ taskId: taskA, page: 2 });
     expect(screen.getByText('Showing 21–21 of 21')).toBeInTheDocument();
     expect(screen.getByText('event-21')).toBeInTheDocument();
     expect(screen.queryByText('event-1')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Previous activity page' }));
+    fireEvent.click(button('Previous activity page'));
     expect(state.requested.at(-1)).toEqual({ taskId: taskA, page: 1 });
     expect(screen.getByText('event-1')).toBeInTheDocument();
     expect(screen.queryByText('event-21')).not.toBeInTheDocument();
@@ -131,7 +157,7 @@ describe('AuditLog activity pagination', () => {
     });
 
     const view = render(<AuditLog taskId={taskA} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Next activity page' }));
+    fireEvent.click(button('Next activity page'));
     expect(screen.getByText('event-21')).toBeInTheDocument();
 
     view.rerender(<AuditLog taskId={taskB} />);
@@ -152,8 +178,8 @@ describe('AuditLog activity pagination', () => {
     ready(taskA, 1, 21);
 
     render(<AuditLog taskId={taskA} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Next activity page' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Next activity page' }));
+    fireEvent.click(button('Next activity page'));
+    fireEvent.click(button('Next activity page'));
 
     expect(state.requested.at(-1)).toEqual({ taskId: taskA, page: 1 });
     expect(screen.getByText('Showing 1–20 of 21')).toBeInTheDocument();
@@ -164,7 +190,7 @@ describe('AuditLog activity pagination', () => {
     state.results.set(`${taskA}:1`, { data: undefined, isLoading: true, isError: false, isFetching: true });
     const loading = render(<AuditLog taskId={taskA} />);
     expect(screen.getByText('Loading...')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Next activity page' })).not.toBeInTheDocument();
+    expect(maybeButton('Next activity page')).not.toBeInTheDocument();
     loading.unmount();
 
     state.results.set(`${taskA}:1`, { data: undefined, isLoading: false, isError: true, isFetching: false });
@@ -210,11 +236,11 @@ describe('AuditLog activity pagination', () => {
     });
 
     render(<AuditLog taskId={taskA} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Next activity page' }));
+    fireEvent.click(button('Next activity page'));
 
     expect(screen.getByRole('alert')).toHaveTextContent('Activity is unavailable. Try again later.');
-    expect(screen.getByRole('button', { name: 'Retry activity' })).toBeEnabled();
-    expect(screen.getByRole('button', { name: 'Show newest activity' })).toBeEnabled();
+    expect(button('Retry activity')).toBeEnabled();
+    expect(button('Show newest activity')).toBeEnabled();
     expect(screen.queryByText('event-21')).not.toBeInTheDocument();
   });
 
@@ -229,9 +255,9 @@ describe('AuditLog activity pagination', () => {
     });
 
     const view = render(<AuditLog taskId={taskA} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Retry activity' }));
+    fireEvent.click(button('Retry activity'));
     expect(retryFirstPage).toHaveBeenCalledOnce();
-    expect(screen.queryByRole('button', { name: 'Show newest activity' })).not.toBeInTheDocument();
+    expect(maybeButton('Show newest activity')).not.toBeInTheDocument();
 
     ready(taskA, 1, 1);
     view.rerender(<AuditLog taskId={taskA} />);
@@ -251,10 +277,10 @@ describe('AuditLog activity pagination', () => {
     });
 
     render(<AuditLog taskId={taskA} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Next activity page' }));
+    fireEvent.click(button('Next activity page'));
     expect(screen.queryByText('event-21')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Retry activity' }));
+    fireEvent.click(button('Retry activity'));
     expect(retryPageTwo).toHaveBeenCalledOnce();
     expect(state.requested.at(-1)).toEqual({ taskId: taskA, page: 2 });
     expect(screen.getByRole('alert')).toHaveTextContent('Activity is unavailable. Try again later.');
@@ -271,8 +297,8 @@ describe('AuditLog activity pagination', () => {
     });
 
     render(<AuditLog taskId={taskA} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Next activity page' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Show newest activity' }));
+    fireEvent.click(button('Next activity page'));
+    fireEvent.click(button('Show newest activity'));
 
     expect(state.requested.at(-1)).toEqual({ taskId: taskA, page: 1 });
     expect(screen.getByText('event-1')).toBeInTheDocument();
@@ -291,9 +317,9 @@ describe('AuditLog activity pagination', () => {
     });
 
     render(<AuditLog taskId={taskA} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Next activity page' }));
-    const retry = screen.getByRole('button', { name: 'Retry activity' });
-    const newest = screen.getByRole('button', { name: 'Show newest activity' });
+    fireEvent.click(button('Next activity page'));
+    const retry = button('Retry activity');
+    const newest = button('Show newest activity');
     expect(retry).toBeDisabled();
     expect(newest).toBeDisabled();
 
@@ -323,15 +349,15 @@ describe('AuditLog activity pagination', () => {
     });
 
     const view = render(<AuditLog taskId={taskA} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Next activity page' }));
-    expect(screen.getByRole('button', { name: 'Show newest activity' })).toBeInTheDocument();
+    fireEvent.click(button('Next activity page'));
+    expect(button('Show newest activity')).toBeInTheDocument();
 
     view.rerender(<AuditLog taskId={taskB} />);
     expect(state.requested.at(-1)).toEqual({ taskId: taskB, page: 1 });
-    expect(screen.queryByRole('button', { name: 'Show newest activity' })).not.toBeInTheDocument();
+    expect(maybeButton('Show newest activity')).not.toBeInTheDocument();
     expect(screen.queryByText('event-99')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Retry activity' }));
+    fireEvent.click(button('Retry activity'));
     expect(retryTaskB).toHaveBeenCalledOnce();
     expect(retryTaskA).not.toHaveBeenCalled();
   });
@@ -343,7 +369,7 @@ describe('AuditLog activity pagination', () => {
 
     expect(screen.getByText('Showing 0–0 of 0')).toBeInTheDocument();
     expect(screen.getByText('No activity on this page.')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Previous activity page' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Next activity page' })).toBeDisabled();
+    expect(button('Previous activity page')).toBeDisabled();
+    expect(button('Next activity page')).toBeDisabled();
   });
 });
