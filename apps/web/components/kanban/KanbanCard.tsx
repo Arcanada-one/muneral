@@ -6,6 +6,7 @@ import { GripVertical, Bot, User, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { taskDetailHref } from '@/lib/task-detail-href';
 import type { Task } from '@/lib/api/tasks';
 
 interface KanbanCardProps {
@@ -60,7 +61,7 @@ export function KanbanCard({ task, wsSlug, projSlug }: KanbanCardProps) {
 
       <div className="pl-4">
         <Link
-          href={`/workspaces/${wsSlug}/projects/${projSlug}/tasks/${task.id}`}
+          href={taskDetailHref(wsSlug, projSlug, task.id)}
           className="text-sm font-medium leading-tight hover:underline line-clamp-2"
         >
           {task.title}
