@@ -144,6 +144,15 @@ export class AuthService {
    * - Sets old key to expire in 24h (grace period for in-flight requests)
    */
   async rotateApiKey(keyId: string): Promise<{ key: string; keyId: string }> {
+    // MUN-0074: `self` is reserved for POST /agents/keys/self/rotate (ApiKeyGuard).
+    // Without this guard, JWT POST /agents/keys/:keyId/rotate would treat keyId=self
+    // as a real id and answer 401 — the measured prod shadowing defect.
+    if (keyId === 'self') {
+      throw new BadRequestException(
+        'Use POST /agents/keys/self/rotate with the presenting agent API key',
+      );
+    }
+
     const existing = await this.prisma.apiKey.findUnique({ where: { id: keyId } });
     if (!existing) {
       throw new UnauthorizedException('API key not found');
@@ -159,6 +168,45 @@ export class AuthService {
     await this.prisma.apiKey.update({
       where: { id: keyId },
       data: { expiresAt: new Date(Date.now() + ROTATION_GRACE_MS) },
+    });
+
+    return result;
+  }
+
+  /**
+   * MUN-0074 — agent self-rotation. Rotates ONLY the presenting key: the id
+   * comes from ApiKeyGuard (`apiKeyId`), never from path/body. Creates a
+   * replacement key (plaintext once), applies the same grace `expiresAt` as
+   * JWT rotate, and writes one `agent:api_key_self_rotated` activity row.
+   * Response shape matches JWT rotate: `{ key, keyId }` for the new key only.
+   */
+  async rotateOwnApiKey(
+    keyId: string,
+    agent: { id: string; workspaceId: string },
+  ): Promise<{ key: string; keyId: string }> {
+    const existing = await this.prisma.apiKey.findFirst({
+      where: { id: keyId, agentId: agent.id, revokedAt: null },
+    });
+    if (!existing) {
+      throw new UnauthorizedException('Invalid or expired API key');
+    }
+
+    const result = await this.createApiKey(existing.agentId, existing.label ?? undefined);
+
+    await this.prisma.apiKey.update({
+      where: { id: keyId },
+      data: { expiresAt: new Date(Date.now() + ROTATION_GRACE_MS) },
+    });
+
+    await this.prisma.activityLog.create({
+      data: {
+        workspaceId: agent.workspaceId,
+        taskId: null,
+        actorType: 'agent',
+        actorId: agent.id,
+        action: 'agent:api_key_self_rotated',
+        payload: { oldKeyId: keyId, newKeyId: result.keyId },
+      },
     });
 
     return result;

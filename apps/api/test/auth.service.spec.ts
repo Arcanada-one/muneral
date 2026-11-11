@@ -44,9 +44,13 @@ const makePrisma = () => ({
   },
   apiKey: {
     findUnique: jest.fn(),
+    findFirst: jest.fn(),
     create: jest.fn((args) => Promise.resolve({ id: 'key-1', ...args.data })),
     update: jest.fn((args) => Promise.resolve({ id: args.where.id, ...args.data })),
     findMany: jest.fn().mockResolvedValue([]),
+  },
+  activityLog: {
+    create: jest.fn((args) => Promise.resolve({ id: 'act-1', ...args.data })),
   },
 });
 
@@ -177,6 +181,11 @@ describe('AuthService', () => {
       );
     });
 
+    it('MUN-0074: refuses keyId=self so JWT rotate cannot shadow self-rotate', async () => {
+      await expect(service.rotateApiKey('self')).rejects.toThrow(BadRequestException);
+      expect(prisma.apiKey.findUnique).not.toHaveBeenCalled();
+    });
+
     it('sets old key expires_at to 24h from now (grace period)', async () => {
       const existingKey = {
         id: 'key-1',
@@ -203,6 +212,57 @@ describe('AuthService', () => {
       // Grace period should be ~24h (86400000ms) with some tolerance
       expect(gracePeriodMs).toBeGreaterThan(86_390_000);
       expect(gracePeriodMs).toBeLessThanOrEqual(86_400_000 + (after - before));
+    });
+  });
+
+  describe('rotateOwnApiKey (MUN-0074)', () => {
+    const agent = { id: 'agent-1', workspaceId: 'ws-1' };
+
+    it('throws UnauthorizedException when presenting key is missing or foreign', async () => {
+      prisma.apiKey.findFirst.mockResolvedValue(null);
+      await expect(service.rotateOwnApiKey('key-1', agent)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      expect(prisma.apiKey.create).not.toHaveBeenCalled();
+    });
+
+    it('mints a replacement key, grace-expires the old one, and audits without hashes', async () => {
+      prisma.apiKey.findFirst.mockResolvedValue({
+        id: 'key-1',
+        agentId: 'agent-1',
+        revokedAt: null,
+        label: 'fleet',
+      });
+      prisma.apiKey.create.mockResolvedValue({ id: 'key-2', agentId: 'agent-1' });
+
+      const before = Date.now();
+      const result = await service.rotateOwnApiKey('key-1', agent);
+      const after = Date.now();
+
+      expect(result.keyId).toBe('key-2');
+      expect(result.key.startsWith('mun_sk_')).toBe(true);
+      expect(JSON.stringify(result)).not.toMatch(/keyHash|lookupHash/);
+
+      const findArgs = (prisma.apiKey.findFirst as jest.Mock).mock.calls[0][0];
+      expect(findArgs.where).toEqual({
+        id: 'key-1',
+        agentId: 'agent-1',
+        revokedAt: null,
+      });
+
+      const oldKeyUpdate = (prisma.apiKey.update as jest.Mock).mock.calls.find(
+        (call) => call[0].where?.id === 'key-1',
+      );
+      expect(oldKeyUpdate).toBeDefined();
+      const expiresAt = oldKeyUpdate![0].data.expiresAt as Date;
+      const gracePeriodMs = expiresAt.getTime() - before;
+      expect(gracePeriodMs).toBeGreaterThan(86_390_000);
+      expect(gracePeriodMs).toBeLessThanOrEqual(86_400_000 + (after - before));
+
+      const audit = (prisma.activityLog.create as jest.Mock).mock.calls[0][0];
+      expect(audit.data.action).toBe('agent:api_key_self_rotated');
+      expect(audit.data.payload).toEqual({ oldKeyId: 'key-1', newKeyId: 'key-2' });
+      expect(JSON.stringify(audit.data.payload)).not.toMatch(/keyHash|lookupHash|mun_sk_/);
     });
   });
 
