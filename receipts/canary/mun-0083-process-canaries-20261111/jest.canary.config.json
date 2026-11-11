@@ -1,0 +1,18 @@
+{
+  "rootDir": "/repo/apps/api",
+  "roots": ["/spec"],
+  "testRegex": "kanban-gateway\\.canary\\.spec\\.ts$",
+  "moduleFileExtensions": ["js", "json", "ts", "mjs"],
+  "preset": "ts-jest/presets/default-esm",
+  "extensionsToTreatAsEsm": [".ts"],
+  "transform": {
+    "^.+\\.ts$": ["ts-jest", {"tsconfig": "/repo/apps/api/tsconfig.test.json", "useESM": true, "diagnostics": false}]
+  },
+  "moduleNameMapper": {
+    "^(\\.{1,2}/.*)\\.js$": "$1"
+  },
+  "modulePaths": ["/repo/apps/api/node_modules", "/repo/apps/web/node_modules"],
+  "setupFiles": ["/repo/apps/api/test/setup-env.ts"],
+  "testEnvironment": "node",
+  "cacheDirectory": "/tmp/jest-cache"
+}
