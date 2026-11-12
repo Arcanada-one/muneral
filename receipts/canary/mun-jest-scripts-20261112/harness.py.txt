@@ -1,0 +1,36 @@
+"""JANITOR copy (from the MUN-HYG precedent) of the MUN-0083 process-canary harness. Runs the original CanaryPlan/v2 process probes via the vendored process_observation.run and
+assembles a CanaryResult/v2. Runs INSIDE the private-namespace sandbox: source at /repo, plan at /plan,
+output at /out. It claims nothing the observation does not carry."""
+import hashlib, json, sys
+from datetime import datetime, timezone
+sys.path.insert(0, "/repo/.github/graph-admission/tools/graph")
+import process_observation as po
+raw = open("/plan/plan.json", "rb").read()
+plan = json.loads(raw)
+errs = po.plan_errors(plan)
+if errs:
+    print("PLAN_REFUSED", errs); sys.exit(3)
+probes = []
+for p in plan["probes"]:
+    r = po.run(p, "/repo")
+    probes.append({"id": p["id"], "kind": "process", **r})
+rank = {"verified": 0, "not_measured": 1, "failed": 2}
+rows = []
+ents = {}
+for p in plan["probes"]:
+    for e in p["entities"]:
+        ents.setdefault(e, []).append(p["id"])
+by = {x["id"]: x for x in probes}
+for e, ids in ents.items():
+    worst = max((by[i]["outcome"] for i in ids), key=lambda o: rank[o])
+    rows.append({"entity": e, "verdict": worst, "reason": by[ids[0]]["reason"], "probe_ids": ids})
+doc = {"schema": "CanaryResult/v2",
+       "captured_at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+       "producer": {"tool": "receipts/canary/mun-jest-scripts-20261112/harness.py.txt", "version": "1.0.0"},
+       "model": "none: deterministic process producer",
+       "plan": {"id": plan["id"], "path": "plan.json", "digest": hashlib.sha256(raw).hexdigest()},
+       "environment": plan["environment"], "phase": "pre", "read_only": plan["read_only"],
+       "observation_owner": plan["owner"], "resident_version": None, "subject": plan["subject"],
+       "probes": probes, "entity_verdicts": rows, "source_binding_errors": []}
+open("/out/result.json", "w").write(json.dumps(doc, indent=2) + "\n")
+print("OUTCOMES", {p["id"]: p["outcome"] for p in probes}, "TERM", [p["termination"] for p in probes])

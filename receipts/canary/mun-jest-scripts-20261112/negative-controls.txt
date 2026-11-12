@@ -1,0 +1,29 @@
+== NEG0 control: unmodified tree, probe contract-unit-tests (same raw command, same sandbox)
+ℹ pass 5
+ℹ fail 0
+exit=0
+== NEG1 parser mutant: jest-list-tests.mjs treats every line as a path (the original --json defect); probe contract-unit-tests
+✖ --json listTests output: ONE line holding a JSON array (the MUN-JEST defect) (1.370082ms)
+✖ malformed or non-string JSON array is an error, never a bogus path (0.281539ms)
+✖ zero test files fails closed (1.244862ms)
+ℹ pass 2
+ℹ fail 3
+✖ failing tests:
+exit=1
+== NEG2 fail-closed mutant: assertEnoughTestFiles no longer refuses 0 files; probe contract-unit-tests
+✖ zero test files fails closed (0.938923ms)
+ℹ pass 4
+ℹ fail 1
+✖ failing tests:
+✖ zero test files fails closed (0.938923ms)
+exit=1
+== NEG3 runner mutant: zero-files check removed; probe runner-refuses-zero-files-old-ci-flags (expected exit 1)
+run-jest-isolated: 0 test files discovered (minimum 1)
+exit=0
+== NEG4 runner mutant: listTests output split by lines instead of parsed (the original defect); probe runner-real-run-json-report (expected exit 0)
+run-jest-isolated: 1 test files discovered (minimum 1)
+Test Suites: 1 passed, 1 total
+Tests:       3 passed, 3 total
+  Invalid testPattern ["/repo/apps/api/src/activity/comment-body-from-payload.spec.ts"]|src/activity/comment-body-from-payload.spec.ts supplied. Running all tests instead.
+  Invalid testPattern ["/repo/apps/api/src/activity/comment-body-from-payload.spec.ts"]|src/activity/comment-body-from-payload.spec.ts supplied. Running all tests instead.
+exit=0

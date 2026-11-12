@@ -1,0 +1,299 @@
+{
+  "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces on arcana-devs, source of branch commit c585def401af0888e7c94a7d7ca7f3beed5c8932 (tree c99e23f684304f8e9ace9b4f9a2ab312b248a2fa) mounted read-only at /repo, no network, /tmp is a private tmpfs, NOT a production probe",
+  "id": "muneral-mun-jest-scripts-c585def",
+  "owner": "JANITOR-dev-mun-jest author lane, Muneral task 361f4902-1dd0-4e15-a089-70aae4982aaf",
+  "probes": [
+    {
+      "argv": [
+        "/usr/bin/node",
+        "--test",
+        "apps/api/scripts/run-jest-isolated.test.mjs"
+      ],
+      "artifacts": [],
+      "capture_limit_bytes": 1048576,
+      "cwd": ".",
+      "entities": [
+        "code_unit:apps/api/scripts/jest-list-tests.mjs",
+        "code_unit:apps/api/scripts/run-jest-isolated.test.mjs"
+      ],
+      "env_keys": [
+        "CI",
+        "HOME",
+        "LANG",
+        "NODE_OPTIONS",
+        "NO_COLOR",
+        "PATH",
+        "TMPDIR",
+        "TZ"
+      ],
+      "executable_sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+      "execution_files": [
+        {
+          "attribution": {
+            "kind": "system_executable",
+            "source_id": "/usr/bin/node",
+            "version": "sha256:89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+          },
+          "path": "/usr/bin/node",
+          "sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/scripts/jest-list-tests.mjs",
+          "sha256": "3e13dd3561edba47049b247d88c2e7699e2916dea4cac6ec965b7e5be7755f49"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/scripts/run-jest-isolated.test.mjs",
+          "sha256": "3e74a292452470134c142ce6a0c8b805c8229601c7342bcf3fe9e459cc60b1d5"
+        }
+      ],
+      "expect": {
+        "exit_codes": [
+          0
+        ],
+        "stdout_contains": [
+          "pass 5",
+          "fail 0"
+        ]
+      },
+      "id": "contract-unit-tests",
+      "kind": "process",
+      "mutating": false,
+      "timeout_seconds": 120
+    },
+    {
+      "argv": [
+        "/usr/bin/node",
+        "apps/api/scripts/run-jest-isolated.mjs",
+        "--min-test-files",
+        "1000",
+        "--json"
+      ],
+      "artifacts": [],
+      "capture_limit_bytes": 1048576,
+      "cwd": ".",
+      "entities": [
+        "code_unit:apps/api/scripts/run-jest-isolated.mjs",
+        "code_unit:apps/api/scripts/jest-list-tests.mjs"
+      ],
+      "env_keys": [
+        "CI",
+        "HOME",
+        "LANG",
+        "NODE_OPTIONS",
+        "NO_COLOR",
+        "PATH",
+        "TMPDIR",
+        "TZ"
+      ],
+      "executable_sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+      "execution_files": [
+        {
+          "attribution": {
+            "kind": "system_executable",
+            "source_id": "/usr/bin/node",
+            "version": "sha256:89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+          },
+          "path": "/usr/bin/node",
+          "sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/scripts/run-jest-isolated.mjs",
+          "sha256": "0bd0ee29171631fdc736199f6152ef95b34179338f363eba78f96d6ad05e67ee"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/scripts/jest-list-tests.mjs",
+          "sha256": "3e13dd3561edba47049b247d88c2e7699e2916dea4cac6ec965b7e5be7755f49"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/package.json",
+          "sha256": "0726ca5f358349e2016e8c3da72ee485669417c6f38fe8cdf8f3528c80c3dad4"
+        }
+      ],
+      "expect": {
+        "exit_codes": [
+          1
+        ],
+        "stderr_contains": [
+          "only 127 Jest test files discovered",
+          "expected at least 1000"
+        ]
+      },
+      "id": "runner-refuses-below-minimum",
+      "kind": "process",
+      "mutating": false,
+      "timeout_seconds": 120
+    },
+    {
+      "argv": [
+        "/usr/bin/node",
+        "apps/api/scripts/run-jest-isolated.mjs",
+        "--passWithNoTests",
+        "--json",
+        "nosuchtestpattern_xyz"
+      ],
+      "artifacts": [],
+      "capture_limit_bytes": 1048576,
+      "cwd": ".",
+      "entities": [
+        "code_unit:apps/api/scripts/run-jest-isolated.mjs"
+      ],
+      "env_keys": [
+        "CI",
+        "HOME",
+        "LANG",
+        "NODE_OPTIONS",
+        "NO_COLOR",
+        "PATH",
+        "TMPDIR",
+        "TZ"
+      ],
+      "executable_sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+      "execution_files": [
+        {
+          "attribution": {
+            "kind": "system_executable",
+            "source_id": "/usr/bin/node",
+            "version": "sha256:89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+          },
+          "path": "/usr/bin/node",
+          "sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/scripts/run-jest-isolated.mjs",
+          "sha256": "0bd0ee29171631fdc736199f6152ef95b34179338f363eba78f96d6ad05e67ee"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/scripts/jest-list-tests.mjs",
+          "sha256": "3e13dd3561edba47049b247d88c2e7699e2916dea4cac6ec965b7e5be7755f49"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/package.json",
+          "sha256": "0726ca5f358349e2016e8c3da72ee485669417c6f38fe8cdf8f3528c80c3dad4"
+        }
+      ],
+      "expect": {
+        "exit_codes": [
+          1
+        ],
+        "stderr_contains": [
+          "no Jest test files were discovered (0 found)"
+        ]
+      },
+      "id": "runner-refuses-zero-files-old-ci-flags",
+      "kind": "process",
+      "mutating": false,
+      "timeout_seconds": 120
+    },
+    {
+      "argv": [
+        "/usr/bin/node",
+        "apps/api/scripts/run-jest-isolated.mjs",
+        "--min-test-files",
+        "1",
+        "--json",
+        "--outputFile",
+        "/tmp/jest-report.json",
+        "src/activity/comment-body-from-payload.spec.ts"
+      ],
+      "artifacts": [],
+      "capture_limit_bytes": 1048576,
+      "cwd": ".",
+      "entities": [
+        "code_unit:apps/api/scripts/run-jest-isolated.mjs"
+      ],
+      "env_keys": [
+        "CI",
+        "HOME",
+        "LANG",
+        "NODE_OPTIONS",
+        "NO_COLOR",
+        "PATH",
+        "TMPDIR",
+        "TZ"
+      ],
+      "executable_sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+      "execution_files": [
+        {
+          "attribution": {
+            "kind": "system_executable",
+            "source_id": "/usr/bin/node",
+            "version": "sha256:89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+          },
+          "path": "/usr/bin/node",
+          "sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/scripts/run-jest-isolated.mjs",
+          "sha256": "0bd0ee29171631fdc736199f6152ef95b34179338f363eba78f96d6ad05e67ee"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/scripts/jest-list-tests.mjs",
+          "sha256": "3e13dd3561edba47049b247d88c2e7699e2916dea4cac6ec965b7e5be7755f49"
+        },
+        {
+          "attribution": {
+            "kind": "product_source"
+          },
+          "path": "/repo/apps/api/package.json",
+          "sha256": "0726ca5f358349e2016e8c3da72ee485669417c6f38fe8cdf8f3528c80c3dad4"
+        }
+      ],
+      "expect": {
+        "exit_codes": [
+          0
+        ],
+        "stderr_contains": [
+          "1 test files discovered",
+          "6 passed"
+        ]
+      },
+      "id": "runner-real-run-json-report",
+      "kind": "process",
+      "mutating": false,
+      "timeout_seconds": 120
+    }
+  ],
+  "producer_repository": "/repo",
+  "read_only": true,
+  "schema": "CanaryPlan/v2",
+  "subject": {
+    "commit": "c585def401af0888e7c94a7d7ca7f3beed5c8932",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "d87fc5ae3604c9ff8d203e64a405bdd21b90cd8b1dba3a76a01c09c6341c5aa4",
+      "source_field": "commit"
+    },
+    "schema": "GitCanarySubject/v1",
+    "tree": "c99e23f684304f8e9ace9b4f9a2ab312b248a2fa"
+  }
+}
