@@ -6,10 +6,14 @@
  * or blank the process refuses to start. The message names the variable only,
  * never a value.
  */
+export const MIN_JWT_SECRET_LENGTH = 64;
+
 export function getJwtSecret(): string {
   const secret = process.env.JWT_SECRET;
-  if (secret === undefined || secret.trim() === '') {
-    throw new Error('JWT_SECRET is not set: refusing to start without a JWT signing secret');
+  if (secret === undefined || secret.trim().length < MIN_JWT_SECRET_LENGTH) {
+    throw new Error(
+      `JWT_SECRET must be set and contain at least ${MIN_JWT_SECRET_LENGTH} characters: refusing to start without a valid JWT signing secret`,
+    );
   }
   return secret;
 }

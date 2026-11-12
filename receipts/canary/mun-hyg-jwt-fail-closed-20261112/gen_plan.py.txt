@@ -32,7 +32,7 @@ new["entities"] = ["code_unit:apps/api/src/auth/auth.module.ts", "code_unit:apps
                    "code_unit:apps/api/src/auth/strategies/jwt.strategy.ts", "code_unit:apps/api/src/ws/kanban.gateway.ts",
                    "code_unit:apps/api/src/ws/ws.module.ts"]
 new["execution_files"] = rows
-new["expect"] = {"exit_codes": [0], "stderr_contains": ["Tests:       15 passed, 15 total", "Test Suites: 2 passed, 2 total"]}
+new["expect"] = {"exit_codes": [0], "stderr_contains": ["Tests:       20 passed, 20 total", "Test Suites: 2 passed, 2 total"]}
 plan = {"schema": "CanaryPlan/v2",
         "id": "muneral-hyg-jwt-fail-closed-" + ev["commit"][:7],
         "owner": "MUN-HYG leaf, Muneral task b5245745-f678-4bbd-94f7-0f0083a53df8",

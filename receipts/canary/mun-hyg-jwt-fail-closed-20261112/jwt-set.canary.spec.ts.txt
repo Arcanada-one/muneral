@@ -10,7 +10,7 @@ import { Test } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { io as connect } from '/repo/apps/web/node_modules/socket.io-client/build/esm/index.js';
-import { getJwtSecret } from '/repo/apps/api/src/auth/jwt-secret';
+import { getJwtSecret, MIN_JWT_SECRET_LENGTH } from '/repo/apps/api/src/auth/jwt-secret';
 import { AuthModule } from '/repo/apps/api/src/auth/auth.module';
 import { JwtStrategy } from '/repo/apps/api/src/auth/strategies/jwt.strategy';
 import { WsModule } from '/repo/apps/api/src/ws/ws.module';
@@ -31,6 +31,30 @@ describe('JWT_SECRET set: changed code units behave as before', () => {
   });
 
   it('getJwtSecret returns the configured value', () => { expect(getJwtSecret()).toBe(VALUE); });
+
+  it.each(['x', 'x'.repeat(MIN_JWT_SECRET_LENGTH - 1), `${'x'.repeat(MIN_JWT_SECRET_LENGTH - 1)} `])(
+    'refuses a short value after trimming and does not reveal it',
+    (supplied) => {
+      process.env.JWT_SECRET = supplied;
+      let message = '';
+      try { getJwtSecret(); } catch (error) { message = (error as Error).message; }
+      expect(message).toContain('JWT_SECRET');
+      expect(message).toContain(String(MIN_JWT_SECRET_LENGTH));
+      expect(message).not.toContain(supplied);
+    },
+  );
+
+  it('accepts exactly the minimum length after trimming', () => {
+    const supplied = 'x'.repeat(MIN_JWT_SECRET_LENGTH);
+    process.env.JWT_SECRET = supplied;
+    expect(getJwtSecret()).toBe(supplied);
+  });
+
+  it('accepts a minimum-length secret surrounded by whitespace and preserves the input', () => {
+    const supplied = ` ${'x'.repeat(MIN_JWT_SECRET_LENGTH)} `;
+    process.env.JWT_SECRET = supplied;
+    expect(getJwtSecret()).toBe(supplied);
+  });
 
   it('auth.module.ts registers JwtModule with the configured secret', () => {
     const imports: any[] = Reflect.getMetadata('imports', AuthModule) ?? [];

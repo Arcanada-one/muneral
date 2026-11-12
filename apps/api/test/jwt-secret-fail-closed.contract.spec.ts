@@ -6,14 +6,14 @@ import { jest } from '@jest/globals';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as url from 'node:url';
-import { getJwtSecret } from '../src/auth/jwt-secret.js';
+import { getJwtSecret, MIN_JWT_SECRET_LENGTH } from '../src/auth/jwt-secret.js';
 import { JwtStrategy } from '../src/auth/strategies/jwt.strategy.js';
 import { KanbanGateway } from '../src/ws/kanban.gateway.js';
 
 const apiRoot = path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), '..');
 const srcRoot = path.join(apiRoot, 'src');
 const OLD_PUBLIC_DEFAULT = ['change-me', 'in-production'].join('-');
-const TEST_VALUE = 'contract-test-only-5d2b7c91e0a346f8';
+const TEST_VALUE = 'contract-test-only-' + '5d2b7c91e0a346f8'.repeat(3);
 
 const FOUR_CONSUMERS = [
   'auth/auth.module.ts',
@@ -38,11 +38,33 @@ describe('JWT_SECRET fails closed', () => {
   });
 
   describe('(a) unset or blank: every consumer refuses', () => {
-    it.each([undefined, '', '   '])('getJwtSecret throws for %j and names only the variable', (v) => {
+    it.each([undefined, '', '   ', 'x', 'x'.repeat(63)])('getJwtSecret throws for unset, blank, or short values', (v) => {
       if (v === undefined) delete process.env.JWT_SECRET;
       else process.env.JWT_SECRET = v;
-      expect(() => getJwtSecret()).toThrow(/JWT_SECRET/);
-      expect(() => getJwtSecret()).not.toThrow(new RegExp(OLD_PUBLIC_DEFAULT));
+      let message = '';
+      try {
+        getJwtSecret();
+      } catch (error) {
+        message = (error as Error).message;
+      }
+      expect(message).toContain('JWT_SECRET');
+      expect(message).toContain(String(MIN_JWT_SECRET_LENGTH));
+      if (v) expect(message).not.toContain(v);
+      expect(message).not.toContain(OLD_PUBLIC_DEFAULT);
+    });
+
+    it('rejects a raw 64-character value when trimming makes it too short', () => {
+      const supplied = `${'x'.repeat(63)} `;
+      process.env.JWT_SECRET = supplied;
+      let message = '';
+      try {
+        getJwtSecret();
+      } catch (error) {
+        message = (error as Error).message;
+      }
+      expect(message).toContain('JWT_SECRET');
+      expect(message).toContain('64');
+      expect(message).not.toContain(supplied);
     });
 
     it('JwtStrategy construction (used by auth.module) throws', () => {
@@ -73,6 +95,18 @@ describe('JWT_SECRET fails closed', () => {
     it('getJwtSecret returns the configured value verbatim', () => {
       process.env.JWT_SECRET = TEST_VALUE;
       expect(getJwtSecret()).toBe(TEST_VALUE);
+    });
+
+    it('accepts 64 trimmed characters', () => {
+      const value = 'x'.repeat(64);
+      process.env.JWT_SECRET = value;
+      expect(getJwtSecret()).toBe(value);
+    });
+
+    it('accepts a 64-character value padded with surrounding spaces and returns it verbatim', () => {
+      const value = ` ${'x'.repeat(64)} `;
+      process.env.JWT_SECRET = value;
+      expect(getJwtSecret()).toBe(value);
     });
 
     it('JwtStrategy constructs', () => {
