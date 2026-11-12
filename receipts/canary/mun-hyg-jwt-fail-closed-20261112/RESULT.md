@@ -1,6 +1,6 @@
 # Process canary: JWT_SECRET fails closed (MUN-HYG, task b5245745-f678-4bbd-94f7-0f0083a53df8)
 
-contour=candidate-local. Subject: candidate commit `8bfe508ccbb90285f8540e4acd01145577cde542`, tree `1c1d358774fd15c9963d09a60b3ddd36014d579e` (clean worktree, `dirty=false`, see
+contour=candidate-local. Subject: candidate commit `b9bf519b8fd2236f447dd8bb1e53fd21519eb5f9`, tree `cf0e1e695be50211c4c6733518ee091595eed739` (clean worktree, `dirty=false`, see
 `source-evidence.json`) on base Muneral `main` `ac0a332865a5aa5f27d6c3588ff3180f4f2ef556`. This is NOT a production
 probe and MUST NOT be reported as one. No exemption is written by this record.
 
@@ -61,3 +61,7 @@ not part of any CanaryResult.
 
 Escaped descendants are not proven absent (tool wording). Whether the gate accepts a candidate-local result as the "live
 contour" for these entities is NOT_MEASURED until graph-admission runs.
+
+## Re-run after merge
+
+Re-measured 2026-11-12 on candidate commit `b9bf519b8fd2236f447dd8bb1e53fd21519eb5f9` and tree `cf0e1e695be50211c4c6733518ee091595eed739`, with base main `df0313b3548ba315c45ebea28b0446fce4dc8c05`. The process probe exited 0; all 5 code-unit entities remain `verified`; both WS route entities remain `NOT_MEASURED` under the preserved refusal in `route-attempt.txt`. The two specs passed 15/15, and the seven sandboxed negative controls all exited 1 (killed), as listed in `negative-controls.txt`. `SHA256SUMS.txt` binds every record file; all record files are mode 100644. No exemption was added.

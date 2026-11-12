@@ -36,7 +36,7 @@ new["expect"] = {"exit_codes": [0], "stderr_contains": ["Tests:       15 passed,
 plan = {"schema": "CanaryPlan/v2",
         "id": "muneral-hyg-jwt-fail-closed-" + ev["commit"][:7],
         "owner": "MUN-HYG leaf, Muneral task b5245745-f678-4bbd-94f7-0f0083a53df8",
-        "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces on arcana-devs, source of candidate commit %s (tree %s; base main ac0a332865a5aa5f27d6c3588ff3180f4f2ef556) mounted read-only at /repo, no network, NOT a production probe" % (ev["commit"], ev["tree"]),
+        "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces on arcana-devs, source of candidate commit %s (tree %s; base main df0313b3548ba315c45ebea28b0446fce4dc8c05) mounted read-only at /repo, no network, NOT a production probe" % (ev["commit"], ev["tree"]),
         "read_only": True, "producer_repository": "/repo", "probes": [new],
         "subject": {"commit": ev["commit"], "evidence": {"path": "source-evidence.json", "sha256": sha(evid), "source_field": "commit"},
                     "schema": "GitCanarySubject/v1", "tree": ev["tree"]}}

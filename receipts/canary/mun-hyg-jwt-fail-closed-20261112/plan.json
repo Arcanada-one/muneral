@@ -1,6 +1,6 @@
 {
-  "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces on arcana-devs, source of candidate commit 8bfe508ccbb90285f8540e4acd01145577cde542 (tree 1c1d358774fd15c9963d09a60b3ddd36014d579e; base main ac0a332865a5aa5f27d6c3588ff3180f4f2ef556) mounted read-only at /repo, no network, NOT a production probe",
-  "id": "muneral-hyg-jwt-fail-closed-8bfe508",
+  "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces on arcana-devs, source of candidate commit b9bf519b8fd2236f447dd8bb1e53fd21519eb5f9 (tree cf0e1e695be50211c4c6733518ee091595eed739; base main df0313b3548ba315c45ebea28b0446fce4dc8c05) mounted read-only at /repo, no network, NOT a production probe",
+  "id": "muneral-hyg-jwt-fail-closed-b9bf519",
   "owner": "MUN-HYG leaf, Muneral task b5245745-f678-4bbd-94f7-0f0083a53df8",
   "probes": [
     {
@@ -264,13 +264,13 @@
   "read_only": true,
   "schema": "CanaryPlan/v2",
   "subject": {
-    "commit": "8bfe508ccbb90285f8540e4acd01145577cde542",
+    "commit": "b9bf519b8fd2236f447dd8bb1e53fd21519eb5f9",
     "evidence": {
       "path": "source-evidence.json",
-      "sha256": "60bc2d76673c69efbf18030eacacf21cf9e82ae5a50601e88fe29a42dc1881a7",
+      "sha256": "df7a97740ce5252623de7ed541fefc0b264ccfdcf9c60520c745ed3b09cac0b2",
       "source_field": "commit"
     },
     "schema": "GitCanarySubject/v1",
-    "tree": "1c1d358774fd15c9963d09a60b3ddd36014d579e"
+    "tree": "cf0e1e695be50211c4c6733518ee091595eed739"
   }
 }

@@ -1,30 +1,30 @@
 {
   "schema": "CanaryResult/v2",
-  "captured_at_utc": "2026-11-11T22:54:03Z",
+  "captured_at_utc": "2026-11-12T02:06:29Z",
   "producer": {
     "tool": "receipts/canary/mun-hyg-jwt-fail-closed-20261112/harness.py.txt",
     "version": "1.0.0"
   },
   "model": "none: deterministic process producer",
   "plan": {
-    "id": "muneral-hyg-jwt-fail-closed-8bfe508",
+    "id": "muneral-hyg-jwt-fail-closed-b9bf519",
     "path": "plan.json",
-    "digest": "5a49b5d3600190f0dabcdbb661dff66f2016326e42ca9f3f70d94f5680986e27"
+    "digest": "5b54c3043d628eb8c7311017653c4557b3b13a0ac388056715a5aff001f10bc7"
   },
-  "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces on arcana-devs, source of candidate commit 8bfe508ccbb90285f8540e4acd01145577cde542 (tree 1c1d358774fd15c9963d09a60b3ddd36014d579e; base main ac0a332865a5aa5f27d6c3588ff3180f4f2ef556) mounted read-only at /repo, no network, NOT a production probe",
+  "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces on arcana-devs, source of candidate commit b9bf519b8fd2236f447dd8bb1e53fd21519eb5f9 (tree cf0e1e695be50211c4c6733518ee091595eed739; base main df0313b3548ba315c45ebea28b0446fce4dc8c05) mounted read-only at /repo, no network, NOT a production probe",
   "phase": "pre",
   "read_only": true,
   "observation_owner": "MUN-HYG leaf, Muneral task b5245745-f678-4bbd-94f7-0f0083a53df8",
   "resident_version": null,
   "subject": {
-    "commit": "8bfe508ccbb90285f8540e4acd01145577cde542",
+    "commit": "b9bf519b8fd2236f447dd8bb1e53fd21519eb5f9",
     "evidence": {
       "path": "source-evidence.json",
-      "sha256": "60bc2d76673c69efbf18030eacacf21cf9e82ae5a50601e88fe29a42dc1881a7",
+      "sha256": "df7a97740ce5252623de7ed541fefc0b264ccfdcf9c60520c745ed3b09cac0b2",
       "source_field": "commit"
     },
     "schema": "GitCanarySubject/v1",
-    "tree": "1c1d358774fd15c9963d09a60b3ddd36014d579e"
+    "tree": "cf0e1e695be50211c4c6733518ee091595eed739"
   },
   "probes": [
     {
@@ -51,9 +51,9 @@
         "TMPDIR",
         "TZ"
       ],
-      "elapsed_ms": 12905.855,
-      "started_at_utc": "2026-11-11T22:53:50.408392+00:00",
-      "finished_at_utc": "2026-11-11T22:54:03.636071+00:00",
+      "elapsed_ms": 8728.999,
+      "started_at_utc": "2026-11-12T02:06:20.034507+00:00",
+      "finished_at_utc": "2026-11-12T02:06:29.074617+00:00",
       "execution_files": [
         {
           "path": "/node/bin/node",
@@ -328,14 +328,14 @@
       "artifacts": [],
       "streams": {
         "stdout": {
-          "captured_bytes": 216,
-          "sha256": "bee26fa345c0e4f2446ecaf8942c12b855226dc16c36ebb4123817323b7790cc",
+          "captured_bytes": 214,
+          "sha256": "07f58ed18b3ca9d00722c49b0293a210937feb44a08354f7d67e4533dd9a092e",
           "capture": "digest_only",
           "truncated": false
         },
         "stderr": {
-          "captured_bytes": 12012,
-          "sha256": "d55e3b489f946d346cfdeae403d0a4714a968a03f23380b67ab0a1dbfec1e6aa",
+          "captured_bytes": 12023,
+          "sha256": "8b51910bc30cea9ad840a465ad47833b4343ce389418b36424ad32a04303e348",
           "capture": "digest_only",
           "truncated": false
         }
