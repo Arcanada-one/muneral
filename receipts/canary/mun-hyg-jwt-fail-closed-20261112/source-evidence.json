@@ -1,9 +1,9 @@
 {
-  "captured_at_utc": "2026-11-12T02:05:15Z",
-  "commit": "b9bf519b8fd2236f447dd8bb1e53fd21519eb5f9",
+  "captured_at_utc": "2026-11-12T03:35:12Z",
+  "commit": "fcb6674286b6ae91abd6f31ea4ebef883e1b1fb3",
   "dirty": false,
-  "producer": "git rev-parse/status in clean merged worktree (candidate branch mun-hyg/mun-jwt-secret-fail-closed-20261112, post-#428 origin/main df0313b3548ba315c45ebea28b0446fce4dc8c05; MUN-HYG leaf, task b5245745)",
+  "producer": "git rev-parse/status in clean tracked worktree (candidate branch mun-hyg/mun-jwt-secret-fail-closed-20261112, post-#428 origin/main df0313b3548ba315c45ebea28b0446fce4dc8c05; MUN-HYG leaf, task b5245745)",
   "repository_path": "/repo",
   "schema": "MeasuredGitSource/v1",
-  "tree": "cf0e1e695be50211c4c6733518ee091595eed739"
+  "tree": "81b1da009529c8b45f040a72c9bfc0e8494524bd"
 }

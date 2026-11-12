@@ -37,3 +37,5 @@ M4 kanban.gateway fallback: 1 failed, 14 passed, 15 total.
 M5 helper accepts blank: 5 failed, 10 passed, 15 total.
 M6 ws.module fixed secret: 1 failed, 14 passed, 15 total.
 M7 kanban.gateway fixed secret: 4 failed, 11 passed, 15 total.
+
+M8 minimum-length check removed (mutant changes the helper to reject only blank values): raw Jest exited 1; 3 failed, 17 passed, 20 total. The three short-value assertions killed the mutant.

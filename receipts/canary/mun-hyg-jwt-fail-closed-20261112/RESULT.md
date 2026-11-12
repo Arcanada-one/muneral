@@ -65,3 +65,9 @@ contour" for these entities is NOT_MEASURED until graph-admission runs.
 ## Re-run after merge
 
 Re-measured 2026-11-12 on candidate commit `b9bf519b8fd2236f447dd8bb1e53fd21519eb5f9` and tree `cf0e1e695be50211c4c6733518ee091595eed739`, with base main `df0313b3548ba315c45ebea28b0446fce4dc8c05`. The process probe exited 0; all 5 code-unit entities remain `verified`; both WS route entities remain `NOT_MEASURED` under the preserved refusal in `route-attempt.txt`. The two specs passed 15/15, and the seven sandboxed negative controls all exited 1 (killed), as listed in `negative-controls.txt`. `SHA256SUMS.txt` binds every record file; all record files are mode 100644. No exemption was added.
+
+## Re-run on the JWT minimum-length candidate
+
+Candidate-local subject: commit fcb6674286b6ae91abd6f31ea4ebef883e1b1fb3, tree 81b1da009529c8b45f040a72c9bfc0e8494524bd, based on origin/main df0313b3548ba315c45ebea28b0446fce4dc8c05. This is not a production probe. The process canary exited 0: 2 suites and 20/20 tests passed; all five code-unit entities are verified, source_binding_errors is empty, and both WS route entities remain NOT_MEASURED because route-attempt.txt records the tool's refusal. Escaped descendants remain unproven absent.
+
+The seven previous negative controls remain historical observations on this same product commit with the prior 15-test canary harness (7/7 mutants killed). The added M8 control removed the minimum-length check and ran against the expanded 20-test harness: it exited 1 with 3 failed and 17 passed, killing the mutant. These are not represented as a single uniform test run. The result and plan are regenerated for the current 20-test harness. No exemption was added.

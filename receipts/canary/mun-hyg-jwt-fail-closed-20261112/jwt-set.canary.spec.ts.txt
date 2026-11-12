@@ -6,6 +6,7 @@
 // jest setup file (apps/api/test/setup-env.ts, in setupFiles) gave JWT_SECRET: an explicit non-public test value.
 const VALUE = process.env.JWT_SECRET as string;
 
+import { afterEach } from '@jest/globals';
 import { Test } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { IoAdapter } from '@nestjs/platform-socket.io';
@@ -25,6 +26,8 @@ const tok = (s: JwtService, sub: string, type = 'access') => s.sign({ sub, type 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 describe('JWT_SECRET set: changed code units behave as before', () => {
+  afterEach(() => { process.env.JWT_SECRET = VALUE; });
+
   it('the test environment provides a non-empty, non-default value', () => {
     expect(typeof VALUE).toBe('string'); expect(VALUE.length).toBeGreaterThan(16);
     expect(VALUE).not.toBe(['change-me', 'in-production'].join('-'));

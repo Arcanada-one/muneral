@@ -1,6 +1,6 @@
 {
-  "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces on arcana-devs, source of candidate commit b9bf519b8fd2236f447dd8bb1e53fd21519eb5f9 (tree cf0e1e695be50211c4c6733518ee091595eed739; base main df0313b3548ba315c45ebea28b0446fce4dc8c05) mounted read-only at /repo, no network, NOT a production probe",
-  "id": "muneral-hyg-jwt-fail-closed-b9bf519",
+  "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces on arcana-devs, source of candidate commit fcb6674286b6ae91abd6f31ea4ebef883e1b1fb3 (tree 81b1da009529c8b45f040a72c9bfc0e8494524bd; base main df0313b3548ba315c45ebea28b0446fce4dc8c05) mounted read-only at /repo, no network, NOT a production probe",
+  "id": "muneral-hyg-jwt-fail-closed-fcb6674",
   "owner": "MUN-HYG leaf, Muneral task b5245745-f678-4bbd-94f7-0f0083a53df8",
   "probes": [
     {
@@ -55,10 +55,10 @@
           "attribution": {
             "kind": "system_executable",
             "source_id": "/spec/jwt-set.canary.spec.ts",
-            "version": "sha256:44e53b9c12930d561ad88445ee2b8a0f262e56346c863d4109eb7c9898245497"
+            "version": "sha256:72d27765db4c89792f702eee71ac391f5fff4768f667c9278a656f8e953a2a6d"
           },
           "path": "/spec/jwt-set.canary.spec.ts",
-          "sha256": "44e53b9c12930d561ad88445ee2b8a0f262e56346c863d4109eb7c9898245497"
+          "sha256": "72d27765db4c89792f702eee71ac391f5fff4768f667c9278a656f8e953a2a6d"
         },
         {
           "attribution": {
@@ -88,7 +88,7 @@
             "kind": "product_source"
           },
           "path": "/repo/apps/api/src/auth/jwt-secret.ts",
-          "sha256": "c9924dd26f2ad3833f8bb2a74d7efc92680da035e82f64a6df9f7a5c68cfb746"
+          "sha256": "f11eb1669a625ef9befeb52032a44f708c07814ce992e24540b996df3c1acd74"
         },
         {
           "attribution": {
@@ -137,7 +137,7 @@
             "kind": "product_source"
           },
           "path": "/repo/apps/api/test/setup-env.ts",
-          "sha256": "5f9c2ed5f9629a27050721cd2ad8f43c3c74b3e22626d44c8be930cc7f9e6483"
+          "sha256": "41098e59d15c9d57181a9c1b068fb9395624996c0c3ef25f15bdbdc4461e67bb"
         },
         {
           "attribution": {
@@ -250,7 +250,7 @@
           0
         ],
         "stderr_contains": [
-          "Tests:       15 passed, 15 total",
+          "Tests:       20 passed, 20 total",
           "Test Suites: 2 passed, 2 total"
         ]
       },
@@ -264,13 +264,13 @@
   "read_only": true,
   "schema": "CanaryPlan/v2",
   "subject": {
-    "commit": "b9bf519b8fd2236f447dd8bb1e53fd21519eb5f9",
+    "commit": "fcb6674286b6ae91abd6f31ea4ebef883e1b1fb3",
     "evidence": {
       "path": "source-evidence.json",
-      "sha256": "df7a97740ce5252623de7ed541fefc0b264ccfdcf9c60520c745ed3b09cac0b2",
+      "sha256": "07df778457bbaf396765dfcbde41ad296e05701eaef0c68b3f7b3372d20f7d57",
       "source_field": "commit"
     },
     "schema": "GitCanarySubject/v1",
-    "tree": "cf0e1e695be50211c4c6733518ee091595eed739"
+    "tree": "81b1da009529c8b45f040a72c9bfc0e8494524bd"
   }
 }
