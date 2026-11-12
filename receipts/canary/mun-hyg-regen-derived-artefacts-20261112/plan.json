@@ -1,6 +1,6 @@
 {
-  "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces, source at candidate commit a81b59dcb8495ed366755d95aa309d3081ef3f30 (tree b3e3ec25c80fa7a7ac56f106324799fa2796913a) mounted read-only at /repo, private tmpfs /tmp, no network; NOT a GitHub Actions or production run",
-  "id": "muneral-mun-hyg-regen-derived-artefacts-a81b59d",
+  "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces, source at candidate commit e4688f63f51b73d5f50808b2d65aa708f247a086 (tree ccf7a6b03ecf06b1ebeccb55b3ef674115c46d07) mounted read-only at /repo, read-only Git metadata exposed as GIT_DIR only for origin/main negative control, private tmpfs /tmp, no network; NOT a GitHub Actions or production run",
+  "id": "muneral-mun-hyg-regen-derived-artefacts-e4688f6",
   "owner": "MUN-HYG author, Muneral task 7b377cb0-0ba4-44dc-825f-73c242d16746",
   "producer_repository": "/repo",
   "probes": [
@@ -22,10 +22,12 @@
       ],
       "env_keys": [
         "CI",
+        "GIT_DIR",
+        "GIT_WORK_TREE",
         "HOME",
         "LANG",
-        "NO_COLOR",
         "NODE_OPTIONS",
+        "NO_COLOR",
         "PATH",
         "TMPDIR",
         "TZ"
@@ -43,17 +45,26 @@
         },
         {
           "attribution": {
+            "kind": "system_executable",
+            "source_id": "/usr/bin/git",
+            "version": "sha256:eb54b535467e0975c1284d4c4d08eea779aeb248a5d34b02e2ee171382e22201"
+          },
+          "path": "/usr/bin/git",
+          "sha256": "eb54b535467e0975c1284d4c4d08eea779aeb248a5d34b02e2ee171382e22201"
+        },
+        {
+          "attribution": {
             "kind": "product_source"
           },
           "path": "/repo/.github/workflows/regenerate-derived-artefacts.yml",
-          "sha256": "9000d025e08b2be6141f8c0cbf26dae956e0cfad5fb0311c2c1b7fe92f723580"
+          "sha256": "20dc7571ef008e692591a55c70e877c98070adc6d18600db714761010aff15fd"
         },
         {
           "attribution": {
             "kind": "product_source"
           },
           "path": "/repo/apps/api/test/regenerate-derived-artefacts.workflow.contract.spec.ts",
-          "sha256": "44d5218f898d6c47467b776373ffa3640d274cbe223296a1a3117ab24b7a4a17"
+          "sha256": "8d91e4bf805bd0a7a05cc5b5b08714c87e46d288469e4dd1dff2d1d9d88ea874"
         },
         {
           "attribution": {
@@ -76,7 +87,7 @@
         ],
         "stderr_contains": [
           "Test Suites: 1 passed, 1 total",
-          "Tests:       2 passed, 2 total"
+          "Tests:       7 passed, 7 total"
         ]
       },
       "id": "workflow-no-inline-expression-contract",
@@ -89,11 +100,11 @@
   "schema": "CanaryPlan/v2",
   "subject": {
     "schema": "GitCanarySubject/v1",
-    "commit": "a81b59dcb8495ed366755d95aa309d3081ef3f30",
-    "tree": "b3e3ec25c80fa7a7ac56f106324799fa2796913a",
+    "commit": "e4688f63f51b73d5f50808b2d65aa708f247a086",
+    "tree": "ccf7a6b03ecf06b1ebeccb55b3ef674115c46d07",
     "evidence": {
       "path": "source-evidence.json",
-      "sha256": "0911eb139fb3904cc7b4cfc0e0c821dc33f4ec334f713c5c6f328375dab66593",
+      "sha256": "91c4b6757e7d4c43115a961d1a7f9dc6ee0f245e843dccbc66470b3dfdb7ba0b",
       "source_field": "commit"
     }
   }

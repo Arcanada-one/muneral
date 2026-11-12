@@ -1,9 +1,9 @@
 {
-  "captured_at_utc": "2026-11-12T06:20:51Z",
-  "commit": "a81b59dcb8495ed366755d95aa309d3081ef3f30",
+  "captured_at_utc": "2026-11-12T07:46:01Z",
+  "commit": "e4688f63f51b73d5f50808b2d65aa708f247a086",
   "dirty": false,
-  "producer": "git rev-parse/status in clean candidate worktree at a81b59dcb849 (MUN-HYG task 7b377cb0-0ba4-44dc-825f-73c242d16746)",
+  "producer": "git rev-parse/status in clean candidate worktree at e4688f63f51b (MUN-HYG task 7b377cb0-0ba4-44dc-825f-73c242d16746)",
   "repository_path": "/repo",
   "schema": "MeasuredGitSource/v1",
-  "tree": "b3e3ec25c80fa7a7ac56f106324799fa2796913a"
+  "tree": "ccf7a6b03ecf06b1ebeccb55b3ef674115c46d07"
 }

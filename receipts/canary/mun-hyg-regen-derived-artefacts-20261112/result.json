@@ -1,28 +1,28 @@
 {
   "schema": "CanaryResult/v2",
-  "captured_at_utc": "2026-11-12T06:22:13Z",
+  "captured_at_utc": "2026-11-12T07:48:23Z",
   "producer": {
     "tool": "receipts/canary/mun-hyg-regen-derived-artefacts-20261112/harness.py.txt",
     "version": "1.0.0"
   },
   "model": "none: deterministic process producer",
   "plan": {
-    "id": "muneral-mun-hyg-regen-derived-artefacts-a81b59d",
+    "id": "muneral-mun-hyg-regen-derived-artefacts-e4688f6",
     "path": "plan.json",
-    "digest": "2b276093650e533a713e237fc29e6f708c6c55d1b8bf684e0fea1e92bf4c2c26"
+    "digest": "e686de03d30f847795716cf299911fc07dd7adbf2f32d01d2b9ea8dbd3a70959"
   },
-  "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces, source at candidate commit a81b59dcb8495ed366755d95aa309d3081ef3f30 (tree b3e3ec25c80fa7a7ac56f106324799fa2796913a) mounted read-only at /repo, private tmpfs /tmp, no network; NOT a GitHub Actions or production run",
+  "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces, source at candidate commit e4688f63f51b73d5f50808b2d65aa708f247a086 (tree ccf7a6b03ecf06b1ebeccb55b3ef674115c46d07) mounted read-only at /repo, read-only Git metadata exposed as GIT_DIR only for origin/main negative control, private tmpfs /tmp, no network; NOT a GitHub Actions or production run",
   "phase": "pre",
   "read_only": true,
   "observation_owner": "MUN-HYG author, Muneral task 7b377cb0-0ba4-44dc-825f-73c242d16746",
   "resident_version": null,
   "subject": {
     "schema": "GitCanarySubject/v1",
-    "commit": "a81b59dcb8495ed366755d95aa309d3081ef3f30",
-    "tree": "b3e3ec25c80fa7a7ac56f106324799fa2796913a",
+    "commit": "e4688f63f51b73d5f50808b2d65aa708f247a086",
+    "tree": "ccf7a6b03ecf06b1ebeccb55b3ef674115c46d07",
     "evidence": {
       "path": "source-evidence.json",
-      "sha256": "0911eb139fb3904cc7b4cfc0e0c821dc33f4ec334f713c5c6f328375dab66593",
+      "sha256": "91c4b6757e7d4c43115a961d1a7f9dc6ee0f245e843dccbc66470b3dfdb7ba0b",
       "source_field": "commit"
     }
   },
@@ -41,9 +41,11 @@
       "capture_complete": true,
       "artifacts_verifiable": true,
       "executable_sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
-      "invocation_digest": "d0be6dec09dbdda2ddb19af7d2124aaf0bed8a7fb0c7d07c574d4ac519874016",
+      "invocation_digest": "57fb9fe5d82f132fbe6365c6cf9497fb5f0af215c35b2a9468c5ff4c9c577681",
       "environment_keys": [
         "CI",
+        "GIT_DIR",
+        "GIT_WORK_TREE",
         "HOME",
         "LANG",
         "NODE_OPTIONS",
@@ -52,9 +54,9 @@
         "TMPDIR",
         "TZ"
       ],
-      "elapsed_ms": 6622.683,
-      "started_at_utc": "2026-11-12T06:22:06.644129+00:00",
-      "finished_at_utc": "2026-11-12T06:22:13.561617+00:00",
+      "elapsed_ms": 5605.339,
+      "started_at_utc": "2026-11-12T07:48:17.837700+00:00",
+      "finished_at_utc": "2026-11-12T07:48:23.722156+00:00",
       "execution_files": [
         {
           "path": "/usr/bin/node",
@@ -68,9 +70,20 @@
           }
         },
         {
+          "path": "/usr/bin/git",
+          "sha256": "eb54b535467e0975c1284d4c4d08eea779aeb248a5d34b02e2ee171382e22201",
+          "bytes": 4066232,
+          "matched": true,
+          "attribution": {
+            "kind": "system_executable",
+            "source_id": "/usr/bin/git",
+            "version": "sha256:eb54b535467e0975c1284d4c4d08eea779aeb248a5d34b02e2ee171382e22201"
+          }
+        },
+        {
           "path": "/repo/.github/workflows/regenerate-derived-artefacts.yml",
-          "sha256": "9000d025e08b2be6141f8c0cbf26dae956e0cfad5fb0311c2c1b7fe92f723580",
-          "bytes": 19993,
+          "sha256": "20dc7571ef008e692591a55c70e877c98070adc6d18600db714761010aff15fd",
+          "bytes": 19804,
           "matched": true,
           "attribution": {
             "kind": "product_source"
@@ -78,8 +91,8 @@
         },
         {
           "path": "/repo/apps/api/test/regenerate-derived-artefacts.workflow.contract.spec.ts",
-          "sha256": "44d5218f898d6c47467b776373ffa3640d274cbe223296a1a3117ab24b7a4a17",
-          "bytes": 2500,
+          "sha256": "8d91e4bf805bd0a7a05cc5b5b08714c87e46d288469e4dd1dff2d1d9d88ea874",
+          "bytes": 3515,
           "matched": true,
           "attribution": {
             "kind": "product_source"
@@ -107,14 +120,14 @@
       "artifacts": [],
       "streams": {
         "stdout": {
-          "captured_bytes": 190,
-          "sha256": "117bf3554051ba502d622cc6c68f888a20b6898143e291f8085bc506b22eeea8",
+          "captured_bytes": 194,
+          "sha256": "5ac3dff8e3f2761dccff2ca4d481eeb864a82a5c85e3d0393666862b516cf414",
           "capture": "digest_only",
           "truncated": false
         },
         "stderr": {
-          "captured_bytes": 1474,
-          "sha256": "c1be312d0dfd10aa5038863d5bd343e92dc46ac6c8f8f838c2f570197be1c8fb",
+          "captured_bytes": 1828,
+          "sha256": "2e5e563eeb1a56a67871dc0196f96ab9dc59eb35325495f7bc3ea59e424d1cd4",
           "capture": "digest_only",
           "truncated": false
         }
@@ -127,7 +140,7 @@
         },
         {
           "stream": "stderr",
-          "expected": "Tests:       2 passed, 2 total",
+          "expected": "Tests:       7 passed, 7 total",
           "matched": true
         }
       ],

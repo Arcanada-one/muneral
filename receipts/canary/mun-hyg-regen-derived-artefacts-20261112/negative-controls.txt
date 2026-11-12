@@ -1,5 +1,9 @@
-NEG0 fixed candidate, local Jest runner: 2 tests passed, exit 0. The process canary repeats this command in the private namespace and records its exact result in result.json.
+NEG0 fixed candidate: the API-local Jest contract spec passes 7/7 on Node 26.13.0. Cases include the fixed workflow, the original-main positive RED control, four adversarial expression placements, and the hostile shell ref.
 
-NEG1 original workflow red control: ran the new contract spec against the unfixed workflow from origin/main df0df15d6081cfcfa19a11ff87790a5f942645e6. Result: 1 test failed, exit 1. The assertion found five forbidden run-block substitutions: three github.event.repository.default_branch expressions and two steps.pr.outputs.ref expressions.
+NEG1 original workflow RED control: `git show origin/main:.github/workflows/regenerate-derived-artefacts.yml` on base df0df15d6081cfcfa19a11ff87790a5f942645e6 contains five forbidden run-block interpolations. The contract spec asserts that all five are detected; Node 26.13.0 local result: passed.
 
-NEG2 initial canary harness calibration: the first plan used cwd=. and invoked Jest from the repository root, so Jest did not load apps/api's TypeScript transform and exited 1 before tests. The plan was corrected to cwd=apps/api and the API-local Jest path; the final process observation in result.json then passed. This was a harness invocation error, not a product test result.
+NEG2 adversarial synthetic RED controls (Node 26.13.0 local spec): safe then unsafe expressions on one line; no-space `steps.pr.outputs.ref`; expression in a heredoc; expression on a later line in a multiline run block. Each case is detected by the contract scanner.
+
+NEG3 first candidate-local sandbox attempt: FAILED because the linked worktree's `.git` file pointed to metadata outside the read-only `/repo` mount, so the origin/main RED-control test could not resolve its source. No product verdict is inferred from that invocation. The sandbox now exposes the shared Git metadata read-only through explicit GIT_DIR/GIT_WORK_TREE for this control only; network remains disabled.
+
+NEG4 earlier harness calibration from the prior candidate: the first plan used cwd=. and invoked Jest from the repository root, so Jest did not load apps/api's TypeScript transform and exited before tests. The plan was corrected to cwd=apps/api; this is retained as historical harness calibration evidence, not a product failure.
