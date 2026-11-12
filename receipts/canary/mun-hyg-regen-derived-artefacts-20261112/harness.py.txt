@@ -1,0 +1,36 @@
+"""Candidate-local MUN-HYG process canary; records only process_observation evidence."""
+import hashlib, json, sys
+from datetime import datetime, timezone
+sys.path.insert(0, "/repo/.github/graph-admission/tools/graph")
+import process_observation as po
+raw = open("/plan/plan.json", "rb").read()
+plan = json.loads(raw)
+errors = po.plan_errors(plan)
+if errors:
+    print("PLAN_REFUSED", errors)
+    sys.exit(3)
+probes = []
+for probe in plan["probes"]:
+    probes.append({"id": probe["id"], "kind": "process", **po.run(probe, "/repo")})
+rank = {"verified": 0, "not_measured": 1, "failed": 2}
+rows, entities = [], {}
+for probe in plan["probes"]:
+    for entity in probe["entities"]:
+        entities.setdefault(entity, []).append(probe["id"])
+by_id = {probe["id"]: probe for probe in probes}
+for entity, ids in entities.items():
+    measured = max((by_id[item]["outcome"] for item in ids), key=lambda value: rank[value])
+    rows.append({"entity": entity, "verdict": measured, "reason": by_id[ids[0]]["reason"], "probe_ids": ids})
+result = {
+    "schema": "CanaryResult/v2",
+    "captured_at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    "producer": {"tool": "receipts/canary/mun-hyg-regen-derived-artefacts-20261112/harness.py.txt", "version": "1.0.0"},
+    "model": "none: deterministic process producer",
+    "plan": {"id": plan["id"], "path": "plan.json", "digest": hashlib.sha256(raw).hexdigest()},
+    "environment": plan["environment"], "phase": "pre", "read_only": True,
+    "observation_owner": plan["owner"], "resident_version": None,
+    "subject": plan["subject"], "probes": probes, "entity_verdicts": rows,
+    "source_binding_errors": [],
+}
+open("/out/result.json", "w").write(json.dumps(result, indent=2) + "\n")
+print("OUTCOMES", {probe["id"]: probe["outcome"] for probe in probes})

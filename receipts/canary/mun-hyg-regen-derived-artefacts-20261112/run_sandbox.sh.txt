@@ -1,0 +1,15 @@
+#!/bin/bash
+# usage: run_sandbox.sh <repo-worktree> <canary-record-dir> <plan-dir> <out-dir>
+set -eu
+WT=$1; CD=$2; PD=$3; OD=$4
+git_common=$(git -C "$WT" rev-parse --path-format=absolute --git-common-dir)
+git_dir=$(git -C "$WT" rev-parse --path-format=absolute --git-dir)
+git_rel=${git_dir#"$git_common"/}
+exec bwrap --unshare-user --unshare-net --unshare-pid --unshare-ipc --unshare-uts --die-with-parent \
+  --tmpfs / --ro-bind /usr /usr --symlink usr/lib /lib --symlink usr/lib64 /lib64 --symlink usr/bin /bin \
+  --proc /proc --dev /dev --tmpfs /tmp --dir /home/canary --dir /git --ro-bind "$git_common" /git \
+  --ro-bind "$WT" /repo --ro-bind "$CD" /canary --ro-bind "$PD" /plan --bind "$OD" /out \
+  --setenv CI 1 --setenv NO_COLOR 1 --setenv HOME /home/canary --setenv LANG C.UTF-8 --setenv NODE_OPTIONS --experimental-vm-modules \
+  --setenv GIT_DIR "/git/$git_rel" --setenv GIT_WORK_TREE /repo \
+  --setenv PATH /usr/bin:/bin --setenv TMPDIR /tmp --setenv TZ UTC --setenv PYTHONDONTWRITEBYTECODE 1 \
+  /usr/bin/python3 -I /canary/harness.py.txt

@@ -1,0 +1,173 @@
+{
+  "schema": "CanaryResult/v2",
+  "captured_at_utc": "2026-11-12T08:07:48Z",
+  "producer": {
+    "tool": "receipts/canary/mun-hyg-regen-derived-artefacts-20261112/harness.py.txt",
+    "version": "1.0.0"
+  },
+  "model": "none: deterministic process producer",
+  "plan": {
+    "id": "muneral-mun-hyg-regen-derived-artefacts-b96914f",
+    "path": "plan.json",
+    "digest": "090cee677d224e7cb840d2a240d5f3d747f7daf68fc44ee2e46dab3c86abdc45"
+  },
+  "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces, source at candidate commit b96914f0c658cdbe3ce9512868634ff6946c038f (tree 91b45b59d8c0e7a0a5d0dcb047178d885dfee2dd) mounted read-only at /repo, read-only Git metadata exposed as GIT_DIR only for origin/main negative control, private tmpfs /tmp, no network; NOT a GitHub Actions or production run",
+  "phase": "pre",
+  "read_only": true,
+  "observation_owner": "MUN-HYG author, Muneral task 7b377cb0-0ba4-44dc-825f-73c242d16746",
+  "resident_version": null,
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "b96914f0c658cdbe3ce9512868634ff6946c038f",
+    "tree": "91b45b59d8c0e7a0a5d0dcb047178d885dfee2dd",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "62f9895b305fd7a3da6c4caa37ac9c9cc49256dfb34c3f222afc6e8d65f3f755",
+      "source_field": "commit"
+    }
+  },
+  "probes": [
+    {
+      "id": "workflow-no-inline-expression-contract",
+      "kind": "process",
+      "executed": true,
+      "termination": {
+        "kind": "exit",
+        "code": 0
+      },
+      "outcome": "verified",
+      "reason": "Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+      "execution_identity_unchanged": true,
+      "capture_complete": true,
+      "artifacts_verifiable": true,
+      "executable_sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+      "invocation_digest": "eb3d7572e909e85afec3e2eba5f97049d2349b13a2a63cd39991f7eb142f5f3c",
+      "environment_keys": [
+        "CI",
+        "GIT_DIR",
+        "GIT_WORK_TREE",
+        "HOME",
+        "LANG",
+        "NODE_OPTIONS",
+        "NO_COLOR",
+        "PATH",
+        "TMPDIR",
+        "TZ"
+      ],
+      "elapsed_ms": 9819.307,
+      "started_at_utc": "2026-11-12T08:07:38.060130+00:00",
+      "finished_at_utc": "2026-11-12T08:07:48.343756+00:00",
+      "execution_files": [
+        {
+          "path": "/usr/bin/node",
+          "sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+          "bytes": 126458664,
+          "matched": true,
+          "attribution": {
+            "kind": "system_executable",
+            "source_id": "/usr/bin/node",
+            "version": "sha256:89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+          }
+        },
+        {
+          "path": "/usr/bin/git",
+          "sha256": "eb54b535467e0975c1284d4c4d08eea779aeb248a5d34b02e2ee171382e22201",
+          "bytes": 4066232,
+          "matched": true,
+          "attribution": {
+            "kind": "system_executable",
+            "source_id": "/usr/bin/git",
+            "version": "sha256:eb54b535467e0975c1284d4c4d08eea779aeb248a5d34b02e2ee171382e22201"
+          }
+        },
+        {
+          "path": "/repo/.github/workflows/regenerate-derived-artefacts.yml",
+          "sha256": "ea38d0d35f1968c8426919d8ba6e2b02160dc25bf099027b93f49111ee3d1098",
+          "bytes": 19804,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/test/regenerate-derived-artefacts.workflow.contract.spec.ts",
+          "sha256": "8d91e4bf805bd0a7a05cc5b5b08714c87e46d288469e4dd1dff2d1d9d88ea874",
+          "bytes": 3515,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/package.json",
+          "sha256": "0726ca5f358349e2016e8c3da72ee485669417c6f38fe8cdf8f3528c80c3dad4",
+          "bytes": 2885,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/tsconfig.test.json",
+          "sha256": "b45b51f10e6897b5fa212f421842c1334c9e1f7942e446dcf278bb08b9c55d1d",
+          "bytes": 1041,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        }
+      ],
+      "artifacts": [],
+      "streams": {
+        "stdout": {
+          "captured_bytes": 192,
+          "sha256": "52a8a32c4c519c3e49dd6f4616aaca165b5d2bd319999e64a2bb17fa90c99622",
+          "capture": "digest_only",
+          "truncated": false
+        },
+        "stderr": {
+          "captured_bytes": 1839,
+          "sha256": "ee164f32d4c5a259f6d3c6d68863f9eb65308de32ff9ea0651a4a9c906e98a3b",
+          "capture": "digest_only",
+          "truncated": false
+        }
+      },
+      "output_checks": [
+        {
+          "stream": "stderr",
+          "expected": "Test Suites: 1 passed, 1 total",
+          "matched": true
+        },
+        {
+          "stream": "stderr",
+          "expected": "Tests:       7 passed, 7 total",
+          "matched": true
+        }
+      ],
+      "cleanup": {
+        "group_signalled_before_leader_reaped": true,
+        "escaped_descendants": "not_proven_absent",
+        "sandbox": false
+      }
+    }
+  ],
+  "entity_verdicts": [
+    {
+      "entity": "code_unit:.github/workflows/regenerate-derived-artefacts.yml",
+      "verdict": "verified",
+      "reason": "Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+      "probe_ids": [
+        "workflow-no-inline-expression-contract"
+      ]
+    },
+    {
+      "entity": "code_unit:apps/api/test/regenerate-derived-artefacts.workflow.contract.spec.ts",
+      "verdict": "verified",
+      "reason": "Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+      "probe_ids": [
+        "workflow-no-inline-expression-contract"
+      ]
+    }
+  ],
+  "source_binding_errors": []
+}
