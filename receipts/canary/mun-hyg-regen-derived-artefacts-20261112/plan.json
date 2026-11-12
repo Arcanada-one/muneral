@@ -1,6 +1,6 @@
 {
-  "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces, source at candidate commit e4688f63f51b73d5f50808b2d65aa708f247a086 (tree ccf7a6b03ecf06b1ebeccb55b3ef674115c46d07) mounted read-only at /repo, read-only Git metadata exposed as GIT_DIR only for origin/main negative control, private tmpfs /tmp, no network; NOT a GitHub Actions or production run",
-  "id": "muneral-mun-hyg-regen-derived-artefacts-e4688f6",
+  "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces, source at candidate commit b96914f0c658cdbe3ce9512868634ff6946c038f (tree 91b45b59d8c0e7a0a5d0dcb047178d885dfee2dd) mounted read-only at /repo, read-only Git metadata exposed as GIT_DIR only for origin/main negative control, private tmpfs /tmp, no network; NOT a GitHub Actions or production run",
+  "id": "muneral-mun-hyg-regen-derived-artefacts-b96914f",
   "owner": "MUN-HYG author, Muneral task 7b377cb0-0ba4-44dc-825f-73c242d16746",
   "producer_repository": "/repo",
   "probes": [
@@ -57,7 +57,7 @@
             "kind": "product_source"
           },
           "path": "/repo/.github/workflows/regenerate-derived-artefacts.yml",
-          "sha256": "20dc7571ef008e692591a55c70e877c98070adc6d18600db714761010aff15fd"
+          "sha256": "ea38d0d35f1968c8426919d8ba6e2b02160dc25bf099027b93f49111ee3d1098"
         },
         {
           "attribution": {
@@ -100,11 +100,11 @@
   "schema": "CanaryPlan/v2",
   "subject": {
     "schema": "GitCanarySubject/v1",
-    "commit": "e4688f63f51b73d5f50808b2d65aa708f247a086",
-    "tree": "ccf7a6b03ecf06b1ebeccb55b3ef674115c46d07",
+    "commit": "b96914f0c658cdbe3ce9512868634ff6946c038f",
+    "tree": "91b45b59d8c0e7a0a5d0dcb047178d885dfee2dd",
     "evidence": {
       "path": "source-evidence.json",
-      "sha256": "91c4b6757e7d4c43115a961d1a7f9dc6ee0f245e843dccbc66470b3dfdb7ba0b",
+      "sha256": "62f9895b305fd7a3da6c4caa37ac9c9cc49256dfb34c3f222afc6e8d65f3f755",
       "source_field": "commit"
     }
   }

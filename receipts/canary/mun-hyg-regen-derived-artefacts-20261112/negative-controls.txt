@@ -7,3 +7,5 @@ NEG2 adversarial synthetic RED controls (Node 26.13.0 local spec): safe then uns
 NEG3 first candidate-local sandbox attempt: FAILED because the linked worktree's `.git` file pointed to metadata outside the read-only `/repo` mount, so the origin/main RED-control test could not resolve its source. No product verdict is inferred from that invocation. The sandbox now exposes the shared Git metadata read-only through explicit GIT_DIR/GIT_WORK_TREE for this control only; network remains disabled.
 
 NEG4 earlier harness calibration from the prior candidate: the first plan used cwd=. and invoked Jest from the repository root, so Jest did not load apps/api's TypeScript transform and exited before tests. The plan was corrected to cwd=apps/api; this is retained as historical harness calibration evidence, not a product failure.
+
+NEG5 corrected BASE_SHA placement: candidate b96914f0c658cdbe3ce9512868634ff6946c038f restores the assignment immediately before git commit, in its original main-relative position; the workflow diff has no added or removed BASE_SHA assignment line. actionlint 1.7.12 exited 0.

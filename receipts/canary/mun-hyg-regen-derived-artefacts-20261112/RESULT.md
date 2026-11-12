@@ -1,6 +1,6 @@
 # Process canary: regenerate-derived-artefacts workflow shell-input contract
 
-`contour=candidate-local`. Subject commit `e4688f63f51b73d5f50808b2d65aa708f247a086`, tree `ccf7a6b03ecf06b1ebeccb55b3ef674115c46d07`; base `origin/main` was `df0df15d6081cfcfa19a11ff87790a5f942645e6`. The source worktree was clean at the measured commit (`source-evidence.json`). This is not a GitHub Actions run or a production probe. No exemption is written.
+`contour=candidate-local`. Subject commit `b96914f0c658cdbe3ce9512868634ff6946c038f`, tree `91b45b59d8c0e7a0a5d0dcb047178d885dfee2dd`; base `origin/main` was `df0df15d6081cfcfa19a11ff87790a5f942645e6`. The source worktree was clean at the measured commit (`source-evidence.json`). This is not a GitHub Actions run or a production probe. No exemption is written.
 
 ## Entities and outcomes
 
@@ -19,4 +19,4 @@ The candidate-local process canary used Node 24.20.0; repository CI pins Node 26
 
 ## Negative controls and harness calibration
 
-`negative-controls.txt` retains the original-main RED control, all four adversarial scanner controls, and the first candidate-local sandbox failure caused by linked-worktree Git metadata being outside the `/repo` mount. The sandbox plan was corrected to expose Git metadata read-only for the original-main control. It also retains the earlier wrong-working-directory calibration from the prior candidate. The recorded process result is the succeeding invocation only.
+`negative-controls.txt` retains the original-main RED control, all four adversarial scanner controls, the first candidate-local sandbox failure caused by linked-worktree Git metadata being outside the `/repo` mount, and the corrected `BASE_SHA` placement. The sandbox plan exposes Git metadata read-only for the original-main control. An earlier wrong-working-directory calibration from the prior candidate remains historical harness evidence. The recorded process result is the succeeding invocation for this subject commit only.

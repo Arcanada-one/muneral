@@ -1,28 +1,28 @@
 {
   "schema": "CanaryResult/v2",
-  "captured_at_utc": "2026-11-12T07:48:23Z",
+  "captured_at_utc": "2026-11-12T08:07:48Z",
   "producer": {
     "tool": "receipts/canary/mun-hyg-regen-derived-artefacts-20261112/harness.py.txt",
     "version": "1.0.0"
   },
   "model": "none: deterministic process producer",
   "plan": {
-    "id": "muneral-mun-hyg-regen-derived-artefacts-e4688f6",
+    "id": "muneral-mun-hyg-regen-derived-artefacts-b96914f",
     "path": "plan.json",
-    "digest": "e686de03d30f847795716cf299911fc07dd7adbf2f32d01d2b9ea8dbd3a70959"
+    "digest": "090cee677d224e7cb840d2a240d5f3d747f7daf68fc44ee2e46dab3c86abdc45"
   },
-  "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces, source at candidate commit e4688f63f51b73d5f50808b2d65aa708f247a086 (tree ccf7a6b03ecf06b1ebeccb55b3ef674115c46d07) mounted read-only at /repo, read-only Git metadata exposed as GIT_DIR only for origin/main negative control, private tmpfs /tmp, no network; NOT a GitHub Actions or production run",
+  "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces, source at candidate commit b96914f0c658cdbe3ce9512868634ff6946c038f (tree 91b45b59d8c0e7a0a5d0dcb047178d885dfee2dd) mounted read-only at /repo, read-only Git metadata exposed as GIT_DIR only for origin/main negative control, private tmpfs /tmp, no network; NOT a GitHub Actions or production run",
   "phase": "pre",
   "read_only": true,
   "observation_owner": "MUN-HYG author, Muneral task 7b377cb0-0ba4-44dc-825f-73c242d16746",
   "resident_version": null,
   "subject": {
     "schema": "GitCanarySubject/v1",
-    "commit": "e4688f63f51b73d5f50808b2d65aa708f247a086",
-    "tree": "ccf7a6b03ecf06b1ebeccb55b3ef674115c46d07",
+    "commit": "b96914f0c658cdbe3ce9512868634ff6946c038f",
+    "tree": "91b45b59d8c0e7a0a5d0dcb047178d885dfee2dd",
     "evidence": {
       "path": "source-evidence.json",
-      "sha256": "91c4b6757e7d4c43115a961d1a7f9dc6ee0f245e843dccbc66470b3dfdb7ba0b",
+      "sha256": "62f9895b305fd7a3da6c4caa37ac9c9cc49256dfb34c3f222afc6e8d65f3f755",
       "source_field": "commit"
     }
   },
@@ -41,7 +41,7 @@
       "capture_complete": true,
       "artifacts_verifiable": true,
       "executable_sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
-      "invocation_digest": "57fb9fe5d82f132fbe6365c6cf9497fb5f0af215c35b2a9468c5ff4c9c577681",
+      "invocation_digest": "eb3d7572e909e85afec3e2eba5f97049d2349b13a2a63cd39991f7eb142f5f3c",
       "environment_keys": [
         "CI",
         "GIT_DIR",
@@ -54,9 +54,9 @@
         "TMPDIR",
         "TZ"
       ],
-      "elapsed_ms": 5605.339,
-      "started_at_utc": "2026-11-12T07:48:17.837700+00:00",
-      "finished_at_utc": "2026-11-12T07:48:23.722156+00:00",
+      "elapsed_ms": 9819.307,
+      "started_at_utc": "2026-11-12T08:07:38.060130+00:00",
+      "finished_at_utc": "2026-11-12T08:07:48.343756+00:00",
       "execution_files": [
         {
           "path": "/usr/bin/node",
@@ -82,7 +82,7 @@
         },
         {
           "path": "/repo/.github/workflows/regenerate-derived-artefacts.yml",
-          "sha256": "20dc7571ef008e692591a55c70e877c98070adc6d18600db714761010aff15fd",
+          "sha256": "ea38d0d35f1968c8426919d8ba6e2b02160dc25bf099027b93f49111ee3d1098",
           "bytes": 19804,
           "matched": true,
           "attribution": {
@@ -120,14 +120,14 @@
       "artifacts": [],
       "streams": {
         "stdout": {
-          "captured_bytes": 194,
-          "sha256": "5ac3dff8e3f2761dccff2ca4d481eeb864a82a5c85e3d0393666862b516cf414",
+          "captured_bytes": 192,
+          "sha256": "52a8a32c4c519c3e49dd6f4616aaca165b5d2bd319999e64a2bb17fa90c99622",
           "capture": "digest_only",
           "truncated": false
         },
         "stderr": {
-          "captured_bytes": 1828,
-          "sha256": "2e5e563eeb1a56a67871dc0196f96ab9dc59eb35325495f7bc3ea59e424d1cd4",
+          "captured_bytes": 1839,
+          "sha256": "ee164f32d4c5a259f6d3c6d68863f9eb65308de32ff9ea0651a4a9c906e98a3b",
           "capture": "digest_only",
           "truncated": false
         }
