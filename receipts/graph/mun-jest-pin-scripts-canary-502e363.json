@@ -1,9 +1,7 @@
 {
  "admission": {
-  "rule": "admitted requires every verdict = verified; failed without exemption ⇒ refused; not_measured without exemption ⇒ paused_safe; exemptions (owner + expiry) are attached by the admitting agent, never by the verifier (DEC-AUP-0008, matrix P1/P4)",
-  "structural_exclusion_rule": "DEC-AUP-0034: an affected entity is NOT verdict-owing when all three hold — the verifier matrix declares neither a mandatory nor a selectable verifier for its node type (so the only verdict it could ever carry states a property of the MATRIX, not of this change), the change set does not contain it, and its bytes are identical at base and head. Each one is listed in structural_exclusions with the content hash at both revisions that proves the byte-identity, and impact_pair.receipt_problems re-derives that proof from Git rather than believing the receipt.",
-  "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
-  "verdict": "paused_safe"
+  "rule": "admitted_with_exemptions requires every non-verified entity to carry a valid exemption",
+  "verdict": "admitted_with_exemptions"
  },
  "captured_at_utc": "2026-11-12T00:19:25Z",
  "change_set": {
@@ -197,7 +195,68 @@
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
- "exemptions": [],
+ "exemptions": [
+  {
+   "entity": "code_unit:.github/workflows/ci.yml",
+   "expires_at_utc": "2026-11-19T09:00:00Z",
+   "owner": "JANITOR (Muneral 361f4902-1dd0-4e15-a089-70aae4982aaf)",
+   "reason": "Changed workflow file (blob 94e724a5fe44 -> c07deedcbac5; the API jest call drops --passWithNoTests and gets --min-test-files 100; one added line runs node --test on the runner test) that the graph verifier cannot measure. Compensating measurements on the exact head 65445dba49315e372ca9fdf77a3724e8fc318499, re-measured by Root: CI & Deploy run 43127306845 job lint-and-test (id 130882546093) success on this sha; its log shows 'run-jest-isolated: 127 test files discovered (minimum 100)' and 127 per-file Jest summary blocks: suites 126 passed, 0 failed, 1 skipped; tests 2009 passed, 0 failed; network-exposure-lint and governance-diff-guard success; actionlint 1.7.12 exit 0; whole-file sha256 27793610e73665c8dc7b15e44d753f90bbe19c55c9a6accaa5a209984759dbc5 equals the pin in scripts/ci/tested_tree.py (itself verified by canary); receipt verified 12 / not_measured 10 / failed 0; independent exact-head APPROVE of the source change in Muneral 361f4902 comments db0fd318 and f29cd7cb. Recorded by Claude Root as admitting agent under the interim route (per-PR decision)."
+  },
+  {
+   "entity": "code_unit:.github/workflows/activity-visible-count-browser.yml",
+   "expires_at_utc": "2026-11-19T09:00:00Z",
+   "owner": "JANITOR (Muneral 361f4902-1dd0-4e15-a089-70aae4982aaf)",
+   "reason": "File unchanged by this pull request (pulled in by the impact set): git blob 158a680c30de is identical at base 335a500a717b and at head 65445dba4931, re-measured by Root; its shell-caller closure is outside what the graph verifier measures. Same class as the unchanged-closure entries of model-connector#276 and muneral#427. Recorded by Claude Root as admitting agent under the interim route pending DEC-AUP-0187."
+  },
+  {
+   "entity": "code_unit:.github/workflows/dependabot-auto-merge.yml",
+   "expires_at_utc": "2026-11-19T09:00:00Z",
+   "owner": "JANITOR (Muneral 361f4902-1dd0-4e15-a089-70aae4982aaf)",
+   "reason": "File unchanged by this pull request (pulled in by the impact set): git blob 321b6f556489 is identical at base 335a500a717b and at head 65445dba4931, re-measured by Root; its shell-caller closure is outside what the graph verifier measures. Same class as the unchanged-closure entries of model-connector#276 and muneral#427. Recorded by Claude Root as admitting agent under the interim route pending DEC-AUP-0187."
+  },
+  {
+   "entity": "code_unit:.github/workflows/graph-admission.yml",
+   "expires_at_utc": "2026-11-19T09:00:00Z",
+   "owner": "JANITOR (Muneral 361f4902-1dd0-4e15-a089-70aae4982aaf)",
+   "reason": "File unchanged by this pull request (pulled in by the impact set): git blob c37c4b87bfb4 is identical at base 335a500a717b and at head 65445dba4931, re-measured by Root; its shell-caller closure is outside what the graph verifier measures. Same class as the unchanged-closure entries of model-connector#276 and muneral#427. Recorded by Claude Root as admitting agent under the interim route pending DEC-AUP-0187."
+  },
+  {
+   "entity": "code_unit:.github/workflows/regenerate-derived-artefacts.yml",
+   "expires_at_utc": "2026-11-19T09:00:00Z",
+   "owner": "JANITOR (Muneral 361f4902-1dd0-4e15-a089-70aae4982aaf)",
+   "reason": "File unchanged by this pull request (pulled in by the impact set): git blob 43cf705f09c8 is identical at base 335a500a717b and at head 65445dba4931, re-measured by Root; its shell-caller closure is outside what the graph verifier measures. Same class as the unchanged-closure entries of model-connector#276 and muneral#427. Recorded by Claude Root as admitting agent under the interim route pending DEC-AUP-0187."
+  },
+  {
+   "entity": "code_unit:.github/workflows/repository-destination-browser.yml",
+   "expires_at_utc": "2026-11-19T09:00:00Z",
+   "owner": "JANITOR (Muneral 361f4902-1dd0-4e15-a089-70aae4982aaf)",
+   "reason": "File unchanged by this pull request (pulled in by the impact set): git blob 21879233c1a2 is identical at base 335a500a717b and at head 65445dba4931, re-measured by Root; its shell-caller closure is outside what the graph verifier measures. Same class as the unchanged-closure entries of model-connector#276 and muneral#427. Recorded by Claude Root as admitting agent under the interim route pending DEC-AUP-0187."
+  },
+  {
+   "entity": "code_unit:scripts/ci/verify-structure.sh",
+   "expires_at_utc": "2026-11-19T09:00:00Z",
+   "owner": "JANITOR (Muneral 361f4902-1dd0-4e15-a089-70aae4982aaf)",
+   "reason": "File unchanged by this pull request (pulled in by the impact set): git blob 949eeab1557b is identical at base 335a500a717b and at head 65445dba4931, re-measured by Root; its shell-caller closure is outside what the graph verifier measures. Same class as the unchanged-closure entries of model-connector#276 and muneral#427. Recorded by Claude Root as admitting agent under the interim route pending DEC-AUP-0187."
+  },
+  {
+   "entity": "code_unit:apps/api/scripts/jest-list-tests.mjs",
+   "expires_at_utc": "2026-11-19T09:00:00Z",
+   "owner": "JANITOR (Muneral 361f4902-1dd0-4e15-a089-70aae4982aaf)",
+   "reason": "New/changed CI helper script that IS measured by a candidate-local process canary (receipts/canary/mun-jest-scripts-20261112/result.json in the tree lists this code unit as verified, with negative controls), but the verifier matrix routes .mjs under apps/api only to the tsc verifier, whose tsconfig does not include it, so the receipt keeps it not_measured: a verifier scope gap of the tool, not unmeasured code. Compensating measurements on the exact head 65445dba49315e372ca9fdf77a3724e8fc318499, re-measured by Root: CI & Deploy run 43127306845 job lint-and-test (id 130882546093) success on this sha; its log shows 'run-jest-isolated: 127 test files discovered (minimum 100)' and 127 per-file Jest summary blocks: suites 126 passed, 0 failed, 1 skipped; tests 2009 passed, 0 failed; network-exposure-lint and governance-diff-guard success; actionlint 1.7.12 exit 0; whole-file sha256 27793610e73665c8dc7b15e44d753f90bbe19c55c9a6accaa5a209984759dbc5 equals the pin in scripts/ci/tested_tree.py (itself verified by canary); receipt verified 12 / not_measured 10 / failed 0; independent exact-head APPROVE of the source change in Muneral 361f4902 comments db0fd318 and f29cd7cb. Recorded by Claude Root as admitting agent under the interim route (per-PR decision)."
+  },
+  {
+   "entity": "code_unit:apps/api/scripts/run-jest-isolated.mjs",
+   "expires_at_utc": "2026-11-19T09:00:00Z",
+   "owner": "JANITOR (Muneral 361f4902-1dd0-4e15-a089-70aae4982aaf)",
+   "reason": "New/changed CI helper script that IS measured by a candidate-local process canary (receipts/canary/mun-jest-scripts-20261112/result.json in the tree lists this code unit as verified, with negative controls), but the verifier matrix routes .mjs under apps/api only to the tsc verifier, whose tsconfig does not include it, so the receipt keeps it not_measured: a verifier scope gap of the tool, not unmeasured code. Compensating measurements on the exact head 65445dba49315e372ca9fdf77a3724e8fc318499, re-measured by Root: CI & Deploy run 43127306845 job lint-and-test (id 130882546093) success on this sha; its log shows 'run-jest-isolated: 127 test files discovered (minimum 100)' and 127 per-file Jest summary blocks: suites 126 passed, 0 failed, 1 skipped; tests 2009 passed, 0 failed; network-exposure-lint and governance-diff-guard success; actionlint 1.7.12 exit 0; whole-file sha256 27793610e73665c8dc7b15e44d753f90bbe19c55c9a6accaa5a209984759dbc5 equals the pin in scripts/ci/tested_tree.py (itself verified by canary); receipt verified 12 / not_measured 10 / failed 0; independent exact-head APPROVE of the source change in Muneral 361f4902 comments db0fd318 and f29cd7cb. Recorded by Claude Root as admitting agent under the interim route (per-PR decision)."
+  },
+  {
+   "entity": "code_unit:apps/api/scripts/run-jest-isolated.test.mjs",
+   "expires_at_utc": "2026-11-19T09:00:00Z",
+   "owner": "JANITOR (Muneral 361f4902-1dd0-4e15-a089-70aae4982aaf)",
+   "reason": "New/changed CI helper script that IS measured by a candidate-local process canary (receipts/canary/mun-jest-scripts-20261112/result.json in the tree lists this code unit as verified, with negative controls), but the verifier matrix routes .mjs under apps/api only to the tsc verifier, whose tsconfig does not include it, so the receipt keeps it not_measured: a verifier scope gap of the tool, not unmeasured code. Compensating measurements on the exact head 65445dba49315e372ca9fdf77a3724e8fc318499, re-measured by Root: CI & Deploy run 43127306845 job lint-and-test (id 130882546093) success on this sha; its log shows 'run-jest-isolated: 127 test files discovered (minimum 100)' and 127 per-file Jest summary blocks: suites 126 passed, 0 failed, 1 skipped; tests 2009 passed, 0 failed; network-exposure-lint and governance-diff-guard success; actionlint 1.7.12 exit 0; whole-file sha256 27793610e73665c8dc7b15e44d753f90bbe19c55c9a6accaa5a209984759dbc5 equals the pin in scripts/ci/tested_tree.py (itself verified by canary); receipt verified 12 / not_measured 10 / failed 0; independent exact-head APPROVE of the source change in Muneral 361f4902 comments db0fd318 and f29cd7cb. Recorded by Claude Root as admitting agent under the interim route (per-PR decision)."
+  }
+ ],
  "graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
