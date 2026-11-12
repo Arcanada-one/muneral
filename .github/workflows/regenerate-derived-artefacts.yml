@@ -277,11 +277,11 @@ jobs:
           verifier, and nothing outside .arcana/derived-artefacts.v1.json.
           MSG
           sed -i 's/^          //' "${RUNNER_TEMP}/derived-commit-msg.txt"
-          BASE_SHA=$(git rev-parse HEAD)
           # The commit this job MEASURED — the head it checked out, before the evidence
           # commit is written on top of it. This is what the remote must still be for the
           # push below to be safe; read it before committing, so it names the measured tree
           # and not the new one.
+          BASE_SHA=$(git rev-parse HEAD)
           git commit -F "${RUNNER_TEMP}/derived-commit-msg.txt"
           # The mutation battery takes ~15 minutes on this repository, and the branch can
           # move under it — a rebase onto a new main, another writer rebinding the same
