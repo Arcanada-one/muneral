@@ -1,9 +1,7 @@
 {
  "admission": {
-  "rule": "admitted requires every verdict = verified; failed without exemption ⇒ refused; not_measured without exemption ⇒ paused_safe; exemptions (owner + expiry) are attached by the admitting agent, never by the verifier (DEC-AUP-0008, matrix P1/P4)",
-  "structural_exclusion_rule": "DEC-AUP-0034: an affected entity is NOT verdict-owing when all three hold — the verifier matrix declares neither a mandatory nor a selectable verifier for its node type (so the only verdict it could ever carry states a property of the MATRIX, not of this change), the change set does not contain it, and its bytes are identical at base and head. Each one is listed in structural_exclusions with the content hash at both revisions that proves the byte-identity, and impact_pair.receipt_problems re-derives that proof from Git rather than believing the receipt.",
-  "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
-  "verdict": "paused_safe"
+  "rule": "admitted_with_exemptions requires every non-verified entity to carry a valid exemption",
+  "verdict": "admitted_with_exemptions"
  },
  "captured_at_utc": "2026-11-12T08:08:32Z",
  "change_set": {
@@ -89,7 +87,14 @@
   "mode": "diff"
  },
  "decision_ref": "DEC-AUP-0008",
- "exemptions": [],
+ "exemptions": [
+  {
+   "entity": "code_unit:.github/workflows/regenerate-derived-artefacts.yml",
+   "expires_at_utc": "2026-11-19T09:00:00Z",
+   "owner": "MUN-HYG (Muneral 7b377cb0-0ba4-44dc-825f-73c242d16746)",
+   "reason": "Workflow CHANGED, not covered by the signed verifier_scope_gap class (DEC-AUP-0187 C4); per-PR interim decision of Root under R-CHANGED-WORKFLOW-INTERIM; retire when the verifier matrix covers the workflow shell closure (ARC2 task 4b650155). Not_measured is a verifier scope limit, not unmeasured product code: the workflow listens on workflow_run for the registered automated author only and cannot be executed by this PR's CI or by a candidate-local canary. Root read the full diff at head 11093f02b3562caa0258f784a41e99220d9d3a2a: four places where github.event.repository.default_branch and steps.pr.outputs.ref were expanded inside bash now pass through env (DEFAULT_BRANCH, PR_REF) and are used quoted; BASE_SHA untouched; Root parsed the head file: zero run blocks contain a GitHub expression. The change removes a script-injection path (PR branch name is attacker-controlled text) in a job that pushes to the PR branch. Compensating evidence by author and independent reviewer, not re-run by Root: actionlint 1.7.12 exit 0; contract spec 7/7; hostile branch name executed a marker through the old inline form and not through the env form; lint-and-test job 131059498793 success. Receipt: verified 3, not_measured 1 (this entity), failed 0."
+  }
+ ],
  "graph": {
   "builder_version": "1.0.6",
   "built_at_utc": "2026-09-05T00:00:00Z",
