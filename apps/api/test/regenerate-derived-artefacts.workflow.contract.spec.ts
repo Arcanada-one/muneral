@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import url from 'node:url';
-import { spawnSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 
 const WORKFLOW = path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), '../../..', '.github/workflows/regenerate-derived-artefacts.yml');
 
@@ -24,9 +24,11 @@ function runBlockExpressions(source: string): string[] {
     }
 
     for (const line of block) {
-      const expression = line.match(/\$\{\{[^}]+\}\}/)?.[0];
-      if (expression && /\b(?:steps\.[\w-]+\.outputs\.|github\.event\.|github\.head_ref\b|inputs\.)/.test(expression)) {
-        found.push(expression);
+      for (const match of line.matchAll(/\$\{\{.*?\}\}/g)) {
+        const expression = match[0];
+        if (/\b(?:steps\.[\w-]+\.outputs\.|github\.event\.|github\.head_ref\b|inputs\.)/.test(expression)) {
+          found.push(expression);
+        }
       }
     }
   }
@@ -37,6 +39,23 @@ describe('regenerate-derived-artefacts workflow shell inputs', () => {
   it('does not interpolate event data or step outputs directly in run blocks', () => {
     const source = fs.readFileSync(WORKFLOW, 'utf8');
     expect(runBlockExpressions(source)).toEqual([]);
+  });
+
+  it('detects every hazardous expression in the original main-branch workflow', () => {
+    const original = execFileSync('git', ['show', 'origin/main:.github/workflows/regenerate-derived-artefacts.yml'], {
+      cwd: path.resolve(WORKFLOW, '../../..'),
+      encoding: 'utf8',
+    });
+    expect(runBlockExpressions(original)).toHaveLength(5);
+  });
+
+  it.each([
+    ['safe then unsafe on one line', 'run: echo ${{ github.sha }} ${{ github.event.workflow_run.head_ref }}'],
+    ['no-space step expression', 'run: echo ${{steps.pr.outputs.ref}}'],
+    ['expression inside heredoc', "run: |\n      cat <<'EOF'\n      ${{ github.event.pull_request.head.ref }}\n      EOF"],
+    ['expression on a later run-block line', 'run: |\n      echo safe\n      echo ${{ inputs.ref }}'],
+  ])('detects adversarial form: %s', (_name, runBlock) => {
+    expect(runBlockExpressions(`steps:\n  - name: synthetic\n    ${runBlock.replace(/\n/g, '\n    ')}`)).not.toEqual([]);
   });
 
   it('keeps a shell metacharacter in a PR ref literal when passed through the environment', () => {

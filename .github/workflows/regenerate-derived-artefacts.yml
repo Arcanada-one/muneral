@@ -223,18 +223,12 @@ jobs:
           node apps/api/test/assembly/mutation-harness.js \
             --verify-structure apps/api/test/assembly/mutation-results.json
 
-      - name: Record the head measured by this job
-        id: base
-        if: steps.pr.outputs.skip == 'false'
-        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-
       - name: Commit only the declared paths
         id: commit
         if: steps.pr.outputs.skip == 'false'
         env:
           DECLARED: ${{ steps.decl.outputs.paths }}
           PR_REF: ${{ steps.pr.outputs.ref }}
-          BASE_SHA: ${{ steps.base.outputs.sha }}
         run: |
           set -euo pipefail
           # Anything dirty beyond the declared set means the run produced more than the
@@ -283,6 +277,7 @@ jobs:
           verifier, and nothing outside .arcana/derived-artefacts.v1.json.
           MSG
           sed -i 's/^          //' "${RUNNER_TEMP}/derived-commit-msg.txt"
+          BASE_SHA=$(git rev-parse HEAD)
           # The commit this job MEASURED — the head it checked out, before the evidence
           # commit is written on top of it. This is what the remote must still be for the
           # push below to be safe; read it before committing, so it names the measured tree
