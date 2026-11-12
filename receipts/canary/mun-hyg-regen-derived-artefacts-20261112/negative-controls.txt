@@ -1,0 +1,5 @@
+NEG0 fixed candidate, local Jest runner: 2 tests passed, exit 0. The process canary repeats this command in the private namespace and records its exact result in result.json.
+
+NEG1 original workflow red control: ran the new contract spec against the unfixed workflow from origin/main df0df15d6081cfcfa19a11ff87790a5f942645e6. Result: 1 test failed, exit 1. The assertion found five forbidden run-block substitutions: three github.event.repository.default_branch expressions and two steps.pr.outputs.ref expressions.
+
+NEG2 initial canary harness calibration: the first plan used cwd=. and invoked Jest from the repository root, so Jest did not load apps/api's TypeScript transform and exited 1 before tests. The plan was corrected to cwd=apps/api and the API-local Jest path; the final process observation in result.json then passed. This was a harness invocation error, not a product test result.

@@ -1,0 +1,160 @@
+{
+  "schema": "CanaryResult/v2",
+  "captured_at_utc": "2026-11-12T06:22:13Z",
+  "producer": {
+    "tool": "receipts/canary/mun-hyg-regen-derived-artefacts-20261112/harness.py.txt",
+    "version": "1.0.0"
+  },
+  "model": "none: deterministic process producer",
+  "plan": {
+    "id": "muneral-mun-hyg-regen-derived-artefacts-a81b59d",
+    "path": "plan.json",
+    "digest": "2b276093650e533a713e237fc29e6f708c6c55d1b8bf684e0fea1e92bf4c2c26"
+  },
+  "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces, source at candidate commit a81b59dcb8495ed366755d95aa309d3081ef3f30 (tree b3e3ec25c80fa7a7ac56f106324799fa2796913a) mounted read-only at /repo, private tmpfs /tmp, no network; NOT a GitHub Actions or production run",
+  "phase": "pre",
+  "read_only": true,
+  "observation_owner": "MUN-HYG author, Muneral task 7b377cb0-0ba4-44dc-825f-73c242d16746",
+  "resident_version": null,
+  "subject": {
+    "schema": "GitCanarySubject/v1",
+    "commit": "a81b59dcb8495ed366755d95aa309d3081ef3f30",
+    "tree": "b3e3ec25c80fa7a7ac56f106324799fa2796913a",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "0911eb139fb3904cc7b4cfc0e0c821dc33f4ec334f713c5c6f328375dab66593",
+      "source_field": "commit"
+    }
+  },
+  "probes": [
+    {
+      "id": "workflow-no-inline-expression-contract",
+      "kind": "process",
+      "executed": true,
+      "termination": {
+        "kind": "exit",
+        "code": 0
+      },
+      "outcome": "verified",
+      "reason": "Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+      "execution_identity_unchanged": true,
+      "capture_complete": true,
+      "artifacts_verifiable": true,
+      "executable_sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+      "invocation_digest": "d0be6dec09dbdda2ddb19af7d2124aaf0bed8a7fb0c7d07c574d4ac519874016",
+      "environment_keys": [
+        "CI",
+        "HOME",
+        "LANG",
+        "NODE_OPTIONS",
+        "NO_COLOR",
+        "PATH",
+        "TMPDIR",
+        "TZ"
+      ],
+      "elapsed_ms": 6622.683,
+      "started_at_utc": "2026-11-12T06:22:06.644129+00:00",
+      "finished_at_utc": "2026-11-12T06:22:13.561617+00:00",
+      "execution_files": [
+        {
+          "path": "/usr/bin/node",
+          "sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+          "bytes": 126458664,
+          "matched": true,
+          "attribution": {
+            "kind": "system_executable",
+            "source_id": "/usr/bin/node",
+            "version": "sha256:89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+          }
+        },
+        {
+          "path": "/repo/.github/workflows/regenerate-derived-artefacts.yml",
+          "sha256": "9000d025e08b2be6141f8c0cbf26dae956e0cfad5fb0311c2c1b7fe92f723580",
+          "bytes": 19993,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/test/regenerate-derived-artefacts.workflow.contract.spec.ts",
+          "sha256": "44d5218f898d6c47467b776373ffa3640d274cbe223296a1a3117ab24b7a4a17",
+          "bytes": 2500,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/package.json",
+          "sha256": "0726ca5f358349e2016e8c3da72ee485669417c6f38fe8cdf8f3528c80c3dad4",
+          "bytes": 2885,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/tsconfig.test.json",
+          "sha256": "b45b51f10e6897b5fa212f421842c1334c9e1f7942e446dcf278bb08b9c55d1d",
+          "bytes": 1041,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        }
+      ],
+      "artifacts": [],
+      "streams": {
+        "stdout": {
+          "captured_bytes": 190,
+          "sha256": "117bf3554051ba502d622cc6c68f888a20b6898143e291f8085bc506b22eeea8",
+          "capture": "digest_only",
+          "truncated": false
+        },
+        "stderr": {
+          "captured_bytes": 1474,
+          "sha256": "c1be312d0dfd10aa5038863d5bd343e92dc46ac6c8f8f838c2f570197be1c8fb",
+          "capture": "digest_only",
+          "truncated": false
+        }
+      },
+      "output_checks": [
+        {
+          "stream": "stderr",
+          "expected": "Test Suites: 1 passed, 1 total",
+          "matched": true
+        },
+        {
+          "stream": "stderr",
+          "expected": "Tests:       2 passed, 2 total",
+          "matched": true
+        }
+      ],
+      "cleanup": {
+        "group_signalled_before_leader_reaped": true,
+        "escaped_descendants": "not_proven_absent",
+        "sandbox": false
+      }
+    }
+  ],
+  "entity_verdicts": [
+    {
+      "entity": "code_unit:.github/workflows/regenerate-derived-artefacts.yml",
+      "verdict": "verified",
+      "reason": "Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+      "probe_ids": [
+        "workflow-no-inline-expression-contract"
+      ]
+    },
+    {
+      "entity": "code_unit:apps/api/test/regenerate-derived-artefacts.workflow.contract.spec.ts",
+      "verdict": "verified",
+      "reason": "Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+      "probe_ids": [
+        "workflow-no-inline-expression-contract"
+      ]
+    }
+  ],
+  "source_binding_errors": []
+}
