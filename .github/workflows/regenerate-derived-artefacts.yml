@@ -87,6 +87,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           set -euo pipefail
           num=$(gh api "repos/${REPO}/commits/${HEAD_SHA}/pulls" \
@@ -101,7 +102,7 @@ jobs:
             echo "author is not the registered automated author — nothing to regenerate here"
             echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
           fi
-          if [ "$base" != "${{ github.event.repository.default_branch }}" ]; then
+          if [ "$base" != "$DEFAULT_BRANCH" ]; then
             echo "base is ${base}, not the default branch"
             echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
           fi
@@ -134,6 +135,8 @@ jobs:
       - name: The pinned toolchain must be the one ci.yml pins
         id: pin
         if: steps.pr.outputs.skip == 'false'
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           set -euo pipefail
           # From the BASE branch, never the checkout. A workflow_run job runs the workflow
@@ -142,7 +145,7 @@ jobs:
           # measured: «.node-version-for-derived: No such file or directory» on PR #32,
           # whose branch predates the file. Anything this workflow needs ABOUT ITSELF has
           # to be read where the workflow itself lives.
-          base='${{ github.event.repository.default_branch }}'
+          base="$DEFAULT_BRANCH"
           git fetch -q origin "$base"
           want=$(git show "origin/${base}:.github/workflows/ci.yml" | grep -oE 'node-version: *[0-9][0-9.]*' | head -1 | grep -oE '[0-9][0-9.]*')
           have=$(git show "origin/${base}:.github/workflows/.node-version-for-derived" | tr -d '[:space:]')
@@ -163,11 +166,13 @@ jobs:
       # where a run does exist, so the next rename fails loudly instead.
       - name: Every workflow_run listener must name ci.yml as ci.yml names itself
         if: steps.pr.outputs.skip == 'false'
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           set -euo pipefail
           # Also from the base branch, for the same reason: these are facts about the
           # workflows that RUN, which are the base branch's, not the pull request's.
-          base='${{ github.event.repository.default_branch }}'
+          base="$DEFAULT_BRANCH"
           ci_name=$(git show "origin/${base}:.github/workflows/ci.yml" | grep -m1 '^name:' | sed 's/^name:[[:space:]]*//')
           echo "ci.yml calls itself: ${ci_name}"
           bad=0
@@ -218,11 +223,18 @@ jobs:
           node apps/api/test/assembly/mutation-harness.js \
             --verify-structure apps/api/test/assembly/mutation-results.json
 
+      - name: Record the head measured by this job
+        id: base
+        if: steps.pr.outputs.skip == 'false'
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
       - name: Commit only the declared paths
         id: commit
         if: steps.pr.outputs.skip == 'false'
         env:
           DECLARED: ${{ steps.decl.outputs.paths }}
+          PR_REF: ${{ steps.pr.outputs.ref }}
+          BASE_SHA: ${{ steps.base.outputs.sha }}
         run: |
           set -euo pipefail
           # Anything dirty beyond the declared set means the run produced more than the
@@ -275,7 +287,6 @@ jobs:
           # commit is written on top of it. This is what the remote must still be for the
           # push below to be safe; read it before committing, so it names the measured tree
           # and not the new one.
-          BASE_SHA=$(git rev-parse HEAD)
           git commit -F "${RUNNER_TEMP}/derived-commit-msg.txt"
           # The mutation battery takes ~15 minutes on this repository, and the branch can
           # move under it — a rebase onto a new main, another writer rebinding the same
@@ -291,8 +302,8 @@ jobs:
           # would overwrite the other writer's work. Losing the race is a normal outcome, not
           # a failure: the head that won carries its own evidence, and the freshly triggered
           # CI measures it. The run exits 0 and says so.
-          if git push --force-with-lease="${{ steps.pr.outputs.ref }}:${BASE_SHA}" \
-                origin HEAD:"${{ steps.pr.outputs.ref }}"; then
+          if git push --force-with-lease="${PR_REF}:${BASE_SHA}" \
+                origin "HEAD:${PR_REF}"; then
             echo "pushed=true" >> "$GITHUB_OUTPUT"
           else
             echo "the branch moved while the battery was running (remote is no longer ${BASE_SHA})."
