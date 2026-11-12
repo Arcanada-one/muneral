@@ -1,0 +1,44 @@
+"""Generates plan.json (CanaryPlan/v2) for the jwt-fail-closed process canary. Run OUTSIDE the sandbox against the
+clean worktree of the measured commit: python3 gen_plan.py.txt <worktree> <precedent-plan.json> <source-evidence.json> <out>."""
+import hashlib, json, sys
+wt, precedent, evid, out = sys.argv[1:5]
+rec = "/canary"
+def sha(path): return hashlib.sha256(open(path, "rb").read()).hexdigest()
+def host(p): return wt + p[len("/repo"):] if p.startswith("/repo") else p
+old = json.load(open(precedent))
+probe = old["probes"][0]
+ev = json.load(open(evid))
+rows = []
+def sysexec(path, src):
+    s = sha(src); return {"attribution": {"kind": "system_executable", "source_id": path, "version": "sha256:" + s}, "path": path, "sha256": s}
+rows.append(sysexec("/node/bin/node", "/usr/bin/node"))
+import os
+here = os.path.dirname(os.path.abspath(evid))
+rows.append(sysexec("/spec/jwt-unset.canary.spec.ts", here + "/jwt-unset.canary.spec.ts.txt"))
+rows.append(sysexec("/spec/jwt-set.canary.spec.ts", here + "/jwt-set.canary.spec.ts.txt"))
+rows.append(sysexec("/canary/jest.canary.config.json", here + "/jest.canary.config.json"))
+product = ["/repo/apps/api/src/ws/kanban.gateway.ts", "/repo/apps/api/src/ws/ws.module.ts",
+           "/repo/apps/api/src/auth/jwt-secret.ts", "/repo/apps/api/src/auth/auth.module.ts",
+           "/repo/apps/api/src/auth/strategies/jwt.strategy.ts", "/repo/apps/api/test/support/throttler-test-double.ts"]
+seen = set(product)
+for r in probe["execution_files"]:
+    if r["attribution"]["kind"] == "product_source" and r["path"] not in seen:
+        product.append(r["path"]); seen.add(r["path"])
+for p in product:
+    rows.append({"attribution": {"kind": "product_source"}, "path": p, "sha256": sha(host(p))})
+new = dict(probe)
+new["id"] = "jwt-fail-closed-nest-socketio-loopback"
+new["entities"] = ["code_unit:apps/api/src/auth/auth.module.ts", "code_unit:apps/api/src/auth/jwt-secret.ts",
+                   "code_unit:apps/api/src/auth/strategies/jwt.strategy.ts", "code_unit:apps/api/src/ws/kanban.gateway.ts",
+                   "code_unit:apps/api/src/ws/ws.module.ts"]
+new["execution_files"] = rows
+new["expect"] = {"exit_codes": [0], "stderr_contains": ["Tests:       20 passed, 20 total", "Test Suites: 2 passed, 2 total"]}
+plan = {"schema": "CanaryPlan/v2",
+        "id": "muneral-hyg-jwt-fail-closed-" + ev["commit"][:7],
+        "owner": "MUN-HYG leaf, Muneral task b5245745-f678-4bbd-94f7-0f0083a53df8",
+        "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces on arcana-devs, source of candidate commit %s (tree %s; base main df0313b3548ba315c45ebea28b0446fce4dc8c05) mounted read-only at /repo, no network, NOT a production probe" % (ev["commit"], ev["tree"]),
+        "read_only": True, "producer_repository": "/repo", "probes": [new],
+        "subject": {"commit": ev["commit"], "evidence": {"path": "source-evidence.json", "sha256": sha(evid), "source_field": "commit"},
+                    "schema": "GitCanarySubject/v1", "tree": ev["tree"]}}
+open(out, "w").write(json.dumps(plan, indent=2, sort_keys=True) + "\n")
+print("plan written", out, len(rows), "execution files")

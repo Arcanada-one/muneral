@@ -10,6 +10,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { Injectable, Logger } from '@nestjs/common';
+import { getJwtSecret } from '../auth/jwt-secret.js';
 import { maySubscribeToProject } from '../plan-graph/project-membership.js';
 import { ProjectMembershipService } from '../plan-graph/project-membership.service.js';
 
@@ -58,7 +59,7 @@ export class KanbanGateway
 
     try {
       const payload = this.jwtService.verify(token, {
-        secret: process.env.JWT_SECRET ?? 'change-me-in-production',
+        secret: getJwtSecret(),
       }) as { sub: string; type: string };
 
       if (payload.type !== 'access') {

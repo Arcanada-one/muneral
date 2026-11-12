@@ -1,0 +1,2 @@
+route:WS join:project -> ['process evidence supports code units, config keys, deployable-unit roots, and graph-bound contracts/documents']
+route:WS leave:project -> ['process evidence supports code units, config keys, deployable-unit roots, and graph-bound contracts/documents']

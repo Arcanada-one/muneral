@@ -1,0 +1,9 @@
+{
+  "captured_at_utc": "2026-11-12T04:46:12Z",
+  "commit": "c9a671b148dfd7e6b6ee88871063bc7d9f91bf80",
+  "dirty": false,
+  "producer": "git rev-parse/status in clean tracked worktree (candidate branch mun-hyg/mun-jwt-secret-fail-closed-20261112, post-#428 origin/main df0313b3548ba315c45ebea28b0446fce4dc8c05; MUN-HYG leaf, task b5245745)",
+  "repository_path": "/repo",
+  "schema": "MeasuredGitSource/v1",
+  "tree": "98679129fa93fb99a73898ac24fe7c9d6952a9f7"
+}

@@ -1,0 +1,41 @@
+== M1_ws_module
+  FAILED: JWT_SECRET unset: every changed code unit refuses › ws.module.ts refuses at import (module construction)
+Tests:       1 failed, 14 passed, 15 total
+== M2_auth_module
+  FAILED: JWT_SECRET unset: every changed code unit refuses › auth.module.ts refuses at import (module construction)
+Tests:       1 failed, 14 passed, 15 total
+== M3_jwt_strategy
+  FAILED: JWT_SECRET unset: every changed code unit refuses › jwt.strategy.ts refuses at construction
+Tests:       1 failed, 14 passed, 15 total
+== M4_kanban_gateway
+  FAILED: JWT_SECRET unset: every changed code unit refuses › kanban.gateway.ts rejects a handshake and never verifies a token
+Tests:       1 failed, 14 passed, 15 total
+== M5_jwt_secret_helper
+  FAILED: JWT_SECRET unset: every changed code unit refuses › auth.module.ts refuses at import (module construction)
+  FAILED: JWT_SECRET unset: every changed code unit refuses › getJwtSecret throws, naming the variable and no value (unset and blank)
+  FAILED: JWT_SECRET unset: every changed code unit refuses › jwt.strategy.ts refuses at construction
+  FAILED: JWT_SECRET unset: every changed code unit refuses › kanban.gateway.ts rejects a handshake and never verifies a token
+  FAILED: JWT_SECRET unset: every changed code unit refuses › ws.module.ts refuses at import (module construction)
+Tests:       5 failed, 10 passed, 15 total
+== M6_ws_module_fixed_secret
+  FAILED: JWT_SECRET unset: every changed code unit refuses › ws.module.ts refuses at import (module construction)
+Tests:       1 failed, 14 passed, 15 total
+== M7_kanban_gateway_fixed_secret
+  FAILED: JWT_SECRET set: changed code units behave as before › real WsModule + KanbanGateway over a loopback socket.io server › accepts a valid token; join:project admits a member and delivers events
+  FAILED: JWT_SECRET set: changed code units behave as before › real WsModule + KanbanGateway over a loopback socket.io server › join:project refuses a valid-token non-member and delivers nothing to it
+  FAILED: JWT_SECRET set: changed code units behave as before › real WsModule + KanbanGateway over a loopback socket.io server › leave:project stops delivery
+  FAILED: JWT_SECRET unset: every changed code unit refuses › kanban.gateway.ts rejects a handshake and never verifies a token
+Tests:       4 failed, 11 passed, 15 total
+
+
+RERUN ON MERGED CANDIDATE (b9bf519b8fd2236f447dd8bb1e53fd21519eb5f9; post-#428 main df0313b3548ba315c45ebea28b0446fce4dc8c05)
+Each mutant was mounted over exactly one source file in the same private bubblewrap namespace and ran both canary specs (15 tests). All seven exited 1 and were killed:
+M1 ws.module fallback: 1 failed, 14 passed, 15 total.
+M2 auth.module fallback: 1 failed, 14 passed, 15 total.
+M3 jwt.strategy fallback: 1 failed, 14 passed, 15 total.
+M4 kanban.gateway fallback: 1 failed, 14 passed, 15 total.
+M5 helper accepts blank: 5 failed, 10 passed, 15 total.
+M6 ws.module fixed secret: 1 failed, 14 passed, 15 total.
+M7 kanban.gateway fixed secret: 4 failed, 11 passed, 15 total.
+
+M8 minimum-length check removed (mutant changes the helper to reject only blank values): raw Jest exited 1; 3 failed, 17 passed, 20 total. The three short-value assertions killed the mutant.

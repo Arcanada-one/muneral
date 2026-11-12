@@ -1,0 +1,138 @@
+// MUN-HYG jwt-fail-closed process canary, case: JWT_SECRET SET to a throwaway test value.
+// Stored as .txt; run as /spec/jwt-set.canary.spec.ts. contour=candidate-local, NOT production.
+// Real Nest app + real socket.io server on loopback + real socket.io-client + real @nestjs/jwt + real WsModule.
+// ProjectMembershipService is a declared stub (the real one needs PostgreSQL); AuthService is a declared stub.
+// Static imports are hoisted above this line, so product modules read the value that the repository's own
+// jest setup file (apps/api/test/setup-env.ts, in setupFiles) gave JWT_SECRET: an explicit non-public test value.
+const VALUE = process.env.JWT_SECRET as string;
+
+import { afterEach } from '@jest/globals';
+import { Test } from '@nestjs/testing';
+import { JwtService } from '@nestjs/jwt';
+import { IoAdapter } from '@nestjs/platform-socket.io';
+import { io as connect } from '/repo/apps/web/node_modules/socket.io-client/build/esm/index.js';
+import { getJwtSecret, MIN_JWT_SECRET_LENGTH } from '/repo/apps/api/src/auth/jwt-secret';
+import { AuthModule } from '/repo/apps/api/src/auth/auth.module';
+import { JwtStrategy } from '/repo/apps/api/src/auth/strategies/jwt.strategy';
+import { WsModule } from '/repo/apps/api/src/ws/ws.module';
+import { KanbanGateway } from '/repo/apps/api/src/ws/kanban.gateway';
+import { ProjectMembershipService } from '/repo/apps/api/src/plan-graph/project-membership.service';
+
+const P = '11111111-1111-4111-8111-111111111111';
+const MEMBER = 'member-user';
+const good = new JwtService({ secret: VALUE });
+const wrong = new JwtService({ secret: VALUE + '-other' });
+const tok = (s: JwtService, sub: string, type = 'access') => s.sign({ sub, type });
+const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+describe('JWT_SECRET set: changed code units behave as before', () => {
+  afterEach(() => { process.env.JWT_SECRET = VALUE; });
+
+  it('the test environment provides a non-empty, non-default value', () => {
+    expect(typeof VALUE).toBe('string'); expect(VALUE.length).toBeGreaterThan(16);
+    expect(VALUE).not.toBe(['change-me', 'in-production'].join('-'));
+  });
+
+  it('getJwtSecret returns the configured value', () => { expect(getJwtSecret()).toBe(VALUE); });
+
+  it.each(['x', 'x'.repeat(MIN_JWT_SECRET_LENGTH - 1), `${'x'.repeat(MIN_JWT_SECRET_LENGTH - 1)} `])(
+    'refuses a short value after trimming and does not reveal it',
+    (supplied) => {
+      process.env.JWT_SECRET = supplied;
+      let message = '';
+      try { getJwtSecret(); } catch (error) { message = (error as Error).message; }
+      expect(message).toContain('JWT_SECRET');
+      expect(message).toContain(String(MIN_JWT_SECRET_LENGTH));
+      expect(message).not.toContain(supplied);
+    },
+  );
+
+  it('accepts exactly the minimum length after trimming', () => {
+    const supplied = 'x'.repeat(MIN_JWT_SECRET_LENGTH);
+    process.env.JWT_SECRET = supplied;
+    expect(getJwtSecret()).toBe(supplied);
+  });
+
+  it('accepts a minimum-length secret surrounded by whitespace and preserves the input', () => {
+    const supplied = ` ${'x'.repeat(MIN_JWT_SECRET_LENGTH)} `;
+    process.env.JWT_SECRET = supplied;
+    expect(getJwtSecret()).toBe(supplied);
+  });
+
+  it('auth.module.ts registers JwtModule with the configured secret', () => {
+    const imports: any[] = Reflect.getMetadata('imports', AuthModule) ?? [];
+    const secrets = imports.flatMap((m) => (m?.providers ?? []).map((p: any) => p?.useValue?.secret)).filter(Boolean);
+    expect(secrets).toEqual([VALUE]);
+  });
+
+  it('jwt.strategy.ts accepts a token signed with the secret and rejects another', async () => {
+    const strategy: any = new JwtStrategy({ validateJwtPayload: async (p: any) => ({ id: p.sub }) } as any);
+    const run = (token: string) => new Promise<string>((res) => {
+      strategy.success = (u: any) => res('success:' + u.id);
+      strategy.fail = () => res('fail');
+      strategy.error = () => res('error');
+      strategy.authenticate({ headers: { authorization: `Bearer ${token}` } });
+    });
+    expect(await run(tok(good, 'u1'))).toBe('success:u1');
+    expect(await run(tok(wrong, 'u1'))).toBe('fail');
+    expect(await run(tok(good, 'u1', 'refresh'))).toBe('error');
+  });
+
+  describe('real WsModule + KanbanGateway over a loopback socket.io server', () => {
+    let app: any; let url: string; let gateway: KanbanGateway; const open: any[] = [];
+    beforeAll(async () => {
+      const moduleRef = await Test.createTestingModule({ imports: [WsModule] })
+        .overrideProvider(ProjectMembershipService).useValue({
+          lookup: async (u?: string, p?: string) => (u && p ? { userId: u, projectId: p, isMember: u === MEMBER } : null) })
+        .compile();
+      app = moduleRef.createNestApplication();
+      app.useWebSocketAdapter(new IoAdapter(app));
+      await app.listen(0, '127.0.0.1');
+      url = `http://127.0.0.1:${app.getHttpServer().address().port}/kanban`;
+      gateway = moduleRef.get(KanbanGateway);
+    });
+    afterAll(async () => { open.forEach((s) => s.close()); await app.close(); });
+    const client = (auth: Record<string, unknown>) => {
+      const s = connect(url, { auth, transports: ['websocket'], reconnection: false, forceNew: true });
+      (s as any).closed = new Promise<string>((res) => s.on('disconnect', res));
+      open.push(s); return s;
+    };
+    const connected = (s: any) => new Promise<void>((res, rej) => { s.on('connect', res); s.on('connect_error', rej); });
+    const join = (s: any) => new Promise<any>((res) => s.emit('join:project', { projectId: P }, res));
+
+    it('disconnects a socket with no token', async () => {
+      const s = client({}); await connected(s);
+      expect(await (s as any).closed).toBe('io server disconnect');
+    });
+    it('disconnects a socket whose token was signed with a different secret', async () => {
+      const s = client({ token: tok(wrong, MEMBER) }); await connected(s);
+      expect(await (s as any).closed).toBe('io server disconnect');
+    });
+    it('disconnects a socket carrying a non-access token', async () => {
+      const s = client({ token: tok(good, MEMBER, 'refresh') }); await connected(s);
+      expect(await (s as any).closed).toBe('io server disconnect');
+    });
+    it('accepts a valid token; join:project admits a member and delivers events', async () => {
+      const s = client({ token: tok(good, MEMBER) }); await connected(s);
+      expect(await join(s)).toEqual({ ok: true, reason: 'current_project_membership' });
+      const got = new Promise<any>((r) => s.on('task:moved', r));
+      gateway.emit(P, 'task:moved', { id: 't1' });
+      expect(await got).toEqual({ id: 't1' });
+    });
+    it('join:project refuses a valid-token non-member and delivers nothing to it', async () => {
+      const s = client({ token: tok(good, 'outsider-user') }); await connected(s);
+      expect(await join(s)).toEqual({ ok: false, reason: 'not_project_workspace_member' });
+      let received = false; s.on('task:updated', () => { received = true; });
+      gateway.emit(P, 'task:updated', { id: 't2' }); await wait(400);
+      expect(received).toBe(false);
+    });
+    it('leave:project stops delivery', async () => {
+      const s = client({ token: tok(good, MEMBER) }); await connected(s);
+      expect((await join(s)).ok).toBe(true);
+      s.emit('leave:project', { projectId: P }); await wait(300);
+      let received = false; s.on('task:created', () => { received = true; });
+      gateway.emit(P, 'task:created', { id: 't3' }); await wait(400);
+      expect(received).toBe(false);
+    });
+  });
+});
