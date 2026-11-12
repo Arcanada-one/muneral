@@ -1,30 +1,30 @@
 {
   "schema": "CanaryResult/v2",
-  "captured_at_utc": "2026-11-12T03:37:49Z",
+  "captured_at_utc": "2026-11-12T04:46:38Z",
   "producer": {
     "tool": "receipts/canary/mun-hyg-jwt-fail-closed-20261112/harness.py.txt",
     "version": "1.0.0"
   },
   "model": "none: deterministic process producer",
   "plan": {
-    "id": "muneral-hyg-jwt-fail-closed-fcb6674",
+    "id": "muneral-hyg-jwt-fail-closed-c9a671b",
     "path": "plan.json",
-    "digest": "f31551b428f961b091dccbca08156d01e79adcd1610100a19f39a59e6bff3b32"
+    "digest": "8780679b1e9a9428e491418b162ac028784f559aef1a9a7e6bab05dbc4aef908"
   },
-  "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces on arcana-devs, source of candidate commit fcb6674286b6ae91abd6f31ea4ebef883e1b1fb3 (tree 81b1da009529c8b45f040a72c9bfc0e8494524bd; base main df0313b3548ba315c45ebea28b0446fce4dc8c05) mounted read-only at /repo, no network, NOT a production probe",
+  "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces on arcana-devs, source of candidate commit c9a671b148dfd7e6b6ee88871063bc7d9f91bf80 (tree 98679129fa93fb99a73898ac24fe7c9d6952a9f7; base main df0313b3548ba315c45ebea28b0446fce4dc8c05) mounted read-only at /repo, no network, NOT a production probe",
   "phase": "pre",
   "read_only": true,
   "observation_owner": "MUN-HYG leaf, Muneral task b5245745-f678-4bbd-94f7-0f0083a53df8",
   "resident_version": null,
   "subject": {
-    "commit": "fcb6674286b6ae91abd6f31ea4ebef883e1b1fb3",
+    "commit": "c9a671b148dfd7e6b6ee88871063bc7d9f91bf80",
     "evidence": {
       "path": "source-evidence.json",
-      "sha256": "07df778457bbaf396765dfcbde41ad296e05701eaef0c68b3f7b3372d20f7d57",
+      "sha256": "ac62cc9d5b7ce804466f754e835e4a3e95f995b08b6b3b64204545cfd10ad88d",
       "source_field": "commit"
     },
     "schema": "GitCanarySubject/v1",
-    "tree": "81b1da009529c8b45f040a72c9bfc0e8494524bd"
+    "tree": "98679129fa93fb99a73898ac24fe7c9d6952a9f7"
   },
   "probes": [
     {
@@ -41,7 +41,7 @@
       "capture_complete": true,
       "artifacts_verifiable": true,
       "executable_sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
-      "invocation_digest": "9daa34583f559afe8c5d43486290962cdebb838ed0c904518097234eb767fe25",
+      "invocation_digest": "c3f100c794781866f4c584466484c0c275c4dae5f37b11be44033513fd1dbd75",
       "environment_keys": [
         "CI",
         "HOME",
@@ -51,9 +51,9 @@
         "TMPDIR",
         "TZ"
       ],
-      "elapsed_ms": 8018.725,
-      "started_at_utc": "2026-11-12T03:37:41.618865+00:00",
-      "finished_at_utc": "2026-11-12T03:37:49.864356+00:00",
+      "elapsed_ms": 8601.275,
+      "started_at_utc": "2026-11-12T04:46:30.021245+00:00",
+      "finished_at_utc": "2026-11-12T04:46:38.868682+00:00",
       "execution_files": [
         {
           "path": "/node/bin/node",
@@ -182,8 +182,8 @@
         },
         {
           "path": "/repo/apps/api/test/setup-env.ts",
-          "sha256": "41098e59d15c9d57181a9c1b068fb9395624996c0c3ef25f15bdbdc4461e67bb",
-          "bytes": 1312,
+          "sha256": "28bf2e05020e372cbee8d3063e77a59e798c5c1315b580f5e51450e1faa82f1d",
+          "bytes": 1332,
           "matched": true,
           "attribution": {
             "kind": "product_source"
@@ -329,13 +329,13 @@
       "streams": {
         "stdout": {
           "captured_bytes": 214,
-          "sha256": "189920b7ba6b3c12ed806c58379dcc5e24a457e659e7bd3087f09462d3aebc6a",
+          "sha256": "0c08287559351de06d5f2a9c3cd0be624db779c0ae898595171e4c13f0b0cca0",
           "capture": "digest_only",
           "truncated": false
         },
         "stderr": {
-          "captured_bytes": 12027,
-          "sha256": "39993e9d54dc7466796e679eef1a60ce1245f640ee658d5fca52a1fea8dba0d3",
+          "captured_bytes": 12028,
+          "sha256": "0f2ff66ba1d9bca5ee50d00f757a2ebefdbac3aeb5889a57407165f0549aea21",
           "capture": "digest_only",
           "truncated": false
         }
