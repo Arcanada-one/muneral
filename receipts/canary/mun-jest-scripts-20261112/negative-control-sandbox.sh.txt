@@ -1,0 +1,14 @@
+#!/bin/bash
+# usage: sb.sh <worktree> [--overlay SRC DST]... -- <cmd...>   (raw command in the same sandbox as run_sandbox.sh.txt, cwd /repo)
+set -eu
+WT=$1; shift
+OV=()
+while [ "$1" = "--overlay" ]; do OV+=(--ro-bind "$2" "$3"); shift 3; done
+[ "$1" = "--" ] && shift
+exec bwrap --unshare-user --unshare-net --unshare-pid --unshare-ipc --unshare-uts --die-with-parent \
+  --tmpfs / --ro-bind /usr /usr --symlink usr/lib /lib --symlink usr/lib64 /lib64 --symlink usr/bin /bin \
+  --proc /proc --dev /dev --tmpfs /tmp --dir /home/canary \
+  --ro-bind "$WT" /repo "${OV[@]}" --chdir /repo \
+  --setenv CI 1 --setenv NO_COLOR 1 --setenv HOME /home/canary --setenv LANG C.UTF-8 --setenv PATH /usr/bin:/bin \
+  --setenv TMPDIR /tmp --setenv TZ UTC --setenv NODE_OPTIONS --experimental-vm-modules \
+  "$@"

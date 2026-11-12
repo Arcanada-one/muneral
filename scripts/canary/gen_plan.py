@@ -6,7 +6,12 @@ route AND the controller that provides it (`provides_route` edge). A controller'
 is `verified` only when every route it provides is.
 
     python3 .github/graph-admission/tools/graph/build_graph.py . --rev HEAD --out /path/graph.json
-    python3 scripts/canary/gen_plan.py --graph /path/graph.json --out deploy/canary/muneral-route-presence.plan.json
+    python3 scripts/canary/gen_plan.py --graph /path/graph.json --environment production \\
+        --out deploy/canary/muneral-route-presence.plan.json
+
+`--environment` is required and has no default: the label ends up in every CanaryResult, so a run
+against a candidate-local contour must say so ("production" is accepted only when passed explicitly).
+A missing or blank value is refused (exit 2, message on stderr) and no plan file is written.
 
 The plan is generated, then reviewed and committed: the deploy runs the committed file, never a
 freshly generated one. `tests` in scripts/canary/test_canary_plan.py check it still matches the tree.
@@ -31,7 +36,9 @@ def served_path(template: str) -> str:
     return PREFIX + template
 
 
-def plan_from_graph(graph: dict) -> dict:
+def plan_from_graph(graph: dict, environment: str) -> dict:
+    if not isinstance(environment, str) or not environment.strip():
+        raise ValueError("environment must be a non-empty string; there is no default")
     providers: dict[str, list[str]] = {}
     for edge in graph["edges"]:
         if edge.get("type") == "provides_route":
@@ -65,7 +72,7 @@ def plan_from_graph(graph: dict) -> dict:
         "schema": "CanaryPlan/v1",
         "id": "muneral-route-presence",
         "card": "A2-330",
-        "environment": "production",
+        "environment": environment,
         "base_url": "http://127.0.0.1:3500",
         "route_table_path": "/health/routes",
         "owner": "none: read-only plan (GET only, no body, no credential)",
@@ -82,8 +89,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--graph", required=True)
     parser.add_argument("--out", required=True)
+    parser.add_argument("--environment", required=True,
+                        help="contour label written into the plan and every CanaryResult (no default; e.g. production, candidate-local)")
     args = parser.parse_args()
-    plan = plan_from_graph(json.loads(Path(args.graph).read_text(encoding="utf-8")))
+    if not args.environment.strip():
+        parser.error("--environment must not be blank; there is no default")
+    plan = plan_from_graph(json.loads(Path(args.graph).read_text(encoding="utf-8")), args.environment.strip())
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     Path(args.out).write_text(json.dumps(plan, indent=1) + "\n", encoding="utf-8")
     print(f"{args.out}: {len(plan['probes'])} probes")

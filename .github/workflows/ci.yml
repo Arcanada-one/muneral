@@ -125,6 +125,7 @@ jobs:
         continue-on-error: true
         run: |
           node --test apps/api/scripts/semantic-aggregate-readback.test.mjs
+          node --test apps/api/scripts/run-jest-isolated.test.mjs
           bash scripts/ci/semantic-readback-caller-contract.test.sh
       # A2-255: the endpoint probes are a verifier, so they need a verifier of their own. This runs
       # scripts/probe-endpoints.sh against a loopback stub that serves deliberately broken /health
@@ -258,7 +259,7 @@ jobs:
           mkdir -p reports
           # No --bail: collect every failure into the JSON report.
           NODE_OPTIONS=--experimental-vm-modules \
-            pnpm --filter @muneral/api exec node scripts/run-jest-isolated.mjs --passWithNoTests --json --outputFile ../../reports/jest.json
+            pnpm --filter @muneral/api exec node scripts/run-jest-isolated.mjs --min-test-files 100 --json --outputFile ../../reports/jest.json
         env:
           DATABASE_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
           MUN0020_DB_URL: postgresql://test:test@localhost:${{ job.services.postgres.ports['5432'] }}/muneral_test
@@ -279,6 +280,8 @@ jobs:
       - name: Collect ErrorLedger
         id: collect
         if: always() && needs.tested-tree.outputs.reuse != 'true'
+        env:
+          HEAD_REF: ${{ github.head_ref }}
         run: |
           mkdir -p reports "${RUNNER_TEMP}/error-ledger"
           cat > "${RUNNER_TEMP}/error-ledger/step-outcomes.txt" <<'EOF'
@@ -301,6 +304,7 @@ jobs:
           EOF
           python3 - <<'PY' > "${RUNNER_TEMP}/error-ledger/run-meta.json"
           import json
+          import os
           print(json.dumps({
             "repository": """${{ github.repository }}""",
             "run_id": """${{ github.run_id }}""",
@@ -308,7 +312,7 @@ jobs:
             "sha": """${{ github.sha }}""",
             "ref": """${{ github.ref }}""",
             "event_name": """${{ github.event_name }}""",
-            "head_ref": """${{ github.head_ref }}""",
+            "head_ref": os.environ["HEAD_REF"],
           }))
           PY
           summary_args=()

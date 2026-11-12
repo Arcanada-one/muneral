@@ -1,0 +1,9 @@
+{
+  "captured_at_utc": "2026-11-11T23:39:49Z",
+  "commit": "8e497274222bb7d9dd888b2f2c1ae60b8201d197",
+  "dirty": false,
+  "producer": "git rev-parse/status in a clean detached worktree of the measured commit 8e497274 (branch fix/api-jest-suite-really-runs = merge of main 335a500a717b87aa308daa43fd4f15c659ee484d into the JANITOR-dev-mun-jest head; JANITOR author lane, task 361f4902)",
+  "repository_path": "/repo",
+  "schema": "MeasuredGitSource/v1",
+  "tree": "0fa96178dc9fd5ed00d9547e29a1d193fc567ab7"
+}

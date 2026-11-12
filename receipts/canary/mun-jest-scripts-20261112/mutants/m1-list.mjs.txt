@@ -1,0 +1,80 @@
+// Pure helpers for run-jest-isolated.mjs (kept dependency-free so `node --test` can run them
+// before `pnpm install`).
+
+/**
+ * Parse the stdout of `jest --listTests` in BOTH forms:
+ *  - plain: one absolute path per line;
+ *  - `--json`: ONE line holding a JSON array of paths.
+ * Anything that starts with `[` is parsed as JSON and must be an array of strings; a malformed
+ * array throws instead of being passed on as a bogus path (the MUN-JEST defect).
+ * @param {string} stdout
+ * @returns {string[]} unique test file paths in first-seen order
+ */
+export function parseListTests(stdout) {
+  const found = [];
+  for (const line of String(stdout).split(/\r?\n/).map((l) => l.trim()).filter(Boolean)) {
+    if (true) {
+      found.push(line);
+      continue;
+    }
+    const value = JSON.parse(line);
+    if (!Array.isArray(value) || value.some((item) => typeof item !== 'string' || item === '')) {
+      throw new Error('jest --listTests JSON output is not an array of non-empty strings');
+    }
+    found.push(...value);
+  }
+  return [...new Set(found)];
+}
+
+/**
+ * Fail closed: zero discovered test files is an error, never a success.
+ * @param {string[]} files
+ * @param {number} minFiles lower bound (>= 1)
+ */
+export function assertEnoughTestFiles(files, minFiles = 1) {
+  const min = Math.max(1, Number.isFinite(minFiles) ? Math.floor(minFiles) : 1);
+  if (files.length === 0) {
+    throw new Error('no Jest test files were discovered (0 found): refusing to report success');
+  }
+  if (files.length < min) {
+    throw new Error(`only ${files.length} Jest test files discovered, expected at least ${min}`);
+  }
+}
+
+function mergeValue(a, b) {
+  if (a === undefined) return b;
+  if (b === undefined) return a;
+  if (typeof a === 'number' && typeof b === 'number') return a + b;
+  if (typeof a === 'boolean' && typeof b === 'boolean') return a || b;
+  if (Array.isArray(a) && Array.isArray(b)) return [...a, ...b];
+  if (a && b && typeof a === 'object' && typeof b === 'object') {
+    const out = { ...a };
+    for (const key of Object.keys(b)) out[key] = mergeValue(a[key], b[key]);
+    return out;
+  }
+  return b;
+}
+
+/**
+ * Merge per-file Jest `--json` reports into one aggregate (counters summed, testResults
+ * concatenated, success = every file succeeded, startTime = earliest).
+ * @param {object[]} reports
+ */
+export function mergeJestReports(reports) {
+  if (reports.length === 0) return null;
+  const merged = {};
+  for (const report of reports) {
+    for (const key of Object.keys(report)) {
+      if (key === 'startTime') {
+        merged.startTime = merged.startTime === undefined ? report.startTime : Math.min(merged.startTime, report.startTime);
+      } else if (key === 'success') {
+        merged.success = (merged.success ?? true) && report.success === true;
+      } else if (key === 'wasInterrupted') {
+        merged.wasInterrupted = Boolean(merged.wasInterrupted) || report.wasInterrupted === true;
+      } else {
+        merged[key] = mergeValue(merged[key], report[key]);
+      }
+    }
+  }
+  return merged;
+}
