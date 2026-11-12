@@ -1,0 +1,9 @@
+{
+  "captured_at_utc": "2026-11-12T00:15:18Z",
+  "commit": "c585def401af0888e7c94a7d7ca7f3beed5c8932",
+  "dirty": false,
+  "producer": "git rev-parse/status in a clean detached worktree of the measured commit c585def4 (branch fix/api-jest-suite-really-runs; dependencies installed with the default shared pnpm store, node_modules ignored; JANITOR author lane, task 361f4902)",
+  "repository_path": "/repo",
+  "schema": "MeasuredGitSource/v1",
+  "tree": "c99e23f684304f8e9ace9b4f9a2ab312b248a2fa"
+}

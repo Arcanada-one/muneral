@@ -1,0 +1,451 @@
+{
+  "schema": "CanaryResult/v2",
+  "captured_at_utc": "2026-11-12T00:15:52Z",
+  "producer": {
+    "tool": "receipts/canary/mun-jest-scripts-20261112/harness.py.txt",
+    "version": "1.0.0"
+  },
+  "model": "none: deterministic process producer",
+  "plan": {
+    "id": "muneral-mun-jest-scripts-c585def",
+    "path": "plan.json",
+    "digest": "5b42c48c52bbed7be5e6bd10ebd9e2ac827186edcf3b3c5351e22ae4ae2ccb49"
+  },
+  "environment": "contour=candidate-local; bubblewrap private user/net/pid/ipc/uts namespaces on arcana-devs, source of branch commit c585def401af0888e7c94a7d7ca7f3beed5c8932 (tree c99e23f684304f8e9ace9b4f9a2ab312b248a2fa) mounted read-only at /repo, no network, /tmp is a private tmpfs, NOT a production probe",
+  "phase": "pre",
+  "read_only": true,
+  "observation_owner": "JANITOR-dev-mun-jest author lane, Muneral task 361f4902-1dd0-4e15-a089-70aae4982aaf",
+  "resident_version": null,
+  "subject": {
+    "commit": "c585def401af0888e7c94a7d7ca7f3beed5c8932",
+    "evidence": {
+      "path": "source-evidence.json",
+      "sha256": "d87fc5ae3604c9ff8d203e64a405bdd21b90cd8b1dba3a76a01c09c6341c5aa4",
+      "source_field": "commit"
+    },
+    "schema": "GitCanarySubject/v1",
+    "tree": "c99e23f684304f8e9ace9b4f9a2ab312b248a2fa"
+  },
+  "probes": [
+    {
+      "id": "contract-unit-tests",
+      "kind": "process",
+      "executed": true,
+      "termination": {
+        "kind": "exit",
+        "code": 0
+      },
+      "outcome": "verified",
+      "reason": "Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+      "execution_identity_unchanged": true,
+      "capture_complete": true,
+      "artifacts_verifiable": true,
+      "executable_sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+      "invocation_digest": "5f6f49103940e7aed8788c6fde5e7f0a114152c6c0e54ddb054250d249dc35bf",
+      "environment_keys": [
+        "CI",
+        "HOME",
+        "LANG",
+        "NODE_OPTIONS",
+        "NO_COLOR",
+        "PATH",
+        "TMPDIR",
+        "TZ"
+      ],
+      "elapsed_ms": 1035.642,
+      "started_at_utc": "2026-11-12T00:15:42.082519+00:00",
+      "finished_at_utc": "2026-11-12T00:15:43.405727+00:00",
+      "execution_files": [
+        {
+          "path": "/usr/bin/node",
+          "sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+          "bytes": 126458664,
+          "matched": true,
+          "attribution": {
+            "kind": "system_executable",
+            "source_id": "/usr/bin/node",
+            "version": "sha256:89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+          }
+        },
+        {
+          "path": "/repo/apps/api/scripts/jest-list-tests.mjs",
+          "sha256": "3e13dd3561edba47049b247d88c2e7699e2916dea4cac6ec965b7e5be7755f49",
+          "bytes": 3053,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/scripts/run-jest-isolated.test.mjs",
+          "sha256": "3e74a292452470134c142ce6a0c8b805c8229601c7342bcf3fe9e459cc60b1d5",
+          "bytes": 1871,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        }
+      ],
+      "artifacts": [],
+      "streams": {
+        "stdout": {
+          "captured_bytes": 456,
+          "sha256": "87a3f02065905b48b2812d6bfea7e1c07ce2f6d718da7c7e3620c7ebd4ae4ed2",
+          "capture": "digest_only",
+          "truncated": false
+        },
+        "stderr": {
+          "captured_bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "capture": "digest_only",
+          "truncated": false
+        }
+      },
+      "output_checks": [
+        {
+          "stream": "stdout",
+          "expected": "pass 5",
+          "matched": true
+        },
+        {
+          "stream": "stdout",
+          "expected": "fail 0",
+          "matched": true
+        }
+      ],
+      "cleanup": {
+        "group_signalled_before_leader_reaped": true,
+        "escaped_descendants": "not_proven_absent",
+        "sandbox": false
+      }
+    },
+    {
+      "id": "runner-refuses-below-minimum",
+      "kind": "process",
+      "executed": true,
+      "termination": {
+        "kind": "exit",
+        "code": 1
+      },
+      "outcome": "verified",
+      "reason": "Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+      "execution_identity_unchanged": true,
+      "capture_complete": true,
+      "artifacts_verifiable": true,
+      "executable_sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+      "invocation_digest": "f459bbb618f085ba3b8b86fb31bbc97137bdc5e04a58d6e7cf244b05a8c70a70",
+      "environment_keys": [
+        "CI",
+        "HOME",
+        "LANG",
+        "NODE_OPTIONS",
+        "NO_COLOR",
+        "PATH",
+        "TMPDIR",
+        "TZ"
+      ],
+      "elapsed_ms": 1313.928,
+      "started_at_utc": "2026-11-12T00:15:43.405842+00:00",
+      "finished_at_utc": "2026-11-12T00:15:45.017253+00:00",
+      "execution_files": [
+        {
+          "path": "/usr/bin/node",
+          "sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+          "bytes": 126458664,
+          "matched": true,
+          "attribution": {
+            "kind": "system_executable",
+            "source_id": "/usr/bin/node",
+            "version": "sha256:89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+          }
+        },
+        {
+          "path": "/repo/apps/api/scripts/run-jest-isolated.mjs",
+          "sha256": "0bd0ee29171631fdc736199f6152ef95b34179338f363eba78f96d6ad05e67ee",
+          "bytes": 4612,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/scripts/jest-list-tests.mjs",
+          "sha256": "3e13dd3561edba47049b247d88c2e7699e2916dea4cac6ec965b7e5be7755f49",
+          "bytes": 3053,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/package.json",
+          "sha256": "0726ca5f358349e2016e8c3da72ee485669417c6f38fe8cdf8f3528c80c3dad4",
+          "bytes": 2885,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        }
+      ],
+      "artifacts": [],
+      "streams": {
+        "stdout": {
+          "captured_bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "capture": "digest_only",
+          "truncated": false
+        },
+        "stderr": {
+          "captured_bytes": 79,
+          "sha256": "eb330da9383254162c73d24229e835b0f45006a562997f966703c787e62f82b9",
+          "capture": "digest_only",
+          "truncated": false
+        }
+      },
+      "output_checks": [
+        {
+          "stream": "stderr",
+          "expected": "only 127 Jest test files discovered",
+          "matched": true
+        },
+        {
+          "stream": "stderr",
+          "expected": "expected at least 1000",
+          "matched": true
+        }
+      ],
+      "cleanup": {
+        "group_signalled_before_leader_reaped": true,
+        "escaped_descendants": "not_proven_absent",
+        "sandbox": false
+      }
+    },
+    {
+      "id": "runner-refuses-zero-files-old-ci-flags",
+      "kind": "process",
+      "executed": true,
+      "termination": {
+        "kind": "exit",
+        "code": 1
+      },
+      "outcome": "verified",
+      "reason": "Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+      "execution_identity_unchanged": true,
+      "capture_complete": true,
+      "artifacts_verifiable": true,
+      "executable_sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+      "invocation_digest": "d82efad4bcbcba030cac13e88ae5f6d16399d9b7e92d4d71aa3456818b31ed90",
+      "environment_keys": [
+        "CI",
+        "HOME",
+        "LANG",
+        "NODE_OPTIONS",
+        "NO_COLOR",
+        "PATH",
+        "TMPDIR",
+        "TZ"
+      ],
+      "elapsed_ms": 1235.901,
+      "started_at_utc": "2026-11-12T00:15:45.017388+00:00",
+      "finished_at_utc": "2026-11-12T00:15:46.530518+00:00",
+      "execution_files": [
+        {
+          "path": "/usr/bin/node",
+          "sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+          "bytes": 126458664,
+          "matched": true,
+          "attribution": {
+            "kind": "system_executable",
+            "source_id": "/usr/bin/node",
+            "version": "sha256:89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+          }
+        },
+        {
+          "path": "/repo/apps/api/scripts/run-jest-isolated.mjs",
+          "sha256": "0bd0ee29171631fdc736199f6152ef95b34179338f363eba78f96d6ad05e67ee",
+          "bytes": 4612,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/scripts/jest-list-tests.mjs",
+          "sha256": "3e13dd3561edba47049b247d88c2e7699e2916dea4cac6ec965b7e5be7755f49",
+          "bytes": 3053,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/package.json",
+          "sha256": "0726ca5f358349e2016e8c3da72ee485669417c6f38fe8cdf8f3528c80c3dad4",
+          "bytes": 2885,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        }
+      ],
+      "artifacts": [],
+      "streams": {
+        "stdout": {
+          "captured_bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "capture": "digest_only",
+          "truncated": false
+        },
+        "stderr": {
+          "captured_bytes": 92,
+          "sha256": "39836339ee87174536b1326290c9f54f8e23c6f3f0de029a498f86c640f87939",
+          "capture": "digest_only",
+          "truncated": false
+        }
+      },
+      "output_checks": [
+        {
+          "stream": "stderr",
+          "expected": "no Jest test files were discovered (0 found)",
+          "matched": true
+        }
+      ],
+      "cleanup": {
+        "group_signalled_before_leader_reaped": true,
+        "escaped_descendants": "not_proven_absent",
+        "sandbox": false
+      }
+    },
+    {
+      "id": "runner-real-run-json-report",
+      "kind": "process",
+      "executed": true,
+      "termination": {
+        "kind": "exit",
+        "code": 0
+      },
+      "outcome": "verified",
+      "reason": "Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+      "execution_identity_unchanged": true,
+      "capture_complete": true,
+      "artifacts_verifiable": true,
+      "executable_sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+      "invocation_digest": "a0b191714a8235d185f52ff5e53364283443714d4018dbaa5ea150095d2b173f",
+      "environment_keys": [
+        "CI",
+        "HOME",
+        "LANG",
+        "NODE_OPTIONS",
+        "NO_COLOR",
+        "PATH",
+        "TMPDIR",
+        "TZ"
+      ],
+      "elapsed_ms": 6033.816,
+      "started_at_utc": "2026-11-12T00:15:46.530636+00:00",
+      "finished_at_utc": "2026-11-12T00:15:52.844246+00:00",
+      "execution_files": [
+        {
+          "path": "/usr/bin/node",
+          "sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+          "bytes": 126458664,
+          "matched": true,
+          "attribution": {
+            "kind": "system_executable",
+            "source_id": "/usr/bin/node",
+            "version": "sha256:89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+          }
+        },
+        {
+          "path": "/repo/apps/api/scripts/run-jest-isolated.mjs",
+          "sha256": "0bd0ee29171631fdc736199f6152ef95b34179338f363eba78f96d6ad05e67ee",
+          "bytes": 4612,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/scripts/jest-list-tests.mjs",
+          "sha256": "3e13dd3561edba47049b247d88c2e7699e2916dea4cac6ec965b7e5be7755f49",
+          "bytes": 3053,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        },
+        {
+          "path": "/repo/apps/api/package.json",
+          "sha256": "0726ca5f358349e2016e8c3da72ee485669417c6f38fe8cdf8f3528c80c3dad4",
+          "bytes": 2885,
+          "matched": true,
+          "attribution": {
+            "kind": "product_source"
+          }
+        }
+      ],
+      "artifacts": [],
+      "streams": {
+        "stdout": {
+          "captured_bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "capture": "digest_only",
+          "truncated": false
+        },
+        "stderr": {
+          "captured_bytes": 2284,
+          "sha256": "26b1b8ca8db49ddd3ed0918dd67f7b4e7c5dce24808441624de7375c4dc7595b",
+          "capture": "digest_only",
+          "truncated": false
+        }
+      },
+      "output_checks": [
+        {
+          "stream": "stderr",
+          "expected": "1 test files discovered",
+          "matched": true
+        },
+        {
+          "stream": "stderr",
+          "expected": "6 passed",
+          "matched": true
+        }
+      ],
+      "cleanup": {
+        "group_signalled_before_leader_reaped": true,
+        "escaped_descendants": "not_proven_absent",
+        "sandbox": false
+      }
+    }
+  ],
+  "entity_verdicts": [
+    {
+      "entity": "code_unit:apps/api/scripts/jest-list-tests.mjs",
+      "verdict": "verified",
+      "reason": "Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+      "probe_ids": [
+        "contract-unit-tests",
+        "runner-refuses-below-minimum"
+      ]
+    },
+    {
+      "entity": "code_unit:apps/api/scripts/run-jest-isolated.test.mjs",
+      "verdict": "verified",
+      "reason": "Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+      "probe_ids": [
+        "contract-unit-tests"
+      ]
+    },
+    {
+      "entity": "code_unit:apps/api/scripts/run-jest-isolated.mjs",
+      "verdict": "verified",
+      "reason": "Actual owned process termination and original-plan assertions; escaped descendants are not proven absent",
+      "probe_ids": [
+        "runner-refuses-below-minimum",
+        "runner-refuses-zero-files-old-ci-flags",
+        "runner-real-run-json-report"
+      ]
+    }
+  ],
+  "source_binding_errors": []
+}
