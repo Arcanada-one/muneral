@@ -2,9 +2,13 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import url from 'node:url';
-import { execFileSync, spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 
+// Immutable pre-fix control copied from df0df15d6081cfcfa19a11ff87790a5f942645e6.
 const WORKFLOW = path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), '../../..', '.github/workflows/regenerate-derived-artefacts.yml');
+const ORIGINAL_WORKFLOW_FIXTURE = path.join(path.dirname(url.fileURLToPath(import.meta.url)), 'fixtures', 'regenerate-derived-artefacts.original-df0df15d.yml');
+const ORIGINAL_WORKFLOW_BLOB_ID = '43cf705f09c89a8427a70038fff96413f46c4a24';
 
 function runBlockExpressions(source: string): string[] {
   const lines = source.split(/\r?\n/);
@@ -42,11 +46,14 @@ describe('regenerate-derived-artefacts workflow shell inputs', () => {
   });
 
   it('detects every hazardous expression in the original main-branch workflow', () => {
-    const original = execFileSync('git', ['show', 'origin/main:.github/workflows/regenerate-derived-artefacts.yml'], {
-      cwd: path.resolve(WORKFLOW, '../../..'),
-      encoding: 'utf8',
-    });
-    expect(runBlockExpressions(original)).toHaveLength(5);
+    const originalBytes = fs.readFileSync(ORIGINAL_WORKFLOW_FIXTURE);
+    const fixtureBlobId = createHash('sha1')
+      .update(Buffer.from(`blob ${originalBytes.length}\0`))
+      .update(originalBytes)
+      .digest('hex');
+
+    expect(fixtureBlobId).toBe(ORIGINAL_WORKFLOW_BLOB_ID);
+    expect(runBlockExpressions(originalBytes.toString('utf8'))).toHaveLength(5);
   });
 
   it.each([
