@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import url from 'node:url';
 import { spawnSync } from 'node:child_process';
@@ -39,7 +40,7 @@ describe('regenerate-derived-artefacts workflow shell inputs', () => {
   });
 
   it('keeps a shell metacharacter in a PR ref literal when passed through the environment', () => {
-    const scratch = fs.mkdtempSync(path.join(path.dirname(WORKFLOW), '.workflow-contract-'));
+    const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'workflow-contract-'));
     const marker = path.join(scratch, 'executed');
     const hostileRef = `branch"$(touch '${marker}')"`;
 
