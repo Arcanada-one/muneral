@@ -499,8 +499,15 @@ SYSTEMD_ALLOWED = {
                  "CPUWeight", "IOWeight", "Environment", "StandardOutput", "StandardError", "ProtectSystem",
                  "NoNewPrivileges", "PrivateTmp", "ProtectHome", "ProtectKernelTunables",
                  "ProtectKernelModules", "ProtectControlGroups", "RestrictSUIDSGID", "LockPersonality",
-                 "RestrictRealtime", "SystemCallArchitectures", "ReadOnlyPaths", "ReadWritePaths"},
-    "Timer": {"OnCalendar", "Persistent", "RandomizedDelaySec", "Unit"},
+                 "RestrictRealtime", "SystemCallArchitectures", "ReadOnlyPaths", "ReadWritePaths",
+                 "StateDirectory"},
+    # Muneral 7fbbccbe: every key of systemd.timer(5) (systemd 255), not the three the first fixtures used. A valid
+    # key was reported as SYSTEMD_KEY_UNKNOWN and failed the verdict of any change that touched the file
+    # (scrutator deploy/muneral-kb-sync.timer, AccuracySec=15s). Keys stay single-valued: a duplicate is still
+    # SYSTEMD_DUPLICATE_KEY (fail closed), see SYSTEMD_REPEATABLE.
+    "Timer": {"OnActiveSec", "OnBootSec", "OnStartupSec", "OnUnitActiveSec", "OnUnitInactiveSec", "OnCalendar",
+              "AccuracySec", "RandomizedDelaySec", "FixedRandomDelay", "OnClockChange", "OnTimezoneChange",
+              "Unit", "Persistent", "WakeSystem", "RemainAfterElapse"},
     "Install": {"WantedBy", "RequiredBy"},
 }
 SYSTEMD_REPEATABLE = {
@@ -515,6 +522,9 @@ SYSTEMD_BOOLEAN_VALUES = {"1", "yes", "true", "on", "0", "no", "false", "off"}
 SYSTEMD_BOOLEAN_DIRECTIVES = {
     "NoNewPrivileges", "ProtectKernelTunables", "ProtectKernelModules", "RestrictSUIDSGID",
     "LockPersonality", "RestrictRealtime",
+}
+SYSTEMD_TIMER_BOOLEAN_DIRECTIVES = {
+    "FixedRandomDelay", "OnClockChange", "OnTimezoneChange", "Persistent", "WakeSystem", "RemainAfterElapse",
 }
 SYSTEMD_ARCHITECTURES = {
     "x86", "x86-64", "ppc", "ppc-le", "ppc64", "ppc64-le", "ia64", "parisc", "parisc64",
@@ -626,8 +636,14 @@ def _systemd_path_list_is_valid(value: str) -> bool:
 
 
 def _systemd_value_is_valid(section: str, key: str, value: str) -> bool:
+    if section == "Timer" and key in SYSTEMD_TIMER_BOOLEAN_DIRECTIVES:
+        return value.lower() in SYSTEMD_BOOLEAN_VALUES
     if section != "Service":
         return True
+    if key == "StateDirectory":
+        # This bounded grammar supports plain directory basenames only. systemd ownership
+        # modifiers and specifiers remain outside this parser's verified source subset.
+        return bool(re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", value))
     lowered = value.lower()
     if key in SYSTEMD_BOOLEAN_DIRECTIVES:
         return lowered in SYSTEMD_BOOLEAN_VALUES
