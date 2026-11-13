@@ -338,6 +338,50 @@ jobs:
             reports/verify-structure.txt
           if-no-files-found: warn
 
+  # Muneral 7fbbccbe. The Program's current-candidate regime binds the hosted gate to this exact base..head and to the
+  # fixed MUN dependency-setup profile (pnpm-frozen-web-typecheck/v1): the caller hands over a CallerDependencySetup/v1
+  # manifest (repository, base, head, and blob_oid/sha256/bytes of seven fixed source files). It names no command,
+  # script, registry or path; the Program validates it against git and builds nothing from it. It is computed here,
+  # per pull request, because base and head change with every push.
+  graph-admission-setup:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      manifest: ${{ steps.manifest.outputs.manifest }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Build the CallerDependencySetup/v1 manifest
+        id: manifest
+        env:
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          BASE="$(git merge-base "$PR_BASE" "$PR_HEAD")"
+          python3 - "$BASE" "$PR_HEAD" "$REPOSITORY" <<'PY' >> "$GITHUB_OUTPUT"
+          import hashlib, json, subprocess, sys
+          base, head, repository = sys.argv[1:4]
+          files = (".github/workflows/ci.yml", "package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml",
+                   "apps/web/package.json", "packages/types/package.json", ".arcana/derived-artefacts.v1.json")
+          pins = {}
+          for rel in files:
+              raw = subprocess.run(["git", "show", f"{head}:{rel}"], check=True, capture_output=True).stdout
+              oid = subprocess.run(["git", "rev-parse", f"{head}:{rel}"], check=True, capture_output=True, text=True).stdout.strip()
+              pins[rel] = {"blob_oid": oid, "sha256": hashlib.sha256(raw).hexdigest(), "bytes": len(raw)}
+          manifest = {"schema": "CallerDependencySetup/v1", "policy": "pnpm-frozen-web-typecheck/v1",
+                      "repository": repository, "base": base, "head": head, "working_directory": ".",
+                      "scope": "apps/web", "files": pins}
+          print("manifest=" + json.dumps(manifest, sort_keys=True, separators=(",", ":")))
+          PY
+
   # AUP-GRAPH-006 `gate1` (DEC-AUP-0008): «нет receipt — нет мержа». A pull request is admitted only
   # when a ChangeAdmissionReceipt/v1 is bound to exactly this change range — in the head tree under
   # receipts/graph/, or as a ```json block in the pull-request body. Doc-only changes report
@@ -363,7 +407,7 @@ jobs:
     # `always()` is required for the gate to SEE a failure: without it a failed need would skip this
     # job, and a skipped check is not a red one. `deploy` does not depend on this job, so its
     # dependency graph is unchanged.
-    needs: lint-and-test
+    needs: [lint-and-test, graph-admission-setup]
     if: always() && github.event_name == 'pull_request'
     # The workflow file is the program repository's own, vendored byte-for-byte from the pinned SHA
     # below (its sha256 is recorded in .github/graph-admission/BUNDLE.json). It is called LOCALLY
@@ -372,12 +416,19 @@ jobs:
     # and no retrievable annotation. Recorded as a hole, not as a solved problem.
     uses: ./.github/workflows/graph-admission.yml
     with:
-      program_ref: 'cc3307df92348433ab6fbc2f34a12597d9fefeb7'
+      program_ref: 'cdbf3b4e4920a68f08136dca510a0b0c8d2dbec5'
       stage_evidence_path: ''
       stage_evidence_root: ''
       stage_evidence_required: false
       verifier_job: 'lint-and-test'
       verifier_conclusion: ${{ needs.lint-and-test.result }}
+      # Muneral 7fbbccbe: the hosted current-candidate regime (without these a refresh of the vendored bundle is refused
+      # with CURRENT_CANDIDATE_RECEIPT_MISSING) and the fixed MUN dependency-setup manifest built above.
+      candidate_receipt_required: true
+      stage_userpath_required: true
+      candidate_source_outcome_required: true
+      candidate_dependency_setup_required: true
+      candidate_dependency_setup: ${{ needs.graph-admission-setup.outputs.manifest }}
       # AUP-GRAPH-006:gate2b. The fingerprint of the Ed25519 key that signs the vendored bundle's
       # BUNDLE.json. It lives HERE, in this repository's own workflow file, deliberately OUTSIDE
       # .github/graph-admission/: a fingerprint kept inside the bundle would be replaced by the very
