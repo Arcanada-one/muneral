@@ -652,7 +652,8 @@ jobs:
 
   notify-deploy-failure:
     needs: deploy
-    if: always() && needs.deploy.result == 'failure'
+    # Fork deny: AND into existing always()/deploy-failure condition; never drop it.
+    if: always() && needs.deploy.result == 'failure' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
     # A2-384: NOT on the `deploy-gate` lane. This job gates nothing and deploys nothing, and the lane
     # runs on arcana-prd, the same host as `deploy` (`arcana-prd-host`): the one failure it most has to
     # report (arcana-prd gone, taking the deploy runner with it) would take the lane down with it and
