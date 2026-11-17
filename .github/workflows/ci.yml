@@ -461,18 +461,16 @@ jobs:
 
   preflight-caller-contract:
     # BATCH-004 guard: same PR skip rule as lint-and-test / network-exposure.
-    # Job on self-hosted ci-general (operator order: no GitHub-hosted runners). Required `if:` restored for AC3;
-    # capabilities allowlist in pinned datarim preflight-caller-contract is unchanged
-    # (no deploy/vault/contract-step weakening).
+    # Pinned preflight-caller-contract@e3136b1b requires runs-on ubuntu-latest and an exact
+    # BATCH-004 `if` (capabilities allowlist). Self-hosted + fork-deny here is a contract
+    # violation; hosted is retained only for this job until the pin allows otherwise.
     if: >-
-      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && (
       github.event_name != 'pull_request' ||
       startsWith(github.head_ref, 'integration/') ||
       contains(github.event.pull_request.labels.*.name, 'ci:run')
-      )
     permissions:
       contents: read
-    runs-on: [self-hosted, linux, ci-general]
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
