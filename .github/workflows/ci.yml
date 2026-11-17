@@ -345,7 +345,7 @@ jobs:
   # per pull request, because base and head change with every push.
   graph-admission-setup:
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, ci-general]
     timeout-minutes: 5
     permissions:
       contents: read
@@ -452,7 +452,7 @@ jobs:
 
   preflight-caller-contract:
     # BATCH-004 guard: same PR skip rule as lint-and-test / network-exposure.
-    # Job stays on ubuntu-latest (not ci-general). Required `if:` restored for AC3;
+    # Job on self-hosted ci-general (operator order: no GitHub-hosted runners). Required `if:` restored for AC3;
     # capabilities allowlist in pinned datarim preflight-caller-contract is unchanged
     # (no deploy/vault/contract-step weakening).
     if: >-
@@ -461,7 +461,7 @@ jobs:
       contains(github.event.pull_request.labels.*.name, 'ci:run')
     permissions:
       contents: read
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, ci-general]
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1

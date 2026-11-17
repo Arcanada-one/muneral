@@ -79,7 +79,7 @@ jobs:
     if: >-
       github.event.workflow_run.event == 'pull_request' &&
       startsWith(github.event.workflow_run.head_branch, 'dependabot/')
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, ci-general]
     steps:
       - name: Find the pull request and confirm its author
         id: pr

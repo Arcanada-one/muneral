@@ -54,11 +54,9 @@ jobs:
       github.event.workflow_run.event == 'pull_request' &&
       github.event.workflow_run.conclusion == 'success' &&
       startsWith(github.event.workflow_run.head_branch, 'dependabot/')
-    # GitHub-hosted: public repos get free unlimited hosted minutes, and the
-    # org's single self-hosted ci-general runner is permanently contended —
-    # targeting it left these jobs queued indefinitely (SEC-0039). Private-repo
-    # callers need self-hosted, since the org's PAID hosted minutes are spent.
-    runs-on: ubuntu-latest
+    # Operator order 2026-11-17: no GitHub-hosted runners; use self-hosted ci-general.
+    # (SEC-0039 contention note retained historically; hosted minutes are no longer the route.)
+    runs-on: [self-hosted, linux, ci-general]
     steps:
       - name: Evaluate and merge
         env:
