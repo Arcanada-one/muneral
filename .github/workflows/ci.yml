@@ -72,7 +72,7 @@ jobs:
     runs-on: [self-hosted, linux, ci-general]
     needs: tested-tree
     if: >-
-      always() && (
+      always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && (
         github.event_name != 'pull_request' ||
         startsWith(github.head_ref, 'integration/') ||
         contains(github.event.pull_request.labels.*.name, 'ci:run')
@@ -344,7 +344,9 @@ jobs:
   # script, registry or path; the Program validates it against git and builds nothing from it. It is computed here,
   # per pull request, because base and head change with every push.
   graph-admission-setup:
-    if: github.event_name == 'pull_request'
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository
     runs-on: [self-hosted, linux, ci-general]
     timeout-minutes: 5
     permissions:
@@ -408,7 +410,10 @@ jobs:
     # job, and a skipped check is not a red one. `deploy` does not depend on this job, so its
     # dependency graph is unchanged.
     needs: [lint-and-test, graph-admission-setup]
-    if: always() && github.event_name == 'pull_request'
+    if: >-
+      always() &&
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository
     # The workflow file is the program repository's own, vendored byte-for-byte from the pinned SHA
     # below (its sha256 is recorded in .github/graph-admission/BUNDLE.json). It is called LOCALLY
     # because the cross-repository reference to the reusable workflow of the PRIVATE program
@@ -416,8 +421,7 @@ jobs:
     # and no retrievable annotation. Recorded as a hole, not as a solved problem.
     uses: ./.github/workflows/graph-admission.yml
     with:
-      # Signed graph-admission.yml cannot change runs-on defaults (BUNDLE_ACTIVE_WORKFLOW_BYTES_MISMATCH).
-      # Pass a single self-hosted label via caller input instead (same pattern as scrutator).
+      # Default in graph-admission.yml is also ci-general; caller still pins explicitly.
       runs_on: "ci-general"
       program_ref: 'cdbf3b4e4920a68f08136dca510a0b0c8d2dbec5'
       stage_evidence_path: ''
@@ -443,9 +447,11 @@ jobs:
   network-exposure:
     # BATCH-004 guard: skip unlabeled non-integration PRs (do not occupy ci-general).
     if: >-
+      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && (
       github.event_name != 'pull_request' ||
       startsWith(github.head_ref, 'integration/') ||
       contains(github.event.pull_request.labels.*.name, 'ci:run')
+      )
     uses: Arcanada-one/datarim/.github/workflows/network-exposure-lint.yml@1fbb6bd89202b032f4ef9b9a6de4b186d9cf316c
     with:
       compose_paths: docker-compose.prod.yml
@@ -459,9 +465,11 @@ jobs:
     # capabilities allowlist in pinned datarim preflight-caller-contract is unchanged
     # (no deploy/vault/contract-step weakening).
     if: >-
+      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && (
       github.event_name != 'pull_request' ||
       startsWith(github.head_ref, 'integration/') ||
       contains(github.event.pull_request.labels.*.name, 'ci:run')
+      )
     permissions:
       contents: read
     runs-on: [self-hosted, linux, ci-general]

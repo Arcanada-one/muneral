@@ -1,11 +1,11 @@
 {
- "bundle_digest": "sha256:aeb5c081c930f25f05efb1a1109dce22e3342abaa1d75847e1fd95a1cd6470f7",
+ "bundle_digest": "sha256:65ab69a4e70a8935e8411bdeb69a8f467147e884b9ebd1e7147c5ea640e4053a",
  "files": [
   {
-   "blob_oid": "1e69463541de68136b4eb683bb6589e79d7a5d46",
+   "blob_oid": "991cb4f954d29bd14c300ea606fcfa6ded0496e5",
    "note": "the workflow file itself; it is already running by the time the job checks the bundle \u2014 so THIS run cannot vouch for it. The next run's verify_bundle hashes it against this entry (BUNDLE_WORKFLOW_DIGEST_MISMATCH) and the self-update battery's B8 refuses a change to it that this manifest does not attest (KB-039, DEC-AUP-0036)",
    "path": ".github/workflows/graph-admission.yml",
-   "sha256": "sha256:609addba4876fc0ac6aa2c5b25a948eb4f171f730f4a582c860411a688954123",
+   "sha256": "sha256:484984ab8882be0534213db651bafb8c82c2b71c17314df654b4894b4092397b",
    "vendored_to": "graph-admission.yml",
    "verified_by_the_job": false
   },
