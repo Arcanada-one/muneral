@@ -75,7 +75,8 @@ jobs:
       always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && (
         github.event_name != 'pull_request' ||
         startsWith(github.head_ref, 'integration/') ||
-        contains(github.event.pull_request.labels.*.name, 'ci:run')
+        contains(github.event.pull_request.labels.*.name, 'ci:run') ||
+        github.head_ref == 'fix/ci-no-github-hosted-runners'
       )
     services:
       postgres:
