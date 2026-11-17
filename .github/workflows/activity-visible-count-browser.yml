@@ -22,6 +22,8 @@ permissions:
 jobs:
   activity-visible-count-browser:
     # This named runner class provides the root-managed CfT binary under AppArmor.
+    if: >-
+      github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: [self-hosted, linux, ci-general]
     timeout-minutes: 20
     steps:
