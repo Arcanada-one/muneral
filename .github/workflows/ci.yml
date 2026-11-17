@@ -460,24 +460,19 @@ jobs:
       runner_labels: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && '["deploy-gate"]' || '["self-hosted","linux","ci-general"]' }}
 
   preflight-caller-contract:
-    # BATCH-004 guard: same PR skip rule as lint-and-test / network-exposure.
-    # Pinned preflight-caller-contract@e3136b1b requires runs-on ubuntu-latest and an exact
-    # BATCH-004 `if` (capabilities allowlist). Self-hosted + fork-deny here is a contract
-    # violation; hosted is retained only for this job until the pin allows otherwise.
-    if: >-
-      github.event_name != 'pull_request' ||
-      startsWith(github.head_ref, 'integration/') ||
-      contains(github.event.pull_request.labels.*.name, 'ci:run')
+    # datarim preflight-caller-contract@b61925dd (v4.12.8): self-hosted pool requires the
+    # exact BATCH-004∩fork-deny `if` string (capabilities allowlist). Do not fold/split it.
+    if: (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && (github.event_name != 'pull_request' || startsWith(github.head_ref, 'integration/') || contains(github.event.pull_request.labels.*.name, 'ci:run'))
     permissions:
       contents: read
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, ci-general]
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
           ref: ${{ github.workflow_sha }}
-      - uses: Arcanada-one/datarim/.github/actions/preflight-caller-contract@e3136b1b6d245c29805cc7ef1555fcbc1e3c92ff  # v4.12.6
+      - uses: Arcanada-one/datarim/.github/actions/preflight-caller-contract@b61925dd75a302d0a5a344f01fd6df42e461a954  # v4.12.8
         with:
           vault-addr: ${{ vars.VAULT_ADDR }}
 
@@ -535,7 +530,7 @@ jobs:
     steps:
       - name: Pre-deploy host readiness
         id: preflight
-        uses: Arcanada-one/datarim/.github/actions/preflight-check@e3136b1b6d245c29805cc7ef1555fcbc1e3c92ff  # v4.12.6
+        uses: Arcanada-one/datarim/.github/actions/preflight-check@b61925dd75a302d0a5a344f01fd6df42e461a954  # v4.12.8
         with:
           target-host: arcana-prd
           service-name: muneral
