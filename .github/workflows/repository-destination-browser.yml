@@ -10,6 +10,8 @@ jobs:
   repository-destination-browser:
     # ci-general spans more than one host. The fixture fails with a bounded,
     # sanitized reason unless the root-managed CfT binary is present.
+    if: >-
+      github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: [self-hosted, linux, ci-general]
     timeout-minutes: 20
     steps:
