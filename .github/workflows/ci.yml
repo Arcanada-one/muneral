@@ -143,6 +143,13 @@ jobs:
         if: needs.tested-tree.outputs.reuse != 'true'
         continue-on-error: true
         run: bash scripts/ci/probe-contract-digest.test.sh
+      # regenerate-derived-artefacts exit 141 (SIGPIPE) under pipefail when `git show | grep -m1`
+      # / `head -1` close early — measured on runs 44290158619 / inventory 2026-11-18.
+      - name: Test regenerate-derived base-facts parsers reject SIGPIPE pipelines
+        id: regenerate_derived_base_facts_test
+        if: needs.tested-tree.outputs.reuse != 'true'
+        continue-on-error: true
+        run: bash scripts/ci/regenerate-derived-base-facts.test.sh
       # A2-330: the post-deploy canary must be able to go red — a route missing from the resident
       # route table, a 405, a router no-match 404 — and must never send anything but a GET.
       - name: Test the post-deploy canary goes red
@@ -291,6 +298,7 @@ jobs:
           semantic_readback_contract=${{ steps.semantic_readback_contract.outcome }}
           health_identity_probe_test=${{ steps.health_identity_probe_test.outcome }}
           contract_digest_probe_test=${{ steps.contract_digest_probe_test.outcome }}
+          regenerate_derived_base_facts_test=${{ steps.regenerate_derived_base_facts_test.outcome }}
           canary_red_test=${{ steps.canary_red_test.outcome }}
           sanitize_browser_stderr_test=${{ steps.sanitize_browser_stderr_test.outcome }}
           eslint=${{ steps.eslint.outcome }}
