@@ -22,7 +22,7 @@
   },
   "binding": {
     "algorithm": "sha256",
-    "aggregateSha256": "b339cc5ef3d1a84ee20510138be838a239a55521ac96c9ea4cafda7e96fd3a5c",
+    "aggregateSha256": "dfffcff710acf02f86d1027b9b5a889254a686bffa1970c9c895c0eb442a7e7a",
     "files": [
       {
         "path": "apps/api/package.json",
@@ -238,7 +238,7 @@
       },
       {
         "path": "apps/api/test/assembly/mutation-harness.js",
-        "sha256": "8c28bc75a92c6d4ff5fde80e6791986a45979ffa7767dfaf62f9da0988d3ff04"
+        "sha256": "1721cb95ade29957d201b81b9eeb023461d1e049c247ab5ef7ac5c83b9b3d479"
       },
       {
         "path": "apps/api/test/assembly/mutation-sites.json",
@@ -250,7 +250,7 @@
       },
       {
         "path": "apps/api/test/mutation-evidence.spec.ts",
-        "sha256": "0621c127b42a4b5b32be9c16e2d49ccdd7e4c83fb77a5c5fb824244089f961aa"
+        "sha256": "06472e54a90512bf86f306a25ac8e92a9d96350245a71c8afc4fec1dad4b3820"
       },
       {
         "path": "apps/api/tsconfig.json",
@@ -279,8 +279,8 @@
       "docs/",
       "receipts/"
     ],
-    "trackedTreeWithoutEvidence": "5c47170484ab022cdf58d2f92c6ea7baf1f26b34",
-    "trackedSnapshotDiffSha256": "a90750a7237f1da17a4716241cc56109534fcd4466d9a52aa9e51c5fd2daa63a"
+    "trackedTreeWithoutEvidence": "36ab23eb5a21f399538f63970c3bbfa1593eeeee",
+    "trackedSnapshotDiffSha256": "264adedc4fe54898e7caf5362eef0dd472641c366b854f19393a48311294c38c"
   },
   "baseline": {
     "outcome": "SURVIVED",

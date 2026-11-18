@@ -50,7 +50,7 @@ sys.path.insert(0, str(HERE))
 import schema_check  # noqa: E402
 import build_graph  # noqa: E402
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 TOOL = "tools/graph/impact.py"
 QUERY_SCHEMA = "ImpactQuery/v1"
 FIXTURE_DIR = ROOT / "contracts" / "graph-verified-change" / "fixtures"
@@ -77,7 +77,7 @@ TEST_RE = re.compile(r"(^|/)(test|tests|__tests__|e2e|spec)(/|$)|\.(spec|test)\.
 FORWARD_TYPES = {"provides_route", "implements_contract", "maps_model", "deploys_to"}
 BOUNDARY_RANK = {"intra_unit": 0, "service": 1, "repo": 2}
 FILE_HASH_TYPES = {"code_unit", "document", "receipt", "deployable_unit", "systemd_unit", "source_file", "trust_anchor_pin"}  # whole-file bytes
-DEPLOYABLE_MANIFEST_NAMES = ("package.json", "Cargo.toml", "pyproject.toml", "setup.py", "setup.cfg")  # AUP-GRAPH-009: deployable_unit
+DEPLOYABLE_MANIFEST_NAMES = ("package.json", "Cargo.toml", "pyproject.toml", "setup.py", "setup.cfg", "go.mod")  # AUP-GRAPH-009: deployable_unit
 # manifests are no longer always npm — try every builder's manifest name, first one present in the tree wins
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 
@@ -313,6 +313,8 @@ def classify_file(path: str, idx: GraphIndex | None) -> str:
         return "test"
     if idx is not None:
         types = {idx.nodes[i]["type"] for i in idx.by_path.get(path, [])}
+        if any(idx.nodes[i].get("kind") == "operational_configuration" for i in idx.by_path.get(path, [])):
+            return "config"
         if "systemd_unit" in types:
             return "systemd_unit"
         if "source_file" in types:
@@ -662,7 +664,8 @@ def query(idx: GraphIndex, files: list[dict], *, mode: str, base: str | None = N
                 entry["uncovered"] = True
                 uncovered.append(f["path"])
                 uncovered_assets.append(f["path"])
-        elif os.path.splitext(f["path"])[1].lower() in CODE_EXTS | {".prisma"}:
+        elif (os.path.splitext(f["path"])[1].lower() in CODE_EXTS | {".prisma", ".sh", ".bash", ".bats"}
+              or build_graph.operational_config_kind(f["path"])):
             unknown.append(f["path"])
         else:
             entry["uncovered"] = True
@@ -1052,9 +1055,9 @@ def fixture_battery(rules: set[str]) -> list[dict]:
     add("UNKNOWN_NODE: a modified code file without a node is refused", ok, got=got)
     ok, got = refuses("EMPTY_CHANGE_SET", files=[], mode="worktree", tree_commit=SRC, tree_dirty=False)
     add("EMPTY_CHANGE_SET: nothing changed ⇒ refusal, not an empty (approving) impact set", ok, got=got)
-    q = query(g01, [{"path": "apps/api/scripts/setup.sh", "status": "M"}], mode="worktree", tree_commit=SRC, tree_dirty=True, rules=rules)
-    add("uncovered file kind (.sh) is not UNKNOWN_NODE: answered with uncovered flag + EMPTY_IMPACT event",
-        q["change_set"]["files"][0].get("uncovered") is True and [e["code"] for e in q["events"]] == ["EMPTY_IMPACT_REQUIRES_EXPLANATION"])
+    ok, got = refuses("UNKNOWN_NODE", files=[{"path": "apps/api/scripts/setup.sh", "status": "M"}],
+                      mode="worktree", tree_commit=SRC, tree_dirty=True)
+    add("modified shell source absent from the graph is refused rather than reported as an empty impact set", ok, got=got)
 
     # --- provenance separation, depth and edge-type filters on the fixture graph
     files = [{"path": "apps/api/src/tasks/tasks.service.ts", "status": "M"}]

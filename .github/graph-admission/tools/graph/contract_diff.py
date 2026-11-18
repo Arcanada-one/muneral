@@ -1275,6 +1275,27 @@ class Differ:
             out.append(self.ch("TYPE_WIDENED", path, "constraints relaxed: " + "; ".join(widened), direction, error_code, aspect="constraints"))
 
     def objects(self, a: dict, b: dict, path: str, out: list[dict], direction: str, error_code: bool):
+        # Pydantic schema-lite axes carried on the object root (must not fall to NON_SEMANTIC_TEXT).
+        if a.get("model_config") != b.get("model_config") and self.on("type_changed"):
+            out.append(
+                self.ch(
+                    "TYPE_CHANGED",
+                    path or "<model_config>",
+                    f"model_config {a.get('model_config')} → {b.get('model_config')}",
+                    direction,
+                    error_code,
+                )
+            )
+        if a.get("validators") != b.get("validators") and self.on("type_changed"):
+            out.append(
+                self.ch(
+                    "TYPE_CHANGED",
+                    path or "<validators>",
+                    "validators fingerprint changed",
+                    direction,
+                    error_code,
+                )
+            )
         pa, pb = a.get("properties", {}), b.get("properties", {})
         removed = [k for k in pa if k not in pb]
         added = [k for k in pb if k not in pa]
@@ -1307,6 +1328,11 @@ class Differ:
                 out.append(self.ch("FIELD_MADE_REQUIRED", p, f"field {k} optional → required", direction, error_code))
             elif ob and not oa and self.on("required_to_optional"):
                 out.append(self.ch("REQUIRED_TO_OPTIONAL", p, f"field {k} required → optional", direction, error_code))
+            fa, fb = pa[k].get("field_options") or {}, pb[k].get("field_options") or {}
+            if fa != fb and self.on("type_changed"):
+                bits = [f"{o} {fa.get(o)!r}→{fb.get(o)!r}" for o in sorted(set(fa) | set(fb)) if fa.get(o) != fb.get(o)]
+                out.append(self.ch("TYPE_CHANGED", p, "pydantic field options differ: " + "; ".join(bits), direction, error_code,
+                                   aspect="field_options"))
             if self.on("nested_diff") or not path:
                 self.schema(pa[k], pb[k], p, out, direction, error_code)
 
@@ -1873,10 +1899,10 @@ def projection(code: str, symbol: str, schema: dict, disabled: set[str] | None =
                 for index in re.finditer(r"\b" + re.escape(b) + r"\s*\[", seg_exec):
                     ob = index.end() - 1
                     cb = match_close(seg, ob)
-                    key = re.match(r"\s*\??\.\s*(" + IDENT + r")", seg_exec[cb + 1:])
-                    if key:
-                        keys_read.add(key.group(1))
-                    if not key or not re.fullmatch(r'\s*\d+\s*', seg[ob + 1:cb]):
+                    chain = member_chain_from(seg_exec[cb + 1:])
+                    if chain:
+                        keys_read.add(".".join(chain))
+                    if not chain or not re.fullmatch(r'\s*\d+\s*', seg[ob + 1:cb]):
                         array_unresolved(f'array container {b} computed/whole element use unresolved')
                 if re.search(r'[(,]\s*' + re.escape(b) + r'\s*[,)]|\breturn\s+' + re.escape(b) + r'\s*[;}]', seg_exec):
                     array_unresolved(f'array container {b} forwarded as a whole')
@@ -1884,8 +1910,10 @@ def projection(code: str, symbol: str, schema: dict, disabled: set[str] | None =
                     array_unresolved(f'array container {b} spread/iteration unresolved')
                 continue
             seg = executable[s0:s1]
-            for m in re.finditer(r"\b" + re.escape(b) + r"\s*\??\.\s*(" + IDENT + r")", seg):
-                keys_read.add(m.group(1))
+            for m in re.finditer(r"\b" + re.escape(b) + r"(?=(?:\s*\??\.\s*" + IDENT + r")+)", seg):
+                chain = member_chain_from(seg[m.end():])
+                if chain:
+                    keys_read.add(".".join(chain))
             for m in re.finditer(r"\{([^{}]*)\}\s*=\s*" + re.escape(b) + r"\b", seg):
                 keys_read.update(destructured_keys(m.group(1), incomplete))
             if re.search(r"\.\.\.\s*" + re.escape(b) + r"\b", seg):
@@ -1919,9 +1947,9 @@ def projection(code: str, symbol: str, schema: dict, disabled: set[str] | None =
                     continue  # result metadata is not a provider field
                 if member and member.group(1) == "data":
                     payload = tail[member.end():]
-                    key = re.match(r"\s*\??\.\s*(" + IDENT + r")", payload)
-                    if key:
-                        keys_read.add(key.group(1))
+                    chain = member_chain_from(payload)
+                    if chain:
+                        keys_read.add(".".join(chain))
                         continue
                     # A local alias of the payload is projected below. Do not
                     # mistake the result's `.data` wrapper member for a payload
@@ -2035,6 +2063,32 @@ def projection(code: str, symbol: str, schema: dict, disabled: set[str] | None =
             "enum_runtime_unresolved": enum_runtime_unresolved}
 
 
+def member_chain_from(tail: str) -> list[str]:
+    """Consecutive `.ident` / `?.ident` segments at the start of tail (empty when none)."""
+    parts: list[str] = []
+    i = 0
+    while True:
+        m = re.match(r"\s*\??\.\s*(" + IDENT + r")", tail[i:])
+        if not m:
+            break
+        parts.append(m.group(1))
+        i += m.end()
+    return parts
+
+
+def object_declares_path(schema: dict, path: str) -> bool:
+    """True iff every dotted segment of path is a declared object property under schema."""
+    cur = schema
+    for part in path.split("."):
+        if cur.get("kind") != "object":
+            return False
+        props = cur.get("properties", {})
+        if part not in props:
+            return False
+        cur = props[part]
+    return True
+
+
 def _safeparse_payload_aliases(segment: str, result_name: str) -> tuple[set[str], list[str], set[str]]:
     """Project bounded local aliases of a proven safeParse result's `.data` payload."""
     aliases = set()
@@ -2065,9 +2119,21 @@ def _safeparse_payload_aliases(segment: str, result_name: str) -> tuple[set[str]
         declaration_ranges = [(m.start(1), m.end(1)) for m in re.finditer(
             r"\b(?:const|let|var)\s+(" + re.escape(name) + r")\s*=\s*" + re.escape(result_name) + r"\s*\.\s*data\b",
             view)]
-        for member in re.finditer(r"\b" + re.escape(name) + r"\s*\??\.\s*(" + IDENT + r")", view):
-            keys.add(member.group(1))
-            if re.match(r"\s*=(?!=)", view[member.end():]):
+        # Full member chains (frame.candidate.identity.seq), not only the top-level key.
+        # Undeclared nested segments must remain measurable — a top-level-only
+        # projection was a silent pass on unchanged schemas (Muneral 09224753).
+        for member in re.finditer(r"\b" + re.escape(name) + r"(?=(?:\s*\??\.\s*" + IDENT + r")+)", view):
+            chain = member_chain_from(view[member.end():])
+            if not chain:
+                continue
+            keys.add(".".join(chain))
+            consumed = 0
+            for part in chain:
+                step = re.match(r"\s*\??\.\s*" + re.escape(part), view[member.end() + consumed:])
+                if not step:
+                    break
+                consumed += step.end()
+            if re.match(r"\s*=(?!=)", view[member.end() + consumed:]):
                 incomplete.append(f"safeParse payload alias {name} field mutation unresolved")
         for destructure in re.finditer(r"\{([^{}]*)\}\s*=\s*" + re.escape(name) + r"\b", view):
             keys.update(destructured_keys(destructure.group(1), incomplete))
@@ -2164,7 +2230,9 @@ def edge_verdict(proj: dict, head: dict | None, contract_diff: dict, provenance:
     if schema.get("kind") == "object":
         props = set(schema.get("properties", {}))
         for k in proj["keys_read"]:
-            if k not in props and "consumer_keys" not in d:
+            # Walk dotted paths so undeclared nested reads cannot silent-pass
+            # when only the top-level segment is declared.
+            if "consumer_keys" not in d and not object_declares_path(schema, k):
                 failed = True
                 reasons.append(f"consumer reads key `{k}` that the provider does not declare")
         for k in proj["keys_sent"]:
@@ -2177,9 +2245,10 @@ def edge_verdict(proj: dict, head: dict | None, contract_diff: dict, provenance:
                     failed = True
                     reasons.append(f"consumer literal omits required key `{r}`")
         used = set(proj["keys_read"]) | set(proj["keys_sent"])
+        used_tops = {u.split(".")[0].split("[")[0] for u in used if u}
         for c in breaking:
             top = c["path"].split(".")[0].split("[")[0]
-            if top and top in used:
+            if top and top in used_tops:
                 failed = True
                 reasons.append(f"breaking change {c['code']} at `{c['path']}` sits on a key the consumer uses")
     elif schema.get("kind") == "union":
@@ -2646,12 +2715,44 @@ export function handle(request: { body: unknown }) {
     changed_verdict = changed_edges[0]["verdict"] if changed_edges else None
     changed_codes = sorted({c["code"] for c in changed["breaking"]})
     checks.append({
-        "name": "Prime safeParse nested removal: undeclared identity.seq remains failed",
+        "name": "Prime safeParse nested FIELD_REMOVED of used identity.seq remains failed",
         "ok": "FIELD_REMOVED" in changed_codes and changed_verdict == "failed",
         "got": changed_verdict,
         "breaking": changed_codes,
         "edge": edge_id,
     })
+
+    # Undeclared nested reads on an UNCHANGED schema must never silent-pass as verified.
+    for label, expr, expect in (
+        ("leaf", "frame.candidate.identity.nope", "failed"),
+        ("mid", "frame.candidate.nope.x", "failed"),
+    ):
+        undeclared_consumer = consumer.replace(
+            "return frame.candidate.identity.seq;",
+            f"return {expr};",
+        )
+        undeclared_tree = build_graph.Tree(
+            {provider_path: provider.encode(), consumer_path: undeclared_consumer.encode()},
+            {"source_commit": "base", "source_tree": f"prime-nested-undeclared-{label}",
+             "source_repo": "prime-shorthand-fixture"},
+        )
+        undeclared_head = build_graph.Tree(
+            undeclared_tree.files,
+            {**undeclared_tree.meta, "source_commit": "head",
+             "source_tree": f"prime-nested-undeclared-{label}-head"},
+        )
+        undeclared = run_diff(undeclared_tree, undeclared_head, disabled=disabled)
+        ude = [e for e in undeclared["edges"] if e["edge"]["from"] == f"code_unit:{consumer_path}"]
+        uv = ude[0]["verdict"] if ude else None
+        keys = ude[0].get("projection", {}).get("keys_read") if ude else None
+        checks.append({
+            "name": f"Prime safeParse undeclared nested {label} read on unchanged schema is failed (never verified)",
+            "ok": uv == expect and uv != "verified",
+            "got": uv,
+            "keys_read": keys,
+            "expr": expr,
+            "edge": edge_id,
+        })
     return checks
 
 
