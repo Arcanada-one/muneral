@@ -26,11 +26,14 @@ const compose = readFileSync(join(repoRoot, 'docker-compose.prod.yml'), 'utf8');
 
 /** The Dockerfile's production stage — the ENVs of the builder stage never reach a container. */
 const productionStage = (() => {
-  const marker = dockerfile.indexOf(
-    'FROM node:26.13.0-alpine@sha256:8996bb5821d62a8fd9bb27c1cb07462f3fdce6e47d640c6a881ead0b064ce216 AS production',
-  );
-  expect(marker).toBeGreaterThan(-1);
-  return dockerfile.slice(marker);
+  // Match the production FROM line without pinning the digest: Dependabot bumps the
+  // node alpine digest on a schedule, and a hard-coded sha turns every image bump into
+  // a false red before the image itself is judged.
+  const match = /^FROM node:[^\n]+ AS production$/m.exec(dockerfile);
+  if (match === null || match.index === undefined) {
+    throw new Error('Dockerfile has no production FROM node:… AS production line');
+  }
+  return dockerfile.slice(match.index);
 })();
 
 describe('the image serves on every interface, and the code does not', () => {
