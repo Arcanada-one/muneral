@@ -578,59 +578,24 @@ function observedInvocation(jsonPath) {
   };
 }
 
-// A2-307. The snapshot below used to cover EVERY tracked path, which made this
-// evidence a function of bytes the assembly battery cannot read: two of the
-// three merges to main before this change touched only `.github/`, `receipts/`
-// and `apps/web/`, and each one staled the evidence of every open pull request
-// — #172, #173/#175 and #174 each needed a hand rebind, and #174 went stale a
-// second time the moment #175 merged. `git rebase origin/main` conflicted
-// inside the evidence file every single time.
-//
-// The scope is a DENYLIST, not an allowlist, and that direction is the whole
-// point. An allowlist of read paths fails OPEN: a new spec imports a directory
-// nobody listed, the evidence verifies green, and the thing it attests is no
-// longer what was measured — the failure an evidence document exists to
-// prevent. A denylist fails NOISY: a directory nobody classified keeps binding
-// and costs one rebind, which is loud and cheap. Three prefixes are declared
-// here, each one a whole subtree the battery provably never opens; everything
-// else tracked — including root `package.json`, `.npmrc`, `turbo.json`,
-// `prisma.config.ts` and `docker-compose.prod.yml`, which
-// `test/deploy-bind.contract.spec.ts` reads by path — still binds.
-//
-// Adding a prefix here is a change to what this evidence attests. It is
-// reviewable as a diff line because the resolved list is recorded INTO the
-// evidence document (`supplementalGit.excludedPrefixes`) and pinned by
-// `test/mutation-evidence.spec.ts`, which also refuses a prefix that matches
-// no tracked path and a prefix that would swallow a path the battery reads.
-const EVIDENCE_SCOPE_EXCLUSIONS = Object.freeze([
-  // CI configuration and the vendored graph-admission bundle. What the battery
-  // runs ON is pinned separately and by value — `tools` and
-  // `toolchainCompatibility` in this document — not by hashing the workflow
-  // that launches it. The bundle's integrity is re-measured by the gate's own
-  // B6 arms, which corrupt a byte of this artefact and require the declared
-  // verifier to refuse it; none of those arms reads this snapshot.
-  '.github/',
-  // The other deployable. A separate Next application with its own toolchain;
-  // no module under it is resolvable from `apps/api`, whose jest `rootDir` is
-  // `apps/api` and whose `moduleNameMapper` reaches only into
-  // `packages/types` and `apps/api/test/support`.
-  'apps/web/',
-  // The admission gate's own records. Inert JSON: never imported, never read
-  // by a spec. This is the prefix that made the receipt of a change stale the
-  // evidence of that same change, which is why
-  // .arcana/derived-artefacts.v1.json had to mandate recomputing the evidence
-  // after the receipt commit and amending it in.
-  'receipts/',
-].sort());
+// muneral#57. Bind the Git supplement to the SAME allowlist as `bindingPaths()`
+// — the real inputs whose bytes already appear in `binding`. A denylist of
+// `.github/` / `apps/web/` / `receipts/` still left SECURITY.md (and the rest
+// of the tree) able to stale every open PR's mutation evidence. An allowlist
+// fails closed on unrelated merges and still fails loudly when a real input
+// changes (see mutation-evidence.spec.ts).
+function evidenceScopePaths() {
+  return bindingPaths().map((absolute) => path.relative(REPO_ROOT, absolute)).sort();
+}
 
-function gitSupplement(repoRoot = REPO_ROOT, evidencePath = 'apps/api/test/assembly/mutation-results.json') {
+function gitSupplement(
+  repoRoot = REPO_ROOT,
+  evidencePath = 'apps/api/test/assembly/mutation-results.json',
+  scopePaths = evidenceScopePaths(),
+) {
   // A commit id cannot be embedded in a file contained by that commit: adding
   // the id changes the commit again. It is also unstable after a squash merge.
-  // Freeze the effective tracked snapshot instead. A temporary index captures
-  // current tracked bytes (including staged new files) and deliberately omits
-  // this evidence file, avoiding self-reference while remaining identical in
-  // the generation worktree, a clean PR checkout, and the eventual main tree.
-  // It also omits the declared out-of-scope prefixes above.
+  // Freeze the effective tracked snapshot of the allowlisted paths instead.
   const indexed = spawnSync('git', ['write-tree'], {
     cwd: repoRoot,
     encoding: 'utf8',
@@ -639,6 +604,7 @@ function gitSupplement(repoRoot = REPO_ROOT, evidencePath = 'apps/api/test/assem
   const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'mun0022-git-snapshot-'));
   const index = path.join(temporary, 'index');
   const env = { ...process.env, GIT_INDEX_FILE: index };
+  const allow = [...new Set(scopePaths)].sort();
   const run = (args, options = {}) => {
     const { input, trim = true } = options;
     const result = spawnSync('git', args, {
@@ -655,28 +621,25 @@ function gitSupplement(repoRoot = REPO_ROOT, evidencePath = 'apps/api/test/assem
   };
   try {
     // Seed from the real index so staged additions/deletions are preserved,
-    // then update only paths Git already tracks. This represents unstaged
-    // deletions by absence and excludes ordinary untracked files (including a
-    // rename destination) instead of failing on a missing explicit pathspec.
+    // then refresh tracked bytes and drop everything outside the allowlist.
     run(['read-tree', indexed.stdout.trim()]);
     run(['add', '-u', '--', '.']);
     run(['rm', '--cached', '-f', '--ignore-unmatch', '--', evidencePath]);
-    // -r: each entry is a whole subtree. --ignore-unmatch keeps a prefix that
-    // matches nothing from throwing here; the spec is what refuses it, with a
-    // message that says which prefix went dead.
-    run(['rm', '--cached', '-r', '-f', '--ignore-unmatch', '--', ...EVIDENCE_SCOPE_EXCLUSIONS]);
+    const listed = run(['ls-files']).split('\n').filter(Boolean);
+    const allowSet = new Set(allow);
+    const drop = listed.filter((entry) => entry !== evidencePath && !allowSet.has(entry));
+    // Batch removals to stay under argv limits on large trees.
+    const batchSize = 100;
+    for (let i = 0; i < drop.length; i += batchSize) {
+      run(['rm', '--cached', '-f', '--', ...drop.slice(i, i + batchSize)]);
+    }
     const tree = run(['write-tree']);
     const emptyTree = run(['hash-object', '-w', '-t', 'tree', '--stdin'], { input: '' });
-    // Raw recursive diff is a compact Git-native manifest of mode/path/blob
-    // changes. Hashing it binds the same bytes as a binary patch without
-    // buffering the whole repository-sized patch in memory.
     const diff = run([
       'diff-tree', '--no-commit-id', '--raw', '-r', '-z', '--no-renames', emptyTree, tree,
     ], { trim: false });
     return {
-      // Recorded so the scope is a reviewable line in the evidence, never an
-      // implicit property of whatever the harness happened to do that day.
-      excludedPrefixes: [...EVIDENCE_SCOPE_EXCLUSIONS],
+      includedPaths: allow,
       trackedTreeWithoutEvidence: tree,
       trackedSnapshotDiffSha256: sha256Bytes(diff),
     };
@@ -1116,7 +1079,8 @@ export {
   currentTools,
   enumerateSites,
   gitSupplement,
-  EVIDENCE_SCOPE_EXCLUSIONS,
+  evidenceScopePaths,
+  bindingPaths,
   recordedOutcomeMatches,
   toolchainCompatibility,
 };

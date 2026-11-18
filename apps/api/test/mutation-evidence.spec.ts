@@ -117,7 +117,7 @@ describe('Assembly mutation evidence verification', () => {
     const supplement = harness.gitSupplement();
     expect(supplement).toEqual(original.supplementalGit);
     expect(Object.keys(supplement).sort()).toEqual([
-      'excludedPrefixes',
+      'includedPaths',
       'trackedSnapshotDiffSha256',
       'trackedTreeWithoutEvidence',
     ]);
@@ -125,22 +125,24 @@ describe('Assembly mutation evidence verification', () => {
     expect(supplement.trackedSnapshotDiffSha256).toMatch(/^[0-9a-f]{64}$/);
   });
 
-  // A2-307. The supplement used to hash the WHOLE tracked tree, so every merge
-  // to main staled the evidence of every open pull request — two of the three
-  // merges before this change touched only .github/, receipts/ and apps/web/,
-  // none of which the assembly battery reads, and each one forced a hand
-  // rebind (and a rebase conflict inside this very file). The scope is now a
-  // DENYLIST: everything tracked still binds except the prefixes declared in
-  // the harness. A denylist fails noisily — a new directory nobody classified
-  // keeps binding and costs a rebind — which is the right default for an
-  // evidence document, where a false green is the failure that matters.
+  // muneral#57 / A2-307 follow-up. The supplement used to hash (almost) the
+  // whole tracked tree, so SECURITY.md or other out-of-battery bytes staled
+  // mutation evidence. Scope is now an ALLOWLIST equal to bindingPaths() —
+  // the real inputs the evidence already hashes in `binding`. A real input
+  // change must still invalidate; an unrelated tree change must not.
+  const FIXTURE_SCOPE = [
+    'apps/api/src/assembly/assembly.compiler.ts',
+    'apps/api/test/assembly/mutation-harness.js',
+    'pnpm-lock.yaml',
+  ];
+
   function scopeFixture(root: string) {
     fs.mkdirSync(root);
     git(root, ['init', '--quiet']);
     for (const file of [
-      'apps/api/src/assembly/assembly.compiler.ts',
+      ...FIXTURE_SCOPE,
       'apps/api/test/assembly/mutation-results.json',
-      'pnpm-lock.yaml',
+      'SECURITY.md',
       'docker-compose.prod.yml',
       'receipts/graph/change-admission.json',
       '.github/workflows/ci.yml',
@@ -151,63 +153,78 @@ describe('Assembly mutation evidence verification', () => {
     }
     git(root, ['add', '.']);
     git(root, [
-      '-c', 'user.name=A2-307 Fixture',
-      '-c', 'user.email=a2307-fixture.invalid@example.invalid',
+      '-c', 'user.name=MUN-57 Fixture',
+      '-c', 'user.email=mun57-fixture.invalid@example.invalid',
       'commit', '--quiet', '-m', 'fixture',
     ]);
   }
 
-  it('declares its excluded prefixes in the evidence it records', () => {
-    expect(harness.EVIDENCE_SCOPE_EXCLUSIONS).toEqual(['.github/', 'apps/web/', 'receipts/']);
-    expect(original.supplementalGit.excludedPrefixes).toEqual([...harness.EVIDENCE_SCOPE_EXCLUSIONS]);
-    // Every declared exclusion must still match tracked paths in THIS repository.
-    // A prefix that matches nothing is a scope entry someone forgot to delete,
-    // and a silent scope is how this drifts.
-    const tracked = git(path.resolve(API_ROOT, '..', '..'), ['ls-files']).split('\n');
-    for (const prefix of harness.EVIDENCE_SCOPE_EXCLUSIONS) {
-      expect(tracked.some((file) => file.startsWith(prefix))).toBe(true);
+  it('declares its included paths in the evidence it records', () => {
+    const expected = harness.evidenceScopePaths();
+    expect(expected.length).toBeGreaterThan(10);
+    expect(expected).toEqual([...expected].sort());
+    expect(original.supplementalGit.includedPaths).toEqual(expected);
+    for (const rel of expected) {
+      expect(fs.existsSync(path.join(path.resolve(API_ROOT, '..', '..'), rel))).toBe(true);
     }
-    // ...and none of them may swallow a path the battery actually reads.
-    for (const prefix of harness.EVIDENCE_SCOPE_EXCLUSIONS) {
-      for (const bound of ['apps/api/', 'packages/', 'pnpm-lock.yaml', 'package.json']) {
-        expect(bound.startsWith(prefix)).toBe(false);
-      }
-    }
+    expect(expected).toEqual(expect.arrayContaining([
+      'apps/api/src/assembly/assembly.validator.ts',
+      'apps/api/test/assembly/mutation-harness.js',
+      'apps/api/test/mutation-evidence.spec.ts',
+      'pnpm-lock.yaml',
+    ]));
+    expect(expected.includes('SECURITY.md')).toBe(false);
   });
 
-  it('does not stale when a file outside the declared scope changes', () => {
+  it('does not stale when a file outside the allowlist changes (incl. SECURITY.md)', () => {
     const repo = path.join(directory, 'scope-unrelated');
     scopeFixture(repo);
-    const before = harness.gitSupplement(repo, 'apps/api/test/assembly/mutation-results.json');
+    const before = harness.gitSupplement(
+      repo,
+      'apps/api/test/assembly/mutation-results.json',
+      FIXTURE_SCOPE,
+    );
     for (const unrelated of [
+      'SECURITY.md',
+      'docker-compose.prod.yml',
       'receipts/graph/change-admission.json',
       '.github/workflows/ci.yml',
       'apps/web/app/page.tsx',
     ]) {
       fs.appendFileSync(path.join(repo, unrelated), 'a merge landed on main\n');
     }
-    const after = harness.gitSupplement(repo, 'apps/api/test/assembly/mutation-results.json');
+    const after = harness.gitSupplement(
+      repo,
+      'apps/api/test/assembly/mutation-results.json',
+      FIXTURE_SCOPE,
+    );
     expect(after).toEqual(before);
   });
 
-  it('still stales when a file inside the declared scope changes', () => {
+  it('still stales when a real allowlisted input changes', () => {
     const repo = path.join(directory, 'scope-bound');
     scopeFixture(repo);
-    const before = harness.gitSupplement(repo, 'apps/api/test/assembly/mutation-results.json');
-    for (const bound of [
-      'apps/api/src/assembly/assembly.compiler.ts',
-      'pnpm-lock.yaml',
-      'docker-compose.prod.yml',
-    ]) {
+    const before = harness.gitSupplement(
+      repo,
+      'apps/api/test/assembly/mutation-results.json',
+      FIXTURE_SCOPE,
+    );
+    for (const bound of FIXTURE_SCOPE) {
       const probe = path.join(repo, bound);
       const pristine = fs.readFileSync(probe);
       fs.appendFileSync(probe, 'one byte the battery could read\n');
-      expect(harness.gitSupplement(repo, 'apps/api/test/assembly/mutation-results.json'))
-        .not.toEqual(before);
+      expect(harness.gitSupplement(
+        repo,
+        'apps/api/test/assembly/mutation-results.json',
+        FIXTURE_SCOPE,
+      )).not.toEqual(before);
       fs.writeFileSync(probe, pristine);
     }
-    expect(harness.gitSupplement(repo, 'apps/api/test/assembly/mutation-results.json'))
-      .toEqual(before);
+    expect(harness.gitSupplement(
+      repo,
+      'apps/api/test/assembly/mutation-results.json',
+      FIXTURE_SCOPE,
+    )).toEqual(before);
   });
 
   it('records an exact repository-relative invocation that survives checkout relocation', () => {
@@ -245,7 +262,11 @@ describe('Assembly mutation evidence verification', () => {
     git(repo, ['add', 'staged-then-deleted.txt']);
     fs.rmSync(path.join(repo, 'staged-then-deleted.txt'));
 
-    const supplement = harness.gitSupplement(repo, 'mutation-results.json');
+    const supplement = harness.gitSupplement(repo, 'mutation-results.json', [
+      'stable.txt',
+      'removed.txt',
+      'renamed-source.txt',
+    ]);
     expect(git(repo, [
       'ls-tree', '-r', '--name-only', supplement.trackedTreeWithoutEvidence,
     ])).toBe('stable.txt');
