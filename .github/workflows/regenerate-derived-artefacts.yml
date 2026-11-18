@@ -146,10 +146,22 @@ jobs:
           # measured: «.node-version-for-derived: No such file or directory» on PR #32,
           # whose branch predates the file. Anything this workflow needs ABOUT ITSELF has
           # to be read where the workflow itself lives.
+          #
+          # Do NOT parse with `git show | grep -m1` / `head -1` under pipefail: when the
+          # producer outlives the early-closing consumer the step exits 141 (SIGPIPE) —
+          # measured on regenerate-derived-artefacts run 44290158619. Capture to a file,
+          # then parse with scripts/ci/regenerate-derived-base-facts.sh.
           base="$DEFAULT_BRANCH"
           git fetch -q origin "$base"
-          want=$(git show "origin/${base}:.github/workflows/ci.yml" | grep -oE 'node-version: *[0-9][0-9.]*' | head -1 | grep -oE '[0-9][0-9.]*')
-          have=$(git show "origin/${base}:.github/workflows/.node-version-for-derived" | tr -d '[:space:]')
+          work=$(mktemp -d)
+          trap 'rm -rf "$work"' EXIT
+          # Helper from BASE: workflow_run checks out the PR tree, which may predate
+          # this script (same class as .node-version-for-derived on PR #32).
+          git show "origin/${base}:scripts/ci/regenerate-derived-base-facts.sh" >"$work/regenerate-derived-base-facts.sh"
+          git show "origin/${base}:.github/workflows/ci.yml" >"$work/ci.yml"
+          git show "origin/${base}:.github/workflows/.node-version-for-derived" >"$work/node-version-for-derived"
+          want=$(bash "$work/regenerate-derived-base-facts.sh" node-version "$work/ci.yml")
+          have=$(tr -d '[:space:]' <"$work/node-version-for-derived")
           echo "ci.yml pins ${want}; this workflow pins ${have}"
           if [ "$want" != "$have" ]; then
             echo "::error title=regenerate-derived-artefacts::ci.yml pins node ${want} but this workflow pins ${have}. Evidence generated on the wrong patch version is refused with TOOLCHAIN_MISMATCH, so this is a refusal rather than a warning."
@@ -173,28 +185,25 @@ jobs:
           set -euo pipefail
           # Also from the base branch, for the same reason: these are facts about the
           # workflows that RUN, which are the base branch's, not the pull request's.
+          # Capture blobs to files first — never `git show | grep -m1` under pipefail
+          # (exit 141 / SIGPIPE on run 44290158619).
           base="$DEFAULT_BRANCH"
-          ci_name=$(git show "origin/${base}:.github/workflows/ci.yml" | grep -m1 '^name:' | sed 's/^name:[[:space:]]*//')
-          echo "ci.yml calls itself: ${ci_name}"
-          bad=0
           work=$(mktemp -d)
-          for path in $(git ls-tree -r --name-only "origin/${base}" .github/workflows/ | grep -E '\.ya?ml$'); do
-            mkdir -p "${work}/$(dirname "$path")"
-            git show "origin/${base}:${path}" > "${work}/${path}"
-          done
-          for f in "${work}"/.github/workflows/*.yml; do
-            grep -q 'workflow_run:' "$f" || continue
-            # The KEY, not any line mentioning it: `grep 'workflows:'` first matched a
-            # COMMENT in this very file, so the check was red on its own repository —
-            # measured before this landed. An arm that is always red measures nothing.
-            listed=$(sed -n '/^  workflow_run:/,/^  [a-z]/p' "$f" | grep -m1 '^    workflows:' || true)
-            [ -n "$listed" ] || continue
-            case "$listed" in
-              *"$ci_name"*) echo "ok   $(basename "$f"): ${listed# *}" ;;
-              *) echo "::error title=regenerate-derived-artefacts::$(basename "$f") listens for ${listed# *} but ci.yml is named '${ci_name}' — workflow_run matches by name, so that listener never fires and never reports anything."; bad=1 ;;
+          trap 'rm -rf "$work"' EXIT
+          mkdir -p "$work/workflows"
+          git show "origin/${base}:scripts/ci/regenerate-derived-base-facts.sh" >"$work/regenerate-derived-base-facts.sh"
+          git show "origin/${base}:.github/workflows/ci.yml" >"$work/ci.yml"
+          # Enumerate yaml names without `git ls-tree | grep` under pipefail; then
+          # materialise each blob into the temp workflows dir for the helper.
+          while IFS= read -r path; do
+            case "$path" in
+              *.yml|*.yaml) ;;
+              *) continue ;;
             esac
-          done
-          [ "$bad" -eq 0 ]
+            git show "origin/${base}:${path}" >"$work/workflows/$(basename "$path")"
+          done < <(git ls-tree -r --name-only "origin/${base}" .github/workflows/)
+          bash "$work/regenerate-derived-base-facts.sh" assert-workflow-run-names \
+            "$work/ci.yml" "$work/workflows"
 
       # The VALUE, not `node-version-file`. That input reads the path out of the CHECKED-OUT
       # tree, which is the pull request's — and a dependabot branch cut before the pin file
