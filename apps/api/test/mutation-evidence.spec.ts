@@ -145,6 +145,9 @@ describe('Assembly mutation evidence verification', () => {
       'receipts/graph/change-admission.json',
       '.github/workflows/ci.yml',
       'apps/web/app/page.tsx',
+      'SECURITY.md',
+      'README.md',
+      'docs/how-to/example.md',
     ]) {
       fs.mkdirSync(path.join(root, path.dirname(file)), { recursive: true });
       fs.writeFileSync(path.join(root, file), `${file}\n`);
@@ -158,7 +161,14 @@ describe('Assembly mutation evidence verification', () => {
   }
 
   it('declares its excluded prefixes in the evidence it records', () => {
-    expect(harness.EVIDENCE_SCOPE_EXCLUSIONS).toEqual(['.github/', 'apps/web/', 'receipts/']);
+    expect(harness.EVIDENCE_SCOPE_EXCLUSIONS).toEqual([
+      '.github/',
+      'README.md',
+      'SECURITY.md',
+      'apps/web/',
+      'docs/',
+      'receipts/',
+    ]);
     expect(original.supplementalGit.excludedPrefixes).toEqual([...harness.EVIDENCE_SCOPE_EXCLUSIONS]);
     // Every declared exclusion must still match tracked paths in THIS repository.
     // A prefix that matches nothing is a scope entry someone forgot to delete,
@@ -183,6 +193,10 @@ describe('Assembly mutation evidence verification', () => {
       'receipts/graph/change-admission.json',
       '.github/workflows/ci.yml',
       'apps/web/app/page.tsx',
+      // Issue #57: SECURITY.md must not invalidate assembly evidence.
+      'SECURITY.md',
+      'README.md',
+      'docs/how-to/example.md',
     ]) {
       fs.appendFileSync(path.join(repo, unrelated), 'a merge landed on main\n');
     }

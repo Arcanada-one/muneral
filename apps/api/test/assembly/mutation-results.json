@@ -273,11 +273,14 @@
   "supplementalGit": {
     "excludedPrefixes": [
       ".github/",
+      "README.md",
+      "SECURITY.md",
       "apps/web/",
+      "docs/",
       "receipts/"
     ],
-    "trackedTreeWithoutEvidence": "b0631c123375c3d4e3e4139c2463353738c7974b",
-    "trackedSnapshotDiffSha256": "3a47cd47d245a22408965da034b864e7c683920cb3fa72cde87b1048e9765863"
+    "trackedTreeWithoutEvidence": "5c47170484ab022cdf58d2f92c6ea7baf1f26b34",
+    "trackedSnapshotDiffSha256": "a90750a7237f1da17a4716241cc56109534fcd4466d9a52aa9e51c5fd2daa63a"
   },
   "baseline": {
     "outcome": "SURVIVED",

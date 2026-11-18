@@ -591,8 +591,8 @@ function observedInvocation(jsonPath) {
 // nobody listed, the evidence verifies green, and the thing it attests is no
 // longer what was measured — the failure an evidence document exists to
 // prevent. A denylist fails NOISY: a directory nobody classified keeps binding
-// and costs one rebind, which is loud and cheap. Three prefixes are declared
-// here, each one a whole subtree the battery provably never opens; everything
+// and costs one rebind, which is loud and cheap. The prefixes declared here
+// are subtrees (or root docs) the battery provably never opens; everything
 // else tracked — including root `package.json`, `.npmrc`, `turbo.json`,
 // `prisma.config.ts` and `docker-compose.prod.yml`, which
 // `test/deploy-bind.contract.spec.ts` reads by path — still binds.
@@ -615,6 +615,12 @@ const EVIDENCE_SCOPE_EXCLUSIONS = Object.freeze([
   // `apps/api` and whose `moduleNameMapper` reaches only into
   // `packages/types` and `apps/api/test/support`.
   'apps/web/',
+  // Human-facing documentation. Issue #57 measured that editing SECURITY.md
+  // invalidated assembly.validator.ts evidence — provenance text the battery
+  // never opens. README.md and docs/ are the same class.
+  'README.md',
+  'SECURITY.md',
+  'docs/',
   // The admission gate's own records. Inert JSON: never imported, never read
   // by a spec. This is the prefix that made the receipt of a change stale the
   // evidence of that same change, which is why
