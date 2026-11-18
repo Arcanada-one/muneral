@@ -30,8 +30,9 @@ const productionStage = (() => {
   // node alpine digest on a schedule, and a hard-coded sha turns every image bump into
   // a false red before the image itself is judged.
   const match = /^FROM node:[^\n]+ AS production$/m.exec(dockerfile);
-  expect(match).not.toBeNull();
-  expect(match.index).toBeGreaterThan(-1);
+  if (match === null || match.index === undefined) {
+    throw new Error('Dockerfile has no production FROM node:… AS production line');
+  }
   return dockerfile.slice(match.index);
 })();
 
