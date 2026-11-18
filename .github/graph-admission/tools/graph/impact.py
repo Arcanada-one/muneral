@@ -71,6 +71,8 @@ GLOBAL_ROOT_PREFIXES = ("tsconfig",)  # tsconfig.json, tsconfig.base.json … at
 CODE_EXTS = {".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".mts", ".cts"}
 DOC_EXTS = {".md", ".mdx", ".rst", ".txt", ".adoc"}
 CONFIG_EXTS = {".json", ".yml", ".yaml", ".toml", ".ini", ".env", ".cfg", ".conf", ".properties"}
+# DEC-AUP-0188: Python dependency manifests are lock-class files. Without this a requirements*.txt change
+# falls into DOC_EXTS (.txt) and a range of only such files measures nothing (empty verdict list).
 DOC_KINDS = {"doc", "receipt"}
 FALLBACK_KINDS = {"lockfile", "global_config"}
 TEST_RE = re.compile(r"(^|/)(test|tests|__tests__|e2e|spec)(/|$)|\.(spec|test)\.[cm]?[jt]sx?$")
@@ -301,7 +303,7 @@ def classify_file(path: str, idx: GraphIndex | None) -> str:
     base = os.path.basename(path)
     ext = os.path.splitext(base)[1].lower()
     is_root = "/" not in path
-    if base in LOCKFILES:
+    if base in LOCKFILES or schema_check.is_python_dependency_manifest(path):
         return "lockfile"
     if is_root and (base in GLOBAL_ROOT_FILES or base.startswith(GLOBAL_ROOT_PREFIXES) and ext == ".json"):
         return "global_config"

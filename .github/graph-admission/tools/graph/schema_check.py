@@ -104,6 +104,24 @@ def traversal_entities(rows) -> set[str]:
                    for p in e.get("revision_paths", [e]))}
 
 
+# DEC-AUP-0188: Python dependency manifests are lock-class files. ONE definition, used by impact.classify_file
+# (kind `lockfile` -> global fallback) and by ci_gate (a manifest can never be "doc only", whatever the signed
+# doc_only_globs say). Over-matching is the safe side: the cost of a false positive is one measured full suite.
+_PY_DEP_STEM = re.compile(r"(?:[a-z0-9]+[-_.])*(?:requirements|constraints)(?:[-_.][a-z0-9]+)*\.(?:txt|in)")
+PY_DEP_LOCKFILE_NAMES = frozenset({"pipfile.lock", "pdm.lock", "pylock.toml", "conda-lock.yml", "conda-lock.yaml"})
+
+
+def is_python_dependency_manifest(path: str) -> bool:
+    parts = [p.lower() for p in str(path).replace("\\", "/").split("/") if p]
+    if not parts:
+        return False
+    name = parts[-1]
+    if name in PY_DEP_LOCKFILE_NAMES or _PY_DEP_STEM.fullmatch(name):
+        return True
+    # requirements/base.txt, constraints/py312.in
+    return len(parts) > 1 and parts[-2] in {"requirements", "constraints"} and name.endswith((".txt", ".in"))
+
+
 ARMS_SCHEMA = "FullSuiteArmEvidence/v1"
 ARM_BACKENDS = {"real_disposable", "real_external", "stub", "none"}
 ARM_REQUIRES = {"real_disposable", "real_external", "stub_ok"}

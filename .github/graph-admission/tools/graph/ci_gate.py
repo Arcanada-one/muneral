@@ -583,8 +583,21 @@ def changed_files(repo: Path, base: str, head: str) -> list[str]:
     return [l for l in out.splitlines() if l]
 
 
+def _dependency_manifest_predicate():
+    """The single definition lives in schema_check (same bundle directory); load it by exact sibling path."""
+    path = Path(__file__).resolve().with_name("schema_check.py")
+    spec = importlib.util.spec_from_file_location("_ci_gate_dep_manifest_schema_check", path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError("schema_check.py is not loadable beside ci_gate.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.is_python_dependency_manifest
+
+
 def is_doc_only(paths: list[str], globs: list[str]) -> bool:
-    return bool(paths) and all(any(fnmatch.fnmatch(p, g) for g in globs) for p in paths)
+    # DEC-AUP-0188: a dependency manifest is measured by the fallback suite; no doc glob may reclassify it.
+    manifest = _dependency_manifest_predicate()
+    return bool(paths) and all(any(fnmatch.fnmatch(p, g) for g in globs) and not manifest(p) for p in paths)
 
 
 def receipts_from_body(body: str, workdir: Path) -> list[Path]:
@@ -1914,7 +1927,11 @@ AUTH_DEPENDENCY_SETUP_UNCHANGED = (
     "vendor/arcanada-access-contracts-dac7c5ede606698b10c2c5edd0c07ff21a798f83.tgz",
 )
 AUTH_DEPENDENCY_SETUP_REPO = "Arcanada-one/auth-arcana"
-AUTH_DEPENDENCY_SETUP_NODE_VERSIONS = ("24.22.1", "24.22.2")
+AUTH_DEPENDENCY_SETUP_NODE_VERSIONS = ("24.22.1", "24.22.2", "24.22.3")
+# DEC-AUP-0190: .nvmrc is the one file of AUTH_DEPENDENCY_SETUP_UNCHANGED a candidate range may change,
+# and only UPWARD between two exact members of AUTH_DEPENDENCY_SETUP_NODE_VERSIONS (see _auth_exact_node_pin).
+# The tuple is therefore ordered oldest to newest; append a newer version, never insert or reorder.
+AUTH_DEPENDENCY_SETUP_NODE_PIN_FILE = ".nvmrc"
 AUTH_DEPENDENCY_SETUP_VITE_VERSIONS = ("6.4.4", "6.4.5")
 AUTH_DEPENDENCY_SETUP_PNPM = "10.30.3"
 AUTH_DEPENDENCY_SETUP_REGISTRY = "https://registry.npmjs.org/"
@@ -1965,6 +1982,23 @@ def _candidate_setup_blob_oid(repo: Path, revision: str, relative: str) -> str:
     return oid
 
 
+def _auth_exact_node_pin(raw: bytes) -> int | None:
+    """Return the position in AUTH_DEPENDENCY_SETUP_NODE_VERSIONS of the version a .nvmrc names, only
+    when its bytes are exactly the version or the version plus one newline. Anything else (extra text,
+    whitespace, a range, a prefix, an empty file) is None."""
+    for position, version in enumerate(AUTH_DEPENDENCY_SETUP_NODE_VERSIONS):
+        if raw in (version.encode("ascii"), version.encode("ascii") + b"\n"):
+            return position
+    return None
+
+
+def _auth_node_pin_moves_up(base_raw: bytes, head_raw: bytes) -> bool:
+    """True only when both .nvmrc byte strings are exact allowlisted pins and the head pin is strictly
+    newer than the base pin (a downgrade or a byte-only rewrite of the same version is not an upgrade)."""
+    base_pos, head_pos = _auth_exact_node_pin(base_raw), _auth_exact_node_pin(head_raw)
+    return base_pos is not None and head_pos is not None and head_pos > base_pos
+
+
 def validate_candidate_auth_dependency_setup(repo_path: str | Path, repository: str,
                                             base: str, head: str) -> dict:
     """Validate exact Auth dependency inputs and return fixed, non-executing setup argv."""
@@ -2005,6 +2039,12 @@ def validate_candidate_auth_dependency_setup(repo_path: str | Path, repository: 
                 raise ValueError("Auth project npm configuration is not a regular committed file")
             _candidate_setup_git(repo, "diff", "--quiet", head, "--", relative)
         if base_oid != head_oid:
+            if (relative == AUTH_DEPENDENCY_SETUP_NODE_PIN_FILE
+                    and _auth_node_pin_moves_up(_candidate_setup_blob(repo, base, relative)[1],
+                                                source[relative])):
+                # DEC-AUP-0190: allowlisted Node pin to a newer allowlisted Node pin. Skips only this
+                # oid comparison; the head pin is still checked against the allowlist further below.
+                continue
             raise ValueError(f"Auth dependency policy source changed in candidate range: {relative}")
 
     try:
