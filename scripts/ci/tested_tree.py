@@ -18,7 +18,7 @@ EXPECTED_RUNNER_LABELS = {"self-hosted", "linux", "ci-general"}
 GITHUB_ACTIONS_APP_ID = 15368
 # Candidate identity for the complete, independently reviewable CI workflow.
 # Reuse remains false until a reviewer recomputes this from the whole workflow.
-QUALIFIED_WORKFLOW_SHA256 = "ae0da9a1de29b7eac4a8acc47762f800e6cd5c3a02e86a9adb353d88ebbfbc7e"
+QUALIFIED_WORKFLOW_SHA256 = "540d6ba9758facc8fbf41bfc08d85a2f63eb91fe7eda8b7f857f3b894fd15647"
 
 
 class GitHubAPI:
