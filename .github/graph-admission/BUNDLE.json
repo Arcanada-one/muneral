@@ -1,5 +1,5 @@
 {
- "bundle_digest": "sha256:abe7bb01b0949a21a79427ea5c8de18f96d0eeb29de4bde72d2fdcd94c6c8df8",
+ "bundle_digest": "sha256:2bb16e17fccf8d76cd8b6e720bc8f1965577a70ebf917be6b27ccda4a2b08c28",
  "files": [
   {
    "blob_oid": "d7f67a1036fa2ce564c9ffa4aa74fb1638d479f9",
@@ -230,9 +230,9 @@
    "sha256": "sha256:bcc2b9c986588c689a9ef015e04dcaf2e69971cf64c69e761138de70c19258a7"
   },
   {
-   "blob_oid": "5583b8c389c68e5cdfed4f04030e5e98d1747f1e",
+   "blob_oid": "9a2384a4f3d7e4bf43a2057fee3b927765e16304",
    "path": "tools/graph/ci_gate.py",
-   "sha256": "sha256:e44e43ab62479f6799a2840c747dd9cf6f9d7865434873e5359602e0a452d9b4"
+   "sha256": "sha256:fcf4e52759fa4d2ea0cbfd6c79c70cba9411b14566fa6978174b85e5e0406010"
   },
   {
    "blob_oid": "6713f7a05bdf097494a3de43ce19c245b44e9ac0",
@@ -271,9 +271,12 @@
   "tool": "tools/graph/ci_gate.py",
   "version": "1.0.0"
  },
- "program_ref": "ef3ef0caf13215edcd6ae940f9e12cc15917dec1",
+ "program_ref": "77d470399bd845f6ad39167ac800b0169231665c",
  "program_repo": "Arcanada-one/arcanada-universal-program",
  "provisional_until_fable_review": true,
  "rule": "The workflow refuses unless every file's sha256 matches this manifest AND the caller's `program_ref` input matches `program_ref` here. The bundle is a VENDORED copy of one pinned program-repo SHA (the program repository is private and no shared credential exists to check it out from a caller's CI). A pull request that changes anything under the bundle directory is refused by the gate job \u2014 a bundle refresh is its own pull request. Each entry's `blob_oid` is the git object id the bytes were read at: `git hash-object <file>` must equal it, which is how a caller with no credential for the program repository can CONTRADICT this manifest offline (DEC-AUP-0036 R2). Every byte here was read from the object store at program_ref, never from a working tree (R1).",
- "schema": "GraphAdmissionBundle/v1"
+ "schema": "GraphAdmissionBundle/v1",
+ "signing_keys": [
+  "SHA256:9QFqysn44UjA8rXyfHjItP3b2Oadhnbf1bDNqXrsCig"
+ ]
 }
