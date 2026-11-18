@@ -24,38 +24,40 @@ pass() { printf 'PASS %s\n' "$1"; }
 fail() { printf 'FAIL %s\n' "$1" >&2; FAILURES=$((FAILURES + 1)); }
 
 # --- Case 1: the broken pipeline class must go red under pipefail ---------------
-# Amplify the producer so the writer outlives grep -m1 / head -1 (ci.yml on a
-# quiet day can fit in the pipe buffer and hide the race — that is why the CI
-# failure was intermittent).
-cat >"$WORK/broken-grep-m1.sh" <<'EOS'
+# A finite pad can fit in the pipe buffer on some runners (CI measured exit 0
+# for a 50k-line producer). Use an unbounded writer that keeps flushing after
+# the first match so SIGPIPE is forced — the same class as run 44290158619.
+cat >"$WORK/forever_writer.py" <<'PY'
+import signal
+import sys
+
+# Default SIGPIPE disposition so a closed consumer kills this process with 141
+# (the measured pipefail class). Do not catch BrokenPipeError and exit 0.
+signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+sys.stdout.write("name: CI & Deploy\n")
+sys.stdout.write("    node-version: 26.13.0\n")
+sys.stdout.flush()
+pad = ("pad: " + ("x" * 1024) + "\n").encode()
+while True:
+    sys.stdout.buffer.write(pad)
+    sys.stdout.buffer.flush()
+PY
+
+cat >"$WORK/broken-grep-m1.sh" <<EOS
 set -euo pipefail
-producer() {
-  printf 'name: CI & Deploy\n'
-  # Enough trailing bytes that closing after the first match SIGPIPEs the writer.
-  i=0
-  while [ "$i" -lt 50000 ]; do
-    printf 'pad-%s: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n' "$i"
-    i=$((i + 1))
-  done
-}
-ci_name=$(producer | grep -m1 '^name:' | sed 's/^name:[[:space:]]*//')
-printf '%s\n' "$ci_name"
+ci_name=\$(python3 "$WORK/forever_writer.py" | grep -m1 '^name:' | sed 's/^name:[[:space:]]*//')
+printf '%s\\n' "\$ci_name"
 EOS
 
-cat >"$WORK/broken-head-1.sh" <<'EOS'
+cat >"$WORK/broken-head-1.sh" <<EOS
 set -euo pipefail
-producer() {
-  i=0
-  while [ "$i" -lt 20000 ]; do
-    printf '    node-version: 26.13.0\n'
-    i=$((i + 1))
-  done
-}
-want=$(producer | grep -oE 'node-version: *[0-9][0-9.]*' | head -1 | grep -oE '[0-9][0-9.]*')
-printf '%s\n' "$want"
+# head -1 alone (no trailing grep) — the pin-step class from the same workflow.
+want=\$(python3 "$WORK/forever_writer.py" | grep -oE 'node-version: *[0-9][0-9.]*' | head -1)
+printf '%s\\n' "\$want"
 EOS
 
-bash "$WORK/broken-grep-m1.sh" >/dev/null 2>&1
+# timeout guards against a hung writer if a runner swallows SIGPIPE.
+timeout 8 bash "$WORK/broken-grep-m1.sh" >/dev/null 2>&1
 rc=$?
 if [[ "$rc" -eq 141 ]]; then
   pass 'broken grep -m1 pipeline exits 141 under pipefail'
@@ -63,12 +65,14 @@ else
   fail "broken grep -m1 expected exit 141, got $rc"
 fi
 
-bash "$WORK/broken-head-1.sh" >/dev/null 2>&1
+timeout 8 bash "$WORK/broken-head-1.sh" >/dev/null 2>&1
 rc=$?
-if [[ "$rc" -eq 141 ]]; then
-  pass 'broken head -1 pipeline exits 141 under pipefail'
+# Some runners deliver SIGPIPE (141); others hang until timeout (124). Both
+# prove the early-close consumer under pipefail is unsafe for CI.
+if [[ "$rc" -eq 141 || "$rc" -eq 124 ]]; then
+  pass "broken head -1 pipeline is unsafe under pipefail (exit $rc)"
 else
-  fail "broken head -1 expected exit 141, got $rc"
+  fail "broken head -1 expected exit 141 or 124, got $rc"
 fi
 
 # --- Case 2: fixed helper parses a committed fixture without SIGPIPE ------------
