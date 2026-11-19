@@ -78,8 +78,10 @@ export function readTaskPage(value: unknown) {
   return { data: page.items, total: page.total, limit: page.limit, page: page.offset / page.limit + 1 };
 }
 export function readActivity(value: unknown) {
-  return read(z.object({ data: z.array(activity).max(500), total: z.number().int().nonnegative(),
-    page: z.number().int().positive(), limit: z.number().int().positive().max(500) }), value, 'Activity');
+  // GET /tasks/:taskId/activity has no @Max on limit (tasks.controller.ts); default 20.
+  // Cap at MAX_COLLECTION so a valid oversized page cannot become a UI parse error below a fake 500.
+  return read(z.object({ data: z.array(activity).max(MAX_COLLECTION), total: z.number().int().nonnegative(),
+    page: z.number().int().positive(), limit: z.number().int().positive().max(MAX_COLLECTION) }), value, 'Activity');
 }
 export function uniqueSlug<T extends { slug: string }>(rows: T[], slug: string, label: string): T {
   const matches = rows.filter(row => row.slug === slug);

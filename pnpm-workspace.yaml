@@ -98,5 +98,5 @@ overrides:
   # measurement is of 5.9.3 (A2-304b measured that trap).
   # GHSA-mrhx-c7xc-m3w5: Dependabot alerts 278/279 — first patched is 4.6.6 (major from 3.x).
   # Floor every resolution including eslint-plugin-react-hooks transitive; do not pin a vulnerable release.
-  zod: ">=4.6.6"
+  zod: "^4.6.6"
   typescript: 5.9.3
