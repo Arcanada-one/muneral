@@ -460,10 +460,10 @@ jobs:
       startsWith(github.head_ref, 'integration/') ||
       contains(github.event.pull_request.labels.*.name, 'ci:run')
       )
-    uses: Arcanada-one/datarim/.github/workflows/network-exposure-lint.yml@1fbb6bd89202b032f4ef9b9a6de4b186d9cf316c
+    uses: Arcanada-one/datarim/.github/workflows/network-exposure-lint.yml@9709598f710c3d0c2d8af8958d39020de37b26c0
     with:
       compose_paths: docker-compose.prod.yml
-      datarim_ref: '1fbb6bd89202b032f4ef9b9a6de4b186d9cf316c'
+      datarim_ref: '9709598f710c3d0c2d8af8958d39020de37b26c0'
       # A2-315: on the deploying push this gate takes the `deploy-gate` lane too (default is ci-general).
       runner_labels: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') && '["deploy-gate"]' || '["self-hosted","linux","ci-general"]' }}
 
@@ -480,7 +480,7 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ github.workflow_sha }}
-      - uses: Arcanada-one/datarim/.github/actions/preflight-caller-contract@b61925dd75a302d0a5a344f01fd6df42e461a954  # v4.12.8
+      - uses: Arcanada-one/datarim/.github/actions/preflight-caller-contract@9709598f710c3d0c2d8af8958d39020de37b26c0  # v4.12.8
         with:
           vault-addr: ${{ vars.VAULT_ADDR }}
 
@@ -541,7 +541,7 @@ jobs:
     steps:
       - name: Pre-deploy host readiness
         id: preflight
-        uses: Arcanada-one/datarim/.github/actions/preflight-check@b61925dd75a302d0a5a344f01fd6df42e461a954  # v4.12.8
+        uses: Arcanada-one/datarim/.github/actions/preflight-check@9709598f710c3d0c2d8af8958d39020de37b26c0  # v4.12.8
         with:
           target-host: arcana-prd
           service-name: muneral
