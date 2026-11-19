@@ -15,7 +15,10 @@ import { PrismaService } from '../src/prisma/prisma.service.js';
 import { AuthService } from '../src/auth/auth.service.js';
 import { KanbanService } from '../src/ws/kanban.service.js';
 import { createDisposablePostgres } from './support/disposable-postgres.js';
-import { TASK_ACTIVITY_MAX_LIMIT } from '../src/tasks/dto/query-task-activity.dto.js';
+import {
+  TASK_ACTIVITY_DEFAULT_LIMIT,
+  TASK_ACTIVITY_MAX_LIMIT,
+} from '../src/tasks/dto/query-task-activity.dto.js';
 
 @Module({
   imports: [
@@ -87,6 +90,26 @@ describe('GET /tasks/:taskId/activity limit bound (real HTTP/PostgreSQL)', () =>
     if (app) await app.close();
     await pg.stop();
   }, 120_000);
+
+  it(`defaults to limit=${TASK_ACTIVITY_DEFAULT_LIMIT} when query is omitted`, async () => {
+    const res = await supertest(app.getHttpServer())
+      .get(`/tasks/${taskId}/activity`)
+      .auth(token, { type: 'bearer' })
+      .expect(200);
+    expect(res.body.limit).toBe(TASK_ACTIVITY_DEFAULT_LIMIT);
+    expect(Array.isArray(res.body.data)).toBe(true);
+    expect(res.body.data.length).toBeLessThanOrEqual(TASK_ACTIVITY_DEFAULT_LIMIT);
+  });
+
+  it(`defaults to limit=${TASK_ACTIVITY_DEFAULT_LIMIT} when only page=1 is set`, async () => {
+    const res = await supertest(app.getHttpServer())
+      .get(`/tasks/${taskId}/activity?page=1`)
+      .auth(token, { type: 'bearer' })
+      .expect(200);
+    expect(res.body.limit).toBe(TASK_ACTIVITY_DEFAULT_LIMIT);
+    expect(Array.isArray(res.body.data)).toBe(true);
+    expect(res.body.data.length).toBeLessThanOrEqual(TASK_ACTIVITY_DEFAULT_LIMIT);
+  });
 
   it(`accepts limit=${TASK_ACTIVITY_MAX_LIMIT} (orchestration full-history page)`, async () => {
     const res = await supertest(app.getHttpServer())
