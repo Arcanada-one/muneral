@@ -37,7 +37,7 @@ import { UpdateTaskMetadataDto } from './dto/update-task-metadata.dto.js';
 import { QueryTasksDto } from './dto/query-tasks.dto.js';
 import {
   QueryTaskActivityDto,
-  TASK_ACTIVITY_MAX_LIMIT,
+  TASK_ACTIVITY_DEFAULT_LIMIT,
 } from './dto/query-task-activity.dto.js';
 import { QueryWorkspaceDigestDto } from './dto/query-workspace-digest.dto.js';
 import { QueryWorkspaceDigestTransitionsDto } from './dto/query-workspace-digest-transitions.dto.js';
@@ -846,7 +846,7 @@ export class TasksController {
     return this.tasksService.getActivity(
       taskId,
       query.page ?? 1,
-      query.limit ?? TASK_ACTIVITY_MAX_LIMIT,
+      query.limit ?? TASK_ACTIVITY_DEFAULT_LIMIT,
       req.actor.type === 'human' ? req.actor.id : undefined,
     );
   }

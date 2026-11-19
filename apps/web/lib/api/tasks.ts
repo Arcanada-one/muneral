@@ -166,8 +166,10 @@ async function fetchTaskGitRefs(taskId: string): Promise<TaskGitRef[]> {
   return refs;
 }
 
-/** Must match apps/api QueryTaskActivityDto @Max (TASK_ACTIVITY_MAX_LIMIT). */
+/** Web UI page size (server default). Not the server @Max. */
 export const TASK_ACTIVITY_PAGE_LIMIT = 20;
+/** Re-export: equals server QueryTaskActivityDto @Max. */
+export { TASK_ACTIVITY_MAX_LIMIT } from './read-contract';
 
 async function fetchActivity(
   taskId: string,

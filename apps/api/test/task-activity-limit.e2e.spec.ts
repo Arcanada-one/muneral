@@ -88,7 +88,7 @@ describe('GET /tasks/:taskId/activity limit bound (real HTTP/PostgreSQL)', () =>
     await pg.stop();
   }, 120_000);
 
-  it(`accepts limit=${TASK_ACTIVITY_MAX_LIMIT} (client page size)`, async () => {
+  it(`accepts limit=${TASK_ACTIVITY_MAX_LIMIT} (orchestration full-history page)`, async () => {
     const res = await supertest(app.getHttpServer())
       .get(`/tasks/${taskId}/activity?page=1&limit=${TASK_ACTIVITY_MAX_LIMIT}`)
       .auth(token, { type: 'bearer' })
