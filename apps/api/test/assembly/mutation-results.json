@@ -1,6 +1,6 @@
 {
   "formatVersion": "assembly-mutation-evidence-v4",
-  "generatedAt": "2026-11-19T12:38:44.154Z",
+  "generatedAt": "2026-11-19T13:24:35.500Z",
   "invocation": {
     "cwd": ".",
     "argv": [
@@ -276,8 +276,8 @@
       "apps/web/",
       "receipts/"
     ],
-    "trackedTreeWithoutEvidence": "f7d28d900adf740d1359b20a896fca3fc79305e9",
-    "trackedSnapshotDiffSha256": "554aa95bc34a7e55ac154f5df872e8aa8a3ed2f9cfa13ac580733674311b1436"
+    "trackedTreeWithoutEvidence": "73370b5b2a1e3adc03cdb137b5fd247f4d26df5e",
+    "trackedSnapshotDiffSha256": "2179bd61e1c72c649b704c112f81ce6882ac3675eff2bf456963ba316a8aeb05"
   },
   "baseline": {
     "outcome": "SURVIVED",
