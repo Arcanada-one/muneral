@@ -7,7 +7,7 @@ const task = z.object({
   id, projectId: id, title: z.string(), status: z.custom<TaskStatus>((value) => TASK_STATUSES.includes(value as TaskStatus)),
   priority: z.enum(['critical', 'high', 'medium', 'low']), actorType: z.enum(['human', 'agent']).nullable(),
   createdAt: timestamp, updatedAt: timestamp,
-  description: z.string().nullable().optional(), tags: z.array(z.string()).optional(),
+  description: z.string().nullable().optional(), tags: z.array(z.string()).max(200).optional(),
   estimateHours: z.union([z.number().finite(), z.string().regex(/^-?\d+(?:\.\d+)?$/)]).nullable().optional(), dueDate: z.string().nullable().optional(),
   parentId: id.nullable().optional(),
 });
@@ -21,7 +21,8 @@ const checklist = z.object({ id, taskId: id, text: z.string(), checked: z.boolea
   position: z.number().int().nullable() });
 const activity = z.object({ id, taskId: id, actorId: id, actorType: z.enum(['human', 'agent']),
   actorName: z.string().optional(), action: z.string(), createdAt: timestamp,
-  payload: z.record(z.unknown()).nullable().optional() });
+  // Zod 4: z.record requires key + value schemas (single-arg form removed).
+  payload: z.record(z.string(), z.unknown()).nullable().optional() });
 const dependency = z.object({ id, fromTaskId: id, toTaskId: id, type: z.string() });
 const dependencyGraphEntry = z.object({
   id,
@@ -43,39 +44,44 @@ const taskGitRef = z.object({
   createdAt: timestamp,
 });
 
-function read<T>(schema: z.ZodType<T, z.ZodTypeDef, unknown>, value: unknown, label: string): T {
+// Cap collection schemas that parse untrusted HTTP bodies (GHSA-mrhx-c7xc-m3w5).
+const MAX_COLLECTION = 10_000;
+
+function read<T>(schema: z.ZodType<T>, value: unknown, label: string): T {
   const parsed = schema.safeParse(value);
   if (!parsed.success) throw new Error(`${label} response is unavailable: invalid response shape`);
   return parsed.data;
 }
 export const readTask = (value: unknown) => read(task, value, 'Task');
-export const readWorkspaces = (value: unknown) => read(z.array(workspace), value, 'Workspaces');
-export const readProjects = (value: unknown) => read(z.array(project), value, 'Projects');
-export const readDependencies = (value: unknown) => read(z.array(dependency), value, 'Dependencies');
-export const readDependencyGraph = (value: unknown) => read(z.array(dependencyGraphEntry), value, 'Dependencies');
+export const readWorkspaces = (value: unknown) => read(z.array(workspace).max(MAX_COLLECTION), value, 'Workspaces');
+export const readProjects = (value: unknown) => read(z.array(project).max(MAX_COLLECTION), value, 'Projects');
+export const readDependencies = (value: unknown) => read(z.array(dependency).max(MAX_COLLECTION), value, 'Dependencies');
+export const readDependencyGraph = (value: unknown) => read(z.array(dependencyGraphEntry).max(MAX_COLLECTION), value, 'Dependencies');
 export function readTaskReadiness(value: unknown) {
   return read(z.object({
     taskId: id,
     dependencyCount: z.number().int().nonnegative(),
-    blockedBy: z.array(dependencyGraphEntry),
+    blockedBy: z.array(dependencyGraphEntry).max(MAX_COLLECTION),
     ready: z.boolean(),
   }), value, 'Task readiness');
 }
-export const readTaskGitRefs = (value: unknown) => read(z.array(taskGitRef), value, 'Git references');
+export const readTaskGitRefs = (value: unknown) => read(z.array(taskGitRef).max(MAX_COLLECTION), value, 'Git references');
 export function readChecklist(value: unknown) {
-  return read(z.array(checklist), value, 'Checklist').map(({ text, position, ...item }) =>
+  return read(z.array(checklist).max(MAX_COLLECTION), value, 'Checklist').map(({ text, position, ...item }) =>
     ({ ...item, label: text, order: position }));
 }
 export function readTaskPage(value: unknown) {
-  const page = read(z.object({ items: z.array(task), total: z.number().int().nonnegative(),
+  const page = read(z.object({ items: z.array(task).max(200), total: z.number().int().nonnegative(),
     limit: z.number().int().min(1).max(200), offset: z.number().int().nonnegative() }), value, 'Tasks');
   if (page.offset % page.limit !== 0 || page.items.length > page.limit || page.items.length > page.total)
     throw new Error('Tasks response is unavailable: invalid pagination');
   return { data: page.items, total: page.total, limit: page.limit, page: page.offset / page.limit + 1 };
 }
 export function readActivity(value: unknown) {
-  return read(z.object({ data: z.array(activity), total: z.number().int().nonnegative(),
-    page: z.number().int().positive(), limit: z.number().int().positive() }), value, 'Activity');
+  // GET /tasks/:taskId/activity has no @Max on limit (tasks.controller.ts); default 20.
+  // Cap at MAX_COLLECTION so a valid oversized page cannot become a UI parse error below a fake 500.
+  return read(z.object({ data: z.array(activity).max(MAX_COLLECTION), total: z.number().int().nonnegative(),
+    page: z.number().int().positive(), limit: z.number().int().positive().max(MAX_COLLECTION) }), value, 'Activity');
 }
 export function uniqueSlug<T extends { slug: string }>(rows: T[], slug: string, label: string): T {
   const matches = rows.filter(row => row.slug === slug);

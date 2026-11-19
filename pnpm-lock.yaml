@@ -27,6 +27,7 @@ overrides:
   baseline-browser-mapping: '>=2.11.0'
   mysql2: '>=3.22.0'
   qs: '>=6.16.0'
+  zod: ^4.6.6
   typescript: 5.9.3
 
 importers:
@@ -275,8 +276,8 @@ importers:
         specifier: ^3.7.0
         version: 3.7.0
       zod:
-        specifier: ^3.24.3
-        version: 3.25.76
+        specifier: ^4.6.6
+        version: 4.6.7
       zustand:
         specifier: ^5.0.16
         version: 5.1.0(@types/react@19.3.0)(react@19.3.1)
@@ -5274,6 +5275,7 @@ packages:
 
   node-abort-controller@3.1.1:
     resolution: {integrity: sha512-AGK2yQKIjRuqnc6VkX2Xj5d+QW8xZ87pa1UK6yA6ouUyuxfHuMP6umE5QK7UmTeOAymo+Zx1Fxiuw9rVx8taHQ==}
+    deprecated: This package is no longer needed on supported Node.js versions. Node.js 16+ includes AbortController and AbortSignal as built-in globals. All Node.js versions requiring this polyfill are end-of-life. Use the built-in globals instead.
 
   node-addon-api@8.8.0:
     resolution: {integrity: sha512-c5Ko1fZJIJmzhFIkhRN76WTq+fC6tWnGy9CXA0fA+XygsWZmEwG8vmbkNqxMyoaa0Tin4djul49NzdVcJJcjeA==}
@@ -6773,10 +6775,10 @@ packages:
     resolution: {integrity: sha512-Q6/nZLe6jxuU80qb/4uJ4t5v2VEZ44lzQjPDhYJNztRQ4wyWc6VF3D3Kb/fAuPetZQnhS3hnajCf9CsWesghLQ==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
-      zod: ^3.25.0 || ^4.0.0
+      zod: ^4.6.6
 
-  zod@3.25.76:
-    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+  zod@4.6.7:
+    resolution: {integrity: sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==}
 
   zustand@5.1.0:
     resolution: {integrity: sha512-ciJZlP48M1PTQbVQq81CGVFxHTLpZNrFjKqwjtCU34AWuXTZT/jrF3p9+fI84Cf1eSCMLapxqBy/SNTfwOBuqA==}
@@ -10646,8 +10648,8 @@ snapshots:
       '@babel/parser': 7.29.7
       eslint: 10.14.0(jiti@2.7.0)
       hermes-parser: 0.25.1
-      zod: 3.25.76
-      zod-validation-error: 4.0.2(zod@3.25.76)
+      zod: 4.6.7
+      zod-validation-error: 4.0.2(zod@4.6.7)
     transitivePeerDependencies:
       - supports-color
 
@@ -11788,7 +11790,7 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      '@types/node': 24.13.6
+      '@types/node': 24.19.2
       merge-stream: 2.0.0
       supports-color: 8.1.1
     optional: true
@@ -13820,11 +13822,11 @@ snapshots:
       grammex: 3.1.12
       graphmatch: 1.1.1
 
-  zod-validation-error@4.0.2(zod@3.25.76):
+  zod-validation-error@4.0.2(zod@4.6.7):
     dependencies:
-      zod: 3.25.76
+      zod: 4.6.7
 
-  zod@3.25.76: {}
+  zod@4.6.7: {}
 
   zustand@5.1.0(@types/react@19.3.0)(react@19.3.1):
     optionalDependencies:
