@@ -490,7 +490,10 @@ jobs:
     # successful cold suite, plus every security gate, can reach the deploy job.
     needs: [tested-tree, lint-and-test, secrets-gate, network-exposure, preflight-caller-contract]
     if: always() && github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: [self-hosted, linux, ci-general]
+    # DEPLOY-5MIN: this 5-second, capability-free aggregator runs on the dedicated
+    # deploy-gate pool (as secrets-gate does), so it never queues behind ci-general
+    # test jobs. Run 44412728324 waited 857 s for a ci-general runner here.
+    runs-on: [deploy-gate]
     permissions: {}
     steps:
       - name: Require successful test proof and security gates
