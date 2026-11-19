@@ -431,7 +431,7 @@ jobs:
     with:
       # Default in graph-admission.yml is also ci-general; caller still pins explicitly.
       runs_on: "ci-general"
-      program_ref: 'cdbf3b4e4920a68f08136dca510a0b0c8d2dbec5'
+      program_ref: '49a9437198b4ac49fecf8ef493f38914d2f316b8'
       stage_evidence_path: ''
       stage_evidence_root: ''
       stage_evidence_required: false
