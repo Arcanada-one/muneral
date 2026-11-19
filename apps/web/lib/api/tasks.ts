@@ -166,10 +166,13 @@ async function fetchTaskGitRefs(taskId: string): Promise<TaskGitRef[]> {
   return refs;
 }
 
+/** Must match apps/api QueryTaskActivityDto @Max (TASK_ACTIVITY_MAX_LIMIT). */
+export const TASK_ACTIVITY_PAGE_LIMIT = 20;
+
 async function fetchActivity(
   taskId: string,
   page = 1,
-  limit = 20,
+  limit = TASK_ACTIVITY_PAGE_LIMIT,
 ): Promise<PaginatedResult<ActivityLogEntry>> {
   const res = await apiClient.get<PaginatedResult<ActivityLogEntry>>(
     `/tasks/${taskId}/activity?page=${page}&limit=${limit}`,
