@@ -597,11 +597,15 @@ function observedInvocation(jsonPath) {
 // `prisma.config.ts` and `docker-compose.prod.yml`, which
 // `test/deploy-bind.contract.spec.ts` reads by path — still binds.
 //
-// Adding a prefix here is a change to what this evidence attests. It is
+// Adding an entry here is a change to what this evidence attests. It is
 // reviewable as a diff line because the resolved list is recorded INTO the
 // evidence document (`supplementalGit.excludedPrefixes`) and pinned by
-// `test/mutation-evidence.spec.ts`, which also refuses a prefix that matches
-// no tracked path and a prefix that would swallow a path the battery reads.
+// `test/mutation-evidence.spec.ts`, which also refuses an entry that matches
+// no tracked path and an entry that would swallow a path the battery reads.
+// Matching (see `matchesEvidenceScopeExclusion`): an entry ending in `/` is a
+// repository-root prefix; every other entry is an exact repository-relative
+// path. `README.md` must not exclude `README.md.bak`; `docs/` excludes
+// `docs/x.md`.
 const EVIDENCE_SCOPE_EXCLUSIONS = Object.freeze([
   // CI configuration and the vendored graph-admission bundle. What the battery
   // runs ON is pinned separately and by value — `tools` and
@@ -617,7 +621,8 @@ const EVIDENCE_SCOPE_EXCLUSIONS = Object.freeze([
   'apps/web/',
   // Human-facing documentation. Issue #57 measured that editing SECURITY.md
   // invalidated assembly.validator.ts evidence — provenance text the battery
-  // never opens. README.md and docs/ are the same class.
+  // never opens. README.md and docs/ are the same class. Exact file names only
+  // (not README.md.bak / SECURITY.mdx); docs/ is the directory prefix.
   'README.md',
   'SECURITY.md',
   'docs/',
@@ -629,6 +634,11 @@ const EVIDENCE_SCOPE_EXCLUSIONS = Object.freeze([
   'receipts/',
 ].sort());
 
+function matchesEvidenceScopeExclusion(file, exclusion) {
+  if (exclusion.endsWith('/')) return file.startsWith(exclusion);
+  return file === exclusion;
+}
+
 function gitSupplement(repoRoot = REPO_ROOT, evidencePath = 'apps/api/test/assembly/mutation-results.json') {
   // A commit id cannot be embedded in a file contained by that commit: adding
   // the id changes the commit again. It is also unstable after a squash merge.
@@ -636,7 +646,7 @@ function gitSupplement(repoRoot = REPO_ROOT, evidencePath = 'apps/api/test/assem
   // current tracked bytes (including staged new files) and deliberately omits
   // this evidence file, avoiding self-reference while remaining identical in
   // the generation worktree, a clean PR checkout, and the eventual main tree.
-  // It also omits the declared out-of-scope prefixes above.
+  // It also omits the declared out-of-scope entries above.
   const indexed = spawnSync('git', ['write-tree'], {
     cwd: repoRoot,
     encoding: 'utf8',
@@ -667,10 +677,18 @@ function gitSupplement(repoRoot = REPO_ROOT, evidencePath = 'apps/api/test/assem
     run(['read-tree', indexed.stdout.trim()]);
     run(['add', '-u', '--', '.']);
     run(['rm', '--cached', '-f', '--ignore-unmatch', '--', evidencePath]);
-    // -r: each entry is a whole subtree. --ignore-unmatch keeps a prefix that
-    // matches nothing from throwing here; the spec is what refuses it, with a
-    // message that says which prefix went dead.
-    run(['rm', '--cached', '-r', '-f', '--ignore-unmatch', '--', ...EVIDENCE_SCOPE_EXCLUSIONS]);
+    // Exact file entries first (no -r): pathspec must not behave like a
+    // startsWith. Directory prefixes (trailing `/`) use -r for the subtree.
+    // --ignore-unmatch keeps a dead entry from throwing here; the spec refuses
+    // it, naming which entry went dead.
+    const exactFiles = EVIDENCE_SCOPE_EXCLUSIONS.filter((entry) => !entry.endsWith('/'));
+    const dirPrefixes = EVIDENCE_SCOPE_EXCLUSIONS.filter((entry) => entry.endsWith('/'));
+    if (exactFiles.length > 0) {
+      run(['rm', '--cached', '-f', '--ignore-unmatch', '--', ...exactFiles]);
+    }
+    if (dirPrefixes.length > 0) {
+      run(['rm', '--cached', '-r', '-f', '--ignore-unmatch', '--', ...dirPrefixes]);
+    }
     const tree = run(['write-tree']);
     const emptyTree = run(['hash-object', '-w', '-t', 'tree', '--stdin'], { input: '' });
     // Raw recursive diff is a compact Git-native manifest of mode/path/blob
@@ -1123,6 +1141,7 @@ export {
   enumerateSites,
   gitSupplement,
   EVIDENCE_SCOPE_EXCLUSIONS,
+  matchesEvidenceScopeExclusion,
   recordedOutcomeMatches,
   toolchainCompatibility,
 };
