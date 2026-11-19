@@ -24,12 +24,8 @@ Receipt sources (both supported, both reported):
     a) files in the pull-request head tree matching `--receipt-glob` (default the caller's
        `receipts/graph/**` and `receipts/**/change-admission-*.json`);
     b) a fenced ```json block in the PR body whose `schema` starts with `ChangeAdmissionReceipt`.
-    The PR body is read from a FILE (`--pr-body-file`). The reusable workflow writes that file from
-    `$GITHUB_EVENT_PATH` and never places body bytes in an environment variable or argv payload —
-    a large body previously crashed the job with E2BIG / "Argument list too long". A PR body is
-    attacker-controlled text. Until every caller pins a program SHA that includes the event-file
-    path, the interim workaround remains valid: commit the CAR in-tree under `receipts/graph/` and
-    keep the PR body short (the gate accepts a receipt in the head tree).
+    The PR body is read from a FILE (the workflow passes it through an environment variable and a
+    file, never through a shell interpolation) — a PR body is attacker-controlled text.
 
 stdlib only (Python 3.12), deterministic, no network.
 """
@@ -57,21 +53,15 @@ BUNDLE_FILES = [
     # The finished-stage publisher is part of the pinned Program bundle so external callers
     # can run the same producer without a Program checkout in their workspace.
     "tools/ci/stage_userpath.py",
-    # DEC-AUP-0191: host/job-log evidence retention replaces actions/upload-artifact in the
-    # reusable workflow; callers need the same script inside the signed bundle.
-    "tools/ci/retain_evidence.py",
     "governance/decisions/DEC-AUP-0167.md",
     "tools/graph/full_suite_ci.py",
     "tools/graph/shell_source.py",
     "tools/graph/shell_workflow.py",
-    # build_graph.py imports go_source at module scope for the bounded Go extractor.
-    "tools/graph/go_source.py",
     "tools/graph/admit_change.py",
     # The StageEvidence validator reads this committed contract relative to the bundle root.
     # Without it, a vendored admission tool cannot validate the explicit finished-stage input.
     "contracts/graph-verified-change/stage-evidence.v1.json",
     "tools/graph/schema_check.py",
-    "tools/graph/receipt_data.py",  # native verifier/gate dependency; genuine source bytes travel with bundle
     "tools/graph/build_graph.py",
     # build_graph.py imports this at module scope to add declared source-input edges.
     # Keep the parser beside the builder in every exported caller bundle.
@@ -121,11 +111,6 @@ BUNDLE_FILES = [
     # Found by importing every bundled module from a directory that contains nothing else — a
     # static import scan missed it, and so did testing one entry point by hand.
     "tools/graph/canary_evidence.py",
-    "tools/graph/environment_obligations.py",
-    "tools/graph/environment_obligations.cjs",
-    "tools/graph/package.json",
-    "tools/graph/pnpm-lock.yaml",
-    "tools/graph/tsconfig.json",
     "tools/graph/process_observation.py",
     # AUP-GRAPH-006:gate2b — the SSHSIG/Ed25519 verifier. It must travel with the bundle: the gate
     # verifies the bundle's signature before trusting anything in it, and a verifier the caller does
@@ -583,21 +568,8 @@ def changed_files(repo: Path, base: str, head: str) -> list[str]:
     return [l for l in out.splitlines() if l]
 
 
-def _dependency_manifest_predicate():
-    """The single definition lives in schema_check (same bundle directory); load it by exact sibling path."""
-    path = Path(__file__).resolve().with_name("schema_check.py")
-    spec = importlib.util.spec_from_file_location("_ci_gate_dep_manifest_schema_check", path)
-    if spec is None or spec.loader is None:
-        raise RuntimeError("schema_check.py is not loadable beside ci_gate.py")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module.is_python_dependency_manifest
-
-
 def is_doc_only(paths: list[str], globs: list[str]) -> bool:
-    # DEC-AUP-0188: a dependency manifest is measured by the fallback suite; no doc glob may reclassify it.
-    manifest = _dependency_manifest_predicate()
-    return bool(paths) and all(any(fnmatch.fnmatch(p, g) for g in globs) and not manifest(p) for p in paths)
+    return bool(paths) and all(any(fnmatch.fnmatch(p, g) for g in globs) for p in paths)
 
 
 def receipts_from_body(body: str, workdir: Path) -> list[Path]:
@@ -1587,10 +1559,7 @@ def validate_candidate_dependency_setup(manifest: dict, repo_path: str | Path,
 
     The manifest is caller-supplied data, never a command source. This function checks its exact
     policy, subject, range, package scope and seven Git/blob/content pins, then returns only the
-    fixed pnpm operations supported by this profile (frozen install with scripts disabled, the
-    @muneral/types build, then `pnpm exec prisma generate` — the Auth dependency-setup shape —
-    because ignore-scripts would otherwise leave @prisma/client ungenerated for apps/api
-    type_check). Its JSON shape is exactly
+    fixed pnpm operations supported by this profile. Its JSON shape is exactly
     {schema, policy, repository, base, head, working_directory, scope, files}; each files value is
     {blob_oid, sha256, bytes}. The workflow is responsible for executing those literal operations
     after this function succeeds.
@@ -1722,14 +1691,9 @@ def validate_candidate_dependency_setup(manifest: dict, repo_path: str | Path,
         "package_manager": root_package["packageManager"],
         "node_version": root_package["engines"]["node"],
         "files": checked_files,
-        # `--ignore-scripts` skips prisma postinstall. Auth's dependency setup therefore runs
-        # `pnpm exec prisma generate` after the frozen install; Muneral must do the same or
-        # apps/api type_check fails with a flood of missing `@prisma/client` exports
-        # (measured: muneral#444 CURRENT_CANDIDATE_PRODUCER_FAILED).
         "argv": [["pnpm", "install", "--frozen-lockfile", "--ignore-scripts",
                   "--ignore-pnpmfile"],
-                 ["pnpm", "--filter", "@muneral/types", "build"],
-                 ["pnpm", "exec", "prisma", "generate"]],
+                 ["pnpm", "--filter", "@muneral/types", "build"]],
     }
 
 
@@ -1927,11 +1891,7 @@ AUTH_DEPENDENCY_SETUP_UNCHANGED = (
     "vendor/arcanada-access-contracts-dac7c5ede606698b10c2c5edd0c07ff21a798f83.tgz",
 )
 AUTH_DEPENDENCY_SETUP_REPO = "Arcanada-one/auth-arcana"
-AUTH_DEPENDENCY_SETUP_NODE_VERSIONS = ("24.22.1", "24.22.2", "24.22.3")
-# DEC-AUP-0190: .nvmrc is the one file of AUTH_DEPENDENCY_SETUP_UNCHANGED a candidate range may change,
-# and only UPWARD between two exact members of AUTH_DEPENDENCY_SETUP_NODE_VERSIONS (see _auth_exact_node_pin).
-# The tuple is therefore ordered oldest to newest; append a newer version, never insert or reorder.
-AUTH_DEPENDENCY_SETUP_NODE_PIN_FILE = ".nvmrc"
+AUTH_DEPENDENCY_SETUP_NODE_VERSIONS = ("24.22.1", "24.22.2")
 AUTH_DEPENDENCY_SETUP_VITE_VERSIONS = ("6.4.4", "6.4.5")
 AUTH_DEPENDENCY_SETUP_PNPM = "10.30.3"
 AUTH_DEPENDENCY_SETUP_REGISTRY = "https://registry.npmjs.org/"
@@ -1982,23 +1942,6 @@ def _candidate_setup_blob_oid(repo: Path, revision: str, relative: str) -> str:
     return oid
 
 
-def _auth_exact_node_pin(raw: bytes) -> int | None:
-    """Return the position in AUTH_DEPENDENCY_SETUP_NODE_VERSIONS of the version a .nvmrc names, only
-    when its bytes are exactly the version or the version plus one newline. Anything else (extra text,
-    whitespace, a range, a prefix, an empty file) is None."""
-    for position, version in enumerate(AUTH_DEPENDENCY_SETUP_NODE_VERSIONS):
-        if raw in (version.encode("ascii"), version.encode("ascii") + b"\n"):
-            return position
-    return None
-
-
-def _auth_node_pin_moves_up(base_raw: bytes, head_raw: bytes) -> bool:
-    """True only when both .nvmrc byte strings are exact allowlisted pins and the head pin is strictly
-    newer than the base pin (a downgrade or a byte-only rewrite of the same version is not an upgrade)."""
-    base_pos, head_pos = _auth_exact_node_pin(base_raw), _auth_exact_node_pin(head_raw)
-    return base_pos is not None and head_pos is not None and head_pos > base_pos
-
-
 def validate_candidate_auth_dependency_setup(repo_path: str | Path, repository: str,
                                             base: str, head: str) -> dict:
     """Validate exact Auth dependency inputs and return fixed, non-executing setup argv."""
@@ -2039,12 +1982,6 @@ def validate_candidate_auth_dependency_setup(repo_path: str | Path, repository: 
                 raise ValueError("Auth project npm configuration is not a regular committed file")
             _candidate_setup_git(repo, "diff", "--quiet", head, "--", relative)
         if base_oid != head_oid:
-            if (relative == AUTH_DEPENDENCY_SETUP_NODE_PIN_FILE
-                    and _auth_node_pin_moves_up(_candidate_setup_blob(repo, base, relative)[1],
-                                                source[relative])):
-                # DEC-AUP-0190: allowlisted Node pin to a newer allowlisted Node pin. Skips only this
-                # oid comparison; the head pin is still checked against the allowlist further below.
-                continue
             raise ValueError(f"Auth dependency policy source changed in candidate range: {relative}")
 
     try:
