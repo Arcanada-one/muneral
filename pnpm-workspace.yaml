@@ -78,6 +78,14 @@ overrides:
   baseline-browser-mapping: ">=2.11.0"
   # GHSA-3f6p-5ww8-9rcr: auth-plugin downgrade leaking plaintext credentials.
   mysql2: ">=3.22.0"
+  # GHSA-7589-6fvf-x4pw (high, ReDoS in Schema.TemplateLiteral; published 2026-11-19):
+  # effect <=3.22.0 is vulnerable, 3.22.1 patches. The only dependant is
+  # prisma > @prisma/config@7.10.1, which pins effect 3.20.0 exactly, and no released
+  # 7.x requires a patched effect (7.10.1 is the newest stable; prisma 8 is a
+  # prerelease). Floored at the patched version and capped below effect 4. REMOVE this
+  # rule when a released @prisma/config (bump prisma, @prisma/client, @prisma/adapter-pg
+  # and @prisma/config together) depends on effect >=3.22.1 itself.
+  effect: ">=3.22.1 <4"
   # GHSA-x5fp-wj9c-mxmx / GHSA-4mjr-xmp4-gh2g: bracket-key comma-parsing array-limit
   # bypass and isBuffer-controlled DoS.
   qs: ">=6.16.0"
