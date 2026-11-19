@@ -73,9 +73,13 @@ export function readTaskPage(value: unknown) {
     throw new Error('Tasks response is unavailable: invalid pagination');
   return { data: page.items, total: page.total, limit: page.limit, page: page.offset / page.limit + 1 };
 }
+/** Equals apps/api QueryTaskActivityDto TASK_ACTIVITY_MAX_LIMIT (@Max). */
+export const TASK_ACTIVITY_MAX_LIMIT = 500;
+
 export function readActivity(value: unknown) {
-  return read(z.object({ data: z.array(activity), total: z.number().int().nonnegative(),
-    page: z.number().int().positive(), limit: z.number().int().positive() }), value, 'Activity');
+  // Cap equals server TASK_ACTIVITY_MAX_LIMIT; web page default remains 20.
+  return read(z.object({ data: z.array(activity).max(TASK_ACTIVITY_MAX_LIMIT), total: z.number().int().nonnegative(),
+    page: z.number().int().positive(), limit: z.number().int().positive().max(TASK_ACTIVITY_MAX_LIMIT) }), value, 'Activity');
 }
 export function uniqueSlug<T extends { slug: string }>(rows: T[], slug: string, label: string): T {
   const matches = rows.filter(row => row.slug === slug);

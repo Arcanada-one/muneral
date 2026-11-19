@@ -35,6 +35,10 @@ import { CreateTaskDto } from './dto/create-task.dto.js';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto.js';
 import { UpdateTaskMetadataDto } from './dto/update-task-metadata.dto.js';
 import { QueryTasksDto } from './dto/query-tasks.dto.js';
+import {
+  QueryTaskActivityDto,
+  TASK_ACTIVITY_DEFAULT_LIMIT,
+} from './dto/query-task-activity.dto.js';
 import { QueryWorkspaceDigestDto } from './dto/query-workspace-digest.dto.js';
 import { QueryWorkspaceDigestTransitionsDto } from './dto/query-workspace-digest-transitions.dto.js';
 import {
@@ -837,13 +841,12 @@ export class TasksController {
   getActivity(
     @Param('taskId') taskId: string,
     @Req() req: AuthRequest,
-    @Query('page') page = '1',
-    @Query('limit') limit = '20',
+    @Query() query: QueryTaskActivityDto,
   ) {
     return this.tasksService.getActivity(
       taskId,
-      parseInt(page, 10),
-      parseInt(limit, 10),
+      query.page ?? 1,
+      query.limit ?? TASK_ACTIVITY_DEFAULT_LIMIT,
       req.actor.type === 'human' ? req.actor.id : undefined,
     );
   }
