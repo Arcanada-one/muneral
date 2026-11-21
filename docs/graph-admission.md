@@ -49,6 +49,12 @@ hash by hand from a failing diff.
 2. **Issue the ChangeAdmissionReceipt/v1 on that range.** Run `verify.py --diff <base>..<content head> --graph auto
    --work-item <ID>` from the pinned program tools. Put the output under `receipts/graph/`, or in the pull-request body
    as a ```json block.
+
+   When the paired graph has zero impact and the verifier raises `EMPTY_IMPACT_REQUIRES_EXPLANATION`, the author may
+   supply one separate, explicit JSON block in the pull-request description tagged `EmptyImpactExplanation/v1`.
+   The caller forwards only that block to the pinned verifier's existing `empty_impact_explanation` input. The
+   verifier still checks the claim's exact base, head and paired graph digests; an absent, malformed or stale claim
+   does not skip or satisfy the admission gate.
 3. **Commit the receipt.**
 4. **Rebind the mutation evidence again — into the receipt commit, with `git commit --amend`.** The receipt file
    feeds the tracked-tree hash, so the rebind of step 1 is stale the moment the receipt lands, and a *new* commit
