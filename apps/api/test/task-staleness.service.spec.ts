@@ -137,6 +137,12 @@ describe('TaskStalenessService', () => {
       expect((await evaluateAge(30 * 60_000 + 1_000, 30 * 60_000)).reason).toBe(
         'running 30m 1s, over the 30m threshold',
       );
+      expect((await evaluateAge(HOUR, 30 * 60_000)).reason).toBe(
+        'running 1h, over the 30m threshold',
+      );
+      expect((await evaluateAge(90 * 60_000, HOUR)).reason).toBe(
+        'running 1h 30m, over the 1h threshold',
+      );
       expect((await evaluateAge(4, 3.6)).reason).toBe('running 4ms, over the 3.6ms threshold');
       expect((await evaluateAge(1_200_001, 20 * 60_000)).reason).toBe(
         'running 20m 1ms, over the 20m threshold',
