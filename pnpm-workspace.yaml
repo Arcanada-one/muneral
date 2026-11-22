@@ -78,6 +78,10 @@ overrides:
   baseline-browser-mapping: ">=2.11.0"
   # GHSA-3f6p-5ww8-9rcr: auth-plugin downgrade leaking plaintext credentials.
   mysql2: ">=3.22.0"
+  # GHSA-7589-6fvf-x4pw: ReDoS in Schema.TemplateLiteral; effect <=3.22.0 is
+  # vulnerable and 3.22.1 is patched. @prisma/config pins an older effect, so
+  # keep the workspace floor until Prisma publishes a compatible release.
+  effect: ">=3.22.1 <4"
   # GHSA-x5fp-wj9c-mxmx / GHSA-4mjr-xmp4-gh2g / GHSA-6pq8-jhm2-2vcw:
   # array-limit bypass, isBuffer-controlled DoS, and comma-format TypeError.
   qs: ">=6.16.1"

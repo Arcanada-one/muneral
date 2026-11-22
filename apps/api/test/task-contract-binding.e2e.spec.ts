@@ -117,22 +117,38 @@ describe('Task contract CAS binding (af868172, real PostgreSQL)', () => {
     return etag ? request.set('If-None-Match', etag) : request;
   };
 
-  it('invalidates the native conditional GET on bind, rebind and clear', async () => {
-    const id = await create();
-    let previous = await conditionalGet(id).expect(200);
+  async function assertConditionalEtagInvalidation(
+    initialContractDigest: string | null,
+    nextContractDigest: string | null,
+  ) {
+    const id = (await createWithKey({ contractDigest: initialContractDigest }).expect(201)).body.id as string;
+    const previous = await conditionalGet(id).expect(200);
     expect(previous.headers.etag).toBeDefined();
     await conditionalGet(id, previous.headers.etag).expect(304);
-    for (const [expectedContractDigest, contractDigest] of [
-      [null, DIGEST_A], [DIGEST_A, DIGEST_B], [DIGEST_B, null],
-    ]) {
-      await patch(id, { contractDigest, expectedContractDigest }).expect(200);
-      const current = await conditionalGet(id, previous.headers.etag).expect(200);
-      expect(current.body.contractDigest).toBe(contractDigest);
-      expect(current.headers.etag).toBeDefined();
-      expect(current.headers.etag).not.toBe(previous.headers.etag);
-      await conditionalGet(id, current.headers.etag).expect(304);
-      previous = current;
-    }
+    await patch(id, {
+      contractDigest: nextContractDigest,
+      expectedContractDigest: initialContractDigest,
+    }).expect(200);
+    const current = await conditionalGet(id, previous.headers.etag).expect(200);
+    expect(current.body.contractDigest).toBe(nextContractDigest);
+    expect(current.headers.etag).toBeDefined();
+    expect(current.headers.etag).not.toBe(previous.headers.etag);
+    await conditionalGet(id, current.headers.etag).expect(304);
+  }
+
+  // Each HTTP request verifies a production-cost bcrypt API key (12 rounds).
+  // Separate callbacks preserve the same authenticated path while keeping each
+  // transition within Jest's 5-second per-test default.
+  it('invalidates the native conditional GET on first bind', async () => {
+    await assertConditionalEtagInvalidation(null, DIGEST_A);
+  });
+
+  it('invalidates the native conditional GET on rebind', async () => {
+    await assertConditionalEtagInvalidation(DIGEST_A, DIGEST_B);
+  });
+
+  it('invalidates the native conditional GET on clear', async () => {
+    await assertConditionalEtagInvalidation(DIGEST_B, null);
   });
 
   it('invalidates the native conditional GET when project custody changes with the same digest', async () => {
