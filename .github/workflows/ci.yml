@@ -347,7 +347,7 @@ jobs:
           if-no-files-found: warn
 
   # Muneral 7fbbccbe. The Program's current-candidate regime binds the hosted gate to this exact base..head and to the
-  # fixed MUN API Prisma setup profile (pnpm-frozen-api-prisma-typecheck/v1): the caller hands over a CallerDependencySetup/v1
+  # fixed MUN dependency-setup profile (pnpm-frozen-web-typecheck/v1): the caller hands over a CallerDependencySetup/v1
   # manifest (repository, base, head, and blob_oid/sha256/bytes of seven fixed source files). It names no command,
   # script, registry or path; the Program validates it against git and builds nothing from it. It is computed here,
   # per pull request, because base and head change with every push.
@@ -387,9 +387,9 @@ jobs:
               raw = subprocess.run(["git", "show", f"{head}:{rel}"], check=True, capture_output=True).stdout
               oid = subprocess.run(["git", "rev-parse", f"{head}:{rel}"], check=True, capture_output=True, text=True).stdout.strip()
               pins[rel] = {"blob_oid": oid, "sha256": hashlib.sha256(raw).hexdigest(), "bytes": len(raw)}
-          manifest = {"schema": "CallerDependencySetup/v1", "policy": "pnpm-frozen-api-prisma-typecheck/v1",
+          manifest = {"schema": "CallerDependencySetup/v1", "policy": "pnpm-frozen-web-typecheck/v1",
                       "repository": repository, "base": base, "head": head, "working_directory": ".",
-                      "scope": "apps/api", "files": pins}
+                      "scope": "apps/web", "files": pins}
           print("manifest=" + json.dumps(manifest, sort_keys=True, separators=(",", ":")))
           PY
       - name: Read the explicit EmptyImpactExplanation/v1 claim
@@ -482,7 +482,7 @@ jobs:
     with:
       # Default in graph-admission.yml is also ci-general; caller still pins explicitly.
       runs_on: "ci-general"
-      program_ref: '4dbf8a682d94ef43a174051f58c9aa8a1b6ba5a6'
+      program_ref: 'cdbf3b4e4920a68f08136dca510a0b0c8d2dbec5'
       stage_evidence_path: ''
       stage_evidence_root: ''
       stage_evidence_required: false
