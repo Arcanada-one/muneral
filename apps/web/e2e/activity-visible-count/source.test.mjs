@@ -18,6 +18,16 @@ test('the pinned Node runtime exposes its built-in WebSocket client', () => {
   assert.equal(typeof WebSocket, 'function');
 });
 
+test('initial page warmup does not relax per-scenario bounds', async () => {
+  assert.equal(driver.STEP_TIMEOUT_MS, 15_000);
+  assert.equal(driver.INITIAL_PAGE_TIMEOUT_MS, 60_000);
+  assert.ok(driver.INITIAL_PAGE_TIMEOUT_MS <= driver.FIXTURE_TIMEOUT_MS);
+  const source = await readFile(path.join(fixtureDirectory, 'run.mjs'), 'utf8');
+  assert.match(source, /warmup:\s*\{[\s\S]*clientFiles:/);
+  assert.match(source, /prewarmFixtureModules\(state\)/);
+  assert.match(source, /waitForBodyText\(state\.cdp,[\s\S]*'Activity Log', INITIAL_PAGE_TIMEOUT_MS\)/);
+});
+
 test('only same-origin GETs for Vite and the bounded fixture source tree are allowed', () => {
   assert.equal(driver.isAllowedFixtureRequest(`${origin}/`, 'GET', origin, appRoot, repoRoot), true);
   assert.equal(driver.isAllowedFixtureRequest(`${origin}/@vite/client`, 'GET', origin, appRoot, repoRoot), true);
