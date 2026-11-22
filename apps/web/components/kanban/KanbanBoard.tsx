@@ -112,14 +112,19 @@ export function KanbanBoard({ projectId, wsSlug, projSlug }: KanbanBoardProps) {
     }
   }, [projSlug, visibleTasks, viewToken, wsSlug]);
 
-  // Status-change error feedback is scoped to the current project visit: a new scope object
-  // is created per projectId; a layout effect advances the current-scope ref on change, so an
-  // error recorded under an earlier scope is no longer shown (cleared by derivation, which
-  // avoids setState inside an effect); the per-call error handler re-checks the same scope
-  // object so late errors after a project change are suppressed.
+  // Status-change errors belong to one project visit and one move attempt. Clear existing
+  // feedback on project changes; individual mutation promises check the scope again because
+  // an earlier request can fail after the user has moved to another project.
   const statusScope = useMemo(() => ({ projectId }), [projectId]);
+  const [statusError, setStatusError] = useState<{ attempt: number } | null>(null);
+  const [renderedStatusScope, setRenderedStatusScope] = useState(statusScope);
+  if (renderedStatusScope !== statusScope) {
+    setRenderedStatusScope(statusScope);
+    setStatusError(null);
+  }
   const currentStatusScopeRef = useRef<object>(statusScope);
-  const [statusError, setStatusError] = useState<{ scope: object } | null>(null);
+  const moveAttemptRef = useRef(0);
+  const [currentMoveAttempt, setCurrentMoveAttempt] = useState(0);
 
   useLayoutEffect(() => {
     currentStatusScopeRef.current = statusScope;
@@ -128,21 +133,19 @@ export function KanbanBoard({ projectId, wsSlug, projSlug }: KanbanBoardProps) {
   const changeStatus = useCallback(
     (taskId: string, status: TaskStatus) => {
       const scope = statusScope;
+      const attempt = moveAttemptRef.current + 1;
+      moveAttemptRef.current = attempt;
+      setCurrentMoveAttempt(attempt);
       setStatusError(null);
-      updateStatus.mutate(
-        { taskId, status },
-        {
-          onError: () => {
-            if (currentStatusScopeRef.current === scope) {
-              setStatusError({ scope });
-            }
-          },
-        },
-      );
+      void updateStatus.mutateAsync({ taskId, status }).catch(() => {
+        if (currentStatusScopeRef.current === scope && moveAttemptRef.current === attempt) {
+          setStatusError({ attempt });
+        }
+      });
     },
     [statusScope, updateStatus],
   );
-  const currentStatusError = statusError?.scope === statusScope ? statusError : null;
+  const currentStatusError = statusError?.attempt === currentMoveAttempt ? statusError : null;
 
   const currentCopyFeedback = copyFeedback?.viewToken === viewToken ? copyFeedback : null;
   const copyIsPending = currentCopyFeedback?.status === 'pending';
