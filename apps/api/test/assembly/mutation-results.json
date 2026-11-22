@@ -22,7 +22,7 @@
   },
   "binding": {
     "algorithm": "sha256",
-    "aggregateSha256": "b339cc5ef3d1a84ee20510138be838a239a55521ac96c9ea4cafda7e96fd3a5c",
+    "aggregateSha256": "afb631d030f5fd89e10f7c30fc1c33401bef41d6b42b1f8fdbf28ebb75a2f319",
     "files": [
       {
         "path": "apps/api/package.json",
@@ -238,7 +238,7 @@
       },
       {
         "path": "apps/api/test/assembly/mutation-harness.js",
-        "sha256": "8c28bc75a92c6d4ff5fde80e6791986a45979ffa7767dfaf62f9da0988d3ff04"
+        "sha256": "bafc4919bea021d9fa611079b914ae6c4ff7d06a23f0d58671c2f7673c7648e8"
       },
       {
         "path": "apps/api/test/assembly/mutation-sites.json",
@@ -250,7 +250,7 @@
       },
       {
         "path": "apps/api/test/mutation-evidence.spec.ts",
-        "sha256": "0621c127b42a4b5b32be9c16e2d49ccdd7e4c83fb77a5c5fb824244089f961aa"
+        "sha256": "649d28e5652baaa28dd72a91d2936e7fce4b83dedb537ea454264022eeb6587b"
       },
       {
         "path": "apps/api/tsconfig.json",
@@ -273,11 +273,14 @@
   "supplementalGit": {
     "excludedPrefixes": [
       ".github/",
+      "README.md",
+      "SECURITY.md",
       "apps/web/",
+      "docs/",
       "receipts/"
     ],
-    "trackedTreeWithoutEvidence": "8968808bb0401acdd25f6cca77338d89834a50f8",
-    "trackedSnapshotDiffSha256": "c8123d6dfff294c0127b955d835e956d860d24c100496b1b1accb9f4d489a08d"
+    "trackedTreeWithoutEvidence": "1f84e1a1e502d5e0a33631566feb6bc81630f23f",
+    "trackedSnapshotDiffSha256": "5c6293b7e1216f45f770a80327eb630c85b7117f2ddc8816f20fc439f284e77e"
   },
   "baseline": {
     "outcome": "SURVIVED",

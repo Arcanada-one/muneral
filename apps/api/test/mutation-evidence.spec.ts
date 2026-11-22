@@ -145,6 +145,12 @@ describe('Assembly mutation evidence verification', () => {
       'receipts/graph/change-admission.json',
       '.github/workflows/ci.yml',
       'apps/web/app/page.tsx',
+      'SECURITY.md',
+      'SECURITY.mdx',
+      'README.md',
+      'README.md.bak',
+      'docs/how-to/example.md',
+      'docs/x.md',
     ]) {
       fs.mkdirSync(path.join(root, path.dirname(file)), { recursive: true });
       fs.writeFileSync(path.join(root, file), `${file}\n`);
@@ -158,19 +164,33 @@ describe('Assembly mutation evidence verification', () => {
   }
 
   it('declares its excluded prefixes in the evidence it records', () => {
-    expect(harness.EVIDENCE_SCOPE_EXCLUSIONS).toEqual(['.github/', 'apps/web/', 'receipts/']);
+    expect(harness.EVIDENCE_SCOPE_EXCLUSIONS).toEqual([
+      '.github/',
+      'README.md',
+      'SECURITY.md',
+      'apps/web/',
+      'docs/',
+      'receipts/',
+    ]);
     expect(original.supplementalGit.excludedPrefixes).toEqual([...harness.EVIDENCE_SCOPE_EXCLUSIONS]);
     // Every declared exclusion must still match tracked paths in THIS repository.
-    // A prefix that matches nothing is a scope entry someone forgot to delete,
-    // and a silent scope is how this drifts.
+    // An entry that matches nothing is a scope entry someone forgot to delete,
+    // and a silent scope is how this drifts. File entries are exact; only
+    // entries ending in `/` are prefixes (so README.md does not claim README.md.bak).
     const tracked = git(path.resolve(API_ROOT, '..', '..'), ['ls-files']).split('\n');
-    for (const prefix of harness.EVIDENCE_SCOPE_EXCLUSIONS) {
-      expect(tracked.some((file) => file.startsWith(prefix))).toBe(true);
+    for (const exclusion of harness.EVIDENCE_SCOPE_EXCLUSIONS) {
+      expect(
+        tracked.some((file) => harness.matchesEvidenceScopeExclusion(file, exclusion)),
+      ).toBe(true);
     }
+    // Near-names must not satisfy the file entries; directory children must.
+    expect(harness.matchesEvidenceScopeExclusion('README.md.bak', 'README.md')).toBe(false);
+    expect(harness.matchesEvidenceScopeExclusion('SECURITY.mdx', 'SECURITY.md')).toBe(false);
+    expect(harness.matchesEvidenceScopeExclusion('docs/x.md', 'docs/')).toBe(true);
     // ...and none of them may swallow a path the battery actually reads.
-    for (const prefix of harness.EVIDENCE_SCOPE_EXCLUSIONS) {
+    for (const exclusion of harness.EVIDENCE_SCOPE_EXCLUSIONS) {
       for (const bound of ['apps/api/', 'packages/', 'pnpm-lock.yaml', 'package.json']) {
-        expect(bound.startsWith(prefix)).toBe(false);
+        expect(harness.matchesEvidenceScopeExclusion(bound, exclusion)).toBe(false);
       }
     }
   });
@@ -183,6 +203,11 @@ describe('Assembly mutation evidence verification', () => {
       'receipts/graph/change-admission.json',
       '.github/workflows/ci.yml',
       'apps/web/app/page.tsx',
+      // Issue #57: SECURITY.md must not invalidate assembly evidence.
+      'SECURITY.md',
+      'README.md',
+      'docs/how-to/example.md',
+      'docs/x.md',
     ]) {
       fs.appendFileSync(path.join(repo, unrelated), 'a merge landed on main\n');
     }
@@ -198,6 +223,9 @@ describe('Assembly mutation evidence verification', () => {
       'apps/api/src/assembly/assembly.compiler.ts',
       'pnpm-lock.yaml',
       'docker-compose.prod.yml',
+      // Exact-match exclusions must not swallow near-names: these stay in scope.
+      'README.md.bak',
+      'SECURITY.mdx',
     ]) {
       const probe = path.join(repo, bound);
       const pristine = fs.readFileSync(probe);
