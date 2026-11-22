@@ -276,7 +276,7 @@ jobs:
         continue-on-error: true
         run: |
           mkdir -p reports
-          pnpm --filter @muneral/web exec vitest run --maxWorkers=2 --reporter=json --outputFile ../../reports/vitest.json
+          pnpm --filter @muneral/web exec vitest run --reporter=json --outputFile ../../reports/vitest.json
       - name: Verify structure machine report
         id: verify_structure
         if: needs.tested-tree.outputs.reuse != 'true'
