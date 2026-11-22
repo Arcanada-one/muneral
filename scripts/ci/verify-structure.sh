@@ -3,7 +3,7 @@
 # stdout (caller redirects to reports/verify-structure.txt). Exit 0 only when
 # every required path exists. BATCH-005 may replace this with a richer collector.
 set -eu
-ROOT="$(CDPATH= cd -- "$(dirname "$0")/../.." && pwd)"
+ROOT="$(CDPATH='' cd -- "$(dirname "$0")/../.." && pwd)"
 cd -- "$ROOT"
 required=(
   apps/api/package.json
