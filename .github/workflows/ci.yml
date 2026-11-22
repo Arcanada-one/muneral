@@ -350,7 +350,8 @@ jobs:
   # fixed MUN API Prisma setup profile (pnpm-frozen-api-prisma-typecheck/v1): the caller hands over a CallerDependencySetup/v1
   # manifest (repository, base, head, and blob_oid/sha256/bytes of seven fixed source files). It names no command,
   # script, registry or path; the Program validates it against git and builds nothing from it. It is computed here,
-  # per pull request, because base and head change with every push.
+  # per pull request, because base and head change with every push. The signed workflow then runs the validated
+  # API profile's fixed frozen install and Prisma generation plan; caller data cannot add operations.
   graph-admission-setup:
     if: >-
       github.event_name == 'pull_request' &&
