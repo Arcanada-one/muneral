@@ -119,6 +119,7 @@ export function KanbanBoard({ projectId, wsSlug, projSlug }: KanbanBoardProps) {
   // object so late errors after a project change are suppressed.
   const statusScope = useMemo(() => ({ projectId }), [projectId]);
   const currentStatusScopeRef = useRef<object>(statusScope);
+  const moveAttemptRef = useRef(0);
   const [statusError, setStatusError] = useState<{ scope: object } | null>(null);
 
   useLayoutEffect(() => {
@@ -128,12 +129,13 @@ export function KanbanBoard({ projectId, wsSlug, projSlug }: KanbanBoardProps) {
   const changeStatus = useCallback(
     (taskId: string, status: TaskStatus) => {
       const scope = statusScope;
+      const attempt = ++moveAttemptRef.current;
       setStatusError(null);
       updateStatus.mutate(
         { taskId, status },
         {
           onError: () => {
-            if (currentStatusScopeRef.current === scope) {
+            if (currentStatusScopeRef.current === scope && moveAttemptRef.current === attempt) {
               setStatusError({ scope });
             }
           },
