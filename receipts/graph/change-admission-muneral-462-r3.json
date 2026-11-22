@@ -1,0 +1,4369 @@
+{
+ "admission": {
+  "rule": "admitted requires every verdict = verified; failed without exemption ⇒ refused; not_measured without exemption ⇒ paused_safe; exemptions (owner + expiry) are attached by the admitting agent, never by the verifier (DEC-AUP-0008, matrix P1/P4)",
+  "structural_exclusion_rule": "DEC-AUP-0034: an affected entity is NOT verdict-owing when all three hold — the verifier matrix declares neither a mandatory nor a selectable verifier for its node type (so the only verdict it could ever carry states a property of the MATRIX, not of this change), the change set does not contain it, and its bytes are identical at base and head. Each one is listed in structural_exclusions with the content hash at both revisions that proves the byte-identity, and impact_pair.receipt_problems re-derives that proof from Git rather than believing the receipt.",
+  "superseded_self_rule": "DEC-AUP-0035: the entity a receipt can never verify is the PREVIOUS VERSION OF ITSELF. When a receipt is re-issued at the same path for the same work item — the ordinary case after a rebase or a second commit on a card — the copy of it standing in the tree is superseded by construction: this run is the measurement that replaces it, so the only verdict it could carry is I14 `not_measured` about a document that no longer exists at that path once the run finishes. It is excluded with the work item and the output path that identify it, both re-derived from Git by impact_pair.receipt_problems, never asserted.",
+  "verdict": "paused_safe"
+ },
+ "captured_at_utc": "2026-11-22T20:51:19Z",
+ "change_set": {
+  "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+  "files": [
+   {
+    "kind": "config",
+    "path": ".github/graph-admission/BUNDLE.json",
+    "status": "M",
+    "uncovered": true
+   },
+   {
+    "kind": "config",
+    "path": ".github/graph-admission/BUNDLE.json.sig",
+    "status": "M",
+    "uncovered": true
+   },
+   {
+    "kind": "config",
+    "path": ".github/graph-admission/contracts/graph-verified-change/change-admission-receipt.v1.json",
+    "status": "M",
+    "uncovered": true
+   },
+   {
+    "kind": "config",
+    "path": ".github/graph-admission/contracts/graph-verified-change/verifier-matrix.v1.json",
+    "status": "M",
+    "uncovered": true
+   },
+   {
+    "kind": "config",
+    "node_id": "code_unit:.github/graph-admission/tools/ci/retain_evidence.py",
+    "node_ids": [
+     "code_unit:.github/graph-admission/tools/ci/retain_evidence.py"
+    ],
+    "path": ".github/graph-admission/tools/ci/retain_evidence.py",
+    "status": "A"
+   },
+   {
+    "kind": "config",
+    "node_id": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+    "node_ids": [
+     "code_unit:.github/graph-admission/tools/graph/admit_change.py"
+    ],
+    "path": ".github/graph-admission/tools/graph/admit_change.py",
+    "status": "M"
+   },
+   {
+    "kind": "config",
+    "node_id": "code_unit:.github/graph-admission/tools/graph/build_graph.py",
+    "node_ids": [
+     "code_unit:.github/graph-admission/tools/graph/build_graph.py"
+    ],
+    "path": ".github/graph-admission/tools/graph/build_graph.py",
+    "status": "M"
+   },
+   {
+    "kind": "config",
+    "node_id": "code_unit:.github/graph-admission/tools/graph/ci_gate.py",
+    "node_ids": [
+     "code_unit:.github/graph-admission/tools/graph/ci_gate.py"
+    ],
+    "path": ".github/graph-admission/tools/graph/ci_gate.py",
+    "status": "M"
+   },
+   {
+    "kind": "config",
+    "node_id": "code_unit:.github/graph-admission/tools/graph/contract_diff.py",
+    "node_ids": [
+     "code_unit:.github/graph-admission/tools/graph/contract_diff.py"
+    ],
+    "path": ".github/graph-admission/tools/graph/contract_diff.py",
+    "status": "M"
+   },
+   {
+    "kind": "code",
+    "node_id": "code_unit:.github/graph-admission/tools/graph/environment_obligations.cjs",
+    "node_ids": [
+     "code_unit:.github/graph-admission/tools/graph/environment_obligations.cjs"
+    ],
+    "path": ".github/graph-admission/tools/graph/environment_obligations.cjs",
+    "status": "A"
+   },
+   {
+    "kind": "config",
+    "node_id": "code_unit:.github/graph-admission/tools/graph/environment_obligations.py",
+    "node_ids": [
+     "code_unit:.github/graph-admission/tools/graph/environment_obligations.py"
+    ],
+    "path": ".github/graph-admission/tools/graph/environment_obligations.py",
+    "status": "A"
+   },
+   {
+    "kind": "config",
+    "node_id": "code_unit:.github/graph-admission/tools/graph/fixture_contracts.py",
+    "node_ids": [
+     "code_unit:.github/graph-admission/tools/graph/fixture_contracts.py"
+    ],
+    "path": ".github/graph-admission/tools/graph/fixture_contracts.py",
+    "status": "M"
+   },
+   {
+    "kind": "config",
+    "node_id": "code_unit:.github/graph-admission/tools/graph/full_suite_ci.py",
+    "node_ids": [
+     "code_unit:.github/graph-admission/tools/graph/full_suite_ci.py"
+    ],
+    "path": ".github/graph-admission/tools/graph/full_suite_ci.py",
+    "status": "M"
+   },
+   {
+    "kind": "config",
+    "node_id": "code_unit:.github/graph-admission/tools/graph/go_source.py",
+    "node_ids": [
+     "code_unit:.github/graph-admission/tools/graph/go_source.py"
+    ],
+    "path": ".github/graph-admission/tools/graph/go_source.py",
+    "status": "A"
+   },
+   {
+    "kind": "config",
+    "node_id": "code_unit:.github/graph-admission/tools/graph/impact.py",
+    "node_ids": [
+     "code_unit:.github/graph-admission/tools/graph/impact.py"
+    ],
+    "path": ".github/graph-admission/tools/graph/impact.py",
+    "status": "M"
+   },
+   {
+    "kind": "config",
+    "node_id": "code_unit:.github/graph-admission/tools/graph/impact_pair.py",
+    "node_ids": [
+     "code_unit:.github/graph-admission/tools/graph/impact_pair.py"
+    ],
+    "path": ".github/graph-admission/tools/graph/impact_pair.py",
+    "status": "M"
+   },
+   {
+    "kind": "config",
+    "node_id": "code_unit:.github/graph-admission/tools/graph/metadata_contract_proof.py",
+    "node_ids": [
+     "code_unit:.github/graph-admission/tools/graph/metadata_contract_proof.py"
+    ],
+    "path": ".github/graph-admission/tools/graph/metadata_contract_proof.py",
+    "status": "M"
+   },
+   {
+    "kind": "config",
+    "node_id": "code_unit:.github/graph-admission/tools/graph/nest_bootstrap.py",
+    "node_ids": [
+     "code_unit:.github/graph-admission/tools/graph/nest_bootstrap.py"
+    ],
+    "path": ".github/graph-admission/tools/graph/nest_bootstrap.py",
+    "status": "M"
+   },
+   {
+    "kind": "config",
+    "node_id": "code_unit:.github/graph-admission/tools/graph/environment_obligations.cjs",
+    "node_ids": [
+     "code_unit:.github/graph-admission/tools/graph/environment_obligations.cjs",
+     "code_unit:.github/graph-admission/tools/graph/inline_nest_harness.cjs",
+     "code_unit:.github/graph-admission/tools/graph/metadata_contract_observer.cjs"
+    ],
+    "path": ".github/graph-admission/tools/graph/package.json",
+    "scoped_fallback": ".github/graph-admission/tools/graph/package.json changed ⇒ existing TS/JS units beneath .github/graph-admission/tools/graph are rechecked; no runtime deployable inferred",
+    "status": "A"
+   },
+   {
+    "kind": "config",
+    "node_id": "code_unit:.github/graph-admission/tools/graph/environment_obligations.cjs",
+    "node_ids": [
+     "code_unit:.github/graph-admission/tools/graph/environment_obligations.cjs",
+     "code_unit:.github/graph-admission/tools/graph/inline_nest_harness.cjs",
+     "code_unit:.github/graph-admission/tools/graph/metadata_contract_observer.cjs"
+    ],
+    "path": ".github/graph-admission/tools/graph/pnpm-lock.yaml",
+    "scoped_fallback": ".github/graph-admission/tools/graph/pnpm-lock.yaml changed ⇒ existing TS/JS units beneath .github/graph-admission/tools/graph are rechecked; no runtime deployable inferred",
+    "status": "A"
+   },
+   {
+    "kind": "config",
+    "node_id": "code_unit:.github/graph-admission/tools/graph/python_contracts.py",
+    "node_ids": [
+     "code_unit:.github/graph-admission/tools/graph/python_contracts.py"
+    ],
+    "path": ".github/graph-admission/tools/graph/python_contracts.py",
+    "status": "M"
+   },
+   {
+    "kind": "config",
+    "node_id": "code_unit:.github/graph-admission/tools/graph/receipt_data.py",
+    "node_ids": [
+     "code_unit:.github/graph-admission/tools/graph/receipt_data.py"
+    ],
+    "path": ".github/graph-admission/tools/graph/receipt_data.py",
+    "status": "A"
+   },
+   {
+    "kind": "config",
+    "node_id": "code_unit:.github/graph-admission/tools/graph/schema_check.py",
+    "node_ids": [
+     "code_unit:.github/graph-admission/tools/graph/schema_check.py"
+    ],
+    "path": ".github/graph-admission/tools/graph/schema_check.py",
+    "status": "M"
+   },
+   {
+    "kind": "config",
+    "node_id": "code_unit:.github/graph-admission/tools/graph/environment_obligations.cjs",
+    "node_ids": [
+     "code_unit:.github/graph-admission/tools/graph/environment_obligations.cjs",
+     "code_unit:.github/graph-admission/tools/graph/inline_nest_harness.cjs",
+     "code_unit:.github/graph-admission/tools/graph/metadata_contract_observer.cjs"
+    ],
+    "path": ".github/graph-admission/tools/graph/tsconfig.json",
+    "scoped_fallback": ".github/graph-admission/tools/graph/tsconfig.json changed ⇒ existing TS/JS units beneath .github/graph-admission/tools/graph are rechecked; no runtime deployable inferred",
+    "status": "A"
+   },
+   {
+    "kind": "config",
+    "node_id": "code_unit:.github/graph-admission/tools/graph/verify.py",
+    "node_ids": [
+     "code_unit:.github/graph-admission/tools/graph/verify.py"
+    ],
+    "path": ".github/graph-admission/tools/graph/verify.py",
+    "status": "M"
+   },
+   {
+    "kind": "config",
+    "node_id": "code_unit:.github/workflows/ci.yml",
+    "node_ids": [
+     "code_unit:.github/workflows/ci.yml"
+    ],
+    "path": ".github/workflows/ci.yml",
+    "status": "M"
+   },
+   {
+    "kind": "config",
+    "node_id": "code_unit:.github/workflows/graph-admission.yml",
+    "node_ids": [
+     "code_unit:.github/workflows/graph-admission.yml"
+    ],
+    "path": ".github/workflows/graph-admission.yml",
+    "status": "M"
+   },
+   {
+    "kind": "test",
+    "path": "apps/api/test/assembly/mutation-results.json",
+    "status": "M",
+    "uncovered": true
+   },
+   {
+    "kind": "other",
+    "node_id": "code_unit:scripts/ci/candidate_dependency_setup.py",
+    "node_ids": [
+     "code_unit:scripts/ci/candidate_dependency_setup.py"
+    ],
+    "path": "scripts/ci/candidate_dependency_setup.py",
+    "status": "A"
+   },
+   {
+    "kind": "other",
+    "node_id": "code_unit:scripts/ci/test_candidate_dependency_setup.py",
+    "node_ids": [
+     "code_unit:scripts/ci/test_candidate_dependency_setup.py"
+    ],
+    "path": "scripts/ci/test_candidate_dependency_setup.py",
+    "status": "A"
+   }
+  ],
+  "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+  "mode": "diff"
+ },
+ "decision_ref": "DEC-AUP-0008",
+ "exemptions": [],
+ "graph": {
+  "builder_version": "1.0.7",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:01b633faebb973cd89ab921e99f8c3f553c1388683e632275a0b7380061e161a",
+  "path": "/home/dev/aup/claude-work/fin-w2-rev-core/tmp/muneral-462-r3-verifier-out/graph-de8efac4062a.json",
+  "source_commit": "de8efac4062a4e0752a88675c8dd2a0775c0839d"
+ },
+ "head_graph": {
+  "builder_version": "1.0.7",
+  "built_at_utc": "2026-09-05T00:00:00Z",
+  "graph_digest": "sha256:f2210738bed8be29c6a184fedcbf2d92e781e2f3ecb50282d0c24f5114784001",
+  "path": "/home/dev/aup/claude-work/fin-w2-rev-core/tmp/muneral-462-r3-verifier-out/graph-head-edab4093ae9d.json",
+  "source_commit": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+  "staleness": {
+   "checked_at_utc": "2026-11-22T20:52:47Z",
+   "checked_nodes": 785,
+   "method": "manifest.dirty must be false; manifest.source_commit == change_set.head; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at head (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+   "mismatched_nodes": [],
+   "verdict": "fresh"
+  }
+ },
+ "host": "arcana-devs",
+ "impact_set": {
+  "deterministic_core": [
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:.github/graph-admission/tools/graph/ci_selection.py",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "imports",
+      "from": "code_unit:.github/graph-admission/tools/graph/ci_selection.py",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/impact.py",
+      "via": "python-import"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "document:README.md",
+    "node_type": "document",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "document:docs/how-to/activate-muneral-web.md",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     },
+     {
+      "edge_type": "documents",
+      "from": "document:README.md",
+      "provenance": "deterministic",
+      "to": "document:docs/how-to/activate-muneral-web.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "document:SECURITY.md",
+    "node_type": "document",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "document:SECURITY.md",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "document:docs/graph-admission.md",
+    "node_type": "document",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "document:docs/graph-admission.md",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "document:docs/how-to/activate-muneral-web.md",
+    "node_type": "document",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "document:docs/how-to/activate-muneral-web.md",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "document:receipts/canary/mun-hyg-pin-ci-20261112/RESULT.md",
+    "node_type": "document",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "document:receipts/canary/mun-hyg-pin-ci-20261112/RESULT.md",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "document:receipts/canary/mun-jest-pin-ci-20261112/RESULT.md",
+    "node_type": "document",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "document:receipts/canary/mun-jest-pin-ci-20261112/RESULT.md",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-pr332-25ce824.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-pr332-25ce824.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-step-reuse-51952b46.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-step-reuse-51952b46.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/A2-330-muneral-canary.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/A2-330-muneral-canary.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/A2-384-deploy-gate-lane.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/A2-384-deploy-gate-lane.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/a2-304-dependabot-group.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/a2-304-dependabot-group.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "document:docs/graph-admission.md",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/a2-320-web-eslint10.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/a2-320-web-eslint10.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/bundle-refresh-8681292.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/bundle-refresh-8681292.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-2f8218a2-description-disclosure.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-2f8218a2-description-disclosure.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-56aebac8-checklist-completed-filter.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-56aebac8-checklist-completed-filter.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/verify.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "document:docs/graph-admission.md",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "document:docs/graph-admission.md",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-a2275-20260924T172252Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "document:docs/graph-admission.md",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-a2275-20260924T172252Z.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "document:docs/graph-admission.md",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-batch-407fb312-diagnostic8c-20261102.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-batch-407fb312-diagnostic8c-20261102.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-batch004-pr342-88d4c506.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-batch004-pr342-88d4c506.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-bundle-46cbdc0-a2-291c.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-bundle-46cbdc0-a2-291c.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-bundle-515c-20261003.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-bundle-515c-20261003.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-bundle-5fde907.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-bundle-5fde907.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-bundle-966bcf3.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-bundle-966bcf3.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-bundle-a81a6d5.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-bundle-a81a6d5.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-ci-pr-concurrency-454a9f0.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-ci-pr-concurrency-454a9f0.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-full-test-20261021T211916Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "document:docs/graph-admission.md",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-full-test-20261021T211916Z.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-gateorder0-proof-20260914T172339Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "document:docs/graph-admission.md",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-gateorder0-proof-20260914T172339Z.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-infra0417-muneral-20260916T100801Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-infra0417-muneral-20260916T100801Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-integration-batch1.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-integration-batch1.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-kcp-0023-bundle-refresh.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-kcp-0023-bundle-refresh.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-mun-0078-eb68735.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun-0078-eb68735.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-mun-0079-33ceaca.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun-0079-33ceaca.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-mun-0080-ac5-7737515.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun-0080-ac5-7737515.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-mun-0081-ac5-1daea868.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun-0081-ac5-1daea868.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-mun-0084-web-deploy-pra-umask-48583d4.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "document:docs/how-to/activate-muneral-web.md",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun-0084-web-deploy-pra-umask-48583d4.json",
+      "provenance": "deterministic",
+      "to": "document:docs/how-to/activate-muneral-web.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-mun-artifacts-1f99-8f4d7a5.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun-artifacts-1f99-8f4d7a5.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-mun-artifacts-1f99-d3bf2a2.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun-artifacts-1f99-d3bf2a2.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-mun0053-revert-override-20260914T150343Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun0053-revert-override-20260914T150343Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "document:docs/graph-admission.md",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "documents",
+      "from": "document:docs/graph-admission.md",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json",
+      "provenance": "deterministic",
+      "to": "document:docs/graph-admission.md",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-pr331-grantread-67bc.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-pr331-grantread-67bc.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/ctl-bundle-refresh-20260925.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/ctl-bundle-refresh-20260925.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/mun-hyg-pin-ci-canary-349d209.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/mun-hyg-pin-ci-canary-349d209.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/mun-jest-pin-scripts-canary-502e363.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/mun-jest-pin-scripts-canary-502e363.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/pin-repair-muneral-20261007.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/pin-repair-muneral-20261007.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "receipt:receipts/graph/pin-repair-muneral213r2-20261007.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/pin-repair-muneral213r2-20261007.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   }
+  ],
+  "edge_types": "all",
+  "global_fallback": {
+   "triggered": false
+  },
+  "inferred_tail": [
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:.github/workflows/activity-visible-count-browser.yml",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "calls",
+      "from": "code_unit:scripts/ci/verify-structure.sh",
+      "inferred_by": "bounded-shell-unknown-cwd-candidate",
+      "provenance": "inferred",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "literal-shell-reference"
+     },
+     {
+      "edge_type": "calls",
+      "from": "code_unit:.github/workflows/activity-visible-count-browser.yml",
+      "inferred_by": "bounded-workflow-unknown-shell-candidate",
+      "provenance": "inferred",
+      "to": "code_unit:scripts/ci/verify-structure.sh",
+      "via": "unresolved-workflow-shell-closure"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check of the caller; canary when inferred across a boundary"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:.github/workflows/dependabot-auto-merge.yml",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "calls",
+      "from": "code_unit:scripts/ci/verify-structure.sh",
+      "inferred_by": "bounded-shell-unknown-cwd-candidate",
+      "provenance": "inferred",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "literal-shell-reference"
+     },
+     {
+      "edge_type": "calls",
+      "from": "code_unit:.github/workflows/dependabot-auto-merge.yml",
+      "inferred_by": "bounded-workflow-unknown-shell-candidate",
+      "provenance": "inferred",
+      "to": "code_unit:scripts/ci/verify-structure.sh",
+      "via": "unresolved-workflow-shell-closure"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check of the caller; canary when inferred across a boundary"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:.github/workflows/regenerate-derived-artefacts.yml",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "calls",
+      "from": "code_unit:scripts/ci/verify-structure.sh",
+      "inferred_by": "bounded-shell-unknown-cwd-candidate",
+      "provenance": "inferred",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "literal-shell-reference"
+     },
+     {
+      "edge_type": "calls",
+      "from": "code_unit:.github/workflows/regenerate-derived-artefacts.yml",
+      "inferred_by": "bounded-workflow-unknown-shell-candidate",
+      "provenance": "inferred",
+      "to": "code_unit:scripts/ci/verify-structure.sh",
+      "via": "unresolved-workflow-shell-closure"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check of the caller; canary when inferred across a boundary"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 2,
+    "entity": "code_unit:.github/workflows/repository-destination-browser.yml",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "calls",
+      "from": "code_unit:scripts/ci/verify-structure.sh",
+      "inferred_by": "bounded-shell-unknown-cwd-candidate",
+      "provenance": "inferred",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "literal-shell-reference"
+     },
+     {
+      "edge_type": "calls",
+      "from": "code_unit:.github/workflows/repository-destination-browser.yml",
+      "inferred_by": "bounded-workflow-unknown-shell-candidate",
+      "provenance": "inferred",
+      "to": "code_unit:scripts/ci/verify-structure.sh",
+      "via": "unresolved-workflow-shell-closure"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check of the caller; canary when inferred across a boundary"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 3,
+    "entity": "code_unit:scripts/ci/regenerate-derived-base-facts.test.sh",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "calls",
+      "from": "code_unit:scripts/ci/verify-structure.sh",
+      "inferred_by": "bounded-shell-unknown-cwd-candidate",
+      "provenance": "inferred",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "literal-shell-reference"
+     },
+     {
+      "edge_type": "calls",
+      "from": "code_unit:.github/workflows/regenerate-derived-artefacts.yml",
+      "inferred_by": "bounded-workflow-unknown-shell-candidate",
+      "provenance": "inferred",
+      "to": "code_unit:scripts/ci/verify-structure.sh",
+      "via": "unresolved-workflow-shell-closure"
+     },
+     {
+      "edge_type": "imports",
+      "from": "code_unit:scripts/ci/regenerate-derived-base-facts.test.sh",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/regenerate-derived-artefacts.yml",
+      "via": "literal-shell-data-read"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check / compile of the importer"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 1,
+    "entity": "code_unit:scripts/ci/verify-structure.sh",
+    "node_type": "code_unit",
+    "path": [
+     {
+      "edge_type": "calls",
+      "from": "code_unit:scripts/ci/verify-structure.sh",
+      "inferred_by": "bounded-shell-unknown-cwd-candidate",
+      "provenance": "inferred",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "literal-shell-reference"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "type-check of the caller; canary when inferred across a boundary"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 3,
+    "entity": "document:docs/how-to/agent-status-transition-discipline.md",
+    "node_type": "document",
+    "path": [
+     {
+      "edge_type": "calls",
+      "from": "code_unit:scripts/ci/verify-structure.sh",
+      "inferred_by": "bounded-shell-unknown-cwd-candidate",
+      "provenance": "inferred",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "literal-shell-reference"
+     },
+     {
+      "edge_type": "calls",
+      "from": "code_unit:.github/workflows/dependabot-auto-merge.yml",
+      "inferred_by": "bounded-workflow-unknown-shell-candidate",
+      "provenance": "inferred",
+      "to": "code_unit:scripts/ci/verify-structure.sh",
+      "via": "unresolved-workflow-shell-closure"
+     },
+     {
+      "edge_type": "documents",
+      "from": "document:docs/how-to/agent-status-transition-discipline.md",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/dependabot-auto-merge.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 3,
+    "entity": "document:receipts/canary/mun-hyg-regen-derived-artefacts-20261112/RESULT.md",
+    "node_type": "document",
+    "path": [
+     {
+      "edge_type": "calls",
+      "from": "code_unit:scripts/ci/verify-structure.sh",
+      "inferred_by": "bounded-shell-unknown-cwd-candidate",
+      "provenance": "inferred",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "literal-shell-reference"
+     },
+     {
+      "edge_type": "calls",
+      "from": "code_unit:.github/workflows/regenerate-derived-artefacts.yml",
+      "inferred_by": "bounded-workflow-unknown-shell-candidate",
+      "provenance": "inferred",
+      "to": "code_unit:scripts/ci/verify-structure.sh",
+      "via": "unresolved-workflow-shell-closure"
+     },
+     {
+      "edge_type": "documents",
+      "from": "document:receipts/canary/mun-hyg-regen-derived-artefacts-20261112/RESULT.md",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/regenerate-derived-artefacts.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "doc reference check (path/id still resolves)"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 3,
+    "entity": "receipt:receipts/graph/car-verify-20261102T145742Z-a753f831.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "calls",
+      "from": "code_unit:scripts/ci/verify-structure.sh",
+      "inferred_by": "bounded-shell-unknown-cwd-candidate",
+      "provenance": "inferred",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "literal-shell-reference"
+     },
+     {
+      "edge_type": "calls",
+      "from": "code_unit:.github/workflows/activity-visible-count-browser.yml",
+      "inferred_by": "bounded-workflow-unknown-shell-candidate",
+      "provenance": "inferred",
+      "to": "code_unit:scripts/ci/verify-structure.sh",
+      "via": "unresolved-workflow-shell-closure"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/car-verify-20261102T145742Z-a753f831.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/activity-visible-count-browser.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   },
+   {
+    "boundary": "intra_unit",
+    "depth": 3,
+    "entity": "receipt:receipts/graph/car-verify-mun-hyg-327-repository-destination.json",
+    "node_type": "receipt",
+    "path": [
+     {
+      "edge_type": "calls",
+      "from": "code_unit:scripts/ci/verify-structure.sh",
+      "inferred_by": "bounded-shell-unknown-cwd-candidate",
+      "provenance": "inferred",
+      "to": "code_unit:.github/workflows/ci.yml",
+      "via": "literal-shell-reference"
+     },
+     {
+      "edge_type": "calls",
+      "from": "code_unit:.github/workflows/repository-destination-browser.yml",
+      "inferred_by": "bounded-workflow-unknown-shell-candidate",
+      "provenance": "inferred",
+      "to": "code_unit:scripts/ci/verify-structure.sh",
+      "via": "unresolved-workflow-shell-closure"
+     },
+     {
+      "edge_type": "verifies",
+      "from": "receipt:receipts/graph/car-verify-mun-hyg-327-repository-destination.json",
+      "provenance": "deterministic",
+      "to": "code_unit:.github/workflows/repository-destination-browser.yml",
+      "via": "explicit-path"
+     }
+    ],
+    "revisions": [
+     "base",
+     "head"
+    ],
+    "verifier_hint": "selectable: run the targeted test / re-read the receipt"
+   }
+  ],
+  "max_depth": 3,
+  "method": "Union of independently revision-bound base/head traversals; reverse traversal (dependents) + forward declared-by hops (provides_route, implements_contract, maps_model of the same file, deploys_to); best path = fewest inferred/observed hops, then shortest; max_depth 3",
+  "total": 74
+ },
+ "notes": [
+  "DRAFT produced by `arcana verify` (tools/graph/verify.py 1.4.2) from matrix contracts/graph-verified-change/verifier-matrix.v1.json; selection rule: required(entity) = ⋃ edge_types[t].mandatory over the edge types t of the hops that reach the entity in its best path (i…",
+  "profile: .arcana/verify.json at verified head; baseline: (auto-base-freeze: pre-existing findings at base frozen for this run; persist one with --freeze-baseline) (valid); selected: none; disabled: none"
+ ],
+ "producer": {
+  "tool": "tools/graph/verify.py",
+  "version": "1.4.2"
+ },
+ "receipt_id": "car-verify-20261122T205119Z-edab4093",
+ "repo": {
+  "name": "Arcanada-one/muneral",
+  "path": "/home/dev/aup/claude-work/fin-w2-rev-core/clones/muneral-bundle-refresh"
+ },
+ "revision_selection": {
+  "base": [
+   "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+   "code_unit:.github/graph-admission/tools/graph/build_graph.py",
+   "code_unit:.github/graph-admission/tools/graph/ci_gate.py",
+   "code_unit:.github/graph-admission/tools/graph/ci_selection.py",
+   "code_unit:.github/graph-admission/tools/graph/contract_diff.py",
+   "code_unit:.github/graph-admission/tools/graph/fixture_contracts.py",
+   "code_unit:.github/graph-admission/tools/graph/full_suite_ci.py",
+   "code_unit:.github/graph-admission/tools/graph/impact.py",
+   "code_unit:.github/graph-admission/tools/graph/impact_pair.py",
+   "code_unit:.github/graph-admission/tools/graph/inline_nest_harness.cjs",
+   "code_unit:.github/graph-admission/tools/graph/metadata_contract_observer.cjs",
+   "code_unit:.github/graph-admission/tools/graph/metadata_contract_proof.py",
+   "code_unit:.github/graph-admission/tools/graph/nest_bootstrap.py",
+   "code_unit:.github/graph-admission/tools/graph/python_contracts.py",
+   "code_unit:.github/graph-admission/tools/graph/schema_check.py",
+   "code_unit:.github/graph-admission/tools/graph/verify.py",
+   "code_unit:.github/workflows/activity-visible-count-browser.yml",
+   "code_unit:.github/workflows/ci.yml",
+   "code_unit:.github/workflows/dependabot-auto-merge.yml",
+   "code_unit:.github/workflows/graph-admission.yml",
+   "code_unit:.github/workflows/regenerate-derived-artefacts.yml",
+   "code_unit:.github/workflows/repository-destination-browser.yml",
+   "code_unit:scripts/ci/regenerate-derived-base-facts.test.sh",
+   "code_unit:scripts/ci/verify-structure.sh",
+   "document:README.md",
+   "document:SECURITY.md",
+   "document:docs/graph-admission.md",
+   "document:docs/how-to/activate-muneral-web.md",
+   "document:docs/how-to/agent-status-transition-discipline.md",
+   "document:receipts/canary/mun-hyg-pin-ci-20261112/RESULT.md",
+   "document:receipts/canary/mun-hyg-regen-derived-artefacts-20261112/RESULT.md",
+   "document:receipts/canary/mun-jest-pin-ci-20261112/RESULT.md",
+   "receipt:receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-pr332-25ce824.json",
+   "receipt:receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-step-reuse-51952b46.json",
+   "receipt:receipts/graph/A2-330-muneral-canary.json",
+   "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+   "receipt:receipts/graph/A2-384-deploy-gate-lane.json",
+   "receipt:receipts/graph/a2-304-dependabot-group.json",
+   "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json",
+   "receipt:receipts/graph/a2-320-web-eslint10.json",
+   "receipt:receipts/graph/bundle-refresh-8681292.json",
+   "receipt:receipts/graph/car-verify-20261102T145742Z-a753f831.json",
+   "receipt:receipts/graph/car-verify-mun-hyg-327-repository-destination.json",
+   "receipt:receipts/graph/change-admission-2f8218a2-description-disclosure.json",
+   "receipt:receipts/graph/change-admission-56aebac8-checklist-completed-filter.json",
+   "receipt:receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json",
+   "receipt:receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json",
+   "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
+   "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
+   "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json",
+   "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
+   "receipt:receipts/graph/change-admission-a2275-20260924T172252Z.json",
+   "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
+   "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+   "receipt:receipts/graph/change-admission-batch-407fb312-diagnostic8c-20261102.json",
+   "receipt:receipts/graph/change-admission-batch004-pr342-88d4c506.json",
+   "receipt:receipts/graph/change-admission-bundle-46cbdc0-a2-291c.json",
+   "receipt:receipts/graph/change-admission-bundle-515c-20261003.json",
+   "receipt:receipts/graph/change-admission-bundle-5fde907.json",
+   "receipt:receipts/graph/change-admission-bundle-966bcf3.json",
+   "receipt:receipts/graph/change-admission-bundle-a81a6d5.json",
+   "receipt:receipts/graph/change-admission-ci-pr-concurrency-454a9f0.json",
+   "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+   "receipt:receipts/graph/change-admission-full-test-20261021T211916Z.json",
+   "receipt:receipts/graph/change-admission-gateorder0-proof-20260914T172339Z.json",
+   "receipt:receipts/graph/change-admission-infra0417-muneral-20260916T100801Z.json",
+   "receipt:receipts/graph/change-admission-integration-batch1.json",
+   "receipt:receipts/graph/change-admission-kcp-0023-bundle-refresh.json",
+   "receipt:receipts/graph/change-admission-mun-0078-eb68735.json",
+   "receipt:receipts/graph/change-admission-mun-0079-33ceaca.json",
+   "receipt:receipts/graph/change-admission-mun-0080-ac5-7737515.json",
+   "receipt:receipts/graph/change-admission-mun-0081-ac5-1daea868.json",
+   "receipt:receipts/graph/change-admission-mun-0084-web-deploy-pra-umask-48583d4.json",
+   "receipt:receipts/graph/change-admission-mun-artifacts-1f99-8f4d7a5.json",
+   "receipt:receipts/graph/change-admission-mun-artifacts-1f99-d3bf2a2.json",
+   "receipt:receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json",
+   "receipt:receipts/graph/change-admission-mun0053-revert-override-20260914T150343Z.json",
+   "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+   "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json",
+   "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+   "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+   "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json",
+   "receipt:receipts/graph/change-admission-pr331-grantread-67bc.json",
+   "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+   "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+   "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+   "receipt:receipts/graph/ctl-bundle-refresh-20260925.json",
+   "receipt:receipts/graph/mun-hyg-pin-ci-canary-349d209.json",
+   "receipt:receipts/graph/mun-jest-pin-scripts-canary-502e363.json",
+   "receipt:receipts/graph/pin-repair-muneral-20261007.json",
+   "receipt:receipts/graph/pin-repair-muneral213r2-20261007.json"
+  ],
+  "head": [
+   "code_unit:.github/graph-admission/tools/ci/retain_evidence.py",
+   "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+   "code_unit:.github/graph-admission/tools/graph/build_graph.py",
+   "code_unit:.github/graph-admission/tools/graph/ci_gate.py",
+   "code_unit:.github/graph-admission/tools/graph/ci_selection.py",
+   "code_unit:.github/graph-admission/tools/graph/contract_diff.py",
+   "code_unit:.github/graph-admission/tools/graph/environment_obligations.cjs",
+   "code_unit:.github/graph-admission/tools/graph/environment_obligations.py",
+   "code_unit:.github/graph-admission/tools/graph/fixture_contracts.py",
+   "code_unit:.github/graph-admission/tools/graph/full_suite_ci.py",
+   "code_unit:.github/graph-admission/tools/graph/go_source.py",
+   "code_unit:.github/graph-admission/tools/graph/impact.py",
+   "code_unit:.github/graph-admission/tools/graph/impact_pair.py",
+   "code_unit:.github/graph-admission/tools/graph/inline_nest_harness.cjs",
+   "code_unit:.github/graph-admission/tools/graph/metadata_contract_observer.cjs",
+   "code_unit:.github/graph-admission/tools/graph/metadata_contract_proof.py",
+   "code_unit:.github/graph-admission/tools/graph/nest_bootstrap.py",
+   "code_unit:.github/graph-admission/tools/graph/python_contracts.py",
+   "code_unit:.github/graph-admission/tools/graph/receipt_data.py",
+   "code_unit:.github/graph-admission/tools/graph/schema_check.py",
+   "code_unit:.github/graph-admission/tools/graph/verify.py",
+   "code_unit:.github/workflows/activity-visible-count-browser.yml",
+   "code_unit:.github/workflows/ci.yml",
+   "code_unit:.github/workflows/dependabot-auto-merge.yml",
+   "code_unit:.github/workflows/graph-admission.yml",
+   "code_unit:.github/workflows/regenerate-derived-artefacts.yml",
+   "code_unit:.github/workflows/repository-destination-browser.yml",
+   "code_unit:scripts/ci/candidate_dependency_setup.py",
+   "code_unit:scripts/ci/regenerate-derived-base-facts.test.sh",
+   "code_unit:scripts/ci/test_candidate_dependency_setup.py",
+   "code_unit:scripts/ci/verify-structure.sh",
+   "document:README.md",
+   "document:SECURITY.md",
+   "document:docs/graph-admission.md",
+   "document:docs/how-to/activate-muneral-web.md",
+   "document:docs/how-to/agent-status-transition-discipline.md",
+   "document:receipts/canary/mun-hyg-pin-ci-20261112/RESULT.md",
+   "document:receipts/canary/mun-hyg-regen-derived-artefacts-20261112/RESULT.md",
+   "document:receipts/canary/mun-jest-pin-ci-20261112/RESULT.md",
+   "receipt:receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-pr332-25ce824.json",
+   "receipt:receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-step-reuse-51952b46.json",
+   "receipt:receipts/graph/A2-330-muneral-canary.json",
+   "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+   "receipt:receipts/graph/A2-384-deploy-gate-lane.json",
+   "receipt:receipts/graph/a2-304-dependabot-group.json",
+   "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json",
+   "receipt:receipts/graph/a2-320-web-eslint10.json",
+   "receipt:receipts/graph/bundle-refresh-8681292.json",
+   "receipt:receipts/graph/car-verify-20261102T145742Z-a753f831.json",
+   "receipt:receipts/graph/car-verify-mun-hyg-327-repository-destination.json",
+   "receipt:receipts/graph/change-admission-2f8218a2-description-disclosure.json",
+   "receipt:receipts/graph/change-admission-56aebac8-checklist-completed-filter.json",
+   "receipt:receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json",
+   "receipt:receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json",
+   "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
+   "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
+   "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json",
+   "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
+   "receipt:receipts/graph/change-admission-a2275-20260924T172252Z.json",
+   "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
+   "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+   "receipt:receipts/graph/change-admission-batch-407fb312-diagnostic8c-20261102.json",
+   "receipt:receipts/graph/change-admission-batch004-pr342-88d4c506.json",
+   "receipt:receipts/graph/change-admission-bundle-46cbdc0-a2-291c.json",
+   "receipt:receipts/graph/change-admission-bundle-515c-20261003.json",
+   "receipt:receipts/graph/change-admission-bundle-5fde907.json",
+   "receipt:receipts/graph/change-admission-bundle-966bcf3.json",
+   "receipt:receipts/graph/change-admission-bundle-a81a6d5.json",
+   "receipt:receipts/graph/change-admission-ci-pr-concurrency-454a9f0.json",
+   "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+   "receipt:receipts/graph/change-admission-full-test-20261021T211916Z.json",
+   "receipt:receipts/graph/change-admission-gateorder0-proof-20260914T172339Z.json",
+   "receipt:receipts/graph/change-admission-infra0417-muneral-20260916T100801Z.json",
+   "receipt:receipts/graph/change-admission-integration-batch1.json",
+   "receipt:receipts/graph/change-admission-kcp-0023-bundle-refresh.json",
+   "receipt:receipts/graph/change-admission-mun-0078-eb68735.json",
+   "receipt:receipts/graph/change-admission-mun-0079-33ceaca.json",
+   "receipt:receipts/graph/change-admission-mun-0080-ac5-7737515.json",
+   "receipt:receipts/graph/change-admission-mun-0081-ac5-1daea868.json",
+   "receipt:receipts/graph/change-admission-mun-0084-web-deploy-pra-umask-48583d4.json",
+   "receipt:receipts/graph/change-admission-mun-artifacts-1f99-8f4d7a5.json",
+   "receipt:receipts/graph/change-admission-mun-artifacts-1f99-d3bf2a2.json",
+   "receipt:receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json",
+   "receipt:receipts/graph/change-admission-mun0053-revert-override-20260914T150343Z.json",
+   "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+   "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json",
+   "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+   "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+   "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json",
+   "receipt:receipts/graph/change-admission-pr331-grantread-67bc.json",
+   "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+   "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+   "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+   "receipt:receipts/graph/ctl-bundle-refresh-20260925.json",
+   "receipt:receipts/graph/mun-hyg-pin-ci-canary-349d209.json",
+   "receipt:receipts/graph/mun-jest-pin-scripts-canary-502e363.json",
+   "receipt:receipts/graph/pin-repair-muneral-20261007.json",
+   "receipt:receipts/graph/pin-repair-muneral213r2-20261007.json"
+  ],
+  "schema": "RevisionImpactSelection/v1",
+  "unmeasured_head_files": []
+ },
+ "schema": "ChangeAdmissionReceipt/v1",
+ "staleness": {
+  "checked_at_utc": "2026-11-22T20:52:47Z",
+  "method": "manifest.dirty must be false; manifest.source_commit == change_set.base; working tree must be clean (a receipt in diff mode describes committed history only); content_hash of every whole-file node (code_unit, document, receipt; deployable_unit via its package.json) must equal the sha256 of the file bytes at base (git objects); contract/route/data_model hashes are extractor-owned (declaration text) and not recomputed",
+  "mismatched_nodes": [],
+  "verdict": "fresh"
+ },
+ "structural_exclusions": [],
+ "tree": {
+  "commit": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+  "dirty": false
+ },
+ "verdicts": [
+  {
+   "entity": "code_unit:.github/graph-admission/tools/ci/retain_evidence.py",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-canary",
+    "v-config-schema",
+    "v-fitness"
+   ]
+  },
+  {
+   "entity": "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-canary",
+    "v-config-schema",
+    "v-fitness"
+   ]
+  },
+  {
+   "entity": "code_unit:.github/graph-admission/tools/graph/build_graph.py",
+   "reason": "v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness"
+   ]
+  },
+  {
+   "entity": "code_unit:.github/graph-admission/tools/graph/ci_gate.py",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-canary",
+    "v-config-schema",
+    "v-fitness"
+   ]
+  },
+  {
+   "entity": "code_unit:.github/graph-admission/tools/graph/ci_selection.py",
+   "reason": "v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness"
+   ]
+  },
+  {
+   "entity": "code_unit:.github/graph-admission/tools/graph/contract_diff.py",
+   "reason": "v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness"
+   ]
+  },
+  {
+   "entity": "code_unit:.github/graph-admission/tools/graph/environment_obligations.cjs",
+   "reason": "v-type-check-uncovered: COVERAGE_GAP: .github/graph-admission/tools/graph/environment_obligations.cjs lies in no deployable with a TypeScript project and no tsconfig.json exists in its directory, any directory above it, or the root",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-uncovered"
+   ]
+  },
+  {
+   "entity": "code_unit:.github/graph-admission/tools/graph/environment_obligations.py",
+   "reason": "v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness"
+   ]
+  },
+  {
+   "entity": "code_unit:.github/graph-admission/tools/graph/fixture_contracts.py",
+   "reason": "v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness"
+   ]
+  },
+  {
+   "entity": "code_unit:.github/graph-admission/tools/graph/full_suite_ci.py",
+   "reason": "v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness"
+   ]
+  },
+  {
+   "entity": "code_unit:.github/graph-admission/tools/graph/go_source.py",
+   "reason": "v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness"
+   ]
+  },
+  {
+   "entity": "code_unit:.github/graph-admission/tools/graph/impact.py",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-canary",
+    "v-config-schema",
+    "v-fitness"
+   ]
+  },
+  {
+   "entity": "code_unit:.github/graph-admission/tools/graph/impact_pair.py",
+   "reason": "v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness"
+   ]
+  },
+  {
+   "entity": "code_unit:.github/graph-admission/tools/graph/inline_nest_harness.cjs",
+   "reason": "v-type-check-uncovered: COVERAGE_GAP: .github/graph-admission/tools/graph/inline_nest_harness.cjs lies in no deployable with a TypeScript project and no tsconfig.json exists in its directory, any directory above it, or the root",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-uncovered"
+   ]
+  },
+  {
+   "entity": "code_unit:.github/graph-admission/tools/graph/metadata_contract_observer.cjs",
+   "reason": "v-type-check-uncovered: COVERAGE_GAP: .github/graph-admission/tools/graph/metadata_contract_observer.cjs lies in no deployable with a TypeScript project and no tsconfig.json exists in its directory, any directory above it, or the root",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-fitness",
+    "v-type-check-uncovered"
+   ]
+  },
+  {
+   "entity": "code_unit:.github/graph-admission/tools/graph/metadata_contract_proof.py",
+   "reason": "v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness"
+   ]
+  },
+  {
+   "entity": "code_unit:.github/graph-admission/tools/graph/nest_bootstrap.py",
+   "reason": "v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness"
+   ]
+  },
+  {
+   "entity": "code_unit:.github/graph-admission/tools/graph/python_contracts.py",
+   "reason": "v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness"
+   ]
+  },
+  {
+   "entity": "code_unit:.github/graph-admission/tools/graph/receipt_data.py",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-canary",
+    "v-config-schema",
+    "v-fitness"
+   ]
+  },
+  {
+   "entity": "code_unit:.github/graph-admission/tools/graph/schema_check.py",
+   "reason": "v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness"
+   ]
+  },
+  {
+   "entity": "code_unit:.github/graph-admission/tools/graph/verify.py",
+   "reason": "v-canary: INFERRED_BOUNDARY_WITHOUT_CANARY: no canary result lists this entity (matrix P6, observed-edges-and-deploy-gate.v1 rule C1)",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-canary",
+    "v-config-schema",
+    "v-fitness"
+   ]
+  },
+  {
+   "entity": "code_unit:.github/workflows/activity-visible-count-browser.yml",
+   "reason": "v-workflow-config-d217dc9a124356a2: workflow shell caller closure not measured: job activity-visible-count-browser step 3: checkout root or source-affecting workflow environment unresolved; job activity-visible-count-browser step 4: checkout root or source-affecting workflow environment unresolved; job activity-visible-count-browser step 4: line 1: unsupported interpreter script/module/stdin dispatch closure; job activity-visible-count-browser step 5: checkout root or source-affecting workflow environment unresolved; job activity-visible-count-browser step 5: heredoc/group/function/brace expan",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-fitness",
+    "v-workflow-config-d217dc9a124356a2"
+   ]
+  },
+  {
+   "entity": "code_unit:.github/workflows/ci.yml",
+   "reason": "v-workflow-config-b803fcb7f17ed923: workflow configuration not measured: reusable workflow input expression value/type unresolved; 40 workflow shell-caller uncertainty item(s) remain separate from YAML schema validation and are retained in graph closure evidence; v-fitness: no new fitness violation; workflow actionlint NOT_MEASURED: pinned actionlint binary unavailable",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-fitness",
+    "v-workflow-config-b803fcb7f17ed923"
+   ]
+  },
+  {
+   "entity": "code_unit:.github/workflows/dependabot-auto-merge.yml",
+   "reason": "v-workflow-config-2fe48d1021006468: workflow shell caller closure not measured: job auto-merge step 0: opaque input/interpolated workflow source; 1 workflow shell-caller uncertainty item(s) remain separate from YAML schema validation and are retained in graph closure evidence; v-fitness: no new fitness violation; workflow actionlint NOT_MEASURED: pinned actionlint binary unavailable",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-fitness",
+    "v-workflow-config-2fe48d1021006468"
+   ]
+  },
+  {
+   "entity": "code_unit:.github/workflows/graph-admission.yml",
+   "reason": "v-workflow-config-dc49cc771602c92b: workflow shell caller closure not measured: job graph-admission step 10: checkout root or source-affecting workflow environment unresolved; job graph-admission step 10: command/process substitution closure is unresolved; job graph-admission step 11: checkout root or source-affecting workflow environment unresolved; job graph-admission step 11: heredoc/group/function/brace expansion closure is unresolved; job graph-admission step 12: checkout root or source-affecting workflow environment unresolved; job graph-admission step 12: command/process substitution cl",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-fitness",
+    "v-workflow-config-dc49cc771602c92b"
+   ]
+  },
+  {
+   "entity": "code_unit:.github/workflows/regenerate-derived-artefacts.yml",
+   "reason": "v-workflow-config-f2afde09eeffcba0: workflow shell caller closure not measured: job regenerate step 0: command/process substitution closure is unresolved; job regenerate step 2: heredoc/group/function/brace expansion closure is unresolved; job regenerate step 3: command/process substitution closure is unresolved; job regenerate step 4: command/process substitution closure is unresolved; job regenerate step 6: line 6: unsupported interpreter script/module/stdin dispatch closure; job regenerate step 7: line 2: unsupported interpreter script/module/stdin dispatch closure; job regenerate step 8: c",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-fitness",
+    "v-workflow-config-f2afde09eeffcba0"
+   ]
+  },
+  {
+   "entity": "code_unit:.github/workflows/repository-destination-browser.yml",
+   "reason": "v-workflow-config-293d11fa6785da2c: workflow shell caller closure not measured: job repository-destination-browser step 3: checkout root or source-affecting workflow environment unresolved; job repository-destination-browser step 4: checkout root or source-affecting workflow environment unresolved; job repository-destination-browser step 5: checkout root or source-affecting workflow environment unresolved; job repository-destination-browser step 5: heredoc/group/function/brace expansion closure is unresolved; job repository-destination-browser step 6: checkout root or source-affecting workflow",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-fitness",
+    "v-workflow-config-293d11fa6785da2c"
+   ]
+  },
+  {
+   "entity": "code_unit:scripts/ci/candidate_dependency_setup.py",
+   "reason": "v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness"
+   ]
+  },
+  {
+   "entity": "code_unit:scripts/ci/regenerate-derived-base-facts.test.sh",
+   "reason": "v-shell-syntax-0ae469c2efa64051: shell syntax/closure: not_measured; v-shell-behavior-0ae469c2efa64051: SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: line 101: dynamic command/alias/eval; line 109: heredoc data/generation closure not measured; line 123: heredoc data/generation closure not measured; line 135: dynamic command/alias/eval; line 148: heredoc data/generation closure not measured; line 14: directory transition has unresolved execution cwd; line 161: dynamic command/alias/eval; line 24: dynamic load/substitution; line 30: heredoc data/generation closure not measured; line 46: heredoc data/gener",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-fitness",
+    "v-shell-behavior-0ae469c2efa64051",
+    "v-shell-syntax-0ae469c2efa64051"
+   ]
+  },
+  {
+   "entity": "code_unit:scripts/ci/test_candidate_dependency_setup.py",
+   "reason": "v-fitness: no new fitness violation",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-fitness"
+   ]
+  },
+  {
+   "entity": "code_unit:scripts/ci/verify-structure.sh",
+   "reason": "v-shell-syntax-f4341f973b098bca: shell syntax/closure: not_measured; v-shell-behavior-f4341f973b098bca: SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: line 10: relative execution cwd is not declared; line 11: relative execution cwd is not declared; line 12: relative execution cwd is not declared; line 13: relative execution cwd is not declared; line 14: relative execution cwd is not declared; line 15: relative execution cwd is not declared; line 6: directory transition has unresolved execution cwd; line 7: directory transition has unresolved execution cwd; line 9: relative execution cwd is not declared",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-fitness",
+    "v-shell-behavior-f4341f973b098bca",
+    "v-shell-syntax-f4341f973b098bca"
+   ]
+  },
+  {
+   "entity": "document:README.md",
+   "reason": "v-doc-reference: 8 reference(s) resolve at head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-doc-reference"
+   ]
+  },
+  {
+   "entity": "document:SECURITY.md",
+   "reason": "v-doc-reference: 0 reference(s) resolve at head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-doc-reference"
+   ]
+  },
+  {
+   "entity": "document:docs/graph-admission.md",
+   "reason": "v-doc-reference: 4 reference(s) resolve at head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-doc-reference"
+   ]
+  },
+  {
+   "entity": "document:docs/how-to/activate-muneral-web.md",
+   "reason": "v-doc-reference: 3 reference(s) resolve at head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-doc-reference"
+   ]
+  },
+  {
+   "entity": "document:docs/how-to/agent-status-transition-discipline.md",
+   "reason": "v-doc-reference: 4 reference(s) resolve at head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-doc-reference"
+   ]
+  },
+  {
+   "entity": "document:receipts/canary/mun-hyg-pin-ci-20261112/RESULT.md",
+   "reason": "v-doc-reference: 0 reference(s) resolve at head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-doc-reference"
+   ]
+  },
+  {
+   "entity": "document:receipts/canary/mun-hyg-regen-derived-artefacts-20261112/RESULT.md",
+   "reason": "v-doc-reference: 1 reference(s) resolve at head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-doc-reference"
+   ]
+  },
+  {
+   "entity": "document:receipts/canary/mun-jest-pin-ci-20261112/RESULT.md",
+   "reason": "v-doc-reference: 0 reference(s) resolve at head",
+   "verdict": "verified",
+   "verifier_ids": [
+    "v-doc-reference"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-pr332-25ce824.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-step-reuse-51952b46.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/A2-330-muneral-canary.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/A2-384-deploy-gate-lane.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/a2-304-dependabot-group.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/a2-320-web-eslint10.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/bundle-refresh-8681292.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/car-verify-20261102T145742Z-a753f831.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/car-verify-mun-hyg-327-repository-destination.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-2f8218a2-description-disclosure.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-56aebac8-checklist-completed-filter.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-a2275-20260924T172252Z.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-batch-407fb312-diagnostic8c-20261102.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-batch004-pr342-88d4c506.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-bundle-46cbdc0-a2-291c.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-bundle-515c-20261003.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-bundle-5fde907.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-bundle-966bcf3.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-bundle-a81a6d5.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-ci-pr-concurrency-454a9f0.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-full-test-20261021T211916Z.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-gateorder0-proof-20260914T172339Z.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-infra0417-muneral-20260916T100801Z.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-integration-batch1.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-kcp-0023-bundle-refresh.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-mun-0078-eb68735.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-mun-0079-33ceaca.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-mun-0080-ac5-7737515.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-mun-0081-ac5-1daea868.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-mun-0084-web-deploy-pra-umask-48583d4.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-mun-artifacts-1f99-8f4d7a5.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-mun-artifacts-1f99-d3bf2a2.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-mun0053-revert-override-20260914T150343Z.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-pr331-grantread-67bc.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/ctl-bundle-refresh-20260925.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/mun-hyg-pin-ci-canary-349d209.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/mun-jest-pin-scripts-canary-502e363.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/pin-repair-muneral-20261007.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  },
+  {
+   "entity": "receipt:receipts/graph/pin-repair-muneral213r2-20261007.json",
+   "reason": "v-receipt-data: BASE_NATIVE_POLICY_MISSING",
+   "verdict": "not_measured",
+   "verifier_ids": [
+    "v-receipt-data"
+   ]
+  }
+ ],
+ "verifier_selection": {
+  "applied": {},
+  "not_applied": [],
+  "requested": [],
+  "schema": "VerifierSelection/v1"
+ },
+ "verifiers": [
+  {
+   "command": "(none: no compiler project is attributed to these entities)",
+   "duration_s": 0.0,
+   "entities": [
+    "code_unit:.github/graph-admission/tools/graph/environment_obligations.cjs",
+    "code_unit:.github/graph-admission/tools/graph/inline_nest_harness.cjs",
+    "code_unit:.github/graph-admission/tools/graph/metadata_contract_observer.cjs"
+   ],
+   "entity_verdicts": {
+    "code_unit:.github/graph-admission/tools/graph/environment_obligations.cjs": "not_measured",
+    "code_unit:.github/graph-admission/tools/graph/inline_nest_harness.cjs": "not_measured",
+    "code_unit:.github/graph-admission/tools/graph/metadata_contract_observer.cjs": "not_measured"
+   },
+   "exit_code": 127,
+   "id": "v-type-check-uncovered",
+   "kind": "type_check",
+   "output_ref": "/home/dev/aup/claude-work/fin-w2-rev-core/tmp/muneral-462-r3-verifier-out/v-type-check-uncovered.txt",
+   "started_at_utc": "2026-11-22T20:52:58Z",
+   "summary": "not_measured: 3 entity(ies) no tsconfig covers"
+  },
+  {
+   "command": "workflow_config.validate exact head bytes",
+   "duration_s": 0.0,
+   "entities": [
+    "code_unit:.github/workflows/activity-visible-count-browser.yml"
+   ],
+   "entity_verdicts": {
+    "code_unit:.github/workflows/activity-visible-count-browser.yml": "not_measured"
+   },
+   "exit_code": 1,
+   "id": "v-workflow-config-d217dc9a124356a2",
+   "kind": "config_schema",
+   "output_ref": "/home/dev/aup/claude-work/fin-w2-rev-core/tmp/muneral-462-r3-verifier-out/v-workflow-config-d217dc9a124356a2.txt",
+   "started_at_utc": "2026-11-22T20:52:58Z",
+   "summary": "workflow shell caller closure not measured: job activity-visible-count-browser step 3: checkout root or source-affecting workflow environment unresolved; job activity-visible-count-browser step 4: checkout root or source-affecting workflow environment unresolved; job activity-visible-count-browser step 4: line 1: unsupported interpreter script/module/stdin dispatch closure; job activity-visible-count-browser step 5: checkout root or source-affecting workflow environment unresolved; job activity-visible-count-browser step 5: heredoc/group/function/brace expansion closure is unresolved; job activity-visible-count-browser step 6: checkout root or source-affecting workflow environment unresolved; job activity-visible-count-browser step 6: line 3: wrapper execution scope/options unresolved; job activity-visible-count-browser step 7: checkout root or source-affecting workflow environment unresolved; job activity-visible-count-browser step 7: line 2: unsupported interpreter script/module/stdin dispatch closure; job activity-visible-count-browser step 8: checkout root or source-affecting workflow environment unresolved; job activity-visible-count-browser step 8: line 2: unsupported interpreter script/module/stdin dispatch closure; 11 workflow shell-caller uncertainty item(s) remain separate from YAML schema validation and are retained in graph closure evidence"
+  },
+  {
+   "command": "workflow_config.validate exact head bytes",
+   "duration_s": 0.0,
+   "entities": [
+    "code_unit:.github/workflows/ci.yml"
+   ],
+   "entity_verdicts": {
+    "code_unit:.github/workflows/ci.yml": "not_measured"
+   },
+   "exit_code": 1,
+   "id": "v-workflow-config-b803fcb7f17ed923",
+   "kind": "config_schema",
+   "output_ref": "/home/dev/aup/claude-work/fin-w2-rev-core/tmp/muneral-462-r3-verifier-out/v-workflow-config-b803fcb7f17ed923.txt",
+   "started_at_utc": "2026-11-22T20:52:58Z",
+   "summary": "workflow configuration not measured: reusable workflow input expression value/type unresolved; 40 workflow shell-caller uncertainty item(s) remain separate from YAML schema validation and are retained in graph closure evidence"
+  },
+  {
+   "command": "workflow_config.validate exact head bytes",
+   "duration_s": 0.0,
+   "entities": [
+    "code_unit:.github/workflows/dependabot-auto-merge.yml"
+   ],
+   "entity_verdicts": {
+    "code_unit:.github/workflows/dependabot-auto-merge.yml": "not_measured"
+   },
+   "exit_code": 1,
+   "id": "v-workflow-config-2fe48d1021006468",
+   "kind": "config_schema",
+   "output_ref": "/home/dev/aup/claude-work/fin-w2-rev-core/tmp/muneral-462-r3-verifier-out/v-workflow-config-2fe48d1021006468.txt",
+   "started_at_utc": "2026-11-22T20:52:58Z",
+   "summary": "workflow shell caller closure not measured: job auto-merge step 0: opaque input/interpolated workflow source; 1 workflow shell-caller uncertainty item(s) remain separate from YAML schema validation and are retained in graph closure evidence"
+  },
+  {
+   "command": "workflow_config.validate exact head bytes",
+   "duration_s": 0.0,
+   "entities": [
+    "code_unit:.github/workflows/graph-admission.yml"
+   ],
+   "entity_verdicts": {
+    "code_unit:.github/workflows/graph-admission.yml": "not_measured"
+   },
+   "exit_code": 1,
+   "id": "v-workflow-config-dc49cc771602c92b",
+   "kind": "config_schema",
+   "output_ref": "/home/dev/aup/claude-work/fin-w2-rev-core/tmp/muneral-462-r3-verifier-out/v-workflow-config-dc49cc771602c92b.txt",
+   "started_at_utc": "2026-11-22T20:52:58Z",
+   "summary": "workflow shell caller closure not measured: job graph-admission step 10: checkout root or source-affecting workflow environment unresolved; job graph-admission step 10: command/process substitution closure is unresolved; job graph-admission step 11: checkout root or source-affecting workflow environment unresolved; job graph-admission step 11: heredoc/group/function/brace expansion closure is unresolved; job graph-admission step 12: checkout root or source-affecting workflow environment unresolved; job graph-admission step 12: command/process substitution closure is unresolved; job graph-admission step 13: checkout root or source-affecting workflow environment unresolved; job graph-admission step 13: command/process substitution closure is unresolved; job graph-admission step 15: checkout root or source-affecting workflow environment unresolved; job graph-admission step 16: checkout root or source-affecting workflow environment unresolved; job graph-admission step 16: heredoc/group/function/brace expansion closure is unresolved; job graph-admission step 17: checkout root or source-affecting workflow environment unresolved; job graph-admission step 17: command/process substitution closure is unresolved; job graph-admission step 18: checkout root or source-affecting workflow environment unresolved; job graph-admission step 19: checkout root or source-affecting workflow environment unresolved; job graph-admission step 19: heredoc/group/function/brace expansion closure is unresolved; job graph-admission step 1: command/process substitution closure is unresolved; job graph-admission step 22: checkout root or source-affecting workflow environment unresolved; job graph-admission step 22: command/process substitution closure is unresolved; job graph-admission step 23: checkout root or source-affecting workflow environment unresolved; job graph-admission step 23: heredoc/group/function/brace expansion closure is unresolved; job graph-admission step 26: checkout root or source-affecting workflow environment unresolved; job graph-admission step 26: command/process substitution closure is unresolved; job graph-admission step 27: checkout root or source-affecting workflow environment unresolved; job graph-admission step 27: heredoc/group/function/brace expansion closure is unresolved; job graph-admission step 28: checkout root or source-affecting workflow environment unresolved; job graph-admission step 28: line 1: unsupported interpreter script/module/stdin dispatch closure; job graph-admission step 29: checkout root or source-affecting workflow environment unresolved; job graph-admission step 29: command/process substitution closure is unresolved; job graph-admission step 2: command/process substitution closure is unresolved; job graph-admission step 30: checkout root or source-affecting workflow environment unresolved; job graph-admission step 30: heredoc/group/function/brace expansion closure is unresolved; job graph-admission step 31: checkout root or source-affecting workflow environment unresolved; job graph-admission step 31: line 11: unsupported interpreter script/module/stdin dispatch closure; job graph-admission step 32: checkout root or source-affecting workflow environment unresolved; job graph-admission step 32: heredoc/group/function/brace expansion closure is unresolved; job graph-admission step 33: checkout root or source-affecting workflow environment unresolved; job graph-admission step 33: command/process substitution closure is unresolved; job graph-admission step 34: checkout root or source-affecting workflow environment unresolved; job graph-admission step 34: line 4: unsupported interpreter script/module/stdin dispatch closure; job graph-admission step 35: checkout root or source-affecting workflow environment unresolved; job graph-admission step 36: checkout root or source-affecting workflow environment unresolved; job graph-admission step 3: heredoc/group/function/brace expansion closure is unresolved; job graph-admission step 5: line 7: unsupported interpreter script/module/stdin dispatch closure; job graph-admission step 6: command/process substitution closure is unresolved; 45 workflow shell-caller uncertainty item(s) remain separate from YAML schema validation and are retained in graph closure evidence"
+  },
+  {
+   "command": "workflow_config.validate exact head bytes",
+   "duration_s": 0.0,
+   "entities": [
+    "code_unit:.github/workflows/regenerate-derived-artefacts.yml"
+   ],
+   "entity_verdicts": {
+    "code_unit:.github/workflows/regenerate-derived-artefacts.yml": "not_measured"
+   },
+   "exit_code": 1,
+   "id": "v-workflow-config-f2afde09eeffcba0",
+   "kind": "config_schema",
+   "output_ref": "/home/dev/aup/claude-work/fin-w2-rev-core/tmp/muneral-462-r3-verifier-out/v-workflow-config-f2afde09eeffcba0.txt",
+   "started_at_utc": "2026-11-22T20:52:58Z",
+   "summary": "workflow shell caller closure not measured: job regenerate step 0: command/process substitution closure is unresolved; job regenerate step 2: heredoc/group/function/brace expansion closure is unresolved; job regenerate step 3: command/process substitution closure is unresolved; job regenerate step 4: command/process substitution closure is unresolved; job regenerate step 6: line 6: unsupported interpreter script/module/stdin dispatch closure; job regenerate step 7: line 2: unsupported interpreter script/module/stdin dispatch closure; job regenerate step 8: command/process substitution closure is unresolved; 7 workflow shell-caller uncertainty item(s) remain separate from YAML schema validation and are retained in graph closure evidence"
+  },
+  {
+   "command": "workflow_config.validate exact head bytes",
+   "duration_s": 0.0,
+   "entities": [
+    "code_unit:.github/workflows/repository-destination-browser.yml"
+   ],
+   "entity_verdicts": {
+    "code_unit:.github/workflows/repository-destination-browser.yml": "not_measured"
+   },
+   "exit_code": 1,
+   "id": "v-workflow-config-293d11fa6785da2c",
+   "kind": "config_schema",
+   "output_ref": "/home/dev/aup/claude-work/fin-w2-rev-core/tmp/muneral-462-r3-verifier-out/v-workflow-config-293d11fa6785da2c.txt",
+   "started_at_utc": "2026-11-22T20:52:58Z",
+   "summary": "workflow shell caller closure not measured: job repository-destination-browser step 3: checkout root or source-affecting workflow environment unresolved; job repository-destination-browser step 4: checkout root or source-affecting workflow environment unresolved; job repository-destination-browser step 5: checkout root or source-affecting workflow environment unresolved; job repository-destination-browser step 5: heredoc/group/function/brace expansion closure is unresolved; job repository-destination-browser step 6: checkout root or source-affecting workflow environment unresolved; job repository-destination-browser step 6: line 4: wrapper execution scope/options unresolved; job repository-destination-browser step 6: line 8: unsupported interpreter script/module/stdin dispatch closure; job repository-destination-browser step 7: checkout root or source-affecting workflow environment unresolved; job repository-destination-browser step 7: line 2: unsupported interpreter script/module/stdin dispatch closure; 9 workflow shell-caller uncertainty item(s) remain separate from YAML schema validation and are retained in graph closure evidence"
+  },
+  {
+   "command": "verify.py config_schema: keys read at head ⊆ declared keys",
+   "duration_s": 0.73,
+   "entities": [
+    "code_unit:.github/graph-admission/tools/ci/retain_evidence.py",
+    "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+    "code_unit:.github/graph-admission/tools/graph/ci_gate.py",
+    "code_unit:.github/graph-admission/tools/graph/impact.py",
+    "code_unit:.github/graph-admission/tools/graph/receipt_data.py",
+    "code_unit:.github/graph-admission/tools/graph/verify.py"
+   ],
+   "entity_verdicts": {
+    "code_unit:.github/graph-admission/tools/ci/retain_evidence.py": "verified",
+    "code_unit:.github/graph-admission/tools/graph/admit_change.py": "verified",
+    "code_unit:.github/graph-admission/tools/graph/ci_gate.py": "verified",
+    "code_unit:.github/graph-admission/tools/graph/impact.py": "verified",
+    "code_unit:.github/graph-admission/tools/graph/receipt_data.py": "verified",
+    "code_unit:.github/graph-admission/tools/graph/verify.py": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-config-schema",
+   "kind": "config_schema",
+   "output_ref": "/home/dev/aup/claude-work/fin-w2-rev-core/tmp/muneral-462-r3-verifier-out/v-config-schema.json",
+   "started_at_utc": "2026-11-22T20:52:58Z",
+   "summary": "3 source(s), 0 new / 5 frozen undeclared reads, 0 failed; 7 vendored file(s) not attributed to this repository (Arcanada-one/arcanada-universal-program)"
+  },
+  {
+   "command": "verify.py fitness_rules FR-01..FR-05 over the head graph + head sources",
+   "duration_s": 0.21,
+   "entities": [
+    "code_unit:.github/graph-admission/tools/ci/retain_evidence.py",
+    "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+    "code_unit:.github/graph-admission/tools/graph/build_graph.py",
+    "code_unit:.github/graph-admission/tools/graph/ci_gate.py",
+    "code_unit:.github/graph-admission/tools/graph/ci_selection.py",
+    "code_unit:.github/graph-admission/tools/graph/contract_diff.py",
+    "code_unit:.github/graph-admission/tools/graph/environment_obligations.cjs",
+    "code_unit:.github/graph-admission/tools/graph/environment_obligations.py",
+    "code_unit:.github/graph-admission/tools/graph/fixture_contracts.py",
+    "code_unit:.github/graph-admission/tools/graph/full_suite_ci.py",
+    "code_unit:.github/graph-admission/tools/graph/go_source.py",
+    "code_unit:.github/graph-admission/tools/graph/impact.py",
+    "code_unit:.github/graph-admission/tools/graph/impact_pair.py",
+    "code_unit:.github/graph-admission/tools/graph/inline_nest_harness.cjs",
+    "code_unit:.github/graph-admission/tools/graph/metadata_contract_observer.cjs",
+    "code_unit:.github/graph-admission/tools/graph/metadata_contract_proof.py",
+    "code_unit:.github/graph-admission/tools/graph/nest_bootstrap.py",
+    "code_unit:.github/graph-admission/tools/graph/python_contracts.py",
+    "code_unit:.github/graph-admission/tools/graph/receipt_data.py",
+    "code_unit:.github/graph-admission/tools/graph/schema_check.py",
+    "code_unit:.github/graph-admission/tools/graph/verify.py",
+    "code_unit:.github/workflows/activity-visible-count-browser.yml",
+    "code_unit:.github/workflows/ci.yml",
+    "code_unit:.github/workflows/dependabot-auto-merge.yml",
+    "code_unit:.github/workflows/graph-admission.yml",
+    "code_unit:.github/workflows/regenerate-derived-artefacts.yml",
+    "code_unit:.github/workflows/repository-destination-browser.yml",
+    "code_unit:scripts/ci/candidate_dependency_setup.py",
+    "code_unit:scripts/ci/regenerate-derived-base-facts.test.sh",
+    "code_unit:scripts/ci/test_candidate_dependency_setup.py",
+    "code_unit:scripts/ci/verify-structure.sh"
+   ],
+   "entity_verdicts": {
+    "code_unit:.github/graph-admission/tools/ci/retain_evidence.py": "verified",
+    "code_unit:.github/graph-admission/tools/graph/admit_change.py": "verified",
+    "code_unit:.github/graph-admission/tools/graph/build_graph.py": "verified",
+    "code_unit:.github/graph-admission/tools/graph/ci_gate.py": "verified",
+    "code_unit:.github/graph-admission/tools/graph/ci_selection.py": "verified",
+    "code_unit:.github/graph-admission/tools/graph/contract_diff.py": "verified",
+    "code_unit:.github/graph-admission/tools/graph/environment_obligations.cjs": "verified",
+    "code_unit:.github/graph-admission/tools/graph/environment_obligations.py": "verified",
+    "code_unit:.github/graph-admission/tools/graph/fixture_contracts.py": "verified",
+    "code_unit:.github/graph-admission/tools/graph/full_suite_ci.py": "verified",
+    "code_unit:.github/graph-admission/tools/graph/go_source.py": "verified",
+    "code_unit:.github/graph-admission/tools/graph/impact.py": "verified",
+    "code_unit:.github/graph-admission/tools/graph/impact_pair.py": "verified",
+    "code_unit:.github/graph-admission/tools/graph/inline_nest_harness.cjs": "verified",
+    "code_unit:.github/graph-admission/tools/graph/metadata_contract_observer.cjs": "verified",
+    "code_unit:.github/graph-admission/tools/graph/metadata_contract_proof.py": "verified",
+    "code_unit:.github/graph-admission/tools/graph/nest_bootstrap.py": "verified",
+    "code_unit:.github/graph-admission/tools/graph/python_contracts.py": "verified",
+    "code_unit:.github/graph-admission/tools/graph/receipt_data.py": "verified",
+    "code_unit:.github/graph-admission/tools/graph/schema_check.py": "verified",
+    "code_unit:.github/graph-admission/tools/graph/verify.py": "verified",
+    "code_unit:.github/workflows/activity-visible-count-browser.yml": "not_measured",
+    "code_unit:.github/workflows/ci.yml": "not_measured",
+    "code_unit:.github/workflows/dependabot-auto-merge.yml": "not_measured",
+    "code_unit:.github/workflows/graph-admission.yml": "not_measured",
+    "code_unit:.github/workflows/regenerate-derived-artefacts.yml": "not_measured",
+    "code_unit:.github/workflows/repository-destination-browser.yml": "not_measured",
+    "code_unit:scripts/ci/candidate_dependency_setup.py": "verified",
+    "code_unit:scripts/ci/regenerate-derived-base-facts.test.sh": "verified",
+    "code_unit:scripts/ci/test_candidate_dependency_setup.py": "verified",
+    "code_unit:scripts/ci/verify-structure.sh": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-fitness",
+   "kind": "fitness_rules",
+   "output_ref": "/home/dev/aup/claude-work/fin-w2-rev-core/tmp/muneral-462-r3-verifier-out/v-fitness.json",
+   "started_at_utc": "2026-11-22T20:52:59Z",
+   "summary": "5 finding(s): 0 new / 5 frozen; 0 entity(ies) failed"
+  },
+  {
+   "command": "verify.py doc_reference: path / route / model references of affected documents resolve at head",
+   "duration_s": 0.0,
+   "entities": [
+    "document:README.md",
+    "document:SECURITY.md",
+    "document:docs/graph-admission.md",
+    "document:docs/how-to/activate-muneral-web.md",
+    "document:docs/how-to/agent-status-transition-discipline.md",
+    "document:receipts/canary/mun-hyg-pin-ci-20261112/RESULT.md",
+    "document:receipts/canary/mun-hyg-regen-derived-artefacts-20261112/RESULT.md",
+    "document:receipts/canary/mun-jest-pin-ci-20261112/RESULT.md"
+   ],
+   "entity_verdicts": {
+    "document:README.md": "verified",
+    "document:SECURITY.md": "verified",
+    "document:docs/graph-admission.md": "verified",
+    "document:docs/how-to/activate-muneral-web.md": "verified",
+    "document:docs/how-to/agent-status-transition-discipline.md": "verified",
+    "document:receipts/canary/mun-hyg-pin-ci-20261112/RESULT.md": "verified",
+    "document:receipts/canary/mun-hyg-regen-derived-artefacts-20261112/RESULT.md": "verified",
+    "document:receipts/canary/mun-jest-pin-ci-20261112/RESULT.md": "verified"
+   },
+   "exit_code": 0,
+   "id": "v-doc-reference",
+   "kind": "doc_reference",
+   "output_ref": "/home/dev/aup/claude-work/fin-w2-rev-core/tmp/muneral-462-r3-verifier-out/v-doc-reference.txt",
+   "started_at_utc": "2026-11-22T20:52:59Z",
+   "summary": "8 document(s), 0 failed"
+  },
+  {
+   "command": "verify.py receipt_data (Git + authenticated native GET)",
+   "duration_s": 0.48,
+   "entities": [
+    "receipt:receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-pr332-25ce824.json",
+    "receipt:receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-step-reuse-51952b46.json",
+    "receipt:receipts/graph/A2-330-muneral-canary.json",
+    "receipt:receipts/graph/A2-370-outbox-relay-wired.json",
+    "receipt:receipts/graph/A2-384-deploy-gate-lane.json",
+    "receipt:receipts/graph/a2-304-dependabot-group.json",
+    "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json",
+    "receipt:receipts/graph/a2-320-web-eslint10.json",
+    "receipt:receipts/graph/bundle-refresh-8681292.json",
+    "receipt:receipts/graph/car-verify-20261102T145742Z-a753f831.json",
+    "receipt:receipts/graph/car-verify-mun-hyg-327-repository-destination.json",
+    "receipt:receipts/graph/change-admission-2f8218a2-description-disclosure.json",
+    "receipt:receipts/graph/change-admission-56aebac8-checklist-completed-filter.json",
+    "receipt:receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json",
+    "receipt:receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json",
+    "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
+    "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json",
+    "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json",
+    "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json",
+    "receipt:receipts/graph/change-admission-a2275-20260924T172252Z.json",
+    "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json",
+    "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+    "receipt:receipts/graph/change-admission-batch-407fb312-diagnostic8c-20261102.json",
+    "receipt:receipts/graph/change-admission-batch004-pr342-88d4c506.json",
+    "receipt:receipts/graph/change-admission-bundle-46cbdc0-a2-291c.json",
+    "receipt:receipts/graph/change-admission-bundle-515c-20261003.json",
+    "receipt:receipts/graph/change-admission-bundle-5fde907.json",
+    "receipt:receipts/graph/change-admission-bundle-966bcf3.json",
+    "receipt:receipts/graph/change-admission-bundle-a81a6d5.json",
+    "receipt:receipts/graph/change-admission-ci-pr-concurrency-454a9f0.json",
+    "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+    "receipt:receipts/graph/change-admission-full-test-20261021T211916Z.json",
+    "receipt:receipts/graph/change-admission-gateorder0-proof-20260914T172339Z.json",
+    "receipt:receipts/graph/change-admission-infra0417-muneral-20260916T100801Z.json",
+    "receipt:receipts/graph/change-admission-integration-batch1.json",
+    "receipt:receipts/graph/change-admission-kcp-0023-bundle-refresh.json",
+    "receipt:receipts/graph/change-admission-mun-0078-eb68735.json",
+    "receipt:receipts/graph/change-admission-mun-0079-33ceaca.json",
+    "receipt:receipts/graph/change-admission-mun-0080-ac5-7737515.json",
+    "receipt:receipts/graph/change-admission-mun-0081-ac5-1daea868.json",
+    "receipt:receipts/graph/change-admission-mun-0084-web-deploy-pra-umask-48583d4.json",
+    "receipt:receipts/graph/change-admission-mun-artifacts-1f99-8f4d7a5.json",
+    "receipt:receipts/graph/change-admission-mun-artifacts-1f99-d3bf2a2.json",
+    "receipt:receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json",
+    "receipt:receipts/graph/change-admission-mun0053-revert-override-20260914T150343Z.json",
+    "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+    "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json",
+    "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+    "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json",
+    "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json",
+    "receipt:receipts/graph/change-admission-pr331-grantread-67bc.json",
+    "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+    "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+    "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+    "receipt:receipts/graph/ctl-bundle-refresh-20260925.json",
+    "receipt:receipts/graph/mun-hyg-pin-ci-canary-349d209.json",
+    "receipt:receipts/graph/mun-jest-pin-scripts-canary-502e363.json",
+    "receipt:receipts/graph/pin-repair-muneral-20261007.json",
+    "receipt:receipts/graph/pin-repair-muneral213r2-20261007.json"
+   ],
+   "entity_verdicts": {
+    "receipt:receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-pr332-25ce824.json": "not_measured",
+    "receipt:receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-step-reuse-51952b46.json": "not_measured",
+    "receipt:receipts/graph/A2-330-muneral-canary.json": "not_measured",
+    "receipt:receipts/graph/A2-370-outbox-relay-wired.json": "not_measured",
+    "receipt:receipts/graph/A2-384-deploy-gate-lane.json": "not_measured",
+    "receipt:receipts/graph/a2-304-dependabot-group.json": "not_measured",
+    "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json": "not_measured",
+    "receipt:receipts/graph/a2-320-web-eslint10.json": "not_measured",
+    "receipt:receipts/graph/bundle-refresh-8681292.json": "not_measured",
+    "receipt:receipts/graph/car-verify-20261102T145742Z-a753f831.json": "not_measured",
+    "receipt:receipts/graph/car-verify-mun-hyg-327-repository-destination.json": "not_measured",
+    "receipt:receipts/graph/change-admission-2f8218a2-description-disclosure.json": "not_measured",
+    "receipt:receipts/graph/change-admission-56aebac8-checklist-completed-filter.json": "not_measured",
+    "receipt:receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json": "not_measured",
+    "receipt:receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json": "not_measured",
+    "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json": "not_measured",
+    "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json": "not_measured",
+    "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json": "not_measured",
+    "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json": "not_measured",
+    "receipt:receipts/graph/change-admission-a2275-20260924T172252Z.json": "not_measured",
+    "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json": "not_measured",
+    "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json": "not_measured",
+    "receipt:receipts/graph/change-admission-batch-407fb312-diagnostic8c-20261102.json": "not_measured",
+    "receipt:receipts/graph/change-admission-batch004-pr342-88d4c506.json": "not_measured",
+    "receipt:receipts/graph/change-admission-bundle-46cbdc0-a2-291c.json": "not_measured",
+    "receipt:receipts/graph/change-admission-bundle-515c-20261003.json": "not_measured",
+    "receipt:receipts/graph/change-admission-bundle-5fde907.json": "not_measured",
+    "receipt:receipts/graph/change-admission-bundle-966bcf3.json": "not_measured",
+    "receipt:receipts/graph/change-admission-bundle-a81a6d5.json": "not_measured",
+    "receipt:receipts/graph/change-admission-ci-pr-concurrency-454a9f0.json": "not_measured",
+    "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json": "not_measured",
+    "receipt:receipts/graph/change-admission-full-test-20261021T211916Z.json": "not_measured",
+    "receipt:receipts/graph/change-admission-gateorder0-proof-20260914T172339Z.json": "not_measured",
+    "receipt:receipts/graph/change-admission-infra0417-muneral-20260916T100801Z.json": "not_measured",
+    "receipt:receipts/graph/change-admission-integration-batch1.json": "not_measured",
+    "receipt:receipts/graph/change-admission-kcp-0023-bundle-refresh.json": "not_measured",
+    "receipt:receipts/graph/change-admission-mun-0078-eb68735.json": "not_measured",
+    "receipt:receipts/graph/change-admission-mun-0079-33ceaca.json": "not_measured",
+    "receipt:receipts/graph/change-admission-mun-0080-ac5-7737515.json": "not_measured",
+    "receipt:receipts/graph/change-admission-mun-0081-ac5-1daea868.json": "not_measured",
+    "receipt:receipts/graph/change-admission-mun-0084-web-deploy-pra-umask-48583d4.json": "not_measured",
+    "receipt:receipts/graph/change-admission-mun-artifacts-1f99-8f4d7a5.json": "not_measured",
+    "receipt:receipts/graph/change-admission-mun-artifacts-1f99-d3bf2a2.json": "not_measured",
+    "receipt:receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json": "not_measured",
+    "receipt:receipts/graph/change-admission-mun0053-revert-override-20260914T150343Z.json": "not_measured",
+    "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json": "not_measured",
+    "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json": "not_measured",
+    "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json": "not_measured",
+    "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json": "not_measured",
+    "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json": "not_measured",
+    "receipt:receipts/graph/change-admission-pr331-grantread-67bc.json": "not_measured",
+    "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json": "not_measured",
+    "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json": "not_measured",
+    "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json": "not_measured",
+    "receipt:receipts/graph/ctl-bundle-refresh-20260925.json": "not_measured",
+    "receipt:receipts/graph/mun-hyg-pin-ci-canary-349d209.json": "not_measured",
+    "receipt:receipts/graph/mun-jest-pin-scripts-canary-502e363.json": "not_measured",
+    "receipt:receipts/graph/pin-repair-muneral-20261007.json": "not_measured",
+    "receipt:receipts/graph/pin-repair-muneral213r2-20261007.json": "not_measured"
+   },
+   "exit_code": 2,
+   "id": "v-receipt-data",
+   "kind": "receipt_data",
+   "measurements": {
+    "receipt:receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-pr332-25ce824.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-pr332-25ce824.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-step-reuse-51952b46.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-step-reuse-51952b46.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/A2-330-muneral-canary.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/A2-330-muneral-canary.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/A2-370-outbox-relay-wired.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/A2-370-outbox-relay-wired.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/A2-384-deploy-gate-lane.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/A2-384-deploy-gate-lane.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/a2-304-dependabot-group.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/a2-304-dependabot-group.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/a2-307-scoped-mutation-evidence.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/a2-320-web-eslint10.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/a2-320-web-eslint10.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/bundle-refresh-8681292.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/bundle-refresh-8681292.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/car-verify-20261102T145742Z-a753f831.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/car-verify-20261102T145742Z-a753f831.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/car-verify-mun-hyg-327-repository-destination.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/car-verify-mun-hyg-327-repository-destination.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-2f8218a2-description-disclosure.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-2f8218a2-description-disclosure.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-56aebac8-checklist-completed-filter.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-56aebac8-checklist-completed-filter.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-a2-294b-20260925T013217Z.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-a2255-20260924T033607Z.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-a2267-20260924T132227Z.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-a2274-20260924T164654Z.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-a2275-20260924T172252Z.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-a2275-20260924T172252Z.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-a2284-20260924T201424Z.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-batch-407fb312-diagnostic8c-20261102.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-batch-407fb312-diagnostic8c-20261102.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-batch004-pr342-88d4c506.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-batch004-pr342-88d4c506.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-bundle-46cbdc0-a2-291c.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-bundle-46cbdc0-a2-291c.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-bundle-515c-20261003.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-bundle-515c-20261003.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-bundle-5fde907.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-bundle-5fde907.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-bundle-966bcf3.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-bundle-966bcf3.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-bundle-a81a6d5.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-bundle-a81a6d5.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-ci-pr-concurrency-454a9f0.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-ci-pr-concurrency-454a9f0.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-deps-batch-20260914T043640Z.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-full-test-20261021T211916Z.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-full-test-20261021T211916Z.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-gateorder0-proof-20260914T172339Z.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-gateorder0-proof-20260914T172339Z.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-infra0417-muneral-20260916T100801Z.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-infra0417-muneral-20260916T100801Z.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-integration-batch1.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-integration-batch1.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-kcp-0023-bundle-refresh.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-kcp-0023-bundle-refresh.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-mun-0078-eb68735.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-mun-0078-eb68735.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-mun-0079-33ceaca.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-mun-0079-33ceaca.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-mun-0080-ac5-7737515.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-mun-0080-ac5-7737515.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-mun-0081-ac5-1daea868.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-mun-0081-ac5-1daea868.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-mun-0084-web-deploy-pra-umask-48583d4.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-mun-0084-web-deploy-pra-umask-48583d4.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-mun-artifacts-1f99-8f4d7a5.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-mun-artifacts-1f99-8f4d7a5.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-mun-artifacts-1f99-d3bf2a2.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-mun-artifacts-1f99-d3bf2a2.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-mun0053-revert-override-20260914T150343Z.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-mun0053-revert-override-20260914T150343Z.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-mun0055-20260923T121431Z.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-mun0063-20260923T132257Z.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-nestjs12-20260913T230023Z.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-node2421-20260914T000213Z.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-node24221-20261021T203351Z.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-pr331-grantread-67bc.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-pr331-grantread-67bc.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-react-dom-20260914T040927Z.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-types-node24-20260914T005705Z.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/ctl-bundle-refresh-20260925.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/ctl-bundle-refresh-20260925.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/mun-hyg-pin-ci-canary-349d209.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/mun-hyg-pin-ci-canary-349d209.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/mun-jest-pin-scripts-canary-502e363.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/mun-jest-pin-scripts-canary-502e363.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/pin-repair-muneral-20261007.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/pin-repair-muneral-20261007.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    },
+    "receipt:receipts/graph/pin-repair-muneral213r2-20261007.json": {
+     "base": "de8efac4062a4e0752a88675c8dd2a0775c0839d",
+     "entity_path": "receipts/graph/pin-repair-muneral213r2-20261007.json",
+     "head": "edab4093ae9ddeb42fb072d6f4d96b0be86f3292",
+     "reason": "BASE_NATIVE_POLICY_MISSING",
+     "schema": "ReceiptDataMeasurement/v1",
+     "scope": "archived_evidence_data",
+     "verdict": "not_measured"
+    }
+   },
+   "output_ref": "/home/dev/aup/claude-work/fin-w2-rev-core/tmp/muneral-462-r3-verifier-out/v-receipt-data.json",
+   "scope": "archived_evidence_data",
+   "started_at_utc": "2026-11-22T20:52:59Z",
+   "summary": "archival data only; foreign source claims unchanged"
+  },
+  {
+   "command": "tools/graph/deploy_gate.py canary --plan <plan> --phase pre|post (results supplied with --canary)",
+   "duration_s": 0.0,
+   "entities": [
+    "code_unit:.github/graph-admission/tools/ci/retain_evidence.py",
+    "code_unit:.github/graph-admission/tools/graph/admit_change.py",
+    "code_unit:.github/graph-admission/tools/graph/ci_gate.py",
+    "code_unit:.github/graph-admission/tools/graph/impact.py",
+    "code_unit:.github/graph-admission/tools/graph/receipt_data.py",
+    "code_unit:.github/graph-admission/tools/graph/verify.py"
+   ],
+   "entity_verdicts": {
+    "code_unit:.github/graph-admission/tools/ci/retain_evidence.py": "not_measured",
+    "code_unit:.github/graph-admission/tools/graph/admit_change.py": "not_measured",
+    "code_unit:.github/graph-admission/tools/graph/ci_gate.py": "not_measured",
+    "code_unit:.github/graph-admission/tools/graph/impact.py": "not_measured",
+    "code_unit:.github/graph-admission/tools/graph/receipt_data.py": "not_measured",
+    "code_unit:.github/graph-admission/tools/graph/verify.py": "not_measured"
+   },
+   "exit_code": 0,
+   "id": "v-canary",
+   "kind": "canary",
+   "output_ref": "/home/dev/aup/claude-work/fin-w2-rev-core/tmp/muneral-462-r3-verifier-out/v-canary.json",
+   "started_at_utc": "2026-11-22T20:53:00Z",
+   "summary": "0 canary result(s), 0 committed at head; 0 verified / 0 failed / 6 not_measured of 6 entities"
+  },
+  {
+   "command": "bash -n + pinned ShellCheck on syntax projection; no caller/Bats execution",
+   "duration_s": 0.0,
+   "entities": [
+    "code_unit:scripts/ci/regenerate-derived-base-facts.test.sh"
+   ],
+   "entity_verdicts": {
+    "code_unit:scripts/ci/regenerate-derived-base-facts.test.sh": "not_measured"
+   },
+   "exit_code": 0,
+   "id": "v-shell-syntax-0ae469c2efa64051",
+   "kind": "shell_syntax",
+   "output_ref": "/home/dev/aup/claude-work/fin-w2-rev-core/tmp/muneral-462-r3-verifier-out/v-shell-syntax-0ae469c2efa64051.txt",
+   "scope": "shell_source_validation",
+   "started_at_utc": "2026-11-22T20:53:03Z",
+   "summary": "shell syntax/closure: not_measured"
+  },
+  {
+   "command": "bash -n + pinned ShellCheck on syntax projection; no caller/Bats execution",
+   "duration_s": 0.0,
+   "entities": [
+    "code_unit:scripts/ci/verify-structure.sh"
+   ],
+   "entity_verdicts": {
+    "code_unit:scripts/ci/verify-structure.sh": "not_measured"
+   },
+   "exit_code": 0,
+   "id": "v-shell-syntax-f4341f973b098bca",
+   "kind": "shell_syntax",
+   "output_ref": "/home/dev/aup/claude-work/fin-w2-rev-core/tmp/muneral-462-r3-verifier-out/v-shell-syntax-f4341f973b098bca.txt",
+   "scope": "shell_source_validation",
+   "started_at_utc": "2026-11-22T20:53:06Z",
+   "summary": "shell syntax/closure: not_measured"
+  },
+  {
+   "command": "consume source-bound native process fixture; no local execution",
+   "duration_s": 0.0,
+   "entities": [
+    "code_unit:scripts/ci/regenerate-derived-base-facts.test.sh"
+   ],
+   "entity_verdicts": {
+    "code_unit:scripts/ci/regenerate-derived-base-facts.test.sh": "not_measured"
+   },
+   "exit_code": 0,
+   "id": "v-shell-behavior-0ae469c2efa64051",
+   "kind": "shell_behavior",
+   "output_ref": "/home/dev/aup/claude-work/fin-w2-rev-core/tmp/muneral-462-r3-verifier-out/v-shell-behavior-0ae469c2efa64051.txt",
+   "scope": "shell_fixture_behavior",
+   "started_at_utc": "2026-11-22T20:53:06Z",
+   "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: line 101: dynamic command/alias/eval; line 109: heredoc data/generation closure not measured; line 123: heredoc data/generation closure not measured; line 135: dynamic command/alias/eval; line 148: heredoc data/generation closure not measured; line 14: directory transition has unresolved execution cwd; line 161: dynamic command/alias/eval; line 24: dynamic load/substitution; line 30: heredoc data/generation closure not measured; line 46: heredoc data/generation closure not measured; line 52: heredoc data/generation closure not measured; line 60: wrapper execution scope/options unresolved; line 68: wrapper execution scope/options unresolved; line 72: dynamic command/alias/eval; line 86: dynamic load/substitution; line 89: dynamic command/alias/eval; line 93: dynamic command/alias/eval"
+  },
+  {
+   "command": "consume source-bound native process fixture; no local execution",
+   "duration_s": 0.0,
+   "entities": [
+    "code_unit:scripts/ci/verify-structure.sh"
+   ],
+   "entity_verdicts": {
+    "code_unit:scripts/ci/verify-structure.sh": "not_measured"
+   },
+   "exit_code": 0,
+   "id": "v-shell-behavior-f4341f973b098bca",
+   "kind": "shell_behavior",
+   "output_ref": "/home/dev/aup/claude-work/fin-w2-rev-core/tmp/muneral-462-r3-verifier-out/v-shell-behavior-f4341f973b098bca.txt",
+   "scope": "shell_fixture_behavior",
+   "started_at_utc": "2026-11-22T20:53:06Z",
+   "summary": "SHELL_DYNAMIC_CLOSURE_NOT_MEASURED: line 10: relative execution cwd is not declared; line 11: relative execution cwd is not declared; line 12: relative execution cwd is not declared; line 13: relative execution cwd is not declared; line 14: relative execution cwd is not declared; line 15: relative execution cwd is not declared; line 6: directory transition has unresolved execution cwd; line 7: directory transition has unresolved execution cwd; line 9: relative execution cwd is not declared"
+  }
+ ],
+ "verify": {
+  "events": [],
+  "required_by_entity": {
+   "code_unit:.github/graph-admission/tools/ci/retain_evidence.py": [
+    "canary",
+    "config_schema",
+    "fitness_rules"
+   ],
+   "code_unit:.github/graph-admission/tools/graph/admit_change.py": [
+    "canary",
+    "config_schema",
+    "fitness_rules"
+   ],
+   "code_unit:.github/graph-admission/tools/graph/build_graph.py": [
+    "fitness_rules"
+   ],
+   "code_unit:.github/graph-admission/tools/graph/ci_gate.py": [
+    "canary",
+    "config_schema",
+    "fitness_rules"
+   ],
+   "code_unit:.github/graph-admission/tools/graph/ci_selection.py": [
+    "fitness_rules"
+   ],
+   "code_unit:.github/graph-admission/tools/graph/contract_diff.py": [
+    "fitness_rules"
+   ],
+   "code_unit:.github/graph-admission/tools/graph/environment_obligations.cjs": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:.github/graph-admission/tools/graph/environment_obligations.py": [
+    "fitness_rules"
+   ],
+   "code_unit:.github/graph-admission/tools/graph/fixture_contracts.py": [
+    "fitness_rules"
+   ],
+   "code_unit:.github/graph-admission/tools/graph/full_suite_ci.py": [
+    "fitness_rules"
+   ],
+   "code_unit:.github/graph-admission/tools/graph/go_source.py": [
+    "fitness_rules"
+   ],
+   "code_unit:.github/graph-admission/tools/graph/impact.py": [
+    "canary",
+    "config_schema",
+    "fitness_rules"
+   ],
+   "code_unit:.github/graph-admission/tools/graph/impact_pair.py": [
+    "fitness_rules"
+   ],
+   "code_unit:.github/graph-admission/tools/graph/inline_nest_harness.cjs": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:.github/graph-admission/tools/graph/metadata_contract_observer.cjs": [
+    "fitness_rules",
+    "type_check"
+   ],
+   "code_unit:.github/graph-admission/tools/graph/metadata_contract_proof.py": [
+    "fitness_rules"
+   ],
+   "code_unit:.github/graph-admission/tools/graph/nest_bootstrap.py": [
+    "fitness_rules"
+   ],
+   "code_unit:.github/graph-admission/tools/graph/python_contracts.py": [
+    "fitness_rules"
+   ],
+   "code_unit:.github/graph-admission/tools/graph/receipt_data.py": [
+    "canary",
+    "config_schema",
+    "fitness_rules"
+   ],
+   "code_unit:.github/graph-admission/tools/graph/schema_check.py": [
+    "fitness_rules"
+   ],
+   "code_unit:.github/graph-admission/tools/graph/verify.py": [
+    "canary",
+    "config_schema",
+    "fitness_rules"
+   ],
+   "code_unit:.github/workflows/activity-visible-count-browser.yml": [
+    "config_schema",
+    "fitness_rules"
+   ],
+   "code_unit:.github/workflows/ci.yml": [
+    "config_schema",
+    "fitness_rules"
+   ],
+   "code_unit:.github/workflows/dependabot-auto-merge.yml": [
+    "config_schema",
+    "fitness_rules"
+   ],
+   "code_unit:.github/workflows/graph-admission.yml": [
+    "config_schema",
+    "fitness_rules"
+   ],
+   "code_unit:.github/workflows/regenerate-derived-artefacts.yml": [
+    "config_schema",
+    "fitness_rules"
+   ],
+   "code_unit:.github/workflows/repository-destination-browser.yml": [
+    "config_schema",
+    "fitness_rules"
+   ],
+   "code_unit:scripts/ci/candidate_dependency_setup.py": [
+    "fitness_rules"
+   ],
+   "code_unit:scripts/ci/regenerate-derived-base-facts.test.sh": [
+    "fitness_rules",
+    "shell_behavior",
+    "shell_syntax"
+   ],
+   "code_unit:scripts/ci/test_candidate_dependency_setup.py": [
+    "fitness_rules"
+   ],
+   "code_unit:scripts/ci/verify-structure.sh": [
+    "fitness_rules",
+    "shell_behavior",
+    "shell_syntax"
+   ],
+   "document:README.md": [
+    "doc_reference"
+   ],
+   "document:SECURITY.md": [
+    "doc_reference"
+   ],
+   "document:docs/graph-admission.md": [
+    "doc_reference"
+   ],
+   "document:docs/how-to/activate-muneral-web.md": [
+    "doc_reference"
+   ],
+   "document:docs/how-to/agent-status-transition-discipline.md": [
+    "doc_reference"
+   ],
+   "document:receipts/canary/mun-hyg-pin-ci-20261112/RESULT.md": [
+    "doc_reference"
+   ],
+   "document:receipts/canary/mun-hyg-regen-derived-artefacts-20261112/RESULT.md": [
+    "doc_reference"
+   ],
+   "document:receipts/canary/mun-jest-pin-ci-20261112/RESULT.md": [
+    "doc_reference"
+   ],
+   "receipt:receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-pr332-25ce824.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/4dae0857-f648-46c7-a532-11ab7d559668/change-admission-step-reuse-51952b46.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/A2-330-muneral-canary.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/A2-370-outbox-relay-wired.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/A2-384-deploy-gate-lane.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/a2-304-dependabot-group.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/a2-307-scoped-mutation-evidence.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/a2-320-web-eslint10.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/bundle-refresh-8681292.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/car-verify-20261102T145742Z-a753f831.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/car-verify-mun-hyg-327-repository-destination.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-2f8218a2-description-disclosure.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-56aebac8-checklist-completed-filter.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-A2-DRIFT-5a1d666d-bundle-ce356591.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-BUNDLE-DRIFT-db9784ba.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-a2-294b-20260925T013217Z.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-a2255-20260924T033607Z.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-a2267-20260924T132227Z.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-a2274-20260924T164654Z.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-a2275-20260924T172252Z.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-a2284-20260924T201424Z.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-a2p28-probe-20260915T142952Z.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-batch-407fb312-diagnostic8c-20261102.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-batch004-pr342-88d4c506.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-bundle-46cbdc0-a2-291c.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-bundle-515c-20261003.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-bundle-5fde907.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-bundle-966bcf3.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-bundle-a81a6d5.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-ci-pr-concurrency-454a9f0.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-deps-batch-20260914T043640Z.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-full-test-20261021T211916Z.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-gateorder0-proof-20260914T172339Z.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-infra0417-muneral-20260916T100801Z.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-integration-batch1.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-kcp-0023-bundle-refresh.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-mun-0078-eb68735.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-mun-0079-33ceaca.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-mun-0080-ac5-7737515.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-mun-0081-ac5-1daea868.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-mun-0084-web-deploy-pra-umask-48583d4.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-mun-artifacts-1f99-8f4d7a5.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-mun-artifacts-1f99-d3bf2a2.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-mun0053-deploy-override-20260914T141100Z.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-mun0053-revert-override-20260914T150343Z.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-mun0055-20260923T121431Z.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-mun0063-20260923T132257Z.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-nestjs12-20260913T230023Z.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-node2421-20260914T000213Z.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-node24221-20261021T203351Z.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-pr331-grantread-67bc.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-react-dom-20260914T040927Z.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-types-node24-20260914T005705Z.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/change-admission-web-eslint-cli-20260914T003416Z.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/ctl-bundle-refresh-20260925.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/mun-hyg-pin-ci-canary-349d209.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/mun-jest-pin-scripts-canary-502e363.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/pin-repair-muneral-20261007.json": [
+    "receipt_data"
+   ],
+   "receipt:receipts/graph/pin-repair-muneral213r2-20261007.json": [
+    "receipt_data"
+   ]
+  },
+  "seconds": {
+   "prepare": 5.17,
+   "total": 106.37,
+   "verifiers": 1.42
+  }
+ }
+}
