@@ -38,6 +38,31 @@ function assertValidThresholdMs(thresholdMs: number): void {
   }
 }
 
+function formatDuration(ms: number): string {
+  const units: Array<[number, string]> = [
+    [3_600_000, 'h'],
+    [60_000, 'm'],
+  ];
+  let remaining = ms;
+  const parts: string[] = [];
+
+  for (const [unitMs, suffix] of units) {
+    const value = Math.floor(remaining / unitMs);
+    if (value > 0) {
+      parts.push(`${value}${suffix}`);
+      remaining %= unitMs;
+    }
+  }
+
+  if (remaining >= 1_000) {
+    parts.push(`${remaining / 1_000}s`);
+  } else if (remaining > 0) {
+    parts.push(`${remaining}ms`);
+  }
+
+  return parts.join(' ') || '0ms';
+}
+
 @Injectable()
 export class TaskStalenessService {
   constructor(private readonly prisma: PrismaService) {}
@@ -114,7 +139,7 @@ export class TaskStalenessService {
       verdict: stalled ? 'stalled' : 'healthy',
       ageMs,
       reason: stalled
-        ? `running ${Math.round(ageMs / 3_600_000)}h, over the ${Math.round(thresholdMs / 3_600_000)}h threshold`
+        ? `running ${formatDuration(ageMs)}, over the ${formatDuration(thresholdMs)} threshold`
         : 'within threshold',
     };
   }

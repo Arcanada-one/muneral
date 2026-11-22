@@ -112,6 +112,37 @@ describe('TaskStalenessService', () => {
       expect(result.reason).toMatch(/89h, over the 24h threshold/);
     });
 
+    it('describes fractional staleness thresholds precisely without changing the strict boundary', async () => {
+      prisma.taskExecutionState.findUnique.mockResolvedValue({
+        taskId: 't1',
+        currentAttemptId: 'att-1',
+      });
+      const evaluateAge = async (ageMs: number, thresholdMs: number) => {
+        const startedAt = new Date(NOW.getTime() - ageMs);
+        prisma.taskExecutionAttempt.findUnique.mockResolvedValue({
+          attemptId: 'att-1',
+          status: 'running',
+          startedAt,
+          issuedAt: startedAt,
+        });
+        return service.evaluateTask('t1', 'high', thresholdMs, NOW);
+      };
+
+      expect((await evaluateAge(30 * 60_000, 30 * 60_000)).verdict).toBe('healthy');
+
+      const justOver = await evaluateAge(30 * 60_000 + 1, 30 * 60_000);
+      expect(justOver.verdict).toBe('stalled');
+      expect(justOver.reason).toBe('running 30m 1ms, over the 30m threshold');
+
+      expect((await evaluateAge(30 * 60_000 + 1_000, 30 * 60_000)).reason).toBe(
+        'running 30m 1s, over the 30m threshold',
+      );
+      expect((await evaluateAge(4, 3.6)).reason).toBe('running 4ms, over the 3.6ms threshold');
+      expect((await evaluateAge(1_200_001, 20 * 60_000)).reason).toBe(
+        'running 20m 1ms, over the 20m threshold',
+      );
+    });
+
     it('is exactly at the threshold boundary and treats it as healthy (strictly greater-than for stalled)', async () => {
       prisma.taskExecutionState.findUnique.mockResolvedValue({
         taskId: 't1',
