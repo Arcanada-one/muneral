@@ -100,17 +100,25 @@ describe('KanbanBoard status-move feedback', () => {
 
   it('does not carry a late move failure into another project board', async () => {
     let rejectRequest: ((reason: Error) => void) | undefined;
-    state.patch.mockReturnValue(new Promise((_resolve, reject) => { rejectRequest = reject; }));
+    state.patch
+      .mockRejectedValueOnce(new Error('first move failed'))
+      .mockReturnValueOnce(new Promise((_resolve, reject) => { rejectRequest = reject; }));
     const { rerender, queryClient } = renderBoard();
 
     fireEvent.click(screen.getByRole('button', { name: 'Move task to In Progress' }));
-    await waitFor(() => expect(state.patch).toHaveBeenCalledTimes(1));
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Could not change the task status. Try again.',
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Move task to In Progress' }));
+    await waitFor(() => expect(state.patch).toHaveBeenCalledTimes(2));
 
     rerender(
       <QueryClientProvider client={queryClient}>
         <KanbanBoard projectId="33333333-3333-4333-8333-333333333333" wsSlug="workspace" projSlug="other" />
       </QueryClientProvider>,
     );
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 
     await act(async () => rejectRequest?.(new Error('private server response detail')));
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
@@ -134,23 +142,28 @@ describe('KanbanBoard status-move feedback', () => {
     await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument());
   });
 
-  it('does not show an older move failure after a newer move succeeds', async () => {
+  it('keeps the newer move feedback when an older move fails afterward', async () => {
     let rejectEarlierMove: ((reason: Error) => void) | undefined;
-    let confirmLaterMove: ((response: { data: Task }) => void) | undefined;
+    let rejectLaterMove: ((reason: Error) => void) | undefined;
     state.patch
       .mockReturnValueOnce(new Promise((_resolve, reject) => { rejectEarlierMove = reject; }))
-      .mockReturnValueOnce(new Promise((resolve) => { confirmLaterMove = resolve; }));
+      .mockReturnValueOnce(new Promise((_resolve, reject) => { rejectLaterMove = reject; }));
     renderBoard();
 
     fireEvent.click(screen.getByRole('button', { name: 'Move task to In Progress' }));
     await waitFor(() => expect(state.patch).toHaveBeenCalledTimes(1));
     fireEvent.click(screen.getByRole('button', { name: 'Move task to In Progress' }));
     await waitFor(() => expect(state.patch).toHaveBeenCalledTimes(2));
-
-    await act(async () => confirmLaterMove?.({ data: { ...task, status: 'in_progress' } }));
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+
+    await act(async () => rejectLaterMove?.(new Error('newer move failed')));
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Could not change the task status. Try again.',
+    );
 
     await act(async () => rejectEarlierMove?.(new Error('private server response detail')));
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Could not change the task status. Try again.',
+    );
   });
 });
