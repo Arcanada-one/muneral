@@ -4,7 +4,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "pnpm --dir ../.. exec prisma generate --schema apps/api/prisma/schema.prisma && tsc",
     "clean": "rm -rf dist"
   },
   "devDependencies": {
