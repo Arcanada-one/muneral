@@ -1,5 +1,21 @@
 import { z } from 'zod';
-import { TASK_STATUSES, type TaskStatus } from '@muneral/types';
+import { TASK_ACTIVITY_MAX_LIMIT, TASK_STATUSES, type TaskStatus } from '@muneral/types';
+
+// Unpaginated API collections have no contract limit. Stop on the first invalid item.
+function unpaginated<T>(item: z.ZodType<T>) {
+  return z.custom<unknown[]>(Array.isArray).transform((rows, ctx) => {
+    const data: T[] = [];
+    for (const row of rows) {
+      const parsed = item.safeParse(row);
+      if (!parsed.success) {
+        ctx.addIssue({ code: 'custom', message: 'Invalid collection item' });
+        return z.NEVER;
+      }
+      data.push(parsed.data);
+    }
+    return data;
+  });
+}
 
 const id = z.string().uuid();
 const timestamp = z.string().datetime({ offset: true });
@@ -7,7 +23,7 @@ const task = z.object({
   id, projectId: id, title: z.string(), status: z.custom<TaskStatus>((value) => TASK_STATUSES.includes(value as TaskStatus)),
   priority: z.enum(['critical', 'high', 'medium', 'low']), actorType: z.enum(['human', 'agent']).nullable(),
   createdAt: timestamp, updatedAt: timestamp,
-  description: z.string().nullable().optional(), tags: z.array(z.string()).max(200).optional(),
+  description: z.string().nullable().optional(), tags: unpaginated(z.string()).optional(),
   estimateHours: z.union([z.number().finite(), z.string().regex(/^-?\d+(?:\.\d+)?$/)]).nullable().optional(), dueDate: z.string().nullable().optional(),
   parentId: id.nullable().optional(),
 });
@@ -44,30 +60,27 @@ const taskGitRef = z.object({
   createdAt: timestamp,
 });
 
-// Cap collection schemas that parse untrusted HTTP bodies (GHSA-mrhx-c7xc-m3w5).
-const MAX_COLLECTION = 10_000;
-
 function read<T>(schema: z.ZodType<T>, value: unknown, label: string): T {
   const parsed = schema.safeParse(value);
   if (!parsed.success) throw new Error(`${label} response is unavailable: invalid response shape`);
   return parsed.data;
 }
 export const readTask = (value: unknown) => read(task, value, 'Task');
-export const readWorkspaces = (value: unknown) => read(z.array(workspace).max(MAX_COLLECTION), value, 'Workspaces');
-export const readProjects = (value: unknown) => read(z.array(project).max(MAX_COLLECTION), value, 'Projects');
-export const readDependencies = (value: unknown) => read(z.array(dependency).max(MAX_COLLECTION), value, 'Dependencies');
-export const readDependencyGraph = (value: unknown) => read(z.array(dependencyGraphEntry).max(MAX_COLLECTION), value, 'Dependencies');
+export const readWorkspaces = (value: unknown) => read(unpaginated(workspace), value, 'Workspaces');
+export const readProjects = (value: unknown) => read(unpaginated(project), value, 'Projects');
+export const readDependencies = (value: unknown) => read(unpaginated(dependency), value, 'Dependencies');
+export const readDependencyGraph = (value: unknown) => read(unpaginated(dependencyGraphEntry), value, 'Dependencies');
 export function readTaskReadiness(value: unknown) {
   return read(z.object({
     taskId: id,
     dependencyCount: z.number().int().nonnegative(),
-    blockedBy: z.array(dependencyGraphEntry).max(MAX_COLLECTION),
+    blockedBy: unpaginated(dependencyGraphEntry),
     ready: z.boolean(),
   }), value, 'Task readiness');
 }
-export const readTaskGitRefs = (value: unknown) => read(z.array(taskGitRef).max(MAX_COLLECTION), value, 'Git references');
+export const readTaskGitRefs = (value: unknown) => read(unpaginated(taskGitRef), value, 'Git references');
 export function readChecklist(value: unknown) {
-  return read(z.array(checklist).max(MAX_COLLECTION), value, 'Checklist').map(({ text, position, ...item }) =>
+  return read(unpaginated(checklist), value, 'Checklist').map(({ text, position, ...item }) =>
     ({ ...item, label: text, order: position }));
 }
 export function readTaskPage(value: unknown) {
@@ -78,9 +91,12 @@ export function readTaskPage(value: unknown) {
   return { data: page.items, total: page.total, limit: page.limit, page: page.offset / page.limit + 1 };
 }
 export function readActivity(value: unknown) {
-  // The API echoes the requested limit. Bound the rows parsed, independently of that limit.
-  return read(z.object({ data: z.array(activity).max(MAX_COLLECTION), total: z.number().int().nonnegative(),
-    page: z.number().int().positive(), limit: z.number().int().positive() }), value, 'Activity');
+  return read(z.object({
+    data: z.array(activity).max(TASK_ACTIVITY_MAX_LIMIT),
+    total: z.number().int().nonnegative(),
+    page: z.number().int().positive(),
+    limit: z.number().int().positive().max(TASK_ACTIVITY_MAX_LIMIT),
+  }).refine(page => page.data.length <= page.limit), value, 'Activity');
 }
 export function uniqueSlug<T extends { slug: string }>(rows: T[], slug: string, label: string): T {
   const matches = rows.filter(row => row.slug === slug);
