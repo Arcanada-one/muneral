@@ -22,11 +22,11 @@
   },
   "binding": {
     "algorithm": "sha256",
-    "aggregateSha256": "e9b3410db3b2a3283293801667e217f74e70d9c49c522c6f608baa1c8bcb5966",
+    "aggregateSha256": "d3e4ba100d3be4fe4431c1b507142c911f9b922b1816084042251ba23f34d52b",
     "files": [
       {
         "path": "apps/api/package.json",
-        "sha256": "28b1318c91b1064b6562236ed714f508ff44c8135fb7bd4f89184b5430cb4205"
+        "sha256": "e16b584c347057fc78af4804d22e8b510e77839cf974bb06bc8b72b87bb68894"
       },
       {
         "path": "apps/api/src/assembly/assembly.canonical.ts",
@@ -276,8 +276,8 @@
       "apps/web/",
       "receipts/"
     ],
-    "trackedTreeWithoutEvidence": "b430249d3e7282f7c2e97e48e962ad4592f9a81b",
-    "trackedSnapshotDiffSha256": "78edc01cb2475a1b3eaa28e35944023e7eaf2ae3f310f66f3f6b4ffd255c6fa9"
+    "trackedTreeWithoutEvidence": "8a680194527fdfa8008aa5af519e43f3e448bca7",
+    "trackedSnapshotDiffSha256": "2eb210ff0ecd0d7c9ccf7d7c769bde071f2cfda2ecbce252f1aa2394d5bb3778"
   },
   "baseline": {
     "outcome": "SURVIVED",
