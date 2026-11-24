@@ -86,6 +86,10 @@ describe('read adapters on current backend shapes', () => {
     const { result } = renderHook(() => useActivity(taskId), { wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true)); expect(result.current.data?.data[0].actorName).toBeUndefined();
   });
+  it.each([10_000, 10_001, Number.MAX_SAFE_INTEGER])('preserves an empty activity page with echoed limit %i', limit => {
+    const page = { data: [], total: 0, page: 1, limit };
+    expect(readActivity(page)).toEqual(page);
+  });
 });
 describe('invalid bodies never become successful empty reads', () => {
   it.each([{}, { ...task, status: 'unknown' }, { ...task, tags: 'wrong' }, { ...task, title: 42 }])('refuses malformed task %j', value => expect(() => readTask(value)).toThrow(/invalid response shape/));
@@ -94,4 +98,7 @@ describe('invalid bodies never become successful empty reads', () => {
   it('preserves empty page with nonzero total', () => expect(readTaskPage({ items: [], total: 10, limit: 5, offset: 10 })).toEqual({ data: [], total: 10, limit: 5, page: 3 }));
   it('refuses duplicate slug identity', () => expect(() => uniqueSlug([workspace, workspace], workspace.slug, 'Workspace')).toThrow(/unavailable/));
   it('refuses malformed activity rows', () => expect(() => readActivity({ data: [{ action: 'comment' }], total: 1, page: 1, limit: 20 })).toThrow(/invalid response shape/));
+  it.each([0, 1.5, Number.MAX_SAFE_INTEGER + 1])('refuses an invalid activity limit %i', limit => {
+    expect(() => readActivity({ data: [], total: 0, page: 1, limit })).toThrow(/invalid response shape/);
+  });
 });
