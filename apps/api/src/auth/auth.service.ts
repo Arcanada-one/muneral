@@ -54,6 +54,28 @@ export class AuthService {
     );
   }
 
+  async refreshAccess(refreshToken: string): Promise<string> {
+    let payload: { sub?: unknown; type?: unknown; exp?: unknown };
+    try {
+      payload = await this.jwtService.verifyAsync(refreshToken, { algorithms: ['HS256'] });
+    } catch {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+
+    if (
+      payload?.type !== 'refresh' || typeof payload.sub !== 'string' || !payload.sub ||
+      typeof payload.exp !== 'number' || !Number.isFinite(payload.exp)
+    ) {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+
+    const user = await this.validateJwtPayload({ sub: payload.sub });
+    if (!user) {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+    return this.signAccess(user.id);
+  }
+
   async findOrCreateGithubUser(profile: GithubProfile) {
     const githubId = BigInt(profile.id);
     let user = await this.prisma.user.findUnique({ where: { githubId } });
@@ -79,30 +101,26 @@ export class AuthService {
       throw new BadRequestException('Telegram auth not configured');
     }
 
-    // Build data-check-string (all fields except hash, sorted alphabetically)
+    const age = Math.floor(Date.now() / 1000) - dto.auth_date;
+    if (age < 0 || age > 86_400) {
+      return false;
+    }
+
     const { hash, ...rest } = dto;
-    const dataCheckString = Object.keys(rest)
-      .sort()
-      .map((k) => `${k}=${(rest as Record<string, unknown>)[k]}`)
+    const dataCheckString = Object.entries(rest)
+      .filter(([, value]) => value != null)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, value]) => `${key}=${value}`)
       .join('\n');
 
-    const secretKey = crypto
-      .createHmac('sha256', 'WebAppData')
-      .update(botToken)
-      .digest();
-
+    const secretKey = crypto.createHash('sha256').update(botToken).digest();
     const expectedHash = crypto
       .createHmac('sha256', secretKey)
       .update(dataCheckString)
-      .digest('hex');
-
-    // Constant-time comparison to prevent timing attacks
-    const hashBuffer = Buffer.from(hash, 'hex');
-    const expectedBuffer = Buffer.from(expectedHash, 'hex');
-    if (hashBuffer.length !== expectedBuffer.length) {
-      return false;
-    }
-    return crypto.timingSafeEqual(hashBuffer, expectedBuffer);
+      .digest();
+    const receivedHash = Buffer.from(hash, 'hex');
+    return receivedHash.length === expectedHash.length &&
+      crypto.timingSafeEqual(receivedHash, expectedHash);
   }
 
   async findOrCreateTelegramUser(dto: TelegramLoginDto) {

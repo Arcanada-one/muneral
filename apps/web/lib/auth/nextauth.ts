@@ -66,29 +66,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async signIn({ user, account }) {
+    async jwt({ token, user, account }) {
       if (account?.provider === 'github') {
-        try {
-          const res = await apiClient.post<{ access_token: string; refresh_token: string }>(
-            '/auth/github',
-            {
-              githubId: account.providerAccountId,
-              username: (user as { login?: string }).login ?? user.name ?? '',
-              email: user.email ?? '',
-              avatarUrl: user.image ?? '',
-              name: user.name ?? '',
-            },
-          );
-          (user as Record<string, unknown>).accessToken = res.data.access_token;
-          (user as Record<string, unknown>).refreshToken = res.data.refresh_token;
-        } catch {
-          return false;
+        if (!account.access_token) {
+          throw new Error('GitHub sign-in did not return an access token');
         }
-      }
-      return true;
-    },
-    async jwt({ token, user }) {
-      if (user) {
+        const { data } = await apiClient.post<{ access_token: string; refresh_token: string }>(
+          '/auth/github',
+          { access_token: account.access_token },
+        ).catch(() => {
+          // Axios errors may carry request bodies. Keep the provider token out of Auth.js logs.
+          throw new Error('GitHub sign-in could not be completed');
+        });
+        token.accessToken = data.access_token;
+        token.refreshToken = data.refresh_token;
+      } else if (user) {
         const u = user as Record<string, unknown>;
         if (typeof u.accessToken === 'string') token.accessToken = u.accessToken;
         if (typeof u.refreshToken === 'string') token.refreshToken = u.refreshToken;

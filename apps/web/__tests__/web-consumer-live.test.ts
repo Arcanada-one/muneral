@@ -44,17 +44,19 @@ describe.skipIf(!fixturePath)('MUN artifact actual web-to-API HTTP consumer seam
     const row=await taskDetailReadPort(query).load({workspaceSlug:state.fixture.workspaceSlug,projectSlug:state.fixture.projectSlug,taskId:state.fixture.taskId},new AbortController().signal);
     expect(row.id).toBe(state.fixture.taskId); expect(row.projectId).toBe(state.fixture.projectId);query.clear();
   }, CANARY_TIMEOUT_MS);
-  it('observes the existing Telegram protocol refusal through the actual NextAuth consumer and API', async () => {
+  it('exchanges signed Telegram widget data through the actual NextAuth consumer and API', async () => {
     process.env.TELEGRAM_BOT_TOKEN=state.fixture.telegramBotToken;
     const data:any={id:999001,first_name:'Local fixture',auth_date:Math.floor(Date.now()/1000)};
     const check=Object.entries(data).sort(([a],[b])=>a.localeCompare(b)).map(([k,v])=>`${k}=${v}`).join('\n');
     data.hash=createHmac('sha256',createHash('sha256').update(state.fixture.telegramBotToken).digest()).update(check).digest('hex');
     const provider=state.authConfig.providers.find((p:any)=>(p.options?.id??p.id)==='telegram');
     const row=await (provider.options?.authorize??provider.authorize)({telegramData:JSON.stringify(data)});
-    // The unchanged backend uses WebAppData HMAC while this consumer uses Login Widget SHA256.
-    // Record the actual refusal; this is not a successful Telegram login claim.
-    expect(row).toBeNull();
-    const response=await apiClient.post('/auth/telegram',data,{validateStatus:()=>true});
+    expect(row).toMatchObject({
+      id: String(data.id),
+      accessToken: expect.any(String),
+      refreshToken: expect.any(String),
+    });
+    const response=await apiClient.post('/auth/telegram',{...data,id:data.id+1},{validateStatus:()=>true});
     expect(response.status).toBe(400); expect(response.data.message).toBe('Invalid Telegram auth data');
   }, CANARY_TIMEOUT_MS);
 

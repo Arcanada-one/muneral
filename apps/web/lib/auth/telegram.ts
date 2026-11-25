@@ -20,6 +20,7 @@ export interface TelegramLoginData {
  * 4. auth_date must be within 24 hours
  */
 export function verifyTelegramLogin(data: TelegramLoginData, botToken: string): boolean {
+  if (!botToken) return false;
   const { hash, ...rest } = data;
 
   // Build data-check-string
@@ -42,7 +43,7 @@ export function verifyTelegramLogin(data: TelegramLoginData, botToken: string): 
   // Check auth_date is within 24 hours
   const now = Math.floor(Date.now() / 1000);
   const age = now - data.auth_date;
-  if (age > 86400) {
+  if (age < 0 || age > 86400) {
     return false;
   }
 
