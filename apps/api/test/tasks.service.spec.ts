@@ -152,6 +152,33 @@ describe('TasksService', () => {
       expect(executionRecorder.onStatusTransition).not.toHaveBeenCalled();
     });
 
+    it.each([
+      ['omitted', {}],
+      ['empty', { tags: [] }],
+    ])('skips writing tags when tags are %s', async (_description, tagFields) => {
+      prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
+      prisma.task.create.mockResolvedValue({ ...MOCK_TASK, id: 'task-new' });
+
+      await service.create(humanActor, { projectId: 'proj-1', title: 'Test task', ...tagFields });
+
+      expect(prisma.taskTag.createMany).not.toHaveBeenCalled();
+    });
+
+    it('writes both tags in order with the created task ID', async () => {
+      prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
+      prisma.task.create.mockResolvedValue({ ...MOCK_TASK, id: 'task-new' });
+
+      await service.create(humanActor, {
+        projectId: 'proj-1',
+        title: 'Test task',
+        tags: ['triage', 'follow-up'],
+      });
+
+      expect(prisma.taskTag.createMany.mock.calls).toEqual([
+        [{ data: [{ taskId: 'task-new', tag: 'triage' }, { taskId: 'task-new', tag: 'follow-up' }] }],
+      ]);
+    });
+
     it('records an execution attempt when the task is created directly in_progress', async () => {
       prisma.project.findUnique.mockResolvedValue(MOCK_PROJECT);
       prisma.task.create.mockResolvedValue({

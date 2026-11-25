@@ -199,9 +199,10 @@ export class TasksService {
         });
 
         // Save tags
-        if (dto.tags?.length) {
+        const { tags } = dto;
+        if (tags?.length) {
           await tx.taskTag.createMany({
-            data: dto.tags.map((tag) => ({ taskId: created.id, tag })),
+            data: tags.map((tag) => ({ taskId: created.id, tag })),
           });
         }
 
