@@ -1284,6 +1284,20 @@ jobs:
           #!/usr/bin/env python3
           import json, pathlib, subprocess, sys, tempfile
 
+          def bounded(value, limit=4096):
+              encoded = value.encode("utf-8", errors="replace")
+              if len(encoded) <= limit:
+                  return value
+              marker = b"\n...[truncated]\n"
+              prefix = encoded[:limit - len(marker)]
+              while True:
+                  try:
+                      text = prefix.decode("utf-8")
+                      break
+                  except UnicodeDecodeError as error:
+                      prefix = prefix[:error.start]
+              return text + marker.decode("ascii")
+
           def qualify(root, executable):
               root = pathlib.Path(root).resolve()
               executable = pathlib.Path(executable)
@@ -1296,16 +1310,25 @@ jobs:
               result = subprocess.run([str(executable), "--version"], capture_output=True, text=True, timeout=20)
               if result.returncode != 0 or result.stdout.strip() != "Version 7.0.2":
                   raise ValueError("TSC_EXECUTABLE_VERSION_MISMATCH")
-              with tempfile.TemporaryDirectory(prefix="aup-tsc-controls-") as scratch:
+              # compiler_root is created under RUNNER_TEMP; keep controls outside the caller checkout
+              # and independent of an inherited TMPDIR that could point into that checkout.
+              with tempfile.TemporaryDirectory(prefix="aup-tsc-controls-", dir=root.parent) as scratch:
                   path = pathlib.Path(scratch)
+                  for ancestor in (path, *path.parents):
+                      if any((ancestor / name).exists() for name in ("tsconfig.json", "package.json")):
+                          raise ValueError("TSC_CONTROL_WORKDIR_NOT_ISOLATED")
                   for filename, contents, expected_success in [
                       ("valid.ts", "const value: number = 1;\n", True),
                       ("invalid.ts", "const value: number = 'wrong';\n", False),
                   ]:
                       source = path / filename
                       source.write_text(contents)
-                      result = subprocess.run([str(executable), "--noEmit", "--strict", "--skipLibCheck", str(source)], capture_output=True, text=True, timeout=30)
+                      result = subprocess.run([str(executable), "--noEmit", "--strict", "--skipLibCheck", str(source)], capture_output=True, text=True, errors="replace", timeout=30, cwd=path)
                       if (result.returncode == 0) != expected_success:
+                          expected_code = "0" if expected_success else "nonzero"
+                          sys.stderr.write(f"TSC_CONTROL_FAILURE file={filename} expected_exit_code={expected_code} actual_exit_code={result.returncode}\n")
+                          sys.stderr.write("tsc stdout (max 4096 bytes):\n" + bounded(result.stdout))
+                          sys.stderr.write("tsc stderr (max 4096 bytes):\n" + bounded(result.stderr))
                           raise ValueError("TSC_SEMANTIC_CONTROL_FAILED:" + filename)
               return {"version": "7.0.2", "executable": str(executable.resolve()), "valid_input": "PASS", "invalid_input": "REFUSED"}
 
@@ -1513,8 +1536,17 @@ jobs:
           pnpm install --frozen-lockfile --ignore-scripts --ignore-pnpmfile
           cat "$PLAN_PATH" >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Build Muneral shared types before Prisma generation
+        if: >-
+          github.repository == 'Arcanada-one/muneral' &&
+          (steps.candidate_dependency_setup.outputs.setup_policy == 'pnpm-frozen-web-typecheck/v1' ||
+          steps.candidate_dependency_setup.outputs.setup_policy == 'pnpm-frozen-api-prisma-typecheck/v1')
+        run: pnpm --filter @muneral/types build
+
       - name: Generate Prisma Client for fixed caller dependency setup
-        if: inputs.candidate_dependency_setup_required || inputs.candidate_dependency_setup != ''
+        if: >-
+          github.repository == 'Arcanada-one/muneral' &&
+          (inputs.candidate_dependency_setup_required || inputs.candidate_dependency_setup != '')
         env:
           # This non-secret placeholder is consumed only by Prisma generation; generate does not connect.
           CHECKPOINT_DISABLE: '1'
@@ -1528,19 +1560,13 @@ jobs:
           fi
           case "$SETUP_POLICY" in
             pnpm-frozen-web-typecheck/v1|pnpm-frozen-api-prisma-typecheck/v1)
-              pnpm --dir . exec prisma generate --schema apps/api/prisma/schema.prisma
+              pnpm exec prisma generate --config prisma.config.ts --schema apps/api/prisma/schema.prisma
               ;;
             *)
               echo "::error::validated dependency setup policy is unsupported" >&2
               exit 2
               ;;
           esac
-
-      - name: Build Muneral shared types after Prisma generation
-        if: >-
-          steps.candidate_dependency_setup.outputs.setup_policy == 'pnpm-frozen-web-typecheck/v1' ||
-          steps.candidate_dependency_setup.outputs.setup_policy == 'pnpm-frozen-api-prisma-typecheck/v1'
-        run: pnpm --filter @muneral/types build
 
       # Muneral Nest e2e suites inside the candidate producer's full_fallback_test need a live
       # Postgres and a durable DATABASE_URL (muneral#444 / class-c on main). Prisma generation's
@@ -1594,11 +1620,14 @@ jobs:
 
       - name: Apply Muneral Prisma migrations on throwaway Postgres
         if: github.repository == 'Arcanada-one/muneral' && (inputs.candidate_receipt_required || steps.self_update_classifier.outputs.case == 'gate_self_update')
+        env:
+          SETUP_POLICY: ${{ steps.candidate_dependency_setup.outputs.setup_policy }}
         run: |
           set -euo pipefail
           test -n "${DATABASE_URL:-}"
-          # Same root prisma migrate deploy as muneral lint-and-test (schema via prisma.config.ts).
-          pnpm exec prisma migrate deploy
+          test -n "${SETUP_POLICY:-}"
+          # Use the same qualified config and schema as client generation.
+          pnpm exec prisma migrate deploy --config prisma.config.ts --schema apps/api/prisma/schema.prisma
 
       - name: Validate canonical Auth dependency source and toolchain
         id: candidate_auth_dependency_setup
