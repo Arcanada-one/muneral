@@ -41,6 +41,8 @@ export interface PaginatedResult<T> {
   limit: number;
 }
 
+export const TASK_ACTIVITY_MAX_LIMIT = 10_000;
+
 // Task state machine — valid transitions.
 //
 // `cancelled` abandons live (or reviewed-but-not-accepted) work without a

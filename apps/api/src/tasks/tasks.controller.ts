@@ -50,7 +50,7 @@ import type { AgentScopeContext } from '../auth/guards/agent-task-scope.guard.js
 import { AgentScope } from '../auth/agent-scope.decorator.js';
 import { ProjectReadTaskMetadata } from '../auth/project-read-task-metadata.decorator.js';
 import { ActorInterceptor } from '../common/interceptors/actor.interceptor.js';
-import type { Actor } from '@muneral/types';
+import { TASK_ACTIVITY_MAX_LIMIT, type Actor } from '@muneral/types';
 import { FieldChangesService } from './field-state/field-changes.service.js';
 import { TaskStalenessService } from '../execution-authority/task-staleness.service.js';
 import { TaskRedactionService } from './redactions/task-redaction.service.js';
@@ -838,12 +838,16 @@ export class TasksController {
     @Param('taskId') taskId: string,
     @Req() req: AuthRequest,
     @Query('page') page = '1',
-    @Query('limit') limit = '20',
+    @Query('limit') limit: unknown = '20',
   ) {
+    const pageLimit = typeof limit === 'string' && /^\d+$/.test(limit) ? Number(limit) : NaN;
+    if (!Number.isSafeInteger(pageLimit) || pageLimit < 1 || pageLimit > TASK_ACTIVITY_MAX_LIMIT) {
+      throw new BadRequestException(`limit must be an integer between 1 and ${TASK_ACTIVITY_MAX_LIMIT}`);
+    }
     return this.tasksService.getActivity(
       taskId,
       parseInt(page, 10),
-      parseInt(limit, 10),
+      pageLimit,
       req.actor.type === 'human' ? req.actor.id : undefined,
     );
   }

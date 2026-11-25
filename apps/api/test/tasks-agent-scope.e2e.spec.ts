@@ -616,6 +616,38 @@ describe('Agent-key scope on /tasks (e2e)', () => {
     expect(entry.actorId).toBe(assignedAgentId);
   });
 
+  it('returns and echoes activity limits from 1 through 10,000', async () => {
+    const task = await createTask();
+    await assign(task.id);
+    await prisma.activityLog.createMany({
+      data: ['task:created', 'task:updated'].map(action => ({
+        workspaceId, taskId: task.id, actorId: memberUserId, actorType: 'human' as const, action,
+      })),
+    });
+
+    for (const [limit, expectedCount] of [[1, 1], [10_000, 2]]) {
+      const res = await supertest(app.getHttpServer())
+        .get(`/tasks/${task.id}/activity`).query({ limit })
+        .set('Authorization', `Bearer ${assignedKey}`)
+        .expect(200);
+      expect(res.body).toMatchObject({ limit, page: 1, total: 2 });
+      expect(res.body.data).toHaveLength(expectedCount);
+    }
+  });
+
+  it('rejects invalid activity limits with HTTP 400', async () => {
+    const task = await createTask();
+    await assign(task.id);
+
+    for (const query of ['limit=0', 'limit=-1', 'limit=1.5', 'limit=10001', 'limit=1x', 'limit=1&limit=2']) {
+      await supertest(app.getHttpServer())
+        .get(`/tasks/${task.id}/activity?${query}`)
+        .set('Authorization', `Bearer ${assignedKey}`)
+        .expect(400)
+        .expect(({ body }) => expect(body.message).toBe('limit must be an integer between 1 and 10000'));
+    }
+  });
+
   it('the negative control (= the abuse case, same mechanism): an unassigned agent cannot read activity, in or out of workspace', async () => {
     const task = await createTask();
     await assign(task.id);
