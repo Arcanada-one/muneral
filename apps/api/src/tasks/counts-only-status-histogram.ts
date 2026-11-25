@@ -1,6 +1,12 @@
 import type { TaskStatus } from '@muneral/types';
-import { validate as isUuid } from 'uuid';
-import { statusOnlyCohortQuery } from './status-only-cohort.js';
+
+const ALLOWED_SCOPE_VERSIONS = ['fixture-scope-1'] as const;
+const [SCOPE_VERSION] = ALLOWED_SCOPE_VERSIONS;
+const REFUSAL = 'D182_COUNTS_REFUSED';
+
+if (!ALLOWED_SCOPE_VERSIONS.every((version) => /^[a-z][a-z0-9-]{2,40}$/.test(version))) {
+  throw new Error(REFUSAL);
+}
 
 const EMPTY_PUBLIC_COUNTS = {
   todo: 0,
@@ -16,29 +22,29 @@ const EMPTY_COUNTS = { ...EMPTY_PUBLIC_COUNTS, unknown: 0, invalid: 0 };
 type Bucket = keyof typeof EMPTY_COUNTS;
 const BUCKETS = Object.keys(EMPTY_COUNTS) as Bucket[];
 
-interface CountsOnlyStatusHistogram {
-  byStatus: Record<Bucket, number>;
-  total: number;
+interface Cohort {
+  workspaceId: string;
+  projectId?: string;
 }
 
-interface Scope {
-  scopeVersion: string;
-  /** Reviewed public labels supplied by the caller. Never include cohort names. */
-  allowedScopeVersions: ReadonlySet<string>;
+interface CohortWhere {
+  project: { workspaceId: string };
+  projectId?: string;
 }
 
-interface Capture extends Scope {
-  captureStart: Date;
-  captureEnd: Date;
-}
-
-interface StatusRow {
+interface StatusGroup {
   status: unknown;
+  _count: { _all: number };
 }
 
 interface StatusCohortReader {
   task: {
-    findMany(query: ReturnType<typeof statusOnlyCohortQuery>): PromiseLike<readonly StatusRow[]>;
+    groupBy(query: {
+      where: CohortWhere;
+      by: ['status'];
+      _count: { _all: true };
+    }): PromiseLike<readonly StatusGroup[]>;
+    count(query: { where: CohortWhere }): PromiseLike<number>;
   };
 }
 
@@ -47,107 +53,75 @@ function bucketFor(status: unknown): Bucket {
   return Object.hasOwn(EMPTY_PUBLIC_COUNTS, status) ? (status as TaskStatus) : 'invalid';
 }
 
-function assertSafeCount(count: number, label: string): void {
-  if (!Number.isSafeInteger(count) || count < 0) {
-    throw new RangeError(`${label} must be a nonnegative safe integer.`);
-  }
+function hasExactFields(value: object, fields: readonly string[]): boolean {
+  const prototype = Object.getPrototypeOf(value);
+  return (prototype === Object.prototype || prototype === null) &&
+    Reflect.ownKeys(value).length === fields.length &&
+    fields.every((field) => Object.hasOwn(value, field));
 }
 
-function assertReconciled({ byStatus, total }: CountsOnlyStatusHistogram): void {
-  assertSafeCount(total, 'Cohort count');
+function assertSafeCount(count: number): void {
+  if (!Number.isSafeInteger(count) || count < 0) throw new Error(REFUSAL);
+}
+
+function buildCounts(groups: readonly StatusGroup[], total: number): Record<Bucket, number> {
+  assertSafeCount(total);
+  const byStatus: Record<Bucket, number> = Object.assign(Object.create(null), EMPTY_COUNTS);
+
+  for (const group of groups) {
+    if (!hasExactFields(group, ['status', '_count']) || !hasExactFields(group._count, ['_all'])) {
+      throw new Error(REFUSAL);
+    }
+    const count = group._count._all;
+    assertSafeCount(count);
+    byStatus[bucketFor(group.status)] += count;
+  }
+
   let sum = 0n;
   for (const bucket of BUCKETS) {
-    const count = byStatus[bucket];
-    assertSafeCount(count, 'Status count');
-    sum += BigInt(count);
+    assertSafeCount(byStatus[bucket]);
+    sum += BigInt(byStatus[bucket]);
   }
-  if (sum !== BigInt(total)) {
-    throw new RangeError('Status counts do not reconcile with the cohort count.');
-  }
-}
-
-export function buildCountsOnlyStatusHistogram(
-  rows: readonly StatusRow[],
-  cohortCount: number,
-): CountsOnlyStatusHistogram {
-  assertSafeCount(cohortCount, 'Cohort count');
-
-  const byStatus: Record<Bucket, number> = Object.assign(Object.create(null), EMPTY_COUNTS);
-  for (const row of rows) {
-    const prototype = Object.getPrototypeOf(row);
-    const keys = Reflect.ownKeys(row);
-    if (
-      (prototype !== Object.prototype && prototype !== null) ||
-      keys.length !== 1 ||
-      keys[0] !== 'status'
-    ) {
-      throw new TypeError('Cohort query rows must contain only the status field.');
-    }
-    byStatus[bucketFor(row.status)] += 1;
-  }
-
-  const histogram = { byStatus, total: cohortCount };
-  assertReconciled(histogram);
-  return histogram;
-}
-
-function assertAllowedScope({ scopeVersion, allowedScopeVersions }: Scope): void {
-  if (typeof scopeVersion !== 'string' || isUuid(scopeVersion)) {
-    throw new RangeError('Scope version must be a public label.');
-  }
-  if (!allowedScopeVersions.has(scopeVersion)) {
-    throw new RangeError('Scope version is not allowlisted.');
-  }
+  if (sum !== BigInt(total)) throw new Error(REFUSAL);
+  return byStatus;
 }
 
 function formatCaptureInstant(instant: Date): string {
   const utc = instant.toISOString();
-  if (utc.length !== 24) throw new RangeError('Capture instant must have a four-digit UTC year.');
+  if (utc.length !== 24) throw new Error(REFUSAL);
   return utc;
 }
 
-export function serializeCountsOnlyStatusHistogram(
-  histogram: CountsOnlyStatusHistogram,
-  capture: Capture,
-): string {
-  assertAllowedScope(capture);
-  const captureStart = formatCaptureInstant(capture.captureStart);
-  const captureEnd = formatCaptureInstant(capture.captureEnd);
-  if (captureEnd < captureStart) {
-    throw new RangeError('Capture end must not precede capture start.');
-  }
-  assertReconciled(histogram);
-
-  return JSON.stringify({
-    contract: 'D182-ASTAT-M1-COUNTS/1',
-    scope_version: capture.scopeVersion,
-    capture_start: captureStart,
-    capture_end: captureEnd,
-    total: String(histogram.total),
-    by_status: Object.fromEntries(
-      BUCKETS.map((bucket) => [bucket, String(histogram.byStatus[bucket])]),
-    ),
-  });
-}
-
-/** Internal adapter. No controller or agent grant registers this read. */
+/** Internal adapter. The interval brackets both reads without claiming an atomic snapshot. */
 export async function readCountsOnlyStatusHistogram(
   db: StatusCohortReader,
-  cohort: { workspaceId: string; projectId?: string },
-  scope: Scope,
+  cohort: Cohort,
   now: () => Date = () => new Date(),
 ): Promise<string> {
-  assertAllowedScope(scope);
-  if (scope.scopeVersion === cohort.workspaceId || scope.scopeVersion === cohort.projectId) {
-    throw new RangeError('Scope version must be a public label.');
+  try {
+    const { workspaceId, projectId } = cohort;
+    if (SCOPE_VERSION === workspaceId || SCOPE_VERSION === projectId) throw new Error(REFUSAL);
+    const where: CohortWhere = {
+      project: { workspaceId },
+      ...(projectId ? { projectId } : {}),
+    };
+
+    const captureStart = formatCaptureInstant(now());
+    const groups = await db.task.groupBy({ where, by: ['status'], _count: { _all: true } });
+    const total = await db.task.count({ where });
+    const captureEnd = formatCaptureInstant(now());
+    if (captureEnd < captureStart) throw new Error(REFUSAL);
+
+    const byStatus = buildCounts(groups, total);
+    return JSON.stringify({
+      contract: 'D182-ASTAT-M1-COUNTS/2',
+      scope_version: SCOPE_VERSION,
+      capture_start: captureStart,
+      capture_end: captureEnd,
+      'tasks.total_current': String(total),
+      'tasks.source_done_current': String(byStatus.done),
+    });
+  } catch {
+    throw new Error(REFUSAL);
   }
-  const query = statusOnlyCohortQuery(cohort.workspaceId, cohort.projectId);
-  const captureStart = new Date(now().getTime());
-  const rows = await db.task.findMany(query);
-  const captureEnd = now();
-  return serializeCountsOnlyStatusHistogram(buildCountsOnlyStatusHistogram(rows, rows.length), {
-    ...scope,
-    captureStart,
-    captureEnd,
-  });
 }
