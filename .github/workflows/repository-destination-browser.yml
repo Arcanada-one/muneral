@@ -24,10 +24,11 @@ jobs:
           node-version: 26.13.0
 
       - name: Enable the repository-pinned pnpm
+        id: enable-corepack
         run: |
           set -euo pipefail
-          corepack_home="${RUNNER_TEMP}/repository-destination-corepack"
-          mkdir -m 700 "${corepack_home}"
+          corepack_home="$(mktemp -d "${RUNNER_TEMP}/repository-destination-corepack.XXXXXXXX")"
+          printf 'directory=%s\n' "${corepack_home}" >> "${GITHUB_OUTPUT}"
           corepack enable --install-directory "${corepack_home}"
           printf '%s\n' "${corepack_home}" >> "${GITHUB_PATH}"
 
@@ -56,14 +57,16 @@ jobs:
           [[ "${REPOSITORY_DESTINATION_CANDIDATE_SHA}" =~ ^[a-f0-9]{40}$ ]]
           artifact_parent="${RUNNER_TEMP}/repository-destination-artifacts/${REPOSITORY_DESTINATION_RUN_ID}/${REPOSITORY_DESTINATION_RUN_ATTEMPT}"
           private_parent="${RUNNER_TEMP}/repository-destination-private/${REPOSITORY_DESTINATION_RUN_ID}/${REPOSITORY_DESTINATION_RUN_ATTEMPT}"
-          mkdir -p -m 700 "${artifact_parent}" "${private_parent}"
+          mkdir -p "${artifact_parent}" "${private_parent}"
           artifact_root="${artifact_parent}/${REPOSITORY_DESTINATION_CANDIDATE_SHA}"
           private_root="${private_parent}/${REPOSITORY_DESTINATION_CANDIDATE_SHA}"
           mkdir -m 700 "${artifact_root}"
           mkdir -m 700 "${private_root}"
-          printf 'artifact_root=%s\n' "${artifact_root}" >> "${GITHUB_OUTPUT}"
-          printf 'private_root=%s\n' "${private_root}" >> "${GITHUB_OUTPUT}"
-          printf 'ready=true\n' >> "${GITHUB_OUTPUT}"
+          {
+            printf 'artifact_root=%s\n' "${artifact_root}"
+            printf 'private_root=%s\n' "${private_root}"
+            printf 'ready=true\n'
+          } >> "${GITHUB_OUTPUT}"
 
       - name: Run the repository destination browser fixture
         if: steps.allocate-output.outputs.ready == 'true'
@@ -107,3 +110,9 @@ jobs:
             ${{ steps.allocate-output.outputs.artifact_root }}/result.json
             ${{ steps.allocate-output.outputs.artifact_root }}/runner-exit.json
           if-no-files-found: error
+
+      - name: Remove the job's Corepack directory
+        if: always() && steps.enable-corepack.outputs.directory != ''
+        env:
+          COREPACK_DIRECTORY: ${{ steps.enable-corepack.outputs.directory }}
+        run: rm -rf -- "${COREPACK_DIRECTORY}"
