@@ -1420,8 +1420,10 @@ describe('Outbox relay — PostgreSQL service-path integration', () => {
 
   // -- cleanup verification --------------------------------------------------
 
-  it('15. NEGATIVE-CONTROL: DATABASE_URL points to disposable container only', () => {
-    expect(DATABASE_URL).toContain(`localhost:${PG_PORT}`);
+  it('15. NEGATIVE-CONTROL: DATABASE_URL points to the disposable instance only', () => {
+    const target = new URL(DATABASE_URL);
+    expect(['localhost', '127.0.0.1']).toContain(target.hostname);
+    expect(target.port).toBe(String(PG_PORT));
     expect(DATABASE_URL).toContain(PG_DB);
     expect(DATABASE_URL).not.toContain('production');
     expect(DATABASE_URL).not.toContain('prod');
