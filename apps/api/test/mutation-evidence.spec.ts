@@ -216,6 +216,28 @@ describe('Assembly mutation evidence verification', () => {
     expect(after).toEqual(before);
   });
 
+  it('hashes raw allowlisted input bytes even when excluded attributes would normalize them', () => {
+    const repo = path.join(directory, 'scope-attributes');
+    fs.mkdirSync(repo);
+    git(repo, ['init', '--quiet']);
+    git(repo, ['config', 'core.autocrlf', 'false']);
+    const input = Buffer.from('first line\r\nsecond line\r\n');
+    fs.writeFileSync(path.join(repo, 'input.txt'), input);
+    fs.writeFileSync(path.join(repo, '.gitattributes'), '# no conversions\n');
+    git(repo, ['add', 'input.txt', '.gitattributes']);
+    const before = harness.gitSupplement(repo, 'mutation-results.json', ['input.txt']);
+    const index = fs.readFileSync(path.join(repo, '.git', 'index'));
+
+    fs.writeFileSync(path.join(repo, '.gitattributes'), 'input.txt text eol=lf\n');
+    const raw = git(repo, ['hash-object', '--no-filters', 'input.txt']);
+    expect(git(repo, ['hash-object', '--path=input.txt', 'input.txt'])).not.toBe(raw);
+    expect(harness.gitSupplement(repo, 'mutation-results.json', ['input.txt'])).toEqual(before);
+    expect(git(repo, ['ls-tree', '-r', before.trackedTreeWithoutEvidence]))
+      .toBe(`100644 blob ${raw}\tinput.txt`);
+    expect(fs.readFileSync(path.join(repo, 'input.txt'))).toEqual(input);
+    expect(fs.readFileSync(path.join(repo, '.git', 'index'))).toEqual(index);
+  });
+
   it('still stales when a real allowlisted input changes', () => {
     const repo = path.join(directory, 'scope-bound');
     scopeFixture(repo);
@@ -276,15 +298,25 @@ describe('Assembly mutation evidence verification', () => {
     fs.writeFileSync(path.join(repo, 'staged-then-deleted.txt'), 'temporary\n');
     git(repo, ['add', 'staged-then-deleted.txt']);
     fs.rmSync(path.join(repo, 'staged-then-deleted.txt'));
+    fs.writeFileSync(path.join(repo, 'staged-executable.sh'), '#!/bin/sh\n', { mode: 0o755 });
+    git(repo, ['update-index', '--add', '--chmod=+x', 'staged-executable.sh']);
+    const index = fs.readFileSync(path.join(repo, '.git', 'index'));
 
     const supplement = harness.gitSupplement(repo, 'mutation-results.json', [
       'stable.txt',
       'removed.txt',
       'renamed-source.txt',
+      'untracked-rename-destination.txt',
+      'staged-then-deleted.txt',
+      'staged-executable.sh',
     ]);
     expect(git(repo, [
-      'ls-tree', '-r', '--name-only', supplement.trackedTreeWithoutEvidence,
-    ])).toBe('stable.txt');
+      'ls-tree', '-r', supplement.trackedTreeWithoutEvidence,
+    ])).toBe([
+      `100644 blob ${git(repo, ['hash-object', '--no-filters', 'stable.txt'])}\tstable.txt`,
+      `100755 blob ${git(repo, ['hash-object', '--no-filters', 'staged-executable.sh'])}\tstaged-executable.sh`,
+    ].join('\n'));
+    expect(fs.readFileSync(path.join(repo, '.git', 'index'))).toEqual(index);
   });
 
   it('keeps the standalone site map semantically identical to the result map', () => {

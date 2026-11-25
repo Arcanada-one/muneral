@@ -607,20 +607,16 @@ function gitSupplement(
   // A commit id cannot be embedded in a file contained by that commit: adding
   // the id changes the commit again. It is also unstable after a squash merge.
   // Freeze the effective tracked snapshot of the allowlisted paths instead.
-  const indexed = spawnSync('git', ['write-tree'], {
-    cwd: repoRoot,
-    encoding: 'utf8',
-  });
-  if (indexed.status !== 0) throw new Error('cannot read the tracked index for Git supplement');
+  const root = fs.realpathSync(repoRoot);
   const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'mun0022-git-snapshot-'));
   const index = path.join(temporary, 'index');
   const env = { ...process.env, GIT_INDEX_FILE: index };
   const allow = [...new Set(scopePaths)].sort();
   const run = (args, options = {}) => {
-    const { input, trim = true } = options;
+    const { input, trim = true, commandEnv = env } = options;
     const result = spawnSync('git', args, {
-      cwd: repoRoot,
-      env,
+      cwd: root,
+      env: commandEnv,
       encoding: 'utf8',
       input,
     });
@@ -631,19 +627,36 @@ function gitSupplement(
     return trim ? result.stdout.trim() : result.stdout;
   };
   try {
-    // Preserve staged additions/deletions, then prune the temporary index
-    // before refreshing paths so Git never reads unrelated working-tree bytes.
-    run(['read-tree', indexed.stdout.trim()]);
-    const listed = run(['ls-files', '-z'], { trim: false }).split('\0').filter(Boolean);
+    // The real index supplies tracked membership and modes. Build a new index
+    // from working bytes, like buildBinding(), without running Git conversions.
     const allowSet = new Set(allow);
     allowSet.delete(evidencePath);
-    const drop = listed.filter((entry) => !allowSet.has(entry));
-    if (drop.length > 0) {
-      run(['update-index', '--force-remove', '-z', '--stdin'], { input: `${drop.join('\0')}\0` });
+    const listed = allowSet.size === 0 ? '' : run(
+      ['--literal-pathspecs', 'ls-files', '--stage', '-z', '--', ...allowSet],
+      { trim: false, commandEnv: process.env },
+    );
+    const entries = [];
+    for (const record of listed.split('\0').filter(Boolean)) {
+      const separator = record.indexOf('\t');
+      const relative = record.slice(separator + 1);
+      if (!allowSet.has(relative)) continue;
+      const [mode, , stage] = record.slice(0, separator).split(' ');
+      if (stage !== '0') throw new Error(`unmerged Git supplement input: ${relative}`);
+      const absolute = path.join(root, relative);
+      const stat = fs.lstatSync(absolute, { throwIfNoEntry: false });
+      if (!stat || stat.isDirectory()) continue;
+      if (!stat.isFile() || fs.realpathSync(absolute) !== absolute
+          || (mode !== '100644' && mode !== '100755')) {
+        throw new Error(`non-regular Git supplement input: ${relative}`);
+      }
+      const blob = run(['hash-object', '-w', '--no-filters', '--stdin'], {
+        input: fs.readFileSync(absolute),
+      });
+      entries.push(`${mode} ${blob}\t${relative}\0`);
     }
-    const trackedInputs = listed.filter((entry) => allowSet.has(entry));
-    if (trackedInputs.length > 0) {
-      run(['--literal-pathspecs', 'add', '-u', '--', ...trackedInputs]);
+    run(['read-tree', '--empty']);
+    if (entries.length > 0) {
+      run(['update-index', '-z', '--index-info'], { input: entries.join('') });
     }
     const tree = run(['write-tree']);
     const emptyTree = run(['hash-object', '-w', '-t', 'tree', '--stdin'], { input: '' });
