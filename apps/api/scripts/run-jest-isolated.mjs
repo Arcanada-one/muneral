@@ -65,9 +65,9 @@ const discoveryArgs = requestedArgs.filter((arg, i) => {
   return requestedArgs[i - 1] !== '--outputFile';
 });
 
-function run(args, { captureStdout = false } = {}) {
+function run(command, args, { captureStdout = false } = {}) {
   return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, [jestCli, ...args], {
+    const child = spawn(command, args, {
       cwd: apiRoot,
       stdio: captureStdout ? ['ignore', 'pipe', 'inherit'] : 'inherit',
       env: process.env,
@@ -79,7 +79,7 @@ function run(args, { captureStdout = false } = {}) {
   });
 }
 
-const discovery = await run(['--listTests', '--runInBand', ...discoveryArgs], { captureStdout: true });
+const discovery = await run(process.execPath, [jestCli, '--listTests', '--runInBand', ...discoveryArgs], { captureStdout: true });
 if (discovery.code !== 0) process.exit(discovery.code ?? 1);
 
 let testFiles;
@@ -92,6 +92,13 @@ try {
 }
 console.error(`run-jest-isolated: ${testFiles.length} test files discovered (minimum ${minTestFiles})`);
 
+// The generator spec imports the compiled API to check parity with its TypeScript source.
+const generatorSpec = path.join(apiRoot, 'test', 'assembly', 'assembly.generator.spec.ts');
+if (testFiles.includes(generatorSpec)) {
+  const build = await run('pnpm', ['run', 'build']);
+  if (build.code !== 0) process.exit(build.code ?? 1);
+}
+
 let failed = false;
 const reportDir = outputFile && wantsJson ? mkdtempSync(path.join(tmpdir(), 'jest-isolated-')) : null;
 const reports = [];
@@ -100,7 +107,7 @@ for (const [index, testFile] of testFiles.entries()) {
   const fileArgs = ['--runInBand', '--runTestsByPath', testFile, ...executionArgs];
   const reportPath = reportDir ? path.join(reportDir, `${index}.json`) : null;
   if (reportPath) fileArgs.push('--outputFile', reportPath);
-  const result = await run(fileArgs);
+  const result = await run(process.execPath, [jestCli, ...fileArgs]);
   if (result.code !== 0) failed = true;
   if (result.signal) failed = true;
   if (reportPath) {

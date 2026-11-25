@@ -22,7 +22,7 @@
   },
   "binding": {
     "algorithm": "sha256",
-    "aggregateSha256": "068fffd09552775f2940837c6d58cff66d6b5db7a7a70794fdfa3ef56e2dcf19",
+    "aggregateSha256": "8a6f69088a6c435a295f116e1f7539c867b75ea5a78c96f46f6fe2be35197c7c",
     "files": [
       {
         "path": ".npmrc",
@@ -30,7 +30,7 @@
       },
       {
         "path": "apps/api/package.json",
-        "sha256": "81143d7d6875c3f9cf27f8fe6fc37a9d2b9bfe9c1db395273da8d39a252be6cb"
+        "sha256": "0726ca5f358349e2016e8c3da72ee485669417c6f38fe8cdf8f3528c80c3dad4"
       },
       {
         "path": "apps/api/src/assembly/assembly.canonical.ts",
@@ -374,8 +374,8 @@
       "pnpm-lock.yaml",
       "pnpm-workspace.yaml"
     ],
-    "trackedTreeWithoutEvidence": "e5e5ca87436d17e331aaaf2e1a6da6f17cf31740",
-    "trackedSnapshotDiffSha256": "c05164e2b19e678237966cdfc46fc8bb85c32b47514219b803e1a0e3cdbb9a2e"
+    "trackedTreeWithoutEvidence": "4873aa1fcd328fc70747f19c54caf0e5c6abcb44",
+    "trackedSnapshotDiffSha256": "e01fe0ec972fc77d3c54368de9658571cbab1fb7104e2e1051d94f9c3034fff8"
   },
   "baseline": {
     "outcome": "SURVIVED",
