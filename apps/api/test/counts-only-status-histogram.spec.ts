@@ -17,7 +17,11 @@ const EMPTY_COUNTS = {
   unknown: 0,
   invalid: 0,
 };
-const COHORT = { workspaceId: 'workspace-1' };
+const SCOPE_VERSION = 'fixture-scope-1';
+const PROJECT_IDS = [
+  '00000000-0000-4000-8000-000000000001',
+  '00000000-0000-4000-8000-000000000002',
+];
 const START = new Date('2026-11-25T19:00:00.000Z');
 const END = new Date('2026-11-25T19:00:01.250Z');
 const REFUSAL = 'D182_COUNTS_REFUSED';
@@ -38,12 +42,12 @@ function makeReader(groups: ReturnType<typeof group>[], total: number) {
   };
 }
 
-function evaluateAdapter(source: string): unknown {
+function evaluateAdapter(source: string, bindings: Record<string, unknown> = {}): unknown {
   const { outputText } = ts.transpileModule(source, {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   });
   const module = { exports: {} };
-  runInNewContext(outputText, { module, exports: module.exports });
+  runInNewContext(outputText, { ...bindings, module, exports: module.exports });
   return module.exports;
 }
 
@@ -64,7 +68,7 @@ describe('counts-only status histogram', () => {
     expect(imports).toEqual([{ module: "'@muneral/types'", typeOnly: true }]);
     expect(SOURCE).not.toMatch(/\b(?:process|prisma|request)\b/i);
 
-    const payload = await readCountsOnlyStatusHistogram(makeReader([], 0), COHORT);
+    const payload = await readCountsOnlyStatusHistogram(makeReader([], 0), SCOPE_VERSION);
     expect(JSON.parse(payload).scope_version).toBe('fixture-scope-1');
   });
 
@@ -75,13 +79,51 @@ describe('counts-only status histogram', () => {
   });
 
   it.each([
-    { workspaceId: 'fixture-scope-1' },
-    { ...COHORT, projectId: 'fixture-scope-1' },
-  ])('refuses when a cohort identifier equals the scope label', async (cohort) => {
+    ['empty', '[]'],
+    ['malformed', "['not-a-project-uuid']"],
+  ])('refuses an %s project list at load before any query', (_description, replacement) => {
+    const malformed = SOURCE.replace(/projectIds: \[[^\]]*\]/, `projectIds: ${replacement}`);
+    expect(malformed).not.toBe(SOURCE);
     const reader = makeReader([], 0);
-    await expectRefusal(readCountsOnlyStatusHistogram(reader, cohort));
+    const source = `${malformed}\nvoid readCountsOnlyStatusHistogram(reader, '${SCOPE_VERSION}');`;
+
+    expect(() => evaluateAdapter(source, { reader })).toThrow(REFUSAL);
     expect(reader.task.groupBy).not.toHaveBeenCalled();
     expect(reader.task.count).not.toHaveBeenCalled();
+  });
+
+  it('has no separate cohort parameter for the same scope label', () => {
+    const file = ts.createSourceFile('adapter.ts', SOURCE, ts.ScriptTarget.Latest, true);
+    const reader = file.statements.filter(ts.isFunctionDeclaration)
+      .find((declaration) => declaration.name?.text === 'readCountsOnlyStatusHistogram');
+    expect(reader?.parameters.map((parameter) => [
+      parameter.name.getText(file),
+      parameter.type?.getText(file),
+    ])).toEqual([
+      ['db', 'StatusCohortReader'],
+      ['scopeVersion', 'string'],
+      ['now', '() => Date'],
+    ]);
+  });
+
+  it.each([
+    ['unknown', 'unlisted-scope-1'],
+    ['malformed', 'UNLISTED_SCOPE'],
+  ])('refuses a %s scope before either query', async (_description, scopeVersion) => {
+    const reader = makeReader([], 0);
+    await expectRefusal(readCountsOnlyStatusHistogram(reader, scopeVersion));
+    expect(reader.task.groupBy).not.toHaveBeenCalled();
+    expect(reader.task.count).not.toHaveBeenCalled();
+  });
+
+  it('refuses a null status group even when the independent count agrees', async () => {
+    const reader = makeReader([{ status: null, _count: { _all: 1 } }], 1);
+    await expectRefusal(readCountsOnlyStatusHistogram(reader, SCOPE_VERSION));
+  });
+
+  it('refuses an invalid-only constructor status cohort', async () => {
+    const reader = makeReader([{ status: 'constructor', _count: { _all: 1 } }], 1);
+    await expectRefusal(readCountsOnlyStatusHistogram(reader, SCOPE_VERSION));
   });
 
   it('keeps nine internal buckets with distinct unknown and invalid counts', () => {
@@ -105,19 +147,19 @@ describe('counts-only status histogram', () => {
     { groups: [], total: 0 },
     { groups: [group('blocked', 3)], total: 3 },
   ])('emits zero done only for a reconciled set with no done group', async ({ groups, total }) => {
-    const payload = await readCountsOnlyStatusHistogram(makeReader(groups, total), COHORT);
+    const payload = await readCountsOnlyStatusHistogram(makeReader(groups, total), SCOPE_VERSION);
     expect(JSON.parse(payload)).toMatchObject({
       'tasks.total_current': String(total),
       'tasks.source_done_current': '0',
     });
   });
 
-  it('emits only the two metric keys and exposes no other status names', async () => {
+  it('emits only the two metrics with no status, completeness or as_of claim', async () => {
     const groups = [
       group('todo'), group('in_progress'), group('review'), group('blocked'), group('done'),
-      group('cancelled'), group('archived'), group(null), group('unlisted_status'),
+      group('cancelled'), group('archived'),
     ];
-    const payload = await readCountsOnlyStatusHistogram(makeReader(groups, 9), COHORT);
+    const payload = await readCountsOnlyStatusHistogram(makeReader(groups, 7), SCOPE_VERSION);
     expect(Object.keys(JSON.parse(payload))).toEqual([
       'contract', 'scope_version', 'capture_start', 'capture_end',
       'tasks.total_current', 'tasks.source_done_current',
@@ -125,35 +167,30 @@ describe('counts-only status histogram', () => {
     expect(payload).not.toMatch(/by_status|todo|in_progress|review|blocked|cancelled|archived|unknown|invalid|unlisted_status/);
   });
 
-  it.each([undefined, 'project-1'])(
-    'groups only by status and independently counts the same cohort (%s)',
-    async (projectId) => {
-      const reader = makeReader([group('done', 3)], 3);
-      const acceptsGeneratedPrismaClient:
-        PrismaClient extends Parameters<typeof readCountsOnlyStatusHistogram>[0] ? true : never = true;
-      expect(acceptsGeneratedPrismaClient).toBe(true);
+  it('uses only the scope projectId IN list for grouping and independent count', async () => {
+    const reader = makeReader([group('done', 3)], 3);
+    const acceptsGeneratedPrismaClient:
+      PrismaClient extends Parameters<typeof readCountsOnlyStatusHistogram>[0] ? true : never = true;
+    expect(acceptsGeneratedPrismaClient).toBe(true);
 
-      const payload = await readCountsOnlyStatusHistogram(reader, { ...COHORT, projectId });
-      const where = projectId
-        ? { project: { workspaceId: 'workspace-1' }, projectId }
-        : { project: { workspaceId: 'workspace-1' } };
+    const payload = await readCountsOnlyStatusHistogram(reader, SCOPE_VERSION);
+    const where = { projectId: { in: PROJECT_IDS } };
 
-      expect(reader.task.groupBy.mock.calls).toEqual([[{ where, by: ['status'], _count: { _all: true } }]]);
-      expect(reader.task.count.mock.calls).toEqual([[{ where }]]);
-      expect(JSON.parse(payload)).toMatchObject({
-        'tasks.total_current': '3',
-        'tasks.source_done_current': '3',
-      });
-    },
-  );
+    expect(reader.task.groupBy.mock.calls).toEqual([[{ where, by: ['status'], _count: { _all: true } }]]);
+    expect(reader.task.count.mock.calls).toEqual([[{ where }]]);
+    expect(JSON.parse(payload)).toMatchObject({
+      'tasks.total_current': '3',
+      'tasks.source_done_current': '3',
+    });
+  });
 
   it('reproduces the exact fixture and brackets both reads with capture instants', async () => {
     const reader = makeReader([
       group('todo', 3), group('in_progress', 2), group('review'), group('done', 4),
-      group('cancelled'), group(null),
+      group('cancelled', 2),
     ], 12);
     const now = jest.fn(() => END).mockReturnValueOnce(START);
-    const payload = await readCountsOnlyStatusHistogram(reader, COHORT, now);
+    const payload = await readCountsOnlyStatusHistogram(reader, SCOPE_VERSION, now);
     const callOrder = [
       now.mock.invocationCallOrder[0],
       reader.task.groupBy.mock.invocationCallOrder[0],
@@ -170,7 +207,7 @@ describe('counts-only status histogram', () => {
 
   it('serializes the largest safe count as a decimal string', async () => {
     const total = Number.MAX_SAFE_INTEGER;
-    const payload = await readCountsOnlyStatusHistogram(makeReader([group('done', total)], total), COHORT);
+    const payload = await readCountsOnlyStatusHistogram(makeReader([group('done', total)], total), SCOPE_VERSION);
     expect(JSON.parse(payload)).toMatchObject({
       'tasks.total_current': '9007199254740991',
       'tasks.source_done_current': '9007199254740991',
@@ -180,32 +217,37 @@ describe('counts-only status histogram', () => {
   it.each([Number.MAX_SAFE_INTEGER + 1, -1, 0.5, Number.NaN])(
     'refuses an unsafe independent count of %s',
     async (total) => {
-      await expectRefusal(readCountsOnlyStatusHistogram(makeReader([], total), COHORT));
+      await expectRefusal(readCountsOnlyStatusHistogram(makeReader([], total), SCOPE_VERSION));
     },
   );
 
   it.each([Number.MAX_SAFE_INTEGER + 1, -1, 0.5, Number.NaN])(
     'refuses an unsafe group count of %s',
     async (count) => {
-      await expectRefusal(readCountsOnlyStatusHistogram(makeReader([group('done', count)], 0), COHORT));
+      await expectRefusal(readCountsOnlyStatusHistogram(makeReader([group('done', count)], 0), SCOPE_VERSION));
     },
   );
 
   it.each(['done', 'blocked'])(
     'refuses when the grouped %s counts differ from the independent count',
     async (status) => {
-      await expectRefusal(readCountsOnlyStatusHistogram(makeReader([group(status, 3)], 2), COHORT));
+      await expectRefusal(readCountsOnlyStatusHistogram(makeReader([group(status, 3)], 2), SCOPE_VERSION));
     },
   );
 
+  it('refuses out-of-cohort groups from a faulty mock through the count mismatch', async () => {
+    const reader = makeReader([group('done', 4), group('cancelled')], 4);
+    await expectRefusal(readCountsOnlyStatusHistogram(reader, SCOPE_VERSION));
+  });
+
   it('refuses when combining status groups would overflow a bucket', async () => {
     const groups = [group('future_status', Number.MAX_SAFE_INTEGER), group('other_future_status')];
-    await expectRefusal(readCountsOnlyStatusHistogram(makeReader(groups, Number.MAX_SAFE_INTEGER), COHORT));
+    await expectRefusal(readCountsOnlyStatusHistogram(makeReader(groups, Number.MAX_SAFE_INTEGER), SCOPE_VERSION));
   });
 
   it('refuses a clock that moves backward between the reads', async () => {
     const now = jest.fn(() => START).mockReturnValueOnce(END);
-    await expectRefusal(readCountsOnlyStatusHistogram(makeReader([], 0), COHORT, now));
+    await expectRefusal(readCountsOnlyStatusHistogram(makeReader([], 0), SCOPE_VERSION, now));
   });
 
   class OverridesISOString extends Date {
@@ -233,7 +275,7 @@ describe('counts-only status histogram', () => {
   ] as const)('serializes the intrinsic clock time despite a %s override', async (_method, ClockDate) => {
     const now = jest.fn(() => new ClockDate(END.getTime()))
       .mockReturnValueOnce(new ClockDate(START.getTime()));
-    const payload = await readCountsOnlyStatusHistogram(makeReader([], 0), COHORT, now);
+    const payload = await readCountsOnlyStatusHistogram(makeReader([], 0), SCOPE_VERSION, now);
 
     const { capture_start, capture_end } = JSON.parse(payload);
     expect([capture_start, capture_end]).toEqual([
@@ -247,11 +289,11 @@ describe('counts-only status histogram', () => {
     ['invalid Date', () => new Date(Number.NaN)],
     ['extended year', () => new Date('+010000-01-01T00:00:00.000Z')],
   ] as const)('returns the fixed refusal for a %s from the clock', async (_label, now) => {
-    await expectRefusal(readCountsOnlyStatusHistogram(makeReader([], 0), COHORT, now));
+    await expectRefusal(readCountsOnlyStatusHistogram(makeReader([], 0), SCOPE_VERSION, now));
   });
 
   it('wraps clock exceptions in the same fixed refusal', async () => {
-    await expectRefusal(readCountsOnlyStatusHistogram(makeReader([], 0), COHORT, () => {
+    await expectRefusal(readCountsOnlyStatusHistogram(makeReader([], 0), SCOPE_VERSION, () => {
       throw new Error('synthetic clock diagnostic');
     }));
   });
@@ -264,7 +306,7 @@ describe('counts-only status histogram', () => {
     Object.assign(Object.create({ title: 'synthetic inherited field' }), group('todo')),
     { status: 'todo', _count: { _all: 1, title: 1 } },
   ])('refuses unexpected fields in grouped results', async (row) => {
-    await expectRefusal(readCountsOnlyStatusHistogram(makeReader([row], 1), COHORT));
+    await expectRefusal(readCountsOnlyStatusHistogram(makeReader([row], 1), SCOPE_VERSION));
   });
 
   it.each(['groupBy', 'count'] as const)(
@@ -279,7 +321,7 @@ describe('counts-only status histogram', () => {
         .map((level) => jest.spyOn(console, level).mockImplementation(() => {}));
 
       try {
-        const result = readCountsOnlyStatusHistogram(reader, COHORT);
+        const result = readCountsOnlyStatusHistogram(reader, SCOPE_VERSION);
         await expectRefusal(result);
         await expect(result).rejects.not.toBe(source);
         await expect(result).rejects.not.toHaveProperty('cause');

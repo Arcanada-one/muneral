@@ -1,11 +1,26 @@
 import type { TaskStatus } from '@muneral/types';
 
-const ALLOWED_SCOPE_VERSIONS = ['fixture-scope-1'] as const;
-const [SCOPE_VERSION] = ALLOWED_SCOPE_VERSIONS;
+const ALLOWED_SCOPES: readonly { scopeVersion: string; projectIds: readonly string[] }[] = [
+  {
+    scopeVersion: 'fixture-scope-1',
+    projectIds: [
+      '00000000-0000-4000-8000-000000000001',
+      '00000000-0000-4000-8000-000000000002',
+    ],
+  },
+];
 const REFUSAL = 'D182_COUNTS_REFUSED';
+const SCOPE_VERSION_FORMAT = /^[a-z][a-z0-9-]{2,40}$/;
+const PROJECT_UUID_FORMAT = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-if (!ALLOWED_SCOPE_VERSIONS.every((version) => /^[a-z][a-z0-9-]{2,40}$/.test(version))) {
-  throw new Error(REFUSAL);
+for (const { scopeVersion, projectIds } of ALLOWED_SCOPES) {
+  if (!SCOPE_VERSION_FORMAT.test(scopeVersion) || PROJECT_UUID_FORMAT.test(scopeVersion)) {
+    throw new Error(REFUSAL);
+  }
+  if (!Array.isArray(projectIds) || projectIds.length === 0 ||
+      projectIds.some((projectId) => typeof projectId !== 'string' || !PROJECT_UUID_FORMAT.test(projectId))) {
+    throw new Error(REFUSAL);
+  }
 }
 
 const EMPTY_PUBLIC_COUNTS = {
@@ -22,14 +37,8 @@ const EMPTY_COUNTS = { ...EMPTY_PUBLIC_COUNTS, unknown: 0, invalid: 0 };
 type Bucket = keyof typeof EMPTY_COUNTS;
 const BUCKETS = Object.keys(EMPTY_COUNTS) as Bucket[];
 
-interface Cohort {
-  workspaceId: string;
-  projectId?: string;
-}
-
 interface CohortWhere {
-  project: { workspaceId: string };
-  projectId?: string;
+  projectId: { in: string[] };
 }
 
 interface StatusGroup {
@@ -98,27 +107,28 @@ function formatCaptureInstant(instant: Date): string {
 /** Internal adapter. The interval brackets both reads without claiming an atomic snapshot. */
 export async function readCountsOnlyStatusHistogram(
   db: StatusCohortReader,
-  cohort: Cohort,
+  scopeVersion: string,
   now: () => Date = () => new Date(),
 ): Promise<string> {
   try {
-    const { workspaceId, projectId } = cohort;
-    if (SCOPE_VERSION === workspaceId || SCOPE_VERSION === projectId) throw new Error(REFUSAL);
-    const where: CohortWhere = {
-      project: { workspaceId },
-      ...(projectId ? { projectId } : {}),
-    };
+    if (typeof scopeVersion !== 'string' || !SCOPE_VERSION_FORMAT.test(scopeVersion)) {
+      throw new Error(REFUSAL);
+    }
+    const scope = ALLOWED_SCOPES.find((entry) => entry.scopeVersion === scopeVersion);
+    if (!scope) throw new Error(REFUSAL);
+    const where = (): CohortWhere => ({ projectId: { in: [...scope.projectIds] } });
 
     const captureStart = formatCaptureInstant(now());
-    const groups = await db.task.groupBy({ where, by: ['status'], _count: { _all: true } });
-    const total = await db.task.count({ where });
+    const groups = await db.task.groupBy({ where: where(), by: ['status'], _count: { _all: true } });
+    const total = await db.task.count({ where: where() });
     const captureEnd = formatCaptureInstant(now());
     if (captureEnd < captureStart) throw new Error(REFUSAL);
 
     const byStatus = buildCounts(groups, total);
+    if (byStatus.unknown > 0 || byStatus.invalid > 0) throw new Error(REFUSAL);
     return JSON.stringify({
       contract: 'D182-ASTAT-M1-COUNTS/2',
-      scope_version: SCOPE_VERSION,
+      scope_version: scope.scopeVersion,
       capture_start: captureStart,
       capture_end: captureEnd,
       'tasks.total_current': String(total),
