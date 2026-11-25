@@ -112,6 +112,14 @@ class TestedTreeQualificationTests(unittest.TestCase):
         self.assertEqual(hashlib.sha256(workflow).hexdigest(), tested_tree_module.QUALIFIED_WORKFLOW_SHA256)
         self.assertTrue(tested_tree_module.runtime_inputs_qualified(workflow))
 
+    def test_one_byte_workflow_change_refuses(self):
+        *_, workflow = fixture()
+        replacement = b" " if workflow[-1:] != b" " else b"\n"
+        changed = workflow[:-1] + replacement
+        self.assertEqual(len(changed), len(workflow))
+        self.assertEqual(sum(left != right for left, right in zip(workflow, changed)), 1)
+        self.assertFalse(tested_tree_module.runtime_inputs_qualified(changed))
+
     def test_comment_unrelated_job_malformed_and_missing_workflows_refuse(self):
         *_, workflow = fixture()
         mutations = (
