@@ -5,13 +5,32 @@ const API_BASE =
   process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3500';
 
 type SessionRequest = InternalAxiosRequestConfig & {
-  sessionAccessToken?: string;
+  loginSessionId?: string;
   _retry?: boolean;
   skipAuthRefresh?: boolean;
 };
 
-let refreshedAccess: { sessionToken: string; token: string } | undefined;
-const pendingRefresh = new Map<string, Promise<string>>();
+type Login = {
+  id: string;
+  refreshedAccess?: string;
+  pendingRefresh?: Promise<void>;
+};
+
+let activeLogin: Login | undefined;
+
+async function readActiveSession() {
+  const previousLogin = activeLogin;
+  const session = await getSession();
+  const id = session?.loginSessionId;
+  if (activeLogin !== previousLogin && activeLogin?.id !== id) {
+    // An older session response must not overwrite a turnover already observed.
+    return { session: null, login: undefined };
+  }
+  if (activeLogin?.id !== id) {
+    activeLogin = id ? { id } : undefined;
+  }
+  return { session, login: activeLogin };
+}
 
 export const apiClient = axios.create({
   baseURL: `${API_BASE}/api/v1`,
@@ -24,41 +43,49 @@ export const apiClient = axios.create({
 // Attach JWT to every request when the caller did not already set Authorization
 // (agent-scoped canaries and explicit Bearer headers must not be overwritten).
 apiClient.interceptors.request.use(async (config: SessionRequest) => {
-  if (typeof window !== 'undefined' && !config.headers.get('Authorization')) {
-    const session = await getSession();
-    const token = (session as Record<string, unknown> | null)?.accessToken;
-    if (typeof token === 'string' && token.length > 0) {
-      config.sessionAccessToken = token;
-      const access = refreshedAccess?.sessionToken === token ? refreshedAccess.token : token;
+  if (typeof window === 'undefined') return config;
+  if (config._retry && config.loginSessionId) {
+    const { login } = await readActiveSession();
+    if (!login?.refreshedAccess || login.id !== config.loginSessionId) {
+      throw new Error('The session has changed');
+    }
+    config.headers.set('Authorization', `Bearer ${login.refreshedAccess}`);
+  } else if (!config.headers.get('Authorization')) {
+    const { session, login } = await readActiveSession();
+    const access = login?.refreshedAccess ?? session?.accessToken;
+    if (access) {
+      config.loginSessionId = login?.id;
       config.headers.set('Authorization', `Bearer ${access}`);
     }
   }
   return config;
 });
 
-async function refreshSessionAccess(sessionToken: string): Promise<string> {
-  const session = await getSession() as Record<string, unknown> | null;
-  if (session?.accessToken !== sessionToken) {
-    throw new Error('The session has changed');
-  }
+async function refreshSessionAccess(login: Login, refreshToken: string | null | undefined): Promise<void> {
+  let access: string;
   try {
-    if (typeof session.refreshToken !== 'string' || session.refreshToken.length === 0) {
+    if (!refreshToken) {
       throw new Error('No refresh token available');
     }
     const { data } = await axios.post<{ access_token: string }>(
       `${API_BASE}/api/v1/auth/refresh`,
-      { refresh_token: session.refreshToken },
+      { refresh_token: refreshToken },
       { timeout: 15_000 },
     );
     if (typeof data.access_token !== 'string' || data.access_token.length === 0) {
       throw new Error('Invalid refresh response');
     }
-    refreshedAccess = { sessionToken, token: data.access_token };
-    return data.access_token;
+    access = data.access_token;
   } catch (error) {
-    await signOut({ redirect: true, callbackUrl: '/login' });
+    const current = await readActiveSession();
+    if (current.login === login) {
+      await signOut({ redirect: true, callbackUrl: '/login' });
+    }
     throw error;
   }
+  const current = await readActiveSession();
+  if (current.login !== login) throw new Error('The session has changed');
+  login.refreshedAccess = access;
 }
 
 // JWT refresh on 401
@@ -66,24 +93,25 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const request = error.config as SessionRequest | undefined;
-    const sessionToken = request?.sessionAccessToken;
-    if (error.response?.status !== 401 || !request || !sessionToken || request._retry || request.skipAuthRefresh) {
+    if (error.response?.status !== 401 || !request?.loginSessionId || request._retry || request.skipAuthRefresh) {
       throw error;
     }
 
+    const { session, login } = await readActiveSession();
+    if (!login || login.id !== request.loginSessionId) throw error;
+
     request._retry = true;
-    const cached = refreshedAccess?.sessionToken === sessionToken ? refreshedAccess.token : undefined;
+    const cached = login.refreshedAccess;
     if (cached && request.headers.get('Authorization') !== `Bearer ${cached}`) {
-      request.headers.set('Authorization', `Bearer ${cached}`);
       return apiClient(request);
     }
 
-    let refresh = pendingRefresh.get(sessionToken);
-    if (!refresh) {
-      refresh = refreshSessionAccess(sessionToken).finally(() => pendingRefresh.delete(sessionToken));
-      pendingRefresh.set(sessionToken, refresh);
+    if (!login.pendingRefresh) {
+      login.pendingRefresh = refreshSessionAccess(login, session?.refreshToken).finally(() => {
+        login.pendingRefresh = undefined;
+      });
     }
-    request.headers.set('Authorization', `Bearer ${await refresh}`);
+    await login.pendingRefresh;
     return apiClient(request);
   },
 );

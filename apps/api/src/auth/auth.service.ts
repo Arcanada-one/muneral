@@ -93,7 +93,7 @@ export class AuthService {
 
   /**
    * Verify Telegram Login Widget hash (HMAC-SHA256).
-   * See: https://core.telegram.org/widgets/login#checking-authorization
+   * See: https://core.telegram.org/widgets/login-legacy#checking-authorization
    */
   verifyTelegramLogin(dto: TelegramLoginDto): boolean {
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
@@ -102,7 +102,7 @@ export class AuthService {
     }
 
     const age = Math.floor(Date.now() / 1000) - dto.auth_date;
-    if (age < 0 || age > 86_400) {
+    if (age < -30 || age > 300) {
       return false;
     }
 

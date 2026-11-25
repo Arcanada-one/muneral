@@ -41,6 +41,7 @@ describe('Web authentication HTTP contract', () => {
   });
 
   beforeEach(() => {
+    jest.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-11-25T00:00:00Z'));
     jest.replaceProperty(process, 'env', {
       GITHUB_CLIENT_ID: 'synthetic-app-id',
       GITHUB_CLIENT_SECRET: 'synthetic-app-value',
@@ -107,15 +108,20 @@ describe('Web authentication HTTP contract', () => {
     },
   );
 
-  it('exchanges a genuine-format Telegram widget signature with optional fields omitted', async () => {
-    const response = await post('telegram').send(widgetData()).expect(200);
+  it.each([299, 300, -30])('accepts a signed Telegram Widget payload with age %i seconds', async (age) => {
+    const response = await post('telegram').send(widgetData(age)).expect(200);
     expect(findUnique).toHaveBeenCalledWith({ where: { telegramId: 1234n } });
     assertPair(response.body);
   });
 
-  it('refuses changed identity and stale signed data from the Telegram widget', async () => {
+  it.each([301, -31])('refuses a signed Telegram Widget payload with age %i seconds', async (age) => {
+    await post('telegram').send(widgetData(age)).expect(400);
+    expect(findUnique).not.toHaveBeenCalled();
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('refuses a changed identity from the Telegram widget', async () => {
     await post('telegram').send({ ...widgetData(), id: 4321 }).expect(400);
-    await post('telegram').send(widgetData(86_401)).expect(400);
     expect(findUnique).not.toHaveBeenCalled();
     expect(create).not.toHaveBeenCalled();
   });

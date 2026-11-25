@@ -1,7 +1,7 @@
+import { randomUUID } from 'node:crypto';
 import NextAuth from 'next-auth';
 import GitHub from 'next-auth/providers/github';
 import Credentials from 'next-auth/providers/credentials';
-import { verifyTelegramLogin } from './telegram';
 import { apiClient } from '@/lib/api/client';
 import { z } from 'zod';
 
@@ -42,10 +42,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (!result.success) return null;
 
         const data = result.data;
-        const botToken = process.env.TELEGRAM_BOT_TOKEN ?? '';
-
-        const valid = verifyTelegramLogin(data, botToken);
-        if (!valid) return null;
 
         try {
           const res = await apiClient.post<{ access_token: string; refresh_token: string }>(
@@ -85,12 +81,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (typeof u.accessToken === 'string') token.accessToken = u.accessToken;
         if (typeof u.refreshToken === 'string') token.refreshToken = u.refreshToken;
       }
+      if (account && user) token.loginSessionId = randomUUID();
       return token;
     },
     async session({ session, token }) {
       return Object.assign(session, {
         accessToken: token.accessToken,
         refreshToken: token.refreshToken,
+        loginSessionId: token.loginSessionId,
       });
     },
   },

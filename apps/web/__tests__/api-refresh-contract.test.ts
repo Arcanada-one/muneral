@@ -1,9 +1,18 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import axios, { AxiosError, type AxiosAdapter } from 'axios';
 import { getSession, signOut } from 'next-auth/react';
 import { apiClient } from '@/lib/api/client';
 
 vi.mock('next-auth/react', () => ({ getSession: vi.fn(), signOut: vi.fn() }));
+
+function session(loginSessionId: string) {
+  return { expires: '', loginSessionId, accessToken: 'old-access', refreshToken: 'session-refresh' };
+}
+
+const acceptRefreshed: AxiosAdapter = async (config) => {
+  if (config.headers.get('Authorization') === 'Bearer old-access') return expired()(config);
+  return { status: 200, statusText: 'OK', data: {}, headers: {}, config };
+};
 
 function expired(): AxiosAdapter {
   return async (config) => {
@@ -14,10 +23,10 @@ function expired(): AxiosAdapter {
 }
 
 describe('Web API refresh', () => {
+  afterEach(() => vi.restoreAllMocks());
+
   it('coalesces concurrent 401s and reuses the access JWT only for the originating session', async () => {
-    vi.mocked(getSession).mockResolvedValue({
-      expires: '', accessToken: 'old-access', refreshToken: 'session-refresh',
-    } as Awaited<ReturnType<typeof getSession>>);
+    vi.mocked(getSession).mockResolvedValue(session('steady-login'));
     const refresh = vi.spyOn(axios, 'post').mockResolvedValue({ data: { access_token: 'new-access' } });
     try {
       const requests: unknown[] = [];
@@ -40,6 +49,61 @@ describe('Web API refresh', () => {
     } finally {
       refresh.mockRestore();
     }
+  });
+
+  it.each(['success', 'failure'])('isolates a late refresh %s after a login change', async (outcome) => {
+    const active = vi.mocked(getSession);
+    active.mockResolvedValue(session('old-login'));
+    const oldRefresh = Promise.withResolvers<{ data: { access_token: string } }>();
+    const started = Promise.withResolvers<void>();
+    const post = vi.spyOn(axios, 'post').mockImplementationOnce(() => {
+      started.resolve();
+      return oldRefresh.promise;
+    }).mockResolvedValue({ data: { access_token: 'new-login-access' } });
+    const oldAdapter = vi.fn(expired());
+    const oldRequest = apiClient.get('/old-session', { adapter: oldAdapter });
+    const rejection = expect(oldRequest).rejects.toThrow(
+      outcome === 'success' ? 'The session has changed' : 'Refresh failed',
+    );
+    await started.promise;
+
+    // Same API credentials, but a new Auth.js login and a separate refresh.
+    active.mockResolvedValue(session('new-login'));
+    const next = await apiClient.get('/new-session', { adapter: acceptRefreshed });
+    expect(next.config.headers.get('Authorization')).toBe('Bearer new-login-access');
+    expect(post).toHaveBeenCalledTimes(2);
+    if (outcome === 'success') oldRefresh.resolve({ data: { access_token: 'old-login-access' } });
+    else oldRefresh.reject(new Error('Refresh failed'));
+
+    await rejection;
+    expect(oldAdapter).toHaveBeenCalledTimes(1);
+    expect(signOut).not.toHaveBeenCalled();
+    const latest = await apiClient.get('/follow-up', { adapter: acceptRefreshed });
+    expect(latest.config.headers.get('Authorization')).toBe('Bearer new-login-access');
+  });
+
+  it('rechecks the active login before even a cached-token retry reaches the adapter', async () => {
+    const original = session('cached-original');
+    const active = vi.mocked(getSession);
+    active.mockResolvedValue(original);
+    vi.spyOn(axios, 'post').mockResolvedValue({ data: { access_token: 'cached-access' } });
+    const started = Promise.withResolvers<void>();
+    const send401 = Promise.withResolvers<void>();
+    const adapter: AxiosAdapter = vi.fn(async (config) => {
+      started.resolve();
+      await send401.promise;
+      return expired()(config);
+    });
+
+    const first = apiClient.get('/late-401', { adapter });
+    const rejection = expect(first).rejects.toThrow('The session has changed');
+    await started.promise;
+    await apiClient.get('/populate-cache', { adapter: acceptRefreshed });
+    active.mockResolvedValueOnce(original).mockResolvedValue(session('cached-replacement'));
+    send401.resolve();
+    await rejection;
+    expect(adapter).toHaveBeenCalledTimes(1);
+    expect(signOut).not.toHaveBeenCalled();
   });
 
   it('preserves an explicit bearer header and returns its own 401', async () => {

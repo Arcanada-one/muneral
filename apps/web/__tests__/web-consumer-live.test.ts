@@ -45,7 +45,6 @@ describe.skipIf(!fixturePath)('MUN artifact actual web-to-API HTTP consumer seam
     expect(row.id).toBe(state.fixture.taskId); expect(row.projectId).toBe(state.fixture.projectId);query.clear();
   }, CANARY_TIMEOUT_MS);
   it('exchanges signed Telegram widget data through the actual NextAuth consumer and API', async () => {
-    process.env.TELEGRAM_BOT_TOKEN=state.fixture.telegramBotToken;
     const data:any={id:999001,first_name:'Local fixture',auth_date:Math.floor(Date.now()/1000)};
     const check=Object.entries(data).sort(([a],[b])=>a.localeCompare(b)).map(([k,v])=>`${k}=${v}`).join('\n');
     data.hash=createHmac('sha256',createHash('sha256').update(state.fixture.telegramBotToken).digest()).update(check).digest('hex');
