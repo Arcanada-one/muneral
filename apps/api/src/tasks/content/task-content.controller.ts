@@ -27,8 +27,8 @@ export class TaskContentController {
   @Post(':taskId/artifacts/bytes')
   @AgentScope('task-evidence')
   @UseInterceptors(FileInterceptor('content', {
-    // Busboy emits partsLimit at the limit itself. Four valid parts therefore
-    // need a limit of five; files/fields independently cap accepted parts at four.
+    // Multer treats the part limit as inclusive. The separate file and field
+    // limits cap accepted uploads at four parts.
     limits: { fileSize: MAX_CONTENT_BYTES, files: 1, fields: 3, fieldSize: 512, parts: 5 },
   }))
   uploadBytes(@Param('taskId', ParseUUIDPipe) taskId: string, @Req() req: AuthRequest,
