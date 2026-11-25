@@ -87,8 +87,11 @@ function buildCounts(groups: readonly StatusGroup[], total: number): Record<Buck
 }
 
 function formatCaptureInstant(instant: Date): string {
-  const utc = instant.toISOString();
-  if (utc.length !== 24) throw new Error(REFUSAL);
+  // Intrinsic getTime checks the Date brand without invoking an override or coercion.
+  const milliseconds = Date.prototype.getTime.call(instant);
+  const utc = Date.prototype.toISOString.call(new Date(milliseconds));
+  const isoUtc = /^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d\.\d{3}Z$/;
+  if (!isoUtc.test(utc)) throw new Error(REFUSAL);
   return utc;
 }
 

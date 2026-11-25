@@ -208,6 +208,48 @@ describe('counts-only status histogram', () => {
     await expectRefusal(readCountsOnlyStatusHistogram(makeReader([], 0), COHORT, now));
   });
 
+  class OverridesISOString extends Date {
+    override toISOString(): string {
+      return 'synthetic capture text!!';
+    }
+  }
+
+  class OverridesGetTime extends Date {
+    override getTime(): number {
+      return 0;
+    }
+  }
+
+  class OverridesPrimitiveConversion extends Date {
+    override [Symbol.toPrimitive](): never {
+      throw new Error('the formatter must not coerce the clock object');
+    }
+  }
+
+  it.each([
+    ['toISOString', OverridesISOString],
+    ['getTime', OverridesGetTime],
+    ['Symbol.toPrimitive', OverridesPrimitiveConversion],
+  ] as const)('serializes the intrinsic clock time despite a %s override', async (_method, ClockDate) => {
+    const now = jest.fn(() => new ClockDate(END.getTime()))
+      .mockReturnValueOnce(new ClockDate(START.getTime()));
+    const payload = await readCountsOnlyStatusHistogram(makeReader([], 0), COHORT, now);
+
+    const { capture_start, capture_end } = JSON.parse(payload);
+    expect([capture_start, capture_end]).toEqual([
+      '2026-11-25T19:00:00.000Z',
+      '2026-11-25T19:00:01.250Z',
+    ]);
+  });
+
+  it.each([
+    ['non-Date receiver', () => ({ toISOString: () => START.toISOString() }) as Date],
+    ['invalid Date', () => new Date(Number.NaN)],
+    ['extended year', () => new Date('+010000-01-01T00:00:00.000Z')],
+  ] as const)('returns the fixed refusal for a %s from the clock', async (_label, now) => {
+    await expectRefusal(readCountsOnlyStatusHistogram(makeReader([], 0), COHORT, now));
+  });
+
   it('wraps clock exceptions in the same fixed refusal', async () => {
     await expectRefusal(readCountsOnlyStatusHistogram(makeReader([], 0), COHORT, () => {
       throw new Error('synthetic clock diagnostic');
