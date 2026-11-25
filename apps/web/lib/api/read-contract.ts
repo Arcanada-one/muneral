@@ -23,7 +23,19 @@ const task = z.object({
   id, projectId: id, title: z.string(), status: z.custom<TaskStatus>((value) => TASK_STATUSES.includes(value as TaskStatus)),
   priority: z.enum(['critical', 'high', 'medium', 'low']), actorType: z.enum(['human', 'agent']).nullable(),
   createdAt: timestamp, updatedAt: timestamp,
-  description: z.string().nullable().optional(), tags: unpaginated(z.string()).optional(),
+  description: z.string().nullable().optional(),
+  tags: z.preprocess((value, ctx) => {
+    // Reject at the first invalid tag before Zod builds per-item issues.
+    if (Array.isArray(value)) {
+      for (const tag of value) {
+        if (typeof tag !== 'string') {
+          ctx.addIssue({ code: 'custom', message: 'Invalid task tag' });
+          return z.NEVER;
+        }
+      }
+    }
+    return value;
+  }, z.array(z.string())).optional(),
   estimateHours: z.union([z.number().finite(), z.string().regex(/^-?\d+(?:\.\d+)?$/)]).nullable().optional(), dueDate: z.string().nullable().optional(),
   parentId: id.nullable().optional(),
 });

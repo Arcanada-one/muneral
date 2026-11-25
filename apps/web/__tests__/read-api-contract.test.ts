@@ -1,7 +1,7 @@
 import { renderHook, waitFor, cleanup } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createElement, type PropsWithChildren } from 'react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, expectTypeOf, it, vi } from 'vitest';
 import { useTask, useTasks, useChecklist, useActivity } from '@/lib/api/tasks';
 import { useWorkspaces } from '@/lib/api/workspaces';
 import { useProject } from '@/lib/api/projects';
@@ -120,9 +120,22 @@ describe('unpaginated API collections', () => {
   });
 
   it('reads tasks with more than 200 tags and rejects non-string tags', () => {
+    expectTypeOf<ReturnType<typeof readTask>['tags']>().toEqualTypeOf<string[] | undefined>();
+    expectTypeOf<ReturnType<typeof readTaskPage>['data'][number]['tags']>().toEqualTypeOf<string[] | undefined>();
     const tags = Array.from({ length: 201 }, (_, index) => `tag-${index}`);
     expect(readTask({ ...task, tags }).tags).toEqual(tags);
     expect(() => readTask({ ...task, tags: [...tags, 1] })).toThrow(/invalid response shape/);
+  });
+
+  it('stops reading tags at the first invalid element for both task readers', () => {
+    const tags = [42, 'later'];
+    const readLater = vi.fn(() => 'later');
+    Object.defineProperty(tags, 1, { get: readLater });
+    const item = { ...task, tags };
+    expect(() => readTask(item)).toThrow(/invalid response shape/);
+    expect(() => readTaskPage({ items: [item], total: 1, limit: 20, offset: 0 }))
+      .toThrow(/invalid response shape/);
+    expect(readLater).not.toHaveBeenCalled();
   });
 });
 describe('invalid bodies never become successful empty reads', () => {
