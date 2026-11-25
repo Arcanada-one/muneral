@@ -43,8 +43,8 @@ minimumReleaseAgeExclude:
 overrides:
   # Per major line: minimatch@3 wants the CJS 1.x shape, and collapsing it into
   # 5.x breaks it with `expand is not a function` — measured, not feared.
-  'brace-expansion@^1.0.0': ^1.1.18
-  'brace-expansion@^5.0.0': ^5.0.9
+  'brace-expansion@^1.0.0': ^1.1.20
+  'brace-expansion@^5.0.0': ^5.0.11
   # ARCA-0209: @prisma/config 7.8.0 pins deepmerge-ts 7.1.5, which carries a high
   # advisory fixed only in 8.0.0. Version-selector key, so it applies by RESOLVED
   # version rather than by declared range.
@@ -64,10 +64,10 @@ overrides:
   postcss: ^8.5.23
   socket.io-parser: ^4.2.7
   axios: ">=1.18.0"
-  body-parser: ">=2.3.0"
+  body-parser: ">=2.4.0"
   form-data: ">=4.0.6"
-  multer: ">=2.2.0"
-  sharp: ">=0.35.0"
+  multer: ">=2.5.0"
+  sharp: ">=0.35.5"
   ws: ">=8.21.0"
   # GHSA-73wf-gq98-2v4g / GHSA-c83g-rgw3-j3cx: unbounded memory growth / prototype
   # write, both fixed in 4.28.7.
@@ -96,4 +96,11 @@ overrides:
   # 2026-12-01 -- reason, measurements and the check command are in the `typescript`
   # entry of .github/dependabot.yml. Remove this line FIRST when migrating, or every
   # measurement is of 5.9.3 (A2-304b measured that trap).
+  # deps-11: Dependabot critical/high with published fixes (picomatch withdrawn/no fix skipped;
+  # zod 3.x has no 3.x patch for GHSA-mrhx — major 4.6.6 deferred).
+  seroval: ">=1.6.8"
+  engine.io: ">=6.6.10"
+  follow-redirects: ">=1.16.2"
+  source-map-js: ">=1.2.2"
+
   typescript: 5.9.3

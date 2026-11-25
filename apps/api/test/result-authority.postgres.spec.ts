@@ -748,8 +748,9 @@ describe('Committed-result authority — PostgreSQL proofs', () => {
 
   it('16. NEGATIVE CONTROL: only the disposable instance is reachable', () => {
     const url = pg.url();
-    expect(url).toContain('localhost');
-    expect(url).toContain(String(pg.port()));
+    const target = new URL(url);
+    expect(['localhost', '127.0.0.1']).toContain(target.hostname);
+    expect(target.port).toBe(String(pg.port()));
     expect(url).toContain('muneral_result_authority_test');
     // The suite never reads an ambient DATABASE_URL.
     expect(url).not.toBe(process.env.DATABASE_URL);

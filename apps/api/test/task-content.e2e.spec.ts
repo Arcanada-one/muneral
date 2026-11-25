@@ -159,6 +159,22 @@ describe('Task content artifacts (MUN-ARTIFACTS, e2e)', () => {
     expect(await prisma.taskArtifactRevision.count({ where: { taskId: task.id } })).toBe(0);
   });
 
+  it('accepts exactly 512 bytes of multipart metadata and rejects a larger field', async () => {
+    const task = await assignedTask();
+    const name = '\u{1f539}'.repeat(128);
+    expect(Buffer.byteLength(name)).toBe(512);
+    const uploadNamedFile = (value: string) => http().post(`/tasks/${task.id}/artifacts/bytes`)
+      .set('Authorization', `Bearer ${executorKey}`)
+      .field('name', value).field('contentType', 'application/octet-stream').field('sha256', sha)
+      .attach('content', bytes, 'content.bin');
+
+    const accepted = await uploadNamedFile(name).expect(201);
+    expect(accepted.body).toMatchObject({ name, sha256: sha, sizeBytes: bytes.length });
+    const rejected = await uploadNamedFile(`${name}x`).expect(400);
+    expect(rejected.body).toMatchObject({ message: 'Field value too long - name' });
+    expect(await prisma.taskArtifactRevision.count({ where: { taskId: task.id } })).toBe(1);
+  });
+
   it('refuses byte writes by unassigned/foreign/creator-only keys and keeps DB byte limits', async () => {
     const task = await assignedTask();
     for (const key of [strangerKey, foreignKey, creatorKey]) await uploadFile(task.id, bytes, key).expect(403);
