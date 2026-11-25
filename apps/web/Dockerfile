@@ -1,6 +1,6 @@
 # MUN-0084: the Muneral web app (Next.js) served at app.muneral.com via nginx -> 127.0.0.1:3501.
 # Build context is the REPO ROOT (see docker-compose.prod.yml): the web depends on @muneral/types.
-FROM node:26.13.0-alpine@sha256:8996bb5821d62a8fd9bb27c1cb07462f3fdce6e47d640c6a881ead0b064ce216 AS builder
+FROM node:26.13.1-alpine@sha256:6bd9ab43c0ec0190ca7b2d193906cb8b7edf6e7f4afa43ddeccd6452710bffb5 AS builder
 WORKDIR /app
 
 # Node 26+ official images no longer ship corepack. Same pinning as apps/api/Dockerfile.
@@ -28,7 +28,7 @@ RUN pnpm --filter @muneral/types build
 RUN pnpm --filter @muneral/web build
 
 # ---- production image ----
-FROM node:26.13.0-alpine@sha256:8996bb5821d62a8fd9bb27c1cb07462f3fdce6e47d640c6a881ead0b064ce216 AS production
+FROM node:26.13.1-alpine@sha256:6bd9ab43c0ec0190ca7b2d193906cb8b7edf6e7f4afa43ddeccd6452710bffb5 AS production
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
