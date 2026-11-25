@@ -35,6 +35,7 @@ import type { WorkspaceDigestGrantEntry } from '../auth/workspace-digest-grants.
 import { digestRenewalDueAt } from '../auth/workspace-digest-grants.js';
 import { QueryWorkspaceDigestDto } from './dto/query-workspace-digest.dto.js';
 import { QueryWorkspaceDigestTransitionsDto } from './dto/query-workspace-digest-transitions.dto.js';
+import { statusOnlyCohortQuery } from './status-only-cohort.js';
 import {
   buildActiveStatusStalenessReport,
   type ActiveStatusStalenessReport,
@@ -918,13 +919,9 @@ export class TasksService {
 
     let statusRows: { status: string }[] | undefined;
     if (includeStatusHistogram) {
-      statusRows = await this.prisma.task.findMany({
-        where: {
-          project: { workspaceId },
-          ...(dto.projectId ? { projectId: dto.projectId } : {}),
-        },
-        select: { status: true },
-      });
+      statusRows = await this.prisma.task.findMany(
+        statusOnlyCohortQuery(workspaceId, dto.projectId),
+      );
     }
 
     const report = buildDigestTransitionsReport({
