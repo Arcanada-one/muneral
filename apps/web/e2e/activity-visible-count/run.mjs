@@ -24,11 +24,6 @@ const RESULT_SCHEMA = 'ActivityVisibleCountBrowser/v1';
 const PRIVATE_PROCESS_SCHEMA = 'ActivityVisibleCountProcess/v1';
 const FIXTURE_TIMEOUT_MS = 180_000;
 const STEP_TIMEOUT_MS = 15_000;
-// First paint after a cold Vite transform under CDP Fetch is slower than a
-// per-scenario step, especially on deps PRs that churn node_modules. Keep
-// scenario STEP_TIMEOUT_MS unchanged; only the initial "Activity Log" wait
-// may use this longer bound (still inside FIXTURE_TIMEOUT_MS).
-const INITIAL_PAGE_TIMEOUT_MS = 60_000;
 const CHILD_TIMEOUT_MS = 15_000;
 const CAPTURE_LIMIT_BYTES = 64 * 1024;
 const RESULT_LIMIT_BYTES = 16 * 1024;
@@ -742,25 +737,8 @@ async function createViteServer(state) {
     server: {
       host: '127.0.0.1', port: 0, strictPort: false, hmr: false, ws: false, watch: null, open: false,
       fs: { strict: true, allow: [state.repoRoot, state.privateRoot] },
-      // Warm the fixture graph before CDP Fetch proxies every module request.
-      warmup: {
-        clientFiles: [
-          path.join(state.fixtureRoot, 'index.html'),
-          path.join(state.fixtureRoot, 'main.tsx'),
-        ],
-      },
     },
   });
-}
-
-async function prewarmFixtureModules(state) {
-  // Explicit transforms cover runners where warmup races listen(); failures here
-  // stay soft so a later CDP assertion still owns the measured verdict.
-  await Promise.allSettled([
-    state.server.transformRequest('/main.tsx'),
-    state.server.transformRequest('/index.html'),
-    state.server.transformRequest('/synthetic-api-client.mjs'),
-  ]);
 }
 
 async function attachPage(state, browser) {
@@ -808,7 +786,7 @@ async function attachPage(state, browser) {
   const loaded = state.cdp.waitFor('Page.loadEventFired', state.pageSessionId);
   await state.cdp.send('Page.navigate', { url: baseUrl }, state.pageSessionId);
   await loaded;
-  await waitForBodyText(state.cdp, state.pageSessionId, 'Activity Log', INITIAL_PAGE_TIMEOUT_MS);
+  await waitForBodyText(state.cdp, state.pageSessionId, 'Activity Log');
 }
 
 async function runScenarios(state) {
@@ -1013,7 +991,6 @@ async function runFixture() {
     if (!address || typeof address !== 'object' || !Number.isInteger(address.port) || address.port < 1) {
       throw fail('SERVER_ADDRESS_UNAVAILABLE');
     }
-    await prewarmFixtureModules(state);
     state.phase = 'BROWSER_SPAWN_FAILED';
     state.browser = await launchBrowserAfterVerification(state, () => {
       return spawnCaptured(EXPECTED_BROWSER_PATH, browserArguments(state.chromeProfile), {
@@ -1175,9 +1152,6 @@ export const __test = Object.freeze({
   RESULT_SCHEMA,
   FAILURE_REASONS: Object.freeze([...FAILURE_REASONS]),
   SCENARIOS,
-  STEP_TIMEOUT_MS,
-  INITIAL_PAGE_TIMEOUT_MS,
-  FIXTURE_TIMEOUT_MS,
   CHROME_SOCKET_PATH_LIMIT,
   atomicPublishJson,
   browserArguments,
