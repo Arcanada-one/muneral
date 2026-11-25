@@ -1591,13 +1591,11 @@ def validate_candidate_dependency_setup(manifest: dict, repo_path: str | Path,
 
     The manifest is caller-supplied data, never a command source. This function checks its exact
     policy, subject, range, package scope and seven Git/blob/content pins, then returns only the
-    fixed pnpm operations supported by this profile (frozen install with scripts disabled, the
-    `pnpm --dir . exec prisma generate --schema apps/api/prisma/schema.prisma`, then the
-    @muneral/types build. Prisma receives a fixed dummy DATABASE_URL only in that generation
-    step's environment; caller input cannot supply commands or environment values. This follows
-    the Auth dependency-setup shape with Muneral's explicit schema because
-    ignore-scripts would otherwise leave @prisma/client ungenerated for apps/api
-    type_check). Its JSON shape is exactly
+    fixed pnpm operations supported by this profile: frozen install with scripts disabled,
+    the @muneral/types build, and root Prisma client generation. Generation explicitly selects
+    the qualified Muneral config and schema, with a fixed dummy DATABASE_URL scoped to that step.
+    Without generation, the frozen install leaves @prisma/client ungenerated for the API typecheck.
+    The manifest never supplies commands or environment values. Its JSON shape is exactly
     {schema, policy, repository, base, head, working_directory, scope, files}; each files value is
     {blob_oid, sha256, bytes}. The workflow is responsible for executing those literal operations
     after this function succeeds.
@@ -1635,13 +1633,20 @@ def validate_candidate_dependency_setup(manifest: dict, repo_path: str | Path,
         try:
             base_oid = _candidate_setup_git(repo, "rev-parse", "--verify", f"{base}:{relative}").decode().strip()
             head_oid = _candidate_setup_git(repo, "rev-parse", "--verify", f"{head}:{relative}").decode().strip()
-            path = repo / relative
-            mode = path.lstat().st_mode
+            path = repo
+            parts = Path(relative).parts
+            for component in parts[:-1]:
+                path /= component
+                if not stat.S_ISDIR(path.lstat().st_mode):
+                    raise ValueError("Prisma generation input has an unsafe parent path")
+            path /= parts[-1]
+            if not stat.S_ISREG(path.lstat().st_mode):
+                raise ValueError("Prisma generation input is not a regular file")
             working_oid = git_blob_oid_of_bytes(path.read_bytes())
             _candidate_setup_git(repo, "diff", "--quiet", head, "--", relative)
         except (OSError, ValueError, subprocess.SubprocessError) as exc:
             raise ValueError(f"Prisma generation input is unavailable or changed: {relative}") from exc
-        if (not stat.S_ISREG(mode) or base_oid != head_oid or working_oid != head_oid):
+        if base_oid != head_oid or working_oid != head_oid:
             raise ValueError(f"Prisma generation input is unavailable or changed: {relative}")
 
     file_pins = manifest.get("files")
@@ -1744,27 +1749,27 @@ def validate_candidate_dependency_setup(manifest: dict, repo_path: str | Path,
         "package_manager": root_package["packageManager"],
         "node_version": root_package["engines"]["node"],
         "files": checked_files,
-        # `--ignore-scripts` skips prisma postinstall. Generate the API client before building
-        # @muneral/types; prisma.config.ts needs a URL string, but generate does not connect.
+        # `--ignore-scripts` skips Prisma postinstall. Match lint-and-test: build @muneral/types
+        # first, then generate the API client using the qualified config and schema.
         # This placeholder is scoped to the generation step and is never persisted to GITHUB_ENV.
         "argv": [["pnpm", "install", "--frozen-lockfile", "--ignore-scripts",
                   "--ignore-pnpmfile"],
-                 ["pnpm", "--dir", ".", "exec", "prisma", "generate", "--schema",
-                  "apps/api/prisma/schema.prisma"],
-                 ["pnpm", "--filter", "@muneral/types", "build"]],
-        "step_env": [{}, {"CHECKPOINT_DISABLE": "1",
-                         "DATABASE_URL": "postgresql://dummy:dummy@localhost:5432/dummy"}, {}],
+                 ["pnpm", "--filter", "@muneral/types", "build"],
+                 ["pnpm", "exec", "prisma", "generate", "--config", "prisma.config.ts",
+                  "--schema", "apps/api/prisma/schema.prisma"]],
+        "step_env": [{}, {}, {"CHECKPOINT_DISABLE": "1",
+                             "DATABASE_URL": "postgresql://dummy:dummy@localhost:5432/dummy"}],
     }
 
 
 def validate_candidate_api_dependency_setup(manifest: dict, repo_path: str | Path,
                                             repository: str, base: str, head: str) -> dict:
-    """Return the reconciled fixed Prisma-before-types plan for apps/api.
+    """Return the fixed dependency setup plan for apps/api.
 
     The manifest contains only the existing exact subject and source pins. Reuse the validated
     MUN workspace/lockfile/Prisma-input contract, changing only the scope label. API and web use
-    the same fixed operations: frozen install, one pinned Prisma generation with a step-local
-    dummy DATABASE_URL, and the pure `tsc` shared-types build. Caller fields never supply commands
+    the same fixed operations: frozen install, the pure `tsc` shared-types build, and pinned
+    Prisma generation with a step-local dummy DATABASE_URL. Caller fields never supply commands
     or environment values.
     """
     if not isinstance(manifest, dict):
