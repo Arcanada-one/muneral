@@ -75,7 +75,9 @@ describe('muneral-web deploy descriptors (MUN-0084 PR-A)', () => {
   });
 
   it('pins the base image by digest and starts next on 3501 as a non-root user', () => {
-    expect(dockerfile).toMatch(/FROM node:26\.13\.0-alpine@sha256:[0-9a-f]{64} AS production/);
+    const baseImage = 'node:26.13.1-alpine@sha256:6bd9ab43c0ec0190ca7b2d193906cb8b7edf6e7f4afa43ddeccd6452710bffb5';
+    expect(dockerfile).toContain(`FROM ${baseImage} AS builder`);
+    expect(dockerfile).toContain(`FROM ${baseImage} AS production`);
     expect(dockerfile).toMatch(/^USER node$/m);
     expect(dockerfile).toMatch(/CMD \["node_modules\/\.bin\/next", "start", "-p", "3501"\]/);
   });
