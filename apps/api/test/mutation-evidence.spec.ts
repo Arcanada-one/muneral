@@ -132,7 +132,10 @@ describe('Assembly mutation evidence verification', () => {
   // change must still invalidate; an unrelated tree change must not.
   const FIXTURE_SCOPE = [
     'apps/api/src/assembly/assembly.compiler.ts',
+    'apps/api/src/execution-authority/evidence-ref.validator.ts',
+    'apps/api/src/execution-authority/execution-authority.reducer.ts',
     'apps/api/test/assembly/mutation-harness.js',
+    'apps/api/test/setup-env.ts',
     'pnpm-lock.yaml',
   ];
 
@@ -142,7 +145,9 @@ describe('Assembly mutation evidence verification', () => {
     for (const file of [
       ...FIXTURE_SCOPE,
       'apps/api/test/assembly/mutation-results.json',
+      'README.md',
       'SECURITY.md',
+      'docs/policy.md',
       'docker-compose.prod.yml',
       'receipts/graph/change-admission.json',
       '.github/workflows/ci.yml',
@@ -169,8 +174,12 @@ describe('Assembly mutation evidence verification', () => {
     }
     expect(expected).toEqual(expect.arrayContaining([
       'apps/api/src/assembly/assembly.validator.ts',
+      'apps/api/src/execution-authority/evidence-ref.validator.ts',
+      'apps/api/src/execution-authority/execution-authority.reducer.ts',
+      'apps/api/src/execution-authority/execution-authority.replay.ts',
       'apps/api/test/assembly/mutation-harness.js',
       'apps/api/test/mutation-evidence.spec.ts',
+      'apps/api/test/setup-env.ts',
       'pnpm-lock.yaml',
     ]));
     expect(expected.includes('SECURITY.md')).toBe(false);
@@ -184,8 +193,14 @@ describe('Assembly mutation evidence verification', () => {
       'apps/api/test/assembly/mutation-results.json',
       FIXTURE_SCOPE,
     );
+    // A whole-index refresh would run this required clean filter and fail.
+    fs.writeFileSync(path.join(repo, '.git', 'info', 'attributes'), 'SECURITY.md filter=reject-unrelated\n');
+    git(repo, ['config', 'filter.reject-unrelated.clean', 'false']);
+    git(repo, ['config', 'filter.reject-unrelated.required', 'true']);
     for (const unrelated of [
+      'README.md',
       'SECURITY.md',
+      'docs/policy.md',
       'docker-compose.prod.yml',
       'receipts/graph/change-admission.json',
       '.github/workflows/ci.yml',

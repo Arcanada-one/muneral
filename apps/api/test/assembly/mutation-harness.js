@@ -452,18 +452,29 @@ function recursiveFiles(root) {
 function bindingPaths() {
   const paths = [
     ...recursiveFiles(path.join(API_ROOT, 'src', 'assembly')).filter((file) => file.endsWith('.ts')),
-    path.join(API_ROOT, 'src', 'execution-authority', 'canonical-json-v1.ts'),
-    path.join(API_ROOT, 'src', 'execution-authority', 'canonical-json.ts'),
+    // Imported by the compiler and assembly.falsification.spec.ts.
+    ...[
+      'canonical-json-v1.ts',
+      'canonical-json.ts',
+      'evidence-ref.validator.ts',
+      'execution-authority.errors.ts',
+      'execution-authority.reducer.ts',
+      'execution-authority.replay.ts',
+      'execution-authority.types.ts',
+    ].map((file) => path.join(API_ROOT, 'src', 'execution-authority', file)),
     ...recursiveFiles(path.join(API_ROOT, 'test', 'assembly')).filter((file) => {
       if (file.endsWith('mutation-results.json')) return false;
       return /\.(ts|js|py|json)$/.test(file);
     }),
     path.join(API_ROOT, 'test', 'mutation-evidence.spec.ts'),
+    path.join(API_ROOT, 'test', 'setup-env.ts'),
     path.join(API_ROOT, 'tsconfig.json'),
     path.join(API_ROOT, 'tsconfig.test.json'),
     path.join(API_ROOT, 'package.json'),
+    path.join(REPO_ROOT, '.npmrc'),
     path.join(REPO_ROOT, 'package.json'),
     path.join(REPO_ROOT, 'pnpm-lock.yaml'),
+    path.join(REPO_ROOT, 'pnpm-workspace.yaml'),
   ];
   return [...new Set(paths)].sort();
 }
@@ -620,18 +631,19 @@ function gitSupplement(
     return trim ? result.stdout.trim() : result.stdout;
   };
   try {
-    // Seed from the real index so staged additions/deletions are preserved,
-    // then refresh tracked bytes and drop everything outside the allowlist.
+    // Preserve staged additions/deletions, then prune the temporary index
+    // before refreshing paths so Git never reads unrelated working-tree bytes.
     run(['read-tree', indexed.stdout.trim()]);
-    run(['add', '-u', '--', '.']);
-    run(['rm', '--cached', '-f', '--ignore-unmatch', '--', evidencePath]);
-    const listed = run(['ls-files']).split('\n').filter(Boolean);
+    const listed = run(['ls-files', '-z'], { trim: false }).split('\0').filter(Boolean);
     const allowSet = new Set(allow);
-    const drop = listed.filter((entry) => entry !== evidencePath && !allowSet.has(entry));
-    // Batch removals to stay under argv limits on large trees.
-    const batchSize = 100;
-    for (let i = 0; i < drop.length; i += batchSize) {
-      run(['rm', '--cached', '-f', '--', ...drop.slice(i, i + batchSize)]);
+    allowSet.delete(evidencePath);
+    const drop = listed.filter((entry) => !allowSet.has(entry));
+    if (drop.length > 0) {
+      run(['update-index', '--force-remove', '-z', '--stdin'], { input: `${drop.join('\0')}\0` });
+    }
+    const trackedInputs = listed.filter((entry) => allowSet.has(entry));
+    if (trackedInputs.length > 0) {
+      run(['--literal-pathspecs', 'add', '-u', '--', ...trackedInputs]);
     }
     const tree = run(['write-tree']);
     const emptyTree = run(['hash-object', '-w', '-t', 'tree', '--stdin'], { input: '' });

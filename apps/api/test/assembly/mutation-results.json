@@ -1,6 +1,6 @@
 {
   "formatVersion": "assembly-mutation-evidence-v4",
-  "generatedAt": "2026-11-22T08:25:38.740Z",
+  "generatedAt": "2026-11-25T01:12:13.086Z",
   "invocation": {
     "cwd": ".",
     "argv": [
@@ -22,8 +22,12 @@
   },
   "binding": {
     "algorithm": "sha256",
-    "aggregateSha256": "39c6071a9cb08f17a5352eb5b8e7f9ca31b1ad383fd6f3d93ac8d410556c78d7",
+    "aggregateSha256": "e6fdb93f7e1bb951489ed8716a5eb79f31a3367e430703b6efa2011385b17f3c",
     "files": [
+      {
+        "path": ".npmrc",
+        "sha256": "0f9b07f052965c9407b044a87be769b6b2d0d9c7c4a90f602b9cab8f0bc64bc1"
+      },
       {
         "path": "apps/api/package.json",
         "sha256": "0726ca5f358349e2016e8c3da72ee485669417c6f38fe8cdf8f3528c80c3dad4"
@@ -63,6 +67,26 @@
       {
         "path": "apps/api/src/execution-authority/canonical-json.ts",
         "sha256": "eaea71d2b543175dd5210f7b9edf7d25451ae95b295dc9007cd75cd7aee1f4ce"
+      },
+      {
+        "path": "apps/api/src/execution-authority/evidence-ref.validator.ts",
+        "sha256": "34992f3acf3cb207a7a451583140402f79ad58fed17f2573c4ad40bf2c73bf66"
+      },
+      {
+        "path": "apps/api/src/execution-authority/execution-authority.errors.ts",
+        "sha256": "d620cc12524b60c2c0aa5101484b34d8dbd2d9b7467c8bce33a68f80517639fc"
+      },
+      {
+        "path": "apps/api/src/execution-authority/execution-authority.reducer.ts",
+        "sha256": "5b260ef92121341653e85ec4096a35f859ca0be96337ab213fffb885da2888dc"
+      },
+      {
+        "path": "apps/api/src/execution-authority/execution-authority.replay.ts",
+        "sha256": "f9dc477b9366c62f0d0338c87d1763489f67740c8a5f53ff9df35d8cc4d59a60"
+      },
+      {
+        "path": "apps/api/src/execution-authority/execution-authority.types.ts",
+        "sha256": "8e8258cb65668ccae76e26a4da176682fffe96a8ec16fcb0d197b16208540669"
       },
       {
         "path": "apps/api/test/assembly/assembly.boundary.spec.ts",
@@ -238,7 +262,7 @@
       },
       {
         "path": "apps/api/test/assembly/mutation-harness.js",
-        "sha256": "b2c22d5c64c6f1b5ba6a828b6dff86db7c74bf9217d7ce9685defe73bb2b4dda"
+        "sha256": "2dfe9539eeafdf1dbc05c3eb30820cfa356fb756b0d5810fdfd4158255e9c78e"
       },
       {
         "path": "apps/api/test/assembly/mutation-sites.json",
@@ -250,7 +274,11 @@
       },
       {
         "path": "apps/api/test/mutation-evidence.spec.ts",
-        "sha256": "8dc6533bf0133f2b6d08a0d309ca0421782ebb83f8ccffdc9c11f16a7fb090ff"
+        "sha256": "fa08c3833c9ab103a6308b37867600869589ee8f77b1d26334479174e47e8dd0"
+      },
+      {
+        "path": "apps/api/test/setup-env.ts",
+        "sha256": "28bf2e05020e372cbee8d3063e77a59e798c5c1315b580f5e51450e1faa82f1d"
       },
       {
         "path": "apps/api/tsconfig.json",
@@ -267,11 +295,16 @@
       {
         "path": "pnpm-lock.yaml",
         "sha256": "e5a68763996dfa027c1e06ba81db00a18cd1f21c3957f1d4086b28e721b0e2df"
+      },
+      {
+        "path": "pnpm-workspace.yaml",
+        "sha256": "3557eae844bedd16d9059f9440daaa1ff68fffc23d151a329f7fd4e24cfd32ff"
       }
     ]
   },
   "supplementalGit": {
     "includedPaths": [
+      ".npmrc",
       "apps/api/package.json",
       "apps/api/src/assembly/assembly.canonical.ts",
       "apps/api/src/assembly/assembly.compiler.ts",
@@ -282,6 +315,11 @@
       "apps/api/src/assembly/index.ts",
       "apps/api/src/execution-authority/canonical-json-v1.ts",
       "apps/api/src/execution-authority/canonical-json.ts",
+      "apps/api/src/execution-authority/evidence-ref.validator.ts",
+      "apps/api/src/execution-authority/execution-authority.errors.ts",
+      "apps/api/src/execution-authority/execution-authority.reducer.ts",
+      "apps/api/src/execution-authority/execution-authority.replay.ts",
+      "apps/api/src/execution-authority/execution-authority.types.ts",
       "apps/api/test/assembly/assembly.boundary.spec.ts",
       "apps/api/test/assembly/assembly.bounds.spec.ts",
       "apps/api/test/assembly/assembly.canonical.spec.ts",
@@ -329,13 +367,15 @@
       "apps/api/test/assembly/mutation-sites.json",
       "apps/api/test/assembly/validate_assembly_fixtures.py",
       "apps/api/test/mutation-evidence.spec.ts",
+      "apps/api/test/setup-env.ts",
       "apps/api/tsconfig.json",
       "apps/api/tsconfig.test.json",
       "package.json",
-      "pnpm-lock.yaml"
+      "pnpm-lock.yaml",
+      "pnpm-workspace.yaml"
     ],
-    "trackedTreeWithoutEvidence": "483a1bf9a589a5ca28e0c501cd6cc76dd74bee21",
-    "trackedSnapshotDiffSha256": "71d01a0caa27a458c140624a285b1827cd1361db7dff12db33bc5c6bb84086b2"
+    "trackedTreeWithoutEvidence": "de5836f4efff9ba95edebdc19c053cfa6824560c",
+    "trackedSnapshotDiffSha256": "9ceb109dc5b10ac6e8cd562b9825b63d71acae60e9ffee881c3df910830f866d"
   },
   "baseline": {
     "outcome": "SURVIVED",
