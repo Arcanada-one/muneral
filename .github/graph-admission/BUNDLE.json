@@ -1,11 +1,11 @@
 {
- "bundle_digest": "sha256:dd3a7dc0bf01c6006ddd5502f9c226d9e35fa41cd424f40ad97e5a2bc9cfc150",
+ "bundle_digest": "sha256:5071eedcebeedd772803d8f0e59389f602a4dbc5b96644fbd4f3f3b95f0f8a0b",
  "files": [
   {
-   "blob_oid": "3ecbd12d06aec3a1f53ecf079b77aff5224e3334",
+   "blob_oid": "102ccd57dc308802669746b4ebb043a03e16b708",
    "note": "the workflow file itself; it is already running by the time the job checks the bundle \u2014 so THIS run cannot vouch for it. The next run's verify_bundle hashes it against this entry (BUNDLE_WORKFLOW_DIGEST_MISMATCH) and the self-update battery's B8 refuses a change to it that this manifest does not attest (KB-039, DEC-AUP-0036)",
    "path": ".github/workflows/graph-admission.yml",
-   "sha256": "sha256:8b355492fcc5f1eaae567dfb82f1b4938e440a96798fb75537e7f2eb92cdc963",
+   "sha256": "sha256:0092c779a2675f9e1a666a7a9694594ce1c55dcd75ad65a58185438d6afa0e1d",
    "vendored_to": "graph-admission.yml",
    "verified_by_the_job": false
   },
@@ -230,9 +230,9 @@
    "sha256": "sha256:bcc2b9c986588c689a9ef015e04dcaf2e69971cf64c69e761138de70c19258a7"
   },
   {
-   "blob_oid": "8c6fce94d74692f708b672a7fa1981f77e40a58f",
+   "blob_oid": "7718fab739f8b4eacdb467d7b8857e003c56c35d",
    "path": "tools/graph/ci_gate.py",
-   "sha256": "sha256:ef83e40821bb04cc520e12e23a9e992fb49294607041768b53c8858f762a37a4"
+   "sha256": "sha256:a00d6a9a1637e291987e72d2eb9261e572c60e77d969683696ac4f22407d7278"
   },
   {
    "blob_oid": "2b4531d206c51f7a60aa5b461663a0e4e4c2fa24",
@@ -271,7 +271,7 @@
   "tool": "tools/graph/ci_gate.py",
   "version": "1.0.0"
  },
- "program_ref": "9d0b69cba374871f0af79ab7f2d0cba2ef957098",
+ "program_ref": "a2eaafcc571ccf7f38133eee3aaf30581622c506",
  "program_repo": "Arcanada-one/arcanada-universal-program",
  "provisional_until_fable_review": true,
  "rule": "The workflow refuses unless every file's sha256 matches this manifest AND the caller's `program_ref` input matches `program_ref` here. The bundle is a VENDORED copy of one pinned program-repo SHA (the program repository is private and no shared credential exists to check it out from a caller's CI). A pull request that changes anything under the bundle directory is refused by the gate job \u2014 a bundle refresh is its own pull request. Each entry's `blob_oid` is the git object id the bytes were read at: `git hash-object <file>` must equal it, which is how a caller with no credential for the program repository can CONTRADICT this manifest offline (DEC-AUP-0036 R2). Every byte here was read from the object store at program_ref, never from a working tree (R1).",
