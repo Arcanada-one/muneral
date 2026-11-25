@@ -166,10 +166,11 @@ describe('Assembly mutation evidence verification', () => {
 
   it('declares its included paths in the evidence it records', () => {
     const expected = harness.evidenceScopePaths();
+    const included = original.supplementalGit.includedPaths as string[];
     expect(expected.length).toBeGreaterThan(10);
-    expect(expected).toEqual([...expected].sort());
-    expect(original.supplementalGit.includedPaths).toEqual(expected);
-    for (const rel of expected) {
+    expect(included).toEqual([...included].sort());
+    expect(included).toEqual(expect.arrayContaining(expected));
+    for (const rel of included) {
       expect(fs.existsSync(path.join(path.resolve(API_ROOT, '..', '..'), rel))).toBe(true);
     }
     expect(expected).toEqual(expect.arrayContaining([
@@ -182,7 +183,7 @@ describe('Assembly mutation evidence verification', () => {
       'apps/api/test/setup-env.ts',
       'pnpm-lock.yaml',
     ]));
-    expect(expected.includes('SECURITY.md')).toBe(false);
+    expect(included).not.toContain('SECURITY.md');
   });
 
   it('does not stale when a file outside the allowlist changes (incl. SECURITY.md)', () => {
@@ -214,6 +215,35 @@ describe('Assembly mutation evidence verification', () => {
       FIXTURE_SCOPE,
     );
     expect(after).toEqual(before);
+  });
+
+  it.each([
+    ['README.md', 'README.md.bak'],
+    ['SECURITY.md', 'SECURITY.mdx'],
+    ['docs/policy.md', 'docs-extra/policy.md'],
+  ])('excludes %s but tracks edits to %s', (documentation, nearName) => {
+    const repo = path.join(directory, `scope-near-${path.basename(nearName)}`);
+    scopeFixture(repo);
+    const snapshot = () => harness.gitSupplement(
+      repo,
+      'apps/api/test/assembly/mutation-results.json',
+      FIXTURE_SCOPE,
+    );
+    const nearPath = path.join(repo, nearName);
+    fs.mkdirSync(path.dirname(nearPath), { recursive: true });
+    const withoutNearName = snapshot();
+    fs.writeFileSync(nearPath, 'untracked content\n');
+    expect(snapshot()).toEqual(withoutNearName);
+    git(repo, ['add', '--', nearName]);
+
+    const before = snapshot();
+    fs.appendFileSync(path.join(repo, documentation), 'documentation edit\n');
+    expect(snapshot()).toEqual(before);
+    fs.appendFileSync(nearPath, 'tracked edit\n');
+    const after = snapshot();
+    expect(after.trackedSnapshotDiffSha256).not.toBe(before.trackedSnapshotDiffSha256);
+    expect(after.includedPaths).toContain(nearName);
+    expect(after.includedPaths).not.toContain(documentation);
   });
 
   it('hashes raw allowlisted input bytes even when excluded attributes would normalize them', () => {
