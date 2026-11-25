@@ -1,6 +1,6 @@
 {
   "formatVersion": "assembly-mutation-evidence-v4",
-  "generatedAt": "2026-11-25T04:11:55.422Z",
+  "generatedAt": "2026-11-25T07:14:40.593Z",
   "invocation": {
     "cwd": ".",
     "argv": [
@@ -22,7 +22,7 @@
   },
   "binding": {
     "algorithm": "sha256",
-    "aggregateSha256": "3bc53008b9689b8a95634100e5f1019d5582f3acb5f59061c0974916344e6d08",
+    "aggregateSha256": "128d9189d452ede7f9102d8f2ad1454ee760938ca69672d50967907563f045c1",
     "files": [
       {
         "path": ".npmrc",
@@ -262,7 +262,7 @@
       },
       {
         "path": "apps/api/test/assembly/mutation-harness.js",
-        "sha256": "e4de58cf82a2e96a9a3c2977f5c38f3c6ee0a9c813771cce69cdce59b7cdfaad"
+        "sha256": "6ef97a96ed623e98fdde9f8038739b692d25ec02c852606b18281f0e6fcae036"
       },
       {
         "path": "apps/api/test/assembly/mutation-sites.json",
@@ -274,7 +274,7 @@
       },
       {
         "path": "apps/api/test/mutation-evidence.spec.ts",
-        "sha256": "f1acf4e055b86830e3fca50b5b52c9a7ab740e75826abb41196dc4d3965e97b8"
+        "sha256": "8314e42194bbaccc14bd7bac2748305a4b751ae8f1e446f024ffe76f3527beb8"
       },
       {
         "path": "apps/api/test/setup-env.ts",
@@ -374,8 +374,8 @@
       "pnpm-lock.yaml",
       "pnpm-workspace.yaml"
     ],
-    "trackedTreeWithoutEvidence": "628da22096d282a184531062e3a9a49790e62477",
-    "trackedSnapshotDiffSha256": "0466f21610c972058804d52723f4534649e30b04f7885946225a94c405d8d293"
+    "trackedTreeWithoutEvidence": "17a5265a98349df864eeebd7741a79dbc7f66cf3",
+    "trackedSnapshotDiffSha256": "1d85c4b080d92a048147644f03e9ee60e2aa6fcea0673f858d8874e591671691"
   },
   "baseline": {
     "outcome": "SURVIVED",

@@ -589,12 +589,9 @@ function observedInvocation(jsonPath) {
   };
 }
 
-// muneral#57. Bind the Git supplement to the SAME allowlist as `bindingPaths()`
-// — the real inputs whose bytes already appear in `binding`. A denylist of
-// `.github/` / `apps/web/` / `receipts/` still left SECURITY.md (and the rest
-// of the tree) able to stale every open PR's mutation evidence. An allowlist
-// fails closed on unrelated merges and still fails loudly when a real input
-// changes (see mutation-evidence.spec.ts).
+// muneral#57. The Git supplement starts with the inputs already hashed by
+// `bindingPaths()`. It also binds tracked near-names at the documentation
+// boundaries declared below.
 function evidenceScopePaths() {
   return bindingPaths().map((absolute) => path.relative(REPO_ROOT, absolute)).sort();
 }
@@ -611,7 +608,6 @@ function gitSupplement(
   const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'mun0022-git-snapshot-'));
   const index = path.join(temporary, 'index');
   const env = { ...process.env, GIT_INDEX_FILE: index };
-  const allow = [...new Set(scopePaths)].sort();
   const run = (args, options = {}) => {
     const { input, trim = true, commandEnv = env } = options;
     const result = spawnSync('git', args, {
@@ -627,6 +623,13 @@ function gitSupplement(
     return trim ? result.stdout.trim() : result.stdout;
   };
   try {
+    // The exact root docs and the docs/ subtree stay out of scope. The '?' in
+    // each root-anchored pathspec requires a suffix before the path boundary.
+    const nearNames = run([
+      'ls-files', '-z', '--', ':(top,glob)README.md?*', ':(top,glob)SECURITY.md?*',
+      ':(top,glob)docs?*/**',
+    ], { trim: false, commandEnv: process.env }).split('\0').filter(Boolean);
+    const allow = [...new Set([...scopePaths, ...nearNames])].sort();
     // The real index supplies tracked membership and modes. Build a new index
     // from working bytes, like buildBinding(), without running Git conversions.
     const allowSet = new Set(allow);
