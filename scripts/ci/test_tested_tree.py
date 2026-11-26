@@ -1,9 +1,13 @@
 import hashlib
+import io
+import os
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import Mock, patch
+from urllib.error import HTTPError
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import tested_tree as tested_tree_module
@@ -18,6 +22,176 @@ REPOSITORY = "Arcanada-one/muneral"
 PUSH_SHA = "merge-sha"
 HEAD_SHA = "pr-head-sha"
 WORKFLOW_ID = 260321154
+TREE = "4" * 40
+OTHER_TREE = "5" * 40
+STAMP = "2026-11-26T03:36:12Z"
+
+
+class ReceiptAPI:
+    def __init__(self, conclusions):
+        self.responses = {}
+        self.runs = []
+        self.logs = {}
+        self.log_reads = []
+        for offset, conclusion in enumerate(conclusions):
+            run_id, job_id, suite_id = 100 + offset, 200 + offset, 300 + offset
+            run = dict(
+                fixture()[2][0], id=run_id, path=tested_tree_module.WORKFLOW_PATH, check_suite_id=suite_id
+            )
+            steps = [
+                {"name": name, "status": "completed", "conclusion": "success",
+                 "started_at": STAMP, "completed_at": STAMP}
+                for name in sorted(tested_tree_module.FULL_SUITE_STEPS)
+            ] if conclusion == "success" else []
+            job = dict(
+                fixture()[3][0], id=job_id, run_id=run_id, status="completed", head_sha=HEAD_SHA,
+                conclusion=conclusion, steps=steps,
+                check_run_url=f"{tested_tree_module.API}/repos/{REPOSITORY}/check-runs/{job_id}",
+            )
+            check = dict(fixture()[4], id=job_id, conclusion=conclusion, check_suite={"id": suite_id})
+            self.responses[f"actions/runs/{run_id}/attempts/1/jobs?per_page=100"] = {
+                "total_count": 1, "jobs": [job],
+            }
+            self.responses[f"check-runs/{job_id}"] = check
+            self.responses[f"check-suites/{suite_id}"] = {
+                "id": suite_id, "head_sha": HEAD_SHA, "status": "completed",
+                "app": {"id": tested_tree_module.GITHUB_ACTIONS_APP_ID},
+            }
+            self.runs.append(run)
+            self.logs[job_id] = f"{STAMP} tested-tree reuse= tree={TREE}\n".encode()
+
+    def get(self, path):
+        return self.responses[path]
+
+    def get_job_log(self, job_id):
+        self.log_reads.append(job_id)
+        return self.logs[job_id]
+
+    def qualify(self):
+        return tested_tree_module.candidate_receipts_qualified(
+            self, REPOSITORY, fixture()[0], WORKFLOW_ID, self.runs, TREE,
+        )
+
+
+class CandidateReceiptTests(unittest.TestCase):
+    def test_qualify_requires_complete_run_page_and_pinned_workflow_identity(self):
+        api = ReceiptAPI(("skipped", "success"))
+        pr, merge, *_ = fixture()
+        merge["commit"]["tree"]["sha"] = TREE
+        page = {"total_count": len(api.runs), "workflow_runs": api.runs}
+        run_path = f"actions/runs?head_sha={HEAD_SHA}&event=pull_request&per_page=100"
+        workflow = {"id": WORKFLOW_ID, "path": tested_tree_module.WORKFLOW_PATH}
+        api.responses.update({
+            f"commits/{PUSH_SHA}": merge, f"commits/{PUSH_SHA}/pulls": [pr],
+            f"commits/{HEAD_SHA}": merge, "actions/workflows/ci.yml": workflow, run_path: page,
+        })
+        self.assertTrue(tested_tree_module.qualify(api, REPOSITORY, PUSH_SHA))
+        page["total_count"] += 1
+        self.assertFalse(tested_tree_module.qualify(api, REPOSITORY, PUSH_SHA))
+        page["total_count"] -= 1
+        with patch.object(tested_tree_module, "QUALIFIED_WORKFLOW_SHA256", "0" * 64):
+            self.assertFalse(tested_tree_module.qualify(api, REPOSITORY, PUSH_SHA))
+        workflow["path"] = ".github/workflows/another.yml"
+        self.assertFalse(tested_tree_module.qualify(api, REPOSITORY, PUSH_SHA))
+
+    def test_one_skipped_and_one_full_suite_selects_only_full_suite_in_either_order(self):
+        for conclusions, log_id in ((("skipped", "success"), 201), (("success", "skipped"), 200)):
+            with self.subTest(order=conclusions):
+                api = ReceiptAPI(conclusions)
+                api.runs.append({"workflow_id": WORKFLOW_ID + 1, "path": ".github/workflows/unrelated.yml"})
+                self.assertTrue(api.qualify())
+                self.assertEqual(api.log_reads, [log_id])
+
+    def test_only_skipped_two_eligible_and_duplicate_run_refuse(self):
+        self.assertFalse(ReceiptAPI(("skipped",)).qualify())
+        self.assertFalse(ReceiptAPI(("success", "success")).qualify())
+        api = ReceiptAPI(("success",))
+        api.runs *= 2
+        self.assertFalse(api.qualify())
+
+    def test_wrong_run_job_check_or_suite_identity_refuses(self):
+        cases = (
+            ("run", "head_sha", "wrong"), ("run", "event", "push"),
+            ("run", "workflow_id", WORKFLOW_ID + 1), ("run", "path", ".github/workflows/other.yml"),
+            ("run", "conclusion", "cancelled"), ("run", "run_attempt", None),
+            ("job", "run_attempt", 2), ("job", "labels", ["self-hosted", "linux", "deploy-gate"]),
+            ("job", "head_sha", "wrong"), ("job", "status", None), ("job", "id", 99),
+            ("check", "app", {"id": 1}), ("check", "head_sha", "wrong"),
+            ("check", "check_suite", {"id": 301}), ("suite", "id", 301), ("suite", "app", {"id": 1}),
+        )
+        for where, key, val in cases:
+            with self.subTest(where=where, field=key):
+                api = ReceiptAPI(("success", "skipped"))
+                records = {
+                    "run": api.runs[0], "job": api.responses["actions/runs/100/attempts/1/jobs?per_page=100"]["jobs"][0],
+                    "check": api.responses["check-runs/200"], "suite": api.responses["check-suites/300"],
+                }
+                records[where][key] = val
+                self.assertFalse(api.qualify())
+
+    def test_wrong_missing_ambiguous_and_out_of_step_tree_proof_refuses(self):
+        prefix = f"{STAMP} tested-tree reuse= tree=".encode()
+        marker = prefix + TREE.encode() + b"\n"
+        for log in (
+            prefix + OTHER_TREE.encode(), b"", marker * 2,
+            marker.replace(STAMP.encode(), b"2026-11-26T03:36:15Z"),
+            marker.replace(b"reuse= ", b"reuse=true "), b" " * (tested_tree_module.MAX_JOB_LOG + 1),
+        ):
+            with self.subTest(length=len(log)):
+                api = ReceiptAPI(("skipped", "success"))
+                api.logs[201] = log
+                self.assertFalse(api.qualify())
+
+    def test_missing_skipped_or_duplicate_required_step_refuses(self):
+        for alteration in ("absent", "skipped", "duplicate"):
+            with self.subTest(step=alteration):
+                api = ReceiptAPI(("success", "skipped"))
+                steps = api.responses["actions/runs/100/attempts/1/jobs?per_page=100"]["jobs"][0]["steps"]
+                step = next(step for step in steps if step["name"] == "Jest machine report")
+                if alteration == "absent":
+                    steps.remove(step)
+                elif alteration == "skipped":
+                    step["conclusion"] = "skipped"
+                else:
+                    steps.append(step.copy())
+                self.assertFalse(api.qualify())
+
+    def test_missing_or_truncated_jobs_and_ambiguous_job_refuse(self):
+        for kind in ("missing", "truncated", "ambiguous"):
+            with self.subTest(kind=kind):
+                api = ReceiptAPI(("success", "skipped"))
+                jobs = api.responses["actions/runs/100/attempts/1/jobs?per_page=100"]
+                if kind == "missing":
+                    jobs.pop("total_count")
+                else:
+                    jobs["total_count"] = 2
+                    if kind == "ambiguous":
+                        jobs["jobs"] *= 2
+                self.assertFalse(api.qualify())
+
+    def test_api_error_selects_cold_path(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "output"
+            with patch.dict(os.environ, {
+                "GITHUB_OUTPUT": str(output), "GITHUB_REPOSITORY": REPOSITORY,
+                "GITHUB_SHA": PUSH_SHA, "GITHUB_TOKEN": "fixture-only",
+            }), patch.object(tested_tree_module.GitHubAPI, "get", side_effect=RuntimeError):
+                self.assertEqual(tested_tree_module.main(), 0)
+            self.assertEqual(output.read_text().splitlines(), [
+                "reuse=false", "reason=proof lookup failed: RuntimeError",
+            ])
+
+    def test_log_download_does_not_forward_authenticated_request(self):
+        location = "https://download.example.invalid/log"
+        redirect = HTTPError("https://api.github.com", 302, "Found", {"Location": location}, io.BytesIO())
+        opener = Mock()
+        opener.open.side_effect = [redirect, io.BytesIO(b"expected log")]
+        api = tested_tree_module.GitHubAPI(REPOSITORY, "fixture-only")
+        with patch.object(tested_tree_module.urllib.request, "build_opener", return_value=opener):
+            self.assertEqual(api.get_job_log(200), b"expected log")
+        request = opener.open.call_args_list[0].args[0]
+        self.assertEqual(request.get_header("Authorization"), "Bearer fixture-only")
+        self.assertEqual(opener.open.call_args_list[1].args, (location,))
 
 
 def fixture():
