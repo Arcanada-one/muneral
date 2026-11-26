@@ -13,6 +13,8 @@ import type { Request } from 'express';
 import { AuthService } from './auth.service.js';
 import { GithubOAuthGuard } from './guards/github-oauth.guard.js';
 import { TelegramLoginDto } from './dto/telegram-login.dto.js';
+import { GithubExchangeDto, RefreshTokenDto } from './dto/token-exchange.dto.js';
+import { verifyGithubToken } from './github-token.js';
 import { User } from '@prisma/client';
 import { Throttle } from '@nestjs/throttler';
 
@@ -39,11 +41,21 @@ export class AuthController {
     access_token: string;
     refresh_token: string;
   } {
-    const user = req.user;
-    return {
-      access_token: this.authService.signAccess(user.id),
-      refresh_token: this.authService.signRefresh(user.id),
-    };
+    return this.issueTokens(req.user.id);
+  }
+
+  @Post('github')
+  @HttpCode(HttpStatus.OK)
+  async githubExchange(@Body() dto: GithubExchangeDto) {
+    const profile = await verifyGithubToken(dto.access_token);
+    const user = await this.authService.findOrCreateGithubUser(profile);
+    return this.issueTokens(user.id);
+  }
+
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  async refresh(@Body() dto: RefreshTokenDto): Promise<{ access_token: string }> {
+    return { access_token: await this.authService.refreshAccess(dto.refresh_token) };
   }
 
   /** Telegram Login Widget — verify HMAC and issue JWT pair */
@@ -58,9 +70,13 @@ export class AuthController {
       throw new BadRequestException('Invalid Telegram auth data');
     }
     const user = await this.authService.findOrCreateTelegramUser(dto);
+    return this.issueTokens(user.id);
+  }
+
+  private issueTokens(userId: string) {
     return {
-      access_token: this.authService.signAccess(user.id),
-      refresh_token: this.authService.signRefresh(user.id),
+      access_token: this.authService.signAccess(userId),
+      refresh_token: this.authService.signRefresh(userId),
     };
   }
 }

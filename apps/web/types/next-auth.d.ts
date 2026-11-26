@@ -17,5 +17,12 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     accessToken?: string;
     refreshToken?: string | null;
+    loginSessionId?: string;
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    loginSessionId?: string;
   }
 }
