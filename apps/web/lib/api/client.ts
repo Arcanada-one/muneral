@@ -4,6 +4,34 @@ import { getSession, signOut } from 'next-auth/react';
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3500';
 
+type SessionRequest = InternalAxiosRequestConfig & {
+  loginSessionId?: string;
+  _retry?: boolean;
+  skipAuthRefresh?: boolean;
+};
+
+type Login = {
+  id: string;
+  refreshedAccess?: string;
+  pendingRefresh?: Promise<void>;
+};
+
+let activeLogin: Login | undefined;
+
+async function readActiveSession() {
+  const previousLogin = activeLogin;
+  const session = await getSession();
+  const id = session?.loginSessionId;
+  if (activeLogin !== previousLogin && activeLogin?.id !== id) {
+    // An older session response must not overwrite a turnover already observed.
+    return { session: null, login: undefined };
+  }
+  if (activeLogin?.id !== id) {
+    activeLogin = id ? { id } : undefined;
+  }
+  return { session, login: activeLogin };
+}
+
 export const apiClient = axios.create({
   baseURL: `${API_BASE}/api/v1`,
   headers: {
@@ -14,85 +42,77 @@ export const apiClient = axios.create({
 
 // Attach JWT to every request when the caller did not already set Authorization
 // (agent-scoped canaries and explicit Bearer headers must not be overwritten).
-apiClient.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
-  if (typeof window !== 'undefined' && !config.headers.get('Authorization')) {
-    const session = await getSession();
-    const token = (session as Record<string, unknown> | null)?.accessToken;
-    if (typeof token === 'string' && token.length > 0) {
-      config.headers.set('Authorization', `Bearer ${token}`);
+apiClient.interceptors.request.use(async (config: SessionRequest) => {
+  if (typeof window === 'undefined') return config;
+  if (config._retry && config.loginSessionId) {
+    const { login } = await readActiveSession();
+    if (!login?.refreshedAccess || login.id !== config.loginSessionId) {
+      throw new Error('The session has changed');
+    }
+    config.headers.set('Authorization', `Bearer ${login.refreshedAccess}`);
+  } else if (!config.headers.get('Authorization')) {
+    const { session, login } = await readActiveSession();
+    const access = login?.refreshedAccess ?? session?.accessToken;
+    if (access) {
+      config.loginSessionId = login?.id;
+      config.headers.set('Authorization', `Bearer ${access}`);
     }
   }
   return config;
 });
 
-let isRefreshing = false;
-let failedQueue: Array<{
-  resolve: (value: unknown) => void;
-  reject: (reason?: unknown) => void;
-}> = [];
-
-function processQueue(error: unknown, token: string | null = null) {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
+async function refreshSessionAccess(login: Login, refreshToken: string | null | undefined): Promise<void> {
+  let access: string;
+  try {
+    if (!refreshToken) {
+      throw new Error('No refresh token available');
     }
-  });
-  failedQueue = [];
+    const { data } = await axios.post<{ access_token: string }>(
+      `${API_BASE}/api/v1/auth/refresh`,
+      { refresh_token: refreshToken },
+      { timeout: 15_000 },
+    );
+    if (typeof data.access_token !== 'string' || data.access_token.length === 0) {
+      throw new Error('Invalid refresh response');
+    }
+    access = data.access_token;
+  } catch (error) {
+    const current = await readActiveSession();
+    if (current.login === login) {
+      await signOut({ redirect: true, callbackUrl: '/login' });
+    }
+    throw error;
+  }
+  const current = await readActiveSession();
+  if (current.login !== login) throw new Error('The session has changed');
+  login.refreshedAccess = access;
 }
 
 // JWT refresh on 401
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & {
-      _retry?: boolean;
-      skipAuthRefresh?: boolean;
-    };
-
-    if (error.response?.status === 401 && originalRequest && !originalRequest._retry && !originalRequest.skipAuthRefresh) {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        }).then((token) => {
-          if (typeof token === 'string') {
-            originalRequest.headers.set('Authorization', `Bearer ${token}`);
-          }
-          return apiClient(originalRequest);
-        });
-      }
-
-      originalRequest._retry = true;
-      isRefreshing = true;
-
-      try {
-        const session = await getSession();
-        const refreshToken = (session as Record<string, unknown> | null)?.refreshToken;
-
-        if (typeof refreshToken !== 'string' || refreshToken.length === 0) {
-          throw new Error('No refresh token available');
-        }
-
-        const res = await axios.post<{ access_token: string }>(
-          `${API_BASE}/api/v1/auth/refresh`,
-          { refresh_token: refreshToken },
-        );
-
-        const newToken = res.data.access_token;
-        processQueue(null, newToken);
-        originalRequest.headers.set('Authorization', `Bearer ${newToken}`);
-        return apiClient(originalRequest);
-      } catch (refreshError) {
-        processQueue(refreshError, null);
-        await signOut({ redirect: true, callbackUrl: '/login' });
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
-      }
+    const request = error.config as SessionRequest | undefined;
+    if (error.response?.status !== 401 || !request?.loginSessionId || request._retry || request.skipAuthRefresh) {
+      throw error;
     }
 
-    return Promise.reject(error);
+    const { session, login } = await readActiveSession();
+    if (!login || login.id !== request.loginSessionId) throw error;
+
+    request._retry = true;
+    const cached = login.refreshedAccess;
+    if (cached && request.headers.get('Authorization') !== `Bearer ${cached}`) {
+      return apiClient(request);
+    }
+
+    if (!login.pendingRefresh) {
+      login.pendingRefresh = refreshSessionAccess(login, session?.refreshToken).finally(() => {
+        login.pendingRefresh = undefined;
+      });
+    }
+    await login.pendingRefresh;
+    return apiClient(request);
   },
 );
 
