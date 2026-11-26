@@ -6,7 +6,9 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import sys
+import urllib.error
 import urllib.parse
 import urllib.request
 from pathlib import Path
@@ -16,9 +18,28 @@ from typing import Any
 API = "https://api.github.com"
 EXPECTED_RUNNER_LABELS = {"self-hosted", "linux", "ci-general"}
 GITHUB_ACTIONS_APP_ID = 15368
+WORKFLOW_PATH = ".github/workflows/ci.yml"
+SUITE_JOB = "lint-and-test"
+TREE_STEP = "Confirm tested-tree reuse proof"
+FULL_SUITE_STEPS = {
+    TREE_STEP, "Install dependencies", "ESLint machine report",
+    "TypeScript machine report", "Build", "Apply DB migrations",
+    "Jest machine report", "Vitest machine report", "Verify structure machine report",
+    "Collect ErrorLedger",
+}
+MAX_JOB_LOG = 16 * 1024 * 1024
+TREE_LOG_LINE = re.compile(
+    rb"([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2})"
+    rb"(?:\.[0-9]+)?Z tested-tree reuse= tree=([0-9a-f]{40})"
+)
 # Candidate identity for the complete, independently reviewable CI workflow.
 # Reuse remains false until a reviewer recomputes this from the whole workflow.
 QUALIFIED_WORKFLOW_SHA256 = "aded39775129369b537ec31f2a9d8ce252306d04afa9bf3d96b3787d93942996"
+
+
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, request, fp, code, msg, headers, newurl):
+        return None
 
 
 class GitHubAPI:
@@ -26,8 +47,8 @@ class GitHubAPI:
         self.repository = repository
         self.token = token
 
-    def get(self, path: str) -> Any:
-        request = urllib.request.Request(
+    def request(self, path: str) -> urllib.request.Request:
+        return urllib.request.Request(
             f"{API}/repos/{self.repository}/{path.lstrip('/')}",
             headers={
                 "Accept": "application/vnd.github+json",
@@ -36,8 +57,24 @@ class GitHubAPI:
                 "X-GitHub-Api-Version": "2022-11-28",
             },
         )
-        with urllib.request.urlopen(request, timeout=12) as response:
+    def get(self, path: str) -> Any:
+        with urllib.request.urlopen(self.request(path), timeout=12) as response:
             return json.load(response)
+
+    def get_job_log(self, job_id: int) -> bytes:
+        opener = urllib.request.build_opener(NoRedirect)
+        try:
+            with opener.open(self.request(f"actions/jobs/{job_id}/logs"), timeout=12) as response:
+                return response.read(MAX_JOB_LOG + 1)
+        except urllib.error.HTTPError as error:
+            with error:
+                location = error.headers.get("Location", "")
+                target = urllib.parse.urlsplit(location)
+                if error.code != 302 or target.scheme != "https" or not target.hostname or target.username is not None:
+                    raise
+        # Do not forward the Actions token to the signed download URL.
+        with opener.open(location, timeout=12) as response:
+            return response.read(MAX_JOB_LOG + 1)
 
 
 def runtime_inputs_qualified(workflow_bytes: bytes) -> bool:
@@ -149,6 +186,105 @@ def reuse_qualified(
     )
 
 
+def complete_page(response: dict[str, Any], key: str) -> list[dict[str, Any]] | None:
+    records = response.get(key)
+    count = response.get("total_count")
+    if isinstance(records, list) and type(count) is int and count == len(records) < 100:
+        return records
+    return None
+
+
+def observed_full_suite_tree(job: dict[str, Any], log: bytes, expected_tree: str) -> bool:
+    if len(log) > MAX_JOB_LOG or not re.fullmatch(r"[0-9a-f]{40}", expected_tree):
+        return False
+    steps = job.get("steps") or []
+    for name in FULL_SUITE_STEPS:
+        found = [step for step in steps if step.get("name") == name]
+        if len(found) != 1 or found[0].get("status") != "completed" or found[0].get("conclusion") != "success":
+            return False
+    marker = next(step for step in steps if step["name"] == TREE_STEP)
+    start = marker.get("started_at")
+    end = marker.get("completed_at")
+    if not all(isinstance(value, str) and re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z", value)
+               for value in (start, end)):
+        return False
+    matches = [match for line in log.splitlines() if (match := TREE_LOG_LINE.fullmatch(line))]
+    if len(matches) != 1:
+        return False
+    timestamp, tree = matches[0].groups()
+    return tree.decode() == expected_tree and start <= timestamp.decode() + "Z" <= end
+
+
+def candidate_receipts_qualified(
+    api: GitHubAPI, repository: str, pr: dict[str, Any], workflow_id: int,
+    runs: list[dict[str, Any]], tree: str,
+) -> bool:
+    eligible = 0
+    seen = set()
+    head = pr["head"]["sha"]
+    for run in runs:
+        if run.get("workflow_id") != workflow_id:
+            if not isinstance(run.get("workflow_id"), int) or run.get("path") == WORKFLOW_PATH:
+                return False
+            continue
+        run_id, attempt, suite_id = (run.get(field) for field in ("id", "run_attempt", "check_suite_id"))
+        if not (
+            all(type(value) is int and value > 0 for value in (run_id, attempt, suite_id))
+            and run_id not in seen
+            and run.get("path") == WORKFLOW_PATH
+            and run.get("event") == "pull_request"
+            and run.get("head_sha") == head
+            and (run.get("head_repository") or {}).get("full_name") == repository
+            and run.get("status") == "completed"
+            and run.get("conclusion") == "success"
+        ):
+            return False
+        seen.add(run_id)
+        jobs = complete_page(api.get(f"actions/runs/{run_id}/attempts/{attempt}/jobs?per_page=100"), "jobs")
+        if jobs is None:
+            return False
+        matching = [job for job in jobs if job.get("name") == SUITE_JOB]
+        if len(matching) != 1:
+            return False
+        job = matching[0]
+        job_id = job.get("id")
+        if not (
+            type(job_id) is int and job_id > 0
+            and job.get("run_id") == run_id
+            and job.get("run_attempt") == attempt
+            and job.get("head_sha") == head
+            and job.get("status") == "completed"
+            and set(job.get("labels") or []) == EXPECTED_RUNNER_LABELS
+            and job.get("check_run_url") == f"{API}/repos/{repository}/check-runs/{job_id}"
+        ):
+            return False
+        check = api.get(f"check-runs/{job_id}")
+        suite = api.get(f"check-suites/{suite_id}")
+        if not (
+            check.get("id") == job_id
+            and check.get("name") == SUITE_JOB
+            and check.get("status") == "completed"
+            and check.get("head_sha") == head
+            and check.get("conclusion") == job.get("conclusion")
+            and (check.get("app") or {}).get("id") == GITHUB_ACTIONS_APP_ID
+            and (check.get("check_suite") or {}).get("id") == suite_id == suite.get("id")
+            and suite.get("status") == "completed"
+            and suite.get("head_sha") == head
+            and (suite.get("app") or {}).get("id") == GITHUB_ACTIONS_APP_ID
+        ):
+            return False
+        if job.get("conclusion") == "skipped" and job.get("steps") == []:
+            continue
+        if not exact_successful_run(repository, pr, workflow_id, [run], matching, check, suite):
+            return False
+        if not observed_full_suite_tree(job, api.get_job_log(job_id), tree):
+            return False
+        eligible += 1
+        if eligible > 1:
+            return False
+    return eligible == 1
+
+
 def qualify(api: GitHubAPI, repository: str, push_sha: str) -> bool:
     encoded_sha = urllib.parse.quote(push_sha, safe="")
     merge_commit = api.get(f"commits/{encoded_sha}")
@@ -161,57 +297,16 @@ def qualify(api: GitHubAPI, repository: str, push_sha: str) -> bool:
     merge_tree = (merge_commit.get("commit") or {}).get("tree", {}).get("sha")
     head_commit = api.get(f"commits/{urllib.parse.quote(head_sha, safe='')}")
     pr_tree = (head_commit.get("commit") or {}).get("tree", {}).get("sha")
-    if not merge_tree or merge_tree != pr_tree:
+    if not merge_tree or merge_tree != pr_tree or not runtime_inputs_qualified(Path(WORKFLOW_PATH).read_bytes()):
         return False
 
     workflow = api.get("actions/workflows/ci.yml")
     workflow_id = workflow.get("id")
-    if not isinstance(workflow_id, int):
+    if type(workflow_id) is not int or workflow_id < 1 or workflow.get("path") != WORKFLOW_PATH:
         return False
     query = urllib.parse.urlencode({"head_sha": head_sha, "event": "pull_request", "per_page": 100})
-    runs_response = api.get(f"actions/runs?{query}")
-    runs = runs_response.get("workflow_runs") or []
-    matching = [run for run in runs if run.get("workflow_id") == workflow_id]
-    if len(matching) != 1:
-        return False
-    run = matching[0]
-    attempt = run.get("run_attempt")
-    if not isinstance(attempt, int) or attempt < 1:
-        return False
-    run_id = run.get("id")
-    jobs_response = api.get(f"actions/runs/{run_id}/attempts/{attempt}/jobs?per_page=100")
-    jobs = [job for job in jobs_response.get("jobs", []) if job.get("name") == "lint-and-test"]
-    if len(jobs) != 1:
-        return False
-    job = jobs[0]
-    check_url = job.get("check_run_url", "")
-    prefix = f"{API}/repos/{repository}/check-runs/"
-    if not check_url.startswith(prefix):
-        return False
-    check_id = check_url[len(prefix) :].split("/", 1)[0]
-    if not check_id.isdigit():
-        return False
-    check_run = api.get(f"check-runs/{check_id}")
-    suite_id = (check_run.get("check_suite") or {}).get("id")
-    if not isinstance(suite_id, int):
-        return False
-    check_suite = api.get(f"check-suites/{suite_id}")
-
-    workflow_bytes = Path(".github/workflows/ci.yml").read_bytes()
-    return reuse_qualified(
-        repository,
-        push_sha,
-        merge_commit,
-        prs,
-        merge_tree,
-        pr_tree,
-        workflow_id,
-        runs,
-        jobs,
-        check_run,
-        check_suite,
-        workflow_bytes,
-    )
+    runs = complete_page(api.get(f"actions/runs?{query}"), "workflow_runs")
+    return runs is not None and candidate_receipts_qualified(api, repository, pr, workflow_id, runs, merge_tree)
 
 
 def main() -> int:

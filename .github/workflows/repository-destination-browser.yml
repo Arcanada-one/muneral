@@ -23,22 +23,28 @@ jobs:
         with:
           node-version: 26.13.0
 
-      - name: Enable the repository-pinned pnpm
+      - name: Test the browser job's Corepack cleanup
+        run: node --test apps/web/e2e/repository-destination/workflow.test.mjs
+
+      - name: Allocate private Corepack home
+        id: allocate-corepack
         run: |
           set -euo pipefail
-          corepack_home="${RUNNER_TEMP}/repository-destination-corepack"
-          mkdir -m 700 "${corepack_home}"
-          corepack enable --install-directory "${corepack_home}"
-          printf '%s\n' "${corepack_home}" >> "${GITHUB_PATH}"
+          corepack_home="$(mktemp -d "${RUNNER_TEMP}/repository-destination-corepack.XXXXXXXX")"
+          printf 'directory=%s\n' "${corepack_home}" >> "${GITHUB_OUTPUT}"
 
       - name: Install locked workspace dependencies
-        run: pnpm install --frozen-lockfile
+        env:
+          COREPACK_HOME: ${{ steps.allocate-corepack.outputs.directory }}
+        run: corepack pnpm install --frozen-lockfile
 
       - name: Install the isolated browser helper
         # package.json pins playwright-core@1.63.0; no nested lockfile (avoids
         # graph-admission global_fallback on basename pnpm-lock.yaml).
+        env:
+          COREPACK_HOME: ${{ steps.allocate-corepack.outputs.directory }}
         run: >-
-          pnpm --dir apps/web/e2e/repository-destination --ignore-workspace
+          corepack pnpm --dir apps/web/e2e/repository-destination --ignore-workspace
           install
           --config.store-dir="${RUNNER_TEMP}/repository-destination-helper-store"
 
@@ -53,17 +59,17 @@ jobs:
           umask 077
           [[ "${REPOSITORY_DESTINATION_RUN_ID}" =~ ^[0-9]+$ ]]
           [[ "${REPOSITORY_DESTINATION_RUN_ATTEMPT}" =~ ^[1-9][0-9]*$ ]]
-          [[ "${REPOSITORY_DESTINATION_CANDIDATE_SHA}" =~ ^[a-f0-9]{40}$ ]]
+          [[ "${#REPOSITORY_DESTINATION_CANDIDATE_SHA}" -eq 40 ]]
+          [[ "${REPOSITORY_DESTINATION_CANDIDATE_SHA}" =~ ^[a-f0-9]+$ ]]
           artifact_parent="${RUNNER_TEMP}/repository-destination-artifacts/${REPOSITORY_DESTINATION_RUN_ID}/${REPOSITORY_DESTINATION_RUN_ATTEMPT}"
           private_parent="${RUNNER_TEMP}/repository-destination-private/${REPOSITORY_DESTINATION_RUN_ID}/${REPOSITORY_DESTINATION_RUN_ATTEMPT}"
-          mkdir -p -m 700 "${artifact_parent}" "${private_parent}"
+          mkdir -p "${artifact_parent}" "${private_parent}"
           artifact_root="${artifact_parent}/${REPOSITORY_DESTINATION_CANDIDATE_SHA}"
           private_root="${private_parent}/${REPOSITORY_DESTINATION_CANDIDATE_SHA}"
           mkdir -m 700 "${artifact_root}"
           mkdir -m 700 "${private_root}"
-          printf 'artifact_root=%s\n' "${artifact_root}" >> "${GITHUB_OUTPUT}"
-          printf 'private_root=%s\n' "${private_root}" >> "${GITHUB_OUTPUT}"
-          printf 'ready=true\n' >> "${GITHUB_OUTPUT}"
+          printf 'artifact_root=%s\nprivate_root=%s\nready=true\n' \
+            "${artifact_root}" "${private_root}" >> "${GITHUB_OUTPUT}"
 
       - name: Run the repository destination browser fixture
         if: steps.allocate-output.outputs.ready == 'true'
@@ -107,3 +113,9 @@ jobs:
             ${{ steps.allocate-output.outputs.artifact_root }}/result.json
             ${{ steps.allocate-output.outputs.artifact_root }}/runner-exit.json
           if-no-files-found: error
+
+      - name: Remove the job's Corepack home
+        if: always() && steps.allocate-corepack.outputs.directory != ''
+        env:
+          COREPACK_DIRECTORY: ${{ steps.allocate-corepack.outputs.directory }}
+        run: rm -rf -- "${COREPACK_DIRECTORY}"
