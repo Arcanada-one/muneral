@@ -54,6 +54,28 @@ export class AuthService {
     );
   }
 
+  async refreshAccess(refreshToken: string): Promise<string> {
+    let payload: { sub?: unknown; type?: unknown; exp?: unknown };
+    try {
+      payload = await this.jwtService.verifyAsync(refreshToken, { algorithms: ['HS256'] });
+    } catch {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+
+    if (
+      payload?.type !== 'refresh' || typeof payload.sub !== 'string' || !payload.sub ||
+      typeof payload.exp !== 'number' || !Number.isFinite(payload.exp)
+    ) {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+
+    const user = await this.validateJwtPayload({ sub: payload.sub });
+    if (!user) {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+    return this.signAccess(user.id);
+  }
+
   async findOrCreateGithubUser(profile: GithubProfile) {
     const githubId = BigInt(profile.id);
     let user = await this.prisma.user.findUnique({ where: { githubId } });
