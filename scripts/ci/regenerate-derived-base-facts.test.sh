@@ -16,7 +16,7 @@ HELPER="$HERE/regenerate-derived-base-facts.sh"
 [[ -f "$HELPER" ]] || { echo "missing helper: $HELPER" >&2; exit 2; }
 chmod +x "$HELPER"
 
-WORK="$(mktemp -d)"
+WORK="$(mktemp -d)" || exit 2
 trap 'rm -rf "$WORK"' EXIT
 
 FAILURES=0
@@ -132,16 +132,17 @@ jobs:
       - run: 'true'
 EOF
 
-if "$HELPER" assert-workflow-run-names "$WORK/ci.yml" "$WORK/workflows" >/tmp/regenerate-assert.out 2>&1; then
-  if grep -q 'ok   listener.yml' /tmp/regenerate-assert.out; then
+listener_output="$WORK/regenerate-assert.out"
+if "$HELPER" assert-workflow-run-names "$WORK/ci.yml" "$WORK/workflows" >"$listener_output" 2>&1; then
+  if grep -Fq 'ok   listener.yml' "$listener_output"; then
     pass 'assert-workflow-run-names accepts matching listener'
   else
     fail 'assert-workflow-run-names missing ok line'
-    cat /tmp/regenerate-assert.out >&2
+    cat "$listener_output" >&2
   fi
 else
   fail "assert-workflow-run-names exited $?"
-  cat /tmp/regenerate-assert.out >&2
+  cat "$listener_output" >&2
 fi
 
 # Mismatch must go red.
@@ -158,11 +159,18 @@ jobs:
       - run: 'true'
 EOF
 
-if "$HELPER" assert-workflow-run-names "$WORK/ci.yml" "$WORK/workflows" >/tmp/regenerate-assert-bad.out 2>&1; then
+bad_listener_output="$WORK/regenerate-assert-bad.out"
+if "$HELPER" assert-workflow-run-names "$WORK/ci.yml" "$WORK/workflows" >"$bad_listener_output" 2>&1; then
   fail 'assert-workflow-run-names should refuse mismatched workflows: name'
-  cat /tmp/regenerate-assert-bad.out >&2
+  cat "$bad_listener_output" >&2
 else
-  pass 'assert-workflow-run-names refuses mismatched workflows: name'
+  rc=$?
+  if [[ "$rc" -eq 1 ]] && grep -Fq 'bad-listener.yml listens for' "$bad_listener_output"; then
+    pass 'assert-workflow-run-names refuses mismatched workflows: name'
+  else
+    fail "assert-workflow-run-names did not report the expected mismatch (exit $rc)"
+    cat "$bad_listener_output" >&2
+  fi
 fi
 
 # --- Case 4: workflow file must not reintroduce the measured SIGPIPE pipes ------
