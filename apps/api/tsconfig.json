@@ -10,7 +10,10 @@
     "target": "ES2022",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./",
+    // TypeScript 7 turns "strict" on and stops loading every @types package by default.
+    // These two lines keep what 5.9 does here today.
+    "strict": false,
+    "types": ["jest", "node"],
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
