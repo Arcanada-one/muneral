@@ -36,10 +36,11 @@ jobs:
           node-version: 26.13.0
 
       - name: Enable the repository-pinned pnpm
+        id: enable-corepack
         run: |
           set -euo pipefail
-          corepack_home="${RUNNER_TEMP}/activity-visible-count-corepack"
-          mkdir -m 700 "${corepack_home}"
+          corepack_home="$(mktemp -d "${RUNNER_TEMP}/activity-visible-count-corepack.XXXXXXXX")"
+          printf 'directory=%s\n' "${corepack_home}" >> "${GITHUB_OUTPUT}"
           corepack enable --install-directory "${corepack_home}"
           printf '%s\n' "${corepack_home}" >> "${GITHUB_PATH}"
 
@@ -130,3 +131,9 @@ jobs:
           name: activity-visible-count-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ steps.allocate-output.outputs.artifact_root }}/result.json
           if-no-files-found: error
+
+      - name: Remove the job's Corepack directory
+        if: always() && steps.enable-corepack.outputs.directory != ''
+        env:
+          COREPACK_DIRECTORY: ${{ steps.enable-corepack.outputs.directory }}
+        run: rm -rf -- "${COREPACK_DIRECTORY}"

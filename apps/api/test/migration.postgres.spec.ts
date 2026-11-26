@@ -88,7 +88,9 @@ describe('Migration import surface — PostgreSQL proofs', () => {
     overrides: Partial<CreateWorkItemDto> = {},
     occurrenceOverrides: Partial<CreateWorkItemDto['occurrence']> = {},
   ): CreateWorkItemDto {
-    const legacyId = (overrides.legacyId ?? `ARAS-${randomUUID().slice(0, 4)}`) as string;
+    // Source receipts are unique across batches by identity + locator + digest.
+    // Keep generated fixture identities collision-resistant across the whole suite.
+    const legacyId = (overrides.legacyId ?? `ARAS-${randomUUID()}`) as string;
     return {
       batchId,
       sourceNamespace: 'datarim/root',
