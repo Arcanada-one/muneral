@@ -23,7 +23,7 @@ import { Throttle } from '@nestjs/throttler';
  * All auth endpoints are rate-limited to 5 req/min.
  */
 @Controller('auth')
-@Throttle({ default: { limit: 5, ttl: 60000 } })
+@Throttle({ global: { limit: 5, ttl: 60000 } })
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
