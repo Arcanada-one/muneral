@@ -9,6 +9,31 @@ export const SUBJECT = '0197a000-0000-7000-8000-000000000001';
 const part = (value: object) => Buffer.from(JSON.stringify(value)).toString('base64url');
 const decode = (value: string) => JSON.parse(Buffer.from(value, 'base64url').toString()) as Record<string, any>;
 
+/** The stand-in's ID token key. One per test file, because the application caches the key set. */
+const providerSigning = generateKeyPairSync('ed25519');
+export const SIGNING_KID = 'stand-in-signing-1';
+export const SIGNING_JWK = {
+  ...providerSigning.publicKey.export({ format: 'jwk' }), kid: SIGNING_KID, alg: 'EdDSA', use: 'sig',
+};
+/** A key the stand-in does not publish. */
+const strangerSigning = generateKeyPairSync('ed25519');
+
+export interface IdTokenSpoil {
+  alg?: string;
+  kid?: string;
+  /** Signed with a key that is not in the published set. */
+  foreignKey?: boolean;
+  claims?: Record<string, unknown>;
+}
+
+export function standInIdToken(claims: object, spoil: IdTokenSpoil = {}): string {
+  const alg = spoil.alg ?? 'EdDSA';
+  const input = `${part({ alg, typ: 'JWT', kid: spoil.kid ?? SIGNING_KID })}.${part({ ...claims, ...spoil.claims })}`;
+  if (alg === 'none') return `${input}.`;
+  const key = (spoil.foreignKey ? strangerSigning : providerSigning).privateKey;
+  return `${input}.${sign(null, Buffer.from(input), key).toString('base64url')}`;
+}
+
 export function clientKeyPair() {
   const { privateKey, publicKey } = generateKeyPairSync('ed25519');
   return { publicKey, pem: privateKey.export({ type: 'pkcs8', format: 'pem' }).toString() };
@@ -22,12 +47,16 @@ export interface TokenCall {
 export class FakeAuth {
   readonly calls: TokenCall[] = [];
   readonly requested: string[] = [];
-  private readonly signing = generateKeyPairSync('ed25519');
   private issued = 0;
   /** What the next authorization-code exchange and ID token should look like. */
   challenge = '';
   nonce: string | undefined = '';
-  idToken: { alg?: string; claims?: Record<string, unknown> } = {};
+  idToken: IdTokenSpoil = {};
+  /** Set to make a refresh response carry an ID token, spoiled as given. */
+  refreshIdToken: IdTokenSpoil | undefined;
+  /** Changes to the discovery document and to the published key set. */
+  discovery: { status?: number; patch?: Record<string, unknown> } = {};
+  jwks: { status?: number; keys?: object[]; unreachable?: boolean } = {};
   accessLifetime = 300;
   refreshBehaviour: 'ok' | 'invalid_grant' | 'network' | 'server_error' = 'ok';
   refreshGate: Promise<void> | undefined;
@@ -37,12 +66,7 @@ export class FakeAuth {
 
   constructor(private readonly clientPublicKey: KeyObject) {}
 
-  private jwt(claims: object, alg = 'EdDSA'): string {
-    const input = `${part({ alg, typ: 'JWT' })}.${part(claims)}`;
-    return `${input}.${sign(null, Buffer.from(input), this.signing.privateKey).toString('base64url')}`;
-  }
-
-  private tokens(withIdToken: boolean) {
+  private tokens(spoil: IdTokenSpoil | undefined, withNonce = false) {
     const n = ++this.issued;
     const now = Math.floor(Date.now() / 1000);
     return {
@@ -50,15 +74,14 @@ export class FakeAuth {
       access_token: `fake-access-${n}`,
       refresh_token: `fake-refresh-${n}`,
       expires_in: this.accessLifetime,
-      ...(withIdToken
+      ...(spoil
         ? {
-            id_token: this.jwt(
+            id_token: standInIdToken(
               {
                 iss: ISSUER, aud: CLIENT_ID, sub: SUBJECT, iat: now, exp: now + 300,
-                ...(this.nonce === undefined ? {} : { nonce: this.nonce }),
-                ...this.idToken.claims,
+                ...(withNonce && this.nonce !== undefined ? { nonce: this.nonce } : {}),
               },
-              this.idToken.alg,
+              spoil,
             ),
           }
         : {}),
@@ -92,7 +115,12 @@ export class FakeAuth {
         end_session_endpoint: `${ISSUER}/oidc/logout`,
         code_challenge_methods_supported: ['S256'],
         id_token_signing_alg_values_supported: ['EdDSA'],
-      });
+        ...this.discovery.patch,
+      }, this.discovery.status);
+    }
+    if (url === `${ISSUER}/oidc/jwks`) {
+      if (this.jwks.unreachable) throw new TypeError('fetch failed');
+      return json({ keys: this.jwks.keys ?? [SIGNING_JWK] }, this.jwks.status);
     }
     if (url !== `${ISSUER}/oidc/token`) throw new Error(`Unexpected request in test: ${url}`);
     const body = new URLSearchParams(String(init?.body));
@@ -100,7 +128,7 @@ export class FakeAuth {
     if (body.get('grant_type') === 'authorization_code') {
       const proof = createHash('sha256').update(body.get('code_verifier') ?? '').digest('base64url');
       if (proof !== this.challenge) return json({ error: 'invalid_grant' }, 400);
-      return json(this.tokens(true));
+      return json(this.tokens(this.idToken, true));
     }
     await this.refreshGate;
     if (this.refreshBehaviour === 'network') throw new TypeError('fetch failed');
@@ -112,6 +140,6 @@ export class FakeAuth {
     }
     if (this.refreshBehaviour === 'invalid_grant') return json({ error: 'invalid_grant' }, 400);
     this.spent.add(presented);
-    return json(this.tokens(false));
+    return json(this.tokens(this.refreshIdToken));
   };
 }

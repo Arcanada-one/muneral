@@ -192,6 +192,8 @@ describe('sign-in through Auth Arcana', () => {
       ['an expired lifetime', () => { fake.idToken = { claims: { exp: 1 } }; }],
       ['a symmetric alg', () => { fake.idToken = { alg: 'HS256' }; }],
       ['no signature alg', () => { fake.idToken = { alg: 'none' }; }],
+      ['a signature by another key', () => { fake.idToken = { foreignKey: true }; }],
+      ['a key id the issuer does not publish', () => { fake.idToken = { kid: 'stand-in-signing-9' }; }],
     ])('an ID token with %s', async (_label, spoil) => {
       const browser = new Browser(config);
       const { callback } = await authorize(browser);
