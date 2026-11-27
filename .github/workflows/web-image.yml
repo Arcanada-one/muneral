@@ -1,0 +1,47 @@
+# Builds apps/web/Dockerfile and requires HTTP 200 for /login from the container.
+# Verification only: no push, no deploy, no secrets. ci.yml and its deploy jobs are separate.
+name: web-image
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/web-image.yml'
+      - 'scripts/ci/web-image-smoke.sh'
+      - 'scripts/ci/web-image-smoke.test.sh'
+      - 'apps/web/**'
+      - 'packages/types/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.npmrc'
+      - '.dockerignore'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-image-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  web-image:
+    # Same fork-deny and ci:run guard as the other self-hosted jobs in ci.yml.
+    if: (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && (github.event_name != 'pull_request' || startsWith(github.head_ref, 'integration/') || contains(github.event.pull_request.labels.*.name, 'ci:run'))
+    runs-on: [self-hosted, linux, ci-general, docker]
+    timeout-minutes: 30
+    env:
+      WEB_SMOKE_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Smoke script controls
+        run: bash scripts/ci/web-image-smoke.test.sh
+
+      - name: Build the web image and get /login from the container
+        run: bash scripts/ci/web-image-smoke.sh run
+
+      - name: Remove this run's container and image
+        if: always()
+        run: bash scripts/ci/web-image-smoke.sh cleanup
