@@ -18,6 +18,7 @@ import { createDisposablePostgres } from './support/disposable-postgres.js';
 import {
   TASK_ACTIVITY_DEFAULT_LIMIT,
   TASK_ACTIVITY_MAX_LIMIT,
+  TASK_ACTIVITY_MAX_PAGE,
 } from '../src/tasks/dto/query-task-activity.dto.js';
 
 @Module({
@@ -49,6 +50,8 @@ describe('GET /tasks/:taskId/activity limit bound (real HTTP/PostgreSQL)', () =>
       .compile();
     app = mod.createNestApplication();
     app.useLogger(false);
+    // Same query parser as apps/api/src/main.ts.
+    app.getHttpAdapter().getInstance().set('query parser', 'extended');
     app.useGlobalPipes(
       new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
     );
@@ -121,7 +124,7 @@ describe('GET /tasks/:taskId/activity limit bound (real HTTP/PostgreSQL)', () =>
     expect(res.body.data.length).toBeLessThanOrEqual(TASK_ACTIVITY_DEFAULT_LIMIT);
   });
 
-  it(`accepts limit=${TASK_ACTIVITY_MAX_LIMIT} (orchestration full-history page)`, async () => {
+  it(`accepts limit=${TASK_ACTIVITY_MAX_LIMIT}`, async () => {
     const res = await supertest(app.getHttpServer())
       .get(`/tasks/${taskId}/activity?page=1&limit=${TASK_ACTIVITY_MAX_LIMIT}`)
       .auth(token, { type: 'bearer' })
@@ -170,5 +173,45 @@ describe('GET /tasks/:taskId/activity limit bound (real HTTP/PostgreSQL)', () =>
     expect(first.body.data).toHaveLength(1);
     expect(second.body.data).toHaveLength(1);
     expect(first.body.data[0].id).not.toBe(second.body.data[0].id);
+  });
+
+  it('accepts page at TASK_ACTIVITY_MAX_PAGE with limit=500 (empty page)', async () => {
+    const res = await supertest(app.getHttpServer())
+      .get(`/tasks/${taskId}/activity?page=${TASK_ACTIVITY_MAX_PAGE}&limit=${TASK_ACTIVITY_MAX_LIMIT}`)
+      .auth(token, { type: 'bearer' })
+      .expect(200);
+    expect(res.body.data).toHaveLength(0);
+    expect(res.body.total).toBe(2);
+  });
+
+  it.each([String(TASK_ACTIVITY_MAX_PAGE + 1), '1e300', '0'])('rejects page=%s with 400', async (page) => {
+    await supertest(app.getHttpServer())
+      .get(`/tasks/${taskId}/activity?page=${page}`)
+      .auth(token, { type: 'bearer' })
+      .expect(400);
+  });
+
+  const prototypeNames = [
+    '__proto__',
+    'constructor',
+    'prototype',
+    'toString',
+    'valueOf',
+    'hasOwnProperty',
+    'isPrototypeOf',
+  ];
+
+  it.each(prototypeNames)('rejects the query parameter name %s with 400', async (name) => {
+    await supertest(app.getHttpServer())
+      .get(`/tasks/${taskId}/activity?${name}=1`)
+      .auth(token, { type: 'bearer' })
+      .expect(400);
+  });
+
+  it.each(prototypeNames)('rejects %s next to limit=500 with 400', async (name) => {
+    await supertest(app.getHttpServer())
+      .get(`/tasks/${taskId}/activity?limit=${TASK_ACTIVITY_MAX_LIMIT}&${name}=1`)
+      .auth(token, { type: 'bearer' })
+      .expect(400);
   });
 });

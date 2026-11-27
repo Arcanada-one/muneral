@@ -38,6 +38,7 @@ import { QueryTasksDto } from './dto/query-tasks.dto.js';
 import {
   QueryTaskActivityDto,
   TASK_ACTIVITY_DEFAULT_LIMIT,
+  assertActivityQueryKeys,
 } from './dto/query-task-activity.dto.js';
 import { QueryWorkspaceDigestDto } from './dto/query-workspace-digest.dto.js';
 import { QueryWorkspaceDigestTransitionsDto } from './dto/query-workspace-digest-transitions.dto.js';
@@ -843,6 +844,7 @@ export class TasksController {
     @Req() req: AuthRequest,
     @Query() query: QueryTaskActivityDto,
   ) {
+    assertActivityQueryKeys(req.originalUrl ?? req.url);
     return this.tasksService.getActivity(
       taskId,
       query.page ?? 1,

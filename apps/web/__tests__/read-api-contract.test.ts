@@ -93,5 +93,10 @@ describe('invalid bodies never become successful empty reads', () => {
   it.each([{ data: [] }, { items: [], total: 0, limit: 0, offset: 0 }, { items: [task], total: 0, limit: 5, offset: 0 }, { items: [], total: 2, limit: 5, offset: 1 }])('refuses malformed task page %j', value => expect(() => readTaskPage(value)).toThrow(/unavailable/));
   it('preserves empty page with nonzero total', () => expect(readTaskPage({ items: [], total: 10, limit: 5, offset: 10 })).toEqual({ data: [], total: 10, limit: 5, page: 3 }));
   it('refuses duplicate slug identity', () => expect(() => uniqueSlug([workspace, workspace], workspace.slug, 'Workspace')).toThrow(/unavailable/));
+  const activityRow = { id: workspaceId, taskId, actorId: projectId, actorType: 'human', action: 'comment', createdAt: date, payload: null };
+  const activityRows = (n: number) => Array.from({ length: n }, () => ({ ...activityRow }));
+  it('accepts an activity page of 500 rows at limit 500', () => expect(readActivity({ data: activityRows(500), total: 500, page: 1, limit: 500 }).data).toHaveLength(500));
+  it('refuses an activity page with 501 rows', () => expect(() => readActivity({ data: activityRows(501), total: 501, page: 1, limit: 500 })).toThrow(/invalid response shape/));
+  it('refuses an activity page that reports limit 501', () => expect(() => readActivity({ data: [], total: 0, page: 1, limit: 501 })).toThrow(/invalid response shape/));
   it('refuses malformed activity rows', () => expect(() => readActivity({ data: [{ action: 'comment' }], total: 1, page: 1, limit: 20 })).toThrow(/invalid response shape/));
 });
