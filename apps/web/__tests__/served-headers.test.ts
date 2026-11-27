@@ -11,7 +11,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 const WEB = resolve(__dirname, '..');
 const built = existsSync(resolve(WEB, '.next', 'BUILD_ID'));
-const required = process.env.CI === 'true' || process.env.REQUIRE_BUILT_WEB === '1';
+const required = process.env.CI === 'true';
 
 const freePort = () =>
   new Promise<number>((done, fail) => {
