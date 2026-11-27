@@ -209,10 +209,15 @@ request is separate. Activity added or removed between requests can change `tota
 multi-page walk can miss or repeat rows. Rows with equal `createdAt` values also have no guaranteed relative order.
 This endpoint provides no cursor or snapshot token.
 
-Send positive base-10 integer values and use a modest `limit`. The controller parses both values with `parseInt`, and
-the current controller/service path has no explicit integer, range, or maximum-`limit` validation. Do not rely on a
-particular HTTP response for malformed, zero, negative, or excessively large values; those cases are not a documented
-input contract.
+Query parameters are validated (`QueryTaskActivityDto`):
+
+- `page`: integer, 1 to `TASK_ACTIVITY_MAX_PAGE` (`floor(Number.MAX_SAFE_INTEGER / 500)`), default 1.
+- `limit`: integer, 1 to 500, default 20.
+- Parameter names: when `page` and `limit` are valid, any other parameter name gives `400`, including names that
+  match `Object.prototype` members such as `__proto__` or `toString`.
+
+A value outside these ranges, or one that is not an integer (`0`, `1.5`, `abc`, `limit=501`), gives `400`. To read a
+long history, send `limit=500` and loop `page` until `page * limit >= total`.
 
 `ActivityService.findForTask` returns the full stored row, so a `comment`
 action's response includes `payload.body` verbatim — the same content
@@ -238,8 +243,9 @@ Authorization: Bearer mun_sk_<key>
 Response envelope: `{ "data": [...], "total": N, "page": 1, "limit": 20 }`.
 Each `data` row is `{ id, createdAt, actorType, actorId, body }` — no
 `workspaceId`, no raw `payload` object, no non-comment activity actions.
-Paging defaults and caveats match `GET .../activity` (offset pages; no snapshot
-token; `parseInt` on query values with no documented malformed-input contract).
+Paging defaults and the offset caveats match `GET .../activity` (offset pages; no
+snapshot token). Query validation does not: this route parses `page` and `limit`
+with `parseInt` and has no documented malformed-input contract.
 
 Because listing and posting share one scope check, an unassigned agent (same
 workspace) and an agent from another workspace both get the same `403`
