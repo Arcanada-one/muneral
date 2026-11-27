@@ -27,6 +27,12 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        // Header rules replace what a route handler sets, and the last matching rule wins. The
+        // logout redirect carries the ID token in its address: no referrer at all.
+        source: '/api/logout',
+        headers: [{ key: 'Referrer-Policy', value: 'no-referrer' }],
+      },
     ];
   },
 };

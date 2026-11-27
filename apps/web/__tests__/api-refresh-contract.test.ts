@@ -113,6 +113,24 @@ describe('Web API after a 401: the server refreshes, the browser only asks', () 
     expect(signOut).not.toHaveBeenCalled();
   });
 
+  // Reads: 1 the request, 2 the 401 handler, 3 the renewal, 4 the retry as it is sent.
+  it.each([
+    ['another login holds the session', session('other-login', 'other-access')],
+    ['the session no longer holds a token', { expires: SOON, loginSessionId: 'retry-login', error: 'TemporarilyUnavailable' }],
+  ] as const)('does not send the retry when, by the time it is sent, %s', async (_label, atRetry) => {
+    vi.mocked(getSession)
+      .mockResolvedValueOnce(session('retry-login'))
+      .mockResolvedValueOnce(session('retry-login'))
+      .mockResolvedValueOnce(session('retry-login', 'renewed-access'))
+      .mockResolvedValue(atRetry);
+    const sent: unknown[] = [];
+    await expect(apiClient.get('/retry-check', { adapter: api(sent) }))
+      .rejects.toThrow('The session has changed');
+    expect(sent).toEqual(['Bearer old-access']);
+    expect(getSession).toHaveBeenCalledTimes(4);
+    expect(signOut).not.toHaveBeenCalled();
+  });
+
   it('preserves an explicit bearer header and returns its own 401', async () => {
     vi.mocked(getSession).mockResolvedValue(session('explicit-login'));
     const adapter = vi.fn(expired());

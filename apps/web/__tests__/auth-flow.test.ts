@@ -139,13 +139,20 @@ describe('sign-in through Auth Arcana', () => {
   // redirect address the browser follows (auth-logout tests).
   it('gives the browser the access token only, through sign-in and session reads', async () => {
     const browser = await signedIn();
+    const read = (value: string) => decode({ token: value, secret: environment.NEXTAUTH_SECRET, salt: COOKIE });
+    const OWN_FIELDS = ['exp', 'iat', 'jti', 'loginSessionId', 'name', 'sid', 'sub'];
+    // The cookie set by sign-in itself: a session read rewrites it, which would hide what it held.
+    const first = await read(browser.jar.get(COOKIE)!);
+    expect(Object.keys(first!).sort()).toEqual(OWN_FIELDS);
+    expect(JSON.stringify(first)).not.toMatch(/fake-access|fake-refresh|eyJ/);
+
     const session = await browser.session();
     expect(Object.keys(session!).sort()).toEqual(['accessToken', 'expires', 'loginSessionId', 'user']);
     expect(session!.accessToken).toBe('fake-access-1');
     expect(session!.user).toEqual({ name: null });
 
-    const cookie = await decode({ token: browser.jar.get(COOKIE)!, secret: environment.NEXTAUTH_SECRET, salt: COOKIE });
-    expect(Object.keys(cookie!).sort()).toEqual(['exp', 'iat', 'jti', 'loginSessionId', 'name', 'sid', 'sub']);
+    const cookie = await read(browser.jar.get(COOKIE)!);
+    expect(Object.keys(cookie!).sort()).toEqual(OWN_FIELDS);
     expect(cookie!.sub).toBe(SUBJECT);
     expect(JSON.stringify(cookie)).not.toMatch(/fake-access|fake-refresh|eyJ/);
 

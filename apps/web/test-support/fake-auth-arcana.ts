@@ -24,11 +24,13 @@ export interface IdTokenSpoil {
   /** Signed with a key that is not in the published set. */
   foreignKey?: boolean;
   claims?: Record<string, unknown>;
+  header?: Record<string, unknown>;
 }
 
 export function standInIdToken(claims: object, spoil: IdTokenSpoil = {}): string {
   const alg = spoil.alg ?? 'EdDSA';
-  const input = `${part({ alg, typ: 'JWT', kid: spoil.kid ?? SIGNING_KID })}.${part({ ...claims, ...spoil.claims })}`;
+  const header = { alg, typ: 'JWT', kid: spoil.kid ?? SIGNING_KID, ...spoil.header };
+  const input = `${part(header)}.${part({ ...claims, ...spoil.claims })}`;
   if (alg === 'none') return `${input}.`;
   const key = (spoil.foreignKey ? strangerSigning : providerSigning).privateKey;
   return `${input}.${sign(null, Buffer.from(input), key).toString('base64url')}`;

@@ -1,10 +1,9 @@
 /** The calls this server makes to Auth Arcana itself, and the check of the ID tokens it returns. */
-import { createRemoteJWKSet, jwtVerify } from 'jose';
+import { verifySignedIdToken } from './id-token';
 import { API_RESOURCE, type OidcConfig } from './oidc-config';
 
 const ASSERTION_TYPE = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer';
 const TIMEOUT_MS = 10_000;
-const CLOCK_TOLERANCE_SECONDS = 30;
 
 const encodePart = (value: object) => Buffer.from(JSON.stringify(value)).toString('base64url');
 
@@ -106,28 +105,10 @@ export function discover(config: OidcConfig): Promise<Endpoints> {
   return pending;
 }
 
-const keySets = new Map<string, ReturnType<typeof createRemoteJWKSet>>();
-
-/**
- * Verifies an ID token with the issuer's published keys: signature, alg, issuer, audience and
- * expiry. The nonce is checked by Auth.js, which alone holds the expected value. The key set is
- * cached and read again for an unknown key id; its address comes from discovery and redirects are
- * not followed.
- */
+/** Signature against the issuer's key set (its address comes from discovery), alg, iss, aud, expiry. */
 export async function verifyIdToken(config: OidcConfig, idToken: string): Promise<void> {
   const { jwksUri } = await discover(config);
-  let keys = keySets.get(jwksUri);
-  if (!keys) {
-    keys = createRemoteJWKSet(new URL(jwksUri), { timeoutDuration: TIMEOUT_MS });
-    keySets.set(jwksUri, keys);
-  }
-  await jwtVerify(idToken, keys, {
-    algorithms: ['EdDSA'],
-    issuer: config.issuer,
-    audience: config.clientId,
-    requiredClaims: ['exp'],
-    clockTolerance: CLOCK_TOLERANCE_SECONDS,
-  });
+  await verifySignedIdToken(idToken, { jwksUri, issuer: config.issuer, audience: config.clientId });
 }
 
 /**

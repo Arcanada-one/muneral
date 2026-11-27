@@ -4,6 +4,7 @@
 import { generateKeyPairSync } from 'node:crypto';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type * as AuthArcana from '@/lib/auth/auth-arcana';
+import { KEY_SET_COOLDOWN_MS, KEY_SET_MAX_AGE_MS } from '@/lib/auth/id-token';
 import { readOidcConfig, type OidcConfig } from '@/lib/auth/oidc-config';
 import {
   APP, CLIENT_ID, FakeAuth, ISSUER, SIGNING_JWK, SUBJECT, clientKeyPair, standInIdToken,
@@ -34,6 +35,13 @@ afterEach(() => {
 const now = () => Math.floor(Date.now() / 1000);
 const claims = () => ({ iss: ISSUER, aud: CLIENT_ID, sub: SUBJECT, iat: now(), exp: now() + 300 });
 const token = (spoil: IdTokenSpoil = {}) => standInIdToken(claims(), spoil);
+const rejected = (reason: string) => `ID token rejected: ${reason}`;
+const keySetReads = () => fake.requested.filter((url) => url.endsWith('/oidc/jwks')).length;
+/** Moves the clock without faking timers. Tokens made afterwards are dated at the new time. */
+const later = (milliseconds: number) => {
+  const at = Date.now() + milliseconds;
+  vi.spyOn(Date, 'now').mockReturnValue(at);
+};
 
 describe('ID token verification', () => {
   it('accepts a token signed by a published key', async () => {
@@ -41,43 +49,83 @@ describe('ID token verification', () => {
     expect(fake.requested).toEqual([`${ISSUER}/.well-known/openid-configuration`, `${ISSUER}/oidc/jwks`]);
   });
 
+  it.each<[string, Record<string, unknown>]>([
+    ['an audience list that names this client', { aud: ['another', CLIENT_ID] }],
+    ['an expiry just inside the clock tolerance', { exp: Math.floor(Date.now() / 1000) - 5 }],
+    ['a start just inside the clock tolerance', { nbf: Math.floor(Date.now() / 1000) + 5 }],
+  ])('accepts %s', async (_label, spoil) => {
+    await expect(auth.verifyIdToken(oidc, token({ claims: spoil }))).resolves.toBeUndefined();
+  });
+
   it.each<[string, IdTokenSpoil, string]>([
-    ['a bad signature', { foreignKey: true }, 'ERR_JWS_SIGNATURE_VERIFICATION_FAILED'],
-    ['an unknown key id', { kid: 'stand-in-signing-9' }, 'ERR_JWKS_NO_MATCHING_KEY'],
-    ['alg none', { alg: 'none' }, 'ERR_JOSE_ALG_NOT_ALLOWED'],
-    ['another issuer', { claims: { iss: 'https://evil.example' } }, 'ERR_JWT_CLAIM_VALIDATION_FAILED'],
-    ['another audience', { claims: { aud: 'another-client' } }, 'ERR_JWT_CLAIM_VALIDATION_FAILED'],
-    ['an expired lifetime', { claims: { exp: 1 } }, 'ERR_JWT_EXPIRED'],
-    ['no expiry', { claims: { exp: undefined } }, 'ERR_JWT_CLAIM_VALIDATION_FAILED'],
-  ])('refuses %s', async (_label, spoil, code) => {
-    await expect(auth.verifyIdToken(oidc, token(spoil))).rejects.toMatchObject({ code });
+    ['a bad signature', { foreignKey: true }, 'signature'],
+    ['an unknown key id', { kid: 'stand-in-signing-9' }, 'unknown key'],
+    ['no key id', { header: { kid: undefined } }, 'unknown key'],
+    ['alg none', { alg: 'none' }, 'algorithm'],
+    // Signed correctly with the published key: only the allow-list refuses it.
+    ['another alg name', { alg: 'Ed25519' }, 'algorithm'],
+    ['a critical header', { header: { crit: ['exp'] } }, 'critical header'],
+    ['another issuer', { claims: { iss: 'https://evil.example' } }, 'issuer'],
+    ['another audience', { claims: { aud: 'another-client' } }, 'audience'],
+    ['an audience list without this client', { claims: { aud: ['another-client'] } }, 'audience'],
+    ['an expired lifetime', { claims: { exp: 1 } }, 'expiry'],
+    ['no expiry', { claims: { exp: undefined } }, 'expiry'],
+    ['an expiry that is not a number', { claims: { exp: '9999999999' } }, 'expiry'],
+    ['a start in the future', { claims: { nbf: 9_999_999_999 } }, 'not yet valid'],
+    ['a start that is not a number', { claims: { nbf: '1' } }, 'not yet valid'],
+  ])('refuses %s', async (_label, spoil, reason) => {
+    await expect(auth.verifyIdToken(oidc, token(spoil))).rejects.toThrow(rejected(reason));
   });
 
-  it('refuses a token whose signature was cut off', async () => {
-    const [header, payload] = token().split('.');
-    await expect(auth.verifyIdToken(oidc, `${header}.${payload}.`)).rejects.toThrow();
+  it('refuses a signature cut off, changed claims, and text that is not a token', async () => {
+    const [header, payload, signature] = token().split('.');
+    await expect(auth.verifyIdToken(oidc, `${header}.${payload}.`)).rejects.toThrow(rejected('signature'));
+    const changed = Buffer.from(JSON.stringify({ ...claims(), sub: 'someone-else' })).toString('base64url');
+    await expect(auth.verifyIdToken(oidc, `${header}.${changed}.${signature}`)).rejects.toThrow(rejected('signature'));
+    await expect(auth.verifyIdToken(oidc, `${header}.${payload}.${signature}.extra`)).rejects.toThrow(rejected('malformed'));
+    await expect(auth.verifyIdToken(oidc, 'not-a-token')).rejects.toThrow(rejected('malformed'));
+    await expect(auth.verifyIdToken(oidc, `bm90LWpzb24.${payload}.${signature}`)).rejects.toThrow(rejected('malformed'));
   });
 
-  it('refuses an alg outside the allow-list even when the published key names none', async () => {
-    const { alg: _alg, ...unlabelled } = SIGNING_JWK;
-    fake.jwks.keys = [unlabelled];
-    await expect(auth.verifyIdToken(oidc, token({ alg: 'Ed25519' })))
-      .rejects.toMatchObject({ code: 'ERR_JOSE_ALG_NOT_ALLOWED' });
+  const { x: _x, ...withoutX } = SIGNING_JWK as typeof SIGNING_JWK & { x: string };
+  const rsa = generateKeyPairSync('rsa', { modulusLength: 2048 }).publicKey.export({ format: 'jwk' });
+
+  // Each entry is the signing key itself with one property wrong, under the right key id.
+  it.each<[string, object[]]>([
+    ['is under another key id', [{ ...SIGNING_JWK, kid: 'stand-in-signing-2' }]],
+    ['is of another key type', [{ ...rsa, kid: SIGNING_JWK.kid, use: 'sig' }]],
+    ['is labelled with another key type', [{ ...SIGNING_JWK, kty: 'EC' }]],
+    ['names another curve', [{ ...SIGNING_JWK, crv: 'X25519' }]],
+    ['names another alg', [{ ...SIGNING_JWK, alg: 'Ed25519' }]],
+    ['is for encryption', [{ ...SIGNING_JWK, use: 'enc' }]],
+    ['may not verify', [{ ...SIGNING_JWK, key_ops: ['sign'] }]],
+    ['has no public value', [withoutX]],
+    ['appears twice', [SIGNING_JWK, SIGNING_JWK]],
+  ])('refuses when the published key %s', async (_label, published) => {
+    fake.jwks.keys = published;
+    await expect(auth.verifyIdToken(oidc, token())).rejects.toThrow(rejected('unknown key'));
   });
 
-  it('refuses a published key of another type under the same key id', async () => {
-    const rsa = generateKeyPairSync('rsa', { modulusLength: 2048 }).publicKey.export({ format: 'jwk' });
-    fake.jwks.keys = [{ ...rsa, kid: SIGNING_JWK.kid, use: 'sig' }];
-    await expect(auth.verifyIdToken(oidc, token())).rejects.toMatchObject({ code: 'ERR_JWKS_NO_MATCHING_KEY' });
+  it('accepts a published key without alg, use or key_ops, beside an unusable entry', async () => {
+    const { alg: _alg, use: _use, ...bare } = SIGNING_JWK;
+    fake.jwks.keys = [null as unknown as object, bare];
+    await expect(auth.verifyIdToken(oidc, token())).resolves.toBeUndefined();
   });
 
   it.each([
     ['answers 500 with a valid set', { status: 500 }],
     ['redirects', { status: 302 }],
-    ['cannot be reached', { unreachable: true }],
+    ['answers without a key list', { keys: 'none' as unknown as object[] }],
   ])('refuses when the key set endpoint %s', async (_label, jwks) => {
     fake.jwks = jwks;
-    await expect(auth.verifyIdToken(oidc, token())).rejects.toThrow();
+    await expect(auth.verifyIdToken(oidc, token())).rejects.toThrow(rejected('key set unavailable'));
+  });
+
+  it('refuses when the key set cannot be reached, and reads it again next time', async () => {
+    fake.jwks = { unreachable: true };
+    await expect(auth.verifyIdToken(oidc, token())).rejects.toThrow('fetch failed');
+    fake.jwks = {};
+    await expect(auth.verifyIdToken(oidc, token())).resolves.toBeUndefined();
   });
 
   it('asks for the key set without following redirects', async () => {
@@ -88,6 +136,28 @@ describe('ID token verification', () => {
     });
     await auth.verifyIdToken(oidc, token());
     expect(seen).toEqual(['manual']);
+  });
+
+  it('keeps the key set, and reads it once more for a rotated key after the cooldown', async () => {
+    const rotated = { kid: 'stand-in-signing-2' };
+    await auth.verifyIdToken(oidc, token());
+    await auth.verifyIdToken(oidc, token());
+    expect(keySetReads()).toBe(1);
+    fake.jwks.keys = [{ ...SIGNING_JWK, ...rotated }];
+    // Inside the cooldown an unknown key id causes no further request.
+    await expect(auth.verifyIdToken(oidc, token(rotated))).rejects.toThrow(rejected('unknown key'));
+    expect(keySetReads()).toBe(1);
+    later(KEY_SET_COOLDOWN_MS + 1);
+    await expect(auth.verifyIdToken(oidc, token(rotated))).resolves.toBeUndefined();
+    expect(keySetReads()).toBe(2);
+  });
+
+  it('stops accepting a withdrawn key once the key set is too old', async () => {
+    await auth.verifyIdToken(oidc, token());
+    fake.jwks.keys = [];
+    await expect(auth.verifyIdToken(oidc, token())).resolves.toBeUndefined();
+    later(KEY_SET_MAX_AGE_MS + 1);
+    await expect(auth.verifyIdToken(oidc, token())).rejects.toThrow(rejected('unknown key'));
   });
 });
 
@@ -110,7 +180,7 @@ describe('the token request Auth.js makes', () => {
 
   it('withholds a response whose ID token does not verify', async () => {
     answer({ access_token: 'a', id_token: token({ foreignKey: true }) });
-    await expect(exchange()).rejects.toMatchObject({ code: 'ERR_JWS_SIGNATURE_VERIFICATION_FAILED' });
+    await expect(exchange()).rejects.toThrow('ID token rejected: signature');
   });
 
   it('withholds a successful response without an ID token', async () => {
