@@ -36,8 +36,24 @@ model User {
   // Relations
   ownedWorkspaces      Workspace[]
   workspaceMemberships WorkspaceMember[]
+  authIdentityLink     AuthIdentityLink?
 
   @@map("users")
+}
+
+// ---------------------------------------------------------------------------
+// auth_identity_links — local extension of the Auth Arcana user (auth-arcana-mandate,
+// obligation 1). No cross-database FK: auth_user_id is Auth Arcana's user.id.
+// ---------------------------------------------------------------------------
+model AuthIdentityLink {
+  authUserId String   @id @map("auth_user_id") @db.Uuid
+  userId     String   @unique @map("user_id") @db.Uuid
+  linkMethod String   @map("link_method") @db.VarChar
+  linkedAt   DateTime @default(now()) @map("linked_at") @db.Timestamptz()
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("auth_identity_links")
 }
 
 // ---------------------------------------------------------------------------
