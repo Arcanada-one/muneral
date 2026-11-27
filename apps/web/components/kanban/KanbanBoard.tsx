@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { taskDetailHref } from '@/lib/task-detail-href';
 import { Copy } from 'lucide-react';
 import type { TaskStatus } from '@muneral/types';
+import { useI18n } from '@/lib/i18n/useI18n';
 
 interface KanbanBoardProps {
   projectId: string;
@@ -35,6 +36,7 @@ const KANBAN_STATUSES: TaskStatus[] = [
 ];
 
 export function KanbanBoard({ projectId, wsSlug, projSlug }: KanbanBoardProps) {
+  const { t } = useI18n();
   const { data: session } = useSession();
   const [pollingEnabled, setPollingEnabled] = useState(false);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
@@ -234,13 +236,13 @@ export function KanbanBoard({ projectId, wsSlug, projSlug }: KanbanBoardProps) {
   return (
     <div className="relative">
       {pollingEnabled && (
-        <div className="mb-2 flex items-center gap-2 rounded-md bg-amber-50 px-3 py-1.5 text-xs text-amber-700">
+        <div className="mb-2 flex items-center gap-2 rounded-md bg-amber-50 px-3 py-1.5 text-xs text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
           <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-          Live updates paused — polling every 10s
+          {t('Live updates paused — polling every 10s')}
         </div>
       )}
 
-      <div className="mb-3 flex flex-wrap items-center gap-3" role="group" aria-label="Task list actions">
+      <div className="mb-3 flex flex-wrap items-center gap-3" role="group" aria-label={t('Task list actions')}>
         <Button
           type="button"
           onClick={copyVisibleTaskLinks}
@@ -248,33 +250,33 @@ export function KanbanBoard({ projectId, wsSlug, projSlug }: KanbanBoardProps) {
           aria-describedby="copy-visible-task-links-help"
         >
           <Copy className="h-4 w-4" aria-hidden="true" />
-          {copyIsPending ? 'Copying task links…' : 'Copy visible task links'}
+          {copyIsPending ? t('Copying task links…') : t('Copy visible task links')}
         </Button>
         <p id="copy-visible-task-links-help" className="text-sm text-muted-foreground">
           {visibleTasks.length === 0
-            ? 'There are no visible task cards to copy.'
-            : 'Copies links for the task cards currently shown on this board.'}
+            ? t('There are no visible task cards to copy.')
+            : t('Copies links for the task cards currently shown on this board.')}
         </p>
         {currentCopyFeedback?.status === 'pending' && (
           <p role="status" className="basis-full text-sm text-muted-foreground">
-            Copying task links…
+            {t('Copying task links…')}
           </p>
         )}
         {currentCopyFeedback?.status === 'success' && (
-          <p role="status" className="basis-full text-sm text-green-700">
-            Task links copied.
+          <p role="status" className="basis-full text-sm text-green-700 dark:text-green-400">
+            {t('Task links copied.')}
           </p>
         )}
         {currentCopyFeedback?.status === 'failed' && (
           <p role="alert" className="basis-full text-sm text-destructive">
-            Could not copy task links. Try again or copy a task link manually.
+            {t('Could not copy task links. Try again or copy a task link manually.')}
           </p>
         )}
       </div>
 
       {currentStatusError && (
         <p role="alert" className="mb-3 text-sm text-destructive">
-          Could not change the task status. Try again.
+          {t('Could not change the task status. Try again.')}
         </p>
       )}
 

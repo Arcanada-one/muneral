@@ -8,8 +8,10 @@ import { useDetailSession } from '@/lib/api/task-detail-session';
 import type { TaskSelection } from '@/lib/api/task-detail-controller';
 import { TaskDetail } from '@/components/task/TaskDetail';
 import { Button } from '@/components/ui/button';
+import { useI18n } from '@/lib/i18n/useI18n';
 
 export default function TaskPage() {
+  const { t } = useI18n();
   const { wsSlug, projSlug, taskId } = useParams<{
     wsSlug: string;
     projSlug: string;
@@ -50,7 +52,7 @@ export default function TaskPage() {
   if (session.active && ['idle', 'loading'].includes(snapshot.outcome)) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <p className="text-muted-foreground">Loading task...</p>
+        <p className="text-muted-foreground">{t('Loading task...')}</p>
       </div>
     );
   }
@@ -60,8 +62,8 @@ export default function TaskPage() {
     return (
       <div className="rounded-lg border p-8 text-center">
         <p role="alert" className="text-muted-foreground">{
-          !session.active || snapshot.outcome === 'denied' ? 'Task access denied' :
-            snapshot.outcome === 'missing' ? 'Task not found' : 'Task is unavailable'
+          !session.active || snapshot.outcome === 'denied' ? t('Task access denied') :
+            snapshot.outcome === 'missing' ? t('Task not found') : t('Task is unavailable')
         }</p>
         {canRetryRead && (
           <Button
@@ -70,12 +72,12 @@ export default function TaskPage() {
             className="mt-4"
             onClick={() => controller.openTask(selection, false)}
           >
-            Retry loading task
+            {t('Retry loading task')}
           </Button>
         )}
         <Button variant="ghost" className="mt-4" asChild>
           <Link href={`/workspaces/${wsSlug}/projects/${projSlug}`}>
-            Back to project
+            {t('Back to project')}
           </Link>
         </Button>
       </div>
@@ -91,7 +93,7 @@ export default function TaskPage() {
             className="flex items-center gap-1 text-muted-foreground"
           >
             <ChevronLeft className="h-4 w-4" />
-            Back to board
+            {t('Back to board')}
           </Link>
         </Button>
       </div>

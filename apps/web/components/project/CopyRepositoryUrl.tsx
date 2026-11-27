@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useI18n } from '@/lib/i18n/useI18n';
 
 /** Module-private clipboard control for an already-accepted repository URL. */
 export function CopyRepositoryUrl({ repoUrl }: { repoUrl: string }) {
+  const { t } = useI18n();
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const [isCopying, setIsCopying] = useState(false);
   const pendingRef = useRef(false);
@@ -49,16 +51,16 @@ export function CopyRepositoryUrl({ repoUrl }: { repoUrl: string }) {
         }}
         disabled={isCopying}
       >
-        Copy repository URL
+        {t('Copy repository URL')}
       </button>
       {copyState === 'copied' && (
-        <span role="status" className="basis-full text-xs text-green-700">
-          Repository URL copied.
+        <span role="status" className="basis-full text-xs text-green-700 dark:text-green-400">
+          {t('Repository URL copied.')}
         </span>
       )}
       {copyState === 'failed' && (
         <span role="alert" className="basis-full text-xs text-destructive">
-          Could not copy repository URL. Try copying it manually.
+          {t('Could not copy repository URL. Try copying it manually.')}
         </span>
       )}
     </>

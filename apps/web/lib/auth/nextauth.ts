@@ -97,8 +97,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       });
     },
   },
+  // Every page Auth.js would draw itself is a page of this app, with the switchers.
   pages: {
     signIn: '/login',
+    signOut: '/signout',
+    error: '/auth-error',
+    verifyRequest: '/auth-error',
   },
   secret: process.env.NEXTAUTH_SECRET,
 });

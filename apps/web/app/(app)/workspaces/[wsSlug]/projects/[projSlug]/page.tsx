@@ -12,19 +12,21 @@ import { Button } from '@/components/ui/button';
 import { ProjectRepository } from '@/components/project/ProjectRepository';
 import { TASK_STATUS_LABELS } from '@/lib/task-status-labels';
 import { taskDetailHref } from '@/lib/task-detail-href';
+import { useI18n } from '@/lib/i18n/useI18n';
 
-function formatBacklogDueDate(value: string): string {
+function formatBacklogDueDate(value: string, dateLocale: string): string {
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     const date = new Date(`${value}T00:00:00.000Z`);
     if (!Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value) {
-      return date.toLocaleDateString(undefined, { timeZone: 'UTC' });
+      return date.toLocaleDateString(dateLocale, { timeZone: 'UTC' });
     }
   }
 
-  return new Date(value).toLocaleDateString();
+  return new Date(value).toLocaleDateString(dateLocale);
 }
 
 export default function ProjectPage() {
+  const { t, te, dateLocale } = useI18n();
   const { wsSlug, projSlug } = useParams<{ wsSlug: string; projSlug: string }>();
   const { data: project, isError, refetch } = useProject(wsSlug, projSlug);
   const { setCurrentProject } = useProjectStore();
@@ -40,7 +42,7 @@ export default function ProjectPage() {
   if (!project && !isError) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <p className="text-muted-foreground">Loading project...</p>
+        <p className="text-muted-foreground">{t('Loading project...')}</p>
       </div>
     );
   }
@@ -49,7 +51,7 @@ export default function ProjectPage() {
     return (
       <div className="flex h-64 items-center justify-center">
         <p role="alert" className="text-sm text-destructive">
-          Project details are unavailable.
+          {t('Project details are unavailable.')}
         </p>
         <Button
           type="button"
@@ -57,7 +59,7 @@ export default function ProjectPage() {
           className="mt-4"
           onClick={() => { void refetch(); }}
         >
-          Retry loading project
+          {t('Retry loading project')}
         </Button>
       </div>
     );
@@ -68,7 +70,7 @@ export default function ProjectPage() {
       <div className="flex items-center gap-3">
         <h1 className="text-2xl font-bold">{project.name}</h1>
         <Badge variant={project.status === 'active' ? 'success' : 'secondary'}>
-          {project.status}
+          {te(project.status)}
         </Badge>
       </div>
 
@@ -76,8 +78,8 @@ export default function ProjectPage() {
 
       <Tabs defaultValue="kanban">
         <TabsList>
-          <TabsTrigger value="kanban">Kanban</TabsTrigger>
-          <TabsTrigger value="backlog">Backlog ({allTasks.length})</TabsTrigger>
+          <TabsTrigger value="kanban">{t('Kanban')}</TabsTrigger>
+          <TabsTrigger value="backlog">{t('Backlog ({count})', { count: allTasks.length })}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="kanban" className="mt-4">
@@ -93,10 +95,10 @@ export default function ProjectPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/50">
-                  <th className="px-4 py-2 text-left font-medium">Title</th>
-                  <th className="px-4 py-2 text-left font-medium">Status</th>
-                  <th className="px-4 py-2 text-left font-medium">Priority</th>
-                  <th className="px-4 py-2 text-left font-medium">Due</th>
+                  <th className="px-4 py-2 text-left font-medium">{t('Title')}</th>
+                  <th className="px-4 py-2 text-left font-medium">{t('Status')}</th>
+                  <th className="px-4 py-2 text-left font-medium">{t('Priority')}</th>
+                  <th className="px-4 py-2 text-left font-medium">{t('Due')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -112,17 +114,17 @@ export default function ProjectPage() {
                     </td>
                     <td className="px-4 py-2.5">
                       <Badge variant="outline" className="text-xs">
-                        {TASK_STATUS_LABELS[task.status]}
+                        {t(TASK_STATUS_LABELS[task.status])}
                       </Badge>
                     </td>
                     <td className="px-4 py-2.5">
                       <Badge variant="outline" className="text-xs">
-                        {task.priority}
+                        {te(task.priority)}
                       </Badge>
                     </td>
                     <td className="px-4 py-2.5 text-muted-foreground">
                       {task.dueDate
-                        ? formatBacklogDueDate(task.dueDate)
+                        ? formatBacklogDueDate(task.dueDate, dateLocale)
                         : '—'}
                     </td>
                   </tr>
@@ -130,7 +132,7 @@ export default function ProjectPage() {
                 {allTasks.length === 0 && (
                   <tr>
                     <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">
-                      No tasks yet
+                      {t('No tasks yet')}
                     </td>
                   </tr>
                 )}

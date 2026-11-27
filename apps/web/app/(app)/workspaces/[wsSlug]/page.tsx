@@ -7,15 +7,17 @@ import { useProjects } from '@/lib/api/projects';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useI18n } from '@/lib/i18n/useI18n';
 
 export default function WorkspacePage() {
+  const { t, tp, te } = useI18n();
   const { wsSlug } = useParams<{ wsSlug: string }>();
   const { data: projects = [], isLoading } = useProjects(wsSlug);
 
   if (isLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <p className="text-muted-foreground">Loading projects...</p>
+        <p className="text-muted-foreground">{t('Loading projects...')}</p>
       </div>
     );
   }
@@ -24,25 +26,25 @@ export default function WorkspacePage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Projects</h1>
-          <p className="text-muted-foreground">All projects in this workspace</p>
+          <h1 className="text-2xl font-bold">{t('Projects')}</h1>
+          <p className="text-muted-foreground">{t('All projects in this workspace')}</p>
         </div>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
-          New Project
+          {t('New Project')}
         </Button>
       </div>
 
       {projects.length === 0 ? (
         <div className="rounded-xl border-2 border-dashed p-12 text-center">
           <FolderOpen className="mx-auto h-10 w-10 text-muted-foreground" />
-          <h3 className="mt-4 text-lg font-medium">No projects yet</h3>
+          <h3 className="mt-4 text-lg font-medium">{t('No projects yet')}</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Create your first project to start organizing tasks
+            {t('Create your first project to start organizing tasks')}
           </p>
           <Button className="mt-4">
             <Plus className="mr-2 h-4 w-4" />
-            Create Project
+            {t('Create Project')}
           </Button>
         </div>
       ) : (
@@ -60,7 +62,7 @@ export default function WorkspacePage() {
                       variant={project.status === 'active' ? 'success' : 'secondary'}
                       className="flex-shrink-0"
                     >
-                      {project.status}
+                      {te(project.status)}
                     </Badge>
                   </div>
                   {project.description && (
@@ -71,7 +73,7 @@ export default function WorkspacePage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-xs text-muted-foreground">
-                    {project.taskCount} task{project.taskCount !== 1 ? 's' : ''}
+                    {project.taskCount === undefined ? null : tp('task', project.taskCount)}
                   </p>
                 </CardContent>
               </Card>

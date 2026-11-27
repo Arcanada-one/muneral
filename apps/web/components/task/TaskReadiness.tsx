@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTaskReadiness } from '@/lib/api/tasks';
 import { getTaskStatusLabel } from '@/lib/task-status-labels';
+import { useI18n } from '@/lib/i18n/useI18n';
 
 interface TaskReadinessProps {
   taskId: string;
@@ -14,6 +15,7 @@ interface TaskReadinessProps {
 type BlockerStatusFilter = 'all' | 'todo' | 'in_progress' | 'review' | 'blocked';
 
 function CopyBlockerTaskIdButton({ blockerTaskId }: { blockerTaskId: string }) {
+  const { t } = useI18n();
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const [isCopying, setIsCopying] = useState(false);
 
@@ -41,15 +43,15 @@ function CopyBlockerTaskIdButton({ blockerTaskId }: { blockerTaskId: string }) {
         className="h-7 w-7 shrink-0"
         onClick={copyBlockerTaskId}
         disabled={isCopying}
-        aria-label={`Copy blocker task ID ${blockerTaskId}`}
+        aria-label={t('Copy blocker task ID {id}', { id: blockerTaskId })}
       >
         <Copy className="h-3 w-3" />
       </Button>
       {copyState === 'copied' && (
-        <span role="status" className="text-xs text-green-700">Blocker task ID copied.</span>
+        <span role="status" className="text-xs text-green-700 dark:text-green-400">{t('Blocker task ID copied.')}</span>
       )}
       {copyState === 'failed' && (
-        <span role="alert" className="text-xs text-destructive">Could not copy blocker task ID. Try copying it manually.</span>
+        <span role="alert" className="text-xs text-destructive">{t('Could not copy blocker task ID. Try copying it manually.')}</span>
       )}
     </>
   );
@@ -60,6 +62,7 @@ function CopyLoadedBlockerIdsButton({
 }: {
   blockerTaskIds: string[];
 }) {
+  const { t } = useI18n();
   const isCopyPending = useRef(false);
   const [isCopying, setIsCopying] = useState(false);
   const [copyResult, setCopyResult] = useState<'idle' | 'copied' | 'failed'>('idle');
@@ -93,14 +96,14 @@ function CopyLoadedBlockerIdsButton({
   return (
     <div className="mt-2">
       <Button type="button" variant="outline" size="sm" onClick={copyLoadedBlockerIds} disabled={isCopying}>
-        Copy loaded blocker IDs
+        {t('Copy loaded blocker IDs')}
       </Button>
       {copyResult === 'copied' && (
-        <span role="status" className="ml-2 text-xs text-green-700">Blocker IDs copied.</span>
+        <span role="status" className="ml-2 text-xs text-green-700 dark:text-green-400">{t('Blocker IDs copied.')}</span>
       )}
       {copyResult === 'failed' && (
         <span role="alert" className="ml-2 text-xs text-destructive">
-          Could not copy blocker IDs. Try copying them manually.
+          {t('Could not copy blocker IDs. Try copying them manually.')}
         </span>
       )}
     </div>
@@ -114,6 +117,7 @@ function CopyVisibleLoadedBlockerIdsButton({
   blockerTaskIds: string[];
   selectionKey: string;
 }) {
+  const { t } = useI18n();
   const isCopyPending = useRef(false);
   const selectionKeyRef = useRef(selectionKey);
   useLayoutEffect(() => {
@@ -163,14 +167,14 @@ function CopyVisibleLoadedBlockerIdsButton({
         onClick={copyVisibleLoadedBlockerIds}
         disabled={blockerTaskIds.length === 0 || isCopying}
       >
-        Copy visible loaded blocker IDs ({blockerTaskIds.length})
+        {t('Copy visible loaded blocker IDs ({count})', { count: blockerTaskIds.length })}
       </Button>
       {copyResult === 'copied' && (
-        <span role="status" className="ml-2 text-xs text-green-700">Visible blocker IDs copied.</span>
+        <span role="status" className="ml-2 text-xs text-green-700 dark:text-green-400">{t('Visible blocker IDs copied.')}</span>
       )}
       {copyResult === 'failed' && (
         <span role="alert" className="ml-2 text-xs text-destructive">
-          Could not copy visible blocker IDs. Try copying them manually.
+          {t('Could not copy visible blocker IDs. Try copying them manually.')}
         </span>
       )}
     </div>
@@ -201,6 +205,7 @@ function TaskReadinessPanel({
   taskId: string;
   readiness: ReturnType<typeof useTaskReadiness>;
 }) {
+  const { t } = useI18n();
   const { data, isLoading, isError, isFetching, refetch } = readiness;
   const [searchQuery, setSearchQuery] = useState('');
   const [blockerStatusFilter, setBlockerStatusFilter] = useState<BlockerStatusFilter>('all');
@@ -214,18 +219,18 @@ function TaskReadinessPanel({
 
   let content;
   if (!taskId) {
-    content = <p className="text-sm text-muted-foreground">Dependency readiness is unavailable.</p>;
+    content = <p className="text-sm text-muted-foreground">{t('Dependency readiness is unavailable.')}</p>;
   } else if (isError && isFetching) {
-    content = <p className="text-sm text-muted-foreground">Dependency readiness is unknown while it loads.</p>;
+    content = <p className="text-sm text-muted-foreground">{t('Dependency readiness is unknown while it loads.')}</p>;
   } else if (isError) {
-    content = <p className="text-sm text-muted-foreground">Dependency readiness is unavailable.</p>;
+    content = <p className="text-sm text-muted-foreground">{t('Dependency readiness is unavailable.')}</p>;
   } else if (isLoading || !data) {
-    content = <p className="text-sm text-muted-foreground">Dependency readiness is unknown while it loads.</p>;
+    content = <p className="text-sm text-muted-foreground">{t('Dependency readiness is unknown while it loads.')}</p>;
   } else if (data.ready && data.dependencyCount === 0) {
-    content = <p className="text-sm text-muted-foreground">Ready: no dependency links.</p>;
+    content = <p className="text-sm text-muted-foreground">{t('Ready: no dependency links.')}</p>;
   } else if (data.ready) {
     content = <p className="text-sm text-muted-foreground">
-      Ready: no blocking dependencies among {data.dependencyCount} dependency links.
+      {t('Ready: no blocking dependencies among {count} dependency links.', { count: data.dependencyCount })}
     </p>;
   } else {
     const loadedBlockers = data.blockedBy;
@@ -278,16 +283,16 @@ function TaskReadinessPanel({
     content = (
       <>
         <p className="text-sm text-muted-foreground">
-          {data.blockedBy.length} of {data.dependencyCount} dependency links are blocking this task.
+          {t('{blocked} of {total} dependency links are blocking this task.', { blocked: data.blockedBy.length, total: data.dependencyCount })}
         </p>
-        <div role="group" aria-label="Filtered blocker statuses" className="mt-2 text-sm text-muted-foreground">
-          <p>Counts of filtered loaded blocker edges:</p>
-          <ul className="flex flex-wrap gap-x-3" aria-label="Filtered blocker status counts">
-            <li>To Do {blockerStatusCounts.todo}</li>
-            <li>In Progress {blockerStatusCounts.inProgress}</li>
-            <li>Review {blockerStatusCounts.review}</li>
-            <li>Blocked {blockerStatusCounts.blocked}</li>
-            {blockerStatusCounts.other > 0 && <li>Other {blockerStatusCounts.other}</li>}
+        <div role="group" aria-label={t('Filtered blocker statuses')} className="mt-2 text-sm text-muted-foreground">
+          <p>{t('Counts of filtered loaded blocker edges:')}</p>
+          <ul className="flex flex-wrap gap-x-3" aria-label={t('Filtered blocker status counts')}>
+            <li>{t('To Do')} {blockerStatusCounts.todo}</li>
+            <li>{t('In Progress')} {blockerStatusCounts.inProgress}</li>
+            <li>{t('Review')} {blockerStatusCounts.review}</li>
+            <li>{t('Blocked')} {blockerStatusCounts.blocked}</li>
+            {blockerStatusCounts.other > 0 && <li>{t('Other')} {blockerStatusCounts.other}</li>}
           </ul>
         </div>
         {loadedBlockers.length > 0 && (
@@ -299,7 +304,7 @@ function TaskReadinessPanel({
               className="mt-2 rounded text-sm text-foreground underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               onClick={() => setBlockersExpanded((expanded) => !expanded)}
             >
-              {blockersExpanded ? 'Hide blocking tasks' : 'Show blocking tasks'}
+              {blockersExpanded ? t('Hide blocking tasks') : t('Show blocking tasks')}
             </button>
             <CopyLoadedBlockerIdsButton
               key={JSON.stringify([taskId, loadedBlockerIds])}
@@ -312,7 +317,7 @@ function TaskReadinessPanel({
             <div className="mt-3 flex flex-wrap items-end gap-2">
               <div className="flex flex-col gap-1">
                 <label htmlFor={statusFilterId} className="text-sm">
-                  Blocker status
+                  {t('Blocker status')}
                 </label>
                 <select
                   id={statusFilterId}
@@ -323,15 +328,15 @@ function TaskReadinessPanel({
                   }}
                   className="rounded border bg-background px-2 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
-                  <option value="all">All blocker statuses</option>
-                  <option value="todo">To Do</option>
-                  <option value="in_progress">In Progress</option>
-                  <option value="review">Review</option>
-                  <option value="blocked">Blocked</option>
+                  <option value="all">{t('All blocker statuses')}</option>
+                  <option value="todo">{t('To Do')}</option>
+                  <option value="in_progress">{t('In Progress')}</option>
+                  <option value="review">{t('Review')}</option>
+                  <option value="blocked">{t('Blocked')}</option>
                 </select>
               </div>
               <label htmlFor={searchInputId} className="text-sm">
-                Search loaded blockers
+                {t('Search loaded blockers')}
               </label>
               <input
                 id={searchInputId}
@@ -361,23 +366,23 @@ function TaskReadinessPanel({
                 }}
                 aria-describedby={`${searchInputId}-help`}
                 aria-keyshortcuts="Escape"
-                placeholder="Title or task ID"
+                placeholder={t('Title or task ID')}
                 className="min-w-0 flex-1 rounded border bg-background px-2 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               />
               <span id={`${searchInputId}-help`} className="basis-full text-xs text-muted-foreground">
-                Filters the already-loaded readiness blockers locally. Press Escape to clear search.
+                {t('Filters the already-loaded readiness blockers locally. Press Escape to clear search.')}
               </span>
               {searchQuery !== '' && (
                 <button
                   type="button"
-                  aria-label="Clear search"
+                  aria-label={t('Clear search')}
                   className="rounded text-sm text-foreground underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   onClick={() => {
                     setSearchQuery('');
                     setVisibleCopyRevision((revision) => revision + 1);
                   }}
                 >
-                  Clear search
+                  {t('Clear search')}
                 </button>
               )}
               <label htmlFor={reverseOrderId} className="flex items-center gap-2 text-sm text-foreground">
@@ -391,10 +396,10 @@ function TaskReadinessPanel({
                   }}
                   className="h-4 w-4 rounded border-input text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 />
-                Reverse loaded blocker order
+                {t('Reverse loaded blocker order')}
               </label>
               <p className="basis-full text-xs text-muted-foreground">
-                Showing {visibleBlockers.length} of {loadedBlockers.length} loaded blocking dependencies.
+                {t('Showing {shown} of {total} loaded blocking dependencies.', { shown: visibleBlockers.length, total: loadedBlockers.length })}
               </p>
             </div>
           </>
@@ -403,16 +408,16 @@ function TaskReadinessPanel({
           {visibleBlockers.length === 0 ? (
             <p className="mt-2 text-sm text-muted-foreground">
               {loadedBlockers.length === 0
-                ? 'No loaded readiness blockers.'
+                ? t('No loaded readiness blockers.')
                 : normalizedSearchQuery !== '' && blockerStatusFilter === 'all'
-                  ? 'No matching readiness blockers in the loaded list. Clear search to show more.'
+                  ? t('No matching readiness blockers in the loaded list. Clear search to show more.')
                   : filtersActive
-                    ? 'No loaded blocking dependencies match the selected filters. Choose All blocker statuses or clear search to broaden the loaded results.'
-                    : 'No matching readiness blockers in the loaded list. Clear search to show more.'}
+                    ? t('No loaded blocking dependencies match the selected filters. Choose All blocker statuses or clear search to broaden the loaded results.')
+                    : t('No matching readiness blockers in the loaded list. Clear search to show more.')}
             </p>
           ) : (
             <ul
-              aria-label="Loaded readiness blockers"
+              aria-label={t('Loaded readiness blockers')}
               className="mt-2 list-disc space-y-1 pl-5 text-sm"
             >
               {visibleBlockers.map((edge) => {
@@ -421,7 +426,7 @@ function TaskReadinessPanel({
                 return (
                   <li key={`${taskId}:${edge.id}:${edge.otherTaskId}`} className="break-words">
                     {title || edge.otherTaskId}
-                    {status ? <Badge className="ml-2" variant="secondary">{status}</Badge> : null}
+                    {status ? <Badge className="ml-2" variant="secondary">{t(status)}</Badge> : null}
                     <CopyBlockerTaskIdButton
                       blockerTaskId={edge.otherTaskId}
                     />
@@ -438,21 +443,21 @@ function TaskReadinessPanel({
   return (
     <section aria-labelledby={`task-readiness-${taskId}`} className="rounded-lg border p-4" aria-live="polite">
       <div className="mb-2 flex flex-wrap items-center gap-2">
-        <h4 id={`task-readiness-${taskId}`} className="text-sm font-medium">Dependency readiness</h4>
+        <h4 id={`task-readiness-${taskId}`} className="text-sm font-medium">{t('Dependency readiness')}</h4>
         {data && !isError && <Badge variant={data.ready ? 'success' : 'destructive'}>
-          {data.ready ? 'Ready (dependencies)' : 'Blocked'}
+          {data.ready ? t('Ready (dependencies)') : t('Blocked')}
         </Badge>}
       </div>
       {content}
       {taskId && isError && (
         <button
           type="button"
-          aria-label="Retry dependency readiness"
+          aria-label={t('Retry dependency readiness')}
           className="mt-2 rounded text-sm text-foreground underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           disabled={isFetching}
           onClick={() => { void refetch(); }}
         >
-          Retry
+          {t('Retry')}
         </button>
       )}
     </section>

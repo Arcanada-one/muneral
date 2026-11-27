@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/lib/i18n/useI18n';
 
 export interface ToastProps {
   id: string;
@@ -10,6 +11,7 @@ export interface ToastProps {
 }
 
 export function Toast({ id, title, description, variant = 'default', onDismiss }: ToastProps) {
+  const { t } = useI18n();
   return (
     <div
       role="alert"
@@ -27,7 +29,7 @@ export function Toast({ id, title, description, variant = 'default', onDismiss }
       <button
         onClick={() => onDismiss(id)}
         className="absolute right-2 top-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100"
-        aria-label="Dismiss"
+        aria-label={t('Dismiss')}
       >
         <span aria-hidden>×</span>
       </button>

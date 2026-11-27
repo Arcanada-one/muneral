@@ -5,16 +5,18 @@ import { AgentActivityFeed } from '@/components/dashboard/AgentActivityFeed';
 import { VelocityChart } from '@/components/dashboard/VelocityChart';
 import { BlockersList } from '@/components/dashboard/BlockersList';
 import { useProjectStore } from '@/store/project';
+import { useI18n } from '@/lib/i18n/useI18n';
 
 export default function DashboardPage() {
+  const { t } = useI18n();
   const { wsSlug } = useParams<{ wsSlug: string }>();
   const { currentProjectId, currentProjectSlug } = useProjectStore();
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">Agent activity and project health</p>
+        <h1 className="text-2xl font-bold">{t('Dashboard')}</h1>
+        <p className="text-muted-foreground">{t('Agent activity and project health')}</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -35,7 +37,7 @@ export default function DashboardPage() {
             />
           ) : (
             <div className="rounded-lg border p-4 text-center text-sm text-muted-foreground">
-              Select a project to see blockers
+              {t('Select a project to see blockers')}
             </div>
           )}
         </div>

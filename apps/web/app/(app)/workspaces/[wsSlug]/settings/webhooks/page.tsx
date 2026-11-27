@@ -6,8 +6,10 @@ import { useWebhooks } from '@/lib/api/agents';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useI18n } from '@/lib/i18n/useI18n';
 
 export default function WebhooksPage() {
+  const { t } = useI18n();
   const { wsSlug } = useParams<{ wsSlug: string }>();
   const { data: webhooks = [], isLoading } = useWebhooks(wsSlug);
 
@@ -16,27 +18,27 @@ export default function WebhooksPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Webhook className="h-6 w-6" />
-          <h1 className="text-2xl font-bold">Webhooks</h1>
+          <h1 className="text-2xl font-bold">{t('Webhooks')}</h1>
         </div>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
-          Add Webhook
+          {t('Add Webhook')}
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Configured Webhooks</CardTitle>
+          <CardTitle className="text-base">{t('Configured Webhooks')}</CardTitle>
           <CardDescription>
-            Webhooks deliver event notifications to external URLs
+            {t('Webhooks deliver event notifications to external URLs')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <p className="text-sm text-muted-foreground">Loading webhooks...</p>
+            <p className="text-sm text-muted-foreground">{t('Loading webhooks...')}</p>
           ) : webhooks.length === 0 ? (
             <div className="rounded-xl border-2 border-dashed p-8 text-center text-sm text-muted-foreground">
-              No webhooks configured
+              {t('No webhooks configured')}
             </div>
           ) : (
             <ul className="divide-y">
@@ -62,7 +64,7 @@ export default function WebhooksPage() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    aria-label="Delete webhook"
+                    aria-label={t('Delete webhook')}
                     className="text-destructive hover:text-destructive flex-shrink-0"
                   >
                     <Trash2 className="h-4 w-4" />

@@ -16,14 +16,17 @@ import { WorkspaceSelector } from './WorkspaceSelector';
 import { useUiStore } from '@/store/ui';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { useI18n } from '@/lib/i18n/useI18n';
+import type { MessageKey } from '@/lib/i18n/messages';
 
 interface NavItem {
-  label: string;
+  label: MessageKey;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
 }
 
 export function Sidebar() {
+  const { t } = useI18n();
   const { wsSlug } = useParams<{ wsSlug?: string }>();
   const pathname = usePathname();
   const { sidebarCollapsed, toggleSidebar } = useUiStore();
@@ -98,10 +101,10 @@ export function Sidebar() {
                   : 'text-muted-foreground hover:bg-accent hover:text-foreground',
                 sidebarCollapsed && 'justify-center',
               )}
-              title={sidebarCollapsed ? item.label : undefined}
+              title={sidebarCollapsed ? t(item.label) : undefined}
             >
               <Icon className="h-4 w-4 flex-shrink-0" />
-              {!sidebarCollapsed && item.label}
+              {!sidebarCollapsed && t(item.label)}
             </Link>
           );
         })}
@@ -113,7 +116,7 @@ export function Sidebar() {
         size="icon"
         onClick={toggleSidebar}
         className="absolute -right-3 top-16 h-6 w-6 rounded-full border bg-background shadow-sm"
-        aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        aria-label={sidebarCollapsed ? t('Expand sidebar') : t('Collapse sidebar')}
       >
         {sidebarCollapsed ? (
           <ChevronRight className="h-3 w-3" />
