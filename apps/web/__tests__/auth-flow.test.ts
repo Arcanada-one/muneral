@@ -135,7 +135,9 @@ describe('sign-in through Auth Arcana', () => {
     expect(browser.jar.has(COOKIE)).toBe(true);
   });
 
-  it('gives the browser the access token only: no refresh or ID token anywhere it can see', async () => {
+  // Scope: sign-in and session reads. At logout the ID token is sent to Auth as id_token_hint, in a
+  // redirect address the browser follows (auth-logout tests).
+  it('gives the browser the access token only, through sign-in and session reads', async () => {
     const browser = await signedIn();
     const session = await browser.session();
     expect(Object.keys(session!).sort()).toEqual(['accessToken', 'expires', 'loginSessionId', 'user']);
