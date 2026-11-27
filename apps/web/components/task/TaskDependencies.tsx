@@ -513,7 +513,11 @@ function DependencyRowItem({
   onToggleFullTaskId: () => void;
 }) {
   const { t } = useI18n();
-  const config = typeLabels[dep.type];
+  // dep.type is any string in the response schema: only the map's own keys count, never
+  // inherited ones such as "constructor". An unknown type is labelled with its raw name.
+  const config = Object.prototype.hasOwnProperty.call(typeLabels, dep.type)
+    ? typeLabels[dep.type]
+    : undefined;
   const label = config ? t(config[dep.direction]) : dep.type;
   const statusLabel = getTaskStatusLabel(dep.otherTaskStatus);
   const counterpartTitle = dep.otherTaskTitleWithheld === true ? null : dep.otherTaskTitle;

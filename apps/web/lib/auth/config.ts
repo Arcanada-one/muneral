@@ -36,7 +36,12 @@ export function buildAuthConfig(oidc: OidcConfig | null): NextAuthConfig {
     session: { strategy: 'jwt', maxAge: SESSION_MAX_AGE_SECONDS },
     secret: process.env.NEXTAUTH_SECRET,
     // Every page Auth.js would draw itself is the login page, which has the switchers.
-    pages: { signIn: '/login', signOut: '/login', error: '/login' },
+    pages: {
+      signIn: '/login',
+      signOut: '/signout',
+      error: '/auth-error',
+      verifyRequest: '/auth-error',
+    },
     callbacks: {
       // The returned token is the whole content of the session cookie. It is built from scratch so
       // that no provider token or profile field can be carried into it.

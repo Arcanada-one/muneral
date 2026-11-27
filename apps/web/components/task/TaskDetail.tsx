@@ -173,7 +173,7 @@ function TaskDescription({ description }: { description: string }) {
         </button>
       </h3>
       <div id={descriptionId} hidden={!expanded}>
-        <div className="prose prose-sm max-w-none text-sm text-muted-foreground">
+        <div className="max-w-none text-sm text-muted-foreground">
           <p className="whitespace-pre-wrap">{description}</p>
         </div>
       </div>

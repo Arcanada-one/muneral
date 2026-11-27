@@ -97,7 +97,7 @@ async function signedIn() {
 }
 
 function expectRefused(browser: Browser, response: Response) {
-  expect(response.headers.get('location')).toMatch(/\/login\?error=/);
+  expect(response.headers.get('location')).toMatch(/\/(login|auth-error)\?error=/);
   expect(browser.jar.has(COOKIE)).toBe(false);
 }
 

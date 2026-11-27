@@ -16,10 +16,16 @@ const LOCALE_NAMES: Record<Locale, { short: string; own: string }> = {
 const CONTROL =
   'rounded-md px-2 py-1 text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
 
-export function PreferenceSwitchers({ className }: { className?: string }) {
+/** The switchers without the router, for pages that must work when the app has failed. */
+export function PreferenceToggles({
+  className,
+  onLocaleChange,
+}: {
+  className?: string;
+  onLocaleChange?: () => void;
+}) {
   const { locale, theme, setLocale, setTheme } = usePreferences();
   const { t } = useI18n();
-  const router = useRouter();
   const nextTheme = theme === 'dark' ? 'light' : 'dark';
   const themeLabel = nextTheme === 'dark' ? t('Switch to dark theme') : t('Switch to light theme');
 
@@ -35,8 +41,7 @@ export function PreferenceSwitchers({ className }: { className?: string }) {
             aria-pressed={locale === code}
             onClick={() => {
               setLocale(code);
-              // Re-render server components (page titles) with the new cookie.
-              router.refresh();
+              onLocaleChange?.();
             }}
             className={cn(
               CONTROL,
@@ -65,4 +70,10 @@ export function PreferenceSwitchers({ className }: { className?: string }) {
       </button>
     </div>
   );
+}
+
+export function PreferenceSwitchers({ className }: { className?: string }) {
+  const router = useRouter();
+  // Re-render server components (page titles) with the new cookie.
+  return <PreferenceToggles className={className} onLocaleChange={() => router.refresh()} />;
 }
