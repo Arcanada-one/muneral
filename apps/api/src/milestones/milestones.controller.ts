@@ -15,12 +15,13 @@ import { CreateMilestoneDto } from './dto/create-milestone.dto.js';
 import { CreateSprintDto } from './dto/create-sprint.dto.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
 import { ActorInterceptor } from '../common/interceptors/actor.interceptor.js';
+import { HumanTaskReadGuard } from '../auth/guards/human-task-read.guard.js';
 
 /**
  * Milestones and Sprints CRUD.
  */
 @Controller()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, HumanTaskReadGuard)
 @UseInterceptors(ActorInterceptor)
 export class MilestonesController {
   constructor(private readonly milestonesService: MilestonesService) {}

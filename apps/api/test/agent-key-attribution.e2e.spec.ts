@@ -80,6 +80,7 @@ describe('MUN-0066 per-agent mun_sk_ attribution (e2e)', () => {
         data: { slug: `ws-mun0066-${id}`, name: `WS ${id}`, ownerId: user.id },
       })
     ).id;
+    await prisma.workspaceMember.create({ data: { workspaceId, userId, role: 'owner' } });
     projectId = (
       await prisma.project.create({
         data: { workspaceId, slug: `proj-${id}`, name: `Proj ${id}` },

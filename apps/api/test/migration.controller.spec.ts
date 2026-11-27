@@ -6,6 +6,7 @@ import { GUARDS_METADATA, PATH_METADATA, METHOD_METADATA } from '@nestjs/common/
 import { BadRequestException, RequestMethod } from '@nestjs/common';
 import { ApiKeyGuard } from '../src/auth/guards/api-key.guard.js';
 import { JwtOrApiKeyGuard } from '../src/auth/guards/jwt-or-api-key.guard.js';
+import { HumanTaskReadGuard } from '../src/auth/guards/human-task-read.guard.js';
 import { MigrationController } from '../src/migration/migration.controller.js';
 // ESM has no injected globals, so `jest` must be imported for the RUNTIME.
 // Its type, though, comes from @types/jest (already in tsconfig `types`),
@@ -73,7 +74,7 @@ describe('MigrationController', () => {
     ['getByLegacy'],
     ['mappings'],
   ])('lets a human JWT or an agent key read %s', (method) => {
-    expect(guardsOn(method)).toEqual([JwtOrApiKeyGuard]);
+    expect(guardsOn(method)).toEqual([JwtOrApiKeyGuard, HumanTaskReadGuard]);
   });
 
   it('exposes the documented routes', () => {

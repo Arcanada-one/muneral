@@ -20,6 +20,8 @@ import { TaskFieldStateService } from '../src/tasks/field-state/task-field-state
 import { TasksService } from '../src/tasks/tasks.service.js';
 import { HumanTaskReadGuard } from '../src/auth/guards/human-task-read.guard.js';
 import type { ExecutionContext } from '@nestjs/common';
+import { TasksController } from '../src/tasks/tasks.controller.js';
+import { SyncController } from '../src/sync/sync.controller.js';
 
 @Module({ imports: [PrismaModule, AuthModule, ActivityModule, AgentsModule, TasksModule,
   ProjectsModule, WorkspacesModule, SyncModule] })
@@ -193,7 +195,7 @@ describe('Human task reads isolate workspace membership (real HTTP/PostgreSQL)',
     await supertest(app.getHttpServer()).get(`/tasks/${tasks[0]}`).auth(tokens[1], { type: 'bearer' }).expect(403);
   });
   it('service rejects a foreign dependency inserted after the guard admitted the root', async () => {
-    const context = { switchToHttp: () => ({ getRequest: () => ({
+    const context = { getClass: () => TasksController, getHandler: () => TasksController.prototype.getDependencies, switchToHttp: () => ({ getRequest: () => ({
       method: 'GET', path: `/tasks/${tasks[0]}/dependencies`, params: { taskId: tasks[0] }, query: {}, user: { id: users[0] },
     }) }) } as unknown as ExecutionContext;
     await expect(new HumanTaskReadGuard(prisma).canActivate(context)).resolves.toBe(true);
@@ -268,7 +270,7 @@ describe('Human task reads isolate workspace membership (real HTTP/PostgreSQL)',
     });
   }
   it('sync export SQL rejects membership removed after guard authorization', async () => {
-    const context = { switchToHttp: () => ({ getRequest: () => ({ method: 'GET', path: `/sync/datarim/${projects[0]}`, params: { projectId: projects[0] }, query: {}, user: { id: users[0] } }) }) } as unknown as ExecutionContext;
+    const context = { getClass: () => SyncController, getHandler: () => SyncController.prototype.exportDatarim, switchToHttp: () => ({ getRequest: () => ({ method: 'GET', path: `/sync/datarim/${projects[0]}`, params: { projectId: projects[0] }, query: {}, user: { id: users[0] } }) }) } as unknown as ExecutionContext;
     await expect(new HumanTaskReadGuard(prisma).canActivate(context)).resolves.toBe(true);
     await prisma.workspaceMember.delete({ where: { workspaceId_userId: { workspaceId: workspaces[0], userId: users[0] } } });
     try { await expect(app.get(SyncService).exportDatarim(projects[0], users[0])).rejects.toMatchObject({ status: 403 }); }

@@ -8,11 +8,12 @@ import { AgentScope } from '../auth/agent-scope.decorator.js';
 import { ActorInterceptor } from '../common/interceptors/actor.interceptor.js';
 import { UpdateTaskContractDto } from './dto/update-task-contract.dto.js';
 import { TaskContractBindingService } from './task-contract-binding.service.js';
+import { HumanTaskReadGuard } from '../auth/guards/human-task-read.guard.js';
 
 type ScopedRequest = Request & { actor: Actor; agentScope?: AgentScopeContext };
 
 @Controller('tasks')
-@UseGuards(JwtOrApiKeyGuard, AgentTaskScopeGuard)
+@UseGuards(JwtOrApiKeyGuard, AgentTaskScopeGuard, HumanTaskReadGuard)
 @UseInterceptors(ActorInterceptor)
 export class TaskContractBindingController {
   constructor(private readonly binding: TaskContractBindingService) {}

@@ -71,6 +71,7 @@ describe('MUN-0051 — agent-key assign scope, creator read, keyed key lookup (e
     workspaceId = (
       await prisma.workspace.create({ data: { slug: `ws-${id}`, name: `WS ${id}`, ownerId: user.id } })
     ).id;
+    await prisma.workspaceMember.create({ data: { workspaceId, userId, role: 'owner' } });
     otherWorkspaceId = (
       await prisma.workspace.create({ data: { slug: `ws-o-${id}`, name: `Other ${id}`, ownerId: user.id } })
     ).id;
@@ -215,12 +216,12 @@ describe('MUN-0051 — agent-key assign scope, creator read, keyed key lookup (e
     expect(rows[0].payload).toEqual({ agentId: ids.target, role: 'executor', basis: 'jwt' });
   });
 
-  it('a repeat assignment answers 409 and writes nothing more; an unknown task 404 for a JWT', async () => {
+  it('a repeat assignment answers 409 and writes nothing more; an unknown task is 403 for a JWT', async () => {
     const task = await agentTask();
     await assign(task.id, keys.creator, ids.target, 'reviewer').expect(201);
     await assign(task.id, keys.creator, ids.target, 'reviewer').expect(409);
     expect(await assignedRows(task.id)).toHaveLength(1);
-    await assign(uuidv4(), authSvc.signAccess(userId), ids.target, 'reviewer').expect(404);
+    await assign(uuidv4(), authSvc.signAccess(userId), ids.target, 'reviewer').expect(403);
   });
 
   // -------------------------------------------------------------------------

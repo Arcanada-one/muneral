@@ -119,7 +119,12 @@ export class WorkspacesService {
   async listMembers(workspaceId: string) {
     return this.prisma.workspaceMember.findMany({
       where: { workspaceId },
-      include: { user: true },
+      select: {
+        workspaceId: true,
+        userId: true,
+        role: true,
+        user: { select: { id: true, name: true, avatarUrl: true } },
+      },
     });
   }
 }

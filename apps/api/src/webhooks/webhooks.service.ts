@@ -30,11 +30,12 @@ export class WebhooksService {
         events: dto.events,
         secret: dto.secret ?? null,
       },
+      omit: { secret: true },
     });
   }
 
   async findByWorkspace(workspaceId: string) {
-    return this.prisma.webhookConfig.findMany({ where: { workspaceId } });
+    return this.prisma.webhookConfig.findMany({ where: { workspaceId }, omit: { secret: true } });
   }
 
   async delete(webhookId: string): Promise<void> {
@@ -53,6 +54,7 @@ export class WebhooksService {
     return this.prisma.webhookConfig.update({
       where: { id: webhookId },
       data: { active },
+      omit: { secret: true },
     });
   }
 
