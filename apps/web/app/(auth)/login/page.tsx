@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { PreferenceSwitchers } from '@/components/preferences/PreferenceSwitchers';
 import { T } from '@/components/preferences/T';
 import { readPreferences } from '@/lib/preferences/server';
+import { loadOidcConfig } from '@/lib/auth/oidc-config';
 import { translate } from '@/lib/i18n/translate';
 import { LoginForm } from './LoginForm';
 
@@ -10,7 +11,15 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: translate(locale, 'Sign In — Muneral Arcana') };
 }
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const enabled = (await loadOidcConfig()) !== null;
+  // Only the presence of the error is used; its text is never shown.
+  const failed = Boolean((await searchParams).error);
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
       <PreferenceSwitchers className="absolute right-4 top-4" />
@@ -21,7 +30,7 @@ export default function LoginPage() {
             <T k="AI-powered task tracking" />
           </p>
         </div>
-        <LoginForm />
+        <LoginForm enabled={enabled} failed={failed} />
       </div>
     </div>
   );

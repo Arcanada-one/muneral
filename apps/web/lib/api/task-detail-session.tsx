@@ -28,15 +28,21 @@ function SessionQueries({active, children}: {active: boolean; children: React.Re
   }, [query]);
   return <Context.Provider value={session}><QueryClientProvider client={query}>{children}</QueryClientProvider></Context.Provider>;
 }
-/** An opaque lifetime key changes on logout/loading/token replacement. Credentials never enter query keys or snapshots. */
+/**
+ * An opaque lifetime key changes on logout, loading, or a different login. A refreshed access token
+ * of the same login keeps the lifetime, so the page is not remounted. Credentials never enter query
+ * keys or snapshots.
+ */
 export function TaskDetailSessionProvider({children}: {children: React.ReactNode}) {
   const {data, status} = useSession();
   const token = (data as unknown as {accessToken?: unknown} | null)?.accessToken;
   const active = status === 'authenticated' && typeof token === 'string' && token.length > 0;
-  const [previous, setPrevious] = useState({token, status, generation: 0});
-  if (previous.token !== token || previous.status !== status) {
+  const loginId = (data as unknown as {loginSessionId?: unknown} | null)?.loginSessionId;
+  const identity = typeof loginId === 'string' && active ? loginId : token;
+  const [previous, setPrevious] = useState({identity, status, generation: 0});
+  if (previous.identity !== identity || previous.status !== status) {
     // Adjust this component's own state and suppress children until the new lifetime commits.
-    setPrevious({token, status, generation: previous.generation + 1});
+    setPrevious({identity, status, generation: previous.generation + 1});
     return null;
   }
   return <SessionQueries key={previous.generation} active={active}>{children}</SessionQueries>;

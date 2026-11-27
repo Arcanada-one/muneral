@@ -6,7 +6,9 @@ import { TaskDetailSessionProvider } from '@/lib/api/task-detail-session';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProvider>
+    // Re-reads the session before a 5-minute access token lapses, so long-lived users of the token
+    // (the kanban socket) get the one the server refreshed.
+    <SessionProvider refetchInterval={240}>
       <TaskDetailSessionProvider>
         {children}
         {process.env.NODE_ENV === 'development' && (
