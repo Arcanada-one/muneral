@@ -5,6 +5,7 @@ import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useChecklist, useToggleChecklistItem, type ChecklistItem } from '@/lib/api/tasks';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/lib/i18n/useI18n';
 
 interface TaskChecklistProps {
   taskId: string;
@@ -41,6 +42,7 @@ function ChecklistItems({
   onResetFilters,
   onSearchQueryChange,
 }: ChecklistItemsProps) {
+  const { t } = useI18n();
   if (!expanded) return null;
 
   const eligibleItems = hideCompleted
@@ -70,7 +72,7 @@ function ChecklistItems({
         <div className="flex flex-wrap items-end gap-2">
           <div className="min-w-0 flex-1 space-y-1">
             <label htmlFor={searchId} className="text-sm font-medium">
-              Search loaded checklist items
+              {t('Search loaded checklist items')}
             </label>
             <input
               id={searchId}
@@ -99,7 +101,7 @@ function ChecklistItems({
               className="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             />
             <p id={`${searchId}-hint`} className="text-xs text-muted-foreground">
-              Press Escape to clear the search.
+              {t('Press Escape to clear the search.')}
             </p>
           </div>
           <Button
@@ -109,7 +111,7 @@ function ChecklistItems({
             onClick={() => onSearchQueryChange('')}
             disabled={searchQuery.length === 0}
           >
-            Clear search
+            {t('Clear search')}
           </Button>
           <Button
             type="button"
@@ -118,11 +120,11 @@ function ChecklistItems({
             onClick={onResetFilters}
             disabled={filtersAtDefault}
           >
-            Reset checklist filters
+            {t('Reset checklist filters')}
           </Button>
         </div>
         <p className="text-xs text-muted-foreground" aria-live="polite">
-          Showing {visibleItems.length} of {items.length} loaded checklist items.
+          {t('Showing {shown} of {total} loaded checklist items.', { shown: visibleItems.length, total: items.length })}
         </p>
         <div className="flex flex-wrap items-center gap-2">
           <Button
@@ -132,7 +134,7 @@ function ChecklistItems({
             aria-pressed={hideCompleted}
             onClick={() => onHideCompletedChange(!hideCompleted)}
           >
-            Hide completed items
+            {t('Hide completed items')}
           </Button>
           <Button
             type="button"
@@ -141,11 +143,11 @@ function ChecklistItems({
             aria-pressed={showCompletedOnly}
             onClick={() => onShowCompletedOnlyChange(!showCompletedOnly)}
           >
-            Show completed items only
+            {t('Show completed items only')}
           </Button>
           {(hideCompleted || showCompletedOnly) && (
             <Button type="button" variant="outline" size="sm" onClick={onShowAll}>
-              Show all items
+              {t('Show all items')}
             </Button>
           )}
         </div>
@@ -157,15 +159,15 @@ function ChecklistItems({
         <p role="status" className="text-sm text-muted-foreground">
           {hasSearch
             ? hideCompleted
-              ? 'No incomplete loaded checklist items match this search. Clear search or show all items.'
+              ? t('No incomplete loaded checklist items match this search. Clear search or show all items.')
               : showCompletedOnly
-                ? 'No completed loaded checklist items match this search. Clear search or show all items.'
-                : 'No loaded checklist items match this search. Clear search to show the loaded items.'
+                ? t('No completed loaded checklist items match this search. Clear search or show all items.')
+                : t('No loaded checklist items match this search. Clear search to show the loaded items.')
             : hideCompleted
-              ? 'No incomplete items in this loaded checklist.'
+              ? t('No incomplete items in this loaded checklist.')
               : showCompletedOnly
-                ? 'No completed items in this loaded checklist.'
-                : 'No loaded checklist items are available.'}
+                ? t('No completed items in this loaded checklist.')
+                : t('No loaded checklist items are available.')}
         </p>
       ) : (
         <ul className="space-y-2">
@@ -181,7 +183,7 @@ function ChecklistItems({
                 checked={item.checked}
                 disabled={pendingToggleKeys.has(`${taskId}:${item.id}`)}
                 onChange={(e) => onToggle(item.id, e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                className="h-4 w-4 rounded border-input text-primary focus:ring-primary"
               />
               <label
                 htmlFor={`checklist-${item.id}`}
@@ -201,6 +203,7 @@ function ChecklistItems({
 }
 
 function CopyVisibleChecklistLabels({ visibleItems }: { visibleItems: ChecklistItem[] }) {
+  const { t } = useI18n();
   const [pending, setPending] = useState(false);
   const [feedback, setFeedback] = useState<'copied' | 'failed' | null>(null);
   const pendingRef = useRef(false);
@@ -233,14 +236,14 @@ function CopyVisibleChecklistLabels({ visibleItems }: { visibleItems: ChecklistI
         onClick={() => void copyVisibleLabels()}
         disabled={visibleItems.length === 0 || pending}
       >
-        Copy visible checklist labels ({visibleItems.length})
+        {t('Copy visible checklist labels ({count})', { count: visibleItems.length })}
       </Button>
       {feedback === 'copied' && (
-        <span role="status" className="text-xs text-green-700">Checklist labels copied.</span>
+        <span role="status" className="text-xs text-green-700 dark:text-green-400">{t('Checklist labels copied.')}</span>
       )}
       {feedback === 'failed' && (
         <span role="alert" className="text-xs text-destructive">
-          Could not copy checklist labels. Try again or copy them manually.
+          {t('Could not copy checklist labels. Try again or copy them manually.')}
         </span>
       )}
     </div>
@@ -248,6 +251,7 @@ function CopyVisibleChecklistLabels({ visibleItems }: { visibleItems: ChecklistI
 }
 
 export function TaskChecklist({ taskId }: TaskChecklistProps) {
+  const { t } = useI18n();
   const [expanded, setExpanded] = useState(true);
   const [retryingTaskId, setRetryingTaskId] = useState<string | null>(null);
   const [filterState, setFilterState] = useState({
@@ -310,9 +314,9 @@ export function TaskChecklist({ taskId }: TaskChecklistProps) {
     return (
       <div className="rounded-lg border p-4 text-sm text-muted-foreground">
         {isRetrying ? (
-          <p role="status">Retrying checklist…</p>
+          <p role="status">{t('Retrying checklist…')}</p>
         ) : (
-          <p role="alert">Checklist is unavailable. Try again later.</p>
+          <p role="alert">{t('Checklist is unavailable. Try again later.')}</p>
         )}
         <Button
           type="button"
@@ -322,7 +326,7 @@ export function TaskChecklist({ taskId }: TaskChecklistProps) {
           onClick={retryChecklist}
           disabled={isFetching || isRetrying}
         >
-          {isRetrying ? 'Retrying checklist…' : 'Retry checklist'}
+          {isRetrying ? t('Retrying checklist…') : t('Retry checklist')}
         </Button>
       </div>
     );
@@ -331,7 +335,7 @@ export function TaskChecklist({ taskId }: TaskChecklistProps) {
   if (taskId && data === undefined && isPending) {
     return (
       <div className="rounded-lg border p-4 text-sm text-muted-foreground">
-        <p role="status">Loading checklist…</p>
+        <p role="status">{t('Loading checklist…')}</p>
       </div>
     );
   }
@@ -351,7 +355,7 @@ export function TaskChecklist({ taskId }: TaskChecklistProps) {
           ) : (
             <ChevronRight className="h-4 w-4" />
           )}
-          Checklist
+          {t('Checklist')}
         </span>
         <span className="text-xs text-muted-foreground">
           {completed}/{total} ({percentage}%)
@@ -410,7 +414,7 @@ export function TaskChecklist({ taskId }: TaskChecklistProps) {
 
       {toggleFailedForTask && (
         <p role="alert" className="mt-3 rounded-lg border p-3 text-sm text-destructive">
-          Unable to update checklist. Please try again.
+          {t('Unable to update checklist. Please try again.')}
         </p>
       )}
     </div>

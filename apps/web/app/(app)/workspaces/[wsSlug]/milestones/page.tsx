@@ -6,8 +6,10 @@ import { useMilestones } from '@/lib/api/projects';
 import { useProjectStore } from '@/store/project';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useI18n } from '@/lib/i18n/useI18n';
 
 export default function MilestonesPage() {
+  const { t, te, tp, dateLocale } = useI18n();
   const { wsSlug } = useParams<{ wsSlug: string }>();
   const { currentProjectId } = useProjectStore();
   const { data: milestones = [], isLoading } = useMilestones(currentProjectId ?? '');
@@ -15,25 +17,25 @@ export default function MilestonesPage() {
   if (!currentProjectId) {
     return (
       <div className="rounded-lg border p-8 text-center text-muted-foreground">
-        Select a project to view milestones
+        {t('Select a project to view milestones')}
       </div>
     );
   }
 
   if (isLoading) {
-    return <p className="text-muted-foreground">Loading milestones...</p>;
+    return <p className="text-muted-foreground">{t('Loading milestones...')}</p>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2">
         <Flag className="h-6 w-6" />
-        <h1 className="text-2xl font-bold">Milestones</h1>
+        <h1 className="text-2xl font-bold">{t('Milestones')}</h1>
       </div>
 
       {milestones.length === 0 ? (
         <div className="rounded-xl border-2 border-dashed p-12 text-center text-muted-foreground">
-          No milestones defined for this project
+          {t('No milestones defined for this project')}
         </div>
       ) : (
         <div className="space-y-4">
@@ -50,14 +52,14 @@ export default function MilestonesPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <Badge variant={milestone.status === 'closed' ? 'success' : 'info'}>
-                    {milestone.status}
+                    {te(milestone.status)}
                   </Badge>
                   <span className="text-xs text-muted-foreground">
-                    {milestone.taskCount} tasks
+                    {milestone.taskCount === undefined ? null : tp('task', milestone.taskCount)}
                   </span>
                   {milestone.dueDate && (
                     <span className="text-xs text-muted-foreground">
-                      Due {new Date(milestone.dueDate).toLocaleDateString()}
+                      {t('Due {date}', { date: new Date(milestone.dueDate).toLocaleDateString(dateLocale) })}
                     </span>
                   )}
                 </div>

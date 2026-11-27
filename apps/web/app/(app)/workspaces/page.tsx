@@ -6,15 +6,17 @@ import { useWorkspaces } from '@/lib/api/workspaces';
 import { useWorkspaceStore } from '@/store/workspace';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useI18n } from '@/lib/i18n/useI18n';
 
 export default function WorkspacesPage() {
+  const { t, tp } = useI18n();
   const { data: workspaces = [], isLoading } = useWorkspaces();
   const { setCurrentSlug } = useWorkspaceStore();
 
   if (isLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <p className="text-muted-foreground">Loading workspaces...</p>
+        <p className="text-muted-foreground">{t('Loading workspaces...')}</p>
       </div>
     );
   }
@@ -23,25 +25,25 @@ export default function WorkspacesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Workspaces</h1>
-          <p className="text-muted-foreground">Select a workspace to get started</p>
+          <h1 className="text-2xl font-bold">{t('Workspaces')}</h1>
+          <p className="text-muted-foreground">{t('Select a workspace to get started')}</p>
         </div>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
-          New Workspace
+          {t('New Workspace')}
         </Button>
       </div>
 
       {workspaces.length === 0 ? (
         <div className="rounded-xl border-2 border-dashed p-12 text-center">
           <FolderOpen className="mx-auto h-10 w-10 text-muted-foreground" />
-          <h3 className="mt-4 text-lg font-medium">No workspaces yet</h3>
+          <h3 className="mt-4 text-lg font-medium">{t('No workspaces yet')}</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Create your first workspace to start tracking tasks
+            {t('Create your first workspace to start tracking tasks')}
           </p>
           <Button className="mt-4">
             <Plus className="mr-2 h-4 w-4" />
-            Create Workspace
+            {t('Create Workspace')}
           </Button>
         </div>
       ) : (
@@ -64,7 +66,7 @@ export default function WorkspacesPage() {
                 <CardContent>
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Users className="h-3 w-3" />
-                    {ws.memberCount} member{ws.memberCount !== 1 ? 's' : ''}
+                    {ws.memberCount === undefined ? null : tp('member', ws.memberCount)}
                   </div>
                 </CardContent>
               </Card>

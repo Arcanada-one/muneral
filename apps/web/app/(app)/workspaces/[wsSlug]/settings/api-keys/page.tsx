@@ -9,8 +9,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useI18n } from '@/lib/i18n/useI18n';
 
 export default function ApiKeysPage() {
+  const { t, dateLocale } = useI18n();
   const { wsSlug } = useParams<{ wsSlug: string }>();
   const { data: apiKeys = [], isLoading } = useApiKeys(wsSlug);
   const revoke = useRevokeApiKey(wsSlug);
@@ -38,24 +40,24 @@ export default function ApiKeysPage() {
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex items-center gap-2">
         <Key className="h-6 w-6" />
-        <h1 className="text-2xl font-bold">API Keys</h1>
+        <h1 className="text-2xl font-bold">{t('API Keys')}</h1>
       </div>
 
       {/* New key revealed */}
       {plaintext && (
-        <div className="rounded-lg border border-green-200 bg-green-50 p-4">
-          <p className="mb-2 text-sm font-medium text-green-800">
-            New API key created — copy it now, it will not be shown again
+        <div className="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-900 dark:bg-green-950/40">
+          <p className="mb-2 text-sm font-medium text-green-800 dark:text-green-300">
+            {t('New API key created — copy it now, it will not be shown again')}
           </p>
           <div className="flex items-center gap-2">
-            <div className="flex-1 font-mono text-sm bg-white rounded border px-3 py-2 truncate">
+            <div className="flex-1 font-mono text-sm bg-white dark:bg-card rounded border px-3 py-2 truncate">
               {showKey ? plaintext : '•'.repeat(40)}
             </div>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setShowKey((v) => !v)}
-              aria-label="Toggle visibility"
+              aria-label={t('Toggle visibility')}
             >
               {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </Button>
@@ -63,13 +65,13 @@ export default function ApiKeysPage() {
               variant="ghost"
               size="icon"
               onClick={() => handleCopy(plaintext)}
-              aria-label="Copy key"
+              aria-label={t('Copy key')}
             >
               <Copy className="h-4 w-4" />
             </Button>
           </div>
           {copied && (
-            <p className="mt-1 text-xs text-green-700">Copied to clipboard!</p>
+            <p className="mt-1 text-xs text-green-700 dark:text-green-400">{t('Copied to clipboard!')}</p>
           )}
           <Button
             variant="ghost"
@@ -77,7 +79,7 @@ export default function ApiKeysPage() {
             className="mt-2"
             onClick={() => setPlaintext(null)}
           >
-            Dismiss
+            {t('Dismiss')}
           </Button>
         </div>
       )}
@@ -85,16 +87,16 @@ export default function ApiKeysPage() {
       {/* Create new key */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Create API Key</CardTitle>
-          <CardDescription>Generate a new key for agent access</CardDescription>
+          <CardTitle className="text-base">{t('Create API Key')}</CardTitle>
+          <CardDescription>{t('Generate a new key for agent access')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex gap-3">
             <div className="flex-1 space-y-1.5">
-              <Label htmlFor="key-name">Key name</Label>
+              <Label htmlFor="key-name">{t('Key name')}</Label>
               <Input
                 id="key-name"
-                placeholder="e.g. my-agent-key"
+                placeholder={t('e.g. my-agent-key')}
                 value={newKeyName}
                 onChange={(e) => setNewKeyName(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
@@ -106,7 +108,7 @@ export default function ApiKeysPage() {
                 disabled={!newKeyName.trim() || create.isPending}
               >
                 <Plus className="mr-2 h-4 w-4" />
-                Create
+                {t('Create')}
               </Button>
             </div>
           </div>
@@ -116,13 +118,13 @@ export default function ApiKeysPage() {
       {/* Existing keys */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Active Keys</CardTitle>
+          <CardTitle className="text-base">{t('Active Keys')}</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <p className="text-sm text-muted-foreground">Loading keys...</p>
+            <p className="text-sm text-muted-foreground">{t('Loading keys...')}</p>
           ) : apiKeys.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No API keys yet</p>
+            <p className="text-sm text-muted-foreground">{t('No API keys yet')}</p>
           ) : (
             <ul className="divide-y">
               {apiKeys.map((key) => (
@@ -136,14 +138,14 @@ export default function ApiKeysPage() {
                       </code>
                       {key.lastUsedAt && (
                         <span className="text-xs text-muted-foreground">
-                          Last used {new Date(key.lastUsedAt).toLocaleDateString()}
+                          {t('Last used {date}', { date: new Date(key.lastUsedAt).toLocaleDateString(dateLocale) })}
                         </span>
                       )}
                     </div>
                   </div>
                   {key.expiresAt && (
                     <Badge variant="outline" className="text-xs">
-                      Expires {new Date(key.expiresAt).toLocaleDateString()}
+                      {t('Expires {date}', { date: new Date(key.expiresAt).toLocaleDateString(dateLocale) })}
                     </Badge>
                   )}
                   <Button
@@ -151,7 +153,7 @@ export default function ApiKeysPage() {
                     size="icon"
                     onClick={() => revoke.mutate(key.id)}
                     disabled={revoke.isPending}
-                    aria-label="Revoke key"
+                    aria-label={t('Revoke key')}
                     className="text-destructive hover:text-destructive"
                   >
                     <Trash2 className="h-4 w-4" />

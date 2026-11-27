@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { taskDetailHref } from '@/lib/task-detail-href';
 import type { Task } from '@/lib/api/tasks';
+import { useI18n } from '@/lib/i18n/useI18n';
 
 interface KanbanCardProps {
   task: Task;
@@ -16,13 +17,14 @@ interface KanbanCardProps {
 }
 
 const priorityConfig = {
-  critical: { label: 'Critical', variant: 'destructive' as const },
-  high: { label: 'High', variant: 'warning' as const },
-  medium: { label: 'Medium', variant: 'info' as const },
-  low: { label: 'Low', variant: 'secondary' as const },
+  critical: { label: 'Critical' as const, variant: 'destructive' as const },
+  high: { label: 'High' as const, variant: 'warning' as const },
+  medium: { label: 'Medium' as const, variant: 'info' as const },
+  low: { label: 'Low' as const, variant: 'secondary' as const },
 };
 
 export function KanbanCard({ task, wsSlug, projSlug }: KanbanCardProps) {
+  const { t, dateLocale } = useI18n();
   const {
     attributes,
     listeners,
@@ -53,7 +55,7 @@ export function KanbanCard({ task, wsSlug, projSlug }: KanbanCardProps) {
         {...attributes}
         {...listeners}
         className="absolute left-1 top-1/2 -translate-y-1/2 cursor-grab touch-none opacity-0 group-hover:opacity-40 hover:opacity-100 transition-opacity"
-        aria-label="Drag task"
+        aria-label={t('Drag task')}
         tabIndex={-1}
       >
         <GripVertical className="h-4 w-4" />
@@ -69,20 +71,20 @@ export function KanbanCard({ task, wsSlug, projSlug }: KanbanCardProps) {
 
         <div className="mt-2 flex items-center gap-2 flex-wrap">
           <Badge variant={pConfig.variant} className="text-xs">
-            {pConfig.label}
+            {t(pConfig.label)}
           </Badge>
 
           {task.actorType === 'agent' ? (
             <span className="flex items-center gap-1 text-xs text-muted-foreground">
               <Bot className="h-3 w-3" />
-              Agent
+              {t('Agent')}
             </span>
           ) : task.actorType === 'human' ? (
             <span className="flex items-center gap-1 text-xs text-muted-foreground">
               <User className="h-3 w-3" />
-              Human
+              {t('Human')}
             </span>
-          ) : <span className="text-xs text-muted-foreground">Actor not specified</span>}
+          ) : <span className="text-xs text-muted-foreground">{t('Actor not specified')}</span>}
 
           {task.status === 'blocked' && (
             <AlertCircle className="h-3.5 w-3.5 text-destructive" />
@@ -91,7 +93,7 @@ export function KanbanCard({ task, wsSlug, projSlug }: KanbanCardProps) {
 
         {task.dueDate && (
           <p className="mt-1 text-xs text-muted-foreground">
-            Due {Number.isNaN(Date.parse(task.dueDate)) ? task.dueDate : new Date(task.dueDate).toLocaleDateString()}
+            {t('Due {date}', { date: Number.isNaN(Date.parse(task.dueDate)) ? task.dueDate : new Date(task.dueDate).toLocaleDateString(dateLocale) })}
           </p>
         )}
       </div>
