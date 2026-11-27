@@ -3,6 +3,7 @@
 import { signIn } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { useI18n } from '@/lib/i18n/useI18n';
 
 // lucide-react 1.x removed its brand icons — `Github` is gone from the package,
 // not renamed (measured: the 1.39 typings export GitBranch, GitFork, GitMerge and
@@ -18,6 +19,7 @@ function GithubMark({ className }: { className?: string }) {
 }
 
 export function LoginForm() {
+  const { t } = useI18n();
   const handleGitHub = () => {
     signIn('github', { callbackUrl: '/workspaces' });
   };
@@ -26,12 +28,12 @@ export function LoginForm() {
     <div className="space-y-4">
       <Button onClick={handleGitHub} className="w-full" variant="outline">
         <GithubMark className="mr-2 h-4 w-4" />
-        Continue with GitHub
+        {t('Continue with GitHub')}
       </Button>
 
       <div className="flex items-center gap-3 text-xs text-muted-foreground">
         <Separator className="flex-1" />
-        or
+        {t('or')}
         <Separator className="flex-1" />
       </div>
 
@@ -46,7 +48,7 @@ export function LoginForm() {
       />
 
       <p className="text-center text-xs text-muted-foreground">
-        By signing in, you agree to the Terms of Service
+        {t('By signing in, you agree to the Terms of Service')}
       </p>
     </div>
   );

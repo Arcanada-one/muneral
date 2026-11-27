@@ -11,12 +11,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useI18n } from '@/lib/i18n/useI18n';
+import { PreferenceSwitchers } from '@/components/preferences/PreferenceSwitchers';
 
 interface HeaderProps {
   title?: string;
 }
 
 export function Header({ title }: HeaderProps) {
+  const { t } = useI18n();
   const { data: session } = useSession();
   const user = session?.user;
 
@@ -36,6 +39,7 @@ export function Header({ title }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-3">
+        <PreferenceSwitchers />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-ring">
@@ -48,7 +52,7 @@ export function Header({ title }: HeaderProps) {
 
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuLabel>
-              <p className="font-medium">{user?.name ?? 'User'}</p>
+              <p className="font-medium">{user?.name ?? t('User')}</p>
               {user?.email && (
                 <p className="text-xs text-muted-foreground truncate">{user.email}</p>
               )}
@@ -59,7 +63,7 @@ export function Header({ title }: HeaderProps) {
               className="cursor-pointer text-destructive focus:text-destructive"
             >
               <LogOut className="mr-2 h-4 w-4" />
-              Sign out
+              {t('Sign out')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

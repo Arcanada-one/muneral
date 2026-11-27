@@ -13,6 +13,7 @@ import { useTask, useUpdateTaskStatus, type Task } from '@/lib/api/tasks';
 import { TASK_STATUSES, TASK_TRANSITIONS, type TaskStatus } from '@muneral/types';
 import { getTaskStatusLabel, TASK_STATUS_LABELS } from '@/lib/task-status-labels';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/lib/i18n/useI18n';
 
 interface TaskDetailProps {
   task: Task;
@@ -38,21 +39,21 @@ const statusConfig: Record<
 };
 
 const priorityConfig = {
-  critical: { label: 'Critical', variant: 'destructive' as const },
-  high: { label: 'High', variant: 'warning' as const },
-  medium: { label: 'Medium', variant: 'info' as const },
-  low: { label: 'Low', variant: 'secondary' as const },
+  critical: { label: 'Critical' as const, variant: 'destructive' as const },
+  high: { label: 'High' as const, variant: 'warning' as const },
+  medium: { label: 'Medium' as const, variant: 'info' as const },
+  low: { label: 'Low' as const, variant: 'secondary' as const },
 };
 
-function formatDueDate(value: string): string {
+function formatDueDate(value: string, dateLocale: string): string {
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     const date = new Date(`${value}T00:00:00.000Z`);
     if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value) return value;
-    return date.toLocaleDateString(undefined, { timeZone: 'UTC' });
+    return date.toLocaleDateString(dateLocale, { timeZone: 'UTC' });
   }
 
   const timestamp = Date.parse(value);
-  return Number.isNaN(timestamp) ? value : new Date(timestamp).toLocaleDateString();
+  return Number.isNaN(timestamp) ? value : new Date(timestamp).toLocaleDateString(dateLocale);
 }
 
 function isTaskStatus(value: string): value is TaskStatus {
@@ -60,6 +61,7 @@ function isTaskStatus(value: string): value is TaskStatus {
 }
 
 export function TaskDetail({ task, onReloadCurrentTask }: TaskDetailProps) {
+  const { t, dateLocale } = useI18n();
   const pConfig = priorityConfig[task.priority];
 
   return (
@@ -76,30 +78,30 @@ export function TaskDetail({ task, onReloadCurrentTask }: TaskDetailProps) {
             task={task}
             onReloadCurrentTask={onReloadCurrentTask}
           />
-          <Badge variant={pConfig.variant}>{pConfig.label}</Badge>
+          <Badge variant={pConfig.variant}>{t(pConfig.label)}</Badge>
 
           {task.actorType === 'agent' ? (
             <span className="flex items-center gap-1 text-sm text-muted-foreground">
               <Bot className="h-4 w-4" />
-              Agent task
+              {t('Agent task')}
             </span>
           ) : task.actorType === 'human' ? (
             <span className="flex items-center gap-1 text-sm text-muted-foreground">
               <User className="h-4 w-4" />
-              Human task
+              {t('Human task')}
             </span>
-          ) : <span className="text-sm text-muted-foreground">Actor not specified</span>}
+          ) : <span className="text-sm text-muted-foreground">{t('Actor not specified')}</span>}
 
           {task.dueDate && (
             <span className="flex items-center gap-1 text-sm text-muted-foreground">
               <Calendar className="h-4 w-4" />
-              Due {formatDueDate(task.dueDate)}
+              {t('Due {date}', { date: formatDueDate(task.dueDate, dateLocale) })}
             </span>
           )}
         </div>
       </div>
       <div className="flex min-w-0 flex-wrap items-center gap-2 text-sm">
-        <span className="text-muted-foreground">Task ID</span>
+        <span className="text-muted-foreground">{t('Task ID')}</span>
         <code className="break-all font-mono text-xs">{task.id}</code>
         <CopyTaskId key={task.id} taskId={task.id} target="current task" />
       </div>
@@ -121,17 +123,17 @@ export function TaskDetail({ task, onReloadCurrentTask }: TaskDetailProps) {
       {/* Metadata grid */}
       <div className="grid grid-cols-2 gap-4 rounded-lg border p-4 text-sm">
         <div>
-          <p className="text-xs text-muted-foreground">Created</p>
-          <p>{new Date(task.createdAt).toLocaleString()}</p>
+          <p className="text-xs text-muted-foreground">{t('Created')}</p>
+          <p>{new Date(task.createdAt).toLocaleString(dateLocale)}</p>
         </div>
         <div>
-          <p className="text-xs text-muted-foreground">Updated</p>
-          <p>{new Date(task.updatedAt).toLocaleString()}</p>
+          <p className="text-xs text-muted-foreground">{t('Updated')}</p>
+          <p>{new Date(task.updatedAt).toLocaleString(dateLocale)}</p>
         </div>
         {task.estimateHours !== undefined && task.estimateHours !== null && (
           <div>
-            <p className="text-xs text-muted-foreground">Estimate</p>
-            <p>{task.estimateHours}h</p>
+            <p className="text-xs text-muted-foreground">{t('Estimate')}</p>
+            <p>{t('{count}h', { count: task.estimateHours })}</p>
           </div>
         )}
       </div>
@@ -153,6 +155,7 @@ export function TaskDetail({ task, onReloadCurrentTask }: TaskDetailProps) {
 }
 
 function TaskDescription({ description }: { description: string }) {
+  const { t } = useI18n();
   const [expanded, setExpanded] = useState(true);
   const descriptionId = useId();
 
@@ -166,7 +169,7 @@ function TaskDescription({ description }: { description: string }) {
           aria-controls={descriptionId}
           onClick={() => setExpanded((current) => !current)}
         >
-          Description
+          {t('Description')}
         </button>
       </h3>
       <div id={descriptionId} hidden={!expanded}>
@@ -179,6 +182,7 @@ function TaskDescription({ description }: { description: string }) {
 }
 
 function ParentTaskReference({ parentId }: { parentId: string }) {
+  const { t, dateLocale } = useI18n();
   const parentTaskQuery = useTask(parentId);
   const parentTaskCandidate =
     parentTaskQuery.isSuccess &&
@@ -197,7 +201,7 @@ function ParentTaskReference({ parentId }: { parentId: string }) {
   return (
     <div className="mt-1">
       <p className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
-        Parent task:{' '}
+        {t('Parent task:')}{' '}
         {parentTitle !== null ? (
           <span>{parentTitle}</span>
         ) : (
@@ -206,15 +210,15 @@ function ParentTaskReference({ parentId }: { parentId: string }) {
         <CopyTaskId taskId={parentId} target="parent task" />
       </p>
       {parentStatus !== undefined && (
-        <p className="mt-1 text-xs text-muted-foreground">Parent status: {parentStatus}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{t('Parent status: {status}', { status: t(parentStatus) })}</p>
       )}
       {typeof parentDueDate === 'string' && parentDueDate.length > 0 && (
-        <p className="mt-1 text-xs text-muted-foreground">Parent due date: {formatDueDate(parentDueDate)}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{t('Parent due date: {date}', { date: formatDueDate(parentDueDate, dateLocale) })}</p>
       )}
       {parentPriority !== undefined && (
         <div className="mt-1 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
-          <span>Parent priority:{' '}</span>
-          <Badge variant={parentPriority.variant}>{parentPriority.label}</Badge>
+          <span>{t('Parent priority:')}{' '}</span>
+          <Badge variant={parentPriority.variant}>{t(parentPriority.label)}</Badge>
         </div>
       )}
     </div>
@@ -222,6 +226,7 @@ function ParentTaskReference({ parentId }: { parentId: string }) {
 }
 
 function CopyTaskId({ taskId, target }: { taskId: string; target: 'current task' | 'parent task' }) {
+  const { t } = useI18n();
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const [isCopying, setIsCopying] = useState(false);
   const pendingRef = useRef(false);
@@ -260,20 +265,22 @@ function CopyTaskId({ taskId, target }: { taskId: string; target: 'current task'
         className="h-7 w-7 shrink-0"
         onClick={copyTaskId}
         disabled={isCopying}
-        aria-label={`Copy ${target} ID ${taskId}`}
+        aria-label={target === 'parent task'
+          ? t('Copy parent task ID {id}', { id: taskId })
+          : t('Copy current task ID {id}', { id: taskId })}
       >
         <Copy className="h-3 w-3" />
       </Button>
       {copyState === 'copied' && (
-        <span role="status" className="text-xs text-green-700">
-          {target === 'parent task' ? 'Parent task ID copied.' : 'Task ID copied.'}
+        <span role="status" className="text-xs text-green-700 dark:text-green-400">
+          {target === 'parent task' ? t('Parent task ID copied.') : t('Task ID copied.')}
         </span>
       )}
       {copyState === 'failed' && (
         <span role="alert" className="text-xs text-destructive">
           {target === 'parent task'
-            ? 'Could not copy parent task ID. Try copying it manually.'
-            : 'Could not copy task ID. Try copying it manually.'}
+            ? t('Could not copy parent task ID. Try copying it manually.')
+            : t('Could not copy task ID. Try copying it manually.')}
         </span>
       )}
     </>
@@ -281,6 +288,7 @@ function CopyTaskId({ taskId, target }: { taskId: string; target: 'current task'
 }
 
 function TaskStatusAction({ task, onReloadCurrentTask }: TaskDetailProps) {
+  const { t } = useI18n();
   const [confirmedStatus, setConfirmedStatus] = useState<TaskStatus | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -337,11 +345,11 @@ function TaskStatusAction({ task, onReloadCurrentTask }: TaskDetailProps) {
 
   return (
     <>
-      <Badge variant={currentStatusConfig.variant}>{TASK_STATUS_LABELS[currentStatus]}</Badge>
+      <Badge variant={currentStatusConfig.variant}>{t(TASK_STATUS_LABELS[currentStatus])}</Badge>
       {allowedTargets.length > 0 ? (
         <div className="flex items-center gap-2">
           <label htmlFor={`task-status-${task.id}`} className="text-sm text-muted-foreground">
-            Change task status
+            {t('Change task status')}
           </label>
           <select
             id={`task-status-${task.id}`}
@@ -350,30 +358,30 @@ function TaskStatusAction({ task, onReloadCurrentTask }: TaskDetailProps) {
             onChange={(event) => updateTaskStatus(event.currentTarget.value)}
             className="h-9 rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <option value={currentStatus}>Current: {TASK_STATUS_LABELS[currentStatus]}</option>
+            <option value={currentStatus}>{t('Current: {status}', { status: t(TASK_STATUS_LABELS[currentStatus]) })}</option>
             {allowedTargets.map((status) => (
               <option key={status} value={status}>
-                {TASK_STATUS_LABELS[status]}
+                {t(TASK_STATUS_LABELS[status])}
               </option>
             ))}
           </select>
           {isPending && (
             <span aria-live="polite" className="text-sm text-muted-foreground">
-              Updating status…
+              {t('Updating status…')}
             </span>
           )}
         </div>
       ) : (
-        <p className="text-sm text-muted-foreground">No status changes are available.</p>
+        <p className="text-sm text-muted-foreground">{t('No status changes are available.')}</p>
       )}
       {hasError && (
         <div className="flex flex-wrap items-center gap-2">
           <p role="alert" className="text-sm text-destructive">
-            Could not update status. Reload the task to confirm its current status before trying again.
+            {t('Could not update status. Reload the task to confirm its current status before trying again.')}
           </p>
           {onReloadCurrentTask && (
             <Button type="button" variant="ghost" onClick={onReloadCurrentTask}>
-              Reload task
+              {t('Reload task')}
             </Button>
           )}
         </div>

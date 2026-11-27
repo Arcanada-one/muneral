@@ -6,16 +6,18 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useDependencyGraph } from '@/lib/api/tasks';
 import { getTaskStatusLabel } from '@/lib/task-status-labels';
+import { useI18n } from '@/lib/i18n/useI18n';
+import type { MessageKey } from '@/lib/i18n/messages';
 
 interface TaskDependenciesProps {
   taskId: string;
 }
 
-const typeLabels: Record<string, { incoming: string; outgoing: string; className: string }> = {
-  depends_on: { incoming: 'Required by', outgoing: 'Depends on', className: 'text-blue-600' },
-  blocks: { incoming: 'Blocked by', outgoing: 'Blocks', className: 'text-red-600' },
-  related_to: { incoming: 'Related to', outgoing: 'Related to', className: 'text-gray-600' },
-  duplicates: { incoming: 'Duplicates', outgoing: 'Duplicates', className: 'text-amber-600' },
+const typeLabels: Record<string, { incoming: MessageKey; outgoing: MessageKey; className: string }> = {
+  depends_on: { incoming: 'Required by', outgoing: 'Depends on', className: 'text-blue-600 dark:text-blue-400' },
+  blocks: { incoming: 'Blocked by', outgoing: 'Blocks', className: 'text-red-600 dark:text-red-400' },
+  related_to: { incoming: 'Related to', outgoing: 'Related to', className: 'text-gray-600 dark:text-gray-300' },
+  duplicates: { incoming: 'Duplicates', outgoing: 'Duplicates', className: 'text-amber-600 dark:text-amber-400' },
 };
 
 function dependencyRowIdentity(
@@ -28,6 +30,7 @@ function dependencyRowIdentity(
 
 
 function CopyTaskIdButton({ taskId }: { taskId: string }) {
+  const { t } = useI18n();
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const [isCopying, setIsCopying] = useState(false);
 
@@ -54,21 +57,22 @@ function CopyTaskIdButton({ taskId }: { taskId: string }) {
         className="h-7 w-7 shrink-0"
         onClick={copyTaskId}
         disabled={isCopying}
-        aria-label={`Copy task ID ${taskId}`}
+        aria-label={t('Copy task ID {id}', { id: taskId })}
       >
         <Copy className="h-3 w-3" />
       </Button>
       {copyState === 'copied' && (
-        <span role="status" className="basis-full text-xs text-green-700">Task ID copied.</span>
+        <span role="status" className="basis-full text-xs text-green-700 dark:text-green-400">{t('Task ID copied.')}</span>
       )}
       {copyState === 'failed' && (
-        <span role="alert" className="basis-full text-xs text-destructive">Could not copy task ID. Try copying it manually.</span>
+        <span role="alert" className="basis-full text-xs text-destructive">{t('Could not copy task ID. Try copying it manually.')}</span>
       )}
     </>
   );
 }
 
 export function TaskDependencies({ taskId }: TaskDependenciesProps) {
+  const { t } = useI18n();
   const [retryingTaskId, setRetryingTaskId] = useState<string | null>(null);
   const [expandedRowIds, setExpandedRowIds] = useState<ReadonlySet<string>>(() => new Set());
   const [searchState, setSearchState] = useState({ taskId, query: '' });
@@ -108,7 +112,7 @@ export function TaskDependencies({ taskId }: TaskDependenciesProps) {
     return (
       <div role={isRetrying ? 'status' : 'alert'} className="rounded-lg border p-4 text-sm text-muted-foreground">
         <p>
-          {isRetrying ? 'Retrying dependencies…' : 'Dependencies are unavailable.'}
+          {isRetrying ? t('Retrying dependencies…') : t('Dependencies are unavailable.')}
         </p>
         <Button
           type="button"
@@ -118,13 +122,13 @@ export function TaskDependencies({ taskId }: TaskDependenciesProps) {
           onClick={retryDependencies}
           disabled={isFetching || isRetrying}
         >
-          {isRetrying ? 'Retrying dependencies…' : 'Retry dependencies'}
+          {isRetrying ? t('Retrying dependencies…') : t('Retry dependencies')}
         </Button>
       </div>
     );
   }
   if (taskId && isPending && deps === undefined) {
-    return <p role="status" className="text-sm text-muted-foreground">Loading dependencies…</p>;
+    return <p role="status" className="text-sm text-muted-foreground">{t('Loading dependencies…')}</p>;
   }
   if (deps === undefined) return null;
   if (deps.length === 0) {
@@ -132,9 +136,9 @@ export function TaskDependencies({ taskId }: TaskDependenciesProps) {
       <div className="rounded-lg border p-4">
         <h4 className="mb-3 flex items-center gap-2 text-sm font-medium">
           <Link2 className="h-4 w-4" />
-          Dependencies
+          {t('Dependencies')}
         </h4>
-        <p role="status" className="text-sm text-muted-foreground">No dependencies.</p>
+        <p role="status" className="text-sm text-muted-foreground">{t('No dependencies.')}</p>
       </div>
     );
   }
@@ -143,7 +147,7 @@ export function TaskDependencies({ taskId }: TaskDependenciesProps) {
     <div className="rounded-lg border p-4">
       <h4 className="mb-3 flex items-center gap-2 text-sm font-medium">
         <Link2 className="h-4 w-4" />
-        Dependencies
+        {t('Dependencies')}
       </h4>
 
       <DependencyList
@@ -176,6 +180,7 @@ function DependencyList({
   expandedRowIds: ReadonlySet<string>;
   onToggleFullTaskId: (rowIdentity: string) => void;
 }) {
+  const { t } = useI18n();
   const [direction, setDirection] = useState<'all' | 'incoming' | 'outgoing'>('all');
   const [hideCompleted, setHideCompleted] = useState(false);
   const [batchCopyFeedback, setBatchCopyFeedback] = useState<{
@@ -344,7 +349,7 @@ function DependencyList({
     <>
       <div className="mb-3 flex flex-wrap items-center gap-2 text-sm">
         <label htmlFor={`dependency-direction-${taskId}`} className="font-medium">
-          Dependency direction
+          {t('Dependency direction')}
         </label>
         <select
           id={`dependency-direction-${taskId}`}
@@ -355,9 +360,9 @@ function DependencyList({
           }}
           className="rounded-md border bg-background px-2 py-1"
         >
-          <option value="all">All dependencies</option>
-          <option value="incoming">Incoming</option>
-          <option value="outgoing">Outgoing</option>
+          <option value="all">{t('All dependencies')}</option>
+          <option value="incoming">{t('Incoming')}</option>
+          <option value="outgoing">{t('Outgoing')}</option>
         </select>
         <label htmlFor={hideCompletedId} className="inline-flex items-center gap-2">
           <input
@@ -369,12 +374,12 @@ function DependencyList({
               setHideCompleted(event.target.checked);
             }}
           />
-          Hide completed dependencies
+          {t('Hide completed dependencies')}
         </label>
       </div>
 
       <div className="mb-3 flex flex-wrap items-center gap-2 text-sm">
-        <label htmlFor={searchId} className="font-medium">Search loaded dependencies</label>
+        <label htmlFor={searchId} className="font-medium">{t('Search loaded dependencies')}</label>
         <input
           id={searchId}
           type="text"
@@ -398,7 +403,7 @@ function DependencyList({
           className="min-w-0 rounded-md border bg-background px-2 py-1"
         />
         <span id={`${searchId}-escape-help`} className="text-xs text-muted-foreground">
-          Press Escape to clear search.
+          {t('Press Escape to clear search.')}
         </span>
         <Button
           type="button"
@@ -410,7 +415,7 @@ function DependencyList({
           }}
           disabled={searchQuery.length === 0}
         >
-          Clear search
+          {t('Clear search')}
         </Button>
         <Button
           type="button"
@@ -424,10 +429,12 @@ function DependencyList({
           }}
           disabled={direction === 'all' && !hideCompleted && searchQuery.length === 0}
         >
-          Show all loaded dependencies
+          {t('Show all loaded dependencies')}
         </Button>
         <span aria-live="polite" className="text-muted-foreground">
-          Showing {visibleDeps.length}{normalizedQuery ? ' matching' : ''} of {deps.length} loaded dependencies.
+          {t(normalizedQuery
+            ? 'Showing {shown} matching of {total} loaded dependencies.'
+            : 'Showing {shown} of {total} loaded dependencies.', { shown: visibleDeps.length, total: deps.length })}
         </span>
       </div>
 
@@ -439,14 +446,14 @@ function DependencyList({
           onClick={() => void copyVisibleTaskIds()}
           disabled={visibleDeps.length === 0 || isBatchCopyPending}
         >
-          Copy visible dependency task IDs ({visibleDeps.length})
+          {t('Copy visible dependency task IDs ({count})', { count: visibleDeps.length })}
         </Button>
         {currentBatchCopyFeedback === 'copied' && (
-          <span role="status" className="text-xs text-green-700">Dependency task IDs copied.</span>
+          <span role="status" className="text-xs text-green-700 dark:text-green-400">{t('Dependency task IDs copied.')}</span>
         )}
         {currentBatchCopyFeedback === 'failed' && (
           <span role="alert" className="text-xs text-destructive">
-            Could not copy dependency task IDs. Try again or copy them manually.
+            {t('Could not copy dependency task IDs. Try again or copy them manually.')}
           </span>
         )}
         <Button
@@ -456,26 +463,26 @@ function DependencyList({
           onClick={() => void copyVisibleDependencyTitles()}
           disabled={eligibleTitles.length === 0 || isTitleBatchCopyPending}
         >
-          Copy available dependency titles ({eligibleTitles.length})
+          {t('Copy available dependency titles ({count})', { count: eligibleTitles.length })}
         </Button>
         {currentTitleBatchCopyFeedback === 'copied' && (
-          <span role="status" className="text-xs text-green-700">Dependency titles copied.</span>
+          <span role="status" className="text-xs text-green-700 dark:text-green-400">{t('Dependency titles copied.')}</span>
         )}
         {currentTitleBatchCopyFeedback === 'failed' && (
           <span role="alert" className="text-xs text-destructive">
-            Could not copy dependency titles. Try again or copy them manually.
+            {t('Could not copy dependency titles. Try again or copy them manually.')}
           </span>
         )}
       </div>
 
       {visibleDeps.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No matching dependencies in the loaded list.{' '}
+          {t('No matching dependencies in the loaded list.')}{' '}
           {normalizedQuery
-            ? 'Clear search or adjust the dependency filters to show more.'
+            ? t('Clear search or adjust the dependency filters to show more.')
             : hideCompleted
-            ? 'Clear Hide completed dependencies or choose All dependencies to show more.'
-            : 'Choose All dependencies to show the full list.'}
+            ? t('Clear Hide completed dependencies or choose All dependencies to show more.')
+            : t('Choose All dependencies to show the full list.')}
         </p>
       ) : (
         <ul className="space-y-2">
@@ -505,8 +512,9 @@ function DependencyRowItem({
   showFullTaskId: boolean;
   onToggleFullTaskId: () => void;
 }) {
+  const { t } = useI18n();
   const config = typeLabels[dep.type];
-  const label = config?.[dep.direction] ?? dep.type;
+  const label = config ? t(config[dep.direction]) : dep.type;
   const statusLabel = getTaskStatusLabel(dep.otherTaskStatus);
   const counterpartTitle = dep.otherTaskTitleWithheld === true ? null : dep.otherTaskTitle;
   const rowIdentity = dependencyRowIdentity(taskId, dep.id, dep.otherTaskId);
@@ -514,7 +522,7 @@ function DependencyRowItem({
 
   return (
     <li className="flex flex-wrap items-center gap-2 text-sm">
-      <span className={(config?.className ?? 'text-gray-600') + ' text-xs font-medium min-w-[80px]'}>
+      <span className={(config?.className ?? 'text-gray-600 dark:text-gray-300') + ' text-xs font-medium min-w-[80px]'}>
         {label}
       </span>
       <ArrowRight className="h-3 w-3 text-muted-foreground" />
@@ -540,9 +548,9 @@ function DependencyRowItem({
         aria-controls={taskIdTextId}
         onClick={onToggleFullTaskId}
       >
-        {showFullTaskId ? 'Hide full task ID' : 'Show full task ID'}
+        {showFullTaskId ? t('Hide full task ID') : t('Show full task ID')}
       </Button>
-      {statusLabel && <Badge variant="secondary">{statusLabel}</Badge>}
+      {statusLabel && <Badge variant="secondary">{t(statusLabel)}</Badge>}
       <CopyTaskIdButton key={rowIdentity} taskId={dep.otherTaskId} />
     </li>
   );

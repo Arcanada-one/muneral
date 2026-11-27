@@ -13,8 +13,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import { useI18n } from '@/lib/i18n/useI18n';
 
 export function WorkspaceSelector() {
+  const { t } = useI18n();
   const { data: workspaces = [] } = useWorkspaces();
   const { currentSlug, setCurrentSlug } = useWorkspaceStore();
   const current = workspaces.find((w) => w.slug === currentSlug);
@@ -24,14 +26,14 @@ export function WorkspaceSelector() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="w-full justify-between px-2">
           <span className="truncate font-semibold">
-            {current?.name ?? 'Select workspace'}
+            {current?.name ?? t('Select workspace')}
           </span>
           <ChevronDown className="h-4 w-4 opacity-50 flex-shrink-0" />
         </Button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent className="w-56">
-        <DropdownMenuLabel>Workspaces</DropdownMenuLabel>
+        <DropdownMenuLabel>{t('Workspaces')}</DropdownMenuLabel>
         <DropdownMenuSeparator />
 
         {workspaces.map((ws) => (
@@ -50,7 +52,7 @@ export function WorkspaceSelector() {
         <DropdownMenuItem asChild>
           <Link href="/workspaces" className="flex items-center gap-2 cursor-pointer">
             <Plus className="h-4 w-4" />
-            New workspace
+            {t('New workspace')}
           </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>

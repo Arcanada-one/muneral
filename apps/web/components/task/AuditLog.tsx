@@ -7,6 +7,8 @@ import { useActivity } from '@/lib/api/tasks';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useI18n } from '@/lib/i18n/useI18n';
+import type { MessageKey } from '@/lib/i18n/messages';
 
 interface AuditLogProps {
   taskId: string;
@@ -29,7 +31,9 @@ interface VisibleEventIdCopyFeedback {
   status: 'pending' | 'copied' | 'failed';
 }
 
-const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
+type I18n = ReturnType<typeof useI18n>;
+
+const TASK_STATUS_LABELS: Record<TaskStatus, MessageKey> = {
   todo: 'To Do',
   in_progress: 'In Progress',
   review: 'Review',
@@ -39,7 +43,7 @@ const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   archived: 'Archived',
 };
 
-const TASK_PRIORITY_LABELS: Record<TaskPriority, string> = {
+const TASK_PRIORITY_LABELS: Record<TaskPriority, MessageKey> = {
   critical: 'Critical',
   high: 'High',
   medium: 'Medium',
@@ -62,14 +66,14 @@ function isStatusTransitionPayload(
   );
 }
 
-function formatStatusTransition(payload: unknown): string | undefined {
+function formatStatusTransition(payload: unknown, { t }: I18n): string | undefined {
   if (!isStatusTransitionPayload(payload)) return undefined;
   if (!isTaskStatus(payload.from) || !isTaskStatus(payload.to)) return undefined;
 
-  return `${TASK_STATUS_LABELS[payload.from]} → ${TASK_STATUS_LABELS[payload.to]}`;
+  return `${t(TASK_STATUS_LABELS[payload.from])} → ${t(TASK_STATUS_LABELS[payload.to])}`;
 }
 
-function formatTaskCreated(payload: unknown): string | undefined {
+function formatTaskCreated(payload: unknown, { t }: I18n): string | undefined {
   if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) {
     return undefined;
   }
@@ -92,14 +96,17 @@ function formatTaskCreated(payload: unknown): string | undefined {
     return undefined;
   }
 
-  return `Created “${title.value}” · Status: ${TASK_STATUS_LABELS[status.value]}`;
+  return t('Created “{title}” · Status: {status}', {
+    title: title.value,
+    status: t(TASK_STATUS_LABELS[status.value]),
+  });
 }
 
 function isTaskPriority(value: unknown): value is TaskPriority {
   return value === 'critical' || value === 'high' || value === 'medium' || value === 'low';
 }
 
-function formatTaskUpdate(payload: unknown): string[] | undefined {
+function formatTaskUpdate(payload: unknown, { t, dateLocale }: I18n): string[] | undefined {
   if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) {
     return undefined;
   }
@@ -116,7 +123,7 @@ function formatTaskUpdate(payload: unknown): string[] | undefined {
   const priority = Object.getOwnPropertyDescriptor(payload, 'priority');
   if (priority !== undefined) {
     if (!('value' in priority) || !isTaskPriority(priority.value)) return undefined;
-    details.push(`Priority set to ${TASK_PRIORITY_LABELS[priority.value]}`);
+    details.push(t('Priority set to {priority}', { priority: t(TASK_PRIORITY_LABELS[priority.value]) }));
   }
 
   const dueDate = Object.getOwnPropertyDescriptor(payload, 'dueDate');
@@ -127,11 +134,11 @@ function formatTaskUpdate(payload: unknown): string[] | undefined {
       if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== dueDate.value) {
         return undefined;
       }
-      details.push(`Due date set to ${date.toLocaleDateString(undefined, { timeZone: 'UTC' })}`);
+      details.push(t('Due date set to {date}', { date: date.toLocaleDateString(dateLocale, { timeZone: 'UTC' }) }));
     } else {
       const timestamp = Date.parse(dueDate.value);
       if (!Number.isFinite(timestamp)) return undefined;
-      details.push(`Due date set to ${new Date(timestamp).toLocaleDateString()}`);
+      details.push(t('Due date set to {date}', { date: new Date(timestamp).toLocaleDateString(dateLocale) }));
     }
   }
 
@@ -209,17 +216,18 @@ function getEvidenceActivityDetails(payload: unknown): EvidenceActivityDetails |
 }
 
 function EvidenceActivityDetailsView({ details }: { details: EvidenceActivityDetails }) {
+  const { t } = useI18n();
   return (
     <details className="mt-1 min-w-0">
       <summary tabIndex={0} className="cursor-pointer text-xs text-muted-foreground">
-        Evidence details
+        {t('Evidence details')}
       </summary>
       <dl className="mt-1 grid min-w-0 grid-cols-[max-content_minmax(0,1fr)] gap-x-2 gap-y-1 text-xs">
         <dt className="text-muted-foreground">URI</dt>
         <dd dir="auto" className="min-w-0 break-all">{details.uri}</dd>
         <dt className="text-muted-foreground">SHA-256</dt>
         <dd className="min-w-0 break-all">{details.sha256}</dd>
-        <dt className="text-muted-foreground">Content type</dt>
+        <dt className="text-muted-foreground">{t('Content type')}</dt>
         <dd className="min-w-0 break-words">{details.contentType}</dd>
       </dl>
     </details>
@@ -227,6 +235,7 @@ function EvidenceActivityDetailsView({ details }: { details: EvidenceActivityDet
 }
 
 function CommentBody({ body }: { body: string }) {
+  const { t } = useI18n();
   const content = (
     <p className="whitespace-pre-wrap break-words text-xs text-muted-foreground">
       {body}
@@ -237,7 +246,7 @@ function CommentBody({ body }: { body: string }) {
     return (
       <details className="mt-1 min-w-0">
         <summary tabIndex={0} className="cursor-pointer text-xs text-muted-foreground">
-          Read full comment
+          {t('Read full comment')}
         </summary>
         <div className="mt-1">
           {content}
@@ -249,25 +258,25 @@ function CommentBody({ body }: { body: string }) {
   return <div className="mt-1 min-w-0">{content}</div>;
 }
 
-function formatRelativeTime(dateStr: string): string {
+function formatRelativeTime(dateStr: string, { t, dateLocale }: I18n): string {
   const date = new Date(dateStr);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   if (diffMs < 0) {
     const timeUntil = -diffMs;
-    if (timeUntil < 60_000) return 'just now';
+    if (timeUntil < 60_000) return t('just now');
     const minutesUntil = Math.ceil(timeUntil / 60_000);
-    if (minutesUntil < 60) return `in ${minutesUntil}m`;
+    if (minutesUntil < 60) return t('in {count}m', { count: minutesUntil });
     const hoursUntil = Math.ceil(minutesUntil / 60);
-    if (hoursUntil < 24) return `in ${hoursUntil}h`;
-    return date.toLocaleDateString();
+    if (hoursUntil < 24) return t('in {count}h', { count: hoursUntil });
+    return date.toLocaleDateString(dateLocale);
   }
   const diffMins = Math.floor(diffMs / 60_000);
-  if (diffMins < 1) return 'just now';
-  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffMins < 1) return t('just now');
+  if (diffMins < 60) return t('{count}m ago', { count: diffMins });
   const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
-  return date.toLocaleDateString();
+  if (diffHours < 24) return t('{count}h ago', { count: diffHours });
+  return date.toLocaleDateString(dateLocale);
 }
 
 function formatExactUtcTime(value: string): string | undefined {
@@ -306,6 +315,7 @@ function formatExactUtcTime(value: string): string | undefined {
 }
 
 function CopyActivityActorId({ actorId }: { actorId: string }) {
+  const { t } = useI18n();
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const [isCopying, setIsCopying] = useState(false);
 
@@ -329,18 +339,18 @@ function CopyActivityActorId({ actorId }: { actorId: string }) {
         variant="ghost"
         size="icon"
         className="h-6 w-6 shrink-0"
-        aria-label="Copy recorded actor ID"
+        aria-label={t('Copy recorded actor ID')}
         onClick={copyActorId}
         disabled={isCopying}
       >
         <Copy className="h-3 w-3" />
       </Button>
       {copyState === 'copied' && (
-        <span role="status" className="text-xs text-green-700">Actor ID copied.</span>
+        <span role="status" className="text-xs text-green-700 dark:text-green-400">{t('Actor ID copied.')}</span>
       )}
       {copyState === 'failed' && (
         <span role="alert" className="text-xs text-destructive">
-          Could not copy actor ID. Try copying it manually.
+          {t('Could not copy actor ID. Try copying it manually.')}
         </span>
       )}
     </div>
@@ -348,6 +358,7 @@ function CopyActivityActorId({ actorId }: { actorId: string }) {
 }
 
 function CopyActivityEventId({ eventId }: { eventId: string }) {
+  const { t } = useI18n();
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const [isCopying, setIsCopying] = useState(false);
   const isMountedRef = useRef(false);
@@ -390,18 +401,18 @@ function CopyActivityEventId({ eventId }: { eventId: string }) {
         variant="ghost"
         size="icon"
         className="h-6 w-6 shrink-0"
-        aria-label="Copy activity event ID"
+        aria-label={t('Copy activity event ID')}
         onClick={copyEventId}
         disabled={isCopying}
       >
         <Copy className="h-3 w-3" />
       </Button>
       {copyState === 'copied' && (
-        <span role="status" className="text-xs text-green-700">Activity event ID copied.</span>
+        <span role="status" className="text-xs text-green-700 dark:text-green-400">{t('Activity event ID copied.')}</span>
       )}
       {copyState === 'failed' && (
         <span role="alert" className="text-xs text-destructive">
-          Could not copy activity event ID. Try again or copy it manually.
+          {t('Could not copy activity event ID. Try again or copy it manually.')}
         </span>
       )}
     </div>
@@ -409,6 +420,8 @@ function CopyActivityEventId({ eventId }: { eventId: string }) {
 }
 
 export function AuditLog({ taskId }: AuditLogProps) {
+  const i18n = useI18n();
+  const { t, te, tp } = i18n;
   const activityFilterId = useId();
   const [pageState, setPageState] = useState({ taskId, page: 1 });
   if (pageState.taskId !== taskId) setPageState({ taskId, page: 1 });
@@ -564,26 +577,26 @@ export function AuditLog({ taskId }: AuditLogProps) {
   if (isError) {
     return (
       <div role="alert" className="rounded-lg border p-4 text-sm text-muted-foreground">
-        <p>Activity is unavailable. Try again later.</p>
+        <p>{t('Activity is unavailable. Try again later.')}</p>
         <div className="mt-3 flex flex-wrap gap-2">
           <button
             type="button"
-            aria-label="Retry activity"
+            aria-label={t('Retry activity')}
             disabled={isFetching}
             onClick={() => { void refetch().catch(() => undefined); }}
             className="rounded border px-2 py-1 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Retry
+            {t('Retry')}
           </button>
           {page > 1 && (
             <button
               type="button"
-              aria-label="Show newest activity"
+              aria-label={t('Show newest activity')}
               disabled={isFetching}
               onClick={() => setPage(1)}
               className="rounded border px-2 py-1 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Show newest activity
+              {t('Show newest activity')}
             </button>
           )}
         </div>
@@ -594,8 +607,8 @@ export function AuditLog({ taskId }: AuditLogProps) {
   if (isLoading || data === undefined) {
     return (
       <div className="rounded-lg border p-4">
-        <h4 className="mb-3 text-sm font-medium">Activity</h4>
-        <p className="text-xs text-muted-foreground">Loading...</p>
+        <h4 className="mb-3 text-sm font-medium">{t('Activity')}</h4>
+        <p className="text-xs text-muted-foreground">{t('Loading...')}</p>
       </div>
     );
   }
@@ -603,8 +616,8 @@ export function AuditLog({ taskId }: AuditLogProps) {
   if (pageOutOfRange) {
     return (
       <div className="rounded-lg border p-4" aria-live="polite">
-        <h4 className="mb-3 text-sm font-medium">Activity Log</h4>
-        <p className="text-xs text-muted-foreground">Showing the newest activity...</p>
+        <h4 className="mb-3 text-sm font-medium">{t('Activity Log')}</h4>
+        <p className="text-xs text-muted-foreground">{t('Showing the newest activity...')}</p>
       </div>
     );
   }
@@ -622,11 +635,11 @@ export function AuditLog({ taskId }: AuditLogProps) {
     <div className="rounded-lg border p-4">
       <h4 className="mb-3 flex items-center gap-2 text-sm font-medium">
         <Clock className="h-4 w-4" />
-        Activity Log
+        {t('Activity Log')}
       </h4>
 
       <div className="mb-3 flex items-center gap-2 text-xs">
-        <label htmlFor={activityFilterId}>Activity filter</label>
+        <label htmlFor={activityFilterId}>{t('Activity filter')}</label>
         <select
           id={activityFilterId}
           value={filterMode}
@@ -635,13 +648,13 @@ export function AuditLog({ taskId }: AuditLogProps) {
           })}
           className="rounded border bg-background px-2 py-1"
         >
-          <option value="all">All activity</option>
-          <option value="status_changes">Status changes on this page</option>
+          <option value="all">{t('All activity')}</option>
+          <option value="status_changes">{t('Status changes on this page')}</option>
         </select>
       </div>
 
       <div className="mb-3 flex items-center gap-2 text-xs">
-        <label htmlFor={`${activityFilterId}-actor`}>Actor filter</label>
+        <label htmlFor={`${activityFilterId}-actor`}>{t('Actor filter')}</label>
         <select
           id={`${activityFilterId}-actor`}
           value={actorFilterMode}
@@ -652,9 +665,9 @@ export function AuditLog({ taskId }: AuditLogProps) {
           })}
           className="rounded border bg-background px-2 py-1"
         >
-          <option value="all">All actors</option>
-          <option value="humans">Humans on this page</option>
-          <option value="agents">Agents on this page</option>
+          <option value="all">{t('All actors')}</option>
+          <option value="humans">{t('Humans on this page')}</option>
+          <option value="agents">{t('Agents on this page')}</option>
         </select>
       </div>
 
@@ -666,7 +679,7 @@ export function AuditLog({ taskId }: AuditLogProps) {
           onClick={() => updateFilterState({ mode: 'all', actorMode: 'all' })}
           disabled={!canResetActivityFilters}
         >
-          Reset activity filters
+          {t('Reset activity filters')}
         </Button>
       </div>
 
@@ -680,18 +693,17 @@ export function AuditLog({ taskId }: AuditLogProps) {
             aria-describedby={`${activityFilterId}-reverse-order-help`}
             onClick={() => updateFilterState({ reverseLoadedOrder: !reverseLoadedOrder })}
           >
-            Reverse loaded activity order
+            {t('Reverse loaded activity order')}
           </Button>
           <span id={`${activityFilterId}-reverse-order-help`} className="text-muted-foreground">
-            Reverses only matching activity already loaded on this page.
+            {t('Reverses only matching activity already loaded on this page.')}
           </span>
         </div>
       )}
 
       {canShowVisibleCount && (
         <p role="status" className="mb-3 text-xs text-muted-foreground">
-          Showing {entries.length} of {currentPageEntries.length} loaded activity{' '}
-          {currentPageEntries.length === 1 ? 'entry' : 'entries'} on this page.
+          {tp('shown activity entries', currentPageEntries.length, { shown: entries.length })}
         </p>
       )}
 
@@ -703,14 +715,14 @@ export function AuditLog({ taskId }: AuditLogProps) {
           onClick={copyVisibleEventIds}
           disabled={!canCopyVisibleEventIds || visibleEventIdCopyStatus === 'pending'}
         >
-          Copy visible activity event IDs ({entries.length})
+          {t('Copy visible activity event IDs ({count})', { count: entries.length })}
         </Button>
         {visibleEventIdCopyStatus === 'copied' && (
-          <span role="status" className="text-xs text-green-700">Activity event IDs copied.</span>
+          <span role="status" className="text-xs text-green-700 dark:text-green-400">{t('Activity event IDs copied.')}</span>
         )}
         {visibleEventIdCopyStatus === 'failed' && (
           <span role="alert" className="text-xs text-destructive">
-            Could not copy activity event IDs. Try copying them manually.
+            {t('Could not copy activity event IDs. Try copying them manually.')}
           </span>
         )}
       </div>
@@ -722,7 +734,7 @@ export function AuditLog({ taskId }: AuditLogProps) {
           checked={showExactUtcTime}
           onChange={(event) => updateFilterState({ showExactUtcTime: event.target.checked })}
         />
-        <label htmlFor={`${activityFilterId}-exact-utc`}>Show exact UTC timestamps</label>
+        <label htmlFor={`${activityFilterId}-exact-utc`}>{t('Show exact UTC timestamps')}</label>
       </div>
 
       <ScrollArea className="h-64">
@@ -732,10 +744,10 @@ export function AuditLog({ taskId }: AuditLogProps) {
               ? getCommentBody(entry.payload)
               : undefined;
             const taskCreatedDetails = entry.action === 'task:created'
-              ? formatTaskCreated(entry.payload)
+              ? formatTaskCreated(entry.payload, i18n)
               : undefined;
             const taskUpdateDetails = entry.action === 'task:updated'
-              ? formatTaskUpdate(entry.payload)
+              ? formatTaskUpdate(entry.payload, i18n)
               : undefined;
             const evidenceDetails = entry.action === 'task:evidence_attached'
               ? getEvidenceActivityDetails(entry.payload)
@@ -757,23 +769,23 @@ export function AuditLog({ taskId }: AuditLogProps) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <span className="text-xs font-medium">
-                      {entry.actorName || `Actor ID: ${entry.actorId}`}
+                      {entry.actorName || t('Actor ID: {id}', { id: entry.actorId })}
                     </span>
                     <span className={entry.actorType === 'agent'
-                      ? 'rounded bg-blue-100 px-1 py-0.5 text-xs text-blue-700'
+                      ? 'rounded bg-blue-100 px-1 py-0.5 text-xs text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'
                       : 'rounded bg-muted px-1 py-0.5 text-xs text-muted-foreground'}>
-                      {entry.actorType}
+                      {te(entry.actorType)}
                     </span>
                     <span className="text-xs text-muted-foreground">
                       {entry.action === 'task:status_changed'
-                        ? formatStatusTransition(entry.payload) ?? entry.action
+                        ? formatStatusTransition(entry.payload, i18n) ?? entry.action
                         : entry.action}
                     </span>
                   </div>
                   <p className="mt-0.5 text-xs text-muted-foreground">
                     {showExactUtcTime
-                      ? (exactUtcTime ?? 'Exact time unavailable')
-                      : formatRelativeTime(entry.createdAt)}
+                      ? (exactUtcTime ?? t('Exact time unavailable'))
+                      : formatRelativeTime(entry.createdAt, i18n)}
                   </p>
                   {taskCreatedDetails !== undefined && (
                     <p className="mt-1 text-xs text-muted-foreground">
@@ -814,39 +826,39 @@ export function AuditLog({ taskId }: AuditLogProps) {
         {entries.length === 0 && (
           <p className="py-3 text-xs text-muted-foreground">
             {actorFilterMode !== 'all'
-              ? 'No matching activity on this page.'
+              ? t('No matching activity on this page.')
               : filterMode === 'status_changes'
-              ? 'No status changes on this page.'
-              : 'No activity on this page.'}
+              ? t('No status changes on this page.')
+              : t('No activity on this page.')}
           </p>
         )}
       </ScrollArea>
 
-      <nav aria-label="Activity pagination" className="mt-3 flex items-center justify-between gap-3 text-xs">
+      <nav aria-label={t('Activity pagination')} className="mt-3 flex items-center justify-between gap-3 text-xs">
         <span aria-live="polite" className="text-muted-foreground">
           {total !== undefined && limit !== undefined && responsePageMatches
-            ? `Showing ${firstEntry}–${lastEntry} of ${total}`
-            : `Page ${page}`}
+            ? t('Showing {first}–{last} of {total}', { first: firstEntry, last: lastEntry, total: total })
+            : t('Page {page}', { page })}
         </span>
         <div className="flex items-center gap-2">
           <button
             type="button"
-            aria-label="Previous activity page"
+            aria-label={t('Previous activity page')}
             disabled={!canGoPrevious}
             onClick={() => setPage(page - 1)}
             className="rounded border px-2 py-1 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Newer
+            {t('Newer')}
           </button>
-          {pageCount !== undefined && <span>Page {page} of {pageCount}</span>}
+          {pageCount !== undefined && <span>{t('Page {page} of {total}', { page, total: pageCount })}</span>}
           <button
             type="button"
-            aria-label="Next activity page"
+            aria-label={t('Next activity page')}
             disabled={!canGoNext}
             onClick={() => setPage(page + 1)}
             className="rounded border px-2 py-1 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Older
+            {t('Older')}
           </button>
         </div>
       </nav>

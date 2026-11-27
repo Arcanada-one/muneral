@@ -7,6 +7,7 @@ import { useWorkspaceMembers } from '@/lib/api/workspaces';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useI18n } from '@/lib/i18n/useI18n';
 
 const ROLE_COLORS = {
   owner: 'destructive' as const,
@@ -16,6 +17,7 @@ const ROLE_COLORS = {
 };
 
 export default function SettingsPage() {
+  const { t, te, dateLocale } = useI18n();
   const { wsSlug } = useParams<{ wsSlug: string }>();
   const { data: members = [], isLoading } = useWorkspaceMembers(wsSlug);
 
@@ -23,7 +25,7 @@ export default function SettingsPage() {
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex items-center gap-2">
         <Settings className="h-6 w-6" />
-        <h1 className="text-2xl font-bold">Settings</h1>
+        <h1 className="text-2xl font-bold">{t('Settings')}</h1>
       </div>
 
       {/* Quick links to sub-pages */}
@@ -33,9 +35,9 @@ export default function SettingsPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Key className="h-4 w-4" />
-                API Keys
+                {t('API Keys')}
               </CardTitle>
-              <CardDescription>Manage API keys for agent access</CardDescription>
+              <CardDescription>{t('Manage API keys for agent access')}</CardDescription>
             </CardHeader>
           </Card>
         </Link>
@@ -45,9 +47,9 @@ export default function SettingsPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Webhook className="h-4 w-4" />
-                Webhooks
+                {t('Webhooks')}
               </CardTitle>
-              <CardDescription>Configure event webhooks</CardDescription>
+              <CardDescription>{t('Configure event webhooks')}</CardDescription>
             </CardHeader>
           </Card>
         </Link>
@@ -56,12 +58,12 @@ export default function SettingsPage() {
       {/* RBAC — Members */}
       <Card>
         <CardHeader>
-          <CardTitle>Members & Roles</CardTitle>
-          <CardDescription>Manage workspace access and permissions</CardDescription>
+          <CardTitle>{t('Members & Roles')}</CardTitle>
+          <CardDescription>{t('Manage workspace access and permissions')}</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <p className="text-sm text-muted-foreground">Loading members...</p>
+            <p className="text-sm text-muted-foreground">{t('Loading members...')}</p>
           ) : (
             <ul className="divide-y">
               {members.map((member) => {
@@ -80,11 +82,11 @@ export default function SettingsPage() {
                     <div className="flex-1">
                       <p className="text-sm font-medium">{member.userName}</p>
                       <p className="text-xs text-muted-foreground">
-                        Joined {new Date(member.joinedAt).toLocaleDateString()}
+                        {t('Joined {date}', { date: new Date(member.joinedAt).toLocaleDateString(dateLocale) })}
                       </p>
                     </div>
                     <Badge variant={ROLE_COLORS[member.role as keyof typeof ROLE_COLORS] ?? 'secondary'}>
-                      {member.role}
+                      {te(member.role)}
                     </Badge>
                   </li>
                 );

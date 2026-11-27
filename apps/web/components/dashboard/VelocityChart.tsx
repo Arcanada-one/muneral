@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
+import { useI18n } from '@/lib/i18n/useI18n';
 
 export interface VelocityDataPoint {
   sprint: string;
@@ -22,12 +23,13 @@ interface VelocityChartProps {
 }
 
 export function VelocityChart({ data }: VelocityChartProps) {
+  const { t } = useI18n();
   if (data.length === 0) {
     return (
       <div className="rounded-lg border p-4">
-        <h3 className="mb-4 text-sm font-medium">Velocity</h3>
+        <h3 className="mb-4 text-sm font-medium">{t('Velocity')}</h3>
         <div className="flex h-48 items-center justify-center text-xs text-muted-foreground">
-          No sprint data available
+          {t('No sprint data available')}
         </div>
       </div>
     );
@@ -35,7 +37,7 @@ export function VelocityChart({ data }: VelocityChartProps) {
 
   return (
     <div className="rounded-lg border p-4">
-      <h3 className="mb-4 text-sm font-medium">Velocity (tasks per sprint)</h3>
+      <h3 className="mb-4 text-sm font-medium">{t('Velocity (tasks per sprint)')}</h3>
       <ResponsiveContainer width="100%" height={200}>
         <BarChart data={data} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
@@ -55,8 +57,8 @@ export function VelocityChart({ data }: VelocityChartProps) {
             }}
           />
           <Legend wrapperStyle={{ fontSize: '11px' }} />
-          <Bar dataKey="planned" fill="hsl(var(--muted-foreground))" radius={[3, 3, 0, 0]} name="Planned" />
-          <Bar dataKey="completed" fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} name="Completed" />
+          <Bar dataKey="planned" fill="hsl(var(--muted-foreground))" radius={[3, 3, 0, 0]} name={t('Planned')} />
+          <Bar dataKey="completed" fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} name={t('Completed')} />
         </BarChart>
       </ResponsiveContainer>
     </div>

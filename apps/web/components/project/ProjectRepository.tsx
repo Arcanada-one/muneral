@@ -1,4 +1,5 @@
 import { CopyRepositoryUrl } from './CopyRepositoryUrl';
+import { useI18n } from '@/lib/i18n/useI18n';
 
 export function safeRepositoryUrl(value: string): boolean {
   try {
@@ -12,16 +13,17 @@ export function safeRepositoryUrl(value: string): boolean {
 
 /** Display the persisted link; opening it does not certify repository access or sync. */
 export function ProjectRepository({ repoUrl }: { repoUrl?: string | null }) {
-  if (!repoUrl) return <p className="text-sm text-muted-foreground">No repository linked</p>;
+  const { t } = useI18n();
+  if (!repoUrl) return <p className="text-sm text-muted-foreground">{t('No repository linked')}</p>;
   if (!safeRepositoryUrl(repoUrl))
-    return <p role="alert" className="text-sm text-muted-foreground">Repository link unavailable</p>;
+    return <p role="alert" className="text-sm text-muted-foreground">{t('Repository link unavailable')}</p>;
   const destination = new URL(repoUrl);
   return (
     <div className="min-w-0">
       <div className="flex min-w-0 flex-wrap items-center gap-3">
         <a href={repoUrl} target="_blank" rel="noopener noreferrer"
           className="inline-flex min-h-11 items-center text-sm font-medium underline underline-offset-4">
-          Open repository
+          {t('Open repository')}
         </a>
         <CopyRepositoryUrl key={repoUrl} repoUrl={repoUrl} />
       </div>

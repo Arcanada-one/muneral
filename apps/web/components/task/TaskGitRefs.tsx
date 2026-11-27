@@ -5,6 +5,7 @@ import { Copy, GitBranch, GitCommit, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTaskGitRefs, type TaskGitRef } from '@/lib/api/tasks';
 import { safeRepositoryUrl } from '@/components/project/ProjectRepository';
+import { useI18n } from '@/lib/i18n/useI18n';
 
 const iconMap = {
   repo: ExternalLink,
@@ -16,11 +17,12 @@ const referenceLabels = {
   repo: 'repository',
   branch: 'branch',
   commit: 'commit',
-};
+} as const;
 
 type GitReferenceKind = 'all' | TaskGitRef['type'];
 
 function CopyGitReference({ value, label }: { value: string; label: string }) {
+  const { t, te } = useI18n();
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const [isCopying, setIsCopying] = useState(false);
 
@@ -46,16 +48,16 @@ function CopyGitReference({ value, label }: { value: string; label: string }) {
         className="h-7 w-7 shrink-0"
         onClick={copyReference}
         disabled={isCopying}
-        aria-label={`Copy ${label} reference ${value}`}
+        aria-label={t('Copy {kind} reference {value}', { kind: te(label), value })}
       >
         <Copy className="h-3 w-3" />
       </Button>
       {copyState === 'copied' && (
-        <span role="status" className="basis-full text-xs text-green-700">Git reference copied.</span>
+        <span role="status" className="basis-full text-xs text-green-700 dark:text-green-400">{t('Git reference copied.')}</span>
       )}
       {copyState === 'failed' && (
         <span role="alert" className="basis-full text-xs text-destructive">
-          Could not copy Git reference. Try copying it manually.
+          {t('Could not copy Git reference. Try copying it manually.')}
         </span>
       )}
     </>
@@ -72,6 +74,7 @@ function CopyGitReferenceLink({
   url: string;
   label: string;
 }) {
+  const { t, te } = useI18n();
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const [isCopying, setIsCopying] = useState(false);
   const isCopyingRef = useRef(false);
@@ -102,16 +105,16 @@ function CopyGitReferenceLink({
         className="h-7 w-7 shrink-0"
         onClick={copyLink}
         disabled={isCopying}
-        aria-label={`Copy Git reference link for ${label} ${reference}`}
+        aria-label={t('Copy Git reference link for {kind} {value}', { kind: te(label), value: reference })}
       >
         <Copy className="h-3 w-3" />
       </Button>
       {copyState === 'copied' && (
-        <span role="status" className="basis-full text-xs text-green-700">Git reference link copied.</span>
+        <span role="status" className="basis-full text-xs text-green-700 dark:text-green-400">{t('Git reference link copied.')}</span>
       )}
       {copyState === 'failed' && (
         <span role="alert" className="basis-full text-xs text-destructive">
-          Could not copy Git reference link. Try copying the link manually.
+          {t('Could not copy Git reference link. Try copying the link manually.')}
         </span>
       )}
     </>
@@ -119,6 +122,7 @@ function CopyGitReferenceLink({
 }
 
 function CopyAvailableGitReferenceLinks({ urls }: { urls: string[] }) {
+  const { t } = useI18n();
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const [isCopying, setIsCopying] = useState(false);
   const isCopyingRef = useRef(false);
@@ -157,18 +161,18 @@ function CopyAvailableGitReferenceLinks({ urls }: { urls: string[] }) {
         size="sm"
         onClick={() => { void copyLinks(); }}
         disabled={urls.length === 0 || isCopying}
-        aria-label={`Copy ${urls.length} available Git reference links`}
+        aria-label={t('Copy {count} available Git reference links', { count: urls.length })}
         aria-busy={isCopying}
       >
         <Copy className="h-3 w-3" />
-        {isCopying ? 'Copying available links…' : `Copy available links (${urls.length})`}
+        {isCopying ? t('Copying available links…') : t('Copy available links ({count})', { count: urls.length })}
       </Button>
       {copyState === 'copied' && (
-        <span role="status" className="text-xs text-green-700">Available Git reference links copied.</span>
+        <span role="status" className="text-xs text-green-700 dark:text-green-400">{t('Available Git reference links copied.')}</span>
       )}
       {copyState === 'failed' && (
         <span role="alert" className="text-xs text-destructive">
-          Could not copy available Git reference links. Try again.
+          {t('Could not copy available Git reference links. Try again.')}
         </span>
       )}
     </span>
@@ -176,6 +180,7 @@ function CopyAvailableGitReferenceLinks({ urls }: { urls: string[] }) {
 }
 
 function VisibleGitReferenceKindSummary({ refs }: { refs: TaskGitRef[] }) {
+  const { t } = useI18n();
   let repositories = 0;
   let branches = 0;
   let commits = 0;
@@ -189,14 +194,15 @@ function VisibleGitReferenceKindSummary({ refs }: { refs: TaskGitRef[] }) {
   }
 
   return (
-    <p aria-label="Visible reference kinds" className="mb-3 text-xs text-muted-foreground">
-      Visible reference kinds for current loaded rows: Repositories {repositories}; Branches {branches}; Commits {commits}
-      {other > 0 ? `; Other ${other}` : ''}.
+    <p aria-label={t('Visible reference kinds')} className="mb-3 text-xs text-muted-foreground">
+      {t('Visible reference kinds for current loaded rows: Repositories {repositories}; Branches {branches}; Commits {commits}', { repositories, branches, commits })}
+      {other > 0 ? t('; Other {count}', { count: other }) : ''}.
     </p>
   );
 }
 
 function CopyAvailableGitReferenceValues({ refs }: { refs: TaskGitRef[] }) {
+  const { t } = useI18n();
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const [isCopying, setIsCopying] = useState(false);
   const isCopyingRef = useRef(false);
@@ -236,18 +242,18 @@ function CopyAvailableGitReferenceValues({ refs }: { refs: TaskGitRef[] }) {
         size="sm"
         onClick={() => { void copyValues(); }}
         disabled={values.length === 0 || isCopying}
-        aria-label={`Copy ${values.length} available Git reference values`}
+        aria-label={t('Copy {count} available Git reference values', { count: values.length })}
         aria-busy={isCopying}
       >
         <Copy className="h-3 w-3" />
-        {isCopying ? 'Copying available references…' : `Copy available reference values (${values.length})`}
+        {isCopying ? t('Copying available references…') : t('Copy available reference values ({count})', { count: values.length })}
       </Button>
       {copyState === 'copied' && (
-        <span role="status" className="text-xs text-green-700">Available Git reference values copied.</span>
+        <span role="status" className="text-xs text-green-700 dark:text-green-400">{t('Available Git reference values copied.')}</span>
       )}
       {copyState === 'failed' && (
         <span role="alert" className="text-xs text-destructive">
-          Could not copy available Git reference values. Try again.
+          {t('Could not copy available Git reference values. Try again.')}
         </span>
       )}
     </span>
@@ -263,6 +269,7 @@ function GitReferenceDestinationDisclosure({
   edgeId: string;
   url: string;
 }) {
+  const { t } = useI18n();
   const identity = JSON.stringify([taskId, edgeId, url]);
   const [disclosure, setDisclosure] = useState(() => ({ identity, isExpanded: false }));
 
@@ -286,7 +293,7 @@ function GitReferenceDestinationDisclosure({
           isExpanded: current.identity === identity ? !current.isExpanded : true,
         }))}
       >
-        {isExpanded ? 'Hide link destination' : 'Show link destination'}
+        {isExpanded ? t('Hide link destination') : t('Show link destination')}
       </button>
       {isExpanded && (
         <p className="min-w-0 whitespace-normal break-all font-mono text-xs text-muted-foreground">
@@ -302,6 +309,7 @@ export function TaskGitRefs({ taskId }: { taskId: string }) {
 }
 
 function TaskGitRefsForTask({ taskId }: { taskId: string }) {
+  const { t } = useI18n();
   const [selectedKind, setSelectedKind] = useState<GitReferenceKind>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [availableLinksOnly, setAvailableLinksOnly] = useState(false);
@@ -322,7 +330,7 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
     if (!normalizedSearchQuery) return true;
 
     if (!isSafeUrl) {
-      return 'Reference link unavailable'.toLowerCase().includes(normalizedSearchQuery);
+      return t('Reference link unavailable').toLowerCase().includes(normalizedSearchQuery);
     }
 
     const referenceText = ref.ref || ref.url;
@@ -358,28 +366,28 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
 
   let body;
   if (isLoading || (isError && isFetching)) {
-    body = <p className="text-sm text-muted-foreground">Loading Git references…</p>;
+    body = <p className="text-sm text-muted-foreground">{t('Loading Git references…')}</p>;
   } else if (isError) {
     body = (
       <>
-        <p role="alert" className="text-sm text-muted-foreground">Git references are unavailable.</p>
+        <p role="alert" className="text-sm text-muted-foreground">{t('Git references are unavailable.')}</p>
         <button
           type="button"
-          aria-label="Retry Git references"
+          aria-label={t('Retry Git references')}
           className="mt-2 rounded text-sm text-foreground underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           disabled={isFetching}
           onClick={() => { void refetch(); }}
         >
-          Retry
+          {t('Retry')}
         </button>
       </>
     );
   } else if (refs === undefined) {
-    body = <p className="text-sm text-muted-foreground">Git references have not been loaded.</p>;
+    body = <p className="text-sm text-muted-foreground">{t('Git references have not been loaded.')}</p>;
   } else if (refs.length === 0) {
     body = (
       <>
-        <p className="text-sm text-muted-foreground">No Git references.</p>
+        <p className="text-sm text-muted-foreground">{t('No Git references.')}</p>
         {showVisibleKindSummary && <VisibleGitReferenceKindSummary refs={filteredRefs} />}
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <CopyAvailableGitReferenceLinks key={visibleBatchKey} urls={availableLinkUrls} />
@@ -392,27 +400,27 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
       <>
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <label htmlFor={kindSelectId} className="text-sm">
-            Git reference kind
+            {t('Git reference kind')}
           </label>
           <select
             id={kindSelectId}
-            aria-label="Git reference kind"
+            aria-label={t('Git reference kind')}
             className="rounded border bg-background px-2 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             value={selectedKind}
             onChange={(event) => setSelectedKind(event.target.value as GitReferenceKind)}
           >
-            <option value="all">All references</option>
-            <option value="repo">Repositories</option>
-            <option value="branch">Branches</option>
-            <option value="commit">Commits</option>
+            <option value="all">{t('All references')}</option>
+            <option value="repo">{t('Repositories')}</option>
+            <option value="branch">{t('Branches')}</option>
+            <option value="commit">{t('Commits')}</option>
           </select>
           <label htmlFor={searchInputId} className="text-sm">
-            Search loaded Git references
+            {t('Search loaded Git references')}
           </label>
           <input
             id={searchInputId}
             type="search"
-            aria-label="Search loaded Git references"
+            aria-label={t('Search loaded Git references')}
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             onKeyDown={(event) => {
@@ -437,7 +445,7 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
             className="min-w-0 rounded border bg-background px-2 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
           <span id={`${searchInputId}-hint`} className="basis-full text-xs text-muted-foreground">
-            Press Escape to clear the search.
+            {t('Press Escape to clear the search.')}
           </span>
           <label htmlFor={availableOnlyId} className="inline-flex items-center gap-2 text-sm">
             <input
@@ -450,7 +458,7 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
                 if (checked) setUnavailableLinksOnly(false);
               }}
             />
-            Show available links only
+            {t('Show available links only')}
           </label>
           <label htmlFor={unavailableOnlyId} className="inline-flex items-center gap-2 text-sm">
             <input
@@ -463,7 +471,7 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
                 if (checked) setAvailableLinksOnly(false);
               }}
             />
-            Show unavailable links only
+            {t('Show unavailable links only')}
           </label>
           <label htmlFor={`${kindSelectId}-reverse-loaded-order`} className="inline-flex items-center gap-2 text-sm">
             <input
@@ -472,7 +480,7 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
               checked={reverseLoadedOrder}
               onChange={(event) => setReverseLoadedOrder(event.target.checked)}
             />
-            Reverse loaded order
+            {t('Reverse loaded order')}
           </label>
           <label htmlFor={`${kindSelectId}-wrap`} className="inline-flex items-center gap-2 text-sm">
             <input
@@ -481,11 +489,11 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
               checked={wrapReferenceText}
               onChange={(event) => setWrapReferenceText(event.target.checked)}
             />
-            Wrap Git reference text
+            {t('Wrap Git reference text')}
           </label>
           {searchQuery !== '' && (
             <Button type="button" variant="outline" size="sm" onClick={() => setSearchQuery('')}>
-              Clear search
+              {t('Clear search')}
             </Button>
           )}
           <Button
@@ -500,23 +508,23 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
               setUnavailableLinksOnly(false);
             }}
           >
-            Reset Git reference filters
+            {t('Reset Git reference filters')}
           </Button>
           <CopyAvailableGitReferenceLinks key={visibleBatchKey} urls={availableLinkUrls} />
           <CopyAvailableGitReferenceValues key={availableReferencesKey} refs={availableReferences} />
         </div>
         <p className="mb-3 text-xs text-muted-foreground">
-          Showing {visibleRefs.length} of {refs.length} loaded Git references.
+          {t('Showing {shown} of {total} loaded Git references.', { shown: visibleRefs.length, total: refs.length })}
         </p>
         {showVisibleKindSummary && <VisibleGitReferenceKindSummary refs={filteredRefs} />}
         {visibleRefs.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            No matching Git references in the loaded list.{' '}
+            {t('No matching Git references in the loaded list.')}{' '}
             {searchQuery !== ''
-              ? 'Clear search or choose All references to show more.'
-              : 'Choose All references to show more.'}
-            {availableLinksOnly && ' Turn off Show available links only to include unavailable references.'}
-            {unavailableLinksOnly && ' Turn off Show unavailable links only to include available references.'}
+              ? t('Clear search or choose All references to show more.')
+              : t('Choose All references to show more.')}
+            {availableLinksOnly && ` ${t('Turn off Show available links only to include unavailable references.')}`}
+            {unavailableLinksOnly && ` ${t('Turn off Show unavailable links only to include available references.')}`}
           </p>
         ) : (
           <ul className="space-y-2">
@@ -528,7 +536,7 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
                 return (
                   <li key={ref.id}>
                     <span role="alert" className="text-sm text-muted-foreground">
-                      Reference link unavailable
+                      {t('Reference link unavailable')}
                     </span>
                   </li>
                 );
@@ -577,7 +585,7 @@ function TaskGitRefsForTask({ taskId }: { taskId: string }) {
 
   return (
     <div className="rounded-lg border p-4">
-      <h4 className="mb-3 text-sm font-medium">Git References</h4>
+      <h4 className="mb-3 text-sm font-medium">{t('Git References')}</h4>
       {body}
     </div>
   );

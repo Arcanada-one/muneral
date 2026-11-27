@@ -4,6 +4,7 @@ import { AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { useTasks } from '@/lib/api/tasks';
 import { Badge } from '@/components/ui/badge';
+import { useI18n } from '@/lib/i18n/useI18n';
 
 interface BlockersListProps {
   projectId: string;
@@ -12,6 +13,7 @@ interface BlockersListProps {
 }
 
 export function BlockersList({ projectId, wsSlug, projSlug }: BlockersListProps) {
+  const { t, dateLocale } = useI18n();
   const { data: result, isLoading, isError } = useTasks(projectId, { status: 'blocked' });
   const blockers = result?.data ?? [];
 
@@ -20,7 +22,7 @@ export function BlockersList({ projectId, wsSlug, projSlug }: BlockersListProps)
       <div className="border-b px-4 py-3">
         <h3 className="flex items-center gap-2 text-sm font-medium text-destructive">
           <AlertTriangle className="h-4 w-4" />
-          Blockers
+          {t('Blockers')}
           {!isError && !isLoading && blockers.length > 0 && (
             <Badge variant="destructive" className="ml-auto">
               {blockers.length}
@@ -31,15 +33,15 @@ export function BlockersList({ projectId, wsSlug, projSlug }: BlockersListProps)
 
       {isError ? (
         <div role="alert" className="px-4 py-8 text-center text-xs text-muted-foreground">
-          Blockers are unavailable. Try again later.
+          {t('Blockers are unavailable. Try again later.')}
         </div>
       ) : isLoading ? (
         <div className="px-4 py-8 text-center text-xs text-muted-foreground">
-          Loading blockers...
+          {t('Loading blockers...')}
         </div>
       ) : blockers.length === 0 ? (
         <div className="px-4 py-8 text-center text-xs text-muted-foreground">
-          No blockers — keep going!
+          {t('No blockers — keep going!')}
         </div>
       ) : (
         <ul className="divide-y">
@@ -55,7 +57,7 @@ export function BlockersList({ projectId, wsSlug, projSlug }: BlockersListProps)
                 </Link>
                 {task.dueDate && (
                   <p className="text-xs text-muted-foreground">
-                    Due {new Date(task.dueDate).toLocaleDateString()}
+                    {t('Due {date}', { date: new Date(task.dueDate).toLocaleDateString(dateLocale) })}
                   </p>
                 )}
               </div>
