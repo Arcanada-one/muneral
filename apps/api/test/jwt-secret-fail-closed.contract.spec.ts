@@ -75,7 +75,7 @@ describe('JWT_SECRET fails closed', () => {
     it('KanbanGateway rejects the connection and never verifies a token', async () => {
       delete process.env.JWT_SECRET;
       const jwtService = { verify: jest.fn() };
-      const gateway = new KanbanGateway(jwtService as never, {} as never);
+      const gateway = new KanbanGateway(jwtService as never, {} as never, {} as never);
       const socket = { handshake: { auth: { token: 'any.token.value' } }, data: {}, disconnect: jest.fn() };
       await gateway.handleConnection(socket as never);
       expect(socket.disconnect).toHaveBeenCalledWith(true);
@@ -117,7 +117,8 @@ describe('JWT_SECRET fails closed', () => {
     it('KanbanGateway verifies with the configured secret', async () => {
       process.env.JWT_SECRET = TEST_VALUE;
       const jwtService = { verify: jest.fn().mockReturnValue({ sub: 'u1', type: 'access' }) };
-      const gateway = new KanbanGateway(jwtService as never, {} as never);
+      const authService = { validateJwtPayload: jest.fn<() => Promise<unknown>>().mockResolvedValue({ id: 'u1' }) };
+      const gateway = new KanbanGateway(jwtService as never, {} as never, authService as never);
       const socket = { handshake: { auth: { token: 't' } }, data: {} as Record<string, unknown>, disconnect: jest.fn() };
       await gateway.handleConnection(socket as never);
       expect(jwtService.verify).toHaveBeenCalledWith('t', { secret: TEST_VALUE });
