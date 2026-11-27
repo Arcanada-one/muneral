@@ -10,6 +10,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { Injectable, Logger } from '@nestjs/common';
+import { AuthService } from '../auth/auth.service.js';
 import { getJwtSecret } from '../auth/jwt-secret.js';
 import { maySubscribeToProject } from '../plan-graph/project-membership.js';
 import { ProjectMembershipService } from '../plan-graph/project-membership.service.js';
@@ -23,7 +24,8 @@ export type KanbanEvent =
 
 /**
  * KanbanGateway — Socket.io gateway for real-time Kanban board updates.
- * Auth: validate JWT from socket.handshake.auth.token on connect.
+ * Auth: validate JWT from socket.handshake.auth.token on connect; the token's user
+ * must exist (AuthService.validateJwtPayload, as in the HTTP JWT strategy).
  * Rooms: project:{projectId} — clients subscribe per-project.
  *
  * KCLIVE-10 AC4: join:project requires current workspace membership of the
@@ -45,12 +47,24 @@ export class KanbanGateway
   @WebSocketServer()
   server: Server;
 
+  /** Connect-time authentication still in flight, or finished, per socket. */
+  private readonly authentication = new WeakMap<Socket, Promise<void>>();
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly projectMembership: ProjectMembershipService,
+    private readonly authService: AuthService,
   ) {}
 
-  async handleConnection(socket: Socket): Promise<void> {
+  handleConnection(socket: Socket): Promise<void> {
+    // Recorded synchronously: Nest binds message handlers without waiting for this hook,
+    // so join:project has to be able to wait for the user lookup.
+    const authentication = this.authenticate(socket);
+    this.authentication.set(socket, authentication);
+    return authentication;
+  }
+
+  private async authenticate(socket: Socket): Promise<void> {
     const token = socket.handshake.auth['token'] as string | undefined;
     if (!token) {
       socket.disconnect(true);
@@ -63,6 +77,12 @@ export class KanbanGateway
       }) as { sub: string; type: string };
 
       if (payload.type !== 'access') {
+        socket.disconnect(true);
+        return;
+      }
+
+      const user = await this.authService.validateJwtPayload(payload);
+      if (!user) {
         socket.disconnect(true);
         return;
       }
@@ -83,6 +103,7 @@ export class KanbanGateway
     @MessageBody() data: { projectId: string },
     @ConnectedSocket() socket: Socket,
   ): Promise<{ ok: boolean; reason: string }> {
+    await this.authentication.get(socket);
     const userId = socket.data['userId'] as string | undefined;
     const projectId = data?.projectId;
 
