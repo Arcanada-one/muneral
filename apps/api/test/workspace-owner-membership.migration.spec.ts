@@ -72,33 +72,73 @@ describe('migration: ensure every workspace owner has a membership row', () => {
   const comment = (ownerId: string, taskId: string) => supertest(app.getHttpServer())
     .post(`/tasks/${taskId}/comments`).auth(auth.signAccess(ownerId), { type: 'bearer' }).send({ body: 'owner write' });
 
-  it('adds only the missing owner rows, lets those owners write, and does nothing the second time', async () => {
-    const [alone, shared, complete, demoted, colleague, viewer] = [
-      await user('alone'), await user('shared'), await user('complete'), await user('demoted'),
-      await user('colleague'), await user('viewer')];
-    const missingEmpty = await workspace(alone.id, []);
-    const missingBesideOthers = await workspace(shared.id, [[colleague.id, 'manager'], [viewer.id, 'viewer']]);
-    await workspace(complete.id, [[complete.id, 'owner'], [viewer.id, 'developer']]);
-    // An owner who has a row with another role keeps it as it is.
-    const otherRole = await workspace(demoted.id, [[demoted.id, 'developer']]);
+  type Ws = Awaited<ReturnType<typeof workspace>>;
+  /** (a) the owner of record has no row, another member is owner; (b) no rows at all; (c) only a
+   *  manager row; (d) complete; (e) the owner of record holds 'developer', nobody is owner. */
+  let w: Record<'a' | 'b' | 'c' | 'd' | 'e', Ws>;
+  let commentBefore: Record<string, number>;
+  let before: string[], afterFirst: string[], afterSecond: string[];
+  let tablesBefore: Record<string, string>, tablesFirst: Record<string, string>, tablesSecond: Record<string, string>;
+  let inserted: number, insertedAgain: number;
+  const added = () => afterFirst.filter((row) => !before.includes(row));
+  const addedFor = (ws: Ws) => added().filter((row) => row.startsWith(`${ws.id} `));
+  const ownerRow = (ws: Ws) => `${ws.id} ${ws.ownerId} owner`;
 
-    for (const ws of [missingEmpty, missingBesideOthers]) await comment(ws.ownerId, ws.taskId).expect(403);
+  beforeAll(async () => {
+    const [absent, peer, bare, managed, manager, complete, viewer, developer] = [
+      await user('a'), await user('peer'), await user('b'), await user('c'), await user('manager'),
+      await user('d'), await user('viewer'), await user('e')];
+    w = {
+      a: await workspace(absent.id, [[peer.id, 'owner']]),
+      b: await workspace(bare.id, []),
+      c: await workspace(managed.id, [[manager.id, 'manager']]),
+      d: await workspace(complete.id, [[complete.id, 'owner'], [viewer.id, 'developer']]),
+      e: await workspace(developer.id, [[developer.id, 'developer']]),
+    };
+    commentBefore = {};
+    for (const [name, ws] of Object.entries(w)) commentBefore[name] = (await comment(ws.ownerId, ws.taskId)).status;
+    before = await memberRows();
+    tablesBefore = await otherTables();
+    inserted = await prisma.$executeRawUnsafe(MIGRATION);
+    afterFirst = await memberRows();
+    tablesFirst = await otherTables();
+    insertedAgain = await prisma.$executeRawUnsafe(MIGRATION);
+    afterSecond = await memberRows();
+    tablesSecond = await otherTables();
+  }, 120_000);
 
-    const before = await memberRows();
-    const tablesBefore = await otherTables();
-    expect(await prisma.$executeRawUnsafe(MIGRATION)).toBe(2);
+  it('(a) workspace that has another owner: no insert, the owner of record stays refused', async () => {
+    expect(commentBefore.a).toBe(403);
+    expect(addedFor(w.a)).toEqual([]);
+    expect((await comment(w.a.ownerId, w.a.taskId)).status).toBe(403);
+  });
 
-    const after = await memberRows();
-    const added = [missingEmpty, missingBesideOthers].map((ws) => `${ws.id} ${ws.ownerId} owner`).sort();
-    expect(after.filter((row) => !before.includes(row)).sort()).toEqual(added);
-    expect(after.filter((row) => !added.includes(row))).toEqual(before);
-    expect(after).toContain(`${otherRole.id} ${demoted.id} developer`);
-    expect(await otherTables()).toEqual(tablesBefore);
+  it.each(['b', 'c'] as const)('(%s) workspace without an owner row: one insert, then the owner can write', async (name) => {
+    expect(commentBefore[name]).toBe(403);
+    expect(addedFor(w[name])).toEqual([ownerRow(w[name])]);
+    expect((await comment(w[name].ownerId, w[name].taskId)).status).toBe(201);
+  });
 
-    expect(await prisma.$executeRawUnsafe(MIGRATION)).toBe(0);
-    expect(await memberRows()).toEqual(after);
-    expect(await otherTables()).toEqual(tablesBefore);
+  it('(d) complete workspace: no insert', () => {
+    expect(commentBefore.d).toBe(201);
+    expect(addedFor(w.d)).toEqual([]);
+  });
 
-    for (const ws of [missingEmpty, missingBesideOthers]) await comment(ws.ownerId, ws.taskId).expect(201);
+  it('(e) owner of record with another role: no insert, role unchanged', () => {
+    expect(commentBefore.e).toBe(201);
+    expect(addedFor(w.e)).toEqual([]);
+    expect(afterFirst).toContain(`${w.e.id} ${w.e.ownerId} developer`);
+  });
+
+  it('inserts nothing else, keeps every earlier row and leaves all other tables as they were', () => {
+    expect(inserted).toBe(added().length);
+    expect(afterFirst.filter((row) => !added().includes(row))).toEqual(before);
+    expect(tablesFirst).toEqual(tablesBefore);
+  });
+
+  it('a second run inserts nothing', () => {
+    expect(insertedAgain).toBe(0);
+    expect(afterSecond).toEqual(afterFirst);
+    expect(tablesSecond).toEqual(tablesBefore);
   });
 });
