@@ -25,6 +25,7 @@ import { ActorInterceptor } from '../common/interceptors/actor.interceptor.js';
 import { UseInterceptors } from '@nestjs/common';
 import type { Actor } from '@muneral/types';
 import { User } from '@prisma/client';
+import { HumanTaskReadGuard } from '../auth/guards/human-task-read.guard.js';
 
 type AuthRequest = Request & { user: User; actor?: Actor; agentScope?: AgentScopeContext };
 
@@ -32,7 +33,7 @@ type AuthRequest = Request & { user: User; actor?: Actor; agentScope?: AgentScop
  * Workspaces CRUD and member management.
  */
 @Controller('workspaces')
-@UseGuards(JwtOrApiKeyGuard, AgentTaskScopeGuard)
+@UseGuards(JwtOrApiKeyGuard, AgentTaskScopeGuard, HumanTaskReadGuard)
 @UseInterceptors(ActorInterceptor)
 export class WorkspacesController {
   constructor(private readonly workspacesService: WorkspacesService) {}

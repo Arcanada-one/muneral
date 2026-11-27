@@ -87,6 +87,7 @@ describe('PATCH /tasks/:taskId/status with an agent key — creator or executor 
         data: { slug: `ws-${id}`, name: `WS ${id}`, ownerId: user.id },
       })
     ).id;
+    await prisma.workspaceMember.create({ data: { workspaceId, userId, role: 'owner' } });
     otherWorkspaceId = (
       await prisma.workspace.create({
         data: { slug: `ws-other-${id}`, name: `Other ${id}`, ownerId: user.id },

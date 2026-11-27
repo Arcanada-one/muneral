@@ -12,6 +12,7 @@ import { ApiKeyGuard } from '../src/auth/guards/api-key.guard.js';
 import { JwtAuthGuard } from '../src/auth/guards/jwt-auth.guard.js';
 import { JwtOrApiKeyGuard } from '../src/auth/guards/jwt-or-api-key.guard.js';
 import { AgentTaskScopeGuard } from '../src/auth/guards/agent-task-scope.guard.js';
+import { HumanTaskReadGuard } from '../src/auth/guards/human-task-read.guard.js';
 import { ActorInterceptor } from '../src/common/interceptors/actor.interceptor.js';
 
 const agents = {
@@ -97,6 +98,8 @@ describe('GET /agents/me (HTTP)', () => {
       .overrideGuard(JwtOrApiKeyGuard)
       .useValue(allow)
       .overrideGuard(AgentTaskScopeGuard)
+      .useValue(allow)
+      .overrideGuard(HumanTaskReadGuard)
       .useValue(allow)
       .overrideInterceptor(ActorInterceptor)
       .useValue(actor)

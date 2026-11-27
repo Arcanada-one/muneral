@@ -27,7 +27,7 @@ import { ActorInterceptor } from '../common/interceptors/actor.interceptor.js';
  * Projects and git-refs management.
  */
 @Controller('projects')
-@UseGuards(JwtOrApiKeyGuard, AgentTaskScopeGuard)
+@UseGuards(JwtOrApiKeyGuard, AgentTaskScopeGuard, HumanTaskReadGuard)
 @UseInterceptors(ActorInterceptor)
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
@@ -71,7 +71,6 @@ export class ProjectsController {
    */
   @Get('tasks/:taskId/git-refs')
   @AgentScope('task')
-  @UseGuards(HumanTaskReadGuard)
   getGitRefs(@Param('taskId') taskId: string, @Req() req: Request & { actor: Actor }) {
     return this.projectsService.getGitRefs(taskId, req.actor.type === 'human' ? req.actor.id : undefined);
   }

@@ -15,12 +15,13 @@ import { WebhooksService } from './webhooks.service.js';
 import { CreateWebhookDto } from './dto/create-webhook.dto.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
 import { ActorInterceptor } from '../common/interceptors/actor.interceptor.js';
+import { HumanTaskReadGuard } from '../auth/guards/human-task-read.guard.js';
 
 /**
  * Webhook configuration CRUD.
  */
 @Controller('webhooks')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, HumanTaskReadGuard)
 @UseInterceptors(ActorInterceptor)
 export class WebhooksController {
   constructor(private readonly webhooksService: WebhooksService) {}

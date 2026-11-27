@@ -24,6 +24,7 @@ import { AgentScope } from '../auth/agent-scope.decorator.js';
 import { ActorInterceptor } from '../common/interceptors/actor.interceptor.js';
 import { Agent } from '@prisma/client';
 import type { Actor } from '@muneral/types';
+import { HumanTaskReadGuard } from '../auth/guards/human-task-read.guard.js';
 
 /**
  * Agents management, task assignment, and API key lifecycle.
@@ -34,13 +35,13 @@ export class AgentsController {
   constructor(private readonly agentsService: AgentsService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, HumanTaskReadGuard)
   register(@Body() dto: CreateAgentDto) {
     return this.agentsService.register(dto);
   }
 
   @Get('workspace/:workspaceId')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, HumanTaskReadGuard)
   findByWorkspace(@Param('workspaceId') workspaceId: string) {
     return this.agentsService.findByWorkspace(workspaceId);
   }
@@ -73,7 +74,7 @@ export class AgentsController {
    * narrowed. Every assignment writes a `task:agent_assigned` activity row.
    */
   @Post('tasks/:taskId/assign')
-  @UseGuards(JwtOrApiKeyGuard, AgentTaskScopeGuard)
+  @UseGuards(JwtOrApiKeyGuard, AgentTaskScopeGuard, HumanTaskReadGuard)
   @AgentScope('task-assign')
   assignToTask(
     @Param('taskId') taskId: string,
@@ -85,7 +86,7 @@ export class AgentsController {
 
   @Delete('tasks/:taskId/assign/:agentId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, HumanTaskReadGuard)
   removeFromTask(
     @Param('taskId') taskId: string,
     @Param('agentId') agentId: string,
@@ -106,7 +107,7 @@ export class AgentsController {
   }
 
   @Post(':agentId/keys')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, HumanTaskReadGuard)
   createApiKey(
     @Param('agentId') agentId: string,
     @Body() body: { label?: string },
@@ -127,7 +128,7 @@ export class AgentsController {
   }
 
   @Post('keys/:keyId/rotate')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, HumanTaskReadGuard)
   rotateApiKey(@Param('keyId') keyId: string) {
     return this.agentsService.rotateApiKey(keyId);
   }
@@ -146,7 +147,7 @@ export class AgentsController {
 
   @Delete('keys/:keyId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, HumanTaskReadGuard)
   revokeApiKey(@Param('keyId') keyId: string) {
     return this.agentsService.revokeApiKey(keyId);
   }

@@ -36,6 +36,7 @@ import { CreateDecisionDto } from './dto/create-decision.dto.js';
 import { CreateTransitionDto } from './dto/create-transition.dto.js';
 import { CreateWorkItemDto } from './dto/create-work-item.dto.js';
 import { MigrationService } from './migration.service.js';
+import { HumanTaskReadGuard } from '../auth/guards/human-task-read.guard.js';
 
 type ActorRequest = Request & { actor: Actor };
 
@@ -60,7 +61,7 @@ export class MigrationController {
   }
 
   @Get('batches/:batchId')
-  @UseGuards(JwtOrApiKeyGuard)
+  @UseGuards(JwtOrApiKeyGuard, HumanTaskReadGuard)
   getBatch(@Param('batchId', ParseUUIDPipe) batchId: string, @Req() req: ActorRequest) {
     return this.migration.getBatch(batchId, req.actor);
   }
@@ -93,7 +94,7 @@ export class MigrationController {
    * segment.
    */
   @Get('work-items/search')
-  @UseGuards(JwtOrApiKeyGuard)
+  @UseGuards(JwtOrApiKeyGuard, HumanTaskReadGuard)
   search(@Req() req: ActorRequest, @Query('legacyId') legacyId?: unknown) {
     // The query parser is `extended`, so `?legacyId[]=a&legacyId[]=b` arrives
     // as an array and `?legacyId[x]=1` as an object. Handing either to Prisma
@@ -116,7 +117,7 @@ export class MigrationController {
    * wrong answer costs the most.
    */
   @Get('work-items/by-legacy/:sourceNamespace/:legacyId')
-  @UseGuards(JwtOrApiKeyGuard)
+  @UseGuards(JwtOrApiKeyGuard, HumanTaskReadGuard)
   getByLegacy(
     @Param('sourceNamespace') sourceNamespace: string,
     @Param('legacyId') legacyId: string,
@@ -150,7 +151,7 @@ export class MigrationController {
   }
 
   @Get('identities/:identityId/mappings')
-  @UseGuards(JwtOrApiKeyGuard)
+  @UseGuards(JwtOrApiKeyGuard, HumanTaskReadGuard)
   mappings(@Param('identityId', ParseUUIDPipe) identityId: string, @Req() req: ActorRequest) {
     return this.migration.getReverseMapping(identityId, req.actor);
   }
