@@ -1,14 +1,15 @@
-// MUN-0084 drift guard (PR-A, profile-gated). app.muneral.com is proxied by nginx to 127.0.0.1:3501;
+// MUN-0084 drift guard (PR-B, activated). app.muneral.com is proxied by nginx to 127.0.0.1:3501;
 // for weeks nothing listened there and the edge answered 502 while every API check stayed green.
 // The claims below live outside TypeScript and a type-check cannot see them, so they are asserted
 // against the files:
 //   1. the compose stack defines muneral-web and publishes it on loopback 3501 ONLY;
-//   2. muneral-web sits under the `web` profile, so the broker's default build/up (no service
-//      argument, no --profile) neither builds nor starts it - merging changes nothing on production;
+//   2. no service sits under a profile, so the broker's default build/up (no service argument, no
+//      --profile) builds and starts muneral-api AND muneral-web;
 //   3. muneral-api (the fleet task system) is untouched by the web bring-up;
-//   4. muneral-web has no env_file (the API .env holds database and signing secrets);
+//   4. muneral-web has no env_file (the API .env holds database and signing secrets) and receives
+//      exactly the listed names, none of them in a required-variable form that could block the API;
 //   5. the web image build receives the public API origin and starts next on 3501 as non-root.
-// There is deliberately NO assertion about a CI probe step: PR-A does not change any workflow.
+// There is deliberately NO assertion about a CI probe step: this change does not touch any workflow.
 
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -35,17 +36,16 @@ const apiService = serviceBlock('muneral-api');
 /** Service keys declared under `services:` (two-space indented, uncommented). */
 const declaredServices = [...compose.matchAll(/^ {2}([a-z][a-z0-9-]*):\s*$/gm)].map((m) => m[1]);
 
-describe('muneral-web deploy descriptors (MUN-0084 PR-A)', () => {
+describe('muneral-web deploy descriptors (MUN-0084 PR-B)', () => {
   it('publishes the web on loopback 3501 only', () => {
     expect(webService).toMatch(/"127\.0\.0\.1:3501:3501"/);
     expect(webService).not.toMatch(/"(0\.0\.0\.0:)?3501:3501"/);
   });
 
-  it('is under the web profile, so default build/up neither builds nor starts it', () => {
-    expect(webService).toMatch(/^ {4}profiles:\s*\[\s*web\s*\]\s*$/m);
-    // Without a profile the service would join the default set; muneral-api is the only one that does.
+  it('is in the default set, so the broker default build/up builds and starts it', () => {
+    expect(webService).not.toMatch(/^ {4}profiles:/m);
     const unprofiled = declaredServices.filter((s) => !/^ {4}profiles:/m.test(serviceBlock(s)));
-    expect(unprofiled).toEqual(['muneral-api']);
+    expect(unprofiled).toEqual(['muneral-api', 'muneral-web']);
   });
 
   it('leaves muneral-api unchanged: no profile, same build, port, env_file and healthcheck', () => {
@@ -61,6 +61,18 @@ describe('muneral-web deploy descriptors (MUN-0084 PR-A)', () => {
 
   it('does not hand the API env_file (database / signing secrets) to the web container', () => {
     expect(webService).not.toMatch(/env_file/);
+  });
+
+  it('receives exactly the listed environment names, each optional so the API is never blocked', () => {
+    const block = webService.match(/^ {4}environment:\n((?: {6}\S.*\n)+)/m);
+    expect(block).not.toBeNull();
+    const entries = block![1].trimEnd().split('\n').map((l) => l.trim());
+    expect(entries).toEqual([
+      'NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-}',
+      'GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}',
+      'GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}',
+      'AUTH_TRUST_HOST: "true"',
+    ]);
   });
 
   it('has a restart policy and an HTTP healthcheck on the served port', () => {

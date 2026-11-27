@@ -26,15 +26,14 @@ services:
   # MUN-0084: the web app. nginx (site muneral-app on arcana-prd) proxies app.muneral.com to
   # 127.0.0.1:3501; before this service existed nothing listened there and the edge answered 502.
   # Loopback bind ONLY (network-exposure-lint). It gets NO env_file: the API's .env holds database
-  # and signing secrets the browser-facing web must not carry. The two variables below are
-  # interpolated by name from the broker-installed root-owned .env, so only these two reach the
-  # container (empty when the file does not define them - not_measured, see docs/how-to/activate-muneral-web.md).
+  # and signing secrets the browser-facing web must not carry. The names under `environment` are
+  # interpolated from the broker-installed root-owned .env, so only those reach the container.
+  # `:-` is deliberate: the required-variable form would fail every compose command on this file,
+  # muneral-api's included. An undefined name is empty (see docs/how-to/activate-muneral-web.md).
   muneral-web:
-    # PROFILE SWITCH (MUN-0084 PR-A): the broker runs `docker compose -p muneral -f docker-compose.prod.yml
-    # build` / `up -d` with no service argument and no --profile, so a service under a profile is
-    # neither built nor started by it. Merging this file therefore changes nothing on production;
-    # muneral-api (the fleet task system) is untouched. PR-B removes this line to activate the web.
-    profiles: [web]
+    # MUN-0084 PR-B: no profile, so the broker's default `build` / `up -d` (no service argument)
+    # builds and starts this service together with muneral-api. A failing web image build therefore
+    # fails the broker's build step for the whole stack, muneral-api included.
     image: muneral-web:latest
     build:
       context: .
@@ -46,6 +45,8 @@ services:
       - "127.0.0.1:3501:3501"
     environment:
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
       AUTH_TRUST_HOST: "true"
     restart: unless-stopped
     healthcheck:
