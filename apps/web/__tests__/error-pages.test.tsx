@@ -1,27 +1,15 @@
 import { Component, type ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { NextAuthConfig } from 'next-auth';
-import { signOut } from 'next-auth/react';
+import { buildAuthConfig } from '@/lib/auth/config';
 import ErrorPage from '@/app/error';
 import GlobalError from '@/app/global-error';
 import { SignOutPanel } from '@/app/(auth)/signout/SignOutPanel';
 import { PreferencesProvider } from '@/components/preferences/PreferencesProvider';
 import type { Locale, Theme } from '@/lib/preferences/preferences';
 
-// Kept as a plain value: mock call records are reset between tests.
-const captured = vi.hoisted(() => ({ config: undefined as unknown }));
-vi.mock('next-auth', () => ({
-  default: (config: unknown) => {
-    captured.config = config;
-    return {};
-  },
-}));
-vi.mock('next-auth/react', () => ({ signOut: vi.fn() }));
 vi.mock('next/font/google', () => ({ Inter: () => ({ className: 'font' }) }));
-vi.mock('@/lib/api/client', () => ({ apiClient: { post: vi.fn() } }));
-import '@/lib/auth/nextauth';
 
 class Boundary extends Component<{ children: ReactNode }, { error?: Error }> {
   state: { error?: Error } = {};
@@ -78,22 +66,22 @@ describe.each(cases)('error pages in %s %s', (locale, theme, title, retry, theme
 
 describe('Auth.js pages', () => {
   it('are all pages of this app', () => {
-    const config = captured.config as NextAuthConfig;
-    expect(config.pages).toEqual({
+    expect(buildAuthConfig(null).pages).toEqual({
       signIn: '/login', signOut: '/signout', error: '/auth-error', verifyRequest: '/auth-error',
     });
   });
 
   it.each([['ru', 'Выйти из Muneral?', 'Выйти'], ['zh', '要退出 Muneral 吗？', '退出登录']] as const)(
-    'the sign-out page is localized (%s) and signs out on request', (locale, title, button) => {
+    'the sign-out page is localized (%s) and posts to the server logout', (locale, title, button) => {
       render(
         <PreferencesProvider initialLocale={locale} initialTheme="light">
           <SignOutPanel />
         </PreferencesProvider>,
       );
       expect(screen.getByRole('heading').textContent).toBe(title);
-      expect(signOut).not.toHaveBeenCalled();
-      fireEvent.click(screen.getByRole('button', { name: button }));
-      expect(signOut).toHaveBeenCalledWith({ callbackUrl: '/login' });
+      const submit = screen.getByRole('button', { name: button }) as HTMLButtonElement;
+      expect(submit.type).toBe('submit');
+      expect(submit.form?.getAttribute('action')).toBe('/api/logout');
+      expect(submit.form?.method).toBe('post');
     });
 });

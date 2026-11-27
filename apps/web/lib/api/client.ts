@@ -12,8 +12,7 @@ type SessionRequest = InternalAxiosRequestConfig & {
 
 type Login = {
   id: string;
-  refreshedAccess?: string;
-  pendingRefresh?: Promise<void>;
+  renewal?: Promise<string | undefined>;
 };
 
 let activeLogin: Login | undefined;
@@ -40,55 +39,41 @@ export const apiClient = axios.create({
   timeout: 15_000,
 });
 
-// Attach JWT to every request when the caller did not already set Authorization
+// Attach the access token to every request when the caller did not already set Authorization
 // (agent-scoped canaries and explicit Bearer headers must not be overwritten).
 apiClient.interceptors.request.use(async (config: SessionRequest) => {
   if (typeof window === 'undefined') return config;
   if (config._retry && config.loginSessionId) {
-    const { login } = await readActiveSession();
-    if (!login?.refreshedAccess || login.id !== config.loginSessionId) {
+    const { session, login } = await readActiveSession();
+    if (!session?.accessToken || login?.id !== config.loginSessionId) {
       throw new Error('The session has changed');
     }
-    config.headers.set('Authorization', `Bearer ${login.refreshedAccess}`);
+    config.headers.set('Authorization', `Bearer ${session.accessToken}`);
   } else if (!config.headers.get('Authorization')) {
     const { session, login } = await readActiveSession();
-    const access = login?.refreshedAccess ?? session?.accessToken;
-    if (access) {
+    if (session?.accessToken) {
       config.loginSessionId = login?.id;
-      config.headers.set('Authorization', `Bearer ${access}`);
+      config.headers.set('Authorization', `Bearer ${session.accessToken}`);
     }
   }
   return config;
 });
 
-async function refreshSessionAccess(login: Login, refreshToken: string | null | undefined): Promise<void> {
-  let access: string;
-  try {
-    if (!refreshToken) {
-      throw new Error('No refresh token available');
-    }
-    const { data } = await axios.post<{ access_token: string }>(
-      `${API_BASE}/api/v1/auth/refresh`,
-      { refresh_token: refreshToken },
-      { timeout: 15_000 },
-    );
-    if (typeof data.access_token !== 'string' || data.access_token.length === 0) {
-      throw new Error('Invalid refresh response');
-    }
-    access = data.access_token;
-  } catch (error) {
-    const current = await readActiveSession();
-    if (current.login === login) {
-      await signOut({ redirect: true, callbackUrl: '/login' });
-    }
-    throw error;
-  }
+/**
+ * After a 401: ask the server session, which refreshes on the server when the token is due.
+ * Returns the current access token, or signs out when the server says the login is over.
+ */
+async function currentAccess(login: Login): Promise<string | undefined> {
   const current = await readActiveSession();
   if (current.login !== login) throw new Error('The session has changed');
-  login.refreshedAccess = access;
+  if (current.session?.error === 'SessionExpired') {
+    await signOut({ redirect: true, callbackUrl: '/login' });
+    return undefined;
+  }
+  return current.session?.accessToken;
 }
 
-// JWT refresh on 401
+// One retry on 401, only when the server session now holds a different access token.
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
@@ -97,21 +82,16 @@ apiClient.interceptors.response.use(
       throw error;
     }
 
-    const { session, login } = await readActiveSession();
+    const { login } = await readActiveSession();
     if (!login || login.id !== request.loginSessionId) throw error;
 
     request._retry = true;
-    const cached = login.refreshedAccess;
-    if (cached && request.headers.get('Authorization') !== `Bearer ${cached}`) {
-      return apiClient(request);
-    }
-
-    if (!login.pendingRefresh) {
-      login.pendingRefresh = refreshSessionAccess(login, session?.refreshToken).finally(() => {
-        login.pendingRefresh = undefined;
-      });
-    }
-    await login.pendingRefresh;
+    login.renewal ??= currentAccess(login).finally(() => {
+      login.renewal = undefined;
+    });
+    const access = await login.renewal;
+    // The same token would be refused again; signing out here could loop.
+    if (!access || request.headers.get('Authorization') === `Bearer ${access}`) throw error;
     return apiClient(request);
   },
 );

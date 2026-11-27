@@ -1,6 +1,7 @@
 'use client';
 
-import { useSession, signOut } from 'next-auth/react';
+import { useRef } from 'react';
+import { useSession } from 'next-auth/react';
 import { LogOut, User } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -21,6 +22,7 @@ interface HeaderProps {
 export function Header({ title }: HeaderProps) {
   const { t } = useI18n();
   const { data: session } = useSession();
+  const signOutForm = useRef<HTMLFormElement>(null);
   const user = session?.user;
 
   const initials = user?.name
@@ -40,6 +42,8 @@ export function Header({ title }: HeaderProps) {
 
       <div className="flex items-center gap-3">
         <PreferenceSwitchers />
+        {/* Outside the menu, which unmounts its items when one is selected. */}
+        <form ref={signOutForm} method="post" action="/api/logout" hidden />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-ring">
@@ -59,7 +63,7 @@ export function Header({ title }: HeaderProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => signOut({ callbackUrl: '/login' })}
+              onSelect={() => signOutForm.current?.requestSubmit()}
               className="cursor-pointer text-destructive focus:text-destructive"
             >
               <LogOut className="mr-2 h-4 w-4" />

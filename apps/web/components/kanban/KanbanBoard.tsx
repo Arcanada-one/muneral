@@ -159,8 +159,8 @@ export function KanbanBoard({ projectId, wsSlug, projSlug }: KanbanBoardProps) {
   );
 
   // WebSocket setup with polling fallback
+  const accessToken = (session as Record<string, unknown> | null)?.accessToken;
   useEffect(() => {
-    const accessToken = (session as Record<string, unknown> | null)?.accessToken;
     if (typeof accessToken !== 'string' || !projectId) return;
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3500';
@@ -184,7 +184,7 @@ export function KanbanBoard({ projectId, wsSlug, projSlug }: KanbanBoardProps) {
       client.disconnect();
       wsClientRef.current = null;
     };
-  }, [session, projectId, wsSlug, refetch]);
+  }, [accessToken, projectId, wsSlug, refetch]);
 
   // Polling fallback when WS is disconnected
   useEffect(() => {

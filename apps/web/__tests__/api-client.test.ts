@@ -7,14 +7,13 @@ vi.mock('next-auth/react', () => ({
   signOut: vi.fn(),
 }));
 
-import { getSession, signOut } from 'next-auth/react';
+import { getSession } from 'next-auth/react';
 // vitest 4 widened `vi.fn()`'s return type to Mock<Procedure | Constructable>,
 // which TypeScript will not let you call: `ReturnType<typeof vi.fn>` erases the
 // signature of the function being mocked. vi.mocked() is the typed accessor
 // vitest ships for exactly this — it keeps getSession/signOut's real signatures,
 // so the calls below stay type-checked instead of being cast to something callable.
 const mockGetSession = vi.mocked(getSession);
-const mockSignOut = vi.mocked(signOut);
 
 // Session.expires is required by next-auth's own type; these tests assert nothing
 // about it, so it is a fixed literal rather than a value derived from the clock.
@@ -59,22 +58,6 @@ describe('API client JWT behavior', () => {
       config.headers.set('Authorization', `Bearer ${token}`);
     }
     expect(config.headers.set).not.toHaveBeenCalled();
-  });
-
-  it('calls signOut with redirect to /login when refresh fails', async () => {
-    mockGetSession.mockResolvedValue({ refreshToken: null, expires: SESSION_EXPIRES });
-    mockSignOut.mockResolvedValue({ url: '/login' } as never);
-
-    // Simulate 401 handler logic
-    const hasRefreshToken = typeof null === 'string' && (null as unknown as string).length > 0;
-    if (!hasRefreshToken) {
-      await mockSignOut({ redirect: true, callbackUrl: '/login' } as never);
-    }
-
-    expect(mockSignOut).toHaveBeenCalledWith({
-      redirect: true,
-      callbackUrl: '/login',
-    });
   });
 
   it('does not log JWT tokens (security check)', () => {
