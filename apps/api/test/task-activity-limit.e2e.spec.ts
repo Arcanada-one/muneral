@@ -82,6 +82,16 @@ describe('GET /tasks/:taskId/activity limit bound (real HTTP/PostgreSQL)', () =>
         payload: { body: 'boundary fixture' },
       },
     });
+    await prisma.activityLog.create({
+      data: {
+        taskId: task.id,
+        workspaceId: ws.id,
+        actorType: 'human',
+        actorId: user.id,
+        action: 'comment',
+        payload: { body: 'second page fixture' },
+      },
+    });
     taskId = task.id;
     token = auth.signAccess(user.id);
   }, 120_000);
@@ -126,5 +136,39 @@ describe('GET /tasks/:taskId/activity limit bound (real HTTP/PostgreSQL)', () =>
       .get(`/tasks/${taskId}/activity?page=1&limit=${TASK_ACTIVITY_MAX_LIMIT + 1}`)
       .auth(token, { type: 'bearer' })
       .expect(400);
+  });
+
+  it('rejects an unknown query parameter with 400 (forbidNonWhitelisted)', async () => {
+    await supertest(app.getHttpServer())
+      .get(`/tasks/${taskId}/activity?page=1&limit=20&cursor=abc`)
+      .auth(token, { type: 'bearer' })
+      .expect(400);
+  });
+
+  it('rejects limit=0 and a non-integer limit with 400', async () => {
+    for (const limit of ['0', '1.5', 'abc']) {
+      await supertest(app.getHttpServer())
+        .get(`/tasks/${taskId}/activity?limit=${limit}`)
+        .auth(token, { type: 'bearer' })
+        .expect(400);
+    }
+  });
+
+  it('pages by offset: page=1 and page=2 with limit=1 return distinct rows and the same total', async () => {
+    const first = await supertest(app.getHttpServer())
+      .get(`/tasks/${taskId}/activity?page=1&limit=1`)
+      .auth(token, { type: 'bearer' })
+      .expect(200);
+    const second = await supertest(app.getHttpServer())
+      .get(`/tasks/${taskId}/activity?page=2&limit=1`)
+      .auth(token, { type: 'bearer' })
+      .expect(200);
+    expect(first.body.total).toBe(2);
+    expect(second.body.total).toBe(2);
+    expect(first.body.page).toBe(1);
+    expect(second.body.page).toBe(2);
+    expect(first.body.data).toHaveLength(1);
+    expect(second.body.data).toHaveLength(1);
+    expect(first.body.data[0].id).not.toBe(second.body.data[0].id);
   });
 });
