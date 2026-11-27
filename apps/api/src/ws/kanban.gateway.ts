@@ -9,8 +9,10 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service.js';
+import { ArcanaAuthService } from '../auth/arcana/arcana-auth.service.js';
+import { LegacyAuthCounter } from '../auth/arcana/legacy-auth.counter.js';
 import { getJwtSecret } from '../auth/jwt-secret.js';
 import { maySubscribeToProject } from '../plan-graph/project-membership.js';
 import { ProjectMembershipService } from '../plan-graph/project-membership.service.js';
@@ -22,10 +24,15 @@ export type KanbanEvent =
   | 'task:created'
   | 'task:deleted';
 
+/** setTimeout fires at once for a longer delay, so a distant expiry is reached in steps. */
+const MAX_TIMER_DELAY_MS = 2 ** 31 - 1;
+
 /**
  * KanbanGateway — Socket.io gateway for real-time Kanban board updates.
  * Auth: validate JWT from socket.handshake.auth.token on connect; the token's user
- * must exist (AuthService.validateJwtPayload, as in the HTTP JWT strategy).
+ * must exist (AuthService.validateJwtPayload, as in the HTTP JWT strategy). Verifier
+ * choice is the same as for HTTP (ArcanaAuthService.routes). The socket is disconnected
+ * when its token expires; the client must reconnect with a fresh token.
  * Rooms: project:{projectId} — clients subscribe per-project.
  *
  * KCLIVE-10 AC4: join:project requires current workspace membership of the
@@ -50,10 +57,15 @@ export class KanbanGateway
   /** Connect-time authentication still in flight, or finished, per socket. */
   private readonly authentication = new WeakMap<Socket, Promise<void>>();
 
+  /** Pending disconnect at token expiry, per socket. */
+  private readonly expiry = new WeakMap<Socket, ReturnType<typeof setTimeout>>();
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly projectMembership: ProjectMembershipService,
     private readonly authService: AuthService,
+    @Optional() private readonly arcanaAuth?: ArcanaAuthService,
+    @Optional() private readonly legacyAuthCounter?: LegacyAuthCounter,
   ) {}
 
   handleConnection(socket: Socket): Promise<void> {
@@ -71,10 +83,21 @@ export class KanbanGateway
       return;
     }
 
+    if (this.arcanaAuth?.routes(token)) {
+      try {
+        const { user, expiresAt } = await this.arcanaAuth.authenticate(token);
+        socket.data['userId'] = user.id;
+        this.disconnectAt(socket, expiresAt);
+      } catch {
+        socket.disconnect(true);
+      }
+      return;
+    }
+
     try {
       const payload = this.jwtService.verify(token, {
         secret: getJwtSecret(),
-      }) as { sub: string; type: string };
+      }) as { sub: string; type: string; exp?: number };
 
       if (payload.type !== 'access') {
         socket.disconnect(true);
@@ -89,13 +112,36 @@ export class KanbanGateway
 
       // Attach userId to socket data for room management
       socket.data['userId'] = payload.sub;
+      this.legacyAuthCounter?.record('ws');
+      if (typeof payload.exp === 'number') this.disconnectAt(socket, payload.exp);
     } catch {
       socket.disconnect(true);
     }
   }
 
-  handleDisconnect(_socket: Socket): void {
-    // Cleanup is automatic — Socket.io removes from rooms on disconnect
+  /** Disconnect the socket at `expiresAt` (seconds since the epoch). */
+  private disconnectAt(socket: Socket, expiresAt: number): void {
+    // The client left while it was being authenticated: nothing is left to expire.
+    if (socket.disconnected) return;
+
+    const remaining = expiresAt * 1000 - Date.now();
+    if (remaining <= 0) {
+      delete socket.data['userId'];
+      socket.disconnect(true);
+      return;
+    }
+    const timer = setTimeout(
+      () => this.disconnectAt(socket, expiresAt),
+      Math.min(remaining, MAX_TIMER_DELAY_MS),
+    );
+    timer.unref();
+    this.expiry.set(socket, timer);
+  }
+
+  handleDisconnect(socket: Socket): void {
+    // Socket.io removes the socket from its rooms; only the expiry timer is ours.
+    clearTimeout(this.expiry.get(socket));
+    this.expiry.delete(socket);
   }
 
   @SubscribeMessage('join:project')

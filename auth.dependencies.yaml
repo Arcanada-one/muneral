@@ -1,0 +1,38 @@
+# auth.dependencies.yaml — Auth Arcana service manifest (auth-arcana-mandate, obligation 6)
+#
+# The mandate names a format specification (creative-AUTH-0003-dependency-graph.md) that was not
+# available when this file was written, so the layout follows the manifest in
+# Arcanada-one/auth-arcana. Conformance to the specification is not measured.
+# CI gate: apps/api/test/auth-dependencies.contract.spec.ts fails the build when this file is
+# missing or disagrees with the verifier.
+
+service: muneral
+auth_arcana_role: relying-party
+# Not set: the Auth Arcana release that registers this client and its resource does not exist yet.
+auth_arcana_min_version: null
+# Not set: nothing has been validated against a running Auth Arcana.
+last_validated: null
+
+# State of the dependency in this repository: the API can verify Auth Arcana access tokens, and
+# the path is off unless AUTH_ARCANA_ENABLED is "true".
+dependencies:
+  - name: auth-arcana-jwks
+    target: "https://auth.arcanada.ai/.well-known/jwks.json"
+    purpose: "Signing keys for access tokens of signed-in users (EdDSA)"
+    when: "AUTH_ARCANA_ENABLED=true; fetched on the first such token, never at boot"
+
+# Required of Auth Arcana before the path can be switched on.
+access_tokens_accepted:
+  issuer: "https://auth.arcanada.ai"
+  audience: "urn:arcanada:muneral:api"
+  scope: "muneral:api"
+  client_id: "arc_muneral_web"
+  algorithm: "EdDSA"
+  token_type: "at+jwt"
+
+# Obligations of the mandate that this repository does not meet yet.
+not_yet_met:
+  - "obligation 2: own GitHub and Telegram sign-in stay through the dual-auth window and are removed in M7; the window has not started"
+  - "obligation 3: the legacy HS256 sign-in (JWT_SECRET) stays during the 30-day dual-auth window"
+  - "obligation 4: agent API keys are still mun_sk_ keys issued by this service; still owed under obligation 8, tracked in Muneral task 904d3f60-bded-44b5-b6b3-c89fa4cd7a64"
+  - "obligation 5: workspace roles are local, ReBAC is not used; still owed under obligation 8, tracked in Muneral task 904d3f60-bded-44b5-b6b3-c89fa4cd7a64"

@@ -5,6 +5,9 @@ import { AuthService } from './auth.service.js';
 import { AuthController } from './auth.controller.js';
 import { getJwtSecret } from './jwt-secret.js';
 import { JwtStrategy } from './strategies/jwt.strategy.js';
+import { ARCANA_KEY_SOURCE, arcanaKeySourceFromEnv } from './arcana/arcana-key-source.js';
+import { ArcanaAuthService } from './arcana/arcana-auth.service.js';
+import { LegacyAuthCounter } from './arcana/legacy-auth.counter.js';
 import { GithubStrategy } from './strategies/github.strategy.js';
 import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
 import { ApiKeyGuard } from './guards/api-key.guard.js';
@@ -40,6 +43,10 @@ if (process.env.GITHUB_CLIENT_ID) {
   providers: [
     AuthService,
     JwtStrategy,
+    // Off unless AUTH_ARCANA_ENABLED is "true" — see arcana/arcana-key-source.ts.
+    { provide: ARCANA_KEY_SOURCE, useFactory: () => arcanaKeySourceFromEnv(process.env) },
+    ArcanaAuthService,
+    LegacyAuthCounter,
     ...optionalProviders,
     JwtAuthGuard,
     ApiKeyGuard,
@@ -65,6 +72,9 @@ if (process.env.GITHUB_CLIENT_ID) {
     // AgentsModule module`. Exporting the provider satisfies it for real.
     PassportModule,
     AuthService,
+    // KanbanGateway (WsModule) uses the same verifier and counter as HTTP.
+    ArcanaAuthService,
+    LegacyAuthCounter,
     JwtAuthGuard,
     ApiKeyGuard,
     JwtOrApiKeyGuard,

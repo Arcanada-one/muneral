@@ -97,6 +97,9 @@ importers:
       ioredis:
         specifier: ^5.4.2
         version: 5.11.1
+      jose:
+        specifier: ^6.2.3
+        version: 6.2.3
       passport:
         specifier: ^0.7.0
         version: 0.7.0

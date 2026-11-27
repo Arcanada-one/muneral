@@ -11,6 +11,8 @@ import { KanbanService } from './kanban.service.js';
     AuthModule,
     JwtModule.register({
       secret: getJwtSecret(),
+      // The legacy verifier accepts the one algorithm this API signs with.
+      verifyOptions: { algorithms: ['HS256'] },
     }),
   ],
   providers: [ProjectMembershipService, KanbanGateway, KanbanService],
